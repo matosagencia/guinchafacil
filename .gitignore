@@ -1,0 +1,20 @@
+# Segredos — nunca commitar (§5.4)
+.env
+
+# Scripts de diagnóstico — nunca commitar
+diagnostico.php
+phpinfo.php
+probe.php
+_dbg.php
+
+# Dependências
+vendor/
+
+# Uploads e logs gerados em runtime
+uploads/
+logs/
+
+# Arquivos de sistema
+.DS_Store
+Thumbs.db
+*.log

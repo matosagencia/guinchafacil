@@ -1,0 +1,111 @@
+<?php
+
+declare(strict_types=1);
+
+class Avaliacao
+{
+    private static function logErr(string $method, string $phase, string $message, array $ctx = []): void
+    {
+        $line = '[Avaliacao][' . $method . '][' . $phase . '] ' . $message;
+        if (!empty($ctx)) {
+            $line .= ' | ctx=' . json_encode($ctx, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        }
+        error_log($line);
+    }
+
+    public static function criar(int $pedido_id, int $cliente_id, int $guincho_id, int $estrelas, string $comentario): int|false
+    {
+        try {
+            $sql = "INSERT INTO avaliacoes (pedido_id, cliente_id, guincho_id, estrelas, comentario, criado_em)
+                    VALUES (:pedido_id, :cliente_id, :guincho_id, :estrelas, :comentario, NOW())";
+
+            $stmt = getPDO()->prepare($sql);
+            $stmt->execute([
+                ':pedido_id' => $pedido_id,
+                ':cliente_id' => $cliente_id,
+                ':guincho_id' => $guincho_id,
+                ':estrelas' => max(1, min(5, $estrelas)),
+                ':comentario' => trim($comentario),
+            ]);
+
+            return (int)getPDO()->lastInsertId();
+        } catch (Throwable $e) {
+            self::logErr(__FUNCTION__, 'insert', $e->getMessage(), [
+                'pedido_id' => $pedido_id,
+                'cliente_id' => $cliente_id,
+                'guincho_id' => $guincho_id,
+            ]);
+            return false;
+        }
+    }
+
+    public static function buscarPorPedido(int $pedido_id): array|false
+    {
+        try {
+            $sql = "SELECT a.*, u.nome as cliente_nome
+                    FROM avaliacoes a
+                    JOIN usuarios u ON a.cliente_id = u.id
+                    WHERE a.pedido_id = :pedido_id
+                    LIMIT 1";
+
+            $stmt = getPDO()->prepare($sql);
+            $stmt->execute([':pedido_id' => $pedido_id]);
+            return $stmt->fetch(PDO::FETCH_ASSOC);
+        } catch (Throwable $e) {
+            self::logErr(__FUNCTION__, 'select', $e->getMessage(), ['pedido_id' => $pedido_id]);
+            return false;
+        }
+    }
+
+    public static function listarPorGuincho(int $guincho_id, int $pagina = 1): array
+    {
+        try {
+            $offset = max(0, ($pagina - 1) * 20);
+            $sql = "SELECT a.*, u.nome as cliente_nome
+                    FROM avaliacoes a
+                    JOIN usuarios u ON a.cliente_id = u.id
+                    WHERE a.guincho_id = :guincho_id
+                    ORDER BY a.criado_em DESC
+                    LIMIT 20 OFFSET :offset";
+
+            $stmt = getPDO()->prepare($sql);
+            $stmt->bindValue(':guincho_id', $guincho_id, PDO::PARAM_INT);
+            $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+            $stmt->execute();
+
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (Throwable $e) {
+            self::logErr(__FUNCTION__, 'select', $e->getMessage(), ['guincho_id' => $guincho_id, 'pagina' => $pagina]);
+            return [];
+        }
+    }
+
+    public static function mediaGuincho(int $guincho_id): float
+    {
+        try {
+            $stmt = getPDO()->prepare('SELECT AVG(estrelas) as media FROM avaliacoes WHERE guincho_id = :guincho_id');
+            $stmt->execute([':guincho_id' => $guincho_id]);
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+            return isset($result['media']) ? (float)$result['media'] : 0.0;
+        } catch (Throwable $e) {
+            self::logErr(__FUNCTION__, 'aggregate', $e->getMessage(), ['guincho_id' => $guincho_id]);
+            return 0.0;
+        }
+    }
+
+    public static function jaAvaliou(int $pedido_id, int $cliente_id): bool
+    {
+        try {
+            $stmt = getPDO()->prepare('SELECT COUNT(*) as total FROM avaliacoes WHERE pedido_id = :pedido_id AND cliente_id = :cliente_id');
+            $stmt->execute([
+                ':pedido_id' => $pedido_id,
+                ':cliente_id' => $cliente_id,
+            ]);
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+            return (int)($result['total'] ?? 0) > 0;
+        } catch (Throwable $e) {
+            self::logErr(__FUNCTION__, 'select', $e->getMessage(), ['pedido_id' => $pedido_id, 'cliente_id' => $cliente_id]);
+            return false;
+        }
+    }
+}
