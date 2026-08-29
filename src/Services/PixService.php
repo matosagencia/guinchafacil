@@ -39,6 +39,14 @@ class PixService
             return ['sucesso' => false, 'id_transacao' => null, 'erro' => $msg];
         }
 
+        if (static::deveValidarGuardFinanceiro()) {
+            $guard = self::validarGuardFinanceiroTransferencia($pedidoId);
+            if (!$guard['ok']) {
+                error_log("[PixService] {$guard['erro']}");
+                return ['sucesso' => false, 'id_transacao' => null, 'erro' => $guard['erro']];
+            }
+        }
+
         $body = json_encode([
             'transaction_amount' => round($valor, 2),
             'payment_method_id'  => 'pix',
@@ -54,22 +62,14 @@ class PixService
             ],
         ]);
 
-        $ch = curl_init(self::MP_PAYMENTS_URL);
-        curl_setopt_array($ch, [
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_POST           => true,
-            CURLOPT_POSTFIELDS     => $body,
-            CURLOPT_HTTPHEADER     => [
-                'Authorization: Bearer ' . MP_ACCESS_TOKEN,
-                'Content-Type: application/json',
-                'X-Idempotency-Key: pix-pedido-' . $pedidoId,
-            ],
-            CURLOPT_TIMEOUT => 30,
-        ]);
-        $resp     = curl_exec($ch);
-        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        $curlErr  = curl_error($ch);
-        curl_close($ch);
+        $result = static::httpPost(self::MP_PAYMENTS_URL, [
+            'Authorization: Bearer ' . MP_ACCESS_TOKEN,
+            'Content-Type: application/json',
+            'X-Idempotency-Key: pix-pedido-' . $pedidoId,
+        ], $body);
+        $resp     = $result['body'] ?? '';
+        $httpCode = (int)($result['code'] ?? 0);
+        $curlErr  = (string)($result['error'] ?? '');
 
         if ($curlErr) {
             $msg = "Pedido {$pedidoId}: erro cURL — {$curlErr}";
@@ -130,7 +130,7 @@ class PixService
         $pdo->prepare("UPDATE pagamentos SET status_pix = 'processando' WHERE pedido_id = ? AND status_pix = 'falha'")
             ->execute([$pedidoId]);
 
-        $resultado = self::transferir(
+        $resultado = static::transferir(
             $pedidoId,
             (float)$pagamento['valor_guincho'],
             $guincho['chave_pix'],       // já descriptografado pelo Guincho model
@@ -138,11 +138,7 @@ class PixService
         );
 
         if ($resultado['sucesso']) {
-            $pdo->prepare(
-                "UPDATE pagamentos
-                 SET status_pix = 'concluido', id_transacao_pix = ?, pago_guincho = 1, data_pagamento_guincho = NOW()
-                 WHERE pedido_id = ?"
-            )->execute([$resultado['id_transacao'], $pedidoId]);
+            Pagamento::confirmarRepassePix((int)$pagamento['id'], (string)$resultado['id_transacao']);
         } else {
             $pdo->prepare("UPDATE pagamentos SET status_pix = 'falha' WHERE pedido_id = ?")
                 ->execute([$pedidoId]);
@@ -150,5 +146,70 @@ class PixService
         }
 
         return $resultado;
+    }
+
+    protected static function deveValidarGuardFinanceiro(): bool
+    {
+        return true;
+    }
+
+    private static function validarGuardFinanceiroTransferencia(int $pedidoId): array
+    {
+        if (!class_exists('Pagamento')) {
+            require_once __DIR__ . '/../Models/Pagamento.php';
+        }
+
+        $qtdAprovados = Pagamento::contarAprovadosPorPedido($pedidoId);
+        if ($qtdAprovados !== 1) {
+            return [
+                'ok' => false,
+                'erro' => "PIX-GUARD-01: transferencia do pedido {$pedidoId} exige exatamente 1 pagamento aprovado; encontrados {$qtdAprovados}.",
+            ];
+        }
+
+        $pagamento = Pagamento::buscarAprovadoPorPedido($pedidoId);
+        if (!$pagamento) {
+            return [
+                'ok' => false,
+                'erro' => "PIX-GUARD-01: pagamento aprovado do pedido {$pedidoId} nao encontrado.",
+            ];
+        }
+
+        if ((int)($pagamento['pago_guincho'] ?? 0) !== 0) {
+            return [
+                'ok' => false,
+                'erro' => "PIX-GUARD-02: transferencia do pedido {$pedidoId} bloqueada; guincho ja foi pago.",
+            ];
+        }
+
+        if (($pagamento['status_pix'] ?? '') !== 'processando') {
+            return [
+                'ok' => false,
+                'erro' => "PIX-GUARD-03: transferencia do pedido {$pedidoId} exige status_pix=processando.",
+            ];
+        }
+
+        return ['ok' => true, 'erro' => null];
+    }
+
+    protected static function httpPost(string $url, array $headers, string $body): array
+    {
+        $ch = curl_init($url);
+        curl_setopt_array($ch, [
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_POST           => true,
+            CURLOPT_POSTFIELDS     => $body,
+            CURLOPT_HTTPHEADER     => $headers,
+            CURLOPT_TIMEOUT => 30,
+        ]);
+        if ($ca = ca_bundle_path()) {
+            curl_setopt($ch, CURLOPT_CAINFO, $ca);
+        }
+        $resp     = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $curlErr  = curl_error($ch);
+        curl_close($ch);
+
+        return ['body' => (string)$resp, 'code' => (int)$httpCode, 'error' => (string)$curlErr];
     }
 }

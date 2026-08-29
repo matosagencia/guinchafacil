@@ -1,0 +1,13 @@
+/* ============================================================
+   GuinchaFácil — Health Check (admin/health.php)
+   Substitui os style="" pontuais da view (gate visual do Nível 2).
+   ============================================================ */
+
+body.admin .stat-icon--ok,
+body.admin .stat-value--ok { color: #22c55e; }
+
+body.admin .stat-icon--aviso,
+body.admin .stat-value--aviso { color: #f59e0b; }
+
+body.admin .stat-icon--erro,
+body.admin .stat-value--erro { color: #ef4444; }

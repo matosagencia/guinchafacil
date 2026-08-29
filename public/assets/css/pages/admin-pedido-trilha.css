@@ -1,0 +1,18 @@
+/* ============================================================
+   GuinchaFácil — Trilha POR do Pedido (admin/pedido_trilha.php)
+   Substitui os style="" pontuais da view (gate visual do Nível 2).
+   ============================================================ */
+
+body.admin .trilha-map {
+  height: 440px;
+  border-radius: 0 0 12px 12px;
+  min-height: 280px;
+}
+
+body.admin .trilha-legenda-validada { color: #16a34a; }
+body.admin .trilha-legenda-rejeitado { color: #dc2626; }
+body.admin .trilha-legenda-origem-destino { color: #0d6efd; }
+
+body.admin .trilha-fase-box {
+  border-color: var(--theme-border) !important;
+}

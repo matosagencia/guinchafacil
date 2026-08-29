@@ -94,27 +94,34 @@ class Guincho
             $pdo = getPDO();
             $stmt = $pdo->prepare(
                 "INSERT INTO " . self::TBL . " (
-                    usuario_id, cnh_numero, cnh_validade, placa_guincho,
-                    capacidade_ton, raio_cobertura_km, chave_pix, chave_pix_tipo,
-                    foto_veiculo, doc_cnh_frente, doc_cnh_verso, 
+                    usuario_id, cidade_id, cnh_numero, cnh_validade, placa_guincho,
+                    cidade_placa, uf_placa, capacidade_ton, raio_cobertura_km, chave_pix, chave_pix_tipo,
+                    lat_operacao, lng_operacao,
+                    foto_veiculo, doc_cnh_frente, doc_cnh_verso,
                     aprovado, disponivel, criado_em
                  ) VALUES (
-                    ?,?,?,?,
-                    ?,?,?,?,
+                    ?,?,?,?,?,
+                    ?,?, ?,?,?,?,
+                    ?,?,
                     ?,?,?,
                     0,0,NOW()
                  )"
             );
-            
+
             $stmt->execute([
                 $usuario_id,
+                isset($dados['cidade_id']) && (int)$dados['cidade_id'] > 0 ? (int)$dados['cidade_id'] : null,
                 $dados['cnh_numero']       ?? '',
                 $dados['cnh_validade']     ?? date('Y-m-d', strtotime('+5 years')),
                 strtoupper(trim($dados['placa_guincho'] ?? '')),
+                trim((string)($dados['cidade_placa'] ?? '')),
+                strtoupper(trim((string)($dados['uf_placa'] ?? ''))),
                 (float)($dados['capacidade_ton']    ?? 0),
                 (int)($dados['raio_cobertura_km']   ?? 20),
                 self::encryptPix($dados['chave_pix'] ?? ''), // §5.4: criptografada em repouso
                 $dados['chave_pix_tipo']   ?? 'cpf',
+                isset($dados['lat_operacao']) ? (float)$dados['lat_operacao'] : null,
+                isset($dados['lng_operacao']) ? (float)$dados['lng_operacao'] : null,
                 $dados['foto_veiculo']     ?? null,
                 $dados['doc_cnh_frente']   ?? null,
                 $dados['doc_cnh_verso']    ?? null,
@@ -133,10 +140,47 @@ class Guincho
     public static function aprovar(int $id): bool
     {
         try {
-            $stmt = getPDO()->prepare("UPDATE " . self::TBL . " SET aprovado=1 WHERE id=?");
-            return $stmt->execute([$id]);
+            getPDO()->prepare("UPDATE " . self::TBL . " SET aprovado=1 WHERE id=?")->execute([$id]);
+            // Se o prestador oferece reboque, a aprovação também libera o
+            // reboque (reboque_aprovado = oferece_reboque). Especialista puro
+            // continua com reboque_aprovado=0. Guardado caso a coluna ainda
+            // não tenha sido migrada.
+            try {
+                getPDO()->prepare("UPDATE " . self::TBL . " SET reboque_aprovado = CASE WHEN oferece_reboque=1 AND placa_guincho IS NOT NULL AND CHAR_LENGTH(placa_guincho)=7 AND cnh_numero IS NOT NULL AND CHAR_LENGTH(cnh_numero)>=9 AND cnh_validade IS NOT NULL AND cnh_validade>=CURDATE() AND capacidade_ton>0 AND chave_pix<>'' AND doc_cnh_frente IS NOT NULL AND doc_cnh_verso IS NOT NULL THEN 1 ELSE 0 END WHERE id=?")->execute([$id]);
+            } catch (\Throwable $e) { /* migration_prestador_tipo_v1 ainda não rodou */ }
+            return true;
         } catch (PDOException $e) {
             self::logErr('aprovar', 'db/pdo/update', $e->getMessage(), ['id' => $id]);
+            return false;
+        }
+    }
+
+    /**
+     * Especialista já aprovado pede para virar guincho: grava os dados de
+     * reboque, marca oferece_reboque=1 e reboque_aprovado=0 (volta pra fila de
+     * aprovação). Não mexe em `aprovado` (ele já opera como especialista).
+     */
+    public static function solicitarReboque(int $id, array $d): bool
+    {
+        try {
+            $stmt = getPDO()->prepare(
+                "UPDATE " . self::TBL . "
+                    SET oferece_reboque = 1, reboque_aprovado = 0,
+                        placa_guincho = ?, cidade_placa = ?, uf_placa = ?, capacidade_ton = ?,
+                        cnh_numero = ?, cnh_validade = ?
+                  WHERE id = ?"
+            );
+            return $stmt->execute([
+                strtoupper((string)($d['placa_guincho'] ?? '')),
+                (string)($d['cidade_placa'] ?? ''),
+                strtoupper((string)($d['uf_placa'] ?? '')),
+                (float)($d['capacidade_ton'] ?? 0),
+                preg_replace('/\D/', '', (string)($d['cnh_numero'] ?? '')),
+                ($d['cnh_validade'] ?? '') ?: null,
+                $id,
+            ]);
+        } catch (PDOException $e) {
+            self::logErr('solicitarReboque', 'db/pdo/update', $e->getMessage(), ['id' => $id]);
             return false;
         }
     }
@@ -173,11 +217,16 @@ class Guincho
     public static function listarPendentes(): array
     {
         try {
+            // Fila única: novos cadastros (aprovado=0) E especialistas já
+            // aprovados que pediram para virar guincho (oferece_reboque=1 mas
+            // reboque ainda não aprovado). COALESCE cobre bases pré-migração.
             $stmt = getPDO()->prepare(
                 "SELECT g.*, u.nome AS nome_operador, u.email, u.telefone, u.cpf
-                 FROM " . self::TBL . " g 
+                 FROM " . self::TBL . " g
                  JOIN usuarios u ON g.usuario_id = u.id
-                 WHERE g.aprovado = 0 AND u.ativo = 1
+                 WHERE u.ativo = 1
+                   AND (g.aprovado = 0
+                        OR (COALESCE(g.oferece_reboque,0) = 1 AND COALESCE(g.reboque_aprovado,0) = 0))
                  ORDER BY g.criado_em ASC"
             );
             $stmt->execute();

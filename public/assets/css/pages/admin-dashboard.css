@@ -1,0 +1,192 @@
+/* ============================================================
+   GuinchaFácil — Dashboard do admin (Nível 2, escopo admin/dashboard.php),
+   visual alinhado ao protótipo aprovado (doc/PROTOTIPO_VISUAL_PERFIS_
+   GUINCHAFACIL.html, seção "admin"): <header class="page-head">,
+   grade de stats, mapa ao vivo + alertas lado a lado, e o "lower-grid"
+   de 3 colunas. Todos os dados continuam vindo de admin/dashboard/json
+   e admin/dashboard/mapa-json — aqui só o visual muda.
+   ============================================================ */
+
+body.admin .page-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+}
+
+body.admin .page-head .eyebrow {
+  display: block;
+  font-size: .72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  color: var(--theme-accent);
+  margin-bottom: var(--space-1);
+}
+
+body.admin .page-head h1 {
+  margin: 0 0 var(--space-1);
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: var(--theme-text);
+}
+
+body.admin .page-head p {
+  margin: 0;
+  color: var(--theme-muted);
+  font-size: .92rem;
+}
+
+/* ---------- Grade de estatísticas ---------- */
+body.admin .admin-stats {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+
+@media (max-width: 899px) {
+  body.admin .admin-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+body.admin .admin-stat {
+  min-height: 112px;
+  padding: 16px 18px;
+  border-radius: var(--radius-xs);
+  background: var(--theme-surface);
+  border: 1px solid var(--theme-border);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  transition: background var(--transition), border-color var(--transition), transform var(--transition);
+}
+body.admin .admin-stat:hover { background: var(--theme-surface-2); border-color: color-mix(in srgb, var(--brand) 35%, var(--theme-border)); transform: translateY(-1px); }
+
+body.admin .admin-stat strong {
+  font-size: 1.65rem;
+  font-weight: 800;
+  color: var(--theme-text);
+  line-height: 1.2;
+}
+
+body.admin .admin-stat span {
+  font-size: .78rem;
+  color: var(--theme-muted);
+}
+
+body.admin .admin-stat-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: color-mix(in srgb, var(--theme-accent) 15%, transparent);
+  color: var(--theme-accent);
+  margin-bottom: 4px;
+}
+
+body.admin .admin-stat--alert .admin-stat-icon {
+  background: color-mix(in srgb, #ef4444 18%, transparent);
+  color: #ef4444;
+}
+
+body.admin .admin-stat--alert strong {
+  color: #ef4444;
+}
+
+/* ---------- Mapa + alertas lado a lado ---------- */
+body.admin .admin-layout {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: var(--space-4);
+  align-items: stretch;
+}
+body.admin .admin-layout > .card,
+body.admin .lower-grid > .card,
+body.admin .main-content > .row .card {
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
+}
+
+@media (max-width: 991.98px) {
+  body.admin .admin-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+body.admin .admin-alert-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+body.admin .admin-alert-item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  padding: var(--space-2) 0;
+  border-bottom: 1px solid var(--theme-border);
+}
+
+body.admin .admin-alert-item > div {
+  flex: 1;
+  min-width: 0;
+}
+
+body.admin .admin-alert-item > small {
+  flex-shrink: 0;
+  color: var(--theme-muted);
+  font-size: .72rem;
+}
+
+body.admin .card-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+body.admin .admin-alert-item:last-child {
+  border-bottom: none;
+}
+
+body.admin .admin-alert-item strong {
+  display: block;
+  font-size: .86rem;
+}
+
+body.admin .admin-alert-item p {
+  margin: 2px 0 0;
+  font-size: .78rem;
+  color: var(--theme-muted);
+}
+
+body.admin .admin-alert-dot {
+  flex-shrink: 0;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-top: 6px;
+  background: #ef4444;
+}
+
+body.admin .admin-alert-item--aviso .admin-alert-dot {
+  background: #f59e0b;
+}
+
+/* ---------- Grade inferior (gráficos + últimos pedidos) ---------- */
+body.admin .lower-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-4);
+}
+
+@media (max-width: 899px) {
+  body.admin .lower-grid {
+    grid-template-columns: 1fr;
+  }
+}

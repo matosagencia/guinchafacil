@@ -1,0 +1,5 @@
+-- Avaliações de especialistas, sem alterar avaliações existentes de guinchos.
+SET @db := DATABASE();
+SET @sql := (SELECT IF(COUNT(*)=0, 'ALTER TABLE avaliacoes MODIFY guincho_id INT NULL', 'SELECT 1') FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA=@db AND TABLE_NAME='avaliacoes' AND COLUMN_NAME='guincho_id' AND IS_NULLABLE='YES'); PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+SET @sql := (SELECT IF(COUNT(*)=0, 'ALTER TABLE avaliacoes ADD COLUMN especialista_id INT NULL AFTER guincho_id', 'SELECT 1') FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA=@db AND TABLE_NAME='avaliacoes' AND COLUMN_NAME='especialista_id'); PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+SET @sql := (SELECT IF(COUNT(*)=0, 'ALTER TABLE avaliacoes ADD INDEX idx_avaliacoes_especialista (especialista_id)', 'SELECT 1') FROM INFORMATION_SCHEMA.STATISTICS WHERE TABLE_SCHEMA=@db AND TABLE_NAME='avaliacoes' AND INDEX_NAME='idx_avaliacoes_especialista'); PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;

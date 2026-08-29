@@ -1,0 +1,19 @@
+/* ============================================================
+   GuinchaFácil — Detalhe do Guincho (admin/guinhodetalhe.php)
+   Substitui os style="" pontuais da view (gate visual do Nível 2).
+   ============================================================ */
+
+body.admin .ghd-table { font-size: .88rem; }
+
+body.admin .ghd-label { color: var(--theme-muted); }
+body.admin .ghd-label--35 { width: 35%; }
+body.admin .ghd-label--40 { width: 40%; }
+
+body.admin .ghd-pendente-header { background: #d97706; }
+
+body.admin .ghd-pendente-text {
+  color: var(--theme-muted);
+  font-size: .88rem;
+}
+
+body.admin .ghd-empty { color: var(--theme-muted); }

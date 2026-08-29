@@ -1,0 +1,23 @@
+/* ============================================================
+   GuinchaFácil — Tema Gerente (roxo) — L2.x
+   Segue o mesmo padrão de temas por perfil já estabelecido:
+   branco = cliente, verde = guincho, preto = admin, teal =
+   funcionário. Gerente é quem aprova/rejeita demandas — cor própria
+   pra diferenciar de cara do funcionário (que só solicita).
+
+   Aditivo a style.css (não redefine nada fora de body.gerente).
+   ============================================================ */
+
+body.gerente {
+  --theme-bg: #120a1a;
+  --theme-surface: #1c1027;
+  --theme-surface-2: #251636;
+  --theme-border: #3d2657;
+  --theme-text: #f6f0ff;
+  --theme-muted: #c6b3df;
+  --theme-accent: #a855f7;
+  --theme-accent-hover: #9333ea;
+  --theme-on-accent: #ffffff;
+  --theme-nav: #0b0611;
+  --theme-sidebar: #170c22;
+}

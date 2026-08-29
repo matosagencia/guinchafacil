@@ -1,10 +1,11 @@
+<?php $bp = defined('BASE_PATH') ? BASE_PATH : ''; ?>
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="/public/assets/css/style.css" rel="stylesheet">
+    <link href="<?php echo htmlspecialchars($bp); ?>/public/assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="<?php echo htmlspecialchars($bp); ?>/public/assets/css/style.css" rel="stylesheet">
     <title>Esqueceu a Senha — GuinchaFácil</title>
 </head>
 <body>
@@ -26,7 +27,7 @@
             Informe seu email cadastrado e enviaremos um link para redefinir sua senha.
         </p>
 
-        <form method="POST" action="/senha/esqueceu">
+        <form method="POST" action="<?php echo htmlspecialchars($bp); ?>/senha/esqueceu">
             <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($csrf_token ?? ''); ?>">
             <div class="mb-3">
                 <label for="email" class="form-label">Email</label>
@@ -38,10 +39,10 @@
 
         <hr>
         <div class="text-center small">
-            <a href="/login">← Voltar ao login</a>
+            <a href="<?php echo htmlspecialchars($bp); ?>/login">← Voltar ao login</a>
         </div>
     </div>
 </div>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script<?php echo csp_script_nonce_attr(); ?> src="<?php echo htmlspecialchars($bp); ?>/public/assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

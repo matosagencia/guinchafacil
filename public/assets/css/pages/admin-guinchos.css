@@ -1,0 +1,121 @@
+/* ============================================================
+   GuinchaFácil — Gerenciar guinchos (admin/guinchos.php)
+   Substitui os style="" pontuais da view (gate visual do Nível 2).
+   ============================================================ */
+
+body.admin .text-muted-theme { color: var(--theme-muted); }
+
+body.admin .guinchos-icon-accent { color: var(--primary); }
+
+body.admin .guinchos-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+body.admin .guinchos-dot--pendente { background: #f59e0b; }
+body.admin .guinchos-dot--aprovado { background: var(--primary); }
+
+body.admin .guinchos-section-title {
+  color: var(--theme-muted);
+  font-size: .82rem;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  font-weight: 700;
+}
+
+body.admin .guinchos-card-pendente {
+  border-left: 4px solid #f59e0b;
+}
+
+body.admin .guinchos-icon-pendente {
+  margin: 0;
+  width: 44px;
+  height: 44px;
+  font-size: 1rem;
+  background: rgba(245, 158, 11, .15);
+}
+
+body.admin .guinchos-icon-pendente i {
+  color: #f59e0b;
+}
+
+body.admin .guinchos-nome-truncado {
+  font-weight: 700;
+  color: var(--theme-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+body.admin .guinchos-email-muted {
+  font-size: .77rem;
+  color: var(--theme-muted);
+}
+
+body.admin .guinchos-data-pendente {
+  font-size: .7rem;
+  color: #f59e0b;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+body.admin .guinchos-table-sm {
+  font-size: .81rem;
+}
+
+body.admin .guinchos-table-sm td:first-child {
+  color: var(--theme-muted);
+  width: 38%;
+}
+
+body.admin .guinchos-placa-meta {
+  font-size: .73rem;
+  color: var(--theme-muted);
+  margin-top: 2px;
+}
+
+body.admin .guinchos-id-col {
+  font-weight: 600;
+  color: var(--theme-muted);
+}
+
+body.admin .guinchos-nome-col {
+  font-weight: 600;
+  color: var(--theme-text);
+}
+
+body.admin .guinchos-contato-col {
+  font-size: .84rem;
+}
+
+body.admin .guinchos-cadastro-col {
+  font-size: .8rem;
+  color: var(--theme-muted);
+}
+
+body.admin .guinchos-rep {
+  font-weight: 700;
+}
+
+body.admin .guinchos-rep--alta { color: #22c55e; }
+body.admin .guinchos-rep--media { color: #f59e0b; }
+body.admin .guinchos-rep--baixa { color: #ef4444; }
+body.admin .guinchos-rep--sem { color: var(--theme-muted); }
+
+body.admin .guinchos-status-ativo,
+body.admin .guinchos-status-suspenso {
+  font-size: .8rem;
+}
+
+body.admin .guinchos-status-ativo { color: #22c55e; }
+body.admin .guinchos-status-suspenso { color: #f87171; }
+
+body.admin .guinchos-status-dot {
+  font-size: .5rem;
+}
+
+body.admin .guinchos-empty-icon {
+  opacity: .3;
+}

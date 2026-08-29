@@ -2,13 +2,15 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
+    <?php require __DIR__ . '/../components/marketing_tracking.php'; ?>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <link href="<?php echo htmlspecialchars($bp); ?>/public/assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="<?php echo htmlspecialchars($bp); ?>/public/assets/vendor/fontawesome/css/all.min.css" rel="stylesheet">
     <link href="<?php echo htmlspecialchars($bp); ?>/public/assets/css/style.css" rel="stylesheet">
     <link rel="icon" type="image/png" href="<?php echo htmlspecialchars($bp); ?>/public/assets/img/favicon-32.png">
-    <title>Cadastro Guincheiro — GuinchaFácil</title>
+    <meta name="description" content="Cadastre sua empresa de guincho na GuinchaFácil e receba oportunidades de reboque na sua área, com valores apresentados antes do aceite e controle da sua disponibilidade.">
+    <title>Seja guincho parceiro em Niterói e região | GuinchaFácil</title>
     <style>
         body { margin: 0; min-height: 100vh; background: #0a1a0d; }
 
@@ -24,7 +26,7 @@
             position: relative;
             overflow: hidden;
             background: linear-gradient(145deg, #071a0a 0%, #0f3318 40%, #1a5c2a 100%);
-            display: flex; flex-direction: column; justify-content: flex-end; padding: 3rem;
+            display: flex; flex-direction: column; justify-content: flex-start; padding: 3rem;
         }
         .reg-hero::before {
             content: '';
@@ -148,7 +150,7 @@
         .input-group-text { background: rgba(47,179,74,.1); border-color: rgba(47,179,74,.2); color: #2fb34a; }
     </style>
 </head>
-<body>
+<body class="guincho registro-publico">
 
 <div class="reg-wrapper">
 
@@ -165,14 +167,19 @@
             </div>
 
             <div class="hero-badge">
-                <i class="fas fa-shield-halved"></i>Parceiro Verificado
+                <i class="fas fa-shield-halved"></i>Cadastro sujeito a análise
             </div>
 
-            <h1 class="hero-title">Seja um guincheiro<br><span>GuinchaFácil</span></h1>
+            <h1 class="hero-title">Sua experiência na estrada<br><span>pode gerar novas corridas.</span></h1>
 
             <p class="hero-desc">
-                Cadastre seu reboque e receba pedidos de socorro 24h.<br>
-                Defina seu raio de atendimento e trabalhe quando quiser.
+                Você trabalha com reboque? Cadastre seu veículo e sua área de atendimento na GuinchaFácil.
+                Quando houver um pedido compatível, você vê os detalhes e o valor previsto antes de aceitar.
+                <strong>Você decide quando está disponível e mantém autonomia sobre sua operação.</strong>
+                <br><br>
+                <i class="fas fa-circle-check me-1" style="color:#2fb34a"></i>Valores e condições apresentados antes do aceite.<br>
+                <i class="fas fa-circle-check me-1" style="color:#2fb34a"></i>Chamados compatíveis com sua área e capacidade informada.<br>
+                <i class="fas fa-circle-check me-1" style="color:#2fb34a"></i>Cadastro gratuito; a aprovação depende da conferência dos dados.<br>
             </p>
 
             <div class="hero-stats">
@@ -181,12 +188,12 @@
                     <span class="lbl">Mensalidade</span>
                 </div>
                 <div class="hero-stat">
-                    <span class="num">24h</span>
-                    <span class="lbl">Pedidos</span>
+                    <span class="num">Seu ritmo</span>
+                    <span class="lbl">Disponibilidade</span>
                 </div>
                 <div class="hero-stat">
-                    <span class="num">+500</span>
-                    <span class="lbl">Parceiros</span>
+                    <span class="num">Clareza</span>
+                    <span class="lbl">Antes do aceite</span>
                 </div>
             </div>
         </div>
@@ -229,25 +236,25 @@
                     <div class="row g-3 mb-3">
                         <div class="col-12">
                             <label class="form-label">Nome Completo *</label>
-                            <input type="text" class="form-control" name="nome" id="f_nome"
+                            <input type="text" class="form-control" name="nome" autocomplete="name" id="f_nome"
                                    placeholder="Seu nome completo" required minlength="3">
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">E-mail *</label>
-                            <input type="email" class="form-control" name="email" id="f_email"
+                            <input type="email" class="form-control" name="email" autocomplete="email" id="f_email"
                                    placeholder="seu@email.com" required>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Telefone / WhatsApp *</label>
                             <div class="input-group">
                                 <span class="input-group-text"><i class="fas fa-phone"></i></span>
-                                <input type="tel" class="form-control" name="telefone" id="f_tel"
+                                <input type="tel" class="form-control" name="telefone" autocomplete="tel" id="f_tel"
                                        placeholder="(11) 99999-9999" required>
                             </div>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">CPF *</label>
-                            <input type="text" class="form-control" name="cpf" id="f_cpf"
+                            <input type="text" class="form-control" name="cpf" autocomplete="off" id="f_cpf"
                                    placeholder="000.000.000-00" maxlength="14" required>
                         </div>
                         <div class="col-md-6">
@@ -258,7 +265,7 @@
                         <div class="col-md-6">
                             <label class="form-label">Senha *</label>
                             <input type="password" class="form-control" name="senha" id="f_senha"
-                                   placeholder="Mínimo 6 caracteres" required minlength="6">
+                                   placeholder="Mínimo 8 caracteres" required minlength="8">
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Confirmar Senha *</label>
@@ -267,33 +274,140 @@
                             <div id="senhaFb" class="small mt-1 d-none" style="color:#f87171">Senhas não conferem</div>
                         </div>
                     </div>
-                    <button type="button" class="btn-register mb-3" onclick="irStep(2)">
+                    <div class="form-section-hd"><i class="fas fa-map-marker-alt"></i>Endereco de Operacao</div>
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-4">
+                            <label class="form-label">CEP *</label>
+                            <input type="text" class="form-control" name="cep" autocomplete="postal-code" id="g_cep"
+                                   placeholder="00000-000" maxlength="9" required>
+                        </div>
+                        <div class="col-md-8">
+                            <label class="form-label">Logradouro *</label>
+                            <input type="text" class="form-control" name="logradouro" autocomplete="street-address" id="g_logradouro"
+                                   placeholder="Rua, Avenida..." required>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Numero *</label>
+                            <input type="text" class="form-control" name="numero" placeholder="N" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Complemento</label>
+                            <input type="text" class="form-control" name="complemento" placeholder="Base, garagem...">
+                        </div>
+                        <div class="col-md-5">
+                            <label class="form-label">Bairro *</label>
+                            <input type="text" class="form-control" name="bairro" autocomplete="address-level3" id="g_bairro" required>
+                        </div>
+                        <div class="col-md-7">
+                            <label class="form-label">Cidade *</label>
+                            <input type="text" class="form-control" name="cidade" autocomplete="address-level2" id="g_cidade" required>
+                        </div>
+                        <div class="col-md-5">
+                            <label class="form-label">Estado *</label>
+                            <select class="form-select" name="estado" id="g_estado" required>
+                                <option value="">UF</option>
+                                <?php foreach (['AC','AL','AP','AM','BA','CE','DF','ES','GO','MA','MT','MS','MG','PA','PB','PR','PE','PI','RJ','RN','RS','RO','RR','SC','SP','SE','TO'] as $uf): ?>
+                                <option value="<?php echo $uf; ?>"><?php echo $uf; ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Cidade-alvo de atuação *</label>
+                            <select class="form-select" name="cidade_id" id="g_cidade_id" required>
+                                <option value="">Selecione a cidade onde você presta atendimento</option>
+                                <?php foreach (($cidadesAtivas ?? []) as $c): ?>
+                                <option value="<?php echo (int)$c['id']; ?>"><?php echo htmlspecialchars($c['nome'] . '/' . $c['uf']); ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                            <?php if (empty($cidadesAtivas)): ?>
+                            <div class="form-text text-warning">Nenhuma cidade-alvo cadastrada ainda — fale com o administrador.</div>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                    <button type="button" class="btn-register mb-3" data-go-step="2">
                         Continuar <i class="fas fa-arrow-right ms-2"></i>
                     </button>
                 </div>
 
-                <!-- STEP 2: Veículo e CNH -->
+                <!-- STEP 2: Veículo e CNH (só para quem oferece reboque) -->
                 <div id="step2" style="display:none">
+                    <div id="towOnlyAviso" class="alert d-none" style="background:rgba(47,179,74,.08);border:1px solid rgba(47,179,74,.25);color:#7dff96;font-size:.85rem">
+                        <i class="fas fa-circle-info me-1"></i>Você não marcou <strong>reboque</strong>. Esta etapa é só para guincho — pode clicar em <strong>Continuar</strong> e pular.
+                    </div>
                     <div class="form-section-hd"><i class="fas fa-truck"></i>Dados do Veículo</div>
                     <div class="row g-3 mb-3">
                         <div class="col-md-6">
                             <label class="form-label">Placa do Reboque *</label>
                             <input type="text" class="form-control" name="placa_guincho" id="f_placa"
-                                   placeholder="ABC1D23" style="text-transform:uppercase" required>
+                                   placeholder="ABC1D23" style="text-transform:uppercase">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Cidade do Emplacamento</label>
+                            <input type="text" class="form-control" name="cidade_placa"
+                                   placeholder="Ex: Rio de Janeiro">
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">UF</label>
+                            <input type="text" class="form-control text-uppercase" name="uf_placa"
+                                   maxlength="2" placeholder="RJ">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Marca do Caminhão</label>
+                            <input type="text" class="form-control" name="marca_caminhao" id="g_marcaInput" autocomplete="off"
+                                   placeholder="Digite pra buscar. Ex: Mercedes-Benz">
+                            <input type="hidden" name="vehicle_brand_id" id="g_marcaIdInput">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Modelo do Caminhão</label>
+                            <input type="text" class="form-control" name="modelo_caminhao" id="g_modeloInput" autocomplete="off"
+                                   placeholder="Digite pra buscar. Ex: Accelo">
+                            <input type="hidden" name="vehicle_model_id" id="g_modeloIdInput">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Tipo de guincho <span class="text-muted">(opcional)</span></label>
+                            <select class="form-select" name="tipo_guincho">
+                                <option value="">Ainda vou informar</option>
+                                <option value="plataforma">Plataforma / prancha</option>
+                                <option value="asa_delta">Asa-delta</option>
+                                <option value="deck">Plataforma com deck</option>
+                                <option value="lanca">Plataforma lança</option>
+                                <option value="outro">Outro tipo</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Ano de fabricação <span class="text-muted">(opcional)</span></label>
+                            <input type="number" class="form-control" name="ano_fabricacao" min="1950" max="<?php echo date('Y') + 1; ?>" placeholder="Ex.: 2020">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Categoria CNH <span class="text-muted">(opcional)</span></label>
+                            <select class="form-select" name="categoria_cnh">
+                                <option value="">Informar depois</option>
+                                <option value="B">B</option><option value="C">C</option><option value="D">D</option><option value="E">E</option>
+                            </select>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Capacidade de Carga (ton) *</label>
                             <input type="number" step="0.1" min="0.5" max="50" class="form-control" name="capacidade_ton"
-                                   placeholder="ex: 3.5" required>
+                                   placeholder="ex: 3.5">
                         </div>
                         <div class="col-12">
                             <label class="form-label">Raio de Atendimento (km)</label>
                             <div class="d-flex align-items-center gap-3">
                                 <input type="range" class="form-range flex-fill" id="raioRange" name="raio_cobertura_km"
-                                       min="5" max="200" value="30" oninput="document.getElementById('raioVal').textContent=this.value">
+                                       min="5" max="200" value="30">
                                 <span id="raioVal" style="color:#2fb34a;font-weight:700;min-width:40px">30</span>
                                 <span style="color:rgba(232,252,234,.4);font-size:.82rem">km</span>
                             </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Latitude Operacional</label>
+                            <input type="number" class="form-control" name="lat_operacao" step="0.00000001"
+                                   placeholder="-23.55050000">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Longitude Operacional</label>
+                            <input type="number" class="form-control" name="lng_operacao" step="0.00000001"
+                                   placeholder="-46.63330000">
                         </div>
                     </div>
 
@@ -302,20 +416,35 @@
                         <div class="col-md-6">
                             <label class="form-label">Número da CNH *</label>
                             <input type="text" class="form-control" name="cnh_numero" id="f_cnh"
-                                   placeholder="00000000000" maxlength="11" required>
+                                   placeholder="00000000000" maxlength="11">
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Validade da CNH *</label>
                             <input type="date" class="form-control" name="cnh_validade"
-                                   min="<?php echo date('Y-m-d'); ?>" required>
+                                   min="<?php echo date('Y-m-d'); ?>">
                         </div>
                     </div>
 
+                    <div class="form-section-hd"><i class="fas fa-toolbox"></i>Equipamentos <span class="text-muted" style="font-size:.75rem">(opcional; complete depois se preferir)</span></div>
+                    <div class="row g-2 mb-3">
+                        <?php foreach ([
+                            'plataforma' => ['fa-truck-loading', 'Plataforma'],
+                            'asa_delta' => ['fa-angle-double-up', 'Asa-delta'],
+                            'deck' => ['fa-layer-group', 'Deck'],
+                            'lanca' => ['fa-arrows-alt', 'Lança'],
+                            'bateria' => ['fa-car-battery', 'Bateria'],
+                            'pneu' => ['fa-circle-notch', 'Borracharia'],
+                            'sinalizacao' => ['fa-triangle-exclamation', 'Sinalização'],
+                        ] as $equip => [$icone, $texto]): ?>
+                        <div class="col-6 col-md-4"><label class="d-flex align-items-center gap-2 p-2 rounded" style="border:1px solid rgba(47,179,74,.22);cursor:pointer"><input type="checkbox" name="equipamentos[]" value="<?php echo $equip; ?>"><i class="fas <?php echo $icone; ?>" style="color:#2fb34a"></i><span><?php echo $texto; ?></span></label></div>
+                        <?php endforeach; ?>
+                    </div>
+
                     <div class="d-flex gap-2 mb-3">
-                        <button type="button" class="btn btn-secondary flex-fill" onclick="irStep(1)">
+                        <button type="button" class="btn btn-secondary flex-fill" data-go-step="1">
                             <i class="fas fa-arrow-left me-1"></i>Voltar
                         </button>
-                        <button type="button" class="btn-register flex-fill" onclick="irStep(3)" style="width:auto">
+                        <button type="button" class="btn-register flex-fill" data-go-step="3" style="width:auto">
                             Continuar <i class="fas fa-arrow-right ms-2"></i>
                         </button>
                     </div>
@@ -328,9 +457,9 @@
                     <div class="row g-3 mb-3">
                         <div class="col-12">
                             <label class="form-label">CNH — Frente</label>
-                            <div class="upload-zone" onclick="document.getElementById('u_cnh_frente').click()">
+                            <div class="upload-zone" data-upload-trigger="u_cnh_frente">
                                 <input type="file" id="u_cnh_frente" name="doc_cnh_frente"
-                                       accept="image/*,.pdf" onchange="previewUpload(this,'prev_cnh_frente')">
+                                       accept="image/*,.pdf" data-preview-target="prev_cnh_frente">
                                 <div id="prev_cnh_frente">
                                     <i class="fas fa-id-card fa-2x mb-2" style="color:rgba(47,179,74,.4)"></i>
                                     <div style="color:rgba(232,252,234,.4);font-size:.85rem">Clique para enviar foto da CNH (frente)</div>
@@ -339,9 +468,9 @@
                         </div>
                         <div class="col-12">
                             <label class="form-label">CNH — Verso</label>
-                            <div class="upload-zone" onclick="document.getElementById('u_cnh_verso').click()">
+                            <div class="upload-zone" data-upload-trigger="u_cnh_verso">
                                 <input type="file" id="u_cnh_verso" name="doc_cnh_verso"
-                                       accept="image/*,.pdf" onchange="previewUpload(this,'prev_cnh_verso')">
+                                       accept="image/*,.pdf" data-preview-target="prev_cnh_verso">
                                 <div id="prev_cnh_verso">
                                     <i class="fas fa-id-card fa-2x mb-2" style="color:rgba(47,179,74,.4)"></i>
                                     <div style="color:rgba(232,252,234,.4);font-size:.85rem">Clique para enviar foto da CNH (verso)</div>
@@ -350,9 +479,9 @@
                         </div>
                         <div class="col-12">
                             <label class="form-label">Foto do Veículo Reboque</label>
-                            <div class="upload-zone" onclick="document.getElementById('u_foto').click()">
+                            <div class="upload-zone" data-upload-trigger="u_foto">
                                 <input type="file" id="u_foto" name="foto_veiculo"
-                                       accept="image/*" onchange="previewUpload(this,'prev_foto')">
+                                       accept="image/*" data-preview-target="prev_foto">
                                 <div id="prev_foto">
                                     <i class="fas fa-truck fa-2x mb-2" style="color:rgba(47,179,74,.4)"></i>
                                     <div style="color:rgba(232,252,234,.4);font-size:.85rem">Clique para enviar foto do reboque</div>
@@ -380,7 +509,7 @@
                     </div>
 
                     <div class="d-flex gap-2 mb-3">
-                        <button type="button" class="btn btn-secondary flex-fill" onclick="irStep(2)">
+                        <button type="button" class="btn btn-secondary flex-fill" data-go-step="2">
                             <i class="fas fa-arrow-left me-1"></i>Voltar
                         </button>
                         <button type="submit" class="btn-register flex-fill" id="btnFinal" style="width:auto">
@@ -397,6 +526,12 @@
             </form>
 
             <div class="text-center mt-3" style="font-size:.85rem;color:rgba(232,252,234,.35)">
+                <div class="mb-2 small">
+                    Ao continuar você concorda com os
+                    <a href="<?php echo $bp; ?>/termos-servico.php" target="_blank" rel="noopener noreferrer" style="color:#2fb34a">Termos de Uso</a>
+                    e com a
+                    <a href="<?php echo $bp; ?>/politica-privacidade.php" target="_blank" rel="noopener noreferrer" style="color:#2fb34a">Política de Privacidade</a>.
+                </div>
                 Já tem conta? <a href="<?php echo $bp; ?>/login" style="color:#2fb34a">Fazer login</a>
                 &nbsp;·&nbsp;
                 É cliente? <a href="<?php echo $bp; ?>/registro/cliente" style="color:#2fb34a">Cadastre-se aqui</a>
@@ -405,81 +540,18 @@
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-// Steps
-function irStep(n) {
-    if (n === 2 && !validarStep1()) return;
-    if (n === 3 && !validarStep2()) return;
-    [1,2,3].forEach(i => {
-        document.getElementById(`step${i}`).style.display = i === n ? 'block' : 'none';
-        document.getElementById(`dot${i}`).classList.toggle('active', i <= n);
-    });
-    window.scrollTo({top:0, behavior:'smooth'});
-}
-
-function validarStep1() {
-    const nome  = document.getElementById('f_nome').value.trim();
-    const email = document.getElementById('f_email').value.trim();
-    const senha = document.getElementById('f_senha').value;
-    const conf  = document.getElementById('f_conf').value;
-    const cpf   = document.getElementById('f_cpf').value;
-    const tel   = document.getElementById('f_tel').value;
-    if (nome.length < 3) { alert('Informe seu nome completo.'); return false; }
-    if (!email.includes('@')) { alert('Informe um e-mail válido.'); return false; }
-    if (tel.replace(/\D/g,'').length < 10) { alert('Informe um telefone válido.'); return false; }
-    if (cpf.replace(/\D/g,'').length < 11) { alert('Informe um CPF válido.'); return false; }
-    if (senha.length < 6) { alert('Senha mínima de 6 caracteres.'); return false; }
-    if (senha !== conf) { alert('As senhas não conferem.'); return false; }
-    return true;
-}
-
-function validarStep2() {
-    const placa = document.getElementById('f_placa').value.trim();
-    const cnh   = document.getElementById('f_cnh').value.trim();
-    if (placa.length < 7) { alert('Informe a placa do veículo.'); return false; }
-    if (cnh.length < 9) { alert('Informe o número da CNH.'); return false; }
-    return true;
-}
-
-// Masks
-document.getElementById('f_cpf').addEventListener('input', function() {
-    let v = this.value.replace(/\D/g,'').slice(0,11);
-    if (v.length > 9) v = v.replace(/(\d{3})(\d{3})(\d{3})(\d{1,2})/,'$1.$2.$3-$4');
-    else if (v.length > 6) v = v.replace(/(\d{3})(\d{3})(\d{1,3})/,'$1.$2.$3');
-    else if (v.length > 3) v = v.replace(/(\d{3})(\d{1,3})/,'$1.$2');
-    this.value = v;
+<script<?php echo csp_script_nonce_attr(); ?> src="<?php echo htmlspecialchars($bp); ?>/public/assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script<?php echo csp_script_nonce_attr(); ?> src="<?php echo htmlspecialchars($bp); ?>/public/assets/js/app.js"></script>
+<script<?php echo csp_script_nonce_attr(); ?> src="<?php echo htmlspecialchars($bp); ?>/public/assets/js/auth-registro-guincho.js"></script>
+<script<?php echo csp_script_nonce_attr(); ?> src="<?php echo htmlspecialchars($bp); ?>/public/assets/js/components/vehicle-brand-model-autocomplete.js"></script>
+<script<?php echo csp_script_nonce_attr(); ?>>
+initVehicleBrandModelAutocomplete({
+    baseUrl: '<?php echo addslashes($bp); ?>',
+    marcaInput: document.getElementById('g_marcaInput'),
+    marcaIdInput: document.getElementById('g_marcaIdInput'),
+    modeloInput: document.getElementById('g_modeloInput'),
+    modeloIdInput: document.getElementById('g_modeloIdInput'),
 });
-document.getElementById('f_tel').addEventListener('input', function() {
-    let v = this.value.replace(/\D/g,'').slice(0,11);
-    if (v.length > 10) v = v.replace(/(\d{2})(\d{5})(\d{4})/,'($1) $2-$3');
-    else if (v.length > 6) v = v.replace(/(\d{2})(\d{4,5})(\d{0,4})/,'($1) $2-$3');
-    else if (v.length > 2) v = v.replace(/(\d{2})(\d{0,5})/,'($1) $2');
-    this.value = v;
-});
-document.getElementById('f_placa').addEventListener('input', function() {
-    this.value = this.value.toUpperCase().replace(/[^A-Z0-9]/g,'');
-});
-document.getElementById('f_conf').addEventListener('input', function() {
-    const ok = this.value === document.getElementById('f_senha').value;
-    document.getElementById('senhaFb').classList.toggle('d-none', ok || !this.value);
-});
-
-// Preview uploads
-function previewUpload(input, previewId) {
-    const file = input.files[0];
-    const el = document.getElementById(previewId);
-    if (!file) return;
-    if (file.type.startsWith('image/')) {
-        const reader = new FileReader();
-        reader.onload = e => {
-            el.innerHTML = `<img src="${e.target.result}" class="upload-preview"><div style="color:#2fb34a;font-size:.8rem;margin-top:.4rem"><i class="fas fa-check me-1"></i>${file.name}</div>`;
-        };
-        reader.readAsDataURL(file);
-    } else {
-        el.innerHTML = `<i class="fas fa-file-pdf fa-2x" style="color:#2fb34a"></i><div style="color:#2fb34a;font-size:.8rem;margin-top:.4rem">${file.name}</div>`;
-    }
-}
 </script>
 </body>
 </html>

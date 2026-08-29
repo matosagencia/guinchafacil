@@ -1,0 +1,56 @@
+/* ============================================================
+   GuinchaFácil — Logs do sistema (admin/logs_v2.php)
+   Substitui os style="" pontuais da view (gate visual do Nível 2).
+   ============================================================ */
+
+body.admin .logs-progress-track {
+  height: 8px;
+}
+
+body.admin .logs-col-correlacao {
+  min-width: 200px;
+}
+
+body.admin .logs-col-mensagem {
+  max-width: 420px;
+}
+
+body.admin .logs-ctx-pre {
+  white-space: pre-wrap;
+}
+
+body.admin .logs-file-tail {
+  white-space: pre-wrap;
+  max-height: 40vh;
+  overflow: auto;
+  background: #050505;
+  color: #4ade80;
+  padding: 1rem;
+  border-radius: 8px;
+  font-size: .82rem;
+}
+
+/* ---- admin/logs.php (versão antiga) ---- */
+body.admin .logs-col-correlacao--180 {
+  min-width: 180px;
+}
+
+body.admin .logs-payload-code {
+  font-size: .75rem;
+}
+
+body.admin .logs-file-tail--lg {
+  white-space: pre-wrap;
+  max-height: 60vh;
+  overflow: auto;
+  background: #050505;
+  color: #4ade80;
+  padding: 1rem;
+  border-radius: 8px;
+  font-size: .82rem;
+}
+
+body.admin .logs-pagina-label {
+  color: var(--theme-muted);
+  font-size: .85rem;
+}

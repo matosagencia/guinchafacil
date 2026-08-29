@@ -1,0 +1,65 @@
+/* ============================================================
+   GuinchaFácil — Design tokens (Pacote L2.1)
+   Fonte primária de VALORES: doc/PROTOTIPO_VISUAL_PERFIS_GUINCHAFACIL.html
+   (mockup aprovado visualmente pelo usuário). Os NOMES de variável
+   seguem o que já foi estabelecido nesta primeira passada do L2.1
+   (baseado no texto do plano) para não obrigar a readequar
+   nomenclatura em cascata — só os valores numéricos/hex foram
+   conferidos e ajustados para bater exatamente com o protótipo.
+
+   Este arquivo é ADITIVO: convive com public/assets/css/style.css
+   (que continua ativo como legado, conforme a "Regra de transição
+   do CSS" do plano, seção 5.2). Os nomes de variável aqui são
+   intencionalmente diferentes dos já usados em style.css
+   (--theme-surf, --primary etc.) para não colidir nem alterar o
+   visual de nenhuma tela existente — quem vai efetivamente ler
+   estas variáveis são os componentes/páginas novos dos pacotes
+   L2.2 em diante (shell.css, components/*.css, pages/*.css).
+   ============================================================ */
+
+:root {
+  --brand: #2fb34a;
+  --brand-dark: #248f3a; /* = --brand-hover do protótipo */
+  --brand-strong: #146b29;
+  --success: #16a34a;
+  --warning: #e7a51a; /* valor do protótipo (era #f59e0b no texto do plano) */
+  --danger: #dc3f45;  /* valor do protótipo (era #dc2626 no texto do plano) */
+  --info: #3186dc;    /* valor do protótipo (era #2563eb no texto do plano) */
+  --audit: #9c6cff;   /* novo (Pacote L2.3): estado "auditoria/revisão" da Central Operacional */
+
+  --font-sans: "Segoe UI", Inter, system-ui, -apple-system, sans-serif;
+  --radius-xs: 8px;
+  --radius-sm: 12px;
+  --radius-control: 14px; /* novo: raio de botões/inputs, do protótipo (--radius-control) */
+  --radius-md: 16px;
+  --radius-lg: 24px;      /* = --radius-card do protótipo */
+  --radius-xl: 30px;      /* = --radius-hero do protótipo */
+  --radius-pill: 999px;
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+
+  --topbar-height: 64px;
+  --mobile-topbar-height: 60px;
+  --sidebar-width: 248px;
+  --bottom-nav-height: 72px;
+  --content-max: 1440px;
+  --control-height: 50px; /* valor do protótipo (--control), era 52px no texto do plano */
+  --action-height: 56px;
+
+  /* Central Operacional (Pacote L2.3 — remodelação do backoffice admin):
+     terceira coluna do shell de despacho (sidebar + worklist + workspace).
+     Não usada por nenhuma tela antes deste pacote. */
+  --worklist-width: 380px;
+  --worklist-width-compact: 340px;
+
+  --shadow-card: 0 8px 24px rgba(12, 28, 17, .08);  /* = --shadow-sm do protótipo */
+  --shadow-float: 0 20px 60px rgba(12, 28, 17, .13); /* = --shadow-md do protótipo */
+  --transition: 180ms ease;
+}

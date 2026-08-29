@@ -3,21 +3,21 @@ $bp = defined('BASE_PATH') ? BASE_PATH : '';
 include __DIR__ . '/../layouts/header.php';
 $editando = !empty($oficina['id']);
 ?>
+<link rel="stylesheet" href="<?php echo htmlspecialchars($bp); ?>/public/assets/css/pages/client-oficinaform.css">
 <div class="main-wrapper">
 <?php include __DIR__ . '/../layouts/sidebar_cliente.php'; ?>
 <main class="main-content">
 
-    <div class="page-header">
+    <header class="page-head mb-4">
         <div>
-            <div class="page-title">
-                <i class="fas fa-wrench me-2" style="color:var(--primary)"></i>
-                <?php echo $editando ? 'Editar Oficina' : 'Cadastrar Oficina Favorita'; ?>
-            </div>
+            <span class="eyebrow">Conta</span>
+            <h1><i class="fas fa-wrench me-2 oficinaform-icon-accent"></i><?php echo $editando ? 'Editar Oficina' : 'Cadastrar Oficina Favorita'; ?></h1>
+            <p>Marque no mapa ou digite o endereço para salvar a localização exata.</p>
         </div>
         <a href="<?php echo $bp; ?>/cliente/oficinas" class="btn btn-secondary btn-sm">
             <i class="fas fa-arrow-left me-1"></i>Voltar
         </a>
-    </div>
+    </header>
 
     <?php if (!empty($_GET['erro'])): ?>
     <div class="alert alert-danger mb-3">
@@ -28,15 +28,15 @@ $editando = !empty($oficina['id']);
     <div class="row g-4">
         <!-- Mapa -->
         <div class="col-lg-6 order-lg-2">
-            <div class="card" style="position:sticky;top:80px">
+            <div class="card oficinaform-mapa-card">
                 <div class="card-header">
                     <i class="fas fa-map-pin me-2"></i>Localização — clique no mapa ou preencha o endereço
                 </div>
                 <div class="card-body p-0">
-                    <div id="mapaOficina" style="height:340px"></div>
+                    <div id="mapaOficina" class="oficinaform-mapa"></div>
                 </div>
                 <div class="card-body pt-2 pb-2">
-                    <div id="mapaStatus" class="small text-center" style="color:var(--theme-muted)">
+                    <div id="mapaStatus" class="small text-center oficinaform-mapa-status">
                         <i class="fas fa-mouse-pointer me-1"></i>Clique no mapa para marcar ou busque pelo endereço
                     </div>
                 </div>
@@ -71,7 +71,7 @@ $editando = !empty($oficina['id']);
                             <input type="text" class="form-control" name="endereco" id="enderecoInput"
                                    value="<?php echo htmlspecialchars($oficina['endereco'] ?? ''); ?>"
                                    placeholder="Rua, número, bairro, cidade" required>
-                            <div style="font-size:.77rem;color:var(--theme-muted);margin-top:.3rem">
+                            <div class="oficinaform-hint">
                                 <i class="fas fa-search me-1"></i>O mapa busca a localização automaticamente
                             </div>
                         </div>
@@ -101,8 +101,8 @@ $editando = !empty($oficina['id']);
 </main>
 <?php include __DIR__ . '/../layouts/footer.php'; ?>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script>
+<script<?php echo csp_script_nonce_attr(); ?> src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script<?php echo csp_script_nonce_attr(); ?>>
 (function() {
     const initLat = <?php echo !empty($oficina['lat']) ? (float)$oficina['lat'] : -23.5505; ?>;
     const initLng = <?php echo !empty($oficina['lng']) ? (float)$oficina['lng'] : -46.6333; ?>;
@@ -112,7 +112,7 @@ $editando = !empty($oficina['id']);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {attribution: '© OSM'}).addTo(map);
 
     const pinIcon = L.divIcon({
-        html: '<div style="width:18px;height:18px;background:#2fb34a;border-radius:50%;border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.5)"></div>',
+        html: '<div class="oficinaform-pin"></div>',
         iconAnchor: [9,9], iconSize: [18,18]
     });
 
@@ -138,7 +138,7 @@ $editando = !empty($oficina['id']);
         });
         map.setView([lat, lng], 16);
         document.getElementById('mapaStatus').innerHTML =
-            '<i class="fas fa-check-circle" style="color:#2fb34a"></i> Localização marcada! Você pode arrastar o pino para ajustar.';
+            '<i class="fas fa-check-circle oficinaform-icon-accent"></i> Localização marcada! Você pode arrastar o pino para ajustar.';
     }
 
     map.on('click', function(e) {

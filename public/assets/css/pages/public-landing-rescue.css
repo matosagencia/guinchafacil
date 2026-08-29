@@ -1,0 +1,7 @@
+body.gf-landing .gf-hero{position:relative;isolation:isolate;overflow:hidden;max-width:none;width:100%;border-radius:0;margin-bottom:28px;background:linear-gradient(90deg,rgba(251,253,251,.98) 0%,rgba(251,253,251,.94) 38%,rgba(251,253,251,.42) 70%,rgba(251,253,251,.08) 100%),url('../../img/landing/hero-guincho-suv.png') center right/cover no-repeat;box-shadow:inset 0 -1px 0 rgba(20,107,41,.08)}
+body.gf-landing .gf-hero::after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(180deg,rgba(255,255,255,.08),rgba(20,107,41,.08))}
+body.gf-landing .gf-hero>div{position:relative;z-index:1}
+body.gf-landing .gf-nav{position:relative;z-index:10;width:100%;max-width:none;margin:0;padding-left:24px;padding-right:24px;background:#fbfdfb;border-bottom:1px solid rgba(20,107,41,.08)}
+body.gf-landing .gf-brand{display:flex;align-items:center;color:#16241a;font-weight:800}
+body.gf-landing .gf-brand img{display:block;width:40px;height:40px;object-fit:contain}
+@media(max-width:780px){body.gf-landing .gf-hero{border-radius:0;margin-bottom:20px;background:linear-gradient(180deg,rgba(251,253,251,.98) 0%,rgba(251,253,251,.94) 48%,rgba(251,253,251,.68) 100%),url('../../img/landing/hero-guincho-suv.png') 64% center/cover no-repeat}}

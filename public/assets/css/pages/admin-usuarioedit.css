@@ -1,0 +1,13 @@
+/* ============================================================
+   GuinchaFácil — Editar Usuário (admin/usuarioedit.php)
+   Substitui os style="" pontuais da view (gate visual do Nível 2).
+   ============================================================ */
+
+body.admin .usuarioedit-senha-feedback { color: var(--theme-muted); }
+
+body.admin .usuarioedit-info-table { font-size: .88rem; }
+
+body.admin .usuarioedit-info-label {
+  color: var(--theme-muted);
+  width: 40%;
+}

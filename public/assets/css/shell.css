@@ -1,0 +1,243 @@
+/* ============================================================
+   GuinchaFácil — Shell (topbar/sidebar/bottom-nav/grid) — Pacote L2.1
+   Fonte de ESTRUTURA e VALORES: doc/PROTOTIPO_VISUAL_PERFIS_GUINCHAFACIL.html
+   (mockup aprovado visualmente). Classes prefixadas com "shell-"
+   (em vez de repetir .topbar/.shell/.sidebar/.content literais do
+   protótipo) de propósito: style.css hoje já define .sidebar,
+   .card, .main-content etc. para as views em produção, e usar os
+   mesmos nomes agora sobrescreveria o visual atual antes de
+   qualquer página ser migrada. Mantém os nomes já estabelecidos
+   nesta primeira passada do L2.1.
+
+   IMPORTANTE: nenhuma view existente hoje usa as classes .shell-*
+   abaixo — o header.php/sidebars atuais continuam com o markup e
+   CSS antigos. Este arquivo define a camada de layout que os
+   componentes novos do Pacote L2.2 (src/Views/components/
+   page_header.php, bottom_navigation.php etc.) vão consumir quando
+   forem criados.
+   ============================================================ */
+
+.shell-topbar {
+  height: var(--topbar-height);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--space-6);
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: var(--theme-nav, #fff);
+  color: var(--theme-text, inherit);
+  border-bottom: 1px solid var(--theme-border, #d4e6d8);
+}
+
+@media (max-width: 767.98px) {
+  .shell-topbar {
+    height: var(--mobile-topbar-height);
+    padding: 0 var(--space-4);
+  }
+}
+
+/* Grid topbar-fora / sidebar+conteúdo-dentro, igual ao .shell do protótipo. */
+.shell {
+  display: grid;
+  grid-template-columns: var(--sidebar-width) minmax(0, 1fr);
+  min-height: calc(100vh - var(--topbar-height));
+  background: var(--theme-bg, #f4f8f5);
+  color: var(--theme-text, inherit);
+}
+
+.shell-sidebar {
+  background: var(--theme-sidebar, #edf6ef);
+  border-right: 1px solid var(--theme-border, #d4e6d8);
+  padding: var(--space-5) var(--space-3);
+}
+
+.shell-main {
+  min-width: 0;
+}
+
+.shell-content {
+  width: min(100%, var(--content-max));
+  margin: 0 auto;
+  padding: var(--space-8) var(--space-8) calc(var(--space-8) + var(--space-6));
+}
+
+.shell-bottom-nav {
+  display: none;
+}
+
+@media (max-width: 899px) {
+  .shell {
+    grid-template-columns: 1fr;
+  }
+
+  .shell-sidebar {
+    display: none;
+  }
+
+  .shell-content {
+    padding: var(--space-6);
+  }
+}
+
+@media (max-width: 767.98px) {
+  .shell-content {
+    padding: var(--space-4) var(--space-4) calc(var(--bottom-nav-height) + var(--space-6));
+  }
+
+  .shell-bottom-nav {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    position: fixed;
+    z-index: 40;
+    left: 0; right: 0; bottom: 0;
+    height: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom, 0px));
+    padding: 7px var(--space-3) calc(7px + env(safe-area-inset-bottom, 0px));
+    background: color-mix(in srgb, var(--theme-nav, #fff) 94%, transparent);
+    backdrop-filter: blur(16px);
+    border-top: 1px solid var(--theme-border, #d4e6d8);
+  }
+}
+
+.shell-nav-item {
+  min-height: 44px;
+  min-width: 44px;
+  display: grid;
+  place-items: center;
+  gap: var(--space-1);
+  font-size: .625rem;
+  font-weight: 800;
+  color: var(--theme-muted, inherit);
+  text-decoration: none;
+  text-align: center;
+}
+
+.shell-nav-item.is-active {
+  color: var(--theme-accent, var(--brand));
+}
+
+/* ============================================================
+   Central Operacional (Pacote L2.3) — variante de 3 colunas do
+   .shell acima: sidebar + fila de trabalho (worklist) + workspace
+   do item selecionado. Prefixo "shell-ops-" pra não colidir com
+   .shell/.shell-sidebar (2 colunas, usado pelas telas herdadas) —
+   ambos convivem, cada tela escolhe um dos dois.
+   ============================================================ */
+.shell-ops {
+  display: grid;
+  grid-template-columns: var(--sidebar-width) var(--worklist-width) minmax(0, 1fr);
+  min-height: calc(100vh - var(--topbar-height));
+  background: var(--theme-bg, #07090c);
+  color: var(--theme-text, inherit);
+}
+
+.shell-ops-sidebar {
+  min-width: 0;
+  overflow-y: auto;
+  background: var(--theme-sidebar, #0a0d10);
+  border-right: 1px solid var(--theme-border, #232c35);
+}
+
+.shell-ops-worklist {
+  min-width: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  background: var(--theme-surface, #11151a);
+  border-right: 1px solid var(--theme-border, #232c35);
+}
+
+.shell-ops-workspace {
+  min-width: 0;
+  overflow-y: auto;
+  background: var(--theme-bg, #07090c);
+}
+
+@media (max-width: 1366px) {
+  .shell-ops {
+    grid-template-columns: 208px var(--worklist-width-compact) minmax(0, 1fr);
+  }
+  body.is-sidebar-collapsed .shell-ops {
+    grid-template-columns: 68px var(--worklist-width-compact) minmax(0, 1fr);
+  }
+}
+
+/* Collapse do menu lateral (toggle em admin_nav_operacional.php) — precisa
+   vencer as duas variantes de shell (2 colunas clássico e 3 colunas
+   shell-ops) e a compactação de 1366px acima, senão o menu "recolhido"
+   continua ocupando a largura cheia da coluna. */
+body.is-sidebar-collapsed .shell {
+  grid-template-columns: 68px minmax(0, 1fr);
+}
+body.is-sidebar-collapsed .shell-ops {
+  grid-template-columns: 68px var(--worklist-width) minmax(0, 1fr);
+}
+
+@media (max-width: 899px) {
+  .shell-ops {
+    grid-template-columns: var(--worklist-width-compact) minmax(0, 1fr);
+  }
+  .shell-ops-sidebar {
+    position: fixed;
+    z-index: 100;
+    top: var(--topbar-height);
+    bottom: 0;
+    left: 0;
+    width: 260px;
+    transform: translateX(-100%);
+    transition: transform var(--transition);
+    box-shadow: 0 18px 60px rgba(0, 0, 0, .38);
+  }
+  .shell-ops-sidebar.is-open {
+    transform: translateX(0);
+  }
+}
+
+@media (max-width: 767.98px) {
+  .shell-ops {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .shell-ops-workspace {
+    display: none;
+  }
+  .shell-ops.has-selection .shell-ops-worklist {
+    display: none;
+  }
+  .shell-ops.has-selection .shell-ops-workspace {
+    display: block;
+  }
+}
+
+/* Variante de 2 colunas (sidebar + único painel de conteúdo) da mesma
+   arquitetura shell-ops — usada por páginas-dashboard que não têm uma
+   entidade única pra virar fila clicável (ex.: /admin/dashboard), mas que
+   ainda devem ter topbar/resumo full-bleed e sidebar/colapso idênticos às
+   páginas de 3 colunas, em vez do wrapper clássico .shell/.main-content. */
+.shell-ops--no-worklist {
+  grid-template-columns: var(--sidebar-width) minmax(0, 1fr);
+}
+.shell-ops--no-worklist .shell-ops-workspace {
+  border-right: 0;
+}
+body.is-sidebar-collapsed .shell-ops--no-worklist {
+  grid-template-columns: 68px minmax(0, 1fr);
+}
+@media (max-width: 1366px) {
+  .shell-ops--no-worklist {
+    grid-template-columns: 208px minmax(0, 1fr);
+  }
+  body.is-sidebar-collapsed .shell-ops--no-worklist {
+    grid-template-columns: 68px minmax(0, 1fr);
+  }
+}
+@media (max-width: 899px) {
+  .shell-ops--no-worklist {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+@media (max-width: 767.98px) {
+  .shell-ops--no-worklist .shell-ops-workspace {
+    display: block;
+  }
+}

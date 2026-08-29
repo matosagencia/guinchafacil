@@ -1,0 +1,26 @@
+/* ============================================================
+   GuinchaFácil — Tema Guincho (verde operacional) — Pacote L2.1
+   Fonte de VALORES: doc/PROTOTIPO_VISUAL_PERFIS_GUINCHAFACIL.html
+   (perfil "tow"/verde, mockup aprovado).
+
+   Aditivo a style.css (body.guincho existente mantido intacto).
+   ============================================================ */
+
+body.guincho {
+  --theme-bg: #061209;
+  --theme-surface: #0d2413;
+  --theme-surface-2: #14351c;
+  --theme-border: #285632;
+  --theme-text: #f5fff7;
+  --theme-muted: #b3d7bb;
+  --theme-accent: #42d564;
+  --theme-accent-hover: #2fb34a;
+  --theme-on-accent: #061209;
+  --theme-nav: #050f07;
+  --theme-sidebar: #07150a;
+  /* Superfícies claras dentro do tema escuro (ex.: card de oferta
+     no protótipo, .offer{background:#f7fbf8;color:#142018}). */
+  --surface-light-bg: #f7fbf8;
+  --surface-light-text: #142018;
+  --surface-light-muted: #5a6b5f;
+}

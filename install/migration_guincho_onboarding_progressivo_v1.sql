@@ -1,0 +1,18 @@
+-- Campos opcionais de qualificacao operacional.
+-- Nao sao obrigatorios para criar a conta; gates de aprovacao/matching permanecem.
+SET @col := (SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='guinchos' AND COLUMN_NAME='tipo_guincho');
+SET @sql := IF(@col=0, 'ALTER TABLE guinchos ADD COLUMN tipo_guincho VARCHAR(40) NULL AFTER modelo_caminhao', 'SELECT 1');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+
+SET @col := (SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='guinchos' AND COLUMN_NAME='categoria_cnh');
+SET @sql := IF(@col=0, 'ALTER TABLE guinchos ADD COLUMN categoria_cnh VARCHAR(2) NULL AFTER cnh_validade', 'SELECT 1');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+SET @col := (SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='guinchos' AND COLUMN_NAME='ear');
+SET @sql := IF(@col=0, 'ALTER TABLE guinchos ADD COLUMN ear TINYINT(1) NULL AFTER categoria_cnh', 'SELECT 1');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+SET @col := (SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='guinchos' AND COLUMN_NAME='ano_fabricacao');
+SET @sql := IF(@col=0, 'ALTER TABLE guinchos ADD COLUMN ano_fabricacao SMALLINT NULL AFTER ano_veiculo', 'SELECT 1');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+SET @col := (SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='guinchos' AND COLUMN_NAME='equipamentos_json');
+SET @sql := IF(@col=0, 'ALTER TABLE guinchos ADD COLUMN equipamentos_json TEXT NULL AFTER tipo_guincho', 'SELECT 1');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;

@@ -1,0 +1,13 @@
+# Bloqueia acesso direto a todos os arquivos da pasta /install
+Options -Indexes
+
+<IfModule mod_authz_core.c>
+  Require all denied
+</IfModule>
+<IfModule !mod_authz_core.c>
+  Order Deny,Allow
+  Deny from all
+</IfModule>
+
+# Nenhum arquivo desta pasta deve ser acessível por URL pública.
+# As migrations devem ser executadas exclusivamente via CLI.

@@ -1,0 +1,53 @@
+/* ============================================================
+   GuinchaFácil — Meus veículos (cliente/veiculos.php)
+   Substitui os style="" pontuais da view (gate visual do Nível 2).
+   ============================================================ */
+
+body.cliente .veiculo-icon-accent {
+  color: var(--primary);
+}
+
+body.cliente .veiculo-card {
+  border-top: 3px solid var(--primary);
+}
+
+body.cliente .veiculo-icon {
+  margin: 0;
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  font-size: 1.2rem;
+}
+
+body.cliente .veiculo-nome {
+  font-weight: 700;
+  color: var(--theme-text);
+  font-size: .95rem;
+}
+
+body.cliente .veiculo-placa-badge {
+  font-size: .71rem;
+  margin-top: 2px;
+}
+
+body.cliente .veiculo-meta-row {
+  font-size: .8rem;
+  color: var(--theme-muted);
+}
+
+body.cliente .veiculo-empty-icon {
+  opacity: .2;
+  color: var(--theme-muted);
+}
+
+body.cliente .veiculo-empty-title {
+  color: var(--theme-text);
+  font-weight: 700;
+}
+
+body.cliente .veiculo-empty-subtitle {
+  color: var(--theme-muted);
+  font-size: .9rem;
+  max-width: 380px;
+  margin: 0 auto 1.5rem;
+}

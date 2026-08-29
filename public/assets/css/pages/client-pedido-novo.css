@@ -1,0 +1,37 @@
+/* Fluxo de socorro: mapa como contexto e painel como tarefa principal. */
+body.cliente .main-wrapper:has(.socorro-shell) .main-content {
+  padding: 18px 20px 24px;
+  background: var(--theme-bg, #f4f8f5);
+}
+body.cliente .socorro-shell {
+  height: calc(100vh - 82px);
+  min-height: 600px;
+  border: 1px solid var(--theme-border, #d4e6d8);
+  background: #dfe9e2;
+  box-shadow: 0 12px 32px rgba(20, 32, 24, .14);
+}
+body.cliente .socorro-sheet {
+  left: auto;
+  width: min(600px, 100%);
+  max-height: calc(100% - 24px);
+  margin: 12px;
+  border-radius: 18px;
+  border: 1px solid var(--theme-border, #d4e6d8);
+  box-shadow: 0 10px 30px rgba(20, 32, 24, .2);
+}
+body.cliente .socorro-topbar { left: 18px; top: 18px; right: auto; width: min(470px, calc(100% - 36px)); }
+body.cliente .socorro-search-pill { max-width: none; border: 1px solid var(--theme-border, #d4e6d8); }
+body.cliente .socorro-sheet-handle { display: none; }
+body.cliente .socorro-title { color: var(--theme-text, #142018); font-size: clamp(1.25rem, 2vw, 1.55rem); }
+body.cliente .socorro-subtitle { color: var(--theme-muted, #607066); }
+body.cliente .socorro-chip { background: var(--theme-surface, #fff); border-color: var(--theme-border, #d4e6d8); color: var(--theme-text, #142018); transition: transform .15s ease, border-color .15s ease, background .15s ease; }
+body.cliente .socorro-chip:hover { transform: translateY(-2px); border-color: var(--theme-accent, #2fb34a); background: var(--theme-surface-2, #edf6ef); }
+body.cliente .socorro-progress-track { background: #dce6df; }
+body.cliente .socorro-progress-labels { color: var(--theme-muted, #607066); }
+@media (max-width: 767.98px) {
+  body.cliente .main-wrapper:has(.socorro-shell) .main-content { padding: 10px; }
+  body.cliente .socorro-shell { height: calc(100vh - 74px); min-height: 500px; border-radius: 12px; }
+  body.cliente .socorro-sheet { left: 0; right: 0; bottom: 0; width: auto; max-height: 78%; margin: 0; border-radius: 18px 18px 0 0; border-left: 0; border-right: 0; border-bottom: 0; }
+  body.cliente .socorro-sheet-handle { display: block; }
+  body.cliente .socorro-topbar { left: 10px; top: 10px; width: calc(100% - 20px); }
+}

@@ -1,0 +1,184 @@
+/* ============================================================
+   GuinchaFácil — Base (reset + tipografia) — Pacote L2.1
+   Aditivo a style.css: só normaliza box-sizing e tipografia via
+   os tokens novos (--font-sans), sem redefinir cor/fundo do body
+   (isso já é responsabilidade de style.css hoje, preservado).
+   ============================================================ */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  margin: 0 0 var(--space-3);
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+/* Ícone de ajuda (i) usado em headers de card pra explicar termos técnicos
+   (POR, pontos rejeitados, saltos etc.) pro empregado que opera o painel —
+   usa o atributo title nativo (tooltip do navegador), sem dependência de JS. */
+.hint-icon {
+  color: var(--text-muted, #8a8a8a);
+  cursor: help;
+  font-size: 0.85em;
+}
+
+/* Pinos de origem/destino usados em todos os mapas de acompanhamento
+   (admin/dashboard, admin/pedidodetalhe, admin/pedido_trilha,
+   guincho/atendimento, cliente/pedidostatus): vermelho enquanto o guincho
+   ainda não chegou naquele ponto, cinza depois que chegou — dá pra ver de
+   relance, só pela cor, se a coleta (origem) ou a entrega (destino) já
+   aconteceu, sem precisar ler o status por extenso. */
+.mapa-pin {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  color: #fff;
+  font-size: 0.8rem;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.35);
+}
+.mapa-pin--pendente { background: #ef4444; }
+.mapa-pin--concluido { background: #6c757d; }
+.mapa-pin--provider { background: #f59e0b; }
+
+/* Balão (popup) do Leaflet padronizado em todos os mapas do sistema (admin
+   dashboard, admin pedidodetalhe/pedido_trilha, guincho atendimento, cliente
+   pedidostatus/pedidonovo/oficinas etc.) — tom escuro, mais legível sobre o
+   mapa claro do OpenStreetMap do que o branco padrão do Leaflet. Também
+   normaliza a font-family (leaflet.css define a sua própria, diferente da
+   tipografia do resto do app). Global aqui pra não precisar duplicar em
+   cada tela que tem um mapa. */
+/* !important em tudo aqui: cada página carrega o leaflet.css dela num ponto
+   diferente do HTML (algumas antes deste base.css, outras — a maioria —
+   bem mais abaixo, perto do rodapé), então sem !important a ordem de load
+   de cada página decidiria quem vence, e o tema ficava inconsistente entre
+   telas mesmo com a mesma especificidade de seletor. */
+.leaflet-popup-content, .leaflet-popup-content * {
+  font-family: var(--font-sans) !important;
+}
+.leaflet-popup-content-wrapper {
+  background: #1f2937 !important;
+  color: #f1f5f9 !important;
+  border-radius: 10px !important;
+}
+.leaflet-popup-content { color: #f1f5f9 !important; margin: 10px 14px !important; }
+.leaflet-popup-content strong { color: #ffffff !important; }
+.leaflet-popup-tip { background: #1f2937 !important; }
+.leaflet-popup-close-button {
+  color: #cbd5e1 !important;
+}
+.leaflet-popup-close-button:hover {
+  color: #ffffff !important;
+}
+
+p {
+  margin: 0 0 var(--space-3);
+}
+
+img, svg {
+  max-width: 100%;
+  display: block;
+}
+
+/* Alvo de toque mínimo (critério de aceite do Nível 2, seção 5.4). */
+button, a, input, select, textarea {
+  touch-action: manipulation;
+}
+
+/* Controles de selecao: estado marcado sempre visivel em todos os temas.
+   O Bootstrap usa background-image para o indicador e alguns temas legados
+   sobrescreviam o fundo, deixando o checkbox visualmente indistinguivel. */
+input.form-check-input[type="checkbox"],
+input.form-check-input[type="radio"] {
+  appearance: none;
+  -webkit-appearance: none;
+  position: relative;
+  width: 1.2rem;
+  height: 1.2rem;
+  margin-top: .16rem;
+  flex: 0 0 1.2rem;
+  border: 2px solid var(--theme-border, #64748b);
+  background: var(--theme-surface-2, #fff);
+  color: var(--theme-on-accent, #fff);
+  cursor: pointer;
+  display: inline-grid;
+  place-content: center;
+  transition: background-color .15s ease, border-color .15s ease, box-shadow .15s ease;
+}
+input.form-check-input[type="checkbox"] { border-radius: .3rem; }
+input.form-check-input[type="radio"] { border-radius: 50%; }
+input.form-check-input[type="checkbox"]::before,
+input.form-check-input[type="radio"]::before {
+  content: "";
+  display: block;
+  transform: scale(0);
+  transition: transform .12s ease;
+  background: currentColor;
+}
+input.form-check-input[type="checkbox"]::before {
+  width: .62rem;
+  height: .34rem;
+  border-left: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: scale(0) rotate(-45deg);
+}
+input.form-check-input[type="radio"]::before {
+  width: .48rem;
+  height: .48rem;
+  border-radius: 50%;
+}
+input.form-check-input[type="checkbox"]:checked,
+input.form-check-input[type="radio"]:checked {
+  background: var(--theme-accent, var(--brand, #2fb34a));
+  border-color: var(--theme-accent, var(--brand, #2fb34a));
+}
+input.form-check-input[type="checkbox"]:checked::before { transform: scale(1) rotate(-45deg); }
+input.form-check-input[type="radio"]:checked::before { transform: scale(1); }
+input.form-check-input:focus-visible {
+  outline: 0;
+  box-shadow: 0 0 0 .22rem color-mix(in srgb, var(--theme-accent, #2fb34a) 28%, transparent);
+}
+input.form-check-input:disabled { opacity: .58; cursor: not-allowed; }
+
+/* switches permanecem com o comportamento nativo do Bootstrap. */
+.form-switch input.form-check-input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
+  display: inline-block;
+  width: 2.35em;
+  height: 1.3em;
+  flex: 0 0 2.35em;
+  border: 0;
+  border-radius: 2em;
+  background: var(--theme-surface-2, #cbd5e1);
+}
+.form-switch input.form-check-input[type="checkbox"]::before {
+  width: .95em;
+  height: .95em;
+  border: 0;
+  border-radius: 50%;
+  background: #fff;
+  transform: translateX(-.48em) scale(1);
+}
+.form-switch input.form-check-input[type="checkbox"]:checked {
+  background: var(--theme-accent, var(--brand, #2fb34a));
+}
+.form-switch input.form-check-input[type="checkbox"]:checked::before {
+  transform: translateX(.48em) scale(1);
+}

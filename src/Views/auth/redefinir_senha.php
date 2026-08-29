@@ -1,10 +1,11 @@
+<?php $bp = defined('BASE_PATH') ? BASE_PATH : ''; ?>
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="/public/assets/css/style.css" rel="stylesheet">
+    <link href="<?php echo htmlspecialchars($bp); ?>/public/assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="<?php echo htmlspecialchars($bp); ?>/public/assets/css/style.css" rel="stylesheet">
     <title>Redefinir Senha — GuinchaFácil</title>
 </head>
 <body>
@@ -22,7 +23,7 @@
             <p class="text-muted">Criar nova senha</p>
         </div>
 
-        <form method="POST" action="/senha/redefinir" id="formRedefinir">
+        <form method="POST" action="<?php echo htmlspecialchars($bp); ?>/senha/redefinir" id="formRedefinir">
             <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($csrf_token ?? ''); ?>">
             <input type="hidden" name="token" value="<?php echo htmlspecialchars($token ?? ''); ?>">
 
@@ -31,7 +32,7 @@
                 <div class="input-group">
                     <input type="password" class="form-control" id="senha" name="senha"
                            minlength="8" placeholder="Mínimo 8 caracteres" required>
-                    <button class="btn btn-outline-secondary" type="button" onclick="toggleSenha('senha')">
+                    <button class="btn btn-outline-secondary" type="button" data-toggle-password="senha">
                         <i id="icon-senha" class="bi bi-eye">👁</i>
                     </button>
                 </div>
@@ -48,7 +49,7 @@
                 <div class="input-group">
                     <input type="password" class="form-control" id="confirmacao" name="confirmacao"
                            minlength="8" placeholder="Repita a senha" required>
-                    <button class="btn btn-outline-secondary" type="button" onclick="toggleSenha('confirmacao')">
+                    <button class="btn btn-outline-secondary" type="button" data-toggle-password="confirmacao">
                         <i id="icon-confirmacao" class="bi bi-eye">👁</i>
                     </button>
                 </div>
@@ -60,70 +61,12 @@
 
         <hr>
         <div class="text-center small">
-            <a href="/login">← Voltar ao login</a>
+            <a href="<?php echo htmlspecialchars($bp); ?>/login">← Voltar ao login</a>
         </div>
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-function toggleSenha(id) {
-    const input = document.getElementById(id);
-    input.type = input.type === 'password' ? 'text' : 'password';
-}
-
-const senhaInput = document.getElementById('senha');
-const confirmInput = document.getElementById('confirmacao');
-const forcaBar = document.getElementById('forca-bar');
-const forcaLabel = document.getElementById('forca-label');
-const matchMsg = document.getElementById('match-msg');
-const btnSalvar = document.getElementById('btnSalvar');
-
-function avaliarForca(s) {
-    let score = 0;
-    if (s.length >= 8)  score++;
-    if (s.length >= 12) score++;
-    if (/[A-Z]/.test(s)) score++;
-    if (/[0-9]/.test(s)) score++;
-    if (/[^A-Za-z0-9]/.test(s)) score++;
-    return score;
-}
-
-senhaInput.addEventListener('input', function() {
-    const v = this.value;
-    const score = avaliarForca(v);
-    const pct = Math.min(score * 20, 100);
-    forcaBar.style.width = pct + '%';
-    const cores = ['','#dc2626','#f59e0b','#eab308','#22c55e','#16a34a'];
-    const labels = ['','Muito fraca','Fraca','Média','Forte','Muito forte'];
-    forcaBar.style.backgroundColor = cores[score] || '#dc2626';
-    forcaLabel.textContent = labels[score] || '';
-    forcaLabel.style.color = cores[score] || '#dc2626';
-    verificarMatch();
-});
-
-confirmInput.addEventListener('input', verificarMatch);
-
-function verificarMatch() {
-    if (!confirmInput.value) { matchMsg.textContent = ''; return; }
-    if (senhaInput.value === confirmInput.value) {
-        matchMsg.textContent = '✅ Senhas coincidem';
-        matchMsg.style.color = '#16a34a';
-        btnSalvar.disabled = false;
-    } else {
-        matchMsg.textContent = '❌ Senhas não coincidem';
-        matchMsg.style.color = '#dc2626';
-        btnSalvar.disabled = true;
-    }
-}
-
-document.getElementById('formRedefinir').addEventListener('submit', function(e) {
-    if (senhaInput.value !== confirmInput.value) {
-        e.preventDefault();
-        matchMsg.textContent = '❌ Senhas não coincidem';
-        matchMsg.style.color = '#dc2626';
-    }
-});
-</script>
+<script<?php echo csp_script_nonce_attr(); ?> src="<?php echo htmlspecialchars($bp); ?>/public/assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script<?php echo csp_script_nonce_attr(); ?> src="<?php echo htmlspecialchars($bp); ?>/public/assets/js/auth-redefinir-senha.js"></script>
 </body>
 </html>

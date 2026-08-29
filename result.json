@@ -1,0 +1,9 @@
+{
+  "run_id": "local",
+  "status": "failed",
+  "exit_code": 0,
+  "duration_ms": 1,
+  "total_steps": 0,
+  "failed_steps": 0,
+  "steps": []
+}

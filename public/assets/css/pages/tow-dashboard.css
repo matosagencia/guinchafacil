@@ -1,0 +1,541 @@
+/* ============================================================
+   GuinchaFácil — Dashboard do guincho (Pacote L2.1/L2.2, escopo único
+   guincho/dashboard.php, conforme decisão de fatiar o Nível 2 página
+   a página antes de mexer no shell compartilhado).
+
+   Causa raiz do bug visual relatado (texto quase invisível no card
+   "Bem-vindo" e nos cards da fila/atendimentos): guincho/dashboard.php
+   usa classes .tow-hero/.tow-active-card/.tow-stat/.tow-card/.tow-item/
+   .tow-activity-item/.tow-chip, mas components/dashboard.css só define
+   .app-hero/.app-card/.app-stat/.app-chip (nomes diferentes — mesmo
+   problema já apontado na auditoria: "componentes usam app-card no CSS
+   e dash-card no HTML"). Além disso, style.css tem uma regra genérica
+   `body.guincho [class*="tow-"] { color: var(--surface-contrast-text)
+   !important; }` (pensada para os cards CLAROS dentro do tema escuro)
+   que força texto escuro nesses elementos mesmo sem fundo claro real —
+   resultando em texto escuro sobre o fundo escuro do body, quase
+   invisível.
+
+   Este arquivo define de verdade as classes .tow-* usadas na view,
+   com o visual do protótipo aprovado (doc/PROTOTIPO_VISUAL_PERFIS_
+   GUINCHAFACIL.html, seção "tow"), usando os tokens/tema já criados
+   em tokens.css + themes/tow.css — sem depender da regra de contraste
+   genérica do style.css (aqui os estilos já vêm com fundo/cor
+   corretos, então aquele !important passa a ser inofensivo).
+   ============================================================ */
+
+body.guincho .app-dashboard {
+  /* Sobrescreve o fundo claro fixo de dashboard.css (pensado só pro
+     tema claro do cliente) só dentro do perfil guincho. */
+  --dashboard-bg: var(--theme-surface);
+  --dashboard-border: 1px solid var(--theme-border);
+  --dashboard-shadow: var(--shadow-float);
+}
+
+body.guincho .app-hero,
+body.guincho .app-card,
+body.guincho .app-stat {
+  color: var(--theme-text);
+}
+
+/* O hero pedido: fino, com padding/flex do protótipo (não a caixa alta e
+   escura que estava saindo antes). components/dashboard.css define
+   .app-hero pensado pro tema claro do cliente (fundo branco + blobs
+   coloridos de destaque) — aqui sobrescrevemos fundo, borda e as blobs
+   decorativas para o visual do protótipo (doc/PROTOTIPO_VISUAL_PERFIS_
+   GUINCHAFACIL.html, regra ".tow-hero"): gradiente sutil da própria
+   superfície do tema, não um preto liso. */
+body.guincho .app-hero.tow-hero {
+  padding: 24px 28px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--theme-surface) 92%, var(--theme-accent) 8%), var(--theme-surface));
+  border: 1px solid var(--theme-border);
+  box-shadow: var(--shadow-float);
+  border-radius: var(--radius-lg);
+}
+
+/* As blobs de destaque de dashboard.css (rgba(47,179,74,.3) etc.) foram
+   pensadas pro cartão branco do cliente; em cima do gradiente escuro do
+   guincho elas criavam a mancha esverdeada "lavada" por cima do texto.
+   Desligamos aqui e mantemos só o gradiente sutil acima. */
+body.guincho .app-hero.tow-hero::before {
+  content: none;
+}
+
+@media (max-width: 720px) {
+  body.guincho .app-hero.tow-hero {
+    padding: 22px;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+body.guincho .app-stat__label,
+body.guincho .app-panel__subtitle {
+  color: var(--theme-muted);
+}
+
+/* Zera a cor apagada da utilidade .text-muted do Bootstrap (pensada pro
+   tema claro) sempre que ela aparecer dentro do perfil guincho — sem isso
+   ela ganha da nossa cor por especificidade/ordem de carregamento e o
+   texto fica cinza-escuro em cima do fundo escuro do body, quase ilegível. */
+body.guincho .text-muted {
+  color: var(--theme-muted) !important;
+}
+
+/* ---------- Cabeçalho da página (doc/PROTOTIPO_VISUAL_PERFIS_GUINCHAFACIL.html,
+   seção "tow": <header class="page-head">) ---------- */
+body.guincho .page-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+body.guincho .page-head .eyebrow {
+  display: block;
+  font-size: .72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  color: var(--theme-accent);
+  margin-bottom: var(--space-1);
+}
+
+body.guincho .page-head h1 {
+  margin: 0 0 var(--space-1);
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: var(--theme-text);
+}
+
+body.guincho .page-head p {
+  margin: 0;
+  color: var(--theme-muted);
+  font-size: .92rem;
+}
+
+/* ---------- Hero (saudação + nome + cobertura/GPS + toggle) ---------- */
+body.guincho .tow-hero-eyebrow {
+  display: block;
+  font-size: .72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  color: var(--theme-accent);
+  margin-bottom: var(--space-1);
+}
+
+body.guincho .tow-hero-title {
+  margin: 0 0 var(--space-2);
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--theme-text);
+}
+
+body.guincho .tow-hero-subtitle {
+  margin: 0;
+  color: var(--theme-muted);
+  font-size: .95rem;
+}
+
+body.guincho .tow-hero-switch {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+body.guincho .tow-hero-switch span {
+  font-weight: 700;
+  color: var(--theme-text);
+  font-size: .92rem;
+}
+
+/* ---------- Card de pedido ativo ---------- */
+body.guincho .tow-active-card {
+  margin-top: var(--space-4);
+  padding: var(--space-5);
+  border-radius: var(--radius-lg);
+  background: var(--theme-surface-2);
+  border: 1px solid var(--theme-border);
+  color: var(--theme-text);
+}
+
+body.guincho .tow-active-card-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+
+body.guincho .tow-active-driver {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+body.guincho .tow-active-avatar {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--theme-surface);
+  border: 1px solid var(--theme-border);
+  color: var(--theme-accent);
+  flex-shrink: 0;
+}
+
+body.guincho .tow-active-title {
+  font-weight: 800;
+}
+
+body.guincho .tow-active-subtitle {
+  font-size: .82rem;
+  color: var(--theme-muted);
+}
+
+body.guincho .tow-active-route {
+  display: grid;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+
+body.guincho .tow-active-route-item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  font-size: .86rem;
+}
+
+body.guincho .tow-active-route-item strong {
+  display: block;
+  font-size: .72rem;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  color: var(--theme-muted);
+}
+
+body.guincho .tow-active-kpis {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+}
+
+body.guincho .tow-active-kpi {
+  background: var(--theme-surface);
+  border-radius: var(--radius-sm);
+  padding: var(--space-3);
+  text-align: center;
+}
+
+body.guincho .tow-active-kpi strong {
+  display: block;
+  font-size: 1rem;
+}
+
+body.guincho .tow-active-kpi span {
+  font-size: .68rem;
+  color: var(--theme-muted);
+}
+
+body.guincho .tow-active-actions {
+  display: flex;
+  gap: var(--space-3);
+}
+
+/* ---------- Stat cards ---------- */
+body.guincho .tow-stat-link {
+  display: block;
+  height: 100%;
+  color: inherit;
+  text-decoration: none;
+  transition: transform var(--transition), box-shadow var(--transition);
+}
+
+body.guincho .tow-stat-link:hover {
+  transform: translateY(-2px);
+}
+
+body.guincho .tow-stat {
+  height: 100%;
+  padding: var(--space-4);
+  border-radius: var(--radius-lg);
+  background: linear-gradient(160deg, var(--theme-surface), var(--theme-surface-2));
+  border: 1px solid var(--theme-border);
+}
+
+body.guincho .tow-stat-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: var(--radius-control);
+  display: grid;
+  place-items: center;
+  background: color-mix(in srgb, var(--theme-accent) 15%, transparent);
+  color: var(--theme-accent);
+  margin-bottom: var(--space-3);
+}
+
+body.guincho .tow-stat-value {
+  font-size: 1.5rem;
+  font-weight: 800;
+  line-height: 1;
+  color: var(--theme-text);
+}
+
+body.guincho .tow-stat-label {
+  font-size: .78rem;
+  color: var(--theme-muted);
+  margin-top: var(--space-1);
+}
+
+/* ---------- Cards de painel (mapa, fila, histórico) ---------- */
+body.guincho .tow-card {
+  border-radius: var(--radius-lg);
+  background: var(--theme-surface);
+  border: 1px solid var(--theme-border);
+  box-shadow: var(--shadow-card);
+  color: var(--theme-text);
+}
+
+body.guincho .tow-panel-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+
+body.guincho .tow-panel-title {
+  margin: 0;
+  font-size: 1.02rem;
+  font-weight: 800;
+}
+
+body.guincho .tow-panel-subtitle {
+  margin: var(--space-1) 0 0;
+  font-size: .82rem;
+  color: var(--theme-muted);
+}
+
+/* ---------- Item de fila de pedidos ---------- */
+body.guincho .tow-item {
+  padding: var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--theme-surface-2);
+  color: var(--theme-text);
+}
+
+body.guincho .tow-item p {
+  color: var(--theme-text);
+}
+
+/* ---------- Histórico recente ---------- */
+body.guincho .tow-activity-list {
+  display: flex;
+  flex-direction: column;
+}
+
+body.guincho .tow-activity-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-3) 0;
+  border-bottom: 1px solid var(--theme-border);
+}
+
+body.guincho .tow-activity-item:last-child {
+  border-bottom: none;
+}
+
+body.guincho .tow-activity-item strong {
+  display: block;
+  font-size: .88rem;
+}
+
+body.guincho .tow-activity-item span {
+  display: block;
+  font-size: .78rem;
+  color: var(--theme-muted);
+}
+
+/* ---------- Card "Nova solicitação" (oferta ativa) ---------- */
+body.guincho .tow-offer {
+  color: var(--theme-text);
+}
+
+body.guincho .tow-offer-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+
+body.guincho .tow-offer-eyebrow {
+  display: block;
+  font-size: .68rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  color: var(--theme-accent);
+  margin-bottom: var(--space-1);
+}
+
+body.guincho .tow-offer-title {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 800;
+}
+
+body.guincho .tow-offer-subtitle {
+  margin: var(--space-1) 0 0;
+  font-size: .86rem;
+  color: var(--theme-muted);
+}
+
+body.guincho .tow-offer-timer {
+  flex-shrink: 0;
+  min-width: 64px;
+  text-align: center;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-control);
+  background: color-mix(in srgb, var(--theme-accent) 16%, transparent);
+  color: var(--theme-accent);
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+body.guincho .tow-offer-metrics {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+}
+
+@media (min-width: 576px) {
+  body.guincho .tow-offer-metrics {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+body.guincho .tow-offer-metric {
+  background: var(--theme-surface-2);
+  border-radius: var(--radius-sm);
+  padding: var(--space-3);
+  text-align: center;
+}
+
+body.guincho .tow-offer-metric span {
+  display: block;
+  font-size: .68rem;
+  color: var(--theme-muted);
+  margin-bottom: var(--space-1);
+}
+
+body.guincho .tow-offer-metric strong {
+  font-size: 1rem;
+}
+
+body.guincho .tow-offer-route {
+  display: grid;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+  font-size: .86rem;
+}
+
+body.guincho .tow-offer-route-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+body.guincho .tow-offer-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+body.guincho .tow-offer-dot--origin {
+  background: var(--theme-accent);
+}
+
+body.guincho .tow-offer-dot--dest {
+  background: var(--warning);
+}
+
+body.guincho .tow-offer-actions {
+  display: flex;
+  gap: var(--space-3);
+}
+
+/* ---------- Fila de ofertas ---------- */
+body.guincho .tow-queue {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+body.guincho .tow-queue-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  border-radius: var(--radius-sm);
+  background: var(--theme-surface-2);
+}
+
+body.guincho .tow-queue-item strong {
+  display: block;
+  font-size: .88rem;
+}
+
+body.guincho .tow-queue-item span {
+  display: block;
+  font-size: .78rem;
+  color: var(--theme-muted);
+}
+
+body.guincho .tow-queue-time {
+  flex-shrink: 0;
+  font-size: .72rem;
+  font-weight: 700;
+  color: var(--theme-accent);
+}
+
+/* ---------- Proof-of-Road ---------- */
+body.guincho .tow-por-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+body.guincho .tow-por-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-3) 0;
+  border-bottom: 1px solid var(--theme-border);
+  font-size: .88rem;
+}
+
+body.guincho .tow-por-row:last-child {
+  border-bottom: none;
+}
+
+body.guincho .tow-por-row span {
+  color: var(--theme-muted);
+}
+
+body.guincho .tow-por-row strong {
+  font-weight: 800;
+}

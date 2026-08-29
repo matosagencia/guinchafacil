@@ -1,0 +1,225 @@
+/* ============================================================
+   GuinchaFácil — Perfil do guincheiro (guincho/perfil.php)
+   Extraído do <style> inline da view (gate visual do Nível 2).
+   ============================================================ */
+
+body.guincho .ops-shell {
+  position: relative;
+  isolation: isolate;
+}
+
+body.guincho .ops-shell::before,
+body.guincho .ops-shell::after {
+  content: "";
+  position: absolute;
+  width: 340px;
+  height: 340px;
+  border-radius: 999px;
+  filter: blur(90px);
+  opacity: .14;
+  pointer-events: none;
+  z-index: -1;
+}
+
+body.guincho .ops-shell::before {
+  top: -70px;
+  left: -60px;
+  background: rgba(47, 179, 74, .34);
+}
+
+body.guincho .ops-shell::after {
+  top: 100px;
+  right: -100px;
+  background: rgba(239, 68, 68, .24);
+}
+
+body.guincho .ops-hero,
+body.guincho .ops-card {
+  border-radius: 30px;
+  border: 1px solid var(--theme-border);
+  background: var(--theme-surface);
+  box-shadow: var(--shadow-card);
+  color: var(--theme-text);
+}
+
+body.guincho .ops-hero {
+  overflow: hidden;
+  position: relative;
+}
+
+body.guincho .ops-hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at top left, rgba(47, 179, 74, .15), transparent 32%),
+    radial-gradient(circle at bottom right, rgba(239, 68, 68, .12), transparent 30%);
+  pointer-events: none;
+}
+
+body.guincho .ops-hero > * {
+  position: relative;
+}
+
+body.guincho .ops-avatar {
+  width: 94px;
+  height: 94px;
+  border-radius: 30px;
+  display: grid;
+  place-items: center;
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: #fff;
+  background: linear-gradient(135deg, var(--primary), #198754);
+  box-shadow: 0 18px 36px rgba(47, 179, 74, .24);
+}
+
+body.guincho .ops-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: .45rem;
+  padding: .65rem .95rem;
+  border-radius: 999px;
+  border: 1px solid var(--theme-border);
+  background: var(--theme-surface-2);
+  color: var(--theme-text);
+  font-size: .86rem;
+  font-weight: 700;
+}
+
+body.guincho .ops-chip.success i,
+body.guincho .ops-chip.default i {
+  color: var(--primary);
+}
+
+body.guincho .ops-chip.warning i {
+  color: #f59e0b;
+}
+
+body.guincho .ops-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+body.guincho .ops-stat {
+  padding: 1rem 1.1rem;
+  border-radius: 22px;
+  background: var(--theme-surface-2);
+  border: 1px solid var(--theme-border);
+}
+
+body.guincho .ops-stat .label {
+  display: block;
+  color: var(--theme-muted);
+  font-size: .8rem;
+  margin-bottom: .3rem;
+}
+
+body.guincho .ops-stat .value {
+  font-weight: 800;
+  color: var(--theme-text);
+}
+
+body.guincho .ops-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.35rem;
+}
+
+body.guincho .ops-card-title {
+  margin: 0;
+  font-size: 1.08rem;
+  font-weight: 800;
+}
+
+body.guincho .ops-card-subtitle {
+  margin: .25rem 0 0;
+  color: var(--theme-muted);
+  font-size: .9rem;
+}
+
+body.guincho .ops-pane {
+  padding: 1.25rem;
+  border-radius: 22px;
+  background: var(--theme-surface-2);
+  border: 1px solid var(--theme-border);
+}
+
+body.guincho .ops-pane + .ops-pane {
+  margin-top: 1rem;
+}
+
+body.guincho .ops-form .form-label {
+  font-weight: 700;
+  color: var(--theme-text);
+}
+
+body.guincho .ops-form .form-control,
+body.guincho .ops-form .form-select {
+  min-height: 52px;
+  border-radius: 16px;
+  border-color: var(--theme-border);
+  background: var(--theme-surface);
+  color: var(--theme-text);
+}
+
+body.guincho .ops-form .form-control:disabled {
+  background: var(--theme-surface-2);
+}
+
+body.guincho .ops-note {
+  padding: 1rem 1.1rem;
+  border-radius: 18px;
+  border: 1px solid rgba(47, 179, 74, .12);
+  background: linear-gradient(135deg, rgba(47, 179, 74, .09), rgba(245, 158, 11, .08));
+  color: var(--theme-text);
+}
+
+body.guincho .ops-thumb {
+  border-radius: 18px;
+  border: 1px solid var(--theme-border);
+  box-shadow: 0 10px 24px rgba(15, 23, 42, .18);
+}
+
+body.guincho .ops-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+@media (max-width: 1199.98px) {
+  body.guincho .ops-stat-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 767.98px) {
+  body.guincho .ops-stat-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ---------- Substitui os style="" pontuais da view ---------- */
+body.guincho .ops-hero-title {
+  font-size: 2rem;
+  font-weight: 800;
+}
+
+body.guincho .ops-summary-row {
+  background: var(--theme-surface);
+  border: 1px solid var(--theme-border);
+}
+
+body.guincho .ops-thumb-preview {
+  max-height: 180px;
+}
+
+body.guincho .ops-map {
+  height: 240px;
+  border-radius: 18px;
+  border: 1px solid var(--theme-border);
+}

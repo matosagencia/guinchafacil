@@ -1,0 +1,135 @@
+/* ============================================================
+   GuinchaFácil — Histórico de pedidos (cliente/historico.php)
+   Extraído do <style> inline da view (gate visual do Nível 2).
+   ============================================================ */
+
+body.cliente .history-shell {
+  position: relative;
+  isolation: isolate;
+}
+
+body.cliente .history-shell::before,
+body.cliente .history-shell::after {
+  content: "";
+  position: absolute;
+  width: 320px;
+  height: 320px;
+  border-radius: 999px;
+  filter: blur(90px);
+  opacity: .14;
+  z-index: -1;
+  pointer-events: none;
+}
+
+body.cliente .history-shell::before {
+  top: -80px;
+  left: -70px;
+  background: rgba(47, 179, 74, .28);
+}
+
+body.cliente .history-shell::after {
+  top: 160px;
+  right: -90px;
+  background: rgba(245, 158, 11, .22);
+}
+
+body.cliente .history-hero,
+body.cliente .history-card {
+  border-radius: 28px;
+  border: 1px solid rgba(15, 23, 42, .07);
+  background: linear-gradient(180deg, rgba(255, 255, 255, .98), rgba(255, 255, 255, .92));
+  box-shadow: 0 28px 72px rgba(15, 23, 42, .08);
+}
+
+body.cliente .history-hero {
+  position: relative;
+  overflow: hidden;
+}
+
+body.cliente .history-hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at top left, rgba(47, 179, 74, .14), transparent 34%),
+    radial-gradient(circle at bottom right, rgba(245, 158, 11, .12), transparent 30%);
+  pointer-events: none;
+}
+
+body.cliente .history-hero > * {
+  position: relative;
+}
+
+body.cliente .history-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: .45rem;
+  padding: .65rem .95rem;
+  border-radius: 999px;
+  border: 1px solid rgba(15, 23, 42, .08);
+  background: rgba(255, 255, 255, .78);
+  font-size: .86rem;
+  font-weight: 700;
+}
+
+body.cliente .history-chip i {
+  color: var(--primary);
+}
+
+body.cliente .history-list {
+  display: grid;
+  gap: 1rem;
+}
+
+body.cliente .history-item {
+  padding: 1.15rem;
+  border-radius: 22px;
+  background: rgba(248, 250, 252, .84);
+  border: 1px solid rgba(15, 23, 42, .06);
+}
+
+body.cliente .history-item-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: .85rem;
+}
+
+/* ---------- Substitui os style="" pontuais da view ---------- */
+body.cliente .history-icon-accent {
+  color: var(--primary);
+}
+
+body.cliente .history-title {
+  font-size: 1.95rem;
+  font-weight: 800;
+}
+
+body.cliente .history-pedido-id {
+  font-size: 1.02rem;
+}
+
+body.cliente .history-avaliar-btn {
+  color: #000;
+}
+
+body.cliente .history-empty {
+  color: var(--theme-muted);
+}
+
+body.cliente .history-empty-icon {
+  opacity: .25;
+}
+
+body.cliente .history-empty-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--theme-text);
+  margin-bottom: .5rem;
+}
+
+body.cliente .history-empty-subtitle {
+  font-size: .85rem;
+  margin-bottom: 1rem;
+}

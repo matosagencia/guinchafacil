@@ -9,14 +9,14 @@
                 <span>&copy; <?php echo date('Y'); ?> GuinchaFácil. Todos os direitos reservados.</span>
             </div>
             <div class="col-sm-6 text-sm-end mt-2 mt-sm-0">
-                <a href="#">Termos de Uso</a> &middot;
-                <a href="#">Privacidade</a> &middot;
-                <a href="#">Contato</a>
+                <a href="<?php echo htmlspecialchars($bp); ?>/termos-servico.php">Termos de Uso</a> &middot;
+                <a href="<?php echo htmlspecialchars($bp); ?>/politica-privacidade.php">Privacidade</a> &middot;
+                <a href="mailto:<?php echo htmlspecialchars((string)ADMIN_EMAIL); ?>">Contato</a>
             </div>
         </div>
     </div>
 </footer>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script<?php echo csp_script_nonce_attr(); ?> src="<?php echo htmlspecialchars($bp); ?>/public/assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

@@ -2,19 +2,21 @@
 $bp = defined('BASE_PATH') ? BASE_PATH : '';
 include __DIR__ . '/../layouts/header.php';
 ?>
-<div class="main-wrapper">
+<link rel="stylesheet" href="<?php echo htmlspecialchars($bp); ?>/public/assets/css/pages/admin-guinchoform.css">
+<div class="main-wrapper shell admin-shell">
 <?php include __DIR__ . '/../layouts/sidebar_admin.php'; ?>
-<main class="main-content">
+<main class="main-content shell-main shell-content">
 
-    <div class="page-header">
+    <header class="page-head mb-4">
         <div>
-            <div class="page-title"><i class="fas fa-truck me-2" style="color:var(--primary)"></i>Cadastrar Guincheiro</div>
-            <div class="page-subtitle">Registro de novo operador de guincho/reboque pelo administrador</div>
+            <span class="eyebrow">Administração</span>
+            <h1><i class="fas fa-truck me-2 guinchoform-icon-accent"></i>Cadastrar Guincheiro</h1>
+            <p>Registro de novo operador de guincho/reboque pelo administrador</p>
         </div>
         <a href="<?php echo $bp; ?>/admin/guinchos" class="btn btn-secondary btn-sm">
             <i class="fas fa-arrow-left me-1"></i>Voltar
         </a>
-    </div>
+    </header>
 
     <?php if (!empty($_GET['erro'])): ?>
     <div class="alert alert-danger mb-3">
@@ -59,14 +61,26 @@ include __DIR__ . '/../layouts/header.php';
                             <div class="col-md-6">
                                 <label class="form-label">Senha *</label>
                                 <input type="password" class="form-control" name="senha"
-                                       id="senhaInput" minlength="6"
-                                       placeholder="Mínimo 6 caracteres" required>
+                                       id="senhaInput" minlength="8"
+                                       placeholder="Mínimo 8 caracteres" required>
                             </div>
                             <div class="col-12">
                                 <label class="form-label">Confirmar Senha *</label>
                                 <input type="password" class="form-control" name="confirmar_senha"
                                        id="confirmarSenha" required>
-                                <div id="senhaFeedback" class="small mt-1" style="color:var(--theme-muted)"></div>
+                                <div id="senhaFeedback" class="small mt-1 guinchoform-hint"></div>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Cidade-alvo de atuação *</label>
+                                <select class="form-select" name="cidade_id" required>
+                                    <option value="">Selecione a cidade</option>
+                                    <?php foreach (($cidadesAtivas ?? []) as $c): ?>
+                                    <option value="<?php echo (int)$c['id']; ?>" <?php echo ((int)($_POST['cidade_id'] ?? 0) === (int)$c['id']) ? 'selected' : ''; ?>><?php echo htmlspecialchars($c['nome'] . '/' . $c['uf']); ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                                <?php if (empty($cidadesAtivas)): ?>
+                                <div class="form-text text-warning">Nenhuma cidade-alvo cadastrada. <a href="<?php echo $bp; ?>/admin/cidades">Cadastrar em Cidades-alvo</a>.</div>
+                                <?php endif; ?>
                             </div>
                         </div>
                     </div>
@@ -96,7 +110,7 @@ include __DIR__ . '/../layouts/header.php';
                                 <div id="prevFotoVeiculo" class="mt-2"></div>
                             </div>
                         </div>
-                        <div class="small mt-2" style="color:var(--theme-muted)">
+                        <div class="small mt-2 guinchoform-hint">
                             <i class="fas fa-info-circle me-1"></i>Formatos aceitos: JPG, PNG, PDF. Máx. 5MB por arquivo.
                         </div>
                     </div>
@@ -111,9 +125,21 @@ include __DIR__ . '/../layouts/header.php';
                         <div class="row g-3">
                             <div class="col-md-6">
                                 <label class="form-label">Placa do Reboque *</label>
-                                <input type="text" class="form-control" name="placa_guincho" id="placaInput"
+                                <input type="text" class="form-control text-uppercase" name="placa_guincho" id="placaInput"
                                        value="<?php echo htmlspecialchars($_POST['placa_guincho'] ?? ''); ?>"
-                                       placeholder="ABC1D23" style="text-transform:uppercase" required>
+                                       placeholder="ABC1D23" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Cidade do Emplacamento</label>
+                                <input type="text" class="form-control" name="cidade_placa"
+                                       value="<?php echo htmlspecialchars($_POST['cidade_placa'] ?? ''); ?>"
+                                       placeholder="Ex: Rio de Janeiro">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">UF da Placa</label>
+                                <input type="text" class="form-control text-uppercase" name="uf_placa"
+                                       value="<?php echo htmlspecialchars($_POST['uf_placa'] ?? ''); ?>"
+                                       maxlength="2" placeholder="RJ">
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Capacidade (ton) *</label>
@@ -138,6 +164,18 @@ include __DIR__ . '/../layouts/header.php';
                                 <input type="number" class="form-control" name="raio_cobertura_km"
                                        value="<?php echo htmlspecialchars($_POST['raio_cobertura_km'] ?? '20'); ?>"
                                        min="1" max="500">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Latitude Operacional</label>
+                                <input type="number" class="form-control" name="lat_operacao" step="0.00000001"
+                                       value="<?php echo htmlspecialchars($_POST['lat_operacao'] ?? '-23.5505'); ?>"
+                                       placeholder="-23.55050000">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Longitude Operacional</label>
+                                <input type="number" class="form-control" name="lng_operacao" step="0.00000001"
+                                       value="<?php echo htmlspecialchars($_POST['lng_operacao'] ?? '-46.6333'); ?>"
+                                       placeholder="-46.63330000">
                             </div>
                         </div>
                     </div>
@@ -170,12 +208,12 @@ include __DIR__ . '/../layouts/header.php';
                 <div class="card">
                     <div class="card-header"><i class="fas fa-check-circle me-2"></i>Status de Aprovação</div>
                     <div class="card-body">
-                        <label class="d-flex align-items-center gap-3 p-3 rounded border" style="cursor:pointer;border-color:var(--theme-border)!important">
-                            <input type="checkbox" name="aprovado" value="1" class="form-check-input mt-0" style="width:20px;height:20px"
+                        <label class="d-flex align-items-center gap-3 p-3 rounded border guinchoform-aprovado-label">
+                            <input type="checkbox" name="aprovado" value="1" class="form-check-input mt-0 guinchoform-aprovado-checkbox"
                                    <?php echo !empty($_POST['aprovado']) ? 'checked' : ''; ?>>
                             <div>
-                                <div style="font-weight:600">Aprovar imediatamente</div>
-                                <div style="font-size:.82rem;color:var(--theme-muted)">Se marcado, o guincheiro pode receber pedidos imediatamente</div>
+                                <div class="guinchoform-aprovado-title">Aprovar imediatamente</div>
+                                <div class="guinchoform-aprovado-desc">Se marcado, o guincheiro pode receber pedidos imediatamente</div>
                             </div>
                         </label>
                     </div>
@@ -184,7 +222,7 @@ include __DIR__ . '/../layouts/header.php';
         </div>
 
         <div class="mt-4">
-            <button type="submit" class="btn btn-primary w-100 py-3" id="btnSubmit" style="font-size:1.05rem">
+            <button type="submit" class="btn btn-primary w-100 py-3 guinchoform-submit" id="btnSubmit">
                 <i class="fas fa-truck-medical me-2"></i>Cadastrar Guincheiro
             </button>
         </div>
@@ -192,7 +230,7 @@ include __DIR__ . '/../layouts/header.php';
 
 </main>
 <?php include __DIR__ . '/../layouts/footer.php'; ?>
-<script>
+<script<?php echo csp_script_nonce_attr(); ?>>
 // Senha match
 document.getElementById('confirmarSenha').addEventListener('input', function() {
     const s = document.getElementById('senhaInput').value;
@@ -206,6 +244,13 @@ document.getElementById('confirmarSenha').addEventListener('input', function() {
 document.getElementById('placaInput').addEventListener('input', function() {
     this.value = this.value.toUpperCase().replace(/[^A-Z0-9]/g,'');
 });
+
+const ufPlacaInput = document.querySelector('input[name="uf_placa"]');
+if (ufPlacaInput) {
+    ufPlacaInput.addEventListener('input', function() {
+        this.value = this.value.toUpperCase().replace(/[^A-Z]/g, '').slice(0, 2);
+    });
+}
 
 // CPF mask
 document.getElementById('cpfInput').addEventListener('input', function() {
@@ -233,11 +278,11 @@ function previewFile(inputId, previewId) {
         if (file.type.startsWith('image/')) {
             const reader = new FileReader();
             reader.onload = e => {
-                el.innerHTML = `<img src="${e.target.result}" style="max-width:100%;max-height:150px;border-radius:8px;border:1px solid var(--theme-border)">`;
+                el.innerHTML = `<img src="${e.target.result}" class="guinchoform-preview-img">`;
             };
             reader.readAsDataURL(file);
         } else {
-            el.innerHTML = `<span style="font-size:.82rem;color:var(--primary)"><i class="fas fa-file-pdf me-1"></i>${file.name}</span>`;
+            el.innerHTML = `<span class="guinchoform-preview-pdf"><i class="fas fa-file-pdf me-1"></i>${file.name}</span>`;
         }
     });
 }

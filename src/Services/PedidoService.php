@@ -10,8 +10,45 @@ class PedidoService
         $this->pedidoModel = new Pedido();
     }
 
+    public function modoOperacao(): string
+    {
+        return (string)Configuracao::get('system_mode', 'production');
+    }
+
+    public function pagamentoObrigatorio(): bool
+    {
+        return Configuracao::get('payment_required', '1') == '1';
+    }
+
+    public function podeIniciarAtendimento(): bool
+    {
+        $systemMode = $this->modoOperacao();
+        $paymentRequired = $this->pagamentoObrigatorio();
+
+        if ($systemMode === 'freeflow') {
+            return true;
+        }
+
+        if (!$paymentRequired) {
+            return true;
+        }
+
+        return false;
+    }
+
+    public function statusInicialPedido(): string
+    {
+        return $this->podeIniciarAtendimento()
+            ? 'aguardando_guincho'
+            : 'aguardando_pagamento';
+    }
+
     public function create(array $dados): int
     {
+        if (!isset($dados['status']) || !is_string($dados['status']) || $dados['status'] === '') {
+            $dados['status'] = $this->statusInicialPedido();
+        }
+
         return (int)$this->pedidoModel->criar($dados);
     }
 
@@ -31,7 +68,6 @@ class PedidoService
 
     public function getInProgressByCliente(int $clienteId): array
     {
-        // Usa query direta para performance
         $pdo = getPDO();
         $stmt = $pdo->prepare("SELECT * FROM pedidos WHERE cliente_id = ? AND status IN ('aguardando_pagamento','aguardando_guincho','a_caminho','no_local','em_reboque') ORDER BY criado_em DESC");
         $stmt->execute([$clienteId]);
@@ -76,20 +112,67 @@ class PedidoService
         return (int)($r['c'] ?? 0);
     }
 
-    public function cancel(int $pedidoId, int $clienteId): bool
+    public function getDistanciaGuinchoPedido(int $pedidoId): float
     {
-        $p = $this->getByIdAndCliente($pedidoId, $clienteId);
-        if (!$p) return false;
-        // §3: cliente só pode cancelar em aguardando_pagamento ou aguardando_guincho
-        if (!in_array($p['status'], ['aguardando_pagamento', 'aguardando_guincho'], true)) return false;
-
-        $cancelado = (bool)$this->pedidoModel->cancelar($pedidoId);
-        if (!$cancelado) return false;
-
-        // §4.4: estorno automático para cancelamentos nestes dois status
-        require_once __DIR__ . '/EstornoService.php';
-        EstornoService::estornar($pedidoId);
-
-        return true;
+        $pdo = getPDO();
+        $stmt = $pdo->prepare("
+            SELECT p.lat_origem, p.lng_origem, g.lat_atual, g.lng_atual 
+            FROM pedidos p 
+            JOIN guinchos g ON p.guincho_id = g.id 
+            WHERE p.id = ?
+        ");
+        $stmt->execute([$pedidoId]);
+        $data = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        if (!$data || is_null($data['lat_atual'])) return 99999.0;
+        
+        require_once 'GeoService.php';
+        return GeoService::haversine(
+            (float)$data['lat_atual'], (float)$data['lng_atual'],
+            (float)$data['lat_origem'], (float)$data['lng_origem']
+        );
     }
+
+    public function cancelarPorCliente(int $pedidoId, int $clienteId, string $motivo): array
+    {
+        require_once __DIR__ . '/CancelamentoService.php';
+        return CancelamentoService::cancelarPorCliente($pedidoId, $clienteId, $motivo);
+    }
+
+    public function cancelarPorGuincho(int $pedidoId, int $guinchoId, string $motivo): array
+    {
+        require_once __DIR__ . '/CancelamentoService.php';
+        return CancelamentoService::cancelarPorGuincho($pedidoId, $guinchoId, $motivo);
+    }
+
+
+    private function registrarAuditoriaCancelamento(PDO $pdo, int $pedidoId, string $atorTipo, int $atorId, string $motivo, string $statusAnterior, float $penalidade): void
+    {
+        try {
+            $stmt = $pdo->prepare(
+                'INSERT INTO pedido_cancelamentos (pedido_id, ator_tipo, ator_id, motivo, status_anterior, penalidade, ip, user_agent, criado_em) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())'
+            );
+            $stmt->execute([
+                $pedidoId, $atorTipo, $atorId, mb_substr($motivo, 0, 1000), $statusAnterior, $penalidade,
+                (string)($_SERVER['REMOTE_ADDR'] ?? ''), mb_substr((string)($_SERVER['HTTP_USER_AGENT'] ?? ''), 0, 255)
+            ]);
+        } catch (Throwable $e) {
+            // A auditoria é aditiva: a ausência da migration não pode impedir o cancelamento.
+            Logger::exception(__CLASS__, __FUNCTION__, 'auditoria_cancelamento', $e, [
+                'pedido_id' => $pedidoId, 'ator_tipo' => $atorTipo, 'ator_id' => $atorId, 'fase' => 'insert_best_effort'
+            ]);
+        }
+    }
+
+    public function cancel(int $pedidoId, int $clienteId, bool $isAdmin = false): bool
+    {
+        if ($isAdmin) {
+            require_once __DIR__ . '/Pedido/PedidoTransitionService.php';
+            $result = PedidoTransitionService::cancelByAdmin($pedidoId, $clienteId, 'Cancelamento administrativo');
+            return $result->ok;
+        }
+        $r = $this->cancelarPorCliente($pedidoId, $clienteId, 'Cancelamento solicitado pelo cliente');
+        return (bool)($r['ok'] ?? false);
+    }
+
 }

@@ -1,0 +1,160 @@
+/* ============================================================
+   GuinchaFácil — Acompanhamento de pedido (cliente/pedidostatus.php)
+   Extraído do <style> inline da view para manter zero estilo solto
+   nas páginas principais (gate visual do Nível 2, plano §12).
+   ============================================================ */
+
+body.cliente .status-banner-live .card-body {
+  min-height: 96px;
+}
+
+body.cliente .banner-guincho-photo {
+  width: 72px;
+  height: 72px;
+  border-radius: 20px;
+  overflow: hidden;
+  background: rgba(47, 179, 74, .08);
+  border: 1px solid rgba(15, 23, 42, .08);
+  display: grid;
+  place-items: center;
+}
+
+body.cliente .banner-guincho-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+body.cliente .banner-guincho-fallback {
+  font-size: 1.35rem;
+  color: var(--primary);
+}
+
+body.cliente .pedido-hero-card {
+  padding: 1.1rem 1.15rem;
+  border-radius: 24px;
+  border: 1px solid rgba(47, 179, 74, .16);
+  background:
+    radial-gradient(circle at top right, rgba(47, 179, 74, .11), transparent 34%),
+    linear-gradient(180deg, rgba(255, 255, 255, .98), rgba(247, 250, 252, .96));
+  box-shadow: 0 18px 40px rgba(15, 23, 42, .08);
+}
+
+body.cliente .pedido-hero-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+body.cliente .pedido-hero-driver {
+  display: flex;
+  align-items: center;
+  gap: .95rem;
+}
+
+body.cliente .pedido-hero-photo {
+  width: 72px;
+  height: 72px;
+  border-radius: 20px;
+  overflow: hidden;
+  background: rgba(47, 179, 74, .08);
+  border: 1px solid rgba(15, 23, 42, .08);
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+}
+
+body.cliente .pedido-hero-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+body.cliente .pedido-hero-photo .fallback {
+  font-size: 1.35rem;
+  color: var(--primary);
+}
+
+body.cliente .pedido-hero-title {
+  font-weight: 800;
+  font-size: 1.05rem;
+  line-height: 1.15;
+}
+
+body.cliente .pedido-hero-subtitle {
+  color: var(--theme-muted);
+  font-size: .86rem;
+  margin-top: .2rem;
+}
+
+body.cliente .pedido-hero-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: .7rem;
+  margin-top: 1rem;
+}
+
+@media (max-width: 767.98px) {
+  body.cliente .pedido-hero-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+body.cliente .pedido-hero-item {
+  padding: .85rem .95rem;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, .9);
+  border: 1px solid rgba(15, 23, 42, .06);
+}
+
+body.cliente .pedido-hero-item .small {
+  color: var(--theme-muted);
+}
+
+body.cliente .pedido-hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .6rem;
+  margin-top: 1rem;
+}
+
+body.cliente .pedido-hero-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: .45rem;
+  padding: .55rem .8rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, .92);
+  border: 1px solid rgba(15, 23, 42, .08);
+  font-size: .8rem;
+  font-weight: 700;
+}
+
+/* ---------- Substitui os style="" pontuais da view ---------- */
+body.cliente .pedidostatus-map {
+  height: 380px;
+  border-radius: 0 0 12px 12px;
+  min-height: 240px;
+}
+
+body.cliente .pedidostatus-thumb {
+  max-height: 200px;
+}
+
+body.cliente .pedidostatus-thumb-sm {
+  max-height: 80px;
+}
+
+body.cliente .pedidostatus-chatbox {
+  max-height: 260px;
+  overflow-y: auto;
+}
+
+body.cliente .pedidostatus-guincho-icon {
+  color: #f90;
+  font-size: 1.4rem;
+}

@@ -1,0 +1,133 @@
+/* ============================================================
+   GuinchaFácil — Dados operacionais do guincheiro (guincho/perfil_operacao.php)
+   Extraído do <style> inline da view (gate visual do Nível 2).
+   ============================================================ */
+
+body.guincho .ops-mini-shell {
+  position: relative;
+  isolation: isolate;
+}
+
+body.guincho .ops-mini-shell::before,
+body.guincho .ops-mini-shell::after {
+  content: "";
+  position: absolute;
+  width: 320px;
+  height: 320px;
+  border-radius: 999px;
+  filter: blur(90px);
+  z-index: -1;
+  pointer-events: none;
+  opacity: .14;
+}
+
+body.guincho .ops-mini-shell::before {
+  top: -60px;
+  left: -70px;
+  background: rgba(47, 179, 74, .3);
+}
+
+body.guincho .ops-mini-shell::after {
+  top: 140px;
+  right: -90px;
+  background: rgba(239, 68, 68, .24);
+}
+
+body.guincho .ops-mini-hero,
+body.guincho .ops-mini-card {
+  border-radius: 28px;
+  border: 1px solid var(--theme-border);
+  background: var(--theme-surface);
+  box-shadow: var(--shadow-card);
+  color: var(--theme-text);
+}
+
+body.guincho .ops-mini-hero {
+  position: relative;
+  overflow: hidden;
+}
+
+body.guincho .ops-mini-hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at top left, rgba(47, 179, 74, .14), transparent 34%),
+    radial-gradient(circle at bottom right, rgba(245, 158, 11, .12), transparent 30%);
+  pointer-events: none;
+}
+
+body.guincho .ops-mini-hero > * {
+  position: relative;
+}
+
+body.guincho .ops-mini-nav {
+  display: flex;
+  gap: .75rem;
+  flex-wrap: wrap;
+}
+
+body.guincho .ops-mini-nav a {
+  display: inline-flex;
+  align-items: center;
+  gap: .45rem;
+  padding: .8rem 1rem;
+  border-radius: 999px;
+  text-decoration: none;
+  font-weight: 700;
+  border: 1px solid var(--theme-border);
+  background: var(--theme-surface-2);
+  color: var(--theme-text);
+}
+
+body.guincho .ops-mini-nav a.active {
+  color: #fff;
+  background: linear-gradient(135deg, var(--primary), #198754);
+  border-color: transparent;
+  box-shadow: 0 16px 28px rgba(47, 179, 74, .22);
+}
+
+body.guincho .ops-mini-pane {
+  padding: 1.25rem;
+  border-radius: 22px;
+  background: var(--theme-surface-2);
+  border: 1px solid var(--theme-border);
+}
+
+body.guincho .ops-mini-stat {
+  padding: 1rem 1.1rem;
+  border-radius: 20px;
+  background: var(--theme-surface);
+  border: 1px solid var(--theme-border);
+}
+
+body.guincho .ops-mini-stat .label {
+  display: block;
+  color: var(--theme-muted);
+  font-size: .8rem;
+  margin-bottom: .25rem;
+}
+
+body.guincho .ops-mini-stat .value {
+  font-weight: 800;
+  color: var(--theme-text);
+}
+
+body.guincho .ops-mini-form .form-label {
+  font-weight: 700;
+  color: var(--theme-text);
+}
+
+body.guincho .ops-mini-form .form-control {
+  min-height: 52px;
+  border-radius: 16px;
+  border-color: var(--theme-border);
+  background: var(--theme-surface);
+  color: var(--theme-text);
+}
+
+/* ---------- Substitui os style="" pontuais da view ---------- */
+body.guincho .ops-mini-title {
+  font-size: 1.9rem;
+  font-weight: 800;
+}

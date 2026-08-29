@@ -1,0 +1,93 @@
+/* ============================================================
+   GuinchaFácil — Fluxo de Pagamento (cliente/pagamento/*.php)
+   Substitui os style="" pontuais das views (gate visual do Nível 2).
+   ============================================================ */
+
+body.cliente .pagamento-pre-detalhe {
+  white-space: pre-wrap;
+}
+
+/* Checkout transparente (MercadoPago Brick / PagSeguro): o container do
+   Brick e o card que o envolve precisam ocupar a largura real disponível
+   no main-content — sem isso o Brick renderiza espremido em ~500px mesmo
+   com a coluna Bootstrap em col-12, porque o componente calcula sua
+   largura a partir do elemento pai no momento da criação. */
+.checkout-row {
+  width: 100%;
+}
+
+.checkout-row > [class*="col-"] {
+  max-width: 100%;
+}
+
+.checkout-row .card {
+  width: 100%;
+}
+
+#mp-payment-brick-container {
+  width: 100%;
+  min-width: 100%;
+}
+
+#mp-payment-brick-container iframe {
+  width: 100% !important;
+}
+
+#ps-form {
+  width: 100%;
+}
+
+/* Recibo / resumo da solicitação — coluna fixa ao lado do checkout */
+.checkout-recibo {
+  position: sticky;
+  top: 1rem;
+  background: #fafcfb;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.checkout-recibo .card-header {
+  background: #10b981;
+  color: #fff;
+  font-weight: 600;
+}
+
+.recibo-linha {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 0.35rem 0;
+  color: #444;
+}
+
+.recibo-linha.recibo-total {
+  font-size: 1.1rem;
+  color: #111;
+}
+
+.recibo-lista {
+  margin: 0;
+}
+
+.recibo-lista dt {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: #6b7280;
+  margin-top: 0.75rem;
+}
+
+.recibo-lista dt:first-child {
+  margin-top: 0;
+}
+
+.recibo-lista dd {
+  margin: 0.1rem 0 0;
+  color: #1f2937;
+  font-weight: 500;
+}
+
+@media (max-width: 991.98px) {
+  .checkout-recibo {
+    position: static;
+  }
+}

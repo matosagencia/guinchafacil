@@ -1,0 +1,60 @@
+/* ============================================================
+   GuinchaFácil — Guinchos Pendentes (admin/guinchospendentes.php)
+   Substitui os style="" pontuais da view (gate visual do Nível 2).
+   ============================================================ */
+
+body.admin .gp-icon-accent { color: #f59e0b; }
+
+body.admin .gp-card { border-left: 4px solid #f59e0b; }
+
+body.admin .gp-card-header { background: rgba(245, 158, 11, .12); }
+
+body.admin .gp-avatar {
+  margin: 0;
+  width: 44px;
+  height: 44px;
+  background: rgba(245, 158, 11, .2);
+}
+
+body.admin .gp-nome { font-weight: 700; color: var(--theme-text); }
+
+body.admin .gp-contato {
+  font-size: .78rem;
+  color: var(--theme-muted);
+}
+
+body.admin .gp-data {
+  margin-left: auto;
+  font-size: .72rem;
+  color: #f59e0b;
+  font-weight: 700;
+}
+
+body.admin .gp-field-label {
+  font-size: .72rem;
+  color: var(--theme-muted);
+  text-transform: uppercase;
+  letter-spacing: .05em;
+}
+
+body.admin .gp-field-label--docs { margin-bottom: .5rem; }
+
+body.admin .gp-field-value { font-size: .85rem; }
+
+body.admin .gp-badge-placa { font-size: .8rem; }
+
+body.admin .gp-sem-docs {
+  background: rgba(248, 113, 113, .1);
+  border: 1px solid rgba(248, 113, 113, .2);
+  font-size: .8rem;
+  color: #f87171;
+}
+
+body.admin .gp-empty-icon {
+  color: var(--primary);
+  opacity: .5;
+}
+
+body.admin .gp-empty-title { color: var(--theme-text); }
+
+body.admin .gp-empty-text { color: var(--theme-muted); }

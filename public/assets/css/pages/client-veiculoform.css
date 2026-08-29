@@ -1,0 +1,25 @@
+/* ============================================================
+   GuinchaFácil — Formulário de veículo (cliente/veiculoform.php)
+   Substitui os style="" pontuais da view (gate visual do Nível 2).
+   ============================================================ */
+
+body.cliente .veiculoform-icon-accent { color: var(--primary); }
+
+body.cliente .veiculoform-tipo-label {
+  font-size: .8rem;
+  padding: .45rem .3rem;
+}
+
+body.cliente .veiculoform-tipo-icon {
+  font-size: 1.1rem;
+}
+
+body.cliente .veiculoform-placa-input {
+  letter-spacing: .08em;
+}
+
+body.cliente .veiculoform-placa-hint {
+  font-size: .77rem;
+  color: var(--theme-muted);
+  margin-top: .35rem;
+}

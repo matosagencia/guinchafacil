@@ -1,0 +1,221 @@
+======================================================================
+ROTA 1: Rua do Proposito 59 -> Rua da Gamboa 249 (Rio de Janeiro)
+======================================================================
+Distancia total: 702 m | Tempo estimado (carro): 1.5 min
+Fonte: OpenStreetMap (Nominatim) + OSRM | Coordenadas em WGS84 (lat, lon)
+
+TRECHO 1: Rua do Propósito
+  Manobra: depart | Distancia do trecho: 98 m
+  Coordenadas (lat, lon):
+    -22.895633, -43.194425
+    -22.895630, -43.194407
+    -22.895586, -43.194138
+    -22.895468, -43.193492
+
+TRECHO 2: Rua Leôncio de Albuquerque
+  Manobra: turn right | Distancia do trecho: 211 m
+  Coordenadas (lat, lon):
+    -22.895468, -43.193492
+    -22.896133, -43.193346
+    -22.896166, -43.193339
+    -22.897346, -43.193165
+
+TRECHO 3: Rua do Livramento
+  Manobra: end of road right | Distancia do trecho: 280 m
+  Coordenadas (lat, lon):
+    -22.897346, -43.193165
+    -22.897485, -43.194394
+    -22.897601, -43.195457
+    -22.897600, -43.195557
+    -22.897594, -43.195624
+    -22.897586, -43.195684
+    -22.897565, -43.195773
+    -22.897530, -43.195868
+
+TRECHO 4: Rua Rivadávia Corrêa
+  Manobra: turn slight right | Distancia do trecho: 35 m
+  Coordenadas (lat, lon):
+    -22.897530, -43.195868
+    -22.897413, -43.195962
+    -22.897277, -43.196072
+
+TRECHO 5: Rua da Gamboa
+  Manobra: turn left | Distancia do trecho: 78 m
+  Coordenadas (lat, lon):
+    -22.897277, -43.196072
+    -22.897254, -43.196092
+    -22.897200, -43.196139
+    -22.897302, -43.196409
+    -22.897321, -43.196461
+    -22.897337, -43.196499
+    -22.897361, -43.196556
+    -22.897437, -43.196741
+
+TRECHO 6: Rua da Gamboa
+  Manobra: arrive | Distancia do trecho: 0 m
+  Coordenadas (lat, lon):
+    -22.897437, -43.196741
+    -22.897437, -43.196741
+
+
+======================================================================
+ROTA 2: Rua do Mercado 12 -> Rua do Proposito 59 (Rio de Janeiro)
+======================================================================
+Distancia total: 2737 m | Tempo estimado (carro): 4.6 min
+Fonte: OpenStreetMap (Nominatim) + OSRM | Coordenadas em WGS84 (lat, lon)
+
+TRECHO 1: Rua do Mercado
+  Manobra: depart | Distancia do trecho: 103 m
+  Coordenadas (lat, lon):
+    -22.901872, -43.174901
+    -22.901457, -43.175174
+    -22.901078, -43.175427
+
+TRECHO 2: Travessa do Tinoco
+  Manobra: turn left | Distancia do trecho: 52 m
+  Coordenadas (lat, lon):
+    -22.901078, -43.175427
+    -22.901344, -43.175851
+
+TRECHO 3: Rua Visconde de Itaboraí
+  Manobra: turn right | Distancia do trecho: 8 m
+  Coordenadas (lat, lon):
+    -22.901344, -43.175851
+    -22.901284, -43.175894
+
+TRECHO 4: Travessa Tocantins
+  Manobra: turn left | Distancia do trecho: 58 m
+  Coordenadas (lat, lon):
+    -22.901284, -43.175894
+    -22.901501, -43.176403
+
+TRECHO 5: Rua Primeiro de Março
+  Manobra: turn right | Distancia do trecho: 290 m
+  Coordenadas (lat, lon):
+    -22.901501, -43.176403
+    -22.901342, -43.176484
+    -22.900907, -43.176687
+    -22.900856, -43.176705
+    -22.900805, -43.176726
+    -22.900576, -43.176804
+    -22.900517, -43.176823
+    -22.900248, -43.176914
+    -22.899775, -43.177059
+    -22.899245, -43.177224
+    -22.899185, -43.177243
+    -22.899078, -43.177244
+    -22.899018, -43.177246
+
+TRECHO 6: Túnel Rio 450
+  Manobra: new name straight | Distancia do trecho: 1362 m
+  Coordenadas (lat, lon):
+    -22.899018, -43.177246
+    -22.898587, -43.177335
+    -22.898180, -43.177399
+    -22.898077, -43.177419
+    -22.897967, -43.177435
+    -22.897891, -43.177445
+    -22.897753, -43.177468
+    -22.897664, -43.177519
+    -22.897586, -43.177571
+    -22.897516, -43.177634
+    -22.897439, -43.177713
+    -22.897382, -43.177796
+    -22.897314, -43.177908
+    -22.897218, -43.178101
+    -22.897162, -43.178241
+    -22.897125, -43.178337
+    -22.897112, -43.178369
+    -22.897085, -43.178442
+    -22.897046, -43.178538
+    -22.897009, -43.178682
+    -22.896990, -43.178818
+    -22.896974, -43.178945
+    -22.896849, -43.180906
+    -22.896819, -43.181282
+    -22.896791, -43.181487
+    -22.896749, -43.181716
+    -22.895740, -43.184702
+    -22.894391, -43.188595
+
+TRECHO 7: Avenida Oscar Niemeyer
+  Manobra: new name straight | Distancia do trecho: 223 m
+  Coordenadas (lat, lon):
+    -22.894391, -43.188595
+    -22.894057, -43.189549
+    -22.893992, -43.189737
+    -22.893941, -43.189890
+    -22.893701, -43.190636
+
+TRECHO 8: (via sem nome / alca de acesso)
+  Manobra: turn slight left | Distancia do trecho: 68 m
+  Coordenadas (lat, lon):
+    -22.893701, -43.190636
+    -22.893689, -43.190744
+    -22.893680, -43.190808
+    -22.893674, -43.190865
+    -22.893673, -43.190912
+    -22.893684, -43.190945
+    -22.893700, -43.190965
+    -22.893720, -43.190979
+    -22.893746, -43.190989
+    -22.893772, -43.190992
+    -22.893837, -43.190986
+    -22.893995, -43.190960
+
+TRECHO 9: Avenida Venezuela
+  Manobra: turn straight | Distancia do trecho: 102 m
+  Coordenadas (lat, lon):
+    -22.893995, -43.190960
+    -22.894201, -43.190815
+    -22.894255, -43.190766
+    -22.894312, -43.190697
+    -22.894355, -43.190632
+    -22.894390, -43.190566
+    -22.894416, -43.190503
+    -22.894468, -43.190362
+    -22.894486, -43.190313
+    -22.894532, -43.190190
+
+TRECHO 10: Rua Antônio Lage
+  Manobra: turn right | Distancia do trecho: 73 m
+  Coordenadas (lat, lon):
+    -22.894532, -43.190190
+    -22.894583, -43.190212
+    -22.894629, -43.190223
+    -22.894674, -43.190237
+    -22.894788, -43.190285
+    -22.894824, -43.190304
+    -22.894858, -43.190322
+    -22.894880, -43.190339
+    -22.894901, -43.190359
+    -22.894920, -43.190380
+    -22.894938, -43.190408
+    -22.894952, -43.190432
+    -22.894965, -43.190462
+    -22.894972, -43.190489
+    -22.894981, -43.190527
+    -22.895000, -43.190611
+
+TRECHO 11: Praça Coronel Assunção
+  Manobra: new name straight | Distancia do trecho: 164 m
+  Coordenadas (lat, lon):
+    -22.895000, -43.190611
+    -22.895111, -43.191289
+    -22.895236, -43.192184
+
+TRECHO 12: Rua do Propósito
+  Manobra: new name straight | Distancia do trecho: 234 m
+  Coordenadas (lat, lon):
+    -22.895236, -43.192184
+    -22.895468, -43.193492
+    -22.895586, -43.194138
+    -22.895630, -43.194407
+    -22.895633, -43.194425
+
+TRECHO 13: Rua do Propósito
+  Manobra: arrive | Distancia do trecho: 0 m
+  Coordenadas (lat, lon):
+    -22.895633, -43.194425
+    -22.895633, -43.194425
+

@@ -1,0 +1,59 @@
+/* ============================================================
+   GuinchaFácil — Financeiro do guincheiro (guincho/financeiro.php)
+   Extraído do <style> inline da view (gate visual do Nível 2).
+   ============================================================ */
+
+body.guincho .fin-shell { position: relative; isolation: isolate; }
+body.guincho .fin-shell::before,
+body.guincho .fin-shell::after {
+  content: "";
+  position: absolute;
+  width: 320px;
+  height: 320px;
+  border-radius: 999px;
+  filter: blur(90px);
+  opacity: .14;
+  z-index: -1;
+  pointer-events: none;
+}
+body.guincho .fin-shell::before { top: -70px; left: -70px; background: rgba(47, 179, 74, .28); }
+body.guincho .fin-shell::after { top: 170px; right: -90px; background: rgba(245, 158, 11, .18); }
+
+body.guincho .fin-card,
+body.guincho .fin-hero {
+  border-radius: 28px;
+  border: 1px solid var(--theme-border);
+  background: var(--theme-surface);
+  box-shadow: var(--shadow-card);
+  color: var(--theme-text);
+}
+
+body.guincho .fin-hero { overflow: hidden; position: relative; }
+body.guincho .fin-hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at top left, rgba(47, 179, 74, .14), transparent 34%),
+    radial-gradient(circle at bottom right, rgba(245, 158, 11, .12), transparent 30%);
+  pointer-events: none;
+}
+body.guincho .fin-hero > * { position: relative; }
+
+body.guincho .fin-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  padding: .65rem .95rem;
+  border-radius: 999px;
+  border: 1px solid var(--theme-border);
+  background: var(--theme-surface-2);
+  color: var(--theme-text);
+  font-size: .85rem;
+  font-weight: 700;
+}
+
+/* ---------- Substitui os style="" pontuais da view ---------- */
+body.guincho .fin-select-auto { width: auto; }
+body.guincho .fin-title { font-size: 1.9rem; font-weight: 800; }
+body.guincho .fin-subtitle { font-size: 1.08rem; font-weight: 800; }

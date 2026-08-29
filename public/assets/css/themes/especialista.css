@@ -1,0 +1,76 @@
+/* Tema operacional do especialista: laranja/âmbar, mantendo a leitura do shell do guincho. */
+/* A view legada (/especialista/servicos) carrega apenas este tema.
+   Reutilizamos o mesmo stack visual do shell principal para manter
+   espaçamentos, grid, formulários e navegação consistentes. */
+@import url('../../vendor/bootstrap/css/bootstrap.min.css');
+@import url('../../vendor/fontawesome/css/all.min.css');
+@import url('../style.css');
+@import url('../tokens.css');
+@import url('../base.css');
+@import url('../shell.css');
+
+body.especialista {
+  --theme-bg: #211306;
+  --theme-surface: #2d1b08;
+  --theme-surface-2: #3d260b;
+  --theme-border: #704813;
+  --theme-text: #fff8eb;
+  --theme-muted: #f1c98b;
+  --theme-accent: #f0a83b;
+  --theme-accent-hover: #d98b1f;
+  --theme-on-accent: #1c1002;
+  --theme-nav: #190e03;
+  --theme-sidebar: #241304;
+}
+
+body.especialista { background: var(--theme-bg); color: var(--theme-text); }
+body.especialista .topbar,
+body.especialista .navbar { background: var(--theme-nav) !important; border-color: var(--theme-border) !important; }
+body.especialista .main-content { background: var(--theme-bg); }
+body.especialista .shell, body.especialista .especialista-shell { background: var(--theme-bg) !important; }
+body.especialista .especialista-dashboard-main { background: var(--theme-bg) !important; }
+body.especialista .card,
+body.especialista .app-card,
+body.especialista .especialista-tool { background: var(--theme-surface); color: var(--theme-text); border-color: var(--theme-border); }
+body.especialista .text-muted, body.especialista small { color: var(--theme-muted) !important; }
+body.especialista .btn-primary, body.especialista .btn-warning { background: var(--theme-accent); border-color: var(--theme-accent); color: var(--theme-on-accent); }
+body.especialista .btn-primary:hover, body.especialista .btn-warning:hover { background: var(--theme-accent-hover); border-color: var(--theme-accent-hover); }
+body.especialista a { color: #ffc66b; }
+body.especialista .form-control, body.especialista .form-select { background: #1d1004; color: var(--theme-text); border-color: var(--theme-border); }
+body.especialista .form-control::placeholder { color: #d9b77f; }
+.especialista-shell { background: var(--theme-bg); }
+.especialista-sidebar { min-height: calc(100vh - var(--topbar-height)); padding: 1.25rem .9rem; background: var(--theme-sidebar); border-right: 1px solid var(--theme-border); }
+.especialista-sidebar__brand { color: var(--theme-text); font-weight: 700; margin-bottom: 1.25rem; }
+.especialista-sidebar__nav { display: grid; gap: .4rem; }
+.especialista-sidebar__nav a { display: flex; gap: .65rem; align-items: center; padding: .7rem .75rem; border-radius: .65rem; color: var(--theme-muted); text-decoration: none; }
+.especialista-sidebar__nav a:hover, .especialista-sidebar__nav a.active { color: var(--theme-on-accent); background: var(--theme-accent); }
+.especialista-dashboard-main { padding: 1.5rem clamp(1rem, 3vw, 2.5rem); }
+.especialista-hero { background: linear-gradient(135deg, #5b320b, #2d1b08); border: 1px solid var(--theme-border); border-radius: 1rem; padding: 1.5rem; }
+.especialista-stars { color: #ffd166; letter-spacing: .08em; }
+.especialista-tool { display: flex; min-height: 100%; gap: .85rem; align-items: flex-start; padding: 1rem; border: 1px solid var(--theme-border); border-radius: .85rem; text-decoration: none; }
+.especialista-tool i { color: var(--theme-accent); font-size: 1.25rem; }
+.especialista-tool strong { color: var(--theme-text); display: block; }
+.especialista-tool span { color: var(--theme-muted); font-size: .84rem; }
+
+/* Compatibilidade com a view legada /especialista/servicos, que usa
+   especialista-theme e carrega somente este arquivo de tema. */
+body.especialista-theme {
+  --theme-bg: #211306;
+  --theme-surface: #2d1b08;
+  --theme-surface-2: #3d260b;
+  --theme-border: #704813;
+  --theme-text: #fff8eb;
+  --theme-muted: #f1c98b;
+  --theme-accent: #f0a83b;
+  --theme-accent-hover: #d98b1f;
+  --theme-on-accent: #1c1002;
+  background: var(--theme-bg);
+  color: var(--theme-text);
+  font-family: "Segoe UI", Inter, system-ui, sans-serif;
+}
+body.especialista-theme .especialista-shell { min-height: 100vh; background: var(--theme-bg); }
+body.especialista-theme .main-content { background: var(--theme-bg); color: var(--theme-text); }
+body.especialista-theme .card { background: var(--theme-surface); color: var(--theme-text); border: 1px solid var(--theme-border); border-radius: 1rem; }
+body.especialista-theme .text-muted,
+body.especialista-theme small { color: var(--theme-muted) !important; }
+body.especialista-theme .badge.text-bg-warning { background: var(--theme-accent) !important; color: var(--theme-on-accent) !important; }

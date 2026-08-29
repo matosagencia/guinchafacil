@@ -1,0 +1,13 @@
+/* ============================================================
+   GuinchaFácil — Financeiro admin (admin/financeiro.php)
+   Substitui os style="" pontuais da view (gate visual do Nível 2).
+   ============================================================ */
+
+body.admin .fin-admin-pagina-label {
+  color: var(--theme-muted);
+  font-size: .85rem;
+}
+
+body.admin .fin-admin-erro-col {
+  max-width: 340px;
+}

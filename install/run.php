@@ -19,8 +19,6 @@ if (!defined('DB_HOST') || !defined('DB_NAME') || !defined('DB_USER') || !define
     fail('bootstrap', "Constantes DB_* não definidas no config.php (DB_HOST, DB_NAME, DB_USER, DB_PASS).");
 }
 
-$dropFirst = isset($_POST['drop_first']) && $_POST['drop_first'] === '1';
-
 echo "[OK][bootstrap] Lendo SQL: $sqlFile\n";
 
 $sql = file_get_contents($sqlFile);
@@ -90,16 +88,10 @@ try {
 
 echo "[OK][pdo_connect] Conectado em " . DB_HOST . "/" . DB_NAME . "\n";
 
-// Opcional: DROP tables (perigoso)
-if ($dropFirst) {
-    echo "[OK][drop_first] Coletando tabelas...\n";
-    $tables = $pdo->query("SHOW TABLES")->fetchAll(PDO::FETCH_NUM);
-    foreach ($tables as $t) {
-        $tbl = $t[0];
-        $pdo->exec("DROP TABLE IF EXISTS `$tbl`");
-    }
-    echo "[OK][drop_first] DROP concluído.\n";
-}
+// A opção drop_first (DROP TABLE de todas as tabelas via checkbox) foi removida
+// no Pacote L1.2 por risco de perda de dados em produção com proteção fraca.
+// Para recriar o banco do zero, faça isso manualmente via SQL direto, fora
+// desta rota HTTP.
 
 $pdo->beginTransaction();
 try {

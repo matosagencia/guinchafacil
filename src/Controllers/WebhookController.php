@@ -11,6 +11,9 @@ require_once __DIR__ . '/../Services/RankingService.php';
 require_once __DIR__ . '/../Services/NotificacaoService.php';
 require_once __DIR__ . '/../Services/Logger.php';
 require_once __DIR__ . '/../Services/AuditTrailService.php';
+require_once __DIR__ . '/../Services/Pedido/PedidoTransitionService.php';
+require_once __DIR__ . '/../Services/Payment/PagamentoAprovacaoService.php';
+require_once __DIR__ . '/../Services/Financial/SupplementalChargeService.php';
 
 /** Recebe e processa webhooks de pagamento */
 class WebhookController
@@ -35,6 +38,9 @@ class WebhookController
             CURLOPT_HTTPHEADER     => $headers,
             CURLOPT_TIMEOUT        => 10,
         ]);
+        if ($ca = ca_bundle_path()) {
+            curl_setopt($ch, CURLOPT_CAINFO, $ca);
+        }
         $resp = curl_exec($ch);
         $code = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE);
         $err  = curl_error($ch);
@@ -57,7 +63,7 @@ class WebhookController
         $body   = $this->lerInput();
         $xSig   = $_SERVER['HTTP_X_SIGNATURE']  ?? '';
         $reqId  = $_SERVER['HTTP_X_REQUEST_ID'] ?? '';
-        $dataId = $_GET['data.id'] ?? '';
+        $dataId = $_GET['data.id'] ?? $_GET['data_id'] ?? '';
 
         // Parse X-Signature: ts=...,v1=...
         $ts   = null;
@@ -125,7 +131,13 @@ class WebhookController
         }
 
         if (($payment['status'] ?? '') === 'approved') {
-            $pedidoId = (int)($payment['external_reference'] ?? 0);
+            $reference = (string)($payment['external_reference'] ?? '');
+            if (preg_match('/^charge:(\d+):(\d+)$/', $reference, $m)) {
+                $ctx = SupplementalChargeService::buscarContextoPorPagamento((int)$m[2]);
+                if ($ctx) SupplementalChargeService::aprovarPagamentoGateway((int)$m[1], (int)$m[2], 'mp_' . $mpId, json_encode($payment));
+                return;
+            }
+            $pedidoId = (int)$reference;
             if ($pedidoId) {
                 $this->aprovarPagamento($pedidoId, 'mp_' . $mpId, (string)json_encode($payment));
             }
@@ -196,85 +208,14 @@ class WebhookController
 
     // ─── Aprovação ────────────────────────────────────────────────────────────
 
+    /**
+     * Delega para PagamentoAprovacaoService::aprovar() — mesmo caminho
+     * usado pelo checkout transparente quando a resposta síncrona da API
+     * já vem aprovada. Ver comentário da classe para o porquê da extração.
+     */
     private function aprovarPagamento(int $pedidoId, string $idExterno, string $payload): void
     {
-        // Busca campos mínimos direto da tabela (evita JOINs que diferem entre MySQL e SQLite)
-        try {
-            $stmt = getPDO()->prepare(
-                "SELECT status, custo_estimado, cliente_nome, cliente_email FROM pedidos WHERE id = ?"
-            );
-            $stmt->execute([$pedidoId]);
-            $pedido = $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
-        } catch (Throwable $e) {
-            Logger::log(Logger::LEVEL_ERROR, 'WebhookController', 'aprovarPagamento', 'webhook',
-                "Erro ao buscar pedido {$pedidoId}: " . $e->getMessage(),
-                ['pedido_id' => $pedidoId]
-            );
-            return;
-        }
-
-        if (!$pedido || $pedido['status'] !== 'aguardando_pagamento') {
-            Logger::log(Logger::LEVEL_INFO, 'WebhookController', 'aprovarPagamento', 'webhook',
-                "Pedido {$pedidoId} não está aguardando pagamento — ignorado.",
-                ['pedido_id' => $pedidoId, 'status' => $pedido['status'] ?? 'não encontrado']
-            );
-            return;
-        }
-
-        $pag = Pagamento::buscarPorPedido($pedidoId);
-        if (!$pag) {
-            Logger::log(Logger::LEVEL_ERROR, 'WebhookController', 'aprovarPagamento', 'webhook',
-                "Pagamento não encontrado para pedido {$pedidoId}.",
-                ['pedido_id' => $pedidoId, 'id_externo' => $idExterno]
-            );
-            return;
-        }
-
-        // §IDEMPOTENCIA-02: pagamento do pedido já aprovado por outro gateway/evento
-        if (($pag['status'] ?? '') === 'aprovado') {
-            Logger::log(Logger::LEVEL_INFO, 'WebhookController', 'aprovarPagamento', 'webhook',
-                "Pedido {$pedidoId}: pagamento já aprovado (id_externo={$pag['id_externo']}) — ignorando {$idExterno}.",
-                ['pedido_id' => $pedidoId, 'id_externo_existente' => $pag['id_externo'] ?? null]
-            );
-            return;
-        }
-
-        $cfg      = Configuracao::getAll();
-        $raw      = isset($cfg['comissao_plataforma']) ? (float)$cfg['comissao_plataforma'] : 0.15;
-        $comissao = $raw > 1 ? $raw / 100 : $raw;
-        $total    = (float)$pedido['custo_estimado'];
-        $plat     = round($total * $comissao, 2);
-        $guincho  = round($total - $plat, 2);
-
-        Pagamento::aprovar((int)$pag['id'], $idExterno, $payload);
-        Pagamento::atualizarSplit((int)$pag['id'], $guincho, $plat);
-        Pedido::atualizarStatus($pedidoId, 'aguardando_guincho');
-
-        $expMin      = (int)($cfg['tempo_expiracao_min'] ?? 5);
-        $expiracao   = date('Y-m-d H:i:s', strtotime("+{$expMin} minutes"));
-        $raioInicial = (int)($cfg['raio_inicial_km'] ?? 10);
-        Pedido::definirExpiracao($pedidoId, $expiracao, $raioInicial);
-
-        AuditTrailService::evento('pagamento_aprovado', 'WebhookController', 'aprovarPagamento', [
-            'pedido_id'  => $pedidoId,
-            'id_externo' => $idExterno,
-            'valor'      => $total,
-        ]);
-
-        Logger::log(Logger::LEVEL_INFO, 'WebhookController', 'aprovarPagamento', 'webhook',
-            "Pagamento {$idExterno} aprovado para pedido {$pedidoId}. Valor: R${$total}.",
-            ['pedido_id' => $pedidoId, 'id_externo' => $idExterno]
-        );
-
-        try {
-            $cliente = ['nome' => $pedido['cliente_nome'], 'email' => $pedido['cliente_email']];
-            NotificacaoService::pedidoConfirmado($pedido, $cliente);
-        } catch (Throwable $eNotif) {
-            Logger::log(Logger::LEVEL_ERROR, 'WebhookController', 'aprovarPagamento', 'webhook',
-                "Falha ao notificar cliente: " . $eNotif->getMessage(),
-                ['pedido_id' => $pedidoId]
-            );
-        }
+        PagamentoAprovacaoService::aprovar($pedidoId, $idExterno, $payload, 'webhook');
     }
 
     // ─── Log webhook ─────────────────────────────────────────────────────────

@@ -12,163 +12,179 @@ $statusLabels = [
     'cancelado'            => 'Cancelado',
 ];
 ?>
+<link rel="stylesheet" href="<?php echo htmlspecialchars($bp); ?>/public/assets/css/pages/client-historico.css">
+
 <div class="main-wrapper">
 <?php include __DIR__ . '/../layouts/sidebar_cliente.php'; ?>
 <main class="main-content">
+    <div class="history-shell">
+        <header class="page-head mb-4">
+            <div>
+                <span class="eyebrow">Histórico</span>
+                <h1><i class="fas fa-clock-rotate-left me-2 history-icon-accent"></i>Histórico de Pedidos</h1>
+                <p><?php echo (int)($total ?? count($pedidos ?? [])); ?> pedido(s) no total</p>
+            </div>
+            <a href="<?php echo $bp; ?>/cliente/pedido/novo" class="btn btn-primary">
+                <i class="fas fa-circle-plus me-2"></i>Novo Pedido
+            </a>
+        </header>
 
-    <div class="page-header">
-        <div>
-            <div class="page-title">
-                <i class="fas fa-clock-rotate-left me-2" style="color:var(--primary)"></i>Histórico de Pedidos
-            </div>
-            <div class="page-subtitle">
-                <?php echo (int)($total ?? count($pedidos ?? [])); ?> pedido(s) no total
-            </div>
+        <?php if (!empty($_GET['avaliado'])): ?>
+        <div class="alert alert-success mb-3">
+            <i class="fas fa-star me-2"></i>Avaliação enviada! Obrigado pelo feedback.
         </div>
-        <a href="<?php echo $bp; ?>/cliente/pedido/novo" class="btn btn-primary">
-            <i class="fas fa-circle-plus me-2"></i>Novo Pedido
-        </a>
-    </div>
+        <?php elseif (!empty($_GET['ja_avaliou'])): ?>
+        <div class="alert alert-info mb-3">
+            <i class="fas fa-info-circle me-2"></i>Você já avaliou este atendimento.
+        </div>
+        <?php endif; ?>
 
-    <?php if (!empty($_GET['avaliado'])): ?>
-    <div class="alert alert-success mb-3">
-        <i class="fas fa-star me-2"></i>Avaliação enviada! Obrigado pelo feedback.
-    </div>
-    <?php elseif (!empty($_GET['ja_avaliou'])): ?>
-    <div class="alert alert-info mb-3">
-        <i class="fas fa-info-circle me-2"></i>Você já avaliou este atendimento.
-    </div>
-    <?php endif; ?>
+        <section class="history-hero p-4 p-lg-5 mb-4">
+            <div class="row g-4 align-items-center">
+                <div class="col-lg-8">
+                    <div class="d-flex flex-wrap gap-2 mb-3">
+                        <span class="history-chip"><i class="fas fa-route"></i>Pedidos recentes</span>
+                        <span class="history-chip"><i class="fas fa-camera"></i>Evidências e fotos</span>
+                        <span class="history-chip"><i class="fas fa-star"></i>Avaliações pós-serviço</span>
+                    </div>
+                    <h2 class="mb-2 history-title">Seu histórico completo de atendimento.</h2>
+                    <p class="mb-0 text-muted">A mesma lógica de dados foi mantida. A mudança aqui é de apresentação, priorizando leitura rápida e ações claras por pedido.</p>
+                </div>
+                <div class="col-lg-4">
+                    <div class="history-item">
+                        <div class="small text-muted mb-1">Acesso rápido</div>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <strong>Novo chamado de socorro</strong>
+                            <a href="<?php echo $bp; ?>/cliente/pedido/novo" class="btn btn-sm btn-primary">Abrir</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
 
-    <div class="card">
-        <div class="card-body p-0">
-            <div class="table-responsive">
-                <table class="table table-hover mb-0">
-                    <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>Veículo</th>
-                            <th>Problema</th>
-                            <th>Guincheiro</th>
-                            <th>Status</th>
-                            <th>Valor</th>
-                            <th>Data</th>
-                            <th>Ações</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php if (!empty($pedidos)): ?>
-                        <?php foreach ($pedidos as $p): ?>
-                        <?php
-                            $status     = $p['status'] ?? '';
-                            $guinchoId  = (int)($p['guincho_id'] ?? 0);
-                            $jaAvaliou  = false;
-                            if ($status === 'concluido' && $guinchoId) {
-                                try { $jaAvaliou = Avaliacao::jaAvaliou((int)$p['id'], (int)$p['cliente_id']); }
-                                catch (Throwable $e) { $jaAvaliou = false; }
-                            }
-                        ?>
-                        <tr>
-                            <td style="font-weight:600">#<?php echo (int)$p['id']; ?></td>
-                            <td>
-                                <?php if (!empty($p['placa'])): ?>
-                                <div style="font-size:.85rem;font-weight:600">
-                                    <?php echo htmlspecialchars(($p['marca'] ?? '') . ' ' . ($p['modelo'] ?? '')); ?>
-                                </div>
-                                <span class="badge badge-aguardando_pagamento" style="font-size:.7rem">
-                                    <?php echo htmlspecialchars($p['placa']); ?>
-                                </span>
-                                <?php else: ?>
-                                <span style="color:var(--theme-muted)">—</span>
-                                <?php endif; ?>
-                            </td>
-                            <td style="font-size:.85rem">
-                                <?php echo htmlspecialchars(ucfirst(str_replace('_', ' ', $p['tipo_problema'] ?? '—'))); ?>
-                            </td>
-                            <td style="font-size:.84rem">
-                                <?php echo htmlspecialchars($p['guincho_operador'] ?? '—'); ?>
-                            </td>
-                            <td>
+        <section class="history-card p-4 p-lg-5">
+            <div class="history-list">
+                <?php if (!empty($pedidos)): ?>
+                <?php foreach ($pedidos as $p): ?>
+                <?php
+                $status     = $p['status'] ?? '';
+                $guinchoId  = (int)($p['guincho_id'] ?? 0);
+                $jaAvaliou  = false;
+                if ($status === 'concluido' && $guinchoId) {
+                    try { $jaAvaliou = Avaliacao::jaAvaliou((int)$p['id'], (int)$p['cliente_id']); }
+                    catch (Throwable $e) { $jaAvaliou = false; }
+                }
+                $temFotos = !empty($p['foto_plataforma']) || !empty($p['foto_destino']);
+                ?>
+                <article class="history-item">
+                    <div class="history-item-head">
+                        <div>
+                            <div class="d-flex align-items-center gap-2 flex-wrap mb-2">
+                                <strong class="history-pedido-id">Pedido #<?php echo (int)$p['id']; ?></strong>
                                 <span class="badge badge-<?php echo htmlspecialchars($status); ?>">
                                     <?php echo $statusLabels[$status] ?? ucfirst(str_replace('_', ' ', $status)); ?>
                                 </span>
-                            </td>
-                            <td style="font-weight:600">
-                                R$ <?php echo number_format($p['custo_estimado'] ?? 0, 2, ',', '.'); ?>
-                            </td>
-                            <td>
-                                <div style="font-size:.84rem"><?php echo date('d/m/Y', strtotime($p['criado_em'])); ?></div>
-                                <small style="color:var(--theme-muted)"><?php echo date('H:i', strtotime($p['criado_em'])); ?></small>
-                            </td>
-                            <td>
-                                <div class="d-flex gap-1 flex-wrap">
-                                    <a href="<?php echo $bp; ?>/cliente/pedido/<?php echo (int)$p['id']; ?>"
-                                       class="btn btn-sm btn-outline-primary">
-                                        <i class="fas fa-eye me-1"></i>Ver
-                                    </a>
-                                    <?php if ($status === 'concluido' && $guinchoId && !$jaAvaliou): ?>
-                                    <a href="<?php echo $bp; ?>/cliente/avaliar/<?php echo (int)$p['id']; ?>"
-                                       class="btn btn-sm btn-warning" style="color:#000">
-                                        <i class="fas fa-star me-1"></i>Avaliar
-                                    </a>
-                                    <?php elseif ($jaAvaliou): ?>
-                                    <span class="btn btn-sm btn-outline-secondary disabled" style="font-size:.75rem">
-                                        <i class="fas fa-check me-1"></i>Avaliado
-                                    </span>
-                                    <?php endif; ?>
-                                </div>
-                            </td>
-                        </tr>
-                        <?php endforeach; ?>
-                        <?php else: ?>
-                        <tr>
-                            <td colspan="8" class="text-center py-5" style="color:var(--theme-muted)">
-                                <i class="fas fa-inbox fa-3x d-block mb-3" style="opacity:.25"></i>
-                                <div style="font-size:1rem;font-weight:600;color:var(--theme-text);margin-bottom:.5rem">
-                                    Nenhum pedido ainda
-                                </div>
-                                <div style="font-size:.85rem;margin-bottom:1rem">
-                                    Solicite seu primeiro atendimento de guincho agora!
-                                </div>
-                                <a href="<?php echo $bp; ?>/cliente/pedido/novo" class="btn btn-primary">
-                                    <i class="fas fa-circle-plus me-2"></i>Pedir Socorro
-                                </a>
-                            </td>
-                        </tr>
+                            </div>
+                            <div class="small text-muted">
+                                <?php echo date('d/m/Y', strtotime($p['criado_em'])); ?> às <?php echo date('H:i', strtotime($p['criado_em'])); ?>
+                            </div>
+                        </div>
+                        <div class="text-end">
+                            <div class="small text-muted">Valor</div>
+                            <strong>R$ <?php echo number_format((float)($p['custo_estimado'] ?? 0), 2, ',', '.'); ?></strong>
+                        </div>
+                    </div>
+
+                    <div class="row g-3 align-items-center">
+                        <div class="col-md-3">
+                            <div class="small text-muted mb-1">Veículo</div>
+                            <strong><?php echo !empty($p['placa']) ? htmlspecialchars(trim(($p['marca'] ?? '') . ' ' . ($p['modelo'] ?? ''))) : '—'; ?></strong>
+                            <?php if (!empty($p['placa'])): ?>
+                            <div><span class="badge badge-aguardando_pagamento mt-2"><?php echo htmlspecialchars($p['placa']); ?></span></div>
+                            <?php endif; ?>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="small text-muted mb-1">Problema</div>
+                            <strong><?php echo htmlspecialchars(ucfirst(str_replace('_', ' ', $p['tipo_problema'] ?? '—'))); ?></strong>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="small text-muted mb-1">Guincheiro</div>
+                            <strong><?php echo htmlspecialchars($p['guincho_operador'] ?? '—'); ?></strong>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="small text-muted mb-1">Fotos</div>
+                            <?php if ($temFotos): ?>
+                            <a href="<?php echo $bp; ?>/cliente/pedido/<?php echo (int)$p['id']; ?>" class="btn btn-sm btn-info text-white">
+                                <i class="fas fa-camera me-1"></i>Ver evidências
+                            </a>
+                            <?php else: ?>
+                            <span class="text-muted">—</span>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+
+                    <div class="d-flex gap-2 flex-wrap mt-3">
+                        <a href="<?php echo $bp; ?>/cliente/pedido/<?php echo (int)$p['id']; ?>"
+                           class="btn btn-sm btn-outline-primary">
+                            <i class="fas fa-eye me-1"></i>Ver pedido
+                        </a>
+
+                        <?php if ($status === 'concluido' && $guinchoId && !$jaAvaliou): ?>
+                        <a href="<?php echo $bp; ?>/cliente/avaliar/<?php echo (int)$p['id']; ?>"
+                           class="btn btn-sm btn-warning history-avaliar-btn">
+                            <i class="fas fa-star me-1"></i>Avaliar atendimento
+                        </a>
+                        <?php elseif ($jaAvaliou): ?>
+                        <span class="btn btn-sm btn-outline-secondary disabled">
+                            <i class="fas fa-check me-1"></i>Avaliado
+                        </span>
                         <?php endif; ?>
-                    </tbody>
-                </table>
+                    </div>
+                </article>
+                <?php endforeach; ?>
+                <?php else: ?>
+                <div class="text-center py-5 history-empty">
+                    <i class="fas fa-inbox fa-3x d-block mb-3 history-empty-icon"></i>
+                    <div class="history-empty-title">
+                        Nenhum pedido ainda
+                    </div>
+                    <div class="history-empty-subtitle">
+                        Solicite seu primeiro atendimento de guincho agora.
+                    </div>
+                    <a href="<?php echo $bp; ?>/cliente/pedido/novo" class="btn btn-primary">
+                        <i class="fas fa-circle-plus me-2"></i>Pedir Socorro
+                    </a>
+                </div>
+                <?php endif; ?>
             </div>
-        </div>
+        </section>
+
+        <?php if (!empty($totalPaginas) && $totalPaginas > 1): ?>
+        <?php $paginaAtual = max(1, (int)($_GET['pagina'] ?? 1)); ?>
+        <nav class="mt-4">
+            <ul class="pagination justify-content-center">
+                <?php if ($paginaAtual > 1): ?>
+                <li class="page-item">
+                    <a class="page-link" href="<?php echo $bp; ?>/cliente/historico?pagina=<?php echo $paginaAtual - 1; ?>">
+                        <i class="fas fa-chevron-left"></i>
+                    </a>
+                </li>
+                <?php endif; ?>
+                <?php for ($i = 1; $i <= $totalPaginas; $i++): ?>
+                <li class="page-item <?php echo $i === $paginaAtual ? 'active' : ''; ?>">
+                    <a class="page-link" href="<?php echo $bp; ?>/cliente/historico?pagina=<?php echo $i; ?>"><?php echo $i; ?></a>
+                </li>
+                <?php endfor; ?>
+                <?php if ($paginaAtual < $totalPaginas): ?>
+                <li class="page-item">
+                    <a class="page-link" href="<?php echo $bp; ?>/cliente/historico?pagina=<?php echo $paginaAtual + 1; ?>">
+                        <i class="fas fa-chevron-right"></i>
+                    </a>
+                </li>
+                <?php endif; ?>
+            </ul>
+        </nav>
+        <?php endif; ?>
     </div>
-
-    <!-- Paginação -->
-    <?php if (!empty($totalPaginas) && $totalPaginas > 1): ?>
-    <?php $paginaAtual = max(1, (int)($_GET['pagina'] ?? 1)); ?>
-    <nav class="mt-4">
-        <ul class="pagination justify-content-center">
-            <?php if ($paginaAtual > 1): ?>
-            <li class="page-item">
-                <a class="page-link" href="<?php echo $bp; ?>/cliente/historico?pagina=<?php echo $paginaAtual - 1; ?>">
-                    <i class="fas fa-chevron-left"></i>
-                </a>
-            </li>
-            <?php endif; ?>
-            <?php for ($i = 1; $i <= $totalPaginas; $i++): ?>
-            <li class="page-item <?php echo $i === $paginaAtual ? 'active' : ''; ?>">
-                <a class="page-link" href="<?php echo $bp; ?>/cliente/historico?pagina=<?php echo $i; ?>"><?php echo $i; ?></a>
-            </li>
-            <?php endfor; ?>
-            <?php if ($paginaAtual < $totalPaginas): ?>
-            <li class="page-item">
-                <a class="page-link" href="<?php echo $bp; ?>/cliente/historico?pagina=<?php echo $paginaAtual + 1; ?>">
-                    <i class="fas fa-chevron-right"></i>
-                </a>
-            </li>
-            <?php endif; ?>
-        </ul>
-    </nav>
-    <?php endif; ?>
-
 </main>
 <?php include __DIR__ . '/../layouts/footer.php'; ?>

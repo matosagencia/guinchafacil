@@ -1,0 +1,104 @@
+/* ============================================================
+   GuinchaFácil — Atendimento em andamento (guincho/atendimento.php)
+   Extraído do <style> inline da view (gate visual do Nível 2).
+   ============================================================ */
+
+body.guincho .att-hero-card {
+  padding: 1.15rem;
+  border-radius: 24px;
+  border: 1px solid var(--theme-border);
+  background: var(--theme-surface);
+  box-shadow: var(--shadow-card);
+  color: var(--theme-text);
+  margin-bottom: 1.5rem;
+}
+
+body.guincho .att-hero-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  align-items: flex-start;
+}
+
+body.guincho .att-hero-driver {
+  display: flex;
+  align-items: center;
+  gap: .95rem;
+}
+
+body.guincho .att-hero-avatar {
+  width: 62px;
+  height: 62px;
+  border-radius: 18px;
+  display: grid;
+  place-items: center;
+  background: color-mix(in srgb, var(--primary) 15%, transparent);
+  color: var(--primary);
+  font-size: 1.15rem;
+  border: 1px solid var(--theme-border);
+  flex: 0 0 auto;
+}
+
+body.guincho .att-hero-title {
+  font-weight: 800;
+  font-size: 1.05rem;
+  line-height: 1.15;
+}
+
+body.guincho .att-hero-subtitle {
+  color: var(--theme-muted);
+  font-size: .86rem;
+  margin-top: .2rem;
+}
+
+body.guincho .att-hero-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: .7rem;
+  margin-top: 1rem;
+}
+
+@media (max-width: 767.98px) {
+  body.guincho .att-hero-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+body.guincho .att-hero-item {
+  padding: .85rem .95rem;
+  border-radius: 16px;
+  background: var(--theme-surface-2);
+  border: 1px solid var(--theme-border);
+}
+
+body.guincho .att-hero-item .small {
+  color: var(--theme-muted);
+}
+
+body.guincho .att-hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .6rem;
+  margin-top: 1rem;
+}
+
+/* ---------- Substitui os style="" pontuais da view ---------- */
+body.guincho .atendimento-map {
+  height: 380px;
+  border-radius: 0 0 12px 12px;
+  min-height: 240px;
+}
+
+body.guincho .atendimento-chat-body {
+  min-height: 220px;
+}
+
+body.guincho .atendimento-chatbox {
+  max-height: 240px;
+}
+
+body.guincho .atendimento-guincho-icon {
+  color: #f90;
+  font-size: 1.5rem;
+}

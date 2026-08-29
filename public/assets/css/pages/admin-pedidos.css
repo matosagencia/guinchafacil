@@ -1,0 +1,8 @@
+/* ============================================================
+   GuinchaFácil — Gerenciar pedidos (admin/pedidos.php)
+   Substitui os style="" pontuais da view (gate visual do Nível 2).
+   ============================================================ */
+
+body.admin .text-muted-theme {
+  color: var(--theme-muted);
+}

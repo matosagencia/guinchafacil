@@ -6,18 +6,22 @@ include __DIR__ . '/../layouts/header.php';
 <?php include __DIR__ . '/../layouts/sidebar_cliente.php'; ?>
 <main class="main-content">
 
-    <div class="page-header">
-        <div><div class="page-title"><i class="fas fa-star me-2 text-primary-custom"></i>Avaliar Atendimento</div></div>
+    <header class="page-head mb-4">
+        <div>
+            <span class="eyebrow">Histórico</span>
+            <h1><i class="fas fa-star me-2 text-primary-custom"></i>Avaliar Atendimento</h1>
+            <p>Conte como foi o serviço para ajudar outros clientes e o próprio guincheiro.</p>
+        </div>
         <a href="<?php echo $bp; ?>/cliente/historico" class="btn btn-secondary btn-sm"><i class="fas fa-arrow-left me-1"></i>Voltar</a>
-    </div>
+    </header>
 
     <div class="row justify-content-center">
         <div class="col-md-8 col-lg-6">
             <div class="card">
                 <div class="card-header"><i class="fas fa-star me-2"></i>Sua Avaliação</div>
                 <div class="card-body">
-                    <form method="POST" action="<?php echo $bp; ?>/cliente/avaliar_pedido">
-                        <?php if (!empty($csrf_token)): ?><input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($csrf_token); ?>"><?php endif; ?>
+                    <form method="POST" action="<?php echo $bp; ?>/cliente/avaliar/<?php echo (int)($pedidoId ?? 0); ?>">
+                        <?php if (!empty($csrfToken)): ?><input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($csrfToken); ?>"><?php endif; ?>
                         <input type="hidden" name="pedido_id" value="<?php echo htmlspecialchars($pedidoId ?? ''); ?>">
                         <div class="mb-4 text-center">
                             <label class="form-label d-block mb-3">Nota do Atendimento</label>

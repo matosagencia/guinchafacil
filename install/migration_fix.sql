@@ -86,18 +86,86 @@ CREATE TABLE IF NOT EXISTS password_resets (
 -- ----------------------------------------------------------------
 -- FIX 4: colunas críticas ausentes em pagamentos
 -- ----------------------------------------------------------------
-ALTER TABLE pagamentos
-    ADD COLUMN IF NOT EXISTS metodo ENUM('mercadopago','pagseguro') NOT NULL DEFAULT 'mercadopago' AFTER pedido_id,
-    ADD COLUMN IF NOT EXISTS valor_total DECIMAL(10,2) NOT NULL DEFAULT 0.00 AFTER metodo,
-    ADD COLUMN IF NOT EXISTS valor_guincho DECIMAL(10,2) NOT NULL DEFAULT 0.00 AFTER valor_total,
-    ADD COLUMN IF NOT EXISTS valor_plataforma DECIMAL(10,2) NOT NULL DEFAULT 0.00 AFTER valor_guincho,
-    ADD COLUMN IF NOT EXISTS status ENUM('pendente','aprovado','recusado','estornado') NOT NULL DEFAULT 'pendente' AFTER valor_plataforma,
-    ADD COLUMN IF NOT EXISTS id_externo VARCHAR(100) NULL AFTER status,
-    ADD COLUMN IF NOT EXISTS pago_guincho TINYINT(1) NOT NULL DEFAULT 0 AFTER id_externo,
-    ADD COLUMN IF NOT EXISTS data_pagamento DATETIME NULL AFTER pago_guincho,
-    ADD COLUMN IF NOT EXISTS data_pagamento_guincho DATETIME NULL AFTER data_pagamento,
-    ADD COLUMN IF NOT EXISTS webhook_payload TEXT NULL AFTER data_pagamento_guincho,
-    ADD COLUMN IF NOT EXISTS criado_em DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP AFTER webhook_payload;
+SET @db_name := DATABASE();
+
+-- Function to check if column exists
+SET @col_exists := (
+    SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS
+    WHERE TABLE_SCHEMA = @db_name AND TABLE_NAME = 'pagamentos' AND COLUMN_NAME = 'metodo'
+);
+SET @sql := IF(@col_exists = 0, 'ALTER TABLE pagamentos ADD COLUMN metodo ENUM("mercadopago","pagseguro") NOT NULL DEFAULT "mercadopago" AFTER pedido_id', 'SELECT "metodo já existe" AS info');
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @col_exists := (
+    SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS
+    WHERE TABLE_SCHEMA = @db_name AND TABLE_NAME = 'pagamentos' AND COLUMN_NAME = 'valor_total'
+);
+SET @sql := IF(@col_exists = 0, 'ALTER TABLE pagamentos ADD COLUMN valor_total DECIMAL(10,2) NOT NULL DEFAULT 0.00 AFTER metodo', 'SELECT "valor_total já existe" AS info');
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @col_exists := (
+    SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS
+    WHERE TABLE_SCHEMA = @db_name AND TABLE_NAME = 'pagamentos' AND COLUMN_NAME = 'valor_guincho'
+);
+SET @sql := IF(@col_exists = 0, 'ALTER TABLE pagamentos ADD COLUMN valor_guincho DECIMAL(10,2) NOT NULL DEFAULT 0.00 AFTER valor_total', 'SELECT "valor_guincho já existe" AS info');
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @col_exists := (
+    SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS
+    WHERE TABLE_SCHEMA = @db_name AND TABLE_NAME = 'pagamentos' AND COLUMN_NAME = 'valor_plataforma'
+);
+SET @sql := IF(@col_exists = 0, 'ALTER TABLE pagamentos ADD COLUMN valor_plataforma DECIMAL(10,2) NOT NULL DEFAULT 0.00 AFTER valor_guincho', 'SELECT "valor_plataforma já existe" AS info');
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @col_exists := (
+    SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS
+    WHERE TABLE_SCHEMA = @db_name AND TABLE_NAME = 'pagamentos' AND COLUMN_NAME = 'status'
+);
+SET @sql := IF(@col_exists = 0, 'ALTER TABLE pagamentos ADD COLUMN status ENUM("pendente","aprovado","recusado","estornado") NOT NULL DEFAULT "pendente" AFTER valor_plataforma', 'SELECT "status já existe" AS info');
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @col_exists := (
+    SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS
+    WHERE TABLE_SCHEMA = @db_name AND TABLE_NAME = 'pagamentos' AND COLUMN_NAME = 'id_externo'
+);
+SET @sql := IF(@col_exists = 0, 'ALTER TABLE pagamentos ADD COLUMN id_externo VARCHAR(100) NULL AFTER status', 'SELECT "id_externo já existe" AS info');
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @col_exists := (
+    SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS
+    WHERE TABLE_SCHEMA = @db_name AND TABLE_NAME = 'pagamentos' AND COLUMN_NAME = 'pago_guincho'
+);
+SET @sql := IF(@col_exists = 0, 'ALTER TABLE pagamentos ADD COLUMN pago_guincho TINYINT(1) NOT NULL DEFAULT 0 AFTER id_externo', 'SELECT "pago_guincho já existe" AS info');
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @col_exists := (
+    SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS
+    WHERE TABLE_SCHEMA = @db_name AND TABLE_NAME = 'pagamentos' AND COLUMN_NAME = 'data_pagamento'
+);
+SET @sql := IF(@col_exists = 0, 'ALTER TABLE pagamentos ADD COLUMN data_pagamento DATETIME NULL AFTER pago_guincho', 'SELECT "data_pagamento já existe" AS info');
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @col_exists := (
+    SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS
+    WHERE TABLE_SCHEMA = @db_name AND TABLE_NAME = 'pagamentos' AND COLUMN_NAME = 'data_pagamento_guincho'
+);
+SET @sql := IF(@col_exists = 0, 'ALTER TABLE pagamentos ADD COLUMN data_pagamento_guincho DATETIME NULL AFTER data_pagamento', 'SELECT "data_pagamento_guincho já existe" AS info');
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @col_exists := (
+    SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS
+    WHERE TABLE_SCHEMA = @db_name AND TABLE_NAME = 'pagamentos' AND COLUMN_NAME = 'webhook_payload'
+);
+SET @sql := IF(@col_exists = 0, 'ALTER TABLE pagamentos ADD COLUMN webhook_payload TEXT NULL AFTER data_pagamento_guincho', 'SELECT "webhook_payload já existe" AS info');
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @col_exists := (
+    SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS
+    WHERE TABLE_SCHEMA = @db_name AND TABLE_NAME = 'pagamentos' AND COLUMN_NAME = 'criado_em'
+);
+SET @sql := IF(@col_exists = 0, 'ALTER TABLE pagamentos ADD COLUMN criado_em DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP AFTER webhook_payload', 'SELECT "criado_em já existe" AS info');
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
 
 SET @idx := (
     SELECT COUNT(*)
@@ -234,9 +302,19 @@ PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
 -- ----------------------------------------------------------------
 -- FIX 7: colunas Pix em pagamentos (§4.3)
 -- ----------------------------------------------------------------
-ALTER TABLE pagamentos
-    ADD COLUMN IF NOT EXISTS id_transacao_pix VARCHAR(100) NULL AFTER pago_guincho,
-    ADD COLUMN IF NOT EXISTS status_pix ENUM('pendente','processando','concluido','falha') NOT NULL DEFAULT 'pendente' AFTER id_transacao_pix;
+SET @col_exists := (
+    SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS
+    WHERE TABLE_SCHEMA = @db_name AND TABLE_NAME = 'pagamentos' AND COLUMN_NAME = 'id_transacao_pix'
+);
+SET @sql := IF(@col_exists = 0, 'ALTER TABLE pagamentos ADD COLUMN id_transacao_pix VARCHAR(100) NULL AFTER pago_guincho', 'SELECT "id_transacao_pix já existe" AS info');
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @col_exists := (
+    SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS
+    WHERE TABLE_SCHEMA = @db_name AND TABLE_NAME = 'pagamentos' AND COLUMN_NAME = 'status_pix'
+);
+SET @sql := IF(@col_exists = 0, 'ALTER TABLE pagamentos ADD COLUMN status_pix ENUM("pendente","processando","concluido","falha") NOT NULL DEFAULT "pendente" AFTER id_transacao_pix', 'SELECT "status_pix já existe" AS info');
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
 
 -- ----------------------------------------------------------------
 -- FIX 8: tabela logs_webhook (usada por WebhookController::log())

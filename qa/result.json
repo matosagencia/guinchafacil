@@ -1,0 +1,23 @@
+{
+  "run_id": "local",
+  "status": "completed",
+  "exit_code": 0,
+  "duration_ms": 25051,
+  "total_steps": 1,
+  "failed_steps": 0,
+  "steps": [
+    {
+      "code": "exibe ações administrativas e abre o cancelamento existente",
+      "title": " > chromium > admin-pedidos-acoes.spec.ts > Admin — ações no workspace de pedidos > exibe ações administrativas e abre o cancelamento existente",
+      "status": "passed",
+      "message": "passed",
+      "duration_ms": 22739,
+      "file": "C:\\xampp\\htdocs\\guinchafacil\\qa\\suites\\admin-pedidos-acoes.spec.ts",
+      "phase": "test",
+      "system": "E2E",
+      "class": "PlaywrightSuite",
+      "function": "test",
+      "artifacts": []
+    }
+  ]
+}

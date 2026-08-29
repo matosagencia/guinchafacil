@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /cliente/
+Disallow: /guincho/
+Disallow: /api/
+Disallow: /install/
+Disallow: /arquivos/
+
+Sitemap: https://guinchafacil.com.br/sitemap.xml

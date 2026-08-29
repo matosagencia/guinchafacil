@@ -1,0 +1,278 @@
+/* ============================================================
+   GuinchaFácil — Tela de sucesso do pagamento (checkout transparente)
+   Só CSS3/HTML5 (sem libs externas) — anel pulsante + selo de check
+   desenhado via stroke-dasharray + guincho "a caminho" em loop sutil.
+   ============================================================ */
+
+.pg-sucesso-wrap {
+  display: flex;
+  justify-content: center;
+  padding: 2rem 1rem 3rem;
+}
+
+.pg-sucesso-card {
+  width: 100%;
+  max-width: 560px;
+  background: #fff;
+  border-radius: 20px;
+  box-shadow: 0 10px 40px rgba(16, 185, 129, 0.12), 0 2px 8px rgba(0, 0, 0, 0.04);
+  padding: 2.5rem 2rem 2rem;
+  text-align: center;
+  opacity: 0;
+  transform: translateY(16px);
+  animation: pgFadeUp .6s ease-out forwards;
+}
+
+/* ── Emblema: anéis pulsantes + logo + selo de check ── */
+.pg-emblema {
+  position: relative;
+  width: 132px;
+  height: 132px;
+  margin: 0 auto 1.5rem;
+}
+
+.pg-anel {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 2px solid rgba(16, 185, 129, .35);
+  animation: pgPulso 2.4s ease-out infinite;
+}
+.pg-anel.pg-anel-2 { animation-delay: .6s; }
+.pg-anel.pg-anel-3 { animation-delay: 1.2s; }
+
+.pg-logo-circulo {
+  position: absolute;
+  inset: 14px;
+  border-radius: 50%;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, .08);
+  overflow: hidden;
+  animation: pgPopIn .5s cubic-bezier(.34,1.56,.64,1) .1s both;
+}
+
+.pg-logo-circulo img {
+  width: 62%;
+  height: 62%;
+  object-fit: contain;
+}
+
+.pg-selo-check {
+  position: absolute;
+  right: -2px;
+  bottom: 2px;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: #10b981;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 3px 10px rgba(16, 185, 129, .45);
+  animation: pgPopIn .45s cubic-bezier(.34,1.56,.64,1) .55s both;
+}
+
+.pg-selo-check svg {
+  width: 22px;
+  height: 22px;
+}
+
+.pg-selo-check path {
+  fill: none;
+  stroke: #fff;
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 24;
+  stroke-dashoffset: 24;
+  animation: pgRiscarCheck .4s ease-out .9s forwards;
+}
+
+/* ── Textos ── */
+.pg-titulo {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #111827;
+  margin: 0 0 .4rem;
+  opacity: 0;
+  animation: pgFadeUp .5s ease-out .5s forwards;
+}
+
+.pg-subtitulo {
+  color: #6b7280;
+  font-size: .98rem;
+  margin: 0 0 1.75rem;
+  opacity: 0;
+  animation: pgFadeUp .5s ease-out .65s forwards;
+}
+
+.pg-subtitulo strong { color: #10b981; }
+
+/* ── Faixa "procurando guincho" ── */
+.pg-status-guincho {
+  display: flex;
+  align-items: center;
+  gap: .85rem;
+  background: linear-gradient(90deg, #f0fdf9, #f7fefb);
+  border: 1px solid #d7f5e9;
+  border-radius: 14px;
+  padding: 1rem 1.1rem;
+  margin-bottom: 1.5rem;
+  text-align: left;
+  opacity: 0;
+  animation: pgFadeUp .5s ease-out .8s forwards;
+}
+
+.pg-radar {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  flex: none;
+  border-radius: 50%;
+  background: #10b981;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pg-radar::before {
+  content: '';
+  position: absolute;
+  inset: -6px;
+  border-radius: 50%;
+  border: 2px solid #10b981;
+  opacity: 0;
+  animation: pgRadarOnda 1.8s ease-out infinite;
+}
+
+.pg-radar i {
+  color: #fff;
+  font-size: 1.05rem;
+  animation: pgBalancoLeve 1.6s ease-in-out infinite;
+}
+
+.pg-status-texto strong {
+  display: block;
+  color: #065f46;
+  font-size: .92rem;
+  margin-bottom: .15rem;
+}
+
+.pg-status-texto span {
+  color: #4b5563;
+  font-size: .85rem;
+}
+
+.pg-status-pontos::after {
+  content: '';
+  display: inline-block;
+  width: 1.1em;
+  text-align: left;
+  animation: pgPontinhos 1.4s steps(4) infinite;
+}
+
+/* ── Estrada com guincho passando (só decorativo) ── */
+.pg-estrada {
+  position: relative;
+  height: 34px;
+  margin: 0 0 1.75rem;
+  overflow: hidden;
+  border-radius: 8px;
+  background: repeating-linear-gradient(
+    90deg,
+    #e5e7eb 0 16px,
+    transparent 16px 32px
+  );
+  background-position: 0 50%;
+  background-size: 100% 3px;
+  background-repeat: repeat-x;
+}
+
+.pg-estrada i {
+  position: absolute;
+  top: 50%;
+  left: -10%;
+  transform: translateY(-50%);
+  font-size: 1.3rem;
+  color: #10b981;
+  animation: pgGuinchoAndando 3.6s linear infinite;
+}
+
+/* ── Botão ── */
+.pg-acoes {
+  opacity: 0;
+  animation: pgFadeUp .5s ease-out .95s forwards;
+}
+
+.pg-acoes .btn {
+  border-radius: 12px;
+  padding: .7rem 1.6rem;
+  font-weight: 600;
+}
+
+/* ── Keyframes ── */
+@keyframes pgFadeUp {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pgPopIn {
+  from { opacity: 0; transform: scale(.6); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+@keyframes pgPulso {
+  0%   { transform: scale(.85); opacity: .8; }
+  100% { transform: scale(1.35); opacity: 0; }
+}
+
+@keyframes pgRiscarCheck {
+  to { stroke-dashoffset: 0; }
+}
+
+@keyframes pgRadarOnda {
+  0%   { transform: scale(.9); opacity: .7; }
+  100% { transform: scale(1.6); opacity: 0; }
+}
+
+@keyframes pgBalancoLeve {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-2px); }
+}
+
+@keyframes pgPontinhos {
+  0%   { content: ''; }
+  25%  { content: '.'; }
+  50%  { content: '..'; }
+  75%  { content: '...'; }
+  100% { content: ''; }
+}
+
+@keyframes pgGuinchoAndando {
+  from { left: -10%; }
+  to   { left: 108%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pg-sucesso-card,
+  .pg-logo-circulo,
+  .pg-selo-check,
+  .pg-selo-check path,
+  .pg-titulo,
+  .pg-subtitulo,
+  .pg-status-guincho,
+  .pg-acoes,
+  .pg-anel,
+  .pg-radar::before,
+  .pg-radar i,
+  .pg-estrada i,
+  .pg-status-pontos::after {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  .pg-selo-check path { stroke-dashoffset: 0 !important; }
+}

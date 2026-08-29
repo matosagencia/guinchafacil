@@ -1,0 +1,85 @@
+/* ============================================================
+   GuinchaFácil — Histórico do guincheiro (guincho/historico.php)
+   Extraído do <style> inline da view (gate visual do Nível 2).
+   ============================================================ */
+
+body.guincho .tow-history {
+  position: relative;
+  isolation: isolate;
+}
+
+body.guincho .tow-history::before,
+body.guincho .tow-history::after {
+  content: "";
+  position: absolute;
+  width: 320px;
+  height: 320px;
+  border-radius: 999px;
+  filter: blur(90px);
+  opacity: .14;
+  z-index: -1;
+  pointer-events: none;
+}
+
+body.guincho .tow-history::before {
+  top: -70px;
+  left: -80px;
+  background: rgba(47, 179, 74, .28);
+}
+
+body.guincho .tow-history::after {
+  top: 150px;
+  right: -90px;
+  background: rgba(239, 68, 68, .2);
+}
+
+body.guincho .tow-history-hero,
+body.guincho .tow-history-card {
+  border-radius: 28px;
+  border: 1px solid var(--theme-border);
+  background: var(--theme-surface);
+  box-shadow: var(--shadow-card);
+  color: var(--theme-text);
+}
+
+body.guincho .tow-history-hero {
+  position: relative;
+  overflow: hidden;
+}
+
+body.guincho .tow-history-hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at top left, rgba(47, 179, 74, .14), transparent 34%),
+    radial-gradient(circle at bottom right, rgba(245, 158, 11, .12), transparent 30%);
+  pointer-events: none;
+}
+
+body.guincho .tow-history-hero > * {
+  position: relative;
+}
+
+body.guincho .tow-history-item {
+  padding: 1.15rem;
+  border-radius: 22px;
+  background: var(--theme-surface-2);
+  border: 1px solid var(--theme-border);
+  color: var(--theme-text);
+}
+
+/* ---------- Substitui os style="" pontuais da view ---------- */
+body.guincho .tow-history-title {
+  font-size: 1.95rem;
+  font-weight: 800;
+}
+
+body.guincho .tow-history-cliente {
+  font-size: 1.02rem;
+}
+
+body.guincho .tow-history-stars {
+  color: #f59e0b;
+  font-size: 1rem;
+}

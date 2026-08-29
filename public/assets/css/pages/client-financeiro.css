@@ -1,0 +1,45 @@
+/* ============================================================
+   GuinchaFácil — Financeiro do cliente (cliente/financeiro.php)
+   Extraído do <style> inline da view (gate visual do Nível 2).
+   ============================================================ */
+
+body.cliente .fin-shell { position: relative; isolation: isolate; }
+body.cliente .fin-shell::before,
+body.cliente .fin-shell::after {
+  content: "";
+  position: absolute;
+  width: 320px;
+  height: 320px;
+  border-radius: 999px;
+  filter: blur(90px);
+  opacity: .14;
+  z-index: -1;
+  pointer-events: none;
+}
+body.cliente .fin-shell::before { top: -70px; left: -70px; background: rgba(47, 179, 74, .28); }
+body.cliente .fin-shell::after { top: 170px; right: -90px; background: rgba(245, 158, 11, .18); }
+
+body.cliente .fin-card,
+body.cliente .fin-hero {
+  border-radius: 28px;
+  border: 1px solid rgba(15, 23, 42, .07);
+  background: linear-gradient(180deg, rgba(255, 255, 255, .98), rgba(255, 255, 255, .92));
+  box-shadow: 0 28px 72px rgba(15, 23, 42, .08);
+}
+
+body.cliente .fin-hero { position: relative; overflow: hidden; }
+body.cliente .fin-hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at top left, rgba(47, 179, 74, .14), transparent 34%),
+    radial-gradient(circle at bottom right, rgba(245, 158, 11, .12), transparent 30%);
+  pointer-events: none;
+}
+body.cliente .fin-hero > * { position: relative; }
+
+/* ---------- Substitui os style="" pontuais da view ---------- */
+body.cliente .fin-select-auto { width: auto; }
+body.cliente .fin-title { font-size: 1.9rem; font-weight: 800; }
+body.cliente .fin-subtitle { font-size: 1.08rem; font-weight: 800; }

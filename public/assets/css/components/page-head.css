@@ -1,0 +1,39 @@
+/* ============================================================
+   GuinchaFácil — Cabeçalho padrão de página (<header class="page-head">),
+   compartilhado pelos 3 perfis (doc/PROTOTIPO_VISUAL_PERFIS_GUINCHAFACIL.html).
+   Carregado globalmente via layouts/header.php para que qualquer tela nova
+   (não só os dashboards) já herde o padrão, sem precisar duplicar CSS
+   por perfil — as cores vêm dos tokens de tema (--theme-*) já carregados
+   por themes/{client,tow,admin}.css conforme o perfil logado.
+   ============================================================ */
+
+.page-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4, 1rem);
+  flex-wrap: wrap;
+}
+
+.page-head .eyebrow {
+  display: block;
+  font-size: .72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  color: var(--theme-accent);
+  margin-bottom: var(--space-1, .25rem);
+}
+
+.page-head h1 {
+  margin: 0 0 var(--space-1, .25rem);
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: var(--theme-text);
+}
+
+.page-head p {
+  margin: 0;
+  color: var(--theme-muted);
+  font-size: .92rem;
+}

@@ -1,0 +1,67 @@
+/* ============================================================
+   GuinchaFácil — Detalhe do Pedido (admin/pedidodetalhe.php)
+   Substitui os style="" pontuais da view (gate visual do Nível 2).
+   ============================================================ */
+
+body.admin .pd-thumb { max-height: 200px; }
+
+body.admin .pd-modal-content {
+  background: var(--theme-surface);
+  border: 1px solid var(--theme-border);
+  color: var(--theme-text);
+}
+
+body.admin .pd-modal-border { border-color: var(--theme-border); }
+
+body.admin .pd-table { font-size: .88rem; }
+
+body.admin .pd-label { color: var(--theme-muted); }
+body.admin .pd-label--35 { width: 35%; }
+body.admin .pd-label--50 { width: 50%; }
+
+body.admin .pd-guincho-empty {
+  color: var(--theme-muted);
+  font-size: .88rem;
+  text-align: center;
+  padding: 8px 0;
+}
+
+body.admin .pd-job-box { border-color: var(--theme-border) !important; }
+
+body.admin .pd-job-response {
+  white-space: pre-wrap;
+}
+
+body.admin .pd-field-label {
+  font-size: .8rem;
+  color: var(--theme-muted);
+  margin-bottom: 4px;
+}
+
+body.admin .pd-field-value { font-size: .88rem; }
+
+body.admin .pd-map {
+  height: 320px;
+  border-radius: 0 0 12px 12px;
+  min-height: 260px;
+}
+
+body.admin .pd-legenda-validada { color: #16a34a; }
+body.admin .pd-legenda-rejeitado { color: #dc2626; }
+body.admin .pd-legenda-origem-destino { color: #0d6efd; }
+
+body.admin .pd-fase-box { border-color: var(--theme-border) !important; }
+
+body.admin .pd-chatbox { height: 260px; overflow-y: auto; }
+
+body.admin .pd-chat-empty {
+  text-align: center;
+  color: var(--theme-muted);
+  padding: 24px 0;
+}
+
+body.admin .pd-chat-meta {
+  font-size: .72rem;
+  color: var(--theme-muted);
+  margin-bottom: 2px;
+}

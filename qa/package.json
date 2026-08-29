@@ -1,0 +1,22 @@
+{
+  "name": "guinchafacil-qa",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Runner Playwright do GuinchaFacil",
+  "scripts": {
+    "test": "playwright test",
+    "test:smoke": "playwright test suites/smoke.spec.ts --project=chromium",
+    "test:headed": "playwright test --headed",
+    "test:onboarding": "playwright test suites/onboarding-stress.spec.ts --project=chromium",
+    "test:rj": "playwright test suites/atendimento-colisao-rj.spec.ts suites/atendimento-eletrica-rj.spec.ts --project=chromium",
+    "test:stress": "playwright test suites/stress-chaos.spec.ts suites/stress-chat.spec.ts suites/stress-concorrencia.spec.ts suites/stress-pagamento.spec.ts suites/stress-por.spec.ts suites/stress-sessao.spec.ts --project=chromium",
+    "test:chaos": "playwright test suites/stress-chaos.spec.ts --project=chromium",
+    "test:full": "playwright test --project=chromium",
+    "report": "playwright show-report"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.54.2",
+    "@types/node": "^24.0.10",
+    "typescript": "^5.8.3"
+  }
+}

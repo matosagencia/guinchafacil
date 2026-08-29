@@ -1,239 +1,263 @@
 <?php
+/**
+ * Guinchos / Especialistas — reestruturada pro padrão shell-ops (mesma
+ * arquitetura de /admin/central, /admin/ocorrencias, /admin/carteiras e
+ * /admin/guinchospendentes). Lista de aprovados vira a worklist clicável;
+ * o detalhe de cada guincheiro é buscado via fetch() ao endpoint
+ * /admin/guincho-fragmento/{id}, que já existia (retorna {ok, html} com o
+ * mesmo partial usado antes em guinhodetalhe.php) — evita pré-renderizar
+ * o detalhe completo (documentos, pedidos, capacidades) de todos os
+ * guincheiros de uma vez.
+ *
+ * @var array $pendentes
+ * @var array $aprovados
+ * @var string $tipoFiltro
+ * @var string $csrfToken
+ */
 $bp = defined('BASE_PATH') ? BASE_PATH : '';
 include __DIR__ . '/../layouts/header.php';
 
-// Status do guincho calculado dinamicamente
 function guinchoStatusBadge(array $g): string {
-    if (!(int)($g['ativo'] ?? 1)) return '<span class="guincho-status-offline">Suspenso</span>';
-    if ((int)($g['disponivel'] ?? 0)) return '<span class="guincho-status-online">Online</span>';
-    return '<span class="guincho-status-offline">Offline</span>';
+    if (!(int)($g['ativo'] ?? 1)) return '<span class="ops-badge ops-badge--critical">Suspenso</span>';
+    if ((int)($g['disponivel'] ?? 0)) return '<span class="ops-badge ops-badge--service">Online</span>';
+    return '<span class="ops-badge ops-badge--audit">Offline</span>';
 }
 ?>
-<div class="main-wrapper">
-<?php include __DIR__ . '/../layouts/sidebar_admin.php'; ?>
-<main class="main-content">
+<link rel="stylesheet" href="<?php echo htmlspecialchars($bp); ?>/public/assets/css/pages/admin-central-operacional.css">
+<link rel="stylesheet" href="<?php echo htmlspecialchars($bp); ?>/public/assets/css/pages/admin-guinchos.css">
 
-    <div class="page-header">
-        <div>
-            <div class="page-title">
-                <i class="fas fa-truck me-2" style="color:var(--primary)"></i>Gerenciar Guinchos
-            </div>
-            <div class="page-subtitle">
-                <?php echo count($pendentes ?? []) + count($aprovados ?? []); ?> guincheiros cadastrados
-                &bull; <?php echo count($pendentes ?? []); ?> aguardando aprovação
-            </div>
-        </div>
-        <a href="<?php echo $bp; ?>/admin/guincho/novo" class="btn btn-primary">
-            <i class="fas fa-plus me-2"></i>Cadastrar Guincheiro
+<div class="ops-topbar" style="padding:10px 24px;border-bottom:1px solid var(--theme-border,#232c35);background:var(--theme-nav,#030405)">
+    <div class="ops-topbar__search">
+        <i class="fas fa-magnifying-glass"></i>
+        <input type="search" id="guinchosSearchTop" placeholder="Buscar por nome, e-mail, telefone ou placa" autocomplete="off">
+    </div>
+    <div class="ops-topbar__meta">
+        <?php if (!empty($pendentes)): ?>
+        <a href="<?php echo htmlspecialchars($bp); ?>/admin/guinchospendentes" class="ops-dashboard-link" style="color:var(--warning,#f2b53e);">
+            <i class="fas fa-user-clock me-1"></i><?php echo count($pendentes); ?> aguardando aprovação
         </a>
+        <?php endif; ?>
+        <a href="<?php echo htmlspecialchars($bp); ?>/admin/guincho/novo" class="ops-dashboard-link"><i class="fas fa-plus me-1"></i>Cadastrar Guincheiro</a>
     </div>
+</div>
 
-    <?php if (!empty($_GET['msg'])): ?>
-    <?php $msgMap = ['aprovado'=>['success','check-circle','Guincho aprovado com sucesso!'],
-                     'rejeitado'=>['warning','times-circle','Guincho rejeitado.'],
-                     'criado'=>['success','check-circle','Guincheiro cadastrado com sucesso!']];
-          $m = $msgMap[$_GET['msg']] ?? ['info','info-circle',htmlspecialchars($_GET['msg'])]; ?>
-    <div class="alert alert-<?php echo $m[0]; ?> mb-3">
-        <i class="fas fa-<?php echo $m[1]; ?> me-2"></i><?php echo $m[2]; ?>
-    </div>
-    <?php endif; ?>
+<?php if (!empty($_GET['msg'])): ?>
+<?php $msgMap = ['aprovado'=>['success','check-circle','Guincho aprovado com sucesso!'],
+                 'rejeitado'=>['warning','times-circle','Guincho rejeitado.'],
+                 'criado'=>['success','check-circle','Guincheiro cadastrado com sucesso!']];
+      $m = $msgMap[$_GET['msg']] ?? ['info','info-circle',htmlspecialchars($_GET['msg'])]; ?>
+<div class="alert alert-<?php echo $m[0]; ?>" style="margin:16px 24px 0;">
+    <i class="fas fa-<?php echo $m[1]; ?> me-2"></i><?php echo $m[2]; ?>
+</div>
+<?php endif; ?>
 
-    <!-- SEÇÃO: Pendentes de Aprovação -->
-    <?php if (!empty($pendentes)): ?>
-    <div class="d-flex align-items-center gap-2 mb-3">
-        <span style="width:10px;height:10px;border-radius:50%;background:#f59e0b;display:inline-block"></span>
-        <h6 class="mb-0" style="color:var(--theme-muted);font-size:.82rem;text-transform:uppercase;letter-spacing:.08em;font-weight:700">
-            Aguardando Aprovação — <?php echo count($pendentes); ?>
-        </h6>
-    </div>
-    <div class="row g-3 mb-4">
-        <?php foreach ($pendentes as $g): ?>
-        <div class="col-md-6 col-lg-4">
-            <div class="card h-100" style="border-left:4px solid #f59e0b">
-                <div class="card-body">
-                    <div class="d-flex align-items-center gap-3 mb-3">
-                        <div class="stat-icon" style="margin:0;width:44px;height:44px;font-size:1rem;background:rgba(245,158,11,.15)">
-                            <i class="fas fa-clock" style="color:#f59e0b"></i>
-                        </div>
-                        <div class="flex-fill min-w-0">
-                            <div style="font-weight:700;color:var(--theme-text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
-                                <?php echo htmlspecialchars($g['nome_operador'] ?? '—'); ?>
-                            </div>
-                            <div style="font-size:.77rem;color:var(--theme-muted)">
-                                <?php echo htmlspecialchars($g['email'] ?? ''); ?>
-                            </div>
-                        </div>
-                        <span style="font-size:.7rem;color:#f59e0b;font-weight:700;white-space:nowrap">
-                            <?php echo isset($g['criado_em']) ? date('d/m/Y', strtotime($g['criado_em'])) : '—'; ?>
-                        </span>
-                    </div>
+<?php
+$totalAtivos = count(array_filter($aprovados ?? [], static fn($g) => !empty($g['ativo'] ?? 1)));
+$totalOnline = count(array_filter($aprovados ?? [], static fn($g) => !empty($g['disponivel'])));
+$totalSuspensos = count(array_filter($aprovados ?? [], static fn($g) => empty($g['ativo'] ?? 1)));
+?>
+<section class="ops-summary" aria-label="Resumo de guinchos">
+    <a href="<?php echo htmlspecialchars($bp); ?>/admin/guinchos" style="text-decoration:none;">
+        <article class="ops-metric <?php echo $tipoFiltro === '' ? 'is-warning' : ''; ?>">
+            <span class="ops-metric__label">Aprovados<?php echo $tipoFiltro === '' ? ' · filtrando' : ''; ?></span>
+            <strong class="ops-metric__value"><?php echo count($aprovados ?? []); ?></strong>
+        </article>
+    </a>
+    <article class="ops-metric">
+        <span class="ops-metric__label">Online agora</span>
+        <strong class="ops-metric__value"><?php echo $totalOnline; ?></strong>
+    </article>
+    <article class="ops-metric <?php echo $totalSuspensos > 0 ? 'is-danger' : ''; ?>">
+        <span class="ops-metric__label">Suspensos</span>
+        <strong class="ops-metric__value"><?php echo $totalSuspensos; ?></strong>
+    </article>
+    <a href="<?php echo htmlspecialchars($bp); ?>/admin/guinchospendentes" style="text-decoration:none;">
+        <article class="ops-metric <?php echo !empty($pendentes) ? 'is-warning' : ''; ?>">
+            <span class="ops-metric__label">Aguardando aprovação</span>
+            <strong class="ops-metric__value"><?php echo count($pendentes ?? []); ?></strong>
+        </article>
+    </a>
+</section>
 
-                    <table class="table table-sm mb-3" style="font-size:.81rem">
-                        <tr>
-                            <td style="color:var(--theme-muted);width:38%">Placa</td>
-                            <td><span class="badge badge-aguardando_pagamento"><?php echo htmlspecialchars($g['placa_guincho'] ?? '—'); ?></span></td>
-                        </tr>
-                        <tr>
-                            <td style="color:var(--theme-muted)">CNH</td>
-                            <td><?php echo htmlspecialchars($g['cnh_numero'] ?? '—'); ?></td>
-                        </tr>
-                        <tr>
-                            <td style="color:var(--theme-muted)">Telefone</td>
-                            <td><?php echo htmlspecialchars($g['telefone'] ?? '—'); ?></td>
-                        </tr>
-                        <tr>
-                            <td style="color:var(--theme-muted)">Capacidade</td>
-                            <td><?php echo number_format($g['capacidade_ton'] ?? 0, 1); ?> ton</td>
-                        </tr>
-                    </table>
+<div class="shell-ops" id="guinchosShell">
 
-                    <?php if (!empty($g['doc_cnh_frente'])): ?>
-                    <div class="d-flex gap-2 mb-3">
-                        <a href="/uploads/<?php echo htmlspecialchars($g['doc_cnh_frente']); ?>" target="_blank"
-                           class="btn btn-sm btn-outline-primary flex-fill">
-                            <i class="fas fa-file me-1"></i>CNH Frente
-                        </a>
-                        <?php if (!empty($g['doc_cnh_verso'])): ?>
-                        <a href="/uploads/<?php echo htmlspecialchars($g['doc_cnh_verso']); ?>" target="_blank"
-                           class="btn btn-sm btn-outline-primary flex-fill">
-                            <i class="fas fa-file me-1"></i>CNH Verso
-                        </a>
-                        <?php endif; ?>
-                    </div>
-                    <?php endif; ?>
+    <aside class="shell-ops-sidebar" id="guinchosSidebar">
+        <?php include __DIR__ . '/../components/admin_nav_operacional.php'; ?>
+    </aside>
 
-                    <div class="d-flex gap-2">
-                        <form method="POST" action="<?php echo $bp; ?>/admin/guincho/aprovar" class="flex-fill">
-                            <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($csrfToken); ?>">
-                            <input type="hidden" name="id" value="<?php echo (int)$g['id']; ?>">
-                            <button class="btn btn-success btn-sm w-100">
-                                <i class="fas fa-check me-1"></i>Aprovar
-                            </button>
-                        </form>
-                        <form method="POST" action="<?php echo $bp; ?>/admin/guincho/rejeitar" class="flex-fill">
-                            <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($csrfToken); ?>">
-                            <input type="hidden" name="id" value="<?php echo (int)$g['id']; ?>">
-                            <button class="btn btn-danger btn-sm w-100"
-                                    onclick="return confirm('Rejeitar este guincheiro?')">
-                                <i class="fas fa-times me-1"></i>Rejeitar
-                            </button>
-                        </form>
-                        <a href="<?php echo $bp; ?>/admin/guincho/<?php echo (int)$g['id']; ?>"
-                           class="btn btn-outline-primary btn-sm" title="Ver detalhes">
-                            <i class="fas fa-eye"></i>
-                        </a>
-                    </div>
+    <section class="shell-ops-worklist" aria-label="Guinchos aprovados">
+        <header class="ops-worklist-header">
+            <span class="eyebrow">Cadastros</span>
+            <h2><?php echo $tipoFiltro === 'especialista' ? 'Especialistas' : 'Guinchos'; ?></h2>
+            <p><span id="guinchosWorklistCount"><?php echo count($aprovados ?? []); ?></span> prestador(es)</p>
+        </header>
+
+        <div class="d-flex gap-1 flex-wrap" style="padding:0 16px 10px;">
+            <a href="<?php echo htmlspecialchars($bp); ?>/admin/guinchos" class="btn btn-sm <?php echo $tipoFiltro === '' ? 'btn-primary' : 'btn-outline-secondary'; ?>">Todos</a>
+            <a href="<?php echo htmlspecialchars($bp); ?>/admin/guinchos?tipo=reboque" class="btn btn-sm <?php echo $tipoFiltro === 'reboque' ? 'btn-primary' : 'btn-outline-secondary'; ?>">Reboque</a>
+            <a href="<?php echo htmlspecialchars($bp); ?>/admin/guinchos?tipo=especialista" class="btn btn-sm <?php echo $tipoFiltro === 'especialista' ? 'btn-primary' : 'btn-outline-secondary'; ?>">Especialistas</a>
+        </div>
+
+        <div class="ops-worklist-search">
+            <i class="fas fa-magnifying-glass"></i>
+            <input type="search" id="guinchosWorklistSearch" placeholder="Filtrar nesta lista" autocomplete="off">
+        </div>
+
+        <div class="ops-worklist-results" id="guinchosWorklistResults">
+            <?php if (empty($aprovados)): ?>
+                <div class="ops-empty-state">
+                    <i class="fas fa-truck"></i>
+                    Nenhum guincheiro aprovado ainda.
                 </div>
-            </div>
-        </div>
-        <?php endforeach; ?>
-    </div>
-    <?php else: ?>
-    <div class="card mb-4">
-        <div class="card-body text-center py-3" style="color:var(--theme-muted)">
-            <i class="fas fa-check-circle me-2 text-success"></i>Nenhum guincheiro pendente de aprovação.
-        </div>
-    </div>
-    <?php endif; ?>
-
-    <!-- SEÇÃO: Todos os Guinchos (pendentes + aprovados) -->
-    <div class="d-flex align-items-center gap-2 mb-3">
-        <span style="width:10px;height:10px;border-radius:50%;background:var(--primary);display:inline-block"></span>
-        <h6 class="mb-0" style="color:var(--theme-muted);font-size:.82rem;text-transform:uppercase;letter-spacing:.08em;font-weight:700">
-            Todos os Guinchos — <?php echo count($aprovados ?? []); ?> aprovados
-        </h6>
-    </div>
-
-    <div class="card">
-        <div class="card-body p-0">
-            <div class="table-responsive">
-                <table class="table table-hover mb-0">
-                    <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>Guincheiro</th>
-                            <th>Veículo</th>
-                            <th>Contato</th>
-                            <th>Status</th>
-                            <th>Reputação</th>
-                            <th>Ativo</th>
-                            <th>Cadastro</th>
-                            <th>Ações</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php if (!empty($aprovados)): ?>
-                        <?php foreach ($aprovados as $g): ?>
-                        <tr>
-                            <td style="font-weight:600;color:var(--theme-muted)">#<?php echo (int)$g['id']; ?></td>
-                            <td>
-                                <div style="font-weight:600;color:var(--theme-text)">
-                                    <?php echo htmlspecialchars($g['nome_operador'] ?? '—'); ?>
-                                </div>
-                                <small style="color:var(--theme-muted)"><?php echo htmlspecialchars($g['email'] ?? ''); ?></small>
-                            </td>
-                            <td>
-                                <span class="badge badge-aguardando_pagamento">
-                                    <?php echo htmlspecialchars($g['placa_guincho'] ?? '—'); ?>
-                                </span>
-                                <?php if (!empty($g['capacidade_ton'])): ?>
-                                <div style="font-size:.73rem;color:var(--theme-muted);margin-top:2px">
-                                    <?php echo number_format($g['capacidade_ton'], 1); ?> ton
-                                </div>
-                                <?php endif; ?>
-                            </td>
-                            <td style="font-size:.84rem"><?php echo htmlspecialchars($g['telefone'] ?? '—'); ?></td>
-                            <td><?php echo guinchoStatusBadge($g); ?></td>
-                            <td>
-                                <?php $rep = (float)($g['reputacao'] ?? 0); ?>
-                                <span style="color:<?php echo $rep >= 4 ? '#22c55e' : ($rep >= 3 ? '#f59e0b' : ($rep > 0 ? '#ef4444' : 'var(--theme-muted)')); ?>;font-weight:700">
-                                    <?php echo $rep > 0 ? '★ '.number_format($rep, 1) : '—'; ?>
-                                </span>
-                                <?php if (!empty($g['total_avaliacoes'])): ?>
-                                <small style="color:var(--theme-muted)">(<?php echo (int)$g['total_avaliacoes']; ?>)</small>
-                                <?php endif; ?>
-                            </td>
-                            <td>
-                                <?php if ($g['ativo'] ?? 1): ?>
-                                <span style="color:#22c55e;font-size:.8rem"><i class="fas fa-circle me-1" style="font-size:.5rem"></i>Ativo</span>
-                                <?php else: ?>
-                                <span style="color:#f87171;font-size:.8rem"><i class="fas fa-circle me-1" style="font-size:.5rem"></i>Suspenso</span>
-                                <?php endif; ?>
-                            </td>
-                            <td style="font-size:.8rem;color:var(--theme-muted)">
-                                <?php echo !empty($g['criado_em']) ? date('d/m/Y', strtotime($g['criado_em'])) : '—'; ?>
-                            </td>
-                            <td>
-                                <div class="d-flex gap-1">
-                                    <a href="<?php echo $bp; ?>/admin/guincho/<?php echo (int)$g['id']; ?>"
-                                       class="btn btn-sm btn-outline-primary" title="Ver detalhes">
-                                        <i class="fas fa-eye"></i>
-                                    </a>
-                                    <a href="<?php echo $bp; ?>/admin/usuario/editar/<?php echo (int)$g['usuario_id']; ?>"
-                                       class="btn btn-sm btn-outline-secondary" title="Editar">
-                                        <i class="fas fa-edit"></i>
-                                    </a>
-                                </div>
-                            </td>
-                        </tr>
-                        <?php endforeach; ?>
-                        <?php else: ?>
-                        <tr>
-                            <td colspan="9" class="text-center py-5" style="color:var(--theme-muted)">
-                                <i class="fas fa-truck fa-2x d-block mb-2" style="opacity:.3"></i>
-                                Nenhum guincheiro aprovado ainda.
-                                <br>
-                                <a href="<?php echo $bp; ?>/admin/guincho/novo" class="btn btn-primary btn-sm mt-3">
-                                    <i class="fas fa-plus me-1"></i>Cadastrar Primeiro Guincheiro
-                                </a>
-                            </td>
-                        </tr>
+            <?php else: foreach ($aprovados as $g):
+                $busca = strtolower(($g['nome_operador'] ?? '') . ' ' . ($g['email'] ?? '') . ' ' . ($g['telefone'] ?? '') . ' ' . ($g['placa_guincho'] ?? ''));
+                $suspenso = empty($g['ativo'] ?? 1);
+                $rep = (float)($g['reputacao'] ?? 0);
+            ?>
+                <button type="button"
+                    class="ops-worklist-item <?php echo $suspenso ? 'is-warning' : ''; ?>"
+                    data-guincho-id="<?php echo (int)$g['id']; ?>"
+                    data-search-blob="<?php echo htmlspecialchars($busca, ENT_QUOTES, 'UTF-8'); ?>"
+                    aria-selected="false"
+                >
+                    <span class="ops-worklist-item__priority" aria-hidden="true"></span>
+                    <span class="ops-worklist-item__content">
+                        <span class="ops-worklist-item__top">
+                            <strong><?php echo htmlspecialchars($g['nome_operador'] ?? '—'); ?></strong>
+                            <?php echo guinchoStatusBadge($g); ?>
+                        </span>
+                        <span class="ops-worklist-item__customer"><?php echo htmlspecialchars($g['placa_guincho'] ?? '—'); ?> <?php echo $rep > 0 ? '· ★ ' . number_format($rep, 1) : ''; ?></span>
+                        <span class="ops-worklist-item__footer">
+                            <span>#<?php echo (int)$g['id']; ?></span>
+                            <span><?php echo htmlspecialchars($g['telefone'] ?? '—'); ?></span>
+                        </span>
+                    </span>
+                    <span class="ops-worklist-item__signals">
+                        <?php if ($suspenso): ?>
+                        <span class="ops-signal is-danger" title="Suspenso"><i class="fas fa-ban"></i></span>
                         <?php endif; ?>
-                    </tbody>
-                </table>
-            </div>
+                    </span>
+                </button>
+            <?php endforeach; endif; ?>
         </div>
-    </div>
+    </section>
 
-</main>
-<?php include __DIR__ . '/../layouts/footer.php'; ?>
+    <section class="shell-ops-workspace" id="guinchosWorkspace" aria-live="polite">
+        <?php if (empty($aprovados)): ?>
+        <div class="ops-empty-state" style="padding:80px 20px">
+            <i class="fas fa-inbox"></i>
+            Nenhum guincheiro pra exibir.
+        </div>
+        <?php else: ?>
+        <div class="ops-empty-state" style="padding:80px 20px">
+            <i class="fas fa-circle-notch fa-spin"></i>
+            Carregando…
+        </div>
+        <?php endif; ?>
+    </section>
+
+</div>
+
+<script<?php echo csp_script_nonce_attr(); ?>>
+(function () {
+    var shell = document.getElementById('guinchosShell');
+    var results = document.getElementById('guinchosWorklistResults');
+    var workspace = document.getElementById('guinchosWorkspace');
+    if (!shell || !results || !workspace) return;
+
+    var buttons = Array.prototype.slice.call(results.querySelectorAll('[data-guincho-id]'));
+    var cache = {};
+    var loadToken = 0;
+    var BP = '<?php echo addslashes($bp); ?>';
+
+    function escapeHtml(value) {
+        var el = document.createElement('div');
+        el.textContent = String(value == null ? '' : value);
+        return el.innerHTML;
+    }
+
+    function renderSkeleton() {
+        workspace.innerHTML = '<div class="ops-empty-state" style="padding:60px 20px"><i class="fas fa-circle-notch fa-spin"></i>Carregando…</div>';
+    }
+
+    function renderError(message) {
+        workspace.innerHTML = '<div class="ops-empty-state" style="padding:60px 20px"><i class="fas fa-triangle-exclamation"></i>' + escapeHtml(message) + '</div>';
+    }
+
+    function wireBackLink() {
+        var back = workspace.querySelector('[data-action="gu-clear-selection"]');
+        if (back) back.addEventListener('click', function () { selectGuincho(null); });
+    }
+
+    async function loadDetail(guinchoId) {
+        var myToken = ++loadToken;
+        renderSkeleton();
+        try {
+            if (!cache[guinchoId]) {
+                var res = await fetch(BP + '/admin/guincho-fragmento/' + guinchoId, { headers: { Accept: 'application/json' }, credentials: 'same-origin' });
+                var body = await res.json();
+                if (!res.ok || !body.ok) throw new Error(body.erro || ('HTTP ' + res.status));
+                cache[guinchoId] = body.html;
+            }
+            if (myToken !== loadToken) return;
+            workspace.innerHTML = cache[guinchoId];
+            wireBackLink();
+        } catch (err) {
+            if (myToken === loadToken) renderError('Falha ao carregar detalhe: ' + err.message);
+        }
+    }
+
+    function selectGuincho(guinchoId) {
+        buttons.forEach(function (btn) {
+            btn.setAttribute('aria-selected', String(Number(btn.dataset.guinchoId) === guinchoId));
+        });
+        if (!guinchoId) {
+            workspace.innerHTML = '<div class="ops-empty-state" style="padding:80px 20px"><i class="fas fa-hand-pointer"></i>Selecione um guincheiro na lista ao lado.</div>';
+        } else {
+            loadDetail(guinchoId);
+        }
+        if (window.matchMedia('(max-width: 767px)').matches) {
+            shell.classList.toggle('has-selection', !!guinchoId);
+        }
+    }
+
+    results.addEventListener('click', function (event) {
+        var item = event.target.closest('[data-guincho-id]');
+        if (!item) return;
+        selectGuincho(Number(item.dataset.guinchoId));
+    });
+
+    function applyFilter(term) {
+        var t = term.trim().toLowerCase();
+        buttons.forEach(function (btn) {
+            var blob = btn.dataset.searchBlob || '';
+            btn.style.display = (t === '' || blob.indexOf(t) !== -1) ? '' : 'none';
+        });
+    }
+
+    var worklistSearch = document.getElementById('guinchosWorklistSearch');
+    var topSearch = document.getElementById('guinchosSearchTop');
+    if (worklistSearch) worklistSearch.addEventListener('input', function (e) { applyFilter(e.target.value); });
+    if (topSearch) topSearch.addEventListener('input', function (e) {
+        if (worklistSearch) worklistSearch.value = e.target.value;
+        applyFilter(e.target.value);
+    });
+
+    // Reabre no mesmo guincheiro vindo do link antigo /admin/guincho/{id}
+    // (agora um redirect ?guincho_id=X), ou seleciona o primeiro da lista.
+    var paramGuincho = Number(new URLSearchParams(window.location.search).get('guincho_id'));
+    if (paramGuincho && buttons.some(function (b) { return Number(b.dataset.guinchoId) === paramGuincho; })) {
+        selectGuincho(paramGuincho);
+    } else if (buttons.length > 0) {
+        selectGuincho(Number(buttons[0].dataset.guinchoId));
+    }
+})();
+</script>
+
+<?php
+// Não usa layouts/footer.php: esta página usa .shell-ops (grid próprio),
+// igual à Central Operacional, Ocorrências, Carteiras e Guinchos Pendentes.
+?>
+<script<?php echo csp_script_nonce_attr(); ?> src="<?php echo htmlspecialchars($bp); ?>/public/assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

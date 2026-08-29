@@ -1,0 +1,38 @@
+/* ============================================================
+   GuinchaFácil — Detalhe do Usuário (admin/usuariodetalhe.php)
+   Substitui os style="" pontuais da view (gate visual do Nível 2).
+   ============================================================ */
+
+body.admin .usuariodetalhe-stat-icon {
+  margin: 0;
+  width: 56px;
+  height: 56px;
+  font-size: 1.6rem;
+}
+
+body.admin .usuariodetalhe-nome {
+  font-weight: 800;
+  font-size: 1.1rem;
+  color: var(--theme-text);
+}
+
+body.admin .usuariodetalhe-email {
+  font-size: .82rem;
+  color: var(--theme-muted);
+}
+
+body.admin .usuariodetalhe-table { font-size: .88rem; }
+
+body.admin .usuariodetalhe-label { color: var(--theme-muted); }
+body.admin .usuariodetalhe-label--35 { width: 35%; }
+body.admin .usuariodetalhe-label--40 { width: 40%; }
+
+body.admin .usuariodetalhe-doc-label {
+  font-size: .8rem;
+  color: var(--theme-muted);
+  margin-bottom: .5rem;
+}
+
+body.admin .usuariodetalhe-empty {
+  color: var(--theme-muted);
+}

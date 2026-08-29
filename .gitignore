@@ -1,20 +1,40 @@
-# Segredos — nunca commitar (§5.4)
 .env
-
-# Scripts de diagnóstico — nunca commitar
-diagnostico.php
-phpinfo.php
-probe.php
-_dbg.php
-
-# Dependências
-vendor/
-
-# Uploads e logs gerados em runtime
-uploads/
+.env.local
+.env.*.local
+.env.backup
+files/qa-runs/
+logs/*.jsonl
 logs/
+public/uploads/
+uploads/
+qa/node_modules/
+qa/playwright-report/
+qa/test-results/
+qa/.cache/
+qa/.auth/
+*.trace.zip
+*.webm
 
-# Arquivos de sistema
-.DS_Store
-Thumbs.db
-*.log
+# Dependencias e artefatos locais
+/node_modules/
+/vendor/
+/storage/
+/test-results/
+/screenshot/
+/deploy_min/
+/deploy_*.zip
+/.ftpquota
+
+# Diagnosticos e dados operacionais locais
+/_cleanup.php
+/_diag_env_temp.php
+/_test_db.php
+/PROSPECCAO_CELULA_1.csv
+/especialista.txt
+
+# Credenciais e configuracoes privadas
+/google-services.json
+/id_rsa.ppk
+*.pem
+*.key
+*.ppk

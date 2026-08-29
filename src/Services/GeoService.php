@@ -1,5 +1,7 @@
 <?php
 
+require_once __DIR__ . '/GeocodingService.php';
+
 class GeoService {
     
     public static function haversine($lat1, $lng1, $lat2, $lng2) {
@@ -18,31 +20,14 @@ class GeoService {
     }
     
     public static function geocodificarEndereco($endereco) {
-        $endereco_encoded = urlencode($endereco);
-        $url = "https://nominatim.openstreetmap.org/search?q={$endereco_encoded}&format=json&limit=1";
-        
-        $context = stream_context_create([
-            'http' => [
-                'header' => "User-Agent: GuinchaFacil/1.0\r\n",
-                'timeout' => 10
-            ]
-        ]);
-        
-        $response = file_get_contents($url, false, $context);
-        
-        if ($response === false) {
+        $resultado = (new GeocodingService())->geocode((string)$endereco);
+        if ($resultado === null) {
             return false;
         }
-        
-        $data = json_decode($response, true);
-        
-        if (empty($data)) {
-            return false;
-        }
-        
+
         return [
-            'lat' => (float)$data[0]['lat'],
-            'lng' => (float)$data[0]['lon']
+            'lat' => (float)$resultado['lat'],
+            'lng' => (float)$resultado['lng']
         ];
     }
     
@@ -53,33 +38,7 @@ class GeoService {
             return false;
         }
         
-        $url = "https://viacep.com.br/ws/{$cep}/json/";
-        
-        $context = stream_context_create([
-            'http' => [
-                'timeout' => 10
-            ]
-        ]);
-        
-        $response = file_get_contents($url, false, $context);
-        
-        if ($response === false) {
-            return false;
-        }
-        
-        $data = json_decode($response, true);
-        
-        if (isset($data['erro'])) {
-            return false;
-        }
-        
-        return [
-            'cep' => $data['cep'],
-            'logradouro' => $data['logradouro'],
-            'bairro' => $data['bairro'],
-            'localidade' => $data['localidade'],
-            'uf' => $data['uf']
-        ];
+        return GeocodingService::buscarCep($cep) ?: false;
     }
     
     public static function calcularCusto($distancia_km, $tarifa_km, $taxa_fixa) {

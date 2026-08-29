@@ -2,19 +2,21 @@
 $bp = defined('BASE_PATH') ? BASE_PATH : '';
 include __DIR__ . '/../layouts/header.php';
 ?>
-<div class="main-wrapper">
+<link rel="stylesheet" href="<?php echo htmlspecialchars($bp); ?>/public/assets/css/pages/admin-usuarioform.css">
+<div class="main-wrapper shell admin-shell">
 <?php include __DIR__ . '/../layouts/sidebar_admin.php'; ?>
-<main class="main-content">
+<main class="main-content shell-main shell-content">
 
-    <div class="page-header">
+    <header class="page-head mb-4">
         <div>
-            <div class="page-title"><i class="fas fa-user-plus me-2" style="color:var(--primary)"></i>Criar Novo Usuário</div>
-            <div class="page-subtitle">Cadastro manual — selecione o tipo para ver os campos correspondentes</div>
+            <span class="eyebrow">Administração</span>
+            <h1><i class="fas fa-user-plus me-2 usuarioform-icon-accent"></i>Criar Novo Usuário</h1>
+            <p>Cadastro manual — selecione o tipo para ver os campos correspondentes</p>
         </div>
         <a href="<?php echo $bp; ?>/admin/usuarios" class="btn btn-secondary btn-sm">
             <i class="fas fa-arrow-left me-1"></i>Voltar
         </a>
-    </div>
+    </header>
 
     <?php if (isset($_GET['erro'])): ?>
     <div class="alert alert-danger mb-3">
@@ -32,21 +34,22 @@ include __DIR__ . '/../layouts/header.php';
             <div class="card-body">
                 <div class="row g-3">
                     <?php foreach ([
-                        'cliente' => ['fa-user','Cliente','Solicita socorro de guincho','var(--primary)'],
-                        'guincho' => ['fa-truck','Guincheiro','Opera o reboque e aceita pedidos','#f59e0b'],
-                        'admin'   => ['fa-shield-halved','Administrador','Gerencia toda a plataforma','#60a5fa'],
-                    ] as $tipo => [$icon, $label, $desc, $color]): ?>
-                    <div class="col-md-4">
-                        <label class="d-flex gap-3 p-3 rounded border h-100"
-                               style="cursor:pointer;border-color:var(--theme-border)!important;align-items:flex-start"
+                        'cliente'     => ['fa-user','Cliente','Solicita socorro de guincho'],
+                        'guincho'     => ['fa-truck','Guincheiro','Opera o reboque e aceita pedidos'],
+                        'funcionario' => ['fa-headset','Funcionário','Atendimento financeiro/operacional — só cria demandas, nunca executa direto'],
+                        'gerente'     => ['fa-user-tie','Gerente','Aprova ou rejeita as demandas criadas por funcionários'],
+                        'admin'       => ['fa-shield-halved','Administrador','Gerencia toda a plataforma (inclusive configuração técnica)'],
+                    ] as $tipo => [$icon, $label, $desc]): ?>
+                    <div class="col-md-4 col-lg-2">
+                        <label class="d-flex gap-3 p-3 rounded border h-100 usuarioform-type-label"
                                id="label_<?php echo $tipo; ?>">
                             <input type="radio" name="tipo" value="<?php echo $tipo; ?>"
-                                   onchange="mudarTipo('<?php echo $tipo; ?>')"
-                                   <?php echo $tipo === 'cliente' ? 'checked' : ''; ?> style="margin-top:.2rem">
+                                   data-user-type-radio="<?php echo $tipo; ?>"
+                                   <?php echo $tipo === 'cliente' ? 'checked' : ''; ?> class="usuarioform-type-radio">
                             <div>
-                                <i class="fas <?php echo $icon; ?> mb-1" style="color:<?php echo $color; ?>"></i>
-                                <div style="font-weight:600"><?php echo $label; ?></div>
-                                <div style="font-size:.78rem;color:var(--theme-muted)"><?php echo $desc; ?></div>
+                                <i class="fas <?php echo $icon; ?> mb-1 usuarioform-type-icon--<?php echo $tipo; ?>"></i>
+                                <div class="usuarioform-type-title"><?php echo $label; ?></div>
+                                <div class="usuarioform-type-desc"><?php echo $desc; ?></div>
                             </div>
                         </label>
                     </div>
@@ -85,12 +88,12 @@ include __DIR__ . '/../layouts/header.php';
                     <div class="col-md-6">
                         <label class="form-label">Senha *</label>
                         <input type="password" class="form-control" name="senha" id="senhaInput"
-                               minlength="6" required placeholder="Mínimo 6 caracteres">
+                               minlength="8" required placeholder="Mínimo 8 caracteres">
                     </div>
                     <div class="col-md-6">
                         <label class="form-label">Confirmar Senha *</label>
                         <input type="password" class="form-control" name="confirmar_senha" id="confirmarSenha" required>
-                        <div id="senhaFeedback" class="small mt-1" style="color:var(--theme-muted)"></div>
+                        <div id="senhaFeedback" class="small mt-1 usuarioform-senha-feedback"></div>
                     </div>
                 </div>
             </div>
@@ -98,18 +101,18 @@ include __DIR__ . '/../layouts/header.php';
 
         <!-- Campos extras de GUINCHO -->
         <div id="camposGuincho" style="display:none">
-            <div class="card mb-4" style="border-left:3px solid #f59e0b">
-                <div class="card-header" style="background:rgba(245,158,11,.08)">
-                    <i class="fas fa-truck me-2" style="color:#f59e0b"></i>Dados do Guincheiro
-                    <span class="badge ms-2" style="background:#f59e0b;color:#000">Obrigatório para tipo Guincho</span>
+            <div class="card mb-4 usuarioform-guincho-card">
+                <div class="card-header usuarioform-guincho-header">
+                    <i class="fas fa-truck me-2 usuarioform-guincho-icon"></i>Dados do Guincheiro
+                    <span class="badge ms-2 usuarioform-guincho-badge">Obrigatório para tipo Guincho</span>
                 </div>
                 <div class="card-body">
                     <div class="row g-3">
                         <div class="col-md-6">
                             <label class="form-label">Placa do Reboque *</label>
-                            <input type="text" class="form-control" name="placa_guincho" id="placaGuincho"
+                            <input type="text" class="form-control text-uppercase" name="placa_guincho" id="placaGuincho"
                                    value="<?php echo htmlspecialchars($_POST['placa_guincho'] ?? ''); ?>"
-                                   placeholder="ABC1D23" style="text-transform:uppercase">
+                                   placeholder="ABC1D23">
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Capacidade (ton)</label>
@@ -142,25 +145,25 @@ include __DIR__ . '/../layouts/header.php';
                         </div>
                     </div>
 
-                    <div class="mt-3 pt-3" style="border-top:1px solid rgba(47,179,74,.15)">
-                        <div style="font-size:.72rem;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:#f59e0b;margin-bottom:.75rem">
+                    <div class="mt-3 pt-3 usuarioform-doc-divider">
+                        <div class="usuarioform-doc-label">
                             <i class="fas fa-file-alt me-2"></i>Documentos (opcional)
                         </div>
                         <div class="row g-3">
                             <div class="col-md-4">
-                                <label class="form-label" style="font-size:.82rem">CNH — Frente</label>
+                                <label class="form-label usuarioform-doc-file-label">CNH — Frente</label>
                                 <input type="file" class="form-control form-control-sm" name="doc_cnh_frente" accept="image/*,.pdf">
                             </div>
                             <div class="col-md-4">
-                                <label class="form-label" style="font-size:.82rem">CNH — Verso</label>
+                                <label class="form-label usuarioform-doc-file-label">CNH — Verso</label>
                                 <input type="file" class="form-control form-control-sm" name="doc_cnh_verso" accept="image/*,.pdf">
                             </div>
                             <div class="col-md-4">
-                                <label class="form-label" style="font-size:.82rem">Foto do Veículo</label>
+                                <label class="form-label usuarioform-doc-file-label">Foto do Veículo</label>
                                 <input type="file" class="form-control form-control-sm" name="foto_veiculo" accept="image/*">
                             </div>
                         </div>
-                        <div class="small mt-1" style="color:var(--theme-muted)">Formatos: JPG, PNG, PDF. Máx. 5MB cada.</div>
+                        <div class="small mt-1 usuarioform-doc-hint">Formatos: JPG, PNG, PDF. Máx. 5MB cada.</div>
                     </div>
                 </div>
             </div>
@@ -173,10 +176,10 @@ include __DIR__ . '/../layouts/header.php';
 
 </main>
 <?php include __DIR__ . '/../layouts/footer.php'; ?>
-<script>
+<script<?php echo csp_script_nonce_attr(); ?>>
 function mudarTipo(tipo) {
     // Highlight selecionado
-    ['cliente','guincho','admin'].forEach(t => {
+    ['cliente','guincho','funcionario','gerente','admin'].forEach(t => {
         const lbl = document.getElementById('label_' + t);
         lbl.style.borderColor = t === tipo ? 'var(--primary)' : 'var(--theme-border)';
         lbl.style.background  = t === tipo ? 'rgba(47,179,74,.08)' : '';
@@ -189,12 +192,18 @@ function mudarTipo(tipo) {
     document.getElementById('placaGuincho').required = tipo === 'guincho';
 
     // Atualizar botão
-    const labels = {cliente:'Criar Cliente', guincho:'Criar Guincheiro', admin:'Criar Administrador'};
+    const labels = {cliente:'Criar Cliente', guincho:'Criar Guincheiro', funcionario:'Criar Funcionário', gerente:'Criar Gerente', admin:'Criar Administrador'};
     document.getElementById('btnLabel').textContent = labels[tipo] || 'Criar Usuário';
 }
 
-// Inicializar
-mudarTipo('cliente');
+document.querySelectorAll('[data-user-type-radio]').forEach(function (input) {
+    input.addEventListener('change', function () {
+        mudarTipo(this.value);
+    });
+});
+
+const selectedTipo = document.querySelector('[data-user-type-radio]:checked');
+mudarTipo(selectedTipo ? selectedTipo.value : 'cliente');
 
 // Senha
 document.getElementById('confirmarSenha').addEventListener('input', function() {

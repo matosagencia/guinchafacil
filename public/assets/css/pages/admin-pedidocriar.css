@@ -1,0 +1,116 @@
+/* ============================================================
+   GuinchaFácil — Criar Pedido de Socorro (admin/pedidocriar.php)
+   Substitui os style="" pontuais da view (gate visual do Nível 2).
+   ============================================================ */
+
+body.admin .pedidocriar-icon-accent { color: var(--primary); }
+
+body.admin .pedidocriar-btn-criar { font-size: 1.05rem; }
+
+body.admin .pedidocriar-sugestoes-box {
+  z-index: 999;
+  top: 100%;
+  left: 0;
+  display: none;
+  background: var(--theme-card);
+  border: 1px solid var(--theme-border);
+  max-height: 240px;
+  overflow-y: auto;
+}
+
+body.admin .pedidocriar-cliente-selecionado {
+  background: rgba(47, 179, 74, .1);
+  border: 1px solid rgba(47, 179, 74, .3);
+}
+
+body.admin .pedidocriar-problema-label {
+  cursor: pointer;
+  border-color: var(--theme-border) !important;
+}
+
+body.admin .pedidocriar-problema-text { font-size: .88rem; }
+
+body.admin .pedidocriar-coord-badge {
+  display: none;
+  background: var(--primary);
+}
+
+body.admin .pedidocriar-oficinas-label {
+  font-size: .78rem;
+  color: var(--theme-muted);
+  margin-bottom: .4rem;
+}
+
+body.admin .pedidocriar-oficinas-icon { color: #f59e0b; }
+
+body.admin .pedidocriar-readonly-bg { background: var(--theme-surface2); }
+
+body.admin .pedidocriar-hint { color: var(--theme-muted); }
+
+body.admin .pedidocriar-map-card {
+  position: sticky;
+  top: 80px;
+}
+
+body.admin .pedidocriar-map {
+  height: 460px;
+  border-radius: 0;
+}
+
+body.admin .pedidocriar-btn-origem {
+  background: rgba(47, 179, 74, .15);
+  color: var(--primary);
+  border: 1px solid rgba(47, 179, 74, .3);
+}
+
+body.admin .pedidocriar-btn-destino {
+  background: rgba(239, 68, 68, .1);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, .3);
+}
+
+/* ---- Gerado via JS (marcadores Leaflet e listas AJAX) ---- */
+body.admin .pedidocriar-pin-origem {
+  background: #2fb34a;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 3px solid #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, .4);
+}
+
+body.admin .pedidocriar-pin-destino {
+  background: #ef4444;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 3px solid #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, .4);
+}
+
+body.admin .pedidocriar-sugestao-vazia {
+  padding: .75rem;
+  color: var(--theme-muted);
+  font-size: .85rem;
+}
+
+body.admin .sugestao-item {
+  padding: .65rem 1rem;
+  cursor: pointer;
+  border-bottom: 1px solid var(--theme-border);
+  font-size: .9rem;
+}
+
+body.admin .sugestao-item:hover { background: var(--theme-surface2); }
+
+body.admin .pedidocriar-sugestao-email {
+  color: var(--theme-muted);
+  font-size: .8rem;
+}
+
+body.admin .pedidocriar-oficina-btn {
+  background: rgba(245, 158, 11, .1);
+  color: #f59e0b;
+  border: 1px solid rgba(245, 158, 11, .3);
+  font-size: .78rem;
+}

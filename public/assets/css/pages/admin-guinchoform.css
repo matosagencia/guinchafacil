@@ -1,0 +1,40 @@
+/* ============================================================
+   GuinchaFácil — Cadastrar Guincheiro (admin/guinchoform.php)
+   Substitui os style="" pontuais da view (gate visual do Nível 2).
+   ============================================================ */
+
+body.admin .guinchoform-icon-accent { color: var(--primary); }
+
+body.admin .guinchoform-hint { color: var(--theme-muted); }
+
+body.admin .guinchoform-aprovado-label {
+  cursor: pointer;
+  border-color: var(--theme-border) !important;
+}
+
+body.admin .guinchoform-aprovado-checkbox {
+  width: 20px;
+  height: 20px;
+}
+
+body.admin .guinchoform-aprovado-title { font-weight: 600; }
+
+body.admin .guinchoform-aprovado-desc {
+  font-size: .82rem;
+  color: var(--theme-muted);
+}
+
+body.admin .guinchoform-submit { font-size: 1.05rem; }
+
+/* Preview de arquivo gerado via JS */
+body.admin .guinchoform-preview-img {
+  max-width: 100%;
+  max-height: 150px;
+  border-radius: 8px;
+  border: 1px solid var(--theme-border);
+}
+
+body.admin .guinchoform-preview-pdf {
+  font-size: .82rem;
+  color: var(--primary);
+}

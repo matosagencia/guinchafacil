@@ -1,0 +1,368 @@
+/* GuinchaFácil — camada visual compartilhada do painel admin clássico.
+   Aditivo ao legado: só é carregado para body.admin e não altera estrutura.
+*/
+body.admin .main-wrapper:not(.shell-ops) {
+  display: grid;
+  grid-template-columns: var(--sidebar-width) minmax(0, 1fr);
+  min-height: calc(100vh - var(--topbar-height));
+  background: var(--theme-bg);
+}
+body.admin .admin-shell {
+  display: grid;
+  grid-template-columns: var(--sidebar-width) minmax(0, 1fr);
+  min-height: calc(100vh - var(--topbar-height));
+  background: var(--theme-bg);
+}
+body.admin .admin-shell > .admin-shell-sidebar { grid-column: 1; }
+body.admin .admin-shell > .shell-main { grid-column: 2; min-width: 0; }
+
+body.admin .sidebar {
+  width: var(--sidebar-width);
+  padding: 10px 10px 24px;
+  background: var(--theme-sidebar);
+  border-right: 1px solid var(--theme-border);
+  box-shadow: none;
+}
+body.admin .sidebar--ops {
+  padding: 0 0 24px;
+  overflow-y: auto;
+}
+body.admin .sidebar--ops .ops-nav { padding: 10px 10px 0; }
+body.admin .sidebar--ops .ops-nav-section { padding-left: 10px; padding-right: 10px; }
+body.admin .sidebar--ops .ops-nav-link { margin-left: 0; margin-right: 0; }
+body.admin .sidebar--ops .sidebar-sep { margin: 12px 20px; }
+body.admin .sidebar--ops .sidebar-preview { padding: 0 20px; }
+body.admin .sidebar--ops .sidebar-section-header {
+  padding: 10px 12px 8px;
+  color: var(--theme-muted);
+  font-size: .68rem;
+  font-weight: 800;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+body.admin .sidebar--ops .sidebar-link-preview { margin: 0 -8px 2px; }
+body.admin .sidebar--ops .sidebar-preview-badge {
+  margin-left: auto;
+  padding: 2px 5px;
+  border: 1px solid color-mix(in srgb, var(--brand) 45%, transparent);
+  border-radius: 999px;
+  color: var(--brand);
+  font-size: .55rem;
+  font-weight: 800;
+}
+body.admin .sidebar-title {
+  margin: 16px 10px 6px;
+  padding: 0 10px 8px;
+  color: var(--theme-muted);
+  font-size: .66rem;
+  font-weight: 800;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+body.admin .sidebar-link {
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-height: 40px;
+  margin: 0 0 2px;
+  padding: 0 12px;
+  gap: 10px;
+  border-radius: var(--radius-xs);
+  color: var(--theme-muted);
+  background: transparent;
+  font-size: .86rem;
+  text-decoration: none;
+  transition: background var(--transition), color var(--transition), transform var(--transition);
+}
+body.admin .sidebar-link i { width: 18px; text-align: center; font-size: .88rem; }
+body.admin .sidebar-link:hover {
+  color: var(--theme-text);
+  background: color-mix(in srgb, var(--theme-text) 6%, transparent);
+  transform: translateX(1px);
+}
+body.admin .sidebar-link.active {
+  color: var(--brand);
+  background: color-mix(in srgb, var(--brand) 14%, transparent);
+  font-weight: 650;
+}
+body.admin .sidebar-link.active::before {
+  content: '';
+  position: absolute;
+  top: 6px; bottom: 6px; left: -10px;
+  width: 3px;
+  border-radius: 0 3px 3px 0;
+  background: var(--brand);
+}
+body.admin .sidebar-sep { border-color: var(--theme-border); }
+
+body.admin .main-content {
+  min-width: 0;
+  padding: 28px clamp(18px, 3vw, 40px) 48px;
+  background: var(--theme-bg);
+  color: var(--theme-text);
+}
+body.admin .admin-dashboard-topbar {
+  margin: -28px clamp(-40px, -3vw, -18px) 28px;
+  padding: 10px 24px;
+  border-bottom: 1px solid var(--theme-border);
+  background: var(--theme-nav);
+}
+body.admin .admin-dashboard-topbar .ops-dashboard-link {
+  color: var(--brand);
+  font-size: .78rem;
+  font-weight: 750;
+  text-decoration: none;
+}
+body.admin .admin-dashboard-topbar .ops-dashboard-link:hover { color: var(--theme-text); }
+body.admin .main-wrapper:not(.shell-ops) > .sidebar {
+  position: sticky;
+  top: var(--topbar-height);
+  align-self: start;
+  height: calc(100vh - var(--topbar-height));
+  overflow-y: auto;
+}
+body.admin .page-head {
+  border-bottom-color: var(--theme-border);
+}
+body.admin .page-head h1,
+body.admin .page-head h2,
+body.admin .page-head h3 { color: var(--theme-text); }
+body.admin .page-head p,
+body.admin .eyebrow { color: var(--theme-muted); }
+
+body.admin .main-content .card {
+  color: var(--theme-text);
+  background: var(--theme-surface);
+  border: 1px solid var(--theme-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
+}
+body.admin .main-content .card-header,
+body.admin .main-content .card-footer {
+  color: var(--theme-text);
+  background: color-mix(in srgb, var(--theme-surface-2) 72%, transparent);
+  border-color: var(--theme-border);
+}
+body.admin .main-content .table {
+  --bs-table-bg: transparent;
+  --bs-table-color: var(--theme-text);
+  --bs-table-border-color: var(--theme-border);
+  margin-bottom: 0;
+}
+body.admin .main-content .table thead th {
+  color: var(--theme-muted);
+  background: var(--theme-surface-2);
+  border-bottom-color: var(--theme-border);
+  font-size: .72rem;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+}
+body.admin .main-content .table-hover > tbody > tr:hover > * {
+  --bs-table-accent-bg: color-mix(in srgb, var(--brand) 6%, transparent);
+  color: var(--theme-text);
+}
+body.admin .main-content .form-control,
+body.admin .main-content .form-select {
+  color: var(--theme-text);
+  background-color: var(--theme-surface-2);
+  border-color: var(--theme-border);
+  border-radius: var(--radius-xs);
+}
+body.admin .main-content .form-control::placeholder { color: var(--theme-muted); }
+body.admin .main-content .form-control:focus,
+body.admin .main-content .form-select:focus {
+  color: var(--theme-text);
+  background-color: var(--theme-surface-2);
+  border-color: var(--brand);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--brand) 22%, transparent);
+}
+body.admin .main-content .btn { border-radius: var(--radius-xs); font-weight: 650; }
+body.admin .main-content .btn-primary { background: var(--brand); border-color: var(--brand); color: var(--theme-on-accent); }
+body.admin .main-content .btn-primary:hover { background: var(--brand-dark); border-color: var(--brand-dark); }
+body.admin .main-content .alert { border-radius: var(--radius-sm); border-color: var(--theme-border); }
+body.admin .main-content .text-muted { color: var(--theme-muted) !important; }
+
+/* Acabamento transversal das telas legadas, alinhado ao painel Central. */
+body.admin .navbar {
+  min-height: var(--topbar-height);
+  background: var(--theme-nav) !important;
+  border-bottom: 1px solid var(--theme-border);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, .18);
+}
+body.admin .navbar .navbar-brand,
+body.admin .navbar .nav-link { color: var(--theme-text); }
+body.admin .navbar .navbar-brand { font-weight: 800; letter-spacing: -.02em; }
+body.admin .navbar .nav-link:hover { color: var(--brand); }
+body.admin .navbar .dropdown-menu {
+  background: var(--theme-surface);
+  border: 1px solid var(--theme-border);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-float);
+}
+body.admin .navbar .dropdown-item { color: var(--theme-text); }
+body.admin .navbar .dropdown-item:hover { color: var(--theme-text); background: color-mix(in srgb, var(--brand) 12%, transparent); }
+
+body.admin .main-content > .row,
+body.admin .main-content > .container,
+body.admin .main-content > .container-fluid { max-width: var(--content-max); }
+body.admin .main-content .card-body { color: var(--theme-text); }
+body.admin .main-content .card-title,
+body.admin .main-content .card h1,
+body.admin .main-content .card h2,
+body.admin .main-content .card h3,
+body.admin .main-content .card h4,
+body.admin .main-content .card h5 { color: var(--theme-text); }
+body.admin .main-content .border,
+body.admin .main-content .border-top,
+body.admin .main-content .border-bottom,
+body.admin .main-content .border-start,
+body.admin .main-content .border-end { border-color: var(--theme-border) !important; }
+body.admin .main-content hr { border-color: var(--theme-border); opacity: 1; }
+
+body.admin .main-content .form-label {
+  color: var(--theme-muted);
+  font-size: .76rem;
+  font-weight: 700;
+  letter-spacing: .02em;
+}
+body.admin .main-content input[type="checkbox"],
+body.admin .main-content input[type="radio"] { accent-color: var(--brand); }
+body.admin .main-content .input-group-text {
+  color: var(--theme-muted);
+  background: var(--theme-surface-2);
+  border-color: var(--theme-border);
+}
+body.admin .main-content .btn-outline-primary { color: var(--brand); border-color: color-mix(in srgb, var(--brand) 55%, var(--theme-border)); }
+body.admin .main-content .btn-outline-primary:hover { color: var(--theme-on-accent); background: var(--brand); border-color: var(--brand); }
+body.admin .main-content .btn-secondary,
+body.admin .main-content .btn-outline-secondary { color: var(--theme-text); background: var(--theme-surface-2); border-color: var(--theme-border); }
+body.admin .main-content .btn-secondary:hover,
+body.admin .main-content .btn-outline-secondary:hover { background: color-mix(in srgb, var(--theme-text) 12%, var(--theme-surface-2)); border-color: var(--theme-muted); }
+
+body.admin .main-content .alert {
+  color: var(--theme-text);
+  background: var(--theme-surface-2);
+}
+body.admin .main-content .alert-success { border-left: 3px solid var(--success); }
+body.admin .main-content .alert-warning { border-left: 3px solid var(--warning); }
+body.admin .main-content .alert-danger { border-left: 3px solid var(--danger); }
+body.admin .main-content .alert-info { border-left: 3px solid var(--info); }
+
+body.admin .main-content .badge:not([class*="text-bg-"]) {
+  border: 1px solid color-mix(in srgb, currentColor 22%, transparent);
+  border-radius: var(--radius-pill);
+  font-weight: 750;
+}
+body.admin .main-content .pagination .page-link {
+  color: var(--theme-muted);
+  background: var(--theme-surface);
+  border-color: var(--theme-border);
+}
+body.admin .main-content .pagination .page-link:hover,
+body.admin .main-content .pagination .active .page-link { color: var(--theme-on-accent); background: var(--brand); border-color: var(--brand); }
+body.admin .main-content .list-group-item {
+  color: var(--theme-text);
+  background: var(--theme-surface);
+  border-color: var(--theme-border);
+}
+body.admin .main-content .modal-content {
+  color: var(--theme-text);
+  background: var(--theme-surface);
+  border: 1px solid var(--theme-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-float);
+}
+body.admin .main-content .modal-header,
+body.admin .main-content .modal-footer { border-color: var(--theme-border); }
+body.admin .main-content .modal .btn-close { filter: invert(1) grayscale(1); }
+body.admin .main-content .table-responsive { border-radius: var(--radius-sm); }
+body.admin .main-content .table td,
+body.admin .main-content .table th { vertical-align: middle; }
+
+@media (max-width: 767.98px) {
+  body.admin .navbar { min-height: var(--mobile-topbar-height); }
+  body.admin .main-content .page-head { gap: 12px; align-items: flex-start; }
+  body.admin .main-content .page-head h1 { font-size: 1.35rem; }
+  body.admin .main-content .table { min-width: 680px; }
+  body.admin .main-content .table-responsive { overflow-x: auto; }
+  body.admin .admin-dashboard-topbar { margin: -22px -16px 22px; padding: 10px 16px; }
+}
+
+@media (max-width: 991.98px) {
+  body.admin .main-wrapper:not(.shell-ops),
+  body.admin .admin-shell { grid-template-columns: 1fr; }
+  body.admin .admin-shell > .shell-main { grid-column: 1; }
+  body.admin .main-content { padding: 22px 16px 36px; }
+  body.admin .sidebar { display: none; }
+}
+
+/* ─── Faixa de métricas (KPI) ────────────────────────────────
+   Mesma receita visual do .ops-summary/.ops-metric da Central Operacional:
+   uma única faixa com bordas finas entre células, ao invés de vários
+   cards soltos do Bootstrap — pedido do usuário de unificar o estilo
+   visual do restante do admin com o da Central. Uso:
+   <div class="stat-grid">
+     <div class="stat-grid__item"><span class="stat-grid__label">Label</span>
+       <strong class="stat-grid__value">R$ 0,00</strong></div>
+   </div>
+   Modificadores: .stat-grid__item.is-danger / .is-warning / .is-success
+   colorem o valor (equivalente a .ops-metric.is-danger etc). */
+body.admin .stat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 1px;
+  background: var(--theme-border);
+  border: 1px solid var(--theme-border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+body.admin .stat-grid__item {
+  min-width: 0;
+  padding: 14px 16px;
+  background: var(--theme-surface);
+}
+body.admin .stat-grid__label {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--theme-muted);
+  font-size: .7rem;
+  font-weight: 700;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+body.admin .stat-grid__value {
+  display: block;
+  color: var(--theme-text);
+  font-size: 1.5rem;
+  font-weight: 800;
+  line-height: 1.15;
+}
+body.admin .stat-grid__hint {
+  display: block;
+  margin-top: 6px;
+  color: var(--theme-muted);
+  font-size: .72rem;
+}
+body.admin .stat-grid__item.is-warning .stat-grid__value { color: var(--warning); }
+body.admin .stat-grid__item.is-danger .stat-grid__value { color: var(--danger); }
+body.admin .stat-grid__item.is-success .stat-grid__value { color: var(--success); }
+
+/* Barra de rolagem fininha/discreta da sidebar (o navegador desenha uma
+   barra padrão grossa e clara quando a lista de itens excede a altura da
+   tela — chamativa demais sobre o tema escuro, destoando dos mockups de
+   referência). Firefox usa scrollbar-width/scrollbar-color; Chrome/Edge/
+   Safari usam os seletores ::-webkit-scrollbar-*. Mantém o scroll
+   funcional, só troca a aparência. */
+body.admin .sidebar {
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--theme-text) 25%, transparent) transparent;
+}
+body.admin .sidebar::-webkit-scrollbar { width: 6px; }
+body.admin .sidebar::-webkit-scrollbar-track { background: transparent; }
+body.admin .sidebar::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--theme-text) 22%, transparent);
+  border-radius: 999px;
+}
+body.admin .sidebar::-webkit-scrollbar-thumb:hover {
+  background: color-mix(in srgb, var(--theme-text) 34%, transparent);
+}

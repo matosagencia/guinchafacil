@@ -1,0 +1,22 @@
+/* ============================================================
+   GuinchaFácil — Tema Admin (preto/denso) — Pacote L2.1
+   Fonte de VALORES: doc/PROTOTIPO_VISUAL_PERFIS_GUINCHAFACIL.html
+   (perfil "admin"/preto, mockup aprovado).
+
+   Aditivo a style.css (tema padrão do body, usado hoje para o
+   perfil admin, mantido intacto).
+   ============================================================ */
+
+body.admin {
+  --theme-bg: #07090c;
+  --theme-surface: #11151a;
+  --theme-surface-2: #171d24;
+  --theme-border: #29313a;
+  --theme-text: #f7f9fb;
+  --theme-muted: #a6b0ba;
+  --theme-accent: #2fb34a;
+  --theme-accent-hover: #42d564;
+  --theme-on-accent: #051208;
+  --theme-nav: #030405;
+  --theme-sidebar: #0a0d10;
+}

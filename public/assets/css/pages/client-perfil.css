@@ -1,0 +1,197 @@
+/* ============================================================
+   GuinchaFácil — Perfil do cliente (cliente/perfil.php)
+   Extraído do <style> inline da view (gate visual do Nível 2).
+   ============================================================ */
+
+body.cliente .profile-shell {
+  position: relative;
+  isolation: isolate;
+}
+
+body.cliente .profile-shell::before,
+body.cliente .profile-shell::after {
+  content: "";
+  position: absolute;
+  inset: auto;
+  width: 320px;
+  height: 320px;
+  border-radius: 999px;
+  filter: blur(80px);
+  opacity: .16;
+  pointer-events: none;
+  z-index: -1;
+}
+
+body.cliente .profile-shell::before {
+  top: -60px;
+  left: -40px;
+  background: rgba(47, 179, 74, .35);
+}
+
+body.cliente .profile-shell::after {
+  top: 120px;
+  right: -80px;
+  background: rgba(245, 158, 11, .28);
+}
+
+body.cliente .profile-hero,
+body.cliente .profile-card {
+  border: 1px solid rgba(15, 23, 42, .06);
+  border-radius: 28px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, .98), rgba(255, 255, 255, .92));
+  box-shadow: 0 28px 80px rgba(15, 23, 42, .08);
+}
+
+body.cliente .profile-hero {
+  overflow: hidden;
+}
+
+body.cliente .profile-hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at top left, rgba(47, 179, 74, .16), transparent 34%),
+    radial-gradient(circle at top right, rgba(245, 158, 11, .16), transparent 32%),
+    linear-gradient(135deg, rgba(255, 255, 255, .92), rgba(255, 255, 255, .8));
+  pointer-events: none;
+}
+
+body.cliente .profile-hero > * {
+  position: relative;
+}
+
+body.cliente .profile-avatar {
+  width: 88px;
+  height: 88px;
+  border-radius: 28px;
+  display: grid;
+  place-items: center;
+  font-size: 1.65rem;
+  font-weight: 800;
+  color: #fff;
+  background: linear-gradient(135deg, var(--primary), #198754);
+  box-shadow: 0 16px 32px rgba(47, 179, 74, .24);
+}
+
+body.cliente .profile-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: .45rem;
+  padding: .65rem .95rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, .72);
+  border: 1px solid rgba(15, 23, 42, .08);
+  color: var(--theme-text, #1f2937);
+  font-size: .86rem;
+  font-weight: 600;
+}
+
+body.cliente .profile-chip i {
+  color: var(--primary);
+}
+
+body.cliente .profile-meta {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+body.cliente .profile-meta-card {
+  padding: 1rem 1.1rem;
+  border-radius: 22px;
+  background: rgba(255, 255, 255, .78);
+  border: 1px solid rgba(15, 23, 42, .08);
+}
+
+body.cliente .profile-meta-card .label {
+  display: block;
+  color: var(--theme-muted);
+  font-size: .8rem;
+  margin-bottom: .35rem;
+}
+
+body.cliente .profile-meta-card .value {
+  font-weight: 700;
+  color: var(--theme-text, #111827);
+}
+
+body.cliente .profile-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.35rem;
+}
+
+body.cliente .profile-card-title {
+  font-size: 1.08rem;
+  font-weight: 800;
+  margin: 0;
+}
+
+body.cliente .profile-card-subtitle {
+  margin: .25rem 0 0;
+  color: var(--theme-muted);
+  font-size: .9rem;
+}
+
+body.cliente .profile-pane {
+  padding: 1.35rem;
+  border-radius: 22px;
+  background: rgba(248, 250, 252, .82);
+  border: 1px solid rgba(15, 23, 42, .06);
+}
+
+body.cliente .profile-pane + .profile-pane {
+  margin-top: 1rem;
+}
+
+body.cliente .profile-form .form-label {
+  font-weight: 700;
+  color: var(--theme-text, #111827);
+}
+
+body.cliente .profile-form .form-control,
+body.cliente .profile-form .form-select {
+  min-height: 52px;
+  border-radius: 16px;
+  border-color: rgba(15, 23, 42, .1);
+  background: rgba(255, 255, 255, .92);
+}
+
+body.cliente .profile-form .form-control:disabled {
+  background: rgba(241, 245, 249, .92);
+}
+
+body.cliente .profile-note {
+  padding: 1rem 1.1rem;
+  border-radius: 18px;
+  background: linear-gradient(135deg, rgba(47, 179, 74, .1), rgba(245, 158, 11, .08));
+  border: 1px solid rgba(47, 179, 74, .12);
+  color: var(--theme-text, #1f2937);
+}
+
+body.cliente .profile-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+@media (max-width: 991.98px) {
+  body.cliente .profile-meta {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ---------- Substitui os style="" pontuais da view ---------- */
+body.cliente .profile-hero-title {
+  font-size: 2rem;
+  font-weight: 800;
+}
+
+body.cliente .profile-summary-row {
+  background: rgba(255, 255, 255, .88);
+  border: 1px solid rgba(15, 23, 42, .08);
+}

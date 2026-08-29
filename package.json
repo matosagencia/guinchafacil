@@ -1,0 +1,11 @@
+{
+  "dependencies": {
+    "@google/genai": "^2.16.0"
+  },
+  "scripts": {
+    "gemini": "node --dns-result-order=ipv4first gemini.js"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.62.1"
+  }
+}

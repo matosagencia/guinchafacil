@@ -1,0 +1,346 @@
+/* ============================================================
+   GuinchaFácil — Dashboard do cliente (Nível 2, escopo único
+   cliente/dashboard.php), visual alinhado ao protótipo aprovado
+   (doc/PROTOTIPO_VISUAL_PERFIS_GUINCHAFACIL.html, seção "client"):
+   <header class="page-head">, <section class="client-hero hero">
+   com chips + brand-mark, e o service-grid de atalhos rápidos.
+   ============================================================ */
+
+/* ---------- Cabeçalho da página ---------- */
+body.cliente .page-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+body.cliente .page-head .eyebrow {
+  display: block;
+  font-size: .72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  color: var(--theme-accent);
+  margin-bottom: var(--space-1);
+}
+
+body.cliente .page-head h1 {
+  margin: 0 0 var(--space-1);
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: var(--theme-text);
+}
+
+body.cliente .page-head p {
+  margin: 0;
+  color: var(--theme-muted);
+  font-size: .92rem;
+}
+
+/* ---------- Card "Onde está o veículo?" ---------- */
+body.cliente .client-rescue-card {
+  padding: 24px 28px;
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+  background: var(--theme-surface);
+  border: 1px solid var(--theme-border);
+  box-shadow: var(--shadow-card);
+  border-radius: var(--radius-lg);
+}
+
+body.cliente .client-rescue-copy {
+  flex: 0 0 260px;
+}
+
+body.cliente .client-rescue-card .quick-rescue__row {
+  flex: 1 1 320px;
+}
+
+@media (max-width: 720px) {
+  body.cliente .client-rescue-card {
+    padding: 20px;
+    flex-direction: column;
+    align-items: stretch;
+  }
+  body.cliente .client-rescue-copy {
+    flex-basis: auto;
+  }
+}
+
+/* ---------- Hero (saudação + nome + chips) ---------- */
+body.cliente .app-hero.client-hero {
+  padding: 24px 28px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--theme-surface) 92%, var(--theme-accent) 8%), var(--theme-surface));
+  border: 1px solid var(--theme-border);
+  box-shadow: var(--shadow-float);
+  border-radius: var(--radius-lg);
+}
+
+body.cliente .app-hero.client-hero::before {
+  content: none;
+}
+
+@media (max-width: 720px) {
+  body.cliente .app-hero.client-hero {
+    padding: 22px;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+body.cliente .client-hero-eyebrow {
+  display: block;
+  font-size: .72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  color: var(--theme-accent);
+  margin-bottom: var(--space-1);
+}
+
+body.cliente .client-hero-title {
+  margin: 0 0 var(--space-2);
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--theme-text);
+}
+
+body.cliente .client-hero-subtitle {
+  margin: 0 0 var(--space-3);
+  color: var(--theme-muted);
+  font-size: .95rem;
+}
+
+body.cliente .client-hero-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+body.cliente .client-chip {
+  padding: var(--space-1) var(--space-3);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--theme-accent) 12%, transparent);
+  color: var(--theme-accent);
+  font-size: .78rem;
+  font-weight: 700;
+}
+
+body.cliente .client-hero-mark {
+  flex-shrink: 0;
+  width: 76px;
+  height: 76px;
+  border-radius: 24px;
+  display: grid;
+  place-items: center;
+  font-size: 1.5rem;
+  background: var(--theme-accent);
+  color: #fff;
+  text-decoration: none;
+  transition: transform var(--transition);
+}
+
+body.cliente .client-hero-mark:hover {
+  transform: translateY(-2px);
+}
+
+/* ---------- Atalhos rápidos (Reboque, Bateria, Pneu, Pane seca, Agendar) ---------- */
+body.cliente .client-service-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+
+@media (max-width: 992px) {
+  body.cliente .client-service-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 576px) {
+  body.cliente .client-service-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+body.cliente .client-service-tile {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-4);
+  border-radius: var(--radius-lg);
+  background: var(--theme-surface);
+  border: 1px solid var(--theme-border);
+  box-shadow: var(--shadow-card);
+  color: var(--theme-text);
+  text-decoration: none;
+  transition: transform var(--transition), box-shadow var(--transition);
+}
+
+body.cliente .client-service-tile:hover {
+  transform: translateY(-2px);
+  color: var(--theme-text);
+}
+
+body.cliente .client-service-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: var(--radius-control);
+  display: grid;
+  place-items: center;
+  font-size: 1.05rem;
+  margin-bottom: var(--space-1);
+}
+
+/* Cada atalho tem sua própria cor de destaque, como no protótipo
+   (cada card de serviço tem um tom pastel diferente por trás do ícone). */
+body.cliente .client-service-icon--tow {
+  background: #dcf5e0;
+  color: #1f8a36;
+}
+
+body.cliente .client-service-icon--battery {
+  background: #fdf1d8;
+  color: #b4790c;
+}
+
+body.cliente .client-service-icon--tire {
+  background: #e2ebff;
+  color: #2d5bd1;
+}
+
+body.cliente .client-service-icon--fuel {
+  background: #fdeadb;
+  color: #c05f16;
+}
+
+body.cliente .client-service-icon--schedule {
+  background: #dcf5e0;
+  color: #1f8a36;
+}
+
+body.cliente .client-service-tile strong {
+  font-size: .92rem;
+  font-weight: 800;
+}
+
+body.cliente .client-service-tile span {
+  font-size: .78rem;
+  color: var(--theme-muted);
+}
+
+/* ---------- Atividades recentes ---------- */
+body.cliente .app-status-item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+}
+
+body.cliente .client-activity-icon {
+  flex-shrink: 0;
+  width: 34px;
+  height: 34px;
+  border-radius: var(--radius-control);
+  display: grid;
+  place-items: center;
+  background: color-mix(in srgb, var(--theme-accent) 15%, transparent);
+  color: var(--theme-accent);
+  font-size: .85rem;
+}
+
+body.cliente .client-activity-body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+}
+
+body.cliente .client-activity-body .badge {
+  align-self: flex-start;
+  margin-top: 2px;
+}
+
+/* ---------- Comunicado (carrossel "Novidade") ----------
+   Visual exato pedido: card com gradiente, mínimo de altura,
+   conteúdo alinhado à esquerda e arte decorativa posicionada
+   no canto direito (doc/PROTOTIPO_VISUAL_PERFIS_GUINCHAFACIL.html,
+   regra ".communication"). */
+body.cliente .communication-card {
+  min-height: 176px;
+  padding: 26px 30px;
+  display: flex;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(120deg, #daf6e0 0%, #f8fff9 52%, #dfe9ff 100%);
+  color: #142018;
+  border: 1px solid var(--theme-border);
+  box-shadow: var(--shadow-card);
+}
+
+body.cliente .communication-card__body {
+  position: relative;
+  z-index: 1;
+  padding: 0;
+  max-width: 62%;
+}
+
+body.cliente .communication-card__tag {
+  background: rgba(31, 138, 54, .16);
+  color: #1f8a36;
+}
+
+body.cliente .communication-art {
+  position: absolute;
+  top: 50%;
+  right: 24px;
+  transform: translateY(-50%) rotate(-6deg);
+  width: 140px;
+  height: 100px;
+  border-radius: 24px;
+  background: linear-gradient(135deg, #2fb34a, #7fd996);
+  box-shadow: 0 12px 24px rgba(47, 179, 74, .3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 1.6rem;
+  font-weight: 800;
+}
+
+body.cliente .communication-art::after {
+  content: '24h';
+}
+
+@media (max-width: 991.98px) {
+  body.cliente .communication-art {
+    width: 96px;
+    height: 72px;
+    font-size: 1.15rem;
+    right: 16px;
+  }
+}
+
+@media (max-width: 575.98px) {
+  body.cliente .communication-card {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-3);
+  }
+  body.cliente .communication-card__body {
+    max-width: 100%;
+  }
+  body.cliente .communication-art {
+    position: static;
+    transform: none;
+    width: 100%;
+    height: 64px;
+  }
+}

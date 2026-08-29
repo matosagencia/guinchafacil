@@ -1,0 +1,72 @@
+/* ============================================================
+   GuinchaFácil — Oficinas favoritas (cliente/oficinas.php)
+   Substitui os style="" pontuais da view (gate visual do Nível 2).
+   ============================================================ */
+
+body.cliente .oficina-icon-accent {
+  color: var(--primary);
+}
+
+body.cliente .oficina-card {
+  border-top: 3px solid var(--primary);
+}
+
+body.cliente .oficina-icon {
+  margin: 0;
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  font-size: 1rem;
+}
+
+body.cliente .oficina-nome {
+  font-weight: 700;
+  color: var(--theme-text);
+  margin-bottom: .25rem;
+}
+
+body.cliente .oficina-meta {
+  font-size: .79rem;
+  color: var(--theme-muted);
+}
+
+body.cliente .oficina-meta-mt {
+  font-size: .79rem;
+  color: var(--theme-muted);
+  margin-top: .2rem;
+}
+
+body.cliente .oficina-minimap {
+  height: 120px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--theme-border);
+  background: var(--theme-surf2);
+}
+
+body.cliente .oficina-empty-icon {
+  opacity: .2;
+  color: var(--theme-muted);
+}
+
+body.cliente .oficina-empty-title {
+  color: var(--theme-text);
+  font-weight: 700;
+}
+
+body.cliente .oficina-empty-subtitle {
+  color: var(--theme-muted);
+  font-size: .9rem;
+  max-width: 380px;
+  margin: 0 auto 1.5rem;
+}
+
+/* Pino do minimapa Leaflet (gerado via JS, ver oficinas.php) */
+.oficina-minimap-pin {
+  width: 14px;
+  height: 14px;
+  background: #2fb34a;
+  border-radius: 50%;
+  border: 2.5px solid #fff;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, .4);
+}

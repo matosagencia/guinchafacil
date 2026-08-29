@@ -2,9 +2,10 @@
 $bp = defined('BASE_PATH') ? BASE_PATH : '';
 include __DIR__ . '/../layouts/header.php';
 ?>
-<div class="main-wrapper">
+<link rel="stylesheet" href="<?php echo htmlspecialchars($bp); ?>/public/assets/css/pages/admin-usuariodetalhe.css">
+<div class="main-wrapper shell admin-shell">
 <?php include __DIR__ . '/../layouts/sidebar_admin.php'; ?>
-<main class="main-content">
+<main class="main-content shell-main shell-content">
 
     <?php
     $flash = $_SESSION['_flash'] ?? null;
@@ -16,14 +17,15 @@ include __DIR__ . '/../layouts/header.php';
     </div>
     <?php endif; ?>
 
-    <div class="page-header">
+    <header class="page-head mb-4">
         <div>
-            <div class="page-title">
+            <span class="eyebrow">Administração</span>
+            <h1>
                 <i class="fas fa-user me-2 text-primary-custom"></i>
                 <?php echo htmlspecialchars($usuario['nome']); ?>
                 <span class="badge-perfil <?php echo $usuario['tipo']; ?> ms-2"><?php echo ucfirst($usuario['tipo']); ?></span>
-            </div>
-            <div class="page-subtitle">ID #<?php echo $usuario['id']; ?> &bull; <?php echo htmlspecialchars($usuario['email']); ?></div>
+            </h1>
+            <p>ID #<?php echo $usuario['id']; ?> &bull; <?php echo htmlspecialchars($usuario['email']); ?></p>
         </div>
         <div class="d-flex gap-2 flex-wrap">
             <a href="<?php echo $bp; ?>/admin/usuarios" class="btn btn-secondary btn-sm">
@@ -36,7 +38,7 @@ include __DIR__ . '/../layouts/header.php';
             <form method="POST" action="<?php echo $bp; ?>/admin/usuario/suspender" class="d-inline">
                 <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($csrfToken); ?>">
                 <input type="hidden" name="id" value="<?php echo $usuario['id']; ?>">
-                <button class="btn btn-warning btn-sm" onclick="return confirm('Suspender este usuário?')">
+                <button class="btn btn-warning btn-sm" data-confirm-message="Suspender este usuário?">
                     <i class="fas fa-ban me-1"></i>Suspender
                 </button>
             </form>
@@ -50,7 +52,7 @@ include __DIR__ . '/../layouts/header.php';
             </form>
             <?php endif; ?>
         </div>
-    </div>
+    </header>
 
     <div class="row g-4">
         <!-- Dados do usuário -->
@@ -59,25 +61,25 @@ include __DIR__ . '/../layouts/header.php';
                 <div class="card-header"><i class="fas fa-id-card me-2"></i>Dados do Usuário</div>
                 <div class="card-body">
                     <div class="d-flex align-items-center gap-3 mb-4">
-                        <div class="stat-icon" style="margin:0;width:56px;height:56px;font-size:1.6rem">
+                        <div class="stat-icon usuariodetalhe-stat-icon">
                             <i class="fas fa-<?php echo $usuario['tipo']==='guincho'?'truck':'user'; ?>"></i>
                         </div>
                         <div>
-                            <div style="font-weight:800;font-size:1.1rem;color:var(--theme-text)"><?php echo htmlspecialchars($usuario['nome']); ?></div>
-                            <div style="font-size:.82rem;color:var(--theme-muted)"><?php echo htmlspecialchars($usuario['email']); ?></div>
+                            <div class="usuariodetalhe-nome"><?php echo htmlspecialchars($usuario['nome']); ?></div>
+                            <div class="usuariodetalhe-email"><?php echo htmlspecialchars($usuario['email']); ?></div>
                         </div>
                     </div>
-                    <table class="table table-sm mb-0" style="font-size:.88rem">
-                        <tr><td style="color:var(--theme-muted);width:35%">Telefone</td><td><?php echo htmlspecialchars($usuario['telefone'] ?? '—'); ?></td></tr>
-                        <tr><td style="color:var(--theme-muted)">CPF</td><td><?php echo htmlspecialchars($usuario['cpf'] ?? '—'); ?></td></tr>
-                        <tr><td style="color:var(--theme-muted)">Tipo</td><td><span class="badge-perfil <?php echo $usuario['tipo']; ?>"><?php echo ucfirst($usuario['tipo']); ?></span></td></tr>
-                        <tr><td style="color:var(--theme-muted)">Status</td>
+                    <table class="table table-sm mb-0 usuariodetalhe-table">
+                        <tr><td class="usuariodetalhe-label usuariodetalhe-label--35">Telefone</td><td><?php echo htmlspecialchars($usuario['telefone'] ?? '—'); ?></td></tr>
+                        <tr><td class="usuariodetalhe-label">CPF</td><td><?php echo htmlspecialchars($usuario['cpf'] ?? '—'); ?></td></tr>
+                        <tr><td class="usuariodetalhe-label">Tipo</td><td><span class="badge-perfil <?php echo $usuario['tipo']; ?>"><?php echo ucfirst($usuario['tipo']); ?></span></td></tr>
+                        <tr><td class="usuariodetalhe-label">Status</td>
                             <td><span class="badge <?php echo $usuario['ativo'] ? 'badge-concluido' : 'badge-cancelado'; ?>">
                                 <?php echo $usuario['ativo'] ? 'Ativo' : 'Suspenso'; ?>
                             </span></td>
                         </tr>
-                        <tr><td style="color:var(--theme-muted)">Cadastro</td><td><?php echo date('d/m/Y', strtotime($usuario['criado_em'])); ?></td></tr>
-                        <tr><td style="color:var(--theme-muted)">Último Login</td>
+                        <tr><td class="usuariodetalhe-label">Cadastro</td><td><?php echo date('d/m/Y', strtotime($usuario['criado_em'])); ?></td></tr>
+                        <tr><td class="usuariodetalhe-label">Último Login</td>
                             <td><?php echo $usuario['ultimo_login'] ? date('d/m/Y H:i', strtotime($usuario['ultimo_login'])) : '—'; ?></td>
                         </tr>
                     </table>
@@ -88,22 +90,22 @@ include __DIR__ . '/../layouts/header.php';
             <div class="card">
                 <div class="card-header"><i class="fas fa-truck me-2"></i>Dados do Guincho</div>
                 <div class="card-body">
-                    <table class="table table-sm mb-0" style="font-size:.88rem">
-                        <tr><td style="color:var(--theme-muted);width:40%">Placa</td><td><?php echo htmlspecialchars($extra['placa_guincho'] ?? '—'); ?></td></tr>
-                        <tr><td style="color:var(--theme-muted)">CNH</td><td><?php echo htmlspecialchars($extra['cnh_numero'] ?? '—'); ?></td></tr>
-                        <tr><td style="color:var(--theme-muted)">Aprovado</td>
+                    <table class="table table-sm mb-0 usuariodetalhe-table">
+                        <tr><td class="usuariodetalhe-label usuariodetalhe-label--40">Placa</td><td><?php echo htmlspecialchars($extra['placa_guincho'] ?? '—'); ?></td></tr>
+                        <tr><td class="usuariodetalhe-label">CNH</td><td><?php echo htmlspecialchars($extra['cnh_numero'] ?? '—'); ?></td></tr>
+                        <tr><td class="usuariodetalhe-label">Aprovado</td>
                             <td><span class="badge <?php echo $extra['aprovado'] ? 'badge-concluido':'badge-aguardando_guincho'; ?>">
                                 <?php echo $extra['aprovado'] ? 'Sim' : 'Pendente'; ?>
                             </span></td>
                         </tr>
-                        <tr><td style="color:var(--theme-muted)">Disponível</td>
+                        <tr><td class="usuariodetalhe-label">Disponível</td>
                             <td><span class="badge <?php echo $extra['disponivel'] ? 'badge-concluido':'badge-cancelado'; ?>">
                                 <?php echo $extra['disponivel'] ? 'Online' : 'Offline'; ?>
                             </span></td>
                         </tr>
-                        <tr><td style="color:var(--theme-muted)">Reputação</td><td><?php echo number_format($extra['reputacao'] ?? 0, 1); ?> / 5.0</td></tr>
-                        <tr><td style="color:var(--theme-muted)">Avaliações</td><td><?php echo (int)($extra['total_avaliacoes'] ?? 0); ?></td></tr>
-                        <tr><td style="color:var(--theme-muted)">Pix</td><td><?php echo htmlspecialchars($extra['chave_pix'] ?? '—'); ?></td></tr>
+                        <tr><td class="usuariodetalhe-label">Reputação</td><td><?php echo number_format($extra['reputacao'] ?? 0, 1); ?> / 5.0</td></tr>
+                        <tr><td class="usuariodetalhe-label">Avaliações</td><td><?php echo (int)($extra['total_avaliacoes'] ?? 0); ?></td></tr>
+                        <tr><td class="usuariodetalhe-label">Pix</td><td><?php echo htmlspecialchars($extra['chave_pix'] ?? '—'); ?></td></tr>
                     </table>
 
                     <?php if (!$extra['aprovado']): ?>
@@ -116,7 +118,7 @@ include __DIR__ . '/../layouts/header.php';
                         <form method="POST" action="<?php echo $bp; ?>/admin/guincho/rejeitar" class="flex-fill">
                             <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($csrfToken); ?>">
                             <input type="hidden" name="id" value="<?php echo $extra['id']; ?>">
-                            <button class="btn btn-danger btn-sm w-100" onclick="return confirm('Rejeitar este guincho?')">
+                            <button class="btn btn-danger btn-sm w-100" data-confirm-message="Rejeitar este guincho?">
                                 <i class="fas fa-times me-1"></i>Rejeitar
                             </button>
                         </form>
@@ -125,13 +127,14 @@ include __DIR__ . '/../layouts/header.php';
 
                     <?php if (!empty($extra['doc_cnh_frente'])): ?>
                     <div class="mt-3">
-                        <div style="font-size:.8rem;color:var(--theme-muted);margin-bottom:.5rem">Documentos</div>
+                        <div class="usuariodetalhe-doc-label">Documentos</div>
                         <div class="d-flex gap-2 flex-wrap">
-                            <a href="/uploads/<?php echo htmlspecialchars($extra['doc_cnh_frente']); ?>" target="_blank" class="btn btn-sm btn-outline-primary">
+                            <?php // §SEC-UPL-02: link autenticado via ArquivoController::servir() em vez de caminho direto de /uploads. ?>
+                            <a href="<?php echo $bp; ?>/arquivo/<?php echo (int)$extra['id']; ?>?tipo=doc_cnh_frente" target="_blank" class="btn btn-sm btn-outline-primary">
                                 <i class="fas fa-file me-1"></i>CNH Frente
                             </a>
                             <?php if (!empty($extra['doc_cnh_verso'])): ?>
-                            <a href="/uploads/<?php echo htmlspecialchars($extra['doc_cnh_verso']); ?>" target="_blank" class="btn btn-sm btn-outline-primary">
+                            <a href="<?php echo $bp; ?>/arquivo/<?php echo (int)$extra['id']; ?>?tipo=doc_cnh_verso" target="_blank" class="btn btn-sm btn-outline-primary">
                                 <i class="fas fa-file me-1"></i>CNH Verso
                             </a>
                             <?php endif; ?>
@@ -152,7 +155,7 @@ include __DIR__ . '/../layouts/header.php';
                 </div>
                 <div class="card-body p-0">
                     <?php if (empty($pedidos)): ?>
-                    <div class="p-4 text-center" style="color:var(--theme-muted)">
+                    <div class="p-4 text-center usuariodetalhe-empty">
                         <i class="fas fa-inbox fa-2x mb-2 d-block"></i>
                         Nenhum pedido encontrado.
                     </div>

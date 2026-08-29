@@ -1,0 +1,24 @@
+/* ============================================================
+   GuinchaFácil — Tema Cliente (branco/acolhedor) — Pacote L2.1
+   Fonte de VALORES: doc/PROTOTIPO_VISUAL_PERFIS_GUINCHAFACIL.html
+   (perfil "client"/branco, mockup aprovado). Nomes de variável
+   mantidos do que já foi estabelecido nesta primeira passada do L2.1.
+
+   Aditivo a style.css (que já define body.cliente com suas
+   próprias variáveis --theme-surf/--theme-nav-bg/etc. — mantidas
+   intactas).
+   ============================================================ */
+
+body.cliente {
+  --theme-bg: #f4f8f5;
+  --theme-surface: #ffffff;
+  --theme-surface-2: #edf6ef;
+  --theme-border: #d4e6d8;
+  --theme-text: #142018;
+  --theme-muted: #607066;
+  --theme-accent: #2fb34a;
+  --theme-accent-hover: #248f3a;
+  --theme-on-accent: #ffffff;
+  --theme-nav: #ffffff;
+  --theme-sidebar: #edf6ef;
+}

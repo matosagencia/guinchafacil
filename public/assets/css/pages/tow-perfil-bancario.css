@@ -1,0 +1,109 @@
+/* ============================================================
+   GuinchaFácil — Dados bancários do guincheiro (guincho/perfil_bancario.php)
+   Extraído do <style> inline da view (gate visual do Nível 2).
+   ============================================================ */
+
+body.guincho .mini-shell {
+  position: relative;
+  isolation: isolate;
+}
+
+body.guincho .mini-shell::before {
+  content: "";
+  position: absolute;
+  top: -60px;
+  right: -80px;
+  width: 320px;
+  height: 320px;
+  border-radius: 999px;
+  background: rgba(47, 179, 74, .18);
+  filter: blur(90px);
+  z-index: -1;
+  pointer-events: none;
+}
+
+body.guincho .mini-hero,
+body.guincho .mini-card {
+  border-radius: 28px;
+  border: 1px solid var(--theme-border);
+  background: var(--theme-surface);
+  box-shadow: var(--shadow-card);
+  color: var(--theme-text);
+}
+
+body.guincho .mini-hero {
+  position: relative;
+  overflow: hidden;
+}
+
+body.guincho .mini-hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at top left, rgba(47, 179, 74, .14), transparent 34%),
+    radial-gradient(circle at bottom right, rgba(245, 158, 11, .12), transparent 30%);
+  pointer-events: none;
+}
+
+body.guincho .mini-hero > * {
+  position: relative;
+}
+
+body.guincho .mini-nav {
+  display: flex;
+  gap: .75rem;
+  flex-wrap: wrap;
+}
+
+body.guincho .mini-nav a {
+  display: inline-flex;
+  align-items: center;
+  gap: .45rem;
+  padding: .8rem 1rem;
+  border-radius: 999px;
+  text-decoration: none;
+  font-weight: 700;
+  border: 1px solid var(--theme-border);
+  background: var(--theme-surface-2);
+  color: var(--theme-text);
+}
+
+body.guincho .mini-nav a.active {
+  color: #fff;
+  background: linear-gradient(135deg, var(--primary), #198754);
+  border-color: transparent;
+  box-shadow: 0 16px 28px rgba(47, 179, 74, .22);
+}
+
+body.guincho .mini-pane {
+  padding: 1.25rem;
+  border-radius: 22px;
+  background: var(--theme-surface-2);
+  border: 1px solid var(--theme-border);
+}
+
+body.guincho .mini-form .form-label {
+  font-weight: 700;
+  color: var(--theme-text);
+}
+
+body.guincho .mini-form .form-control,
+body.guincho .mini-form .form-select {
+  min-height: 52px;
+  border-radius: 16px;
+  border-color: var(--theme-border);
+  background: var(--theme-surface);
+  color: var(--theme-text);
+}
+
+/* ---------- Substitui os style="" pontuais da view ---------- */
+body.guincho .mini-title {
+  font-size: 1.9rem;
+  font-weight: 800;
+}
+
+body.guincho .mini-subtitle {
+  font-size: 1.08rem;
+  font-weight: 800;
+}

@@ -1,0 +1,35 @@
+/* ============================================================
+   GuinchaFácil — Formulário de oficina (cliente/oficinaform.php)
+   Substitui os style="" pontuais da view (gate visual do Nível 2).
+   ============================================================ */
+
+body.cliente .oficinaform-icon-accent { color: var(--primary); }
+
+body.cliente .oficinaform-mapa-card {
+  position: sticky;
+  top: 80px;
+}
+
+body.cliente .oficinaform-mapa {
+  height: 340px;
+}
+
+body.cliente .oficinaform-mapa-status {
+  color: var(--theme-muted);
+}
+
+body.cliente .oficinaform-hint {
+  font-size: .77rem;
+  color: var(--theme-muted);
+  margin-top: .3rem;
+}
+
+/* Pino do mapa Leaflet (gerado via JS) */
+.oficinaform-pin {
+  width: 18px;
+  height: 18px;
+  background: #2fb34a;
+  border-radius: 50%;
+  border: 3px solid #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, .5);
+}

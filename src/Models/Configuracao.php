@@ -11,8 +11,23 @@ class Configuracao {
     }
     
     public static function set($chave, $valor, $descricao = '') {
-        $sql = "INSERT INTO configuracoes (chave, valor, descricao, criado_em, atualizado_em) \n                VALUES (:chave, :valor, :descricao, NOW(), NOW())\n                ON DUPLICATE KEY UPDATE \n                valor = VALUES(valor), \n                atualizado_em = NOW()";
-        
+        $columns = self::tableColumns();
+
+        if (isset($columns['criado_em'], $columns['atualizado_em'])) {
+            $sql = "INSERT INTO configuracoes (chave, valor, descricao, criado_em, atualizado_em)
+                    VALUES (:chave, :valor, :descricao, NOW(), NOW())
+                    ON DUPLICATE KEY UPDATE
+                    valor = VALUES(valor),
+                    descricao = VALUES(descricao),
+                    atualizado_em = NOW()";
+        } else {
+            $sql = "INSERT INTO configuracoes (chave, valor, descricao)
+                    VALUES (:chave, :valor, :descricao)
+                    ON DUPLICATE KEY UPDATE
+                    valor = VALUES(valor),
+                    descricao = VALUES(descricao)";
+        }
+
         $stmt = getPDO()->prepare($sql);
         return $stmt->execute([
             ':chave' => $chave,
@@ -51,5 +66,27 @@ class Configuracao {
         }
         
         return $configs;
+    }
+
+    private static function tableColumns(): array
+    {
+        static $columns = null;
+        if ($columns !== null) {
+            return $columns;
+        }
+
+        $columns = [];
+        try {
+            foreach (getPDO()->query('SHOW COLUMNS FROM configuracoes') as $row) {
+                $field = (string)($row['Field'] ?? '');
+                if ($field !== '') {
+                    $columns[$field] = true;
+                }
+            }
+        } catch (Throwable $e) {
+            error_log('Configuracao::tableColumns: ' . $e->getMessage());
+        }
+
+        return $columns;
     }
 }

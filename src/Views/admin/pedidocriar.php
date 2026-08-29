@@ -2,19 +2,21 @@
 $bp = defined('BASE_PATH') ? BASE_PATH : '';
 include __DIR__ . '/../layouts/header.php';
 ?>
-<div class="main-wrapper">
+<link rel="stylesheet" href="<?php echo htmlspecialchars($bp); ?>/public/assets/css/pages/admin-pedidocriar.css">
+<div class="main-wrapper shell admin-shell">
 <?php include __DIR__ . '/../layouts/sidebar_admin.php'; ?>
-<main class="main-content">
+<main class="main-content shell-main shell-content">
 
-    <div class="page-header">
+    <header class="page-head mb-4">
         <div>
-            <div class="page-title"><i class="fas fa-plus-circle me-2" style="color:var(--primary)"></i>Criar Pedido de Socorro</div>
-            <div class="page-subtitle">Abertura manual pelo administrador</div>
+            <span class="eyebrow">Administração</span>
+            <h1><i class="fas fa-plus-circle me-2 pedidocriar-icon-accent"></i>Criar Pedido de Socorro</h1>
+            <p>Abertura manual pelo administrador</p>
         </div>
         <a href="<?php echo $bp; ?>/admin/pedidos" class="btn btn-secondary btn-sm">
             <i class="fas fa-arrow-left me-1"></i>Voltar
         </a>
-    </div>
+    </header>
 
     <div class="row g-4">
         <!-- Formulário -->
@@ -36,14 +38,12 @@ include __DIR__ . '/../layouts/header.php';
                             <input type="text" id="clienteBusca" class="form-control"
                                    placeholder="Digite o nome ou e-mail do cliente..."
                                    autocomplete="off">
-                            <div id="clienteSugestoes" class="position-absolute w-100 shadow-lg rounded"
-                                 style="z-index:999;top:100%;left:0;display:none;background:var(--theme-card);border:1px solid var(--theme-border);max-height:240px;overflow-y:auto"></div>
+                            <div id="clienteSugestoes" class="position-absolute w-100 shadow-lg rounded pedidocriar-sugestoes-box"></div>
                         </div>
-                        <div id="clienteSelecionado" class="p-2 rounded d-none"
-                             style="background:rgba(47,179,74,.1);border:1px solid rgba(47,179,74,.3)">
-                            <i class="fas fa-check-circle me-2" style="color:var(--primary)"></i>
+                        <div id="clienteSelecionado" class="p-2 rounded d-none pedidocriar-cliente-selecionado">
+                            <i class="fas fa-check-circle me-2 pedidocriar-icon-accent"></i>
                             <span id="clienteNomeDisplay"></span>
-                            <button type="button" class="btn btn-sm btn-link float-end p-0" onclick="limparCliente()">
+                            <button type="button" class="btn btn-sm btn-link float-end p-0" id="btnLimparCliente">
                                 <i class="fas fa-times"></i>
                             </button>
                         </div>
@@ -75,13 +75,12 @@ include __DIR__ . '/../layouts/header.php';
                             ]; ?>
                             <?php foreach ($problemas as $val => [$emoji, $label]): ?>
                             <div class="col-6 col-md-4">
-                                <label class="d-flex align-items-center gap-2 p-2 rounded border"
-                                       style="cursor:pointer;border-color:var(--theme-border)!important"
+                                <label class="d-flex align-items-center gap-2 p-2 rounded border pedidocriar-problema-label"
                                        id="label_<?php echo $val; ?>">
                                     <input type="radio" name="tipo_problema" value="<?php echo $val; ?>"
-                                           onchange="highlightProblema()" style="display:none">
+                                           data-problema-radio class="d-none">
                                     <span><?php echo $emoji; ?></span>
-                                    <span style="font-size:.88rem"><?php echo $label; ?></span>
+                                    <span class="pedidocriar-problema-text"><?php echo $label; ?></span>
                                 </label>
                             </div>
                             <?php endforeach; ?>
@@ -91,43 +90,86 @@ include __DIR__ . '/../layouts/header.php';
                     </div>
                 </div>
 
+                <!-- 3.1 Tipo de serviço (catálogo) + condições da ocorrência
+                     — paridade com o painel do cliente (Etapa 2/14/15). -->
+                <div class="card mb-4">
+                    <div class="card-header"><i class="fas fa-clipboard-list me-2"></i>3.1 Serviço e condições</div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label class="form-label">Tipo de serviço (define o modo de atendimento e o matching)</label>
+                            <select class="form-select" name="service_type_id" id="serviceTypeSelect">
+                                <option value="">Reboque (padrão)</option>
+                                <?php foreach (($tiposServico ?? []) as $ts): ?>
+                                <option value="<?php echo (int)$ts['id']; ?>"
+                                        data-mode="<?php echo htmlspecialchars($ts['attendance_mode']); ?>">
+                                    <?php echo htmlspecialchars($ts['name']); ?>
+                                    (<?php echo htmlspecialchars($ts['attendance_mode']); ?>)
+                                </option>
+                                <?php endforeach; ?>
+                            </select>
+                            <div class="small mt-1 pedidocriar-hint">
+                                Deixando em "Reboque (padrão)", o pedido vai para a fila de reboque como sempre. Escolhendo um serviço no local (bateria, pneu, chaveiro etc.), o matching passa a exigir capacidade/compatibilidade do prestador.
+                            </div>
+                        </div>
+                        <label class="form-label">Condições do atendimento (usadas para escolher o prestador certo):</label>
+                        <div class="row g-2">
+                            <div class="col-6 col-md-3 form-check ms-2">
+                                <input type="checkbox" class="form-check-input" id="c_batido" name="veiculo_esta_batido" value="1">
+                                <label class="form-check-label" for="c_batido">Veículo batido</label>
+                            </div>
+                            <div class="col-6 col-md-3 form-check ms-2">
+                                <input type="checkbox" class="form-check-input" id="c_rodas" name="rodas_travadas" value="1">
+                                <label class="form-check-label" for="c_rodas">Rodas travadas</label>
+                            </div>
+                            <div class="col-6 col-md-3 form-check ms-2">
+                                <input type="checkbox" class="form-check-input" id="c_acesso" name="local_dificil_acesso" value="1">
+                                <label class="form-check-label" for="c_acesso">Difícil acesso</label>
+                            </div>
+                            <div class="col-6 col-md-3 form-check ms-2">
+                                <input type="checkbox" class="form-check-input" id="c_subsolo" name="em_garagem_subsolo" value="1">
+                                <label class="form-check-label" for="c_subsolo">Garagem/subsolo</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- 4. Endereços -->
                 <div class="card mb-4">
                     <div class="card-header"><i class="fas fa-map-marker-alt me-2"></i>4. Origem e Destino</div>
                     <div class="card-body">
                         <div class="mb-3">
                             <label class="form-label">Endereço de Origem *
-                                <span id="coordOrigem" class="badge ms-2" style="display:none;background:var(--primary)">
+                                <span id="coordOrigem" class="badge ms-2 pedidocriar-coord-badge">
                                     <i class="fas fa-check"></i> Coordenadas OK
                                 </span>
                             </label>
                             <div class="input-group">
                                 <input type="text" class="form-control" name="endereco_origem" id="endOrigem"
                                        placeholder="Rua, número, cidade..." required
-                                       oninput="geocodeDebounce('origem', this.value)">
-                                <button type="button" class="btn btn-outline-secondary" onclick="setMapMode('origem')" title="Clique no mapa">
+                                       >
+                                <button type="button" class="btn btn-outline-secondary" id="btnMapOrigemInput" title="Clique no mapa">
                                     <i class="fas fa-map-pin"></i>
                                 </button>
                             </div>
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Endereço de Destino *
-                                <span id="coordDestino" class="badge ms-2" style="display:none;background:var(--primary)">
+                                <span id="coordDestino" class="badge ms-2 pedidocriar-coord-badge">
                                     <i class="fas fa-check"></i> Coordenadas OK
                                 </span>
                             </label>
                             <!-- Oficinas do cliente como destino rápido -->
                             <div id="oficinasCliente" class="mb-2" style="display:none">
-                                <div style="font-size:.78rem;color:var(--theme-muted);margin-bottom:.4rem">
-                                    <i class="fas fa-star me-1" style="color:#f59e0b"></i>Oficinas favoritas do cliente:
+                                <div class="pedidocriar-oficinas-label">
+                                    <i class="fas fa-star me-1 pedidocriar-oficinas-icon"></i>Oficinas favoritas do cliente:
                                 </div>
                                 <div id="oficinasLista" class="d-flex gap-2 flex-wrap"></div>
                             </div>
                             <div class="input-group">
                                 <input type="text" class="form-control" name="endereco_destino" id="endDestino"
-                                       placeholder="Oficina ou destino..." required
-                                       oninput="geocodeDebounce('destino', this.value)">
-                                <button type="button" class="btn btn-outline-secondary" onclick="setMapMode('destino')" title="Clique no mapa">
+                                       placeholder="Oficina ou destino (obrigatório para reboque)..."
+                                       >
+                                <button type="button" class="btn btn-outline-secondary" id="btnMapDestinoInput" title="Clique no mapa">
                                     <i class="fas fa-flag"></i>
                                 </button>
                             </div>
@@ -138,8 +180,7 @@ include __DIR__ . '/../layouts/header.php';
                             <div class="col-md-6">
                                 <label class="form-label">Distância Estimada</label>
                                 <div class="input-group">
-                                    <input type="text" class="form-control" id="distanciaDisplay" value="—" readonly
-                                           style="background:var(--theme-surface2)">
+                                    <input type="text" class="form-control pedidocriar-readonly-bg" id="distanciaDisplay" value="—" readonly>
                                     <span class="input-group-text">km</span>
                                 </div>
                             </div>
@@ -147,11 +188,10 @@ include __DIR__ . '/../layouts/header.php';
                                 <label class="form-label">Custo Estimado</label>
                                 <div class="input-group">
                                     <span class="input-group-text">R$</span>
-                                    <input type="text" class="form-control" id="custoDisplay" value="—" readonly
-                                           style="background:var(--theme-surface2)">
+                                    <input type="text" class="form-control pedidocriar-readonly-bg" id="custoDisplay" value="—" readonly>
                                 </div>
-                                <div class="small mt-1" style="color:var(--theme-muted)">
-                                    R$ <?php echo number_format((float)($cfg['tarifa_por_km'] ?? 5),2,',','.'); ?>/km + taxa R$ <?php echo number_format((float)($cfg['taxa_fixa'] ?? 10),2,',','.'); ?>
+                                <div class="small mt-1 pedidocriar-hint" id="custoDetalhe">
+                                    A estimativa será calculada pela mesma regra oficial usada na criação do pedido.
                                 </div>
                             </div>
                         </div>
@@ -170,14 +210,14 @@ include __DIR__ . '/../layouts/header.php';
                             </option>
                             <?php endforeach; ?>
                         </select>
-                        <div class="small mt-2" style="color:var(--theme-muted)">
+                        <div class="small mt-2 pedidocriar-hint">
                             <i class="fas fa-info-circle me-1"></i>
                             Deixando em aberto, o pedido vai para a fila e qualquer guincheiro disponível pode aceitar.
                         </div>
                     </div>
                 </div>
 
-                <button type="submit" class="btn btn-primary w-100 py-3 mb-4" id="btnCriar" style="font-size:1.05rem" disabled>
+                <button type="submit" class="btn btn-primary w-100 py-3 mb-4 pedidocriar-btn-criar" id="btnCriar" disabled>
                     <i class="fas fa-circle-exclamation me-2"></i>Criar Pedido de Socorro
                 </button>
             </form>
@@ -185,25 +225,23 @@ include __DIR__ . '/../layouts/header.php';
 
         <!-- Mapa -->
         <div class="col-lg-5">
-            <div class="card" style="position:sticky;top:80px">
+            <div class="card pedidocriar-map-card">
                 <div class="card-header"><i class="fas fa-map me-2"></i>Mapa — Clique para definir pontos</div>
                 <div class="card-body p-0">
-                    <div id="map" style="height:460px;border-radius:0"></div>
+                    <div id="map" class="pedidocriar-map"></div>
                 </div>
                 <div class="card-body pt-2 pb-3">
                     <div class="d-flex gap-2 mb-2">
-                        <button class="btn btn-sm flex-fill" id="btnOrigem"
-                                style="background:rgba(47,179,74,.15);color:var(--primary);border:1px solid rgba(47,179,74,.3)"
-                                onclick="setMapMode('origem')">
+                        <button class="btn btn-sm flex-fill pedidocriar-btn-origem" id="btnOrigem"
+                                type="button">
                             <i class="fas fa-map-pin me-1"></i>Definir Origem
                         </button>
-                        <button class="btn btn-sm flex-fill" id="btnDestino"
-                                style="background:rgba(239,68,68,.1);color:#ef4444;border:1px solid rgba(239,68,68,.3)"
-                                onclick="setMapMode('destino')">
+                        <button class="btn btn-sm flex-fill pedidocriar-btn-destino" id="btnDestino"
+                                type="button">
                             <i class="fas fa-flag me-1"></i>Definir Destino
                         </button>
                     </div>
-                    <div id="mapStatus" class="small text-center" style="color:var(--theme-muted)">
+                    <div id="mapStatus" class="small text-center pedidocriar-hint">
                         Clique em "Definir Origem" e depois clique no mapa
                     </div>
                 </div>
@@ -214,11 +252,9 @@ include __DIR__ . '/../layouts/header.php';
 </main>
 <?php include __DIR__ . '/../layouts/footer.php'; ?>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script>
+<script<?php echo csp_script_nonce_attr(); ?> src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script<?php echo csp_script_nonce_attr(); ?>>
 const bp = '<?php echo $bp; ?>';
-const tarifaKm = <?php echo (float)($cfg['tarifa_por_km'] ?? 5); ?>;
-const taxaFixa = <?php echo (float)($cfg['taxa_fixa'] ?? 10); ?>;
 
 // ── MAPA ──────────────────────────────────────────────────────────
 const map = L.map('map').setView([-23.5505, -46.6333], 12);
@@ -229,11 +265,11 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 let mapMode = null, markerO = null, markerD = null;
 
 const iconO = L.divIcon({
-    html: '<div style="background:#2fb34a;width:18px;height:18px;border-radius:50%;border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.4)"></div>',
+    html: '<div class="pedidocriar-pin-origem"></div>',
     iconAnchor: [9,9], className: ''
 });
 const iconD = L.divIcon({
-    html: '<div style="background:#ef4444;width:18px;height:18px;border-radius:50%;border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.4)"></div>',
+    html: '<div class="pedidocriar-pin-destino"></div>',
     iconAnchor: [9,9], className: ''
 });
 
@@ -251,9 +287,9 @@ map.on('click', function(e) {
     const {lat, lng} = e.latlng;
     setCoordinate(mapMode, lat, lng);
     // Reverse geocode
-    fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&accept-language=pt-BR`)
+    fetch(`${bp}/geocode/reverse?lat=${lat}&lng=${lng}`)
         .then(r => r.json()).then(d => {
-            const addr = d.display_name || `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+            const addr = (d.result && (d.result.display_name || d.result.street)) || `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
             document.getElementById(mapMode === 'origem' ? 'endOrigem' : 'endDestino').value = addr;
         }).catch(() => {});
     mapMode = null;
@@ -287,10 +323,10 @@ function geocodeDebounce(tipo, addr) {
 
 function geocodeAddr(tipo, addr) {
     if (addr.length < 6) return;
-    fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(addr + ', Brasil')}&limit=1&accept-language=pt-BR`)
+    fetch(`${bp}/geocode?q=${encodeURIComponent(addr)}`)
         .then(r => r.json()).then(data => {
-            if (!data[0]) return;
-            const lat = parseFloat(data[0].lat), lng = parseFloat(data[0].lon);
+            if (!data.ok || !data.result) return;
+            const lat = parseFloat(data.result.lat), lng = parseFloat(data.result.lng);
             setCoordinate(tipo, lat, lng);
             recalcularCusto();
             map.flyTo([lat, lng], 15, {duration: 1});
@@ -301,20 +337,74 @@ function geocodeAddr(tipo, addr) {
 function recalcularCusto() {
     const latO = parseFloat(document.getElementById('latOrigem').value);
     const lngO = parseFloat(document.getElementById('lngOrigem').value);
-    const latD = parseFloat(document.getElementById('latDestino').value);
-    const lngD = parseFloat(document.getElementById('lngDestino').value);
+    let latD = parseFloat(document.getElementById('latDestino').value);
+    let lngD = parseFloat(document.getElementById('lngDestino').value);
+    const modo = document.querySelector('#serviceTypeSelect option:checked')?.dataset.mode || 'TOWING';
+    if (modo !== 'TOWING' && latO && lngO && (!latD || !lngD)) { latD = latO; lngD = lngO; }
     if (!latO || !latD || !lngO || !lngD) return;
     const R = 6371;
     const dLat = (latD - latO) * Math.PI / 180;
     const dLng = (lngD - lngO) * Math.PI / 180;
     const a = Math.sin(dLat/2)**2 + Math.cos(latO*Math.PI/180) * Math.cos(latD*Math.PI/180) * Math.sin(dLng/2)**2;
     const dist = R * 2 * Math.asin(Math.sqrt(a));
-    const custo = (tarifaKm * dist + taxaFixa);
     document.getElementById('distanciaKm').value = dist.toFixed(2);
     document.getElementById('distanciaDisplay').value = dist.toFixed(1);
-    document.getElementById('custoDisplay').value = custo.toLocaleString('pt-BR', {minimumFractionDigits:2});
     if (markerO && markerD) map.fitBounds([[latO,lngO],[latD,lngD]], {padding:[40,40]});
+    atualizarEstimativaCusto(dist);
     atualizarBotaoCriar();
+}
+
+async function atualizarEstimativaCusto(distanciaKm) {
+    const veiculoId = document.getElementById('veiculoSelect').value;
+    const custoDisplay = document.getElementById('custoDisplay');
+    const custoDetalhe = document.getElementById('custoDetalhe');
+    if (!veiculoId) {
+        custoDisplay.value = '—';
+        custoDetalhe.textContent = 'Selecione o veículo do cliente para carregar a tarifa oficial.';
+        return;
+    }
+
+    try {
+        const url = new URL(bp + '/admin/pedido/custo', window.location.origin);
+        url.searchParams.set('distancia_km', distanciaKm.toFixed(2));
+        url.searchParams.set('veiculo_id', veiculoId);
+        const serviceType = document.getElementById('serviceTypeSelect').value;
+        if (serviceType) url.searchParams.set('service_type_id', serviceType);
+        const response = await fetch(url.toString(), {
+            headers: {
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+            },
+        });
+        const payload = await response.json();
+        if (!response.ok || !payload.ok) {
+            throw new Error(payload.erro || 'Falha ao carregar a tarifa');
+        }
+
+        const tarifa = payload.tarifa || {};
+        custoDisplay.value = Number(payload.custo || 0).toLocaleString('pt-BR', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+        });
+
+        if (payload.origem === 'especialista_catalogo') {
+            const d = tarifa.detalhe || {};
+            custoDetalhe.textContent = `Catálogo especialista • base R$ ${Number(d.base || 0).toLocaleString('pt-BR',{minimumFractionDigits:2})} • deslocamento R$ ${Number(d.distancia || 0).toLocaleString('pt-BR',{minimumFractionDigits:2})}${Number(d.noturno || 0) ? ' • adicional noturno' : ''}`;
+            return;
+        }
+        const detalhes = [
+            `${Number(tarifa.tarifa_km_aplicada || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}/km`,
+            `taxa fixa R$ ${Number(tarifa.taxa_fixa_aplicada || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+            `categoria ${String(tarifa.categoria || 'popular').replace('_', ' ')}`,
+        ];
+        if (tarifa.is_noturno) {
+            detalhes.push('adicional noturno');
+        }
+        custoDetalhe.textContent = detalhes.join(' • ');
+    } catch (error) {
+        custoDisplay.value = 'erro';
+        custoDetalhe.textContent = error instanceof Error ? error.message : 'Não foi possível obter a tarifa oficial.';
+    }
 }
 
 // ── CLIENTE AJAX SEARCH ───────────────────────────────────────────
@@ -341,16 +431,17 @@ function buscarClientes(q) {
         .then(r => r.json()).then(data => {
             const box = document.getElementById('clienteSugestoes');
             if (!data.clientes || !data.clientes.length) {
-                box.innerHTML = '<div style="padding:.75rem;color:var(--theme-muted);font-size:.85rem">Nenhum cliente encontrado</div>';
+                box.innerHTML = '<div class="pedidocriar-sugestao-vazia">Nenhum cliente encontrado</div>';
                 box.style.display = 'block';
                 return;
             }
             box.innerHTML = data.clientes.map(c =>
-                `<div class="sugestao-item" style="padding:.65rem 1rem;cursor:pointer;border-bottom:1px solid var(--theme-border);font-size:.9rem"
-                     onclick="selecionarCliente(${c.id}, '${c.nome.replace(/'/g,"\\'")} (${c.email.replace(/'/g,"\\'")})', ${c.id})">
-                    <i class="fas fa-user me-2" style="color:var(--primary)"></i>
+                `<div class="sugestao-item"
+                     data-cliente-id="${c.id}"
+                     data-cliente-label="${(c.nome + ' (' + c.email + ')').replace(/"/g, '&quot;')}">
+                    <i class="fas fa-user me-2 pedidocriar-icon-accent"></i>
                     <strong>${c.nome}</strong>
-                    <span style="color:var(--theme-muted);font-size:.8rem"> &nbsp;${c.email}</span>
+                    <span class="pedidocriar-sugestao-email"> &nbsp;${c.email}</span>
                 </div>`
             ).join('');
             box.style.display = 'block';
@@ -384,16 +475,6 @@ function fecharSugestoes() {
     document.getElementById('clienteSugestoes').style.display = 'none';
 }
 
-// Hover effect
-document.getElementById('clienteSugestoes').addEventListener('mouseover', function(e) {
-    const item = e.target.closest('.sugestao-item');
-    if (item) item.style.background = 'var(--theme-surface2)';
-});
-document.getElementById('clienteSugestoes').addEventListener('mouseout', function(e) {
-    const item = e.target.closest('.sugestao-item');
-    if (item) item.style.background = '';
-});
-
 // ── VEÍCULOS AJAX ─────────────────────────────────────────────────
 function carregarVeiculos(clienteId) {
     const sel = document.getElementById('veiculoSelect');
@@ -405,6 +486,9 @@ function carregarVeiculos(clienteId) {
                 sel.innerHTML = '<option value="">Selecione o veículo...</option>' +
                     data.veiculos.map(v => `<option value="${v.id}">${v.marca} ${v.modelo} — ${v.placa}</option>`).join('');
                 sel.disabled = false;
+                if (document.getElementById('distanciaKm').value && Number(document.getElementById('distanciaKm').value) > 0) {
+                    document.getElementById('custoDetalhe').textContent = 'Selecione o veículo para recalcular a tarifa oficial.';
+                }
             } else {
                 sel.innerHTML = '<option value="">Este cliente não tem veículos cadastrados</option>';
             }
@@ -419,9 +503,10 @@ function carregarOficinas(clienteId) {
             const lista = document.getElementById('oficinasLista');
             if (data.oficinas && data.oficinas.length) {
                 lista.innerHTML = data.oficinas.map(o =>
-                    `<button type="button" class="btn btn-sm"
-                             style="background:rgba(245,158,11,.1);color:#f59e0b;border:1px solid rgba(245,158,11,.3);font-size:.78rem"
-                             onclick="usarOficina('${o.endereco.replace(/'/g,"\\'")}', ${o.lat||0}, ${o.lng||0})">
+                    `<button type="button" class="btn btn-sm pedidocriar-oficina-btn"
+                             data-oficina-endereco="${String(o.endereco || '').replace(/"/g, '&quot;')}"
+                             data-oficina-lat="${o.lat || 0}"
+                             data-oficina-lng="${o.lng || 0}">
                         <i class="fas fa-tools me-1"></i>${o.nome}
                      </button>`
                 ).join('');
@@ -463,7 +548,8 @@ function atualizarBotaoCriar() {
     const temVeiculo  = !!document.getElementById('veiculoSelect').value;
     const temProblema = !!document.querySelector('[name="tipo_problema"]:checked');
     const temOrigem   = !!document.getElementById('latOrigem').value;
-    const temDestino  = !!document.getElementById('latDestino').value;
+    const modo = document.querySelector('#serviceTypeSelect option:checked')?.dataset.mode || 'TOWING';
+    const temDestino  = modo !== 'TOWING' || !!document.getElementById('latDestino').value;
     const ok = temCliente && temVeiculo && temProblema && temOrigem && temDestino;
     const btn = document.getElementById('btnCriar');
     btn.disabled = !ok;
@@ -471,4 +557,35 @@ function atualizarBotaoCriar() {
 }
 
 document.getElementById('veiculoSelect').addEventListener('change', atualizarBotaoCriar);
+document.getElementById('serviceTypeSelect').addEventListener('change', function () {
+    const towing = (this.options[this.selectedIndex]?.dataset.mode || 'TOWING') === 'TOWING';
+    document.getElementById('endDestino').required = towing;
+    atualizarBotaoCriar();
+    if (Number(document.getElementById('distanciaKm').value || 0) > 0) atualizarEstimativaCusto(Number(document.getElementById('distanciaKm').value));
+});
+document.getElementById('veiculoSelect').addEventListener('change', function () {
+    if (Number(document.getElementById('distanciaKm').value || 0) > 0) {
+        atualizarEstimativaCusto(Number(document.getElementById('distanciaKm').value));
+    }
+});
+document.getElementById('btnLimparCliente').addEventListener('click', limparCliente);
+document.getElementById('btnMapOrigemInput').addEventListener('click', function () { setMapMode('origem'); });
+document.getElementById('btnMapDestinoInput').addEventListener('click', function () { setMapMode('destino'); });
+document.getElementById('btnOrigem').addEventListener('click', function () { setMapMode('origem'); });
+document.getElementById('btnDestino').addEventListener('click', function () { setMapMode('destino'); });
+document.getElementById('endOrigem').addEventListener('input', function () { geocodeDebounce('origem', this.value); });
+document.getElementById('endDestino').addEventListener('input', function () { geocodeDebounce('destino', this.value); });
+document.querySelectorAll('[data-problema-radio]').forEach(function (input) {
+    input.addEventListener('change', highlightProblema);
+});
+document.getElementById('clienteSugestoes').addEventListener('click', function (e) {
+    const item = e.target.closest('[data-cliente-id]');
+    if (!item) return;
+    selecionarCliente(Number(item.dataset.clienteId), item.dataset.clienteLabel || '', Number(item.dataset.clienteId));
+});
+document.getElementById('oficinasLista').addEventListener('click', function (e) {
+    const btn = e.target.closest('[data-oficina-endereco]');
+    if (!btn) return;
+    usarOficina(btn.dataset.oficinaEndereco || '', Number(btn.dataset.oficinaLat || 0), Number(btn.dataset.oficinaLng || 0));
+});
 </script>

@@ -9,32 +9,24 @@ declare(strict_types=1);
 if (PHP_SAPI !== 'cli') { http_response_code(403); exit; }
 
 require_once dirname(__DIR__) . '/config.php';
-require_once dirname(__DIR__) . '/src/Services/PixService.php';
+require_once dirname(__DIR__) . '/src/Workers/PixPayoutWorker.php';
+require_once dirname(__DIR__) . '/src/Services/CronMonitorService.php';
 
-$pdo = getPDO();
-
-// Busca pedidos concluídos com status_pix=falha (máx 10 por rodada para não sobrecarregar)
-$stmt = $pdo->query(
-    "SELECT DISTINCT pg.pedido_id
-     FROM pagamentos pg
-     JOIN pedidos p ON p.id = pg.pedido_id
-     WHERE pg.status_pix = 'falha'
-       AND p.status = 'concluido'
-     LIMIT 10"
-);
-$pendentes = $stmt->fetchAll(PDO::FETCH_COLUMN);
-
-if (empty($pendentes)) {
-    echo date('[Y-m-d H:i:s]') . " Nenhum Pix pendente de reprocessamento.\n";
+$run = CronMonitorService::start('cron_reprocessar_pix');
+$summary = PixPayoutWorker::processBatch(10, 'cron_pix');
+if (($summary['processed'] ?? 0) === 0) {
+    CronMonitorService::finish($run, 'ok', 'Nenhum payment job pendente.', [
+        'processed' => 0,
+        'errors' => 0,
+    ]);
+    echo date('[Y-m-d H:i:s]') . " Nenhum payment job pendente.\n";
     exit(0);
 }
 
-foreach ($pendentes as $pedidoId) {
-    $pedidoId  = (int)$pedidoId;
-    $resultado = PixService::reprocessar($pedidoId);
-    $msg       = $resultado['sucesso'] ? 'OK' : 'FALHOU: ' . $resultado['erro'];
-    echo date('[Y-m-d H:i:s]') . " Pix pedido #{$pedidoId}: {$msg}\n";
-    error_log("[cron_pix] Pedido #{$pedidoId}: {$msg}");
-}
+CronMonitorService::finish($run, ((int)($summary['errors'] ?? 0)) > 0 ? 'warning' : 'ok', 'Reprocessamento PIX concluído.', [
+    'processed' => (int)($summary['processed'] ?? 0),
+    'errors' => (int)($summary['errors'] ?? 0),
+]);
+echo date('[Y-m-d H:i:s]') . " Payment jobs processados: {$summary['processed']}; erros: {$summary['errors']}\n";
 
 exit(0);
