@@ -34,13 +34,17 @@ function cliente_saudacao(): string
                 <div class="app-panel__title mb-1"><i class="fas fa-circle-exclamation me-2 text-primary-custom"></i>Onde está o veículo?</div>
                 <div class="dash-panel-subtitle">Use o GPS ou digite um ponto de referência.</div>
             </div>
-            <form class="quick-rescue__row d-flex gap-2" method="post" action="<?php echo $bp; ?>/cliente/pedido/rascunho" data-quick-rescue data-reverse-url="<?php echo $bp; ?>/geocode/reverse" data-geocode-url="<?php echo $bp; ?>/geocode">
+            <form class="quick-rescue__row d-flex gap-2 flex-wrap" method="post" action="<?php echo $bp; ?>/cliente/pedido/rascunho" data-quick-rescue data-reverse-url="<?php echo $bp; ?>/geocode/reverse" data-geocode-url="<?php echo $bp; ?>/geocode">
                 <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($csrfToken ?? ''); ?>">
                 <input type="hidden" name="lat_origem" value="<?php echo htmlspecialchars((string)($pedidoRascunho['lat_origem'] ?? '')); ?>">
                 <input type="hidden" name="lng_origem" value="<?php echo htmlspecialchars((string)($pedidoRascunho['lng_origem'] ?? '')); ?>">
                 <div class="input-group flex-grow-1">
                     <span class="input-group-text bg-white border-end-0"><i class="fas fa-location-dot text-primary-custom"></i></span>
                     <input type="text" class="form-control quick-rescue__input border-start-0" name="endereco_origem" data-quick-rescue-input value="<?php echo htmlspecialchars((string)($pedidoRascunho['endereco_origem'] ?? '')); ?>" placeholder="Onde está o veículo?" maxlength="220" required>
+                </div>
+                <div class="input-group" style="max-width:140px;">
+                    <span class="input-group-text bg-white border-end-0">Nº</span>
+                    <input type="text" class="form-control quick-rescue__input border-start-0" name="numero_origem" data-quick-rescue-number value="<?php echo htmlspecialchars((string)($pedidoRascunho['numero_origem'] ?? '')); ?>" placeholder="12" maxlength="20">
                 </div>
                 <button type="button" class="btn btn-outline-secondary" data-quick-rescue-gps aria-label="Usar minha localização atual"><i class="fas fa-location-crosshairs"></i></button>
                 <button type="submit" class="btn btn-primary quick-rescue__cta" data-action="localize">Pedir socorro</button>

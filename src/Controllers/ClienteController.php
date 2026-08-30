@@ -21,6 +21,7 @@ require_once __DIR__ . '/../Models/PedidoDiagnostico.php';
 require_once __DIR__ . '/../Services/Dispatch/OrderVehicleRequirementService.php';
 require_once __DIR__ . '/../Services/Diagnostico/DiagnosticoService.php';
 require_once __DIR__ . '/../Services/Conversion/ConversionService.php';
+require_once __DIR__ . '/../Services/EnderecoFormatter.php';
 
 class ClienteController extends BaseController
 {
@@ -606,7 +607,11 @@ class ClienteController extends BaseController
             exit;
         }
 
-        $endereco = trim((string)($_POST['endereco_origem'] ?? ''));
+        $numero = trim((string)($_POST['numero_origem'] ?? ''));
+        $endereco = EnderecoFormatter::comNumeroNoTexto(
+            (string)($_POST['endereco_origem'] ?? ''),
+            $numero !== '' ? $numero : null
+        );
         $lat = isset($_POST['lat_origem']) ? (float)$_POST['lat_origem'] : 0.0;
         $lng = isset($_POST['lng_origem']) ? (float)$_POST['lng_origem'] : 0.0;
         // Pacote L1.8 — contrato do plano: 'source' identifica se a origem veio do
@@ -637,6 +642,7 @@ class ClienteController extends BaseController
         $_SESSION['pedido_rascunho'] = [
             'draft_id' => $draftId,
             'endereco_origem' => mb_substr($endereco, 0, 220),
+            'numero_origem' => $numero !== '' ? mb_substr($numero, 0, 30) : null,
             'lat_origem' => $lat ?: null,
             'lng_origem' => $lng ?: null,
             'source' => $source,
@@ -657,10 +663,18 @@ class ClienteController extends BaseController
         $veiculoId = (int)($_POST['veiculo_id'] ?? 0);
         $tipo      = $_POST['tipo_problema'] ?? 'outro';
         $descricao = trim($_POST['descricao'] ?? '');
-        $endOrigem = trim($_POST['endereco_origem'] ?? '');
+        $numeroOrigem = trim((string)($_POST['numero_origem'] ?? ''));
+        $endOrigem = EnderecoFormatter::comNumeroNoTexto(
+            (string)($_POST['endereco_origem'] ?? ''),
+            $numeroOrigem !== '' ? $numeroOrigem : null
+        );
         $latOrigem = (float)($_POST['lat_origem'] ?? 0);
         $lngOrigem = (float)($_POST['lng_origem'] ?? 0);
-        $endDest   = trim($_POST['endereco_destino'] ?? '');
+        $numeroDestino = trim((string)($_POST['numero_destino'] ?? ''));
+        $endDest   = EnderecoFormatter::comNumeroNoTexto(
+            (string)($_POST['endereco_destino'] ?? ''),
+            $numeroDestino !== '' ? $numeroDestino : null
+        );
         $latDest   = (float)($_POST['lat_destino'] ?? 0);
         $lngDest   = (float)($_POST['lng_destino'] ?? 0);
         $distancia = (float)($_POST['distancia_km'] ?? 5);

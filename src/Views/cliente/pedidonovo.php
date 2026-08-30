@@ -59,7 +59,11 @@ include __DIR__ . '/../layouts/header.php';
             <input type="text" id="inputOrigem" placeholder="Onde você está agora?"
                    value="<?php echo htmlspecialchars((string)($pedidoRascunho['endereco_origem'] ?? '')); ?>"
                    autocomplete="off">
-            <button type="button" id="btnGps" title="Usar minha localização atual">
+            <input type="text" id="numeroOrigem" name="numero_origem" placeholder="Nº"
+                   value="<?php echo htmlspecialchars((string)($pedidoRascunho['numero_origem'] ?? '')); ?>"
+                   maxlength="20">
+
+            <button type="button" id="btnGps" title="Usar minha localização atual">
                 <i class="fas fa-location-crosshairs"></i>
             </button>
             <button type="button" id="btnBuscarOrigem" title="Buscar endereço">
@@ -221,15 +225,17 @@ include __DIR__ . '/../layouts/header.php';
                     </div>
                     <div class="tab-pane fade" id="paneOutro">
                         <div class="input-group">
-                            <input type="text" class="form-control" id="inputDest" placeholder="Rua, número, bairro, cidade…" autocomplete="off">
-                            <button type="button" class="btn btn-outline-secondary" id="btnBuscarDestinoTab"><i class="fas fa-search"></i></button>
+                            <input type="text" class="form-control" id="inputDest" placeholder="Rua, número, bairro, cidade…" autocomplete="off">
+                            <input type="text" class="form-control mt-2" id="numeroDest" name="numero_destino" placeholder="Nº" maxlength="20">
+                            <button type="button" class="btn btn-outline-secondary" id="btnBuscarDestinoTab"><i class="fas fa-search"></i></button>
                         </div>
                     </div>
                 </div>
                 <?php else: ?>
                 <div class="input-group">
-                    <input type="text" class="form-control" id="inputDest" placeholder="Rua, número, bairro, cidade…" autocomplete="off">
-                    <button type="button" class="btn btn-outline-secondary" id="btnBuscarDestinoLivre"><i class="fas fa-search"></i></button>
+                    <input type="text" class="form-control" id="inputDest" placeholder="Rua, número, bairro, cidade…" autocomplete="off">
+                    <input type="text" class="form-control mt-2" id="numeroDest" name="numero_destino" placeholder="Nº" maxlength="20">
+                    <button type="button" class="btn btn-outline-secondary" id="btnBuscarDestinoLivre"><i class="fas fa-search"></i></button>
                 </div>
                 <div class="form-text">Ou toque no mapa para marcar o ponto exato.</div>
                 <?php endif; ?>
@@ -690,7 +696,9 @@ async function reverseGeocode(lat, lng) {
 }
 
 async function geocodeOrigem() {
-    const q = document.getElementById('inputOrigem').value.trim();
+    const q = ((document.getElementById('inputOrigem')?.value || '').trim() && (document.getElementById('numeroOrigem')?.value || '').trim())
+        ? document.getElementById('inputOrigem').value.trim() + ', nº ' + document.getElementById('numeroOrigem').value.trim()
+        : document.getElementById('inputOrigem').value.trim();
     if (!q) return;
     const btn = document.getElementById('btnBuscarOrigem');
     btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>'; btn.disabled = true;
@@ -706,7 +714,9 @@ async function geocodeOrigem() {
 
 async function geocodeDest() {
     const inp = document.getElementById('inputDest');
-    const q = inp ? inp.value.trim() : '';
+    const q = inp ? (((inp.value || '').trim() && (document.getElementById('numeroDest')?.value || '').trim())
+        ? inp.value.trim() + ', nº ' + document.getElementById('numeroDest').value.trim()
+        : inp.value.trim()) : '';
     if (!q) return;
     const search = inp.nextElementSibling;
     if (search) { search.innerHTML = '<i class="fas fa-spinner fa-spin"></i>'; search.disabled = true; }
@@ -916,7 +926,8 @@ document.addEventListener('DOMContentLoaded', function () {
     document.getElementById('btnBuscarOrigem')?.addEventListener('click', geocodeOrigem);
     document.getElementById('btnGps')?.addEventListener('click', usarGPS);
     const inputOrigem = document.getElementById('inputOrigem');
-    inputOrigem?.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); geocodeOrigem(); } });
+    inputOrigem?.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); geocodeOrigem(); } });
+    document.getElementById('numeroOrigem')?.addEventListener('input', () => { geocodeOrigem(); });
 
     document.querySelectorAll('.socorro-chip[data-symptom]').forEach(chip => {
         chip.addEventListener('click', function () {
@@ -965,7 +976,8 @@ document.addEventListener('DOMContentLoaded', function () {
     document.getElementById('btnBuscarDestinoTab')?.addEventListener('click', geocodeDest);
     document.getElementById('btnBuscarDestinoLivre')?.addEventListener('click', geocodeDest);
     document.getElementById('selectOficina')?.addEventListener('change', function () { selecionarOficina(this); });
-    document.getElementById('inputDest')?.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); geocodeDest(); } });
+    document.getElementById('inputDest')?.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); geocodeDest(); } });
+    document.getElementById('numeroDest')?.addEventListener('input', () => { geocodeDest(); });
     document.getElementById('veiculo_id_select')?.addEventListener('change', function () {
         checkSubmit();
         if (origemOk && destOk) recalcularOuCopiar();

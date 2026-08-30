@@ -1,43 +1,33 @@
 /**
  * public/assets/js/quick-rescue.js
- * Pacote L1.8 — reescrito para seguir o contrato do plano (seção 4.9):
- *   POST /cliente/pedido/rascunho
- *   payload: { endereco_origem, lat_origem, lng_origem, source: 'gps'|'autocomplete' }
- *   resposta: { ok, draft_id, redirect }
- *
- * Regras seguidas aqui:
- *  - o formulário NUNCA troca sua action por string replace — a action é sempre
- *    a rota de rascunho; a navegação pós-sucesso usa o `redirect` que o backend
- *    devolve na resposta;
- *  - digitar endereço e confirmar dispara geocode real via backend (/geocode?q=),
- *    não é mais um "preventDefault + simulação";
- *  - GPS continua usando reverse geocode via backend (/geocode/reverse).
+ * Fluxo rápido do cliente no dashboard.
  */
 (function () {
     function geocodeText(baseUrl, query) {
         const target = new URL(baseUrl, window.location.origin);
         target.searchParams.set('q', query);
-        return fetch(target.toString(), { headers: { 'Accept': 'application/json' } }).then((r) => r.json());
+        return fetch(target.toString(), { headers: { Accept: 'application/json' } }).then((r) => r.json());
     }
 
     function reverseGeocode(url, lat, lng) {
         const target = new URL(url, window.location.origin);
         target.searchParams.set('lat', lat);
         target.searchParams.set('lng', lng);
-        return fetch(target.toString(), { headers: { 'Accept': 'application/json' } }).then((r) => r.json());
+        return fetch(target.toString(), { headers: { Accept: 'application/json' } }).then((r) => r.json());
     }
 
     function postDraft(actionUrl, csrfToken, payload) {
         const body = new URLSearchParams({
             csrf_token: csrfToken,
             endereco_origem: payload.endereco_origem,
+            numero_origem: payload.numero_origem || '',
             lat_origem: payload.lat_origem != null ? String(payload.lat_origem) : '',
             lng_origem: payload.lng_origem != null ? String(payload.lng_origem) : '',
             source: payload.source,
         });
         return fetch(actionUrl, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'Accept': 'application/json' },
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded', Accept: 'application/json' },
             body: body.toString(),
         }).then((r) => r.json());
     }
@@ -47,6 +37,7 @@
         if (!form) return;
 
         const input = form.querySelector('[data-quick-rescue-input]');
+        const numberInput = form.querySelector('[data-quick-rescue-number]');
         const gpsBtn = form.querySelector('[data-quick-rescue-gps]');
         const reverseUrl = form.dataset.reverseUrl || '';
         const geocodeUrl = form.dataset.geocodeUrl || '/geocode';
@@ -54,12 +45,17 @@
         const draftFieldLng = form.querySelector('[name="lng_origem"]');
         const csrfField = form.querySelector('[name="csrf_token"]');
         const submit = form.querySelector('[type="submit"]');
-        // A rota de rascunho é sempre esta — nunca é reescrita em runtime.
         const draftActionUrl = form.getAttribute('action');
 
         let isLocated = false;
         let lastSource = 'autocomplete';
         let submitting = false;
+
+        function composeText() {
+            const texto = input ? input.value.trim() : '';
+            const numero = numberInput ? numberInput.value.trim() : '';
+            return texto && numero ? texto + ', nº ' + numero : texto;
+        }
 
         function updateSubmitButton() {
             if (!submit) return;
@@ -114,16 +110,22 @@
                 updateSubmitButton();
             });
         }
+        if (numberInput) {
+            numberInput.addEventListener('input', () => {
+                isLocated = false;
+                setCoords(null, null);
+                updateSubmitButton();
+            });
+        }
 
         form.addEventListener('submit', async (event) => {
             event.preventDefault();
             if (submitting) return;
 
-            const texto = input ? input.value.trim() : '';
+            const texto = composeText();
             if (texto === '') return;
 
             if (!isLocated) {
-                // Primeiro clique: resolve o endereço digitado via geocoding real do backend.
                 submitting = true;
                 if (submit) submit.disabled = true;
                 try {
@@ -146,13 +148,12 @@
                 return;
             }
 
-            // Segundo clique (já localizado): grava o rascunho via AJAX e segue o
-            // `redirect` devolvido pelo backend — a action do form nunca muda.
             submitting = true;
             if (submit) submit.disabled = true;
             try {
                 const payload = {
                     endereco_origem: texto,
+                    numero_origem: numberInput ? numberInput.value.trim() : '',
                     lat_origem: draftFieldLat ? draftFieldLat.value || null : null,
                     lng_origem: draftFieldLng ? draftFieldLng.value || null : null,
                     source: lastSource,

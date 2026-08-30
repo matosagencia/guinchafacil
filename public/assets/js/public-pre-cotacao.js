@@ -1,33 +1,117 @@
 (function () {
     'use strict';
+
     const gps = document.getElementById('btnGps');
     const status = document.getElementById('gpsStatus');
     const lat = document.getElementById('lat_origem');
     const lng = document.getElementById('lng_origem');
     const address = document.getElementById('localizacao');
+    const number = document.getElementById('numero_origem');
     const destination = document.getElementById('destino');
+    const destinationNumber = document.getElementById('numero_destino');
+
     if (!gps || !status || !lat || !lng) return;
 
-    function setupAddressAutocomplete(input, latInput, lngInput, label) {
+    function composeQuery(input, numberInput) {
+        const base = input ? input.value.trim() : '';
+        const num = numberInput ? numberInput.value.trim() : '';
+        return base && num ? base + ', nº ' + num : base;
+    }
+
+    function setupAddressAutocomplete(input, latInput, lngInput, label, numberInput) {
         if (!input || !latInput || !lngInput) return;
         const wrapper = input.parentElement;
         wrapper.style.position = 'relative';
         const list = document.createElement('div');
-        list.className = 'public-address-suggestions'; list.setAttribute('role', 'listbox'); list.hidden = true;
+        list.className = 'public-address-suggestions';
+        list.setAttribute('role', 'listbox');
+        list.hidden = true;
         wrapper.appendChild(list);
-        let timer = null; let requestId = 0; let selected = false;
-        function clearList() { list.innerHTML = ''; list.hidden = true; }
-        function choose(item) { input.value=item.display_name||''; latInput.value=item.lat; lngInput.value=item.lng; selected=true; clearList(); if(label==='origem') status.textContent='Endereço selecionado. Agora informe a situação.'; }
-        async function search() {
-            const query=input.value.trim(); if(query.length<4||selected){clearList();return;} const current=++requestId;
-            try { const res=await fetch((document.body.dataset.basePath||'')+'/geocode/public?q='+encodeURIComponent(query),{headers:{Accept:'application/json'}}); if(current!==requestId)return; const payload=await res.json(); const items=payload.items||[]; list.innerHTML=''; if(!items.length){clearList();return;}
-                items.forEach(function(item){const button=document.createElement('button');button.type='button';button.className='public-address-suggestion';button.textContent=item.display_name||'Endereço encontrado';button.addEventListener('mousedown',function(e){e.preventDefault();choose(item);});list.appendChild(button);}); list.hidden=false;
-            } catch(e){clearList();}
+        let timer = null;
+        let requestId = 0;
+        let selected = false;
+
+        function clearList() {
+            list.innerHTML = '';
+            list.hidden = true;
         }
-        input.addEventListener('input',function(){selected=false;latInput.value='';lngInput.value='';clearTimeout(timer);timer=setTimeout(search,500);}); input.addEventListener('blur',function(){setTimeout(clearList,180);}); input.addEventListener('keydown',function(e){if(e.key==='Escape')clearList();});
+
+        function choose(item) {
+            input.value = item.display_name || '';
+            latInput.value = item.lat;
+            lngInput.value = item.lng;
+            selected = true;
+            clearList();
+            if (label === 'origem') {
+                status.textContent = 'Endereço selecionado. Agora informe a situação.';
+            }
+        }
+
+        async function search() {
+            const query = composeQuery(input, numberInput);
+            if (query.length < 4 || selected) {
+                clearList();
+                return;
+            }
+
+            const current = ++requestId;
+            try {
+                const res = await fetch((document.body.dataset.basePath || '') + '/geocode/public?q=' + encodeURIComponent(query), {
+                    headers: { Accept: 'application/json' },
+                });
+                if (current !== requestId) return;
+                const payload = await res.json();
+                const items = payload.items || [];
+                list.innerHTML = '';
+                if (!items.length) {
+                    clearList();
+                    return;
+                }
+                items.forEach(function (item) {
+                    const button = document.createElement('button');
+                    button.type = 'button';
+                    button.className = 'public-address-suggestion';
+                    button.textContent = item.display_name || 'Endereço encontrado';
+                    button.addEventListener('mousedown', function (e) {
+                        e.preventDefault();
+                        choose(item);
+                    });
+                    list.appendChild(button);
+                });
+                list.hidden = false;
+            } catch (e) {
+                clearList();
+            }
+        }
+
+        input.addEventListener('input', function () {
+            selected = false;
+            latInput.value = '';
+            lngInput.value = '';
+            clearTimeout(timer);
+            timer = setTimeout(search, 500);
+        });
+
+        if (numberInput) {
+            numberInput.addEventListener('input', function () {
+                selected = false;
+                latInput.value = '';
+                lngInput.value = '';
+                clearTimeout(timer);
+                timer = setTimeout(search, 500);
+            });
+        }
+
+        input.addEventListener('blur', function () {
+            setTimeout(clearList, 180);
+        });
+        input.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') clearList();
+        });
     }
-    setupAddressAutocomplete(address, lat, lng, 'origem');
-    setupAddressAutocomplete(destination, document.getElementById('lat_destino'), document.getElementById('lng_destino'), 'destino');
+
+    setupAddressAutocomplete(address, lat, lng, 'origem', number);
+    setupAddressAutocomplete(destination, document.getElementById('lat_destino'), document.getElementById('lng_destino'), 'destino', destinationNumber);
 
     document.querySelectorAll('[data-choice-group][data-choice-value]').forEach(function (card) {
         card.addEventListener('click', function () {

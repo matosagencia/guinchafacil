@@ -147,6 +147,8 @@ include __DIR__ . '/../layouts/header.php';
                                 <input type="text" class="form-control" name="endereco_origem" id="endOrigem"
                                        placeholder="Rua, número, cidade..." required
                                        >
+                                <input type="text" class="form-control mt-2" name="numero_origem" id="numOrigem"
+                                       placeholder="Número" maxlength="20">
                                 <button type="button" class="btn btn-outline-secondary" id="btnMapOrigemInput" title="Clique no mapa">
                                     <i class="fas fa-map-pin"></i>
                                 </button>
@@ -169,6 +171,8 @@ include __DIR__ . '/../layouts/header.php';
                                 <input type="text" class="form-control" name="endereco_destino" id="endDestino"
                                        placeholder="Oficina ou destino (obrigatório para reboque)..."
                                        >
+                                <input type="text" class="form-control mt-2" name="numero_destino" id="numDestino"
+                                       placeholder="Número" maxlength="20">
                                 <button type="button" class="btn btn-outline-secondary" id="btnMapDestinoInput" title="Clique no mapa">
                                     <i class="fas fa-flag"></i>
                                 </button>
@@ -322,8 +326,10 @@ function geocodeDebounce(tipo, addr) {
 }
 
 function geocodeAddr(tipo, addr) {
-    if (addr.length < 6) return;
-    fetch(`${bp}/geocode?q=${encodeURIComponent(addr)}`)
+    const numero = (document.getElementById(tipo === 'origem' ? 'numOrigem' : 'numDestino')?.value || '').trim();
+    const query = addr && addr.trim() ? (numero ? addr.trim() + ', nº ' + numero : addr.trim()) : '';
+    if (query.length < 6) return;
+    fetch(`${bp}/geocode?q=${encodeURIComponent(query)}`)
         .then(r => r.json()).then(data => {
             if (!data.ok || !data.result) return;
             const lat = parseFloat(data.result.lat), lng = parseFloat(data.result.lng);
@@ -575,6 +581,8 @@ document.getElementById('btnOrigem').addEventListener('click', function () { set
 document.getElementById('btnDestino').addEventListener('click', function () { setMapMode('destino'); });
 document.getElementById('endOrigem').addEventListener('input', function () { geocodeDebounce('origem', this.value); });
 document.getElementById('endDestino').addEventListener('input', function () { geocodeDebounce('destino', this.value); });
+document.getElementById('numOrigem').addEventListener('input', function () { geocodeDebounce('origem', document.getElementById('endOrigem').value); });
+document.getElementById('numDestino').addEventListener('input', function () { geocodeDebounce('destino', document.getElementById('endDestino').value); });
 document.querySelectorAll('[data-problema-radio]').forEach(function (input) {
     input.addEventListener('change', highlightProblema);
 });

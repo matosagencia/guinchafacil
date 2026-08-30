@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/../Services/NotificacaoService.php';
+require_once __DIR__ . '/../Services/EnderecoFormatter.php';
 // File: guinchafacil/src/Controllers/AuthController.php
 
 // Refatorado com transações seguras e validações aprimoradas
@@ -153,10 +154,18 @@ class AuthController extends BaseController
 
         $lat = filter_var($_POST['lat_origem'] ?? null, FILTER_VALIDATE_FLOAT);
         $lng = filter_var($_POST['lng_origem'] ?? null, FILTER_VALIDATE_FLOAT);
-        $localizacao = trim((string)($_POST['localizacao'] ?? ''));
+        $numeroOrigem = trim((string)($_POST['numero_origem'] ?? ''));
+        $localizacao = EnderecoFormatter::comNumeroNoTexto(
+            (string)($_POST['localizacao'] ?? ''),
+            $numeroOrigem !== '' ? $numeroOrigem : null
+        );
         $latDestino = filter_var($_POST['lat_destino'] ?? null, FILTER_VALIDATE_FLOAT);
         $lngDestino = filter_var($_POST['lng_destino'] ?? null, FILTER_VALIDATE_FLOAT);
-        $destino = trim((string)($_POST['destino'] ?? ''));
+        $numeroDestino = trim((string)($_POST['numero_destino'] ?? ''));
+        $destino = EnderecoFormatter::comNumeroNoTexto(
+            (string)($_POST['destino'] ?? ''),
+            $numeroDestino !== '' ? $numeroDestino : null
+        );
         $tipo = trim((string)($_POST['tipo_problema'] ?? ''));
         $categoria = trim((string)($_POST['categoria'] ?? 'popular'));
         $categorias = ['moto', 'popular', 'suv', 'caminhonete', 'eletrico'];

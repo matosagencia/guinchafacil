@@ -36,6 +36,7 @@ require_once __DIR__ . '/../Services/DebugMode.php';
 require_once __DIR__ . '/../Models/Demanda.php';
 require_once __DIR__ . '/../Services/TerritorioMetasService.php';
 require_once __DIR__ . '/../Services/FinancialAttributionReportService.php';
+require_once __DIR__ . '/../Services/EnderecoFormatter.php';
 require_once __DIR__ . '/AdminHealthController.php';
 require_once __DIR__ . '/AdminEnvAuditController.php';
 require_once __DIR__ . '/AdminChatController.php';
@@ -1343,8 +1344,16 @@ class AdminController extends BaseController
         $guinchoId   = (int)($_POST['guincho_id']   ?? 0) ?: null;
         $tipo        = $_POST['tipo_problema'] ?? 'outro';
         $descricao   = trim($_POST['descricao'] ?? '');
-        $endOrigem   = trim($_POST['endereco_origem']  ?? '');
-        $endDestino  = trim($_POST['endereco_destino'] ?? '');
+        $numeroOrigem = trim((string)($_POST['numero_origem'] ?? ''));
+        $numeroDestino = trim((string)($_POST['numero_destino'] ?? ''));
+        $endOrigem   = EnderecoFormatter::comNumeroNoTexto(
+            (string)($_POST['endereco_origem'] ?? ''),
+            $numeroOrigem !== '' ? $numeroOrigem : null
+        );
+        $endDestino  = EnderecoFormatter::comNumeroNoTexto(
+            (string)($_POST['endereco_destino'] ?? ''),
+            $numeroDestino !== '' ? $numeroDestino : null
+        );
         $latOrigem   = (float)($_POST['lat_origem']  ?? -23.5505);
         $lngOrigem   = (float)($_POST['lng_origem']  ?? -46.6333);
         $latDestino  = (float)($_POST['lat_destino'] ?? -23.5505);
