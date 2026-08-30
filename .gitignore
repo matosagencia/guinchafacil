@@ -38,3 +38,7 @@ qa/.auth/
 *.pem
 *.key
 *.ppk
+
+# Documentacao e textos locais fora do repositorio publico
+/doc/
+/*.txt
