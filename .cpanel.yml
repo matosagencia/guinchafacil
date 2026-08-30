@@ -2,6 +2,6 @@
 deployment:
   tasks:
     - export DEPLOYPATH=/home/oawqoqml/public_html/
-    - /bin/rm -rf "$DEPLOYPATH/DOC"
+    - find . -mindepth 1 -maxdepth 1 -exec /bin/cp -R {} "$DEPLOYPATH" \;
+    - /bin/rm -rf "$DEPLOYPATH/.git" "$DEPLOYPATH/.cpanel.yml" "$DEPLOYPATH/DOC"
     - find "$DEPLOYPATH" -maxdepth 1 -type f -name "*.txt" -delete
-    - find . -mindepth 1 -maxdepth 1 ! -name ".git" ! -name ".cpanel.yml" -exec /bin/cp -R {} "$DEPLOYPATH" \;
