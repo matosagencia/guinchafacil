@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . '/BaseController.php';
 require_once __DIR__ . '/../Services/AuthService.php';
+require_once __DIR__ . '/../Services/EnderecoService.php';
 require_once __DIR__ . '/../Models/Especialista.php';
 require_once __DIR__ . '/../Services/EspecialistaAtendimentoService.php';
 require_once __DIR__ . '/../Services/EspecialistaProofOfRoadService.php';
@@ -26,6 +27,7 @@ class EspecialistaController extends BaseController
         $stmt = getPDO()->prepare('SELECT id,nome,email,cpf,telefone FROM usuarios WHERE id=?');
         $stmt->execute([(int)$usuario['id']]);
         $dadosUsuario = $stmt->fetch(PDO::FETCH_ASSOC) ?: [];
+        $enderecoBase = EnderecoService::buscarPrincipalPorUsuarioId((int)$usuario['id']) ?: [];
         $csrfToken = AuthService::gerarCsrfToken();
         $flashMsg = $_SESSION['_flash'] ?? [];
         unset($_SESSION['_flash']);
@@ -57,16 +59,43 @@ class EspecialistaController extends BaseController
             $raio = (float)($_POST['raio_atendimento_km'] ?? 10);
             $pix = trim((string)($_POST['chave_pix'] ?? ''));
             $pixTipo = (string)($_POST['chave_pix_tipo'] ?? 'cpf');
+            $cep = trim((string)($_POST['cep'] ?? ''));
+            $logradouro = trim((string)($_POST['logradouro'] ?? ''));
+            $numero = trim((string)($_POST['numero'] ?? ''));
+            $complemento = trim((string)($_POST['complemento'] ?? ''));
+            $bairro = trim((string)($_POST['bairro'] ?? ''));
+            $cidade = trim((string)($_POST['cidade'] ?? ''));
+            $estado = strtoupper(trim((string)($_POST['estado'] ?? '')));
+            $cepDigits = preg_replace('/\D+/', '', $cep);
             if (mb_strlen($nome) < 3) throw new InvalidArgumentException('Informe um nome profissional válido.');
             if (strlen($telefone) < 10) throw new InvalidArgumentException('Informe um telefone válido.');
             if ($raio <= 0 || $raio > 200) throw new InvalidArgumentException('Raio de atendimento inválido.');
             if ($pix === '') throw new InvalidArgumentException('A chave Pix é obrigatória.');
             if (!in_array($pixTipo, ['cpf','cnpj','email','telefone','aleatoria'], true)) throw new InvalidArgumentException('Tipo de chave Pix inválido.');
+            if (strlen($cepDigits) !== 8) throw new InvalidArgumentException('Informe um CEP válido.');
+            if ($logradouro === '' || $numero === '' || $bairro === '' || $cidade === '' || !preg_match('/^[A-Z]{2}$/', $estado)) throw new InvalidArgumentException('Preencha o endereço base completo.');
+            $pdo = getPDO();
+            $pdo->beginTransaction();
             Especialista::atualizarPerfil((int)$especialista['id'], $nome, $bio, $raio, $pix, $pixTipo);
-            getPDO()->prepare('UPDATE usuarios SET nome=?, telefone=? WHERE id=?')->execute([$nome, $telefone, (int)$usuario['id']]);
+            EnderecoService::salvarPrincipal([
+                'usuario_id' => (int)$usuario['id'],
+                'cep' => $cep,
+                'logradouro' => $logradouro,
+                'numero' => $numero,
+                'complemento' => $complemento,
+                'bairro' => $bairro,
+                'cidade' => $cidade,
+                'estado' => $estado,
+            ]);
+            $pdo->prepare('UPDATE usuarios SET nome=?, telefone=? WHERE id=?')->execute([$nome, $telefone, (int)$usuario['id']]);
+            $pdo->commit();
             $_SESSION['user']['nome'] = $nome;
             $_SESSION['_flash'][] = ['message' => 'Perfil atualizado. Se a chave Pix foi alterada, a nova chave entra em vigor após 24 horas.', 'type' => 'success'];
-        } catch (Throwable $e) { $_SESSION['_flash'][] = ['message' => $e->getMessage(), 'type' => 'error']; }
+        } catch (Throwable $e) {
+            $pdo = getPDO();
+            if ($pdo->inTransaction()) { $pdo->rollBack(); }
+            $_SESSION['_flash'][] = ['message' => $e->getMessage(), 'type' => 'error'];
+        }
         $this->redirect('/especialista/perfil');
     }
 
