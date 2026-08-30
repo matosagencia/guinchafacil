@@ -204,10 +204,19 @@ class AuthController extends BaseController
         require_once __DIR__ . '/../Services/TarifaService.php';
         $detalhe = null;
         $origemTarifa = 'reboque';
+        if ($serviceTypeId > 0 && (($serviceType['attendance_mode'] ?? '') === 'ON_SITE')) {
+            require_once __DIR__ . '/../Services/EspecialistaPricingService.php';
+            $precoEspecialista = EspecialistaPricingService::calcular((string)($serviceType['code'] ?? ''), $distancia);
+            if ($precoEspecialista !== null) {
+                $detalhe = $precoEspecialista['detalhe'];
+                $detalhe['valor'] = $precoEspecialista['customer_amount'];
+                $origemTarifa = 'especialista_catalogo';
+            }
+        }
         if ($serviceTypeId > 0) {
             require_once __DIR__ . '/../Services/Pricing/ZonePricingService.php';
             $zona = ZonePricingService::calcularPreco((float)$lat, (float)$lng, $serviceTypeId, $categoria, $distancia);
-            if ($zona !== null) { $detalhe = $zona['detalhe']; $detalhe['valor'] = $zona['valor']; $origemTarifa = 'zona'; }
+            if ($detalhe === null && $zona !== null) { $detalhe = $zona['detalhe']; $detalhe['valor'] = $zona['valor']; $origemTarifa = 'zona'; }
             if ($detalhe === null && (($serviceType['attendance_mode'] ?? '') !== 'TOWING')) {
                 require_once __DIR__ . '/../Models/Catalog/ServicePricingRule.php';
                 $precoServico = ServicePricingRule::calcularTotal($serviceTypeId, $distancia, null, null);
@@ -611,6 +620,28 @@ class AuthController extends BaseController
                 'raio_atendimento_km' => max(1, min(100, (float)($_POST['raio_atendimento_km'] ?? 10))),
             ], $pdo);
             Especialista::vincularServicos($especialistaId, $servicos, $pdo);
+            foreach (['documento_arquivo' => 'documento_identidade', 'selfie_arquivo' => 'selfie'] as $campo => $tipoDocumento) {
+                $arquivo = $_FILES[$campo] ?? null;
+                if (!$arquivo || ($arquivo['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) {
+                    throw new DomainException('Envie os dois documentos obrigatórios para homologação.');
+                }
+                if (($arquivo['size'] ?? 0) <= 0 || ($arquivo['size'] ?? 0) > (defined('MAX_UPLOAD_SIZE') ? MAX_UPLOAD_SIZE : 5242880)) {
+                    throw new DomainException('Cada documento deve ter no máximo 5 MB.');
+                }
+                $mime = (new finfo(FILEINFO_MIME_TYPE))->file((string)$arquivo['tmp_name']);
+                $ext = ['image/jpeg'=>'jpg','image/png'=>'png','image/webp'=>'webp'][$mime] ?? null;
+                if (!$ext) throw new DomainException('Documentos devem ser imagens JPEG, PNG ou WEBP.');
+                $base = defined('UPLOAD_PATH_DOCS') ? UPLOAD_PATH_DOCS : (dirname(__DIR__, 2) . '/storage/private/uploads');
+                $dir = rtrim($base, '/\\') . DIRECTORY_SEPARATOR . 'especialistas';
+                if (!is_dir($dir) && !@mkdir($dir, 0770, true)) throw new RuntimeException('Não foi possível preparar o armazenamento.');
+                $nome = $tipoDocumento . '_' . $especialistaId . '_' . bin2hex(random_bytes(8)) . '.' . $ext;
+                $destino = $dir . DIRECTORY_SEPARATOR . $nome;
+                $ok = is_uploaded_file((string)$arquivo['tmp_name']) ? move_uploaded_file((string)$arquivo['tmp_name'], $destino) : rename((string)$arquivo['tmp_name'], $destino);
+                if (!$ok) throw new RuntimeException('Falha ao armazenar documento.');
+                Especialista::adicionarDocumento($especialistaId, $tipoDocumento, $_POST['documento_numero'] ?? null, $nome, $pdo);
+                $coluna = $campo;
+                $pdo->prepare("UPDATE especialistas SET {$coluna}=? WHERE id=?")->execute([$nome, $especialistaId]);
+            }
 
             $pdo->commit();
             $this->setFlashMessage('Cadastro de especialista realizado!', 'success');

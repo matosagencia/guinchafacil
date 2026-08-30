@@ -190,9 +190,10 @@ final class PedidoTransitionService
 
             if ($incidenteCriado > 0 && $codigoServicoEspecialista !== '') {
                 try {
-                    $precoEspecialista = EspecialistaPricingService::calcular($codigoServicoEspecialista, 0);
-                    $repasseEspecialista = $precoEspecialista ? min((float)$precoEspecialista['provider_amount'], $total) : $valorGuincho;
-                    $taxaEspecialista = $precoEspecialista ? round($total - $repasseEspecialista, 2) : $valorPlataforma;
+                    // O repasse é sempre recalculado sobre o valor efetivamente
+                    // pago pelo cliente (incluindo distância e adicional noturno).
+                    $repasseEspecialista = round((float)$total * 0.75, 2);
+                    $taxaEspecialista = round((float)$total - $repasseEspecialista, 2);
                     IncidenteFinanceiroService::registrar($incidenteCriado, 'cobranca_cliente', 'pagamento', (int)$pag['id'], $total);
                     IncidenteFinanceiroService::registrar($incidenteCriado, 'taxa_plataforma', 'pagamento', (int)$pag['id'], $taxaEspecialista);
                     $atendimentoId = EspecialistaDispatchService::disparar($incidenteCriado, $codigoServicoEspecialista, $repasseEspecialista, $total, $taxaEspecialista);

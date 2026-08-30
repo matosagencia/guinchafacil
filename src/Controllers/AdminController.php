@@ -961,6 +961,19 @@ class AdminController extends BaseController
         $this->redirect('/admin/especialistas?msg=suspenso');
     }
 
+    public function especialistaDocumentoStatus(): void
+    {
+        AuthService::requireAuth('admin');
+        if (!AuthService::validarCsrfToken($_POST['csrf_token'] ?? '')) { http_response_code(403); exit; }
+        $id = max(0, (int)($_POST['documento_id'] ?? 0));
+        $status = (string)($_POST['status'] ?? '');
+        if ($id > 0 && in_array($status, ['aprovado','rejeitado'], true)) {
+            getPDO()->prepare('UPDATE especialista_documentos SET status=?, observacao_admin=? WHERE id=?')
+                ->execute([$status, trim((string)($_POST['observacao_admin'] ?? '')) ?: null, $id]);
+        }
+        $this->redirect('/admin/especialistas?msg=documento_' . ($status === 'aprovado' ? 'aprovado' : 'rejeitado'));
+    }
+
 
     /**
      * §GUINCHOS-SHELL-01: carrega tudo que o painel de detalhe de um

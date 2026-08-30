@@ -56,6 +56,14 @@ class Especialista
         foreach ($ids as $id) $insert->execute([$especialistaId, $id]);
     }
 
+    public static function adicionarDocumento(int $especialistaId, string $tipo, ?string $numero, string $arquivo, ?PDO $pdo = null): int
+    {
+        $pdo = $pdo ?? getPDO();
+        $st = $pdo->prepare('INSERT INTO especialista_documentos (especialista_id,tipo,numero,arquivo,status) VALUES (?,?,?,?,\'pendente\')');
+        $st->execute([$especialistaId, $tipo, $numero ?: null, $arquivo]);
+        return (int)$pdo->lastInsertId();
+    }
+
     public static function servicosComCatalogo(int $especialistaId): array
     {
         // O preço é sempre da plataforma. preco_pretendido é um campo legado

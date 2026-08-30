@@ -176,4 +176,17 @@ class ArquivoController extends BaseController
         $mime = (new finfo(FILEINFO_MIME_TYPE))->file($path); if (!in_array($mime,['image/jpeg','image/png','image/webp'],true)) { http_response_code(415); exit; }
         header('Content-Type: '.$mime); header('Content-Disposition: inline; filename="'.rawurlencode($name).'"'); header('Cache-Control: private, no-store'); readfile($path); exit;
     }
+
+    public function servirDocumentoEspecialista(int $documentoId): void
+    {
+        $usuario = AuthService::requireAuth(null);
+        if (($usuario['tipo'] ?? '') !== 'admin') { http_response_code(403); exit('Acesso negado'); }
+        $st = getPDO()->prepare('SELECT arquivo FROM especialista_documentos WHERE id=?');
+        $st->execute([$documentoId]); $nome = basename((string)$st->fetchColumn());
+        $path = (defined('UPLOAD_PATH_DOCS') ? UPLOAD_PATH_DOCS : dirname(PUBLIC_PATH).'/storage/private/uploads') . DIRECTORY_SEPARATOR . 'especialistas' . DIRECTORY_SEPARATOR . $nome;
+        if (!$nome || !is_file($path)) { http_response_code(404); exit('Arquivo não encontrado'); }
+        $mime = (new finfo(FILEINFO_MIME_TYPE))->file($path);
+        if (!in_array($mime, ['image/jpeg','image/png','image/webp'], true)) { http_response_code(415); exit; }
+        header('Content-Type: '.$mime); header('Content-Disposition: inline; filename="'.rawurlencode($nome).'"'); header('Cache-Control: private, no-store'); readfile($path); exit;
+    }
 }

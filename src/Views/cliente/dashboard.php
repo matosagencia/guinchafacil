@@ -107,6 +107,9 @@ function cliente_saudacao(): string
                         <?php if (!empty($inc['atendimento_status'])): ?><span class="badge text-bg-warning"><?php echo htmlspecialchars(ucfirst(str_replace('_',' ', (string)$inc['atendimento_status']))); ?></span><?php endif; ?>
                     </div>
                     <div class="small text-muted mt-1"><?php echo htmlspecialchars($inc['especialista_nome'] ?: 'Buscando especialista'); ?></div>
+                    <?php if (!empty($inc['atendimento_status']) || in_array($inc['status'], ['necessita_reboque','em_atendimento','resolvido_local'], true)): ?>
+                        <div class="alert alert-info py-2 px-3 small mt-2 mb-0">O atendimento do especialista é cobrado conforme a cotação. Se você solicitar um guincho, o reboque será uma cobrança adicional, confirmada antes do envio.</div>
+                    <?php endif; ?>
                     <div class="d-flex gap-2 mt-3 flex-wrap">
                         <?php if (($inc['atendimento_status'] ?? '') === 'aguardando_aprovacao' && !empty($inc['atendimento_id'])): ?>
                             <form method="post" action="<?php echo $bp; ?>/cliente/incidente/orcamento/aprovar/<?php echo (int)$inc['atendimento_id']; ?>" class="d-inline">

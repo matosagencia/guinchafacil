@@ -320,6 +320,7 @@ $rotas = [
         '/admin/especialistas' => ['AdminController', 'especialistas', 'admin'],
         '/admin/especialistas/cadastrar' => ['AdminController', 'especialistaCadastroForm', 'admin'],
         '/admin/especialista-fragmento/{id}' => ['AdminController', 'especialistaDetalheFragmento', 'admin'],
+        '/admin/especialista/documento-status' => ['AdminController', 'especialistaDocumentoStatus', 'admin'],
         '/admin/usuarios' => ['AdminController', 'usuarios', 'admin'],
         '/admin/usuario/novo'        => ['AdminController', 'usuarioForm', 'admin'],
         '/admin/usuario/suspender'   => ['AdminController', 'usuariosSuspenderGet', 'admin'],
@@ -550,6 +551,7 @@ $rotasDinamicas = [
     ['GET',  '/arquivo/',                'ArquivoController', 'servir',           null],
     ['GET',  '/evidencia/',              'ArquivoController', 'servirEvidencia',  null],
     ['GET',  '/evidencia-especialista/', 'ArquivoController', 'servirEvidenciaEspecialista', null],
+    ['GET',  '/documento-especialista/', 'ArquivoController', 'servirDocumentoEspecialista', 'admin'],
 
     ['GET',  '/admin/pedido/',           'AdminController',   'pedidoDetalhe',    'admin'],
     ['GET',  '/admin/pedido/status-json/','AdminController',  'pedidoStatusJson', 'admin'],

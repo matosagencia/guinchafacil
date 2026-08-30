@@ -51,6 +51,12 @@ final class EspecialistaProofOfRoadService
         $dist=GeoService::haversine((float)$a['lat_origem'],(float)$a['lng_origem'],$lat,$lng);
         $cfg=class_exists('Configuracao')?Configuracao::getAll():[];
         $limite=(float)($cfg['especialista_geofence_chegada_m']??300);
+        $gps = $pdo->prepare("SELECT latitude,longitude FROM atendimento_eventos WHERE atendimento_tipo='especialista' AND atendimento_id=? AND evento='gps' ORDER BY id DESC LIMIT 1");
+        $gps->execute([$atendimentoId]);
+        $ultimoGps = $gps->fetch(PDO::FETCH_ASSOC);
+        if (!$ultimoGps) throw new DomainException('Registre o deslocamento GPS antes de confirmar a chegada.');
+        $distanciaAnterior = GeoService::haversine((float)$a['lat_origem'], (float)$a['lng_origem'], (float)$ultimoGps['latitude'], (float)$ultimoGps['longitude']) * 1000;
+        if ($distanciaAnterior <= $limite) throw new DomainException('O GPS ainda não comprova deslocamento até o local.');
         if ($dist*1000>$limite) throw new DomainException('Você ainda está fora da área de chegada.');
         self::registrarEvento($atendimentoId,$especialistaId,'chegada',$lat,$lng,$accuracy,['distancia_m'=>round($dist*1000,1)]);
     }
