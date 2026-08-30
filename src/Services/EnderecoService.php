@@ -9,6 +9,36 @@ class EnderecoService
     }
 
     /**
+     * Resolve os nomes das colunas de coordenadas no schema atual.
+     * O schema canônico usa latitude/longitude, mas mantemos fallback
+     * para lat/lng caso exista algum banco legado.
+     *
+     * @return array{0:string,1:string}
+     */
+    private static function coordinateColumns(PDO $pdo): array
+    {
+        static $cache = null;
+        if (is_array($cache)) {
+            return $cache;
+        }
+
+        $stmt = $pdo->query(
+            "SELECT COLUMN_NAME
+             FROM information_schema.COLUMNS
+             WHERE TABLE_SCHEMA = DATABASE()
+               AND TABLE_NAME = 'enderecos'
+               AND COLUMN_NAME IN ('latitude', 'longitude', 'lat', 'lng')"
+        );
+        $columns = array_map('strval', $stmt ? $stmt->fetchAll(PDO::FETCH_COLUMN) : []);
+
+        if (in_array('latitude', $columns, true) || in_array('longitude', $columns, true)) {
+            return $cache = ['latitude', 'longitude'];
+        }
+
+        return $cache = ['lat', 'lng'];
+    }
+
+    /**
      * Cria endereco (tabela enderecos exige usuario_id).
      * Controllers antigos nao passam usuario_id, entao usamos:
      * - $dados['usuario_id'] ou $dados['user_id'] se existir
@@ -22,8 +52,9 @@ class EnderecoService
         }
 
         $pdo = getPDO();
+        [$latCol, $lngCol] = self::coordinateColumns($pdo);
         $sql = "INSERT INTO enderecos
-                (usuario_id, cep, logradouro, numero, complemento, bairro, cidade, estado, lat, lng, principal)
+                (usuario_id, cep, logradouro, numero, complemento, bairro, cidade, estado, {$latCol}, {$lngCol}, principal)
                 VALUES
                 (:usuario_id, :cep, :logradouro, :numero, :complemento, :bairro, :cidade, :estado, :lat, :lng, :principal)";
         $stmt = $pdo->prepare($sql);
@@ -50,8 +81,12 @@ class EnderecoService
             return null;
         }
 
-        $stmt = getPDO()->prepare(
-            'SELECT id, usuario_id, cep, logradouro, numero, complemento, bairro, cidade, estado, lat, lng, principal
+        $pdo = getPDO();
+        [$latCol, $lngCol] = self::coordinateColumns($pdo);
+
+        $stmt = $pdo->prepare(
+            'SELECT id, usuario_id, cep, logradouro, numero, complemento, bairro, cidade, estado, ' .
+            $latCol . ', ' . $lngCol . ', principal
              FROM enderecos
              WHERE usuario_id = ?
              ORDER BY principal DESC, id ASC
@@ -69,6 +104,7 @@ class EnderecoService
         }
 
         $pdo = getPDO();
+        [$latCol, $lngCol] = self::coordinateColumns($pdo);
         $existente = self::buscarPrincipalPorUsuarioId($usuarioId);
         $payload = [
             'cep' => trim((string)($dados['cep'] ?? '')),
@@ -89,7 +125,9 @@ class EnderecoService
         if ($existente) {
             $pdo->prepare(
                 'UPDATE enderecos
-                 SET cep = ?, logradouro = ?, numero = ?, complemento = ?, bairro = ?, cidade = ?, estado = ?, lat = COALESCE(?, lat), lng = COALESCE(?, lng), principal = 1
+                 SET cep = ?, logradouro = ?, numero = ?, complemento = ?, bairro = ?, cidade = ?, estado = ?, ' .
+                $latCol . ' = COALESCE(?, ' . $latCol . '), ' .
+                $lngCol . ' = COALESCE(?, ' . $lngCol . '), principal = 1
                  WHERE id = ? AND usuario_id = ?'
             )->execute([
                 $payload['cep'],
@@ -108,7 +146,8 @@ class EnderecoService
         }
 
         $stmt = $pdo->prepare(
-            'INSERT INTO enderecos (usuario_id, cep, logradouro, numero, complemento, bairro, cidade, estado, lat, lng, principal)
+            'INSERT INTO enderecos (usuario_id, cep, logradouro, numero, complemento, bairro, cidade, estado, ' .
+            $latCol . ', ' . $lngCol . ', principal)
              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1)'
         );
         $stmt->execute([
