@@ -16,6 +16,7 @@ require_once __DIR__ . '/../Services/Payment/GatewayRotationService.php';
 require_once __DIR__ . '/../Services/Payment/PagamentoAprovacaoService.php';
 require_once __DIR__ . '/../Services/Payment/PaymentProviderFactory.php';
 require_once __DIR__ . '/../Services/Financial/SupplementalChargeService.php';
+require_once __DIR__ . '/../Services/CoberturaService.php';
 
 /** Controller de pagamentos (MercadoPago + PagSeguro) */
 class PagamentoController extends BaseController
@@ -335,9 +336,10 @@ class PagamentoController extends BaseController
             $this->redirect('/cliente/dashboard');
         }
 
-        $pedido = Pedido::buscarPorId($pedidoId);
-        if (!$pedido || $pedido['status'] !== 'aguardando_pagamento') {
-            $this->redirect('/cliente/dashboard');
+        [$pedido, $erroPedido] = $this->validarPedidoParaCobrancaTransparente($pedidoId);
+        if ($pedido === null) {
+            $this->setFlashMessage($erroPedido ?? 'Não foi possível iniciar o pagamento.', 'error');
+            $this->redirect('/cliente/pedido/' . $pedidoId);
         }
         $csrfToken = AuthService::gerarCsrfToken();
         $gatewayAtivo = $this->gatewayEfetivo();
@@ -447,6 +449,10 @@ class PagamentoController extends BaseController
         }
         if ($this->pagamentoFoiIgnorado() || ($pedido['status'] ?? '') !== 'aguardando_pagamento') {
             return [null, 'Pedido não está aguardando pagamento.'];
+        }
+        $diagnostico = CoberturaService::diagnosticarAtendimento($pedido);
+        if (($diagnostico['pode_cobrar'] ?? true) !== true) {
+            return [null, (string)($diagnostico['mensagem'] ?? 'No momento não há cobertura para esta ocorrência.')];
         }
         return [$pedido, null];
     }
@@ -750,10 +756,10 @@ class PagamentoController extends BaseController
             http_response_code(403);
             exit;
         }
-        $pedido = Pedido::buscarPorId($pedidoId);
-        if (!$pedido) {
-            $this->setFlashMessage('Pedido não encontrado para iniciar pagamento.', 'error');
-            $this->redirect('/cliente/dashboard');
+        [$pedido, $erroPedido] = $this->validarPedidoParaCobrancaTransparente($pedidoId);
+        if ($pedido === null) {
+            $this->setFlashMessage($erroPedido ?? 'Não foi possível iniciar o pagamento.', 'error');
+            $this->redirect('/cliente/pedido/' . $pedidoId);
         }
         if ($this->pagamentoFoiIgnorado() || ($pedido['status'] ?? '') !== 'aguardando_pagamento') {
             $this->redirect('/cliente/dashboard');
@@ -882,10 +888,10 @@ class PagamentoController extends BaseController
             http_response_code(403);
             exit;
         }
-        $pedido = Pedido::buscarPorId($pedidoId);
-        if (!$pedido) {
-            $this->setFlashMessage('Pedido não encontrado para iniciar pagamento.', 'error');
-            $this->redirect('/cliente/dashboard');
+        [$pedido, $erroPedido] = $this->validarPedidoParaCobrancaTransparente($pedidoId);
+        if ($pedido === null) {
+            $this->setFlashMessage($erroPedido ?? 'Não foi possível iniciar o pagamento.', 'error');
+            $this->redirect('/cliente/pedido/' . $pedidoId);
         }
         if ($this->pagamentoFoiIgnorado() || ($pedido['status'] ?? '') !== 'aguardando_pagamento') {
             $this->redirect('/cliente/dashboard');

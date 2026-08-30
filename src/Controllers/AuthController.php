@@ -201,6 +201,34 @@ class AuthController extends BaseController
         $distancia = min(500.0, max(0.5, round($distancia, 2)));
         if (!in_array($categoria, $categorias, true)) $categoria = 'popular';
 
+        require_once __DIR__ . '/../Services/CoberturaService.php';
+        require_once __DIR__ . '/../Services/PreQuoteDemandService.php';
+        $diagnosticoCobertura = $serviceTypeId > 0 ? CoberturaService::diagnosticarAtendimento([
+            'attendance_mode' => $serviceType['attendance_mode'] ?? '',
+            'lat_origem' => (float)$lat,
+            'lng_origem' => (float)$lng,
+            'service_type_id' => $serviceTypeId,
+            'tipo_problema' => $tipo,
+            'categoria' => $categoria,
+        ]) : ['status' => 'sem_servico', 'pode_cobrar' => false, 'mensagem' => 'Não conseguimos identificar o tipo de atendimento para validar a cobertura.'];
+        if (($diagnosticoCobertura['pode_cobrar'] ?? true) !== true) {
+            PreQuoteDemandService::registrar([
+                'lat_origem' => (float)$lat,
+                'lng_origem' => (float)$lng,
+                'tipo_problema' => $tipo,
+                'categoria' => $categoria,
+            ], 'quote');
+            PreQuoteDemandService::registrarSemCobertura([
+                'lat_origem' => (float)$lat,
+                'lng_origem' => (float)$lng,
+                'tipo_problema' => $tipo,
+                'categoria' => $categoria,
+            ]);
+            $this->setFlashMessage((string)($diagnosticoCobertura['mensagem'] ?? 'No momento não há cobertura para essa ocorrência.'), 'error');
+            $this->redirect('/pre-cotacao');
+            return;
+        }
+
         require_once __DIR__ . '/../Services/TarifaService.php';
         $detalhe = null;
         $origemTarifa = 'reboque';
@@ -224,7 +252,6 @@ class AuthController extends BaseController
             }
         }
         if ($detalhe === null) $detalhe = TarifaService::calcularDetalhado($distancia, $categoria, false);
-        require_once __DIR__ . '/../Services/PreQuoteDemandService.php';
         PreQuoteDemandService::registrar([
             'lat_origem' => (float)$lat, 'lng_origem' => (float)$lng,
             'tipo_problema' => $tipo, 'categoria' => $categoria,

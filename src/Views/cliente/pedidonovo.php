@@ -30,12 +30,13 @@ include __DIR__ . '/../layouts/header.php';
 <?php if ($erro): ?>
 <div class="alert alert-danger mb-3" role="alert">
     <?php
-    $msgs = [
-        'coordenadas_origem'  => 'Confirme sua localização de origem no mapa antes de enviar.',
-        'coordenadas_destino' => 'Confirme o endereço de destino no mapa antes de enviar.',
-        'veiculo'             => 'Veículo inválido. Selecione um dos seus veículos cadastrados.',
-        'sem_cobertura'       => 'No momento não há nenhum prestador que alcance essa localização — o GuinchaFácil ainda não opera nessa região. Assim que houver cobertura, você poderá solicitar normalmente.',
-    ];
+    $msgs = [
+        'coordenadas_origem'  => 'Confirme sua localização de origem no mapa antes de enviar.',
+        'coordenadas_destino' => 'Confirme o endereço de destino no mapa antes de enviar.',
+        'veiculo'             => 'Veículo inválido. Selecione um dos seus veículos cadastrados.',
+        'somente_reboque'     => 'No momento, esta localização tem cobertura apenas para reboque. O atendimento local não será cobrado agora.',
+        'sem_cobertura'       => 'No momento não há nenhum prestador que alcance essa localização — o GuinchaFácil ainda não opera nessa região. Assim que houver cobertura, você poderá solicitar normalmente.',
+    ];
     echo htmlspecialchars($msgs[$erro] ?? 'Corrija os campos indicados e tente novamente.');
     ?>
 </div>

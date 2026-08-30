@@ -16,14 +16,18 @@ final class PreQuoteDemandService
         $quoteDelta = $evento === 'quote' ? 1 : 0;
         $acceptedDelta = $evento === 'accepted' ? 1 : 0;
         $convertedDelta = $evento === 'converted' ? 1 : 0;
+        $noCoverageDelta = $evento === 'no_coverage' ? 1 : 0;
         try {
             $pdo = getPDO();
             $sql = "INSERT INTO pre_quote_demand_cells
-                (cell_lat,cell_lng,period_date,service_key,vehicle_category,quote_count,accepted_count,converted_count,updated_at)
-                VALUES (?,?,CURRENT_DATE,?,?,?,?,?,NOW())
+                (cell_lat,cell_lng,period_date,service_key,vehicle_category,quote_count,accepted_count,converted_count,no_coverage_count,updated_at)
+                VALUES (?,?,CURRENT_DATE,?,?,?,?,?,?,NOW())
                 ON DUPLICATE KEY UPDATE quote_count=quote_count+VALUES(quote_count),
-                accepted_count=accepted_count+VALUES(accepted_count), converted_count=converted_count+VALUES(converted_count), updated_at=NOW()";
-            $pdo->prepare($sql)->execute([$cellLat, $cellLng, $service, $vehicle, $quoteDelta, $acceptedDelta, $convertedDelta]);
+                accepted_count=accepted_count+VALUES(accepted_count),
+                converted_count=converted_count+VALUES(converted_count),
+                no_coverage_count=no_coverage_count+VALUES(no_coverage_count),
+                updated_at=NOW()";
+            $pdo->prepare($sql)->execute([$cellLat, $cellLng, $service, $vehicle, $quoteDelta, $acceptedDelta, $convertedDelta, $noCoverageDelta]);
         } catch (Throwable $e) {
             error_log('[PreQuoteDemand] registro agregado indisponivel: ' . $e->getMessage());
         }
@@ -42,12 +46,17 @@ final class PreQuoteDemandService
     {
         $dias = max(1, min(90, $dias));
         try {
-            $stmt = getPDO()->query("SELECT service_key, SUM(quote_count) total
+            $stmt = getPDO()->query("SELECT service_key, SUM(quote_count) total, SUM(no_coverage_count) no_coverage_total
                 FROM pre_quote_demand_cells WHERE period_date >= DATE_SUB(CURRENT_DATE, INTERVAL {$dias} DAY)
                 GROUP BY service_key ORDER BY total DESC");
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (Throwable $e) {
             return [];
         }
+    }
+
+    public static function registrarSemCobertura(array $quote): void
+    {
+        self::registrar($quote, 'no_coverage');
     }
 }

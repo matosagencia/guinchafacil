@@ -791,8 +791,18 @@ class ClienteController extends BaseController
         // (cron_cancelar_pedidos_expirados.php + EstornoService) cobre o
         // caso de ninguém aceitar a tempo.
         require_once __DIR__ . '/../Services/CoberturaService.php';
-        if (!CoberturaService::existeGuinchoAlcancavel($latOrigem, $lngOrigem, $attendanceMode, $serviceTypeId)) {
-            $this->redirect('/cliente/pedido/novo?erro=sem_cobertura');
+        $diagnosticoCobertura = CoberturaService::diagnosticarAtendimento([
+            'attendance_mode' => $attendanceMode,
+            'lat_origem' => $latOrigem,
+            'lng_origem' => $lngOrigem,
+            'service_type_id' => $serviceTypeId,
+        ]);
+        if (($diagnosticoCobertura['pode_cobrar'] ?? true) !== true) {
+            $erroCobertura = (string)($diagnosticoCobertura['status'] ?? 'sem_cobertura');
+            if (!in_array($erroCobertura, ['sem_cobertura', 'somente_reboque'], true)) {
+                $erroCobertura = 'sem_cobertura';
+            }
+            $this->redirect('/cliente/pedido/novo?erro=' . $erroCobertura);
         }
 
         if (empty($endOrigem)) $endOrigem = 'Localização atual';

@@ -9,6 +9,7 @@ require_once __DIR__ . '/../../Services/NotificacaoService.php';
 require_once __DIR__ . '/../../Services/Logger.php';
 require_once __DIR__ . '/../../Services/AuditTrailService.php';
 require_once __DIR__ . '/../Pedido/PedidoTransitionService.php';
+require_once __DIR__ . '/../CoberturaService.php';
 
 /**
  * Ponto único de aprovação de pagamento — extraído de
@@ -95,6 +96,21 @@ final class PagamentoAprovacaoService
                 ['pedido_id' => $pedidoId, 'id_externo' => $idExterno]
             );
             return ['ok' => false, 'erro' => 'Pagamento não encontrado para o pedido.'];
+        }
+
+        if ((string)($pedido['status'] ?? '') === 'aguardando_pagamento'
+            && (string)($pedido['attendance_mode'] ?? '') === 'ON_SITE'
+            && (int)($pedido['service_type_id'] ?? 0) > 0
+            && empty($pedido['incidente_id'])) {
+            $diagnostico = CoberturaService::diagnosticarAtendimento($pedido);
+            if (($diagnostico['pode_cobrar'] ?? true) !== true) {
+                $mensagem = (string)($diagnostico['mensagem'] ?? 'No momento não há cobertura para esta ocorrência.');
+                Logger::log(Logger::LEVEL_WARN, 'PagamentoAprovacaoService', 'aprovar', $origem,
+                    'Cobertura insuficiente para cobrar o pedido.',
+                    ['pedido_id' => $pedidoId, 'id_externo' => $idExterno, 'diagnostico' => $diagnostico]
+                );
+                return ['ok' => false, 'erro' => $mensagem];
+            }
         }
 
         // §IDEMPOTENCIA-02: pagamento do pedido já aprovado por outro

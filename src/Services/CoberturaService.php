@@ -3,6 +3,7 @@
 
 require_once __DIR__ . '/GeoService.php';
 require_once __DIR__ . '/../Models/Catalog/ProviderCapability.php';
+require_once __DIR__ . '/../Services/EspecialistaDispatchService.php';
 
 /**
  * §COBERTURA-RAIO-01 (05/08/2026)
@@ -92,5 +93,97 @@ class CoberturaService
         }
 
         return false;
+    }
+
+    public static function diagnosticarAtendimento(array $pedido): array
+    {
+        $attendanceMode = strtoupper(trim((string)($pedido['attendance_mode'] ?? '')));
+        if ($attendanceMode !== 'ON_SITE') {
+            return [
+                'status' => 'ok',
+                'pode_cobrar' => true,
+                'pode_especialista' => true,
+                'pode_reboque' => true,
+                'mensagem' => null,
+            ];
+        }
+
+        $lat = is_numeric($pedido['lat_origem'] ?? null) ? (float)$pedido['lat_origem'] : null;
+        $lng = is_numeric($pedido['lng_origem'] ?? null) ? (float)$pedido['lng_origem'] : null;
+        if ($lat === null || $lng === null) {
+            return [
+                'status' => 'sem_coordenadas',
+                'pode_cobrar' => false,
+                'pode_especialista' => false,
+                'pode_reboque' => false,
+                'mensagem' => 'Não conseguimos validar a cobertura para esta localização.',
+            ];
+        }
+
+        $serviceTypeId = (int)($pedido['service_type_id'] ?? 0);
+        if ($serviceTypeId <= 0) {
+            return [
+                'status' => 'sem_servico',
+                'pode_cobrar' => false,
+                'pode_especialista' => false,
+                'pode_reboque' => false,
+                'mensagem' => 'Não conseguimos identificar o tipo de atendimento para validar a cobertura.',
+            ];
+        }
+
+        $serviceCode = self::resolverServiceCode($serviceTypeId);
+        $especialistas = $serviceCode !== ''
+            ? EspecialistaDispatchService::candidatosPorCoordenada($lat, $lng, $serviceCode)
+            : [];
+
+        if (!empty($especialistas)) {
+            return [
+                'status' => 'ok',
+                'pode_cobrar' => true,
+                'pode_especialista' => true,
+                'pode_reboque' => true,
+                'mensagem' => null,
+                'especialistas_encontrados' => count($especialistas),
+                'service_code' => $serviceCode,
+            ];
+        }
+
+        $podeReboque = self::existeGuinchoAlcancavel($lat, $lng, 'TOWING', null);
+        if ($podeReboque) {
+            return [
+                'status' => 'somente_reboque',
+                'pode_cobrar' => false,
+                'pode_especialista' => false,
+                'pode_reboque' => true,
+                'mensagem' => 'Para esta localização, hoje só há cobertura de reboque. O atendimento local não será cobrado agora.',
+                'service_code' => $serviceCode,
+            ];
+        }
+
+        return [
+            'status' => 'sem_cobertura',
+            'pode_cobrar' => false,
+            'pode_especialista' => false,
+            'pode_reboque' => false,
+            'mensagem' => 'No momento não há cobertura para esta ocorrência. Estamos expandindo a rede nesta região.',
+            'service_code' => $serviceCode,
+        ];
+    }
+
+    private static function resolverServiceCode(int $serviceTypeId): string
+    {
+        static $cache = [];
+        if (array_key_exists($serviceTypeId, $cache)) {
+            return $cache[$serviceTypeId];
+        }
+
+        try {
+            $stmt = getPDO()->prepare('SELECT code FROM service_types WHERE id = ? LIMIT 1');
+            $stmt->execute([$serviceTypeId]);
+            $code = strtoupper(trim((string)($stmt->fetchColumn() ?: '')));
+            return $cache[$serviceTypeId] = $code;
+        } catch (Throwable) {
+            return $cache[$serviceTypeId] = '';
+        }
     }
 }

@@ -34,6 +34,11 @@ final class EspecialistaDispatchService
     {
         $incidente = Incidente::buscarPorId($incidenteId);
         if (!$incidente) return [];
+        return self::candidatosPorCoordenada((float)$incidente['lat_origem'], (float)$incidente['lng_origem'], $servicoCodigo);
+    }
+
+    public static function candidatosPorCoordenada(float $latOrigem, float $lngOrigem, string $servicoCodigo): array
+    {
         $codigos = self::SERVICE_MAP[strtoupper($servicoCodigo)] ?? [strtoupper($servicoCodigo)];
         $marks = implode(',', array_fill(0, count($codigos), '?'));
         $sql = "SELECT e.id AS especialista_id, u.nome, e.lat_atual, e.lng_atual,
@@ -48,7 +53,7 @@ final class EspecialistaDispatchService
         $stmt->execute($codigos);
         $out = [];
         foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
-            $dist = GeoService::haversine((float)$incidente['lat_origem'], (float)$incidente['lng_origem'], (float)$row['lat_atual'], (float)$row['lng_atual']);
+            $dist = GeoService::haversine($latOrigem, $lngOrigem, (float)$row['lat_atual'], (float)$row['lng_atual']);
             if ($dist <= (float)$row['raio_atendimento_km']) {
                 $row['distancia_km'] = round($dist, 3);
                 $row['score'] = round(((float)$row['reputacao'] * 10) - $dist, 4);
