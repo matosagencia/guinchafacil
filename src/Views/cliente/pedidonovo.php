@@ -592,14 +592,16 @@ async function recalcular() {
         dist = rota.distKm;
         routeLine = L.polyline(rota.coords, { color: '#f97316', weight: 4, opacity: .85 }).addTo(map);
         map.fitBounds(routeLine.getBounds(), { padding: [40, 120] });
-    } else {
-        const R = 6371, rad = Math.PI / 180;
-        const dLat = (lat2 - lat1) * rad, dLng = (lng2 - lng1) * rad;
-        const a = Math.sin(dLat/2)**2 + Math.cos(lat1*rad)*Math.cos(lat2*rad)*Math.sin(dLng/2)**2;
-        dist = R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-        routeLine = L.polyline([[lat1, lng1], [lat2, lng2]], { color: '#94a3b8', weight: 3, dashArray: '8,5', opacity: .7 }).addTo(map);
-        map.fitBounds(routeLine.getBounds(), { padding: [40, 120] });
-    }
+    } else {
+        const R = 6371, rad = Math.PI / 180;
+        const dLat = (lat2 - lat1) * rad, dLng = (lng2 - lng1) * rad;
+        const a = Math.sin(dLat/2)**2 + Math.cos(lat1*rad)*Math.cos(lat2*rad)*Math.sin(dLng/2)**2;
+        dist = R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        if (routeLine && map.hasLayer(routeLine)) {
+            map.removeLayer(routeLine);
+        }
+        routeLine = null;
+    }
 
     document.getElementById('distancia_km').value = dist.toFixed(2);
     document.getElementById('custoDistDisplay').textContent = dist.toFixed(1) + ' km';

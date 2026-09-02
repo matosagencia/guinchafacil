@@ -239,7 +239,6 @@
             var routeBase = String(options.osrmBaseUrl || '').replace(/\/$/, '');
             var route = function (from, to, style) {
                 if (!from || !to) return;
-                var fallback = L.polyline([[from.lat, from.lng], [to.lat, to.lng]], Object.assign({}, style, { dashArray: '8,6', opacity: 0.55 })).addTo(map);
                 if (!routeBase) return;
                 var controller = new AbortController();
                 var timeout = window.setTimeout(function () { controller.abort(); }, 6000);
@@ -249,7 +248,6 @@
                         var coordinates = payload && payload.routes && payload.routes[0] && payload.routes[0].geometry
                             ? payload.routes[0].geometry.coordinates : null;
                         if (!Array.isArray(coordinates) || coordinates.length < 2) return;
-                        map.removeLayer(fallback);
                         L.polyline(coordinates.map(function (c) { return [c[1], c[0]]; }), style).addTo(map);
                     })
                     .catch(function () {})

@@ -36,6 +36,10 @@ include __DIR__ . '/../layouts/header.php';
         $gatewayAtual = (string)($envAtual['PAYMENT_GATEWAY_ACTIVE'] ?? ($config['gateway_pagamento'] ?? 'mercadopago'));
         $mpEnvAtual = (string)($envAtual['MP_ENV'] ?? 'production');
         $psEnvAtual = (string)($envAtual['PS_ENV'] ?? 'sandbox');
+        $serpApiKeyAtual = trim((string)($envAtual['SERPAPI_KEY'] ?? ''));
+        $serpApiMask = $serpApiKeyAtual !== ''
+            ? substr($serpApiKeyAtual, 0, 4) . str_repeat('*', max(4, strlen($serpApiKeyAtual) - 8)) . substr($serpApiKeyAtual, -4)
+            : 'não configurada';
     ?>
     <div class="card mb-4 config-effective-card">
         <div class="card-header"><i class="fas fa-eye me-2"></i>Configuração efetiva carregada</div>
@@ -48,6 +52,9 @@ include __DIR__ . '/../layouts/header.php';
                 <div class="col-md-4"><span class="config-effective-label">Mercado Pago <small>(arquivo)</small></span><strong><?php echo htmlspecialchars($mpEnvAtual); ?></strong></div>
                 <div class="col-md-4"><span class="config-effective-label">PagSeguro <small>(arquivo)</small></span><strong><?php echo htmlspecialchars($psEnvAtual); ?></strong></div>
                 <div class="col-md-4"><span class="config-effective-label">SMTP <small>(arquivo)</small></span><strong><?php echo htmlspecialchars((string)($envAtual['SMTP_HOST'] ?? 'não configurado')); ?>:<?php echo htmlspecialchars((string)($envAtual['SMTP_PORT'] ?? '')); ?></strong></div>
+                <div class="col-md-4"><span class="config-effective-label">WhatsApp empresa <small>(arquivo)</small></span><strong><?php echo htmlspecialchars((string)($envAtual['COMPANY_WHATSAPP'] ?? 'não configurado')); ?></strong></div>
+                <div class="col-md-4"><span class="config-effective-label">SerpApi <small>(arquivo)</small></span><strong><?php echo htmlspecialchars($serpApiMask); ?></strong></div>
+                <div class="col-md-4"><span class="config-effective-label">Pré-cadastro <small>(arquivo)</small></span><strong><?php echo htmlspecialchars((string)($envAtual['PROSPECCAO_URL_PRE_CADASTRO'] ?? '')); ?></strong></div>
             </div>
         </div>
     </div>
@@ -81,6 +88,55 @@ include __DIR__ . '/../layouts/header.php';
                     <div class="col-12"><button class="btn btn-success"><i class="fas fa-save me-1"></i>Salvar marketing</button></div>
                 </form>
             </div></div>
+        </div>
+        <div class="col-12">
+            <div class="card border-primary">
+                <div class="card-header"><i class="fas fa-user-plus me-2"></i>Prospecção de parceiros</div>
+                <div class="card-body">
+                    <p class="text-muted small">Esses campos alimentam a central de marketing e a busca de leads via SerpApi. A chave fica no .env e é gravada pelo próprio painel.</p>
+                    <form method="POST" action="<?php echo $bp; ?>/admin/configuracoes" class="row g-3">
+                        <?php if (!empty($csrfToken)): ?>
+                        <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($csrfToken); ?>">
+                        <?php endif; ?>
+                        <div class="col-md-4">
+                            <label class="form-label">SERPAPI_KEY</label>
+                            <input type="password" class="form-control font-monospace" name="SERPAPI_KEY" value="<?php echo htmlspecialchars($envAtual['SERPAPI_KEY'] ?? ''); ?>" placeholder="chave da SerpApi">
+                            <small class="text-muted d-block">Atual: <?php echo htmlspecialchars($serpApiMask); ?></small>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">COMPANY_WHATSAPP</label>
+                            <input type="text" class="form-control font-monospace" name="COMPANY_WHATSAPP" value="<?php echo htmlspecialchars($envAtual['COMPANY_WHATSAPP'] ?? (defined('COMPANY_WHATSAPP') ? COMPANY_WHATSAPP : '')); ?>" placeholder="5500000000000">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">PROSPECCAO_URL_PRE_CADASTRO</label>
+                            <input type="url" class="form-control font-monospace" name="PROSPECCAO_URL_PRE_CADASTRO" value="<?php echo htmlspecialchars($envAtual['PROSPECCAO_URL_PRE_CADASTRO'] ?? (defined('PROSPECCAO_URL_PRE_CADASTRO') ? PROSPECCAO_URL_PRE_CADASTRO : '')); ?>">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">PROSPECCAO_OFERTA_RECIPROCIDADE</label>
+                            <input type="text" class="form-control" name="PROSPECCAO_OFERTA_RECIPROCIDADE" value="<?php echo htmlspecialchars($envAtual['PROSPECCAO_OFERTA_RECIPROCIDADE'] ?? (defined('PROSPECCAO_OFERTA_RECIPROCIDADE') ? PROSPECCAO_OFERTA_RECIPROCIDADE : '')); ?>">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">PROSPECCAO_CATEGORIAS_ALVO</label>
+                            <input type="text" class="form-control font-monospace" name="PROSPECCAO_CATEGORIAS_ALVO" value="<?php echo htmlspecialchars($envAtual['PROSPECCAO_CATEGORIAS_ALVO'] ?? (defined('PROSPECCAO_CATEGORIAS_ALVO') ? PROSPECCAO_CATEGORIAS_ALVO : '')); ?>">
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">Quota padrão</label>
+                            <input type="number" class="form-control" name="PROSPECCAO_QUOTA_ALVO_PADRAO" value="<?php echo htmlspecialchars($envAtual['PROSPECCAO_QUOTA_ALVO_PADRAO'] ?? (string)(defined('PROSPECCAO_QUOTA_ALVO_PADRAO') ? PROSPECCAO_QUOTA_ALVO_PADRAO : 5)); ?>">
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">Prioridade</label>
+                            <input type="number" class="form-control" name="PROSPECCAO_PRIORIDADE_FUSEKI_PADRAO" value="<?php echo htmlspecialchars($envAtual['PROSPECCAO_PRIORIDADE_FUSEKI_PADRAO'] ?? (string)(defined('PROSPECCAO_PRIORIDADE_FUSEKI_PADRAO') ? PROSPECCAO_PRIORIDADE_FUSEKI_PADRAO : 100)); ?>">
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">Raio padrão (km)</label>
+                            <input type="number" class="form-control" name="PROSPECCAO_RAIO_PADRAO_KM" value="<?php echo htmlspecialchars($envAtual['PROSPECCAO_RAIO_PADRAO_KM'] ?? (string)(defined('PROSPECCAO_RAIO_PADRAO_KM') ? PROSPECCAO_RAIO_PADRAO_KM : 15)); ?>">
+                        </div>
+                        <div class="col-12">
+                            <button class="btn btn-primary"><i class="fas fa-save me-1"></i>Salvar prospecção</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
         </div>
         <!-- COLUNA ESQUERDA: Tarifas e Modo de Operação -->
         <div class="col-lg-6">

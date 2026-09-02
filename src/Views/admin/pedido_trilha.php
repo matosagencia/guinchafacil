@@ -347,14 +347,9 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function drawFallbackLine(points, style) {
-        // Mesmo ajuste de qa/pedidodetalhe.php: o fallback em linha reta usava
-        // o mesmo estilo da rota real e o admin não conseguia distinguir uma
-        // coisa da outra. Agora sai tracejado e mais claro.
-        const fallbackStyle = Object.assign({}, style, {
-            dashArray: '8,6',
-            opacity: Math.min(0.6, style.opacity ?? 0.6),
-        });
-        return L.polyline(points.map((point) => [point.lat, point.lng]), fallbackStyle).addTo(map);
+        // Sem fallback em linha reta: roteamento indisponível não deve virar
+        // "rota" visual falsa.
+        return null;
     }
 
     function drawRouteLine(points, style, assign) {

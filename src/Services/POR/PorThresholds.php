@@ -126,7 +126,8 @@ final class PorThresholds
      */
     public static function routingFrontendBaseUrl(): string
     {
-        return self::roadMatchBaseUrl();
+        $basePath = defined('BASE_PATH') ? rtrim((string)BASE_PATH, '/') : '';
+        return $basePath . '/api/routing/osrm';
     }
 
     /** Distância máxima (m) do ponto até a via mais próxima pra ser considerado "na estrada". */

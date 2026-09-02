@@ -5,6 +5,8 @@ async function run() {
         throw new Error("[GeminiConfig][API_KEY_MISSING] GEMINI_API_KEY ausente");
     }
 
+    const prompt = process.argv.slice(2).join(" ").trim() || "Explique resumidamente a diferença entre mapas e rotas.";
+
     console.log("[GeminiRequest][START]");
 
     const ai = new GoogleGenAI({
@@ -13,7 +15,7 @@ async function run() {
 
     const response = await ai.models.generateContent({
         model: "gemini-2.5-flash",
-        contents: "Explique resumidamente a diferença entre mapas e rotas."
+        contents: prompt
     });
 
     console.log("[GeminiRequest][SUCCESS]");

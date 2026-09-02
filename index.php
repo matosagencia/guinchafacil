@@ -341,10 +341,18 @@ $rotas = [
         '/admin/financeiro/visao-unificada' => ['AdminFinanceAttributionController', 'visaoUnificada', 'admin'],
         '/admin/marketing' => ['AdminFinanceAttributionController', 'marketingCentral', 'admin'],
         '/admin/marketing/campanha/salvar' => ['AdminFinanceAttributionController', 'campanhaSalvar', 'admin'],
+        '/admin/marketing/prospeccao/buscar' => ['AdminFinanceAttributionController', 'prospeccaoBuscar', 'admin'],
+        '/admin/marketing/prospeccao/regioes/salvar' => ['AdminFinanceAttributionController', 'prospeccaoRegiaoSalvar', 'admin'],
+        '/admin/marketing/prospeccao/sincronizar-zonas' => ['AdminFinanceAttributionController', 'prospeccaoSincronizarZonas', 'admin'],
+        '/admin/prospeccao/sincronizar-zonas' => ['AdminFinanceAttributionController', 'prospeccaoSincronizarZonas', 'admin'],
         '/admin/financeiro/marketing/gasto' => ['AdminFinanceAttributionController', 'gastoSalvar', 'admin'],
         '/admin/financeiro/marketing/importar' => ['AdminFinanceAttributionController', 'gastoImportar', 'admin'],
         '/admin/financeiro/marketing/excluir' => ['AdminFinanceAttributionController', 'gastoExcluir', 'admin'],
         '/admin/financeiro/visao-unificada/csv' => ['AdminFinanceAttributionController', 'exportarCsv', 'admin'],
+        '/admin/prospeccao' => ['AdminFinanceAttributionController', 'marketingCentral', 'admin'],
+        '/admin/prospeccao/regioes' => ['AdminFinanceAttributionController', 'marketingCentral', 'admin'],
+        '/admin/prospeccao/buscar' => ['AdminFinanceAttributionController', 'prospeccaoBuscar', 'admin'],
+        '/admin/prospeccao/regioes/salvar' => ['AdminFinanceAttributionController', 'prospeccaoRegiaoSalvar', 'admin'],
         '/admin/configuracoes'       => ['AdminController', 'configuracoes', 'admin'],
         '/admin/logs'                => ['AdminLogsController', 'index', 'admin'],
         '/admin/logs/export'         => ['AdminController', 'logsExport', 'admin'],
@@ -407,6 +415,16 @@ $rotas = [
         '/especialista/atendimento/status/' => ['EspecialistaController', 'transicionar', 'especialista'],
         '/admin/especialista/aprovar' => ['AdminController', 'especialistaAprovar', 'admin'],
         '/admin/especialista/suspender' => ['AdminController', 'especialistaSuspender', 'admin'],
+        '/admin/marketing/campanha/salvar' => ['AdminFinanceAttributionController', 'campanhaSalvar', 'admin'],
+        '/admin/marketing/prospeccao/buscar' => ['AdminFinanceAttributionController', 'prospeccaoBuscar', 'admin'],
+        '/admin/marketing/prospeccao/regioes/salvar' => ['AdminFinanceAttributionController', 'prospeccaoRegiaoSalvar', 'admin'],
+        '/admin/marketing/prospeccao/sincronizar-zonas' => ['AdminFinanceAttributionController', 'prospeccaoSincronizarZonas', 'admin'],
+        '/admin/prospeccao/sincronizar-zonas' => ['AdminFinanceAttributionController', 'prospeccaoSincronizarZonas', 'admin'],
+        '/admin/financeiro/marketing/gasto' => ['AdminFinanceAttributionController', 'gastoSalvar', 'admin'],
+        '/admin/financeiro/marketing/importar' => ['AdminFinanceAttributionController', 'gastoImportar', 'admin'],
+        '/admin/financeiro/marketing/excluir' => ['AdminFinanceAttributionController', 'gastoExcluir', 'admin'],
+        '/admin/prospeccao/buscar' => ['AdminFinanceAttributionController', 'prospeccaoBuscar', 'admin'],
+        '/admin/prospeccao/regioes/salvar' => ['AdminFinanceAttributionController', 'prospeccaoRegiaoSalvar', 'admin'],
         '/senha/esqueceu'         => ['AuthController', 'esqueceuSenha',     null],
         '/senha/redefinir'        => ['AuthController', 'redefinirSenha',    null],
 
@@ -527,6 +545,12 @@ $rotasDinamicas = [
 
     ['GET',  '/gerente/demanda/',        'GerenteController', 'demandaDetalhe', 'gerente'],
     ['GET',  '/admin/especialista-fragmento/', 'AdminController', 'especialistaDetalheFragmento', 'admin'],
+    ['POST', '/admin/marketing/prospeccao/sincronizar-zonas', 'AdminFinanceAttributionController', 'prospeccaoSincronizarZonas', 'admin'],
+    ['POST', '/admin/prospeccao/sincronizar-zonas', 'AdminFinanceAttributionController', 'prospeccaoSincronizarZonas', 'admin'],
+    ['POST', '/admin/marketing/prospeccao/lead/enviado/', 'AdminFinanceAttributionController', 'prospeccaoMarcarEnviado', 'admin'],
+    ['POST', '/admin/marketing/prospeccao/lead/cadastrado/', 'AdminFinanceAttributionController', 'prospeccaoConfirmarCadastro', 'admin'],
+    ['POST', '/admin/prospeccao/lead/enviado/', 'AdminFinanceAttributionController', 'prospeccaoMarcarEnviado', 'admin'],
+    ['POST', '/admin/prospeccao/lead/cadastrado/', 'AdminFinanceAttributionController', 'prospeccaoConfirmarCadastro', 'admin'],
 
     ['GET',  '/guincho/aceitar/',        'GuinchoController', 'aceitarForm',      'guincho'],
     ['POST', '/guincho/aceitar/',        'GuinchoController', 'aceitar',          'guincho'],
@@ -619,6 +643,13 @@ if (isset($rotas[$metodo][$uri])) {
 
     // API operacional de pedidos: possui sub-recursos depois do ID, por isso
     // precisa ser resolvida antes das rotas dinâmicas numéricas legadas.
+    if ($controller === null && $metodo === 'GET'
+        && preg_match('~^/api/routing/osrm/route/v1/driving/(.+)$~', $uri, $m)) {
+        $controller = 'RoutingApiController';
+        $action = 'route';
+        $perfil = null;
+        $id = $m[1];
+    }
     if (preg_match('~^/api/admin/orders/(\d+)(?:/(tracking|timeline|messages))?$~', $uri, $m)) {
         $controller = 'OrdersApiController';
         $id = (int)$m[1];

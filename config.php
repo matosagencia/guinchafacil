@@ -87,6 +87,13 @@ function ca_bundle_path(): ?string
 define('HTTPS_ONLY',       env('HTTPS_ONLY', 'false') === 'true');
 define('COMPANY_ADDRESS',  env('COMPANY_ADDRESS', 'Rua da Gamboa 131, Rio de Janeiro'));
 define('COMPANY_WHATSAPP', env('COMPANY_WHATSAPP', '21959256849'));
+define('SERPAPI_KEY', env('SERPAPI_KEY', ''));
+define('PROSPECCAO_URL_PRE_CADASTRO', env('PROSPECCAO_URL_PRE_CADASTRO', APP_URL . '/parceiros/interesse'));
+define('PROSPECCAO_OFERTA_RECIPROCIDADE', env('PROSPECCAO_OFERTA_RECIPROCIDADE', 'primeiros 30 dias sem taxa de adesao'));
+define('PROSPECCAO_CATEGORIAS_ALVO', env('PROSPECCAO_CATEGORIAS_ALVO', 'guincho,reboque,autoeletrica,borracheiro,chaveiro_automotivo,mecanico_movel,oficina_mecanica,bateria_automotiva,socorro_veicular'));
+define('PROSPECCAO_QUOTA_ALVO_PADRAO', (int) env('PROSPECCAO_QUOTA_ALVO_PADRAO', '5'));
+define('PROSPECCAO_PRIORIDADE_FUSEKI_PADRAO', (int) env('PROSPECCAO_PRIORIDADE_FUSEKI_PADRAO', '100'));
+define('PROSPECCAO_RAIO_PADRAO_KM', (int) env('PROSPECCAO_RAIO_PADRAO_KM', '15'));
 
 // §IP-CANONICO-01: lista de IPs/CIDRs de reverse proxies confiáveis, separados
 // por vírgula. Vazio por padrão (XAMPP roda direto, sem proxy na frente) —

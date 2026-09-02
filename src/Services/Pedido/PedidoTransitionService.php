@@ -155,12 +155,11 @@ final class PedidoTransitionService
                        SET status = ?,
                            attendance_mode = 'TOWING',
                            guincho_id = NULL,
-                           expiracao_aceite = ?,
+                           expiracao_aceite = " . self::dateAddMinutesExpression($expMin) . ",
                            raio_atual_km = ?
                      WHERE id = ?
                 ")->execute([
                     $statusNovo,
-                    date('Y-m-d H:i:s', strtotime("+{$expMin} minutes")),
                     $raioInicial,
                     $pedidoId,
                 ]);
@@ -176,11 +175,10 @@ final class PedidoTransitionService
                 $pdo->prepare("
                     UPDATE pedidos
                        SET status = 'aguardando_guincho',
-                           expiracao_aceite = ?,
+                           expiracao_aceite = " . self::dateAddMinutesExpression($expMin) . ",
                            raio_atual_km = ?
                      WHERE id = ?
                 ")->execute([
-                    date('Y-m-d H:i:s', strtotime("+{$expMin} minutes")),
                     $raioInicial,
                     $pedidoId,
                 ]);
@@ -324,7 +322,7 @@ final class PedidoTransitionService
                 // dali em diante (a_caminho/no_local/em_reboque/concluido) o
                 // TowingFlowDefinition assume, e são exatamente os mesmos passos
                 // do reboque comum.
-                $sql .= ", guincho_id = NULL, expiracao_aceite = DATE_ADD(NOW(), INTERVAL 30 MINUTE), attendance_mode = 'TOWING'";
+                $sql .= ", guincho_id = NULL, expiracao_aceite = " . self::dateAddMinutesExpression(30) . ", attendance_mode = 'TOWING'";
             }
             $sql .= " WHERE id = ?";
             $params[] = $request->pedidoId;
@@ -1257,5 +1255,16 @@ final class PedidoTransitionService
     private static function lockClause(PDO $pdo): string
     {
         return $pdo->getAttribute(PDO::ATTR_DRIVER_NAME) === 'sqlite' ? '' : ' FOR UPDATE';
+    }
+
+    private static function dateAddMinutesExpression(int $minutes): string
+    {
+        $minutes = max(1, $minutes);
+        $pdo = getPDO();
+        if ($pdo->getAttribute(PDO::ATTR_DRIVER_NAME) === 'sqlite') {
+            return "datetime('now', '+" . $minutes . " minutes')";
+        }
+
+        return "DATE_ADD(NOW(), INTERVAL " . $minutes . " MINUTE)";
     }
 }

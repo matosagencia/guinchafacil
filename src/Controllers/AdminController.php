@@ -1763,7 +1763,15 @@ class AdminController extends BaseController
             "MP_ACCESS_TOKEN_SANDBOX", "MP_ACCESS_TOKEN_PROD",
             "MP_PUBLIC_KEY_SANDBOX", "MP_PUBLIC_KEY_PROD",
             "MP_CLIENT_ID_PROD", "MP_CLIENT_SECRET_PROD",
-            "PS_EMAIL", "PS_TOKEN", "PS_ENV"
+            "PS_EMAIL", "PS_TOKEN", "PS_ENV",
+            "COMPANY_WHATSAPP",
+            "SERPAPI_KEY",
+            "PROSPECCAO_URL_PRE_CADASTRO",
+            "PROSPECCAO_OFERTA_RECIPROCIDADE",
+            "PROSPECCAO_CATEGORIAS_ALVO",
+            "PROSPECCAO_QUOTA_ALVO_PADRAO",
+            "PROSPECCAO_PRIORIDADE_FUSEKI_PADRAO",
+            "PROSPECCAO_RAIO_PADRAO_KM",
         ];
         foreach ($envCampos as $chave) {
             if (array_key_exists($chave, $_POST)) {
@@ -2648,6 +2656,7 @@ class AdminController extends BaseController
             'Gateway ativo'         => ['PAYMENT_GATEWAY_ACTIVE'],
             'MercadoPago'           => ['MP_ACCESS_TOKEN','MP_PUBLIC_KEY','MP_WEBHOOK_SECRET','MP_ENV'],
             'PagSeguro'             => ['PS_EMAIL','PS_TOKEN','PS_ENV'],
+            'Marketing'             => ['SERPAPI_KEY','PROSPECCAO_URL_PRE_CADASTRO','PROSPECCAO_OFERTA_RECIPROCIDADE','PROSPECCAO_CATEGORIAS_ALVO','PROSPECCAO_QUOTA_ALVO_PADRAO','PROSPECCAO_PRIORIDADE_FUSEKI_PADRAO','PROSPECCAO_RAIO_PADRAO_KM'],
             'SMTP'                  => ['SMTP_HOST','SMTP_PORT','SMTP_USER','SMTP_PASS','SMTP_FROM_EMAIL','SMTP_FROM_NAME'],
             'Simulado e testes'     => ['SIMULATION_ENABLED','PIX_DRY_RUN','SIMULATION_ADMIN_TOKEN'],
             'Operacional'           => ['MAX_PIX_TENTATIVAS','GEOCODING_CACHE_TTL_DAYS','TARIFA_BASE','TARIFA_KM','ENCRYPTION_KEY'],
@@ -2746,6 +2755,7 @@ class AdminController extends BaseController
                 "MP_CLIENT_ID_PROD", "MP_CLIENT_SECRET_PROD"
             ],
             "PagSeguro" => ["PS_EMAIL","PS_TOKEN","PS_ENV"],
+            "Marketing" => ["SERPAPI_KEY", "PROSPECCAO_URL_PRE_CADASTRO", "PROSPECCAO_OFERTA_RECIPROCIDADE", "PROSPECCAO_CATEGORIAS_ALVO", "PROSPECCAO_QUOTA_ALVO_PADRAO", "PROSPECCAO_PRIORIDADE_FUSEKI_PADRAO", "PROSPECCAO_RAIO_PADRAO_KM"],
             "SMTP" => ["SMTP_HOST","SMTP_PORT","SMTP_USER","SMTP_PASS","SMTP_FROM_EMAIL","SMTP_FROM_NAME"],
             "Simulado e testes" => ["SIMULATION_ENABLED","PIX_DRY_RUN","SIMULATION_ADMIN_TOKEN"],
             "Operacional" => ["MAX_PIX_TENTATIVAS","GEOCODING_CACHE_TTL_DAYS","TARIFA_BASE","TARIFA_KM","ENCRYPTION_KEY"],

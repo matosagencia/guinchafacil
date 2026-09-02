@@ -37,7 +37,9 @@ final class PagamentoAprovacaoService
     {
         try {
             $stmt = getPDO()->prepare(
-                "SELECT p.status, p.custo_estimado, u.nome AS cliente_nome, u.email AS cliente_email
+                "SELECT p.status, p.custo_estimado, p.attendance_mode, p.service_type_id, p.incidente_id,
+                        p.lat_origem, p.lng_origem,
+                        u.nome AS cliente_nome, u.email AS cliente_email
                  FROM pedidos p JOIN usuarios u ON u.id = p.cliente_id
                  WHERE p.id = ?"
             );

@@ -173,10 +173,6 @@
     }
 
     function drawRoadRoute(from, to, style, epoch, onLayer) {
-        var fallback = L.polyline([[from.lat, from.lng], [to.lat, to.lng]], Object.assign({}, style, {
-            dashArray: '8,6', opacity: Math.min(0.6, style.opacity || 0.6),
-        })).addTo(map);
-        if (typeof onLayer === 'function') onLayer(fallback);
         var baseUrl = String(window.__osrmBaseUrl || '').replace(/\/$/, '');
         if (!baseUrl) return;
         var controller = new AbortController();
@@ -188,7 +184,6 @@
                 var coordinates = payload && payload.routes && payload.routes[0] && payload.routes[0].geometry
                     ? payload.routes[0].geometry.coordinates : null;
                 if (!Array.isArray(coordinates) || coordinates.length < 2) return;
-                map.removeLayer(fallback);
                 var roadLayer = L.polyline(coordinates.map(function (c) { return [c[1], c[0]]; }), style).addTo(map);
                 if (typeof onLayer === 'function') onLayer(roadLayer);
             })

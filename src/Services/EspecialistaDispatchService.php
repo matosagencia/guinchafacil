@@ -75,7 +75,7 @@ final class EspecialistaDispatchService
             if ($lock->fetch()) throw new DomainException('Incidente já possui atendimento ativo.');
             $stmt = $pdo->prepare('INSERT INTO atendimentos_especialista
                 (incidente_id, especialista_id, servico_solicitado_id, status, ofertado_em, expiracao_oferta, provider_amount, platform_amount, customer_amount)
-                VALUES (?,?,?,? ,NOW(),DATE_ADD(NOW(), INTERVAL 5 MINUTE),?,?,?)');
+                VALUES (?,?,?,? ,' . self::nowExpression() . ',' . self::dateAddMinutesExpression(5) . ',?,?,?)');
             $stmt->execute([$incidenteId, $especialistaId, $servicoId, 'ofertado', $providerAmount, $platformAmount, $customerAmount]);
             Incidente::atualizarStatus($incidenteId, 'especialista_designado', null, $pdo);
             $id = (int)$pdo->lastInsertId();
@@ -92,5 +92,26 @@ final class EspecialistaDispatchService
         $stmt=getPDO()->prepare("UPDATE atendimentos_especialista SET status='procurando', especialista_id=NULL WHERE status='ofertado' AND expiracao_oferta IS NOT NULL AND expiracao_oferta < NOW()");
         $stmt->execute();
         return $stmt->rowCount();
+    }
+
+    private static function nowExpression(): string
+    {
+        $pdo = getPDO();
+        if ($pdo->getAttribute(PDO::ATTR_DRIVER_NAME) === 'sqlite') {
+            return "datetime('now')";
+        }
+
+        return 'NOW()';
+    }
+
+    private static function dateAddMinutesExpression(int $minutes): string
+    {
+        $minutes = max(1, $minutes);
+        $pdo = getPDO();
+        if ($pdo->getAttribute(PDO::ATTR_DRIVER_NAME) === 'sqlite') {
+            return "datetime('now', '+" . $minutes . " minutes')";
+        }
+
+        return 'DATE_ADD(NOW(), INTERVAL ' . $minutes . ' MINUTE)';
     }
 }

@@ -850,16 +850,9 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function drawFallbackLine(points, style) {
-        // Achado em QA: quando o OSRM público falha/demora, esta linha reta
-        // era desenhada com o MESMO estilo da rota real — o admin não tinha
-        // como saber que aquilo não era o trajeto de verdade. Agora o
-        // fallback sempre aparece tracejado e mais claro, para deixar visível
-        // que é só uma estimativa em linha reta.
-        const fallbackStyle = Object.assign({}, style, {
-            dashArray: '8,6',
-            opacity: Math.min(0.6, style.opacity ?? 0.6),
-        });
-        return L.polyline(points.map((point) => [point.lat, point.lng]), fallbackStyle).addTo(map);
+        // Sem fallback em linha reta: se o OSRM falhar, a camada é removida
+        // em vez de exibir um traçado enganoso.
+        return null;
     }
 
     function drawRouteLine(points, style, assign) {

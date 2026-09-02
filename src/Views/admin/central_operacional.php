@@ -262,18 +262,13 @@ document.addEventListener('DOMContentLoaded', function () {
                     const coords = payload && payload.routes && payload.routes[0] && payload.routes[0].geometry
                         ? payload.routes[0].geometry.coordinates
                         : null;
-                    let layer;
                     if (Array.isArray(coords) && coords.length >= 2) {
-                        layer = L.polyline(coords.map((c) => [c[1], c[0]]), style).addTo(map);
-                    } else {
-                        layer = L.polyline([[origemPt.lat, origemPt.lng], [destinoPt.lat, destinoPt.lng]], style).addTo(map);
+                        const layer = L.polyline(coords.map((c) => [c[1], c[0]]), style).addTo(map);
+                        marcadores.push(layer);
                     }
-                    marcadores.push(layer);
                 })
                 .catch(() => {
                     if (epoch !== rotaSyncEpoch) return;
-                    const layer = L.polyline([[origemPt.lat, origemPt.lng], [destinoPt.lat, destinoPt.lng]], style).addTo(map);
-                    marcadores.push(layer);
                 })
                 .finally(() => clearTimeout(timeoutId));
         }
@@ -644,18 +639,13 @@ document.addEventListener('DOMContentLoaded', function () {
                     const coords = payload && payload.routes && payload.routes[0] && payload.routes[0].geometry
                         ? payload.routes[0].geometry.coordinates
                         : null;
-                    let layer;
                     if (Array.isArray(coords) && coords.length >= 2) {
-                        layer = L.polyline(coords.map((c) => [c[1], c[0]]), style).addTo(map);
-                    } else {
-                        layer = L.polyline([[origemPt.lat, origemPt.lng], [destinoPt.lat, destinoPt.lng]], style).addTo(map);
+                        const layer = L.polyline(coords.map((c) => [c[1], c[0]]), style).addTo(map);
+                        marcadores.push(layer);
                     }
-                    marcadores.push(layer);
                 })
                 .catch(() => {
                     if (epoch !== rotaSyncEpoch) return;
-                    const layer = L.polyline([[origemPt.lat, origemPt.lng], [destinoPt.lat, destinoPt.lng]], style).addTo(map);
-                    marcadores.push(layer);
                 })
                 .finally(() => clearTimeout(timeoutId));
         }
