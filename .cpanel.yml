@@ -2,6 +2,9 @@
 deployment:
   tasks:
     - export DEPLOYPATH=/home/oawqoqml/public_html/
+    - /bin/mkdir -p "$DEPLOYPATH"
     - find . -mindepth 1 -maxdepth 1 -exec /bin/cp -R {} "$DEPLOYPATH" \;
     - /bin/rm -rf "$DEPLOYPATH/.git" "$DEPLOYPATH/.cpanel.yml" "$DEPLOYPATH/DOC"
+    - /bin/rm -f "$DEPLOYPATH/.env" "$DEPLOYPATH/.env.local" "$DEPLOYPATH/.env.backup"
+    - find "$DEPLOYPATH" -maxdepth 1 -type f -name "SESSION-CHECKPOINT-*.md" -delete
     - find "$DEPLOYPATH" -maxdepth 1 -type f -name "*.txt" -delete
