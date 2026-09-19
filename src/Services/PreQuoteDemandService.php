@@ -1,9 +1,9 @@
-<?php
-declare(strict_types=1);
-
-/** Agrega demanda em células de ~1 km; nunca persiste endereço ou usuário. */
-final class PreQuoteDemandService
-{
+<?php
+declare(strict_types=1);
+
+/** Agrega demanda em células de ~1 km; nunca persiste endereço ou usuário. */
+final class PreQuoteDemandService
+{
     public static function registrar(array $quote, string $evento = 'quote'): void
     {
         $lat = isset($quote['lat_origem']) ? (float)$quote['lat_origem'] : null;
@@ -32,16 +32,16 @@ final class PreQuoteDemandService
             error_log('[PreQuoteDemand] registro agregado indisponivel: ' . $e->getMessage());
         }
     }
-
-    public static function listarPrioridades(int $dias = 30, int $limite = 100): array
-    {
-        $dias = max(1, min(90, $dias)); $limite = max(1, min(500, $limite));
-        $stmt = getPDO()->query("SELECT cell_lat,cell_lng,SUM(quote_count) quote_count,SUM(accepted_count) accepted_count,SUM(converted_count) converted_count
-            FROM pre_quote_demand_cells WHERE period_date >= DATE_SUB(CURRENT_DATE, INTERVAL {$dias} DAY)
-            GROUP BY cell_lat,cell_lng HAVING SUM(quote_count) >= 5 ORDER BY quote_count DESC LIMIT {$limite}");
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
-    }
-
+
+    public static function listarPrioridades(int $dias = 30, int $limite = 100): array
+    {
+        $dias = max(1, min(90, $dias)); $limite = max(1, min(500, $limite));
+        $stmt = getPDO()->query("SELECT cell_lat,cell_lng,SUM(quote_count) quote_count,SUM(accepted_count) accepted_count,SUM(converted_count) converted_count
+            FROM pre_quote_demand_cells WHERE period_date >= DATE_SUB(CURRENT_DATE, INTERVAL {$dias} DAY)
+            GROUP BY cell_lat,cell_lng HAVING SUM(quote_count) >= 5 ORDER BY quote_count DESC LIMIT {$limite}");
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
     public static function resumoPorServico(int $dias = 30): array
     {
         $dias = max(1, min(90, $dias));

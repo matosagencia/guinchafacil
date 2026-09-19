@@ -1,0 +1,22 @@
+{
+  "name": "GuinchaFácil",
+  "short_name": "GuinchaFácil",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#0f172a",
+  "description": "Alertas operacionais e chamados em tempo real para guincheiros e especialistas.",
+  "icons": [
+    {
+      "src": "/public/assets/img/favicon-32.png",
+      "sizes": "32x32",
+      "type": "image/png"
+    },
+    {
+      "src": "/public/assets/img/logo-48.png",
+      "sizes": "48x48",
+      "type": "image/png"
+    }
+  ]
+}

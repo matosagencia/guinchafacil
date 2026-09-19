@@ -1,19 +1,20 @@
-<?php
-require_once __DIR__ . '/BaseController.php';
-require_once __DIR__ . '/../Services/AuthService.php';
+<?php
+require_once __DIR__ . '/BaseController.php';
+require_once __DIR__ . '/../Services/AuthService.php';
 require_once __DIR__ . '/../Services/EnderecoService.php';
 require_once __DIR__ . '/../Models/Especialista.php';
 require_once __DIR__ . '/../Services/EspecialistaAtendimentoService.php';
 require_once __DIR__ . '/../Services/EspecialistaProofOfRoadService.php';
-
-class EspecialistaController extends BaseController
-{
+require_once __DIR__ . '/../Services/PushActionTokenService.php';
+
+class EspecialistaController extends BaseController
+{
     public function dashboard(): void
-    {
-        AuthService::requireAuth('especialista');
-        $usuarioId = (int)($_SESSION['user']['id'] ?? 0);
-        $especialista = Especialista::buscarPorUsuarioId($usuarioId);
-        $bp = defined('BASE_PATH') ? BASE_PATH : '';
+    {
+        AuthService::requireAuth('especialista');
+        $usuarioId = (int)($_SESSION['user']['id'] ?? 0);
+        $especialista = Especialista::buscarPorUsuarioId($usuarioId);
+        $bp = defined('BASE_PATH') ? BASE_PATH : '';
         $atendimentos = $especialista ? EspecialistaAtendimentoService::listarDoEspecialista((int)$especialista['id']) : [];
         require __DIR__ . '/../Views/especialista/dashboard.php';
     }
@@ -164,7 +165,18 @@ class EspecialistaController extends BaseController
         $e=Especialista::buscarPorUsuarioId((int)($_SESSION['user']['id']??0));
         header('Content-Type: application/json; charset=UTF-8');
         if (!$e) { echo json_encode(['ok'=>false,'ofertas'=>[]]); exit; }
-        $st=getPDO()->prepare("SELECT a.id,a.status,a.criado_em,s.nome AS servico_nome,i.endereco_origem FROM atendimentos_especialista a JOIN incidentes i ON i.id=a.incidente_id JOIN servicos_especialista s ON s.id=a.servico_solicitado_id WHERE a.especialista_id=? AND a.status IN ('ofertado','aceito','a_caminho','no_local','em_diagnostico','aguardando_aprovacao','em_execucao') ORDER BY a.criado_em DESC LIMIT 20");
-        $st->execute([(int)$e['id']]); echo json_encode(['ok'=>true,'ofertas'=>$st->fetchAll(PDO::FETCH_ASSOC)?:[]],JSON_UNESCAPED_UNICODE); exit;
+        $st=getPDO()->prepare("SELECT a.id,a.status,a.criado_em,a.incidente_id,s.nome AS servico_nome,i.endereco_origem FROM atendimentos_especialista a JOIN incidentes i ON i.id=a.incidente_id JOIN servicos_especialista s ON s.id=a.servico_solicitado_id WHERE a.especialista_id=? AND a.status IN ('ofertado','aceito','a_caminho','no_local','em_diagnostico','aguardando_aprovacao','em_execucao') ORDER BY a.criado_em DESC LIMIT 20");
+        $st->execute([(int)$e['id']]);
+        $usuarioId = (int)($_SESSION['user']['id'] ?? 0);
+        $ofertas = [];
+        foreach ($st->fetchAll(PDO::FETCH_ASSOC) ?: [] as $row) {
+            $atendimentoId = (int)($row['id'] ?? 0);
+            $row['push_accept_url'] = '/push/acao/aceitar/' . $atendimentoId;
+            $row['push_decline_url'] = '/push/acao/recusar/' . $atendimentoId;
+            $row['push_accept_token'] = PushActionTokenService::gerar($usuarioId, (int)$e['id'], $atendimentoId, 'aceitar');
+            $row['push_decline_token'] = PushActionTokenService::gerar($usuarioId, (int)$e['id'], $atendimentoId, 'recusar');
+            $ofertas[] = $row;
+        }
+        echo json_encode(['ok'=>true,'ofertas'=>$ofertas],JSON_UNESCAPED_UNICODE); exit;
     }
 }

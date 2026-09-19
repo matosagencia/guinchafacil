@@ -1,102 +1,102 @@
-/* ============================================================
-   GuinchaFácil — Base (reset + tipografia) — Pacote L2.1
-   Aditivo a style.css: só normaliza box-sizing e tipografia via
-   os tokens novos (--font-sans), sem redefinir cor/fundo do body
-   (isso já é responsabilidade de style.css hoje, preservado).
-   ============================================================ */
-
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-}
-
-html {
-  -webkit-text-size-adjust: 100%;
-  text-size-adjust: 100%;
-}
-
-body {
-  font-family: var(--font-sans);
-  -webkit-font-smoothing: antialiased;
-}
-
-h1, h2, h3, h4, h5, h6 {
-  margin: 0 0 var(--space-3);
-  font-weight: 700;
-  line-height: 1.25;
-}
-
-/* Ícone de ajuda (i) usado em headers de card pra explicar termos técnicos
-   (POR, pontos rejeitados, saltos etc.) pro empregado que opera o painel —
-   usa o atributo title nativo (tooltip do navegador), sem dependência de JS. */
-.hint-icon {
-  color: var(--text-muted, #8a8a8a);
-  cursor: help;
-  font-size: 0.85em;
-}
-
-/* Pinos de origem/destino usados em todos os mapas de acompanhamento
-   (admin/dashboard, admin/pedidodetalhe, admin/pedido_trilha,
-   guincho/atendimento, cliente/pedidostatus): vermelho enquanto o guincho
-   ainda não chegou naquele ponto, cinza depois que chegou — dá pra ver de
-   relance, só pela cor, se a coleta (origem) ou a entrega (destino) já
-   aconteceu, sem precisar ler o status por extenso. */
-.mapa-pin {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 26px;
-  height: 26px;
-  border-radius: 50%;
-  color: #fff;
-  font-size: 0.8rem;
-  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.35);
-}
-.mapa-pin--pendente { background: #ef4444; }
-.mapa-pin--concluido { background: #6c757d; }
-.mapa-pin--provider { background: #f59e0b; }
-
-/* Balão (popup) do Leaflet padronizado em todos os mapas do sistema (admin
-   dashboard, admin pedidodetalhe/pedido_trilha, guincho atendimento, cliente
-   pedidostatus/pedidonovo/oficinas etc.) — tom escuro, mais legível sobre o
-   mapa claro do OpenStreetMap do que o branco padrão do Leaflet. Também
-   normaliza a font-family (leaflet.css define a sua própria, diferente da
-   tipografia do resto do app). Global aqui pra não precisar duplicar em
-   cada tela que tem um mapa. */
-/* !important em tudo aqui: cada página carrega o leaflet.css dela num ponto
-   diferente do HTML (algumas antes deste base.css, outras — a maioria —
-   bem mais abaixo, perto do rodapé), então sem !important a ordem de load
-   de cada página decidiria quem vence, e o tema ficava inconsistente entre
-   telas mesmo com a mesma especificidade de seletor. */
-.leaflet-popup-content, .leaflet-popup-content * {
-  font-family: var(--font-sans) !important;
-}
-.leaflet-popup-content-wrapper {
-  background: #1f2937 !important;
-  color: #f1f5f9 !important;
-  border-radius: 10px !important;
-}
-.leaflet-popup-content { color: #f1f5f9 !important; margin: 10px 14px !important; }
-.leaflet-popup-content strong { color: #ffffff !important; }
-.leaflet-popup-tip { background: #1f2937 !important; }
-.leaflet-popup-close-button {
-  color: #cbd5e1 !important;
-}
-.leaflet-popup-close-button:hover {
-  color: #ffffff !important;
-}
-
-p {
-  margin: 0 0 var(--space-3);
-}
-
-img, svg {
-  max-width: 100%;
-  display: block;
-}
-
-/* Alvo de toque mínimo (critério de aceite do Nível 2, seção 5.4). */
+/* ============================================================
+   GuinchaFácil — Base (reset + tipografia) — Pacote L2.1
+   Aditivo a style.css: só normaliza box-sizing e tipografia via
+   os tokens novos (--font-sans), sem redefinir cor/fundo do body
+   (isso já é responsabilidade de style.css hoje, preservado).
+   ============================================================ */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  margin: 0 0 var(--space-3);
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+/* Ícone de ajuda (i) usado em headers de card pra explicar termos técnicos
+   (POR, pontos rejeitados, saltos etc.) pro empregado que opera o painel —
+   usa o atributo title nativo (tooltip do navegador), sem dependência de JS. */
+.hint-icon {
+  color: var(--text-muted, #8a8a8a);
+  cursor: help;
+  font-size: 0.85em;
+}
+
+/* Pinos de origem/destino usados em todos os mapas de acompanhamento
+   (admin/dashboard, admin/pedidodetalhe, admin/pedido_trilha,
+   guincho/atendimento, cliente/pedidostatus): vermelho enquanto o guincho
+   ainda não chegou naquele ponto, cinza depois que chegou — dá pra ver de
+   relance, só pela cor, se a coleta (origem) ou a entrega (destino) já
+   aconteceu, sem precisar ler o status por extenso. */
+.mapa-pin {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  color: #fff;
+  font-size: 0.8rem;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.35);
+}
+.mapa-pin--pendente { background: #ef4444; }
+.mapa-pin--concluido { background: #6c757d; }
+.mapa-pin--provider { background: #f59e0b; }
+
+/* Balão (popup) do Leaflet padronizado em todos os mapas do sistema (admin
+   dashboard, admin pedidodetalhe/pedido_trilha, guincho atendimento, cliente
+   pedidostatus/pedidonovo/oficinas etc.) — tom escuro, mais legível sobre o
+   mapa claro do OpenStreetMap do que o branco padrão do Leaflet. Também
+   normaliza a font-family (leaflet.css define a sua própria, diferente da
+   tipografia do resto do app). Global aqui pra não precisar duplicar em
+   cada tela que tem um mapa. */
+/* !important em tudo aqui: cada página carrega o leaflet.css dela num ponto
+   diferente do HTML (algumas antes deste base.css, outras — a maioria —
+   bem mais abaixo, perto do rodapé), então sem !important a ordem de load
+   de cada página decidiria quem vence, e o tema ficava inconsistente entre
+   telas mesmo com a mesma especificidade de seletor. */
+.leaflet-popup-content, .leaflet-popup-content * {
+  font-family: var(--font-sans) !important;
+}
+.leaflet-popup-content-wrapper {
+  background: #1f2937 !important;
+  color: #f1f5f9 !important;
+  border-radius: 10px !important;
+}
+.leaflet-popup-content { color: #f1f5f9 !important; margin: 10px 14px !important; }
+.leaflet-popup-content strong { color: #ffffff !important; }
+.leaflet-popup-tip { background: #1f2937 !important; }
+.leaflet-popup-close-button {
+  color: #cbd5e1 !important;
+}
+.leaflet-popup-close-button:hover {
+  color: #ffffff !important;
+}
+
+p {
+  margin: 0 0 var(--space-3);
+}
+
+img, svg {
+  max-width: 100%;
+  display: block;
+}
+
+/* Alvo de toque mínimo (critério de aceite do Nível 2, seção 5.4). */
 button, a, input, select, textarea {
   touch-action: manipulation;
 }

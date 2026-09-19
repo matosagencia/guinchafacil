@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/../Models/Incidente.php';
 require_once __DIR__ . '/../Services/GeoService.php';
+require_once __DIR__ . '/PushNotificationService.php';
 require_once __DIR__ . '/EspecialistaAtendimentoStateMachine.php';
 
 final class EspecialistaDispatchService
@@ -27,7 +28,15 @@ final class EspecialistaDispatchService
         $stmt->execute($codes);
         $servicoId = (int)$stmt->fetchColumn();
         if ($servicoId <= 0) return null;
-        return self::ofertar($incidenteId, (int)$candidatos[0]['especialista_id'], $servicoId, $providerAmount, $platformAmount, $customerAmount);
+        return self::ofertar(
+            $incidenteId,
+            (int)$candidatos[0]['especialista_id'],
+            $servicoId,
+            $providerAmount,
+            $platformAmount,
+            $customerAmount,
+            (int)($candidatos[0]['usuario_id'] ?? 0)
+        );
     }
 
     public static function candidatos(int $incidenteId, string $servicoCodigo): array
@@ -41,7 +50,7 @@ final class EspecialistaDispatchService
     {
         $codigos = self::SERVICE_MAP[strtoupper($servicoCodigo)] ?? [strtoupper($servicoCodigo)];
         $marks = implode(',', array_fill(0, count($codigos), '?'));
-        $sql = "SELECT e.id AS especialista_id, u.nome, e.lat_atual, e.lng_atual,
+        $sql = "SELECT e.id AS especialista_id, e.usuario_id AS usuario_id, u.nome, e.lat_atual, e.lng_atual,
                        e.raio_atendimento_km, e.reputacao, s.codigo AS servico_codigo
                   FROM especialistas e
                   JOIN usuarios u ON u.id=e.usuario_id AND u.ativo=1
@@ -64,7 +73,7 @@ final class EspecialistaDispatchService
         return $out;
     }
 
-    public static function ofertar(int $incidenteId, int $especialistaId, int $servicoId, float $providerAmount, float $platformAmount, float $customerAmount): int
+    public static function ofertar(int $incidenteId, int $especialistaId, int $servicoId, float $providerAmount, float $platformAmount, float $customerAmount, int $usuarioId = 0): int
     {
         $pdo = getPDO();
         $ownTransaction = !$pdo->inTransaction();
@@ -80,6 +89,22 @@ final class EspecialistaDispatchService
             Incidente::atualizarStatus($incidenteId, 'especialista_designado', null, $pdo);
             $id = (int)$pdo->lastInsertId();
             if ($ownTransaction) $pdo->commit();
+            if ($usuarioId > 0) {
+                try {
+                    PushNotificationService::wakeupEspecialista($usuarioId, [
+                        'incidente_id' => $incidenteId,
+                        'atendimento_id' => $id,
+                        'especialista_id' => $especialistaId,
+                    ]);
+                } catch (Throwable $pushError) {
+                    Logger::exception(__CLASS__, __FUNCTION__, 'push_wakeup_failed', $pushError, [
+                        'incidente_id' => $incidenteId,
+                        'atendimento_id' => $id,
+                        'especialista_id' => $especialistaId,
+                        'usuario_id' => $usuarioId,
+                    ]);
+                }
+            }
             return $id;
         } catch (Throwable $e) {
             if ($ownTransaction && $pdo->inTransaction()) $pdo->rollBack();

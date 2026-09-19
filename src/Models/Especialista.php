@@ -1,13 +1,13 @@
-<?php
-
-class Especialista
-{
+<?php
+
+class Especialista
+{
     public static function buscarPorUsuarioId(int $usuarioId): ?array
     {
         self::aplicarPixPendente($usuarioId);
         $stmt = getPDO()->prepare('SELECT * FROM especialistas WHERE usuario_id = ?');
-        $stmt->execute([$usuarioId]);
-        return $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
+        $stmt->execute([$usuarioId]);
+        return $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
     }
 
     public static function atualizarPerfil(int $id, string $nome, string $bio, float $raio, string $pix, string $pixTipo): void
@@ -33,27 +33,27 @@ class Especialista
             getPDO()->prepare("UPDATE especialistas SET chave_pix=chave_pix_pendente, chave_pix_tipo=chave_pix_tipo_pendente, chave_pix_pendente=NULL, chave_pix_tipo_pendente=NULL, chave_pix_solicitada_em=NULL WHERE usuario_id=? AND chave_pix_pendente IS NOT NULL AND chave_pix_solicitada_em <= DATE_SUB(NOW(), INTERVAL 24 HOUR)")->execute([$usuarioId]);
         } catch (Throwable $e) { /* migration ainda não aplicada: leitura do perfil continua disponível */ }
     }
-
-    public static function criar(array $dados, ?PDO $pdo = null): int
-    {
-        $pdo = $pdo ?? getPDO();
-        $stmt = $pdo->prepare('INSERT INTO especialistas (usuario_id, nome_profissional, cpf_cnpj, documento_tipo, documento_numero, chave_pix, chave_pix_tipo, bio, raio_atendimento_km) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)');
-        $stmt->execute([(int)$dados['usuario_id'], $dados['nome_profissional'] ?: null, $dados['cpf_cnpj'], $dados['documento_tipo'], $dados['documento_numero'] ?: null, $dados['chave_pix'], $dados['chave_pix_tipo'], $dados['bio'] ?: null, (float)$dados['raio_atendimento_km']]);
-        return (int)$pdo->lastInsertId();
-    }
-
+
+    public static function criar(array $dados, ?PDO $pdo = null): int
+    {
+        $pdo = $pdo ?? getPDO();
+        $stmt = $pdo->prepare('INSERT INTO especialistas (usuario_id, nome_profissional, cpf_cnpj, documento_tipo, documento_numero, chave_pix, chave_pix_tipo, bio, raio_atendimento_km) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)');
+        $stmt->execute([(int)$dados['usuario_id'], $dados['nome_profissional'] ?: null, $dados['cpf_cnpj'], $dados['documento_tipo'], $dados['documento_numero'] ?: null, $dados['chave_pix'], $dados['chave_pix_tipo'], $dados['bio'] ?: null, (float)$dados['raio_atendimento_km']]);
+        return (int)$pdo->lastInsertId();
+    }
+
     public static function vincularServicos(int $especialistaId, array $codigos, ?PDO $pdo = null): void
-    {
-        $pdo = $pdo ?? getPDO();
-        $codigos = array_values(array_unique(array_filter(array_map(static fn($codigo) => strtoupper(trim((string)$codigo)), $codigos))));
-        if (!$codigos) throw new InvalidArgumentException('Selecione ao menos um servico.');
-        $marks = implode(',', array_fill(0, count($codigos), '?'));
-        $stmt = $pdo->prepare("SELECT id FROM servicos_especialista WHERE ativo=1 AND codigo IN ($marks)");
-        $stmt->execute($codigos);
-        $ids = array_map('intval', $stmt->fetchAll(PDO::FETCH_COLUMN));
-        if (!$ids) throw new InvalidArgumentException('Nenhum servico selecionado esta disponivel.');
-        $insert = $pdo->prepare('INSERT INTO especialista_servicos (especialista_id, servico_id, habilitado) VALUES (?, ?, 1)');
-        foreach ($ids as $id) $insert->execute([$especialistaId, $id]);
+    {
+        $pdo = $pdo ?? getPDO();
+        $codigos = array_values(array_unique(array_filter(array_map(static fn($codigo) => strtoupper(trim((string)$codigo)), $codigos))));
+        if (!$codigos) throw new InvalidArgumentException('Selecione ao menos um servico.');
+        $marks = implode(',', array_fill(0, count($codigos), '?'));
+        $stmt = $pdo->prepare("SELECT id FROM servicos_especialista WHERE ativo=1 AND codigo IN ($marks)");
+        $stmt->execute($codigos);
+        $ids = array_map('intval', $stmt->fetchAll(PDO::FETCH_COLUMN));
+        if (!$ids) throw new InvalidArgumentException('Nenhum servico selecionado esta disponivel.');
+        $insert = $pdo->prepare('INSERT INTO especialista_servicos (especialista_id, servico_id, habilitado) VALUES (?, ?, 1)');
+        foreach ($ids as $id) $insert->execute([$especialistaId, $id]);
     }
 
     public static function adicionarDocumento(int $especialistaId, string $tipo, ?string $numero, string $arquivo, ?PDO $pdo = null): int

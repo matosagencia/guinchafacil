@@ -9,6 +9,8 @@ require_once __DIR__ . '/../Models/Oficina.php';
 require_once __DIR__ . '/../Models/Chat.php';
 require_once __DIR__ . '/../Models/Avaliacao.php';
 require_once __DIR__ . '/../Models/Configuracao.php';
+require_once __DIR__ . '/../Models/PedidoIndicacaoOficina.php';
+require_once __DIR__ . '/../Services/IndicacaoOficinaService.php';
 require_once __DIR__ . '/../Services/PedidoService.php';
 require_once __DIR__ . '/../Models/PedidoEvidencia.php';
 require_once __DIR__ . '/../Services/POR/ProofOfRoadService.php';
@@ -267,6 +269,7 @@ class ClienteController extends BaseController
         AuthService::requireAuth('cliente');
         $uid     = $this->usuarioId();
         $oficinas = Oficina::listarPorUsuario($uid);
+        $oficinasParceiras = IndicacaoOficinaService::ativo() ? PedidoIndicacaoOficina::listarOficinasAtivas() : [];
         $csrfToken = AuthService::gerarCsrfToken();
         require __DIR__ . '/../Views/cliente/oficinas.php';
     }
@@ -574,6 +577,7 @@ class ClienteController extends BaseController
         $uid     = $this->usuarioId();
         $veiculos = Veiculo::listarPorUsuario($uid);
         $oficinas = Oficina::listarPorUsuario($uid);
+        $oficinasParceiras = IndicacaoOficinaService::ativo() ? PedidoIndicacaoOficina::listarOficinasAtivas() : [];
         $cfg      = Configuracao::getAll();
         $pedidoRascunho = $_SESSION['pedido_rascunho'] ?? null;
         if (!empty($pedidoRascunho['criado_em']) && strtotime($pedidoRascunho['criado_em']) < strtotime('-30 minutes')) {
@@ -677,6 +681,17 @@ class ClienteController extends BaseController
         );
         $latDest   = (float)($_POST['lat_destino'] ?? 0);
         $lngDest   = (float)($_POST['lng_destino'] ?? 0);
+        $oficinaParceiraProviderId = (int)($_POST['oficina_parceira_provider_id'] ?? 0);
+        if ($oficinaParceiraProviderId > 0 && IndicacaoOficinaService::ativo()) {
+            foreach (PedidoIndicacaoOficina::listarOficinasAtivas() as $partner) {
+                if ((int)$partner['id'] === $oficinaParceiraProviderId) {
+                    $latDest = (float)($partner['latitude'] ?? $latDest);
+                    $lngDest = (float)($partner['longitude'] ?? $lngDest);
+                    $endDest = trim((string)($partner['address'] ?: ($partner['trade_name'] ?: $partner['legal_name'])));
+                    break;
+                }
+            }
+        }
         $distancia = (float)($_POST['distancia_km'] ?? 5);
 
         // Validar que veículo pertence ao cliente
@@ -860,6 +875,14 @@ class ClienteController extends BaseController
             $cidadeIdPreco, $pricingZoneId,
         ]);
         $pedidoId = (int)$pdo->lastInsertId();
+
+        if ($oficinaParceiraProviderId > 0 && IndicacaoOficinaService::ativo()) {
+            try {
+                IndicacaoOficinaService::registrarSelecao($pedidoId, $oficinaParceiraProviderId, $uid);
+            } catch (Throwable $indicacaoError) {
+                error_log('[IndicacaoOficina] seleção não registrada: ' . $indicacaoError->getMessage());
+            }
+        }
 
         // Etapa 15 — congela o cenário veicular/situacional deste pedido. É
         // este snapshot que a compatibilidade lê no aceite, não o cadastro

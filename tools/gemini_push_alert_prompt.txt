@@ -1,0 +1,31 @@
+Contexto do projeto:
+- Repositório público: https://github.com/matosagencia/guinchafacil
+- Stack: PHP monolítico com rotas próprias, views em PHP e JS estático.
+- Já existe SSE para pedidos em tempo real: /sse/pedido/{id}, /sse/pedidos e /sse/admin/pedidos.
+- Já existe polling em JavaScript para especialista: public/assets/js/especialista-localizacao.js consulta /especialista/notificacoes a cada 10s.
+- No dashboard do guincho há fila e atualização em tempo real via SSE.
+
+Preciso de um planejamento técnico para este objetivo:
+Quando especialista ou guincheiro logar no sistema, o navegador deve alertar sobre chamados disponíveis e permitir decidir aceitar ou recusar sem ficar com o browser aberto o tempo todo.
+O usuário pode estar no telefone fazendo outras coisas.
+Também queremos considerar SMS como alternativa/fallback quando o navegador não estiver disponível.
+
+Quero que você analise e recomende a melhor estratégia, comparando:
+1. Web Push / Push Notifications com Service Worker.
+2. SSE ou polling em aba aberta.
+3. SMS como fallback.
+4. Possível integração com PWA.
+
+Responda em português e entregue:
+- Conclusão objetiva: qual arquitetura você recomenda.
+- Motivos técnicos e tradeoffs.
+- Diagrama de fluxo em texto ASCII.
+- Lista dos arquivos que provavelmente precisam ser criados/alterados, com número aproximado.
+- Plano em fases: MVP, evolução, fallback e observabilidade.
+- Como o usuário pode aceitar/recusar o chamado a partir da notificação.
+- Como evitar spam de notificações.
+- Como lidar com login, logout, sessão expirada e revalidação do token de notificação.
+- Se houver necessidade de fila assíncrona ou de banco para registrar subscriptions.
+
+Considere que o sistema já tem PHP, rotas próprias e páginas separadas para guincho e especialista.
+Priorize simplicidade operacional no cPanel e compatibilidade com celular.
