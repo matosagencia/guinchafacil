@@ -2,12 +2,13 @@
 $bp = defined('BASE_PATH') ? BASE_PATH : '';
 include __DIR__ . '/../layouts/header.php';
 
-$sensivelEnv = ['DB_PASS', 'SMTP_PASS', 'ENCRYPTION_KEY', 'SIMULATION_ADMIN_TOKEN'];
+$sensivelEnv = ['DB_PASS', 'SMTP_PASS', 'GOOGLE_CLIENT_SECRET', 'ENCRYPTION_KEY', 'SIMULATION_ADMIN_TOKEN'];
 $gruposEnv = [
     'Aplicação' => ['APP_NAME', 'APP_URL', 'APP_ENV', 'APP_DEBUG', 'HTTPS_ONLY', 'FORCE_BASEPATH'],
     'Banco de Dados' => ['DB_HOST', 'DB_NAME', 'DB_USER', 'DB_PASS'],
     'Institucional' => ['COMPANY_ADDRESS', 'ADMIN_EMAIL'],
     'SMTP / Email' => ['SMTP_HOST', 'SMTP_PORT', 'SMTP_USER', 'SMTP_PASS', 'SMTP_FROM_EMAIL', 'SMTP_FROM_NAME'],
+    'Google OAuth' => ['GOOGLE_CLIENT_ID', 'GOOGLE_CLIENT_SECRET', 'GOOGLE_REDIRECT_URI'],
     'Simulado / Testes' => ['SIMULATION_ENABLED', 'PIX_DRY_RUN', 'SIMULATION_ADMIN_TOKEN'],
     'Operacional' => ['MAX_PIX_TENTATIVAS', 'GEOCODING_CACHE_TTL_DAYS', 'TARIFA_BASE', 'TARIFA_KM', 'ENCRYPTION_KEY'],
     'Log do Sistema' => ['SYSTEM_LOG_ENABLED'],
@@ -592,7 +593,7 @@ function maskEnvValue(string $value): string {
                             <strong>Verificação atual:</strong> há pontos críticos de ambiente que devem ser corrigidos antes de publicar.
                         </div>
                     <?php endif; ?>
-                    <form method="POST" action="<?php echo $bp; ?>/admin/configuracoes" class="row g-3">
+                    <form method="POST" action="<?php echo $bp; ?>/admin/env/salvar" class="row g-3">
                         <?php if (!empty($csrfToken)): ?>
                         <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($csrfToken); ?>">
                         <?php endif; ?>
@@ -611,13 +612,13 @@ function maskEnvValue(string $value): string {
                                         <input
                                             type="password"
                                             class="form-control font-monospace"
-                                            name="<?php echo htmlspecialchars($chave); ?>"
+                                            name="env[<?php echo htmlspecialchars($chave); ?>]"
                                             value=""
                                             placeholder="<?php echo htmlspecialchars(maskEnvValue($valorAtual)); ?>"
                                             autocomplete="new-password">
                                         <small class="text-muted d-block">Deixe em branco para manter o valor atual.</small>
                                     <?php elseif ($chave === 'APP_DEBUG' || $chave === 'HTTPS_ONLY' || $chave === 'SIMULATION_ENABLED' || $chave === 'PIX_DRY_RUN' || $chave === 'SYSTEM_LOG_ENABLED'): ?>
-                                        <select class="form-select" name="<?php echo htmlspecialchars($chave); ?>">
+                                        <select class="form-select" name="env[<?php echo htmlspecialchars($chave); ?>]">
                                             <option value="true" <?php echo $valorAtual === 'true' ? 'selected' : ''; ?>>true</option>
                                             <option value="false" <?php echo $valorAtual === 'false' ? 'selected' : ''; ?>>false</option>
                                         </select>
@@ -625,7 +626,7 @@ function maskEnvValue(string $value): string {
                                         <input
                                             type="<?php echo in_array($chave, ['DB_HOST','DB_NAME','DB_USER','APP_NAME','APP_URL','APP_ENV','FORCE_BASEPATH','COMPANY_ADDRESS','ADMIN_EMAIL','SMTP_HOST','SMTP_PORT','SMTP_USER','SMTP_FROM_EMAIL','SMTP_FROM_NAME','MAX_PIX_TENTATIVAS','GEOCODING_CACHE_TTL_DAYS','TARIFA_BASE','TARIFA_KM'], true) ? 'text' : 'text'; ?>"
                                             class="form-control font-monospace"
-                                            name="<?php echo htmlspecialchars($chave); ?>"
+                                            name="env[<?php echo htmlspecialchars($chave); ?>]"
                                             value="<?php echo htmlspecialchars($valorAtual); ?>">
                                     <?php endif; ?>
                                 </div>

@@ -2780,8 +2780,8 @@ class AdminController extends BaseController
         $novos     = $_POST['env'] ?? [];
         $adminId   = (int)($_SESSION['usuario_id'] ?? 0);
 
-        $sensivel = ['DB_PASS','MP_ACCESS_TOKEN','MP_PUBLIC_KEY','MP_WEBHOOK_SECRET',
-                     'PS_TOKEN','SMTP_PASS','ENCRYPTION_KEY','SIMULATION_ADMIN_TOKEN'];
+        $sensivel = ['DB_PASS','MP_ACCESS_TOKEN','MP_PUBLIC_KEY','MP_WEBHOOK_SECRET',
+                     'PS_TOKEN','SMTP_PASS','GOOGLE_CLIENT_SECRET','ENCRYPTION_KEY','SIMULATION_ADMIN_TOKEN'];
 
         // Mescla: campos sensÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â­veis em branco = manter atual
         $merged = $envAtual;
@@ -2802,7 +2802,8 @@ class AdminController extends BaseController
         // Gera conteÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Âºdo novo
         $grupos = [
             'Banco de dados'        => ['DB_HOST','DB_NAME','DB_USER','DB_PASS'],
-            'Aplicacao'             => ['APP_NAME','APP_URL','APP_ENV','APP_DEBUG','HTTPS_ONLY','FORCE_BASEPATH'],
+            'Aplicacao'             => ['APP_NAME','APP_URL','APP_ENV','APP_DEBUG','HTTPS_ONLY','FORCE_BASEPATH'],
+            'Google OAuth'          => ['GOOGLE_CLIENT_ID','GOOGLE_CLIENT_SECRET','GOOGLE_REDIRECT_URI'],
             'Institucional'         => ['COMPANY_ADDRESS','COMPANY_WHATSAPP','ADMIN_EMAIL'],
             'Gateway ativo'         => ['PAYMENT_GATEWAY_ACTIVE'],
             'MercadoPago'           => ['MP_ACCESS_TOKEN','MP_PUBLIC_KEY','MP_WEBHOOK_SECRET','MP_ENV'],
