@@ -21,7 +21,7 @@ $pdo = getPDO();
 $run = CronMonitorService::start('cron_bypass_detector');
 $processed = 0;
 try {
-    $stmt = $pdo->query("SELECT id FROM pedidos WHERE status = 'cancelado' AND updated_at >= NOW() - INTERVAL 6 HOUR ORDER BY id ASC");
+    $stmt = $pdo->query("SELECT id FROM pedidos WHERE status = 'cancelado' AND COALESCE(cancelado_em, criado_em) >= NOW() - INTERVAL 6 HOUR ORDER BY id ASC");
     $errors = 0;
     foreach ($stmt->fetchAll(PDO::FETCH_COLUMN) as $pedidoId) {
         try {

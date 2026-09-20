@@ -15,7 +15,7 @@ final class BypassDetectorService
     public static function analisarPermanenciaPosCancelamento(int $pedidoId, ?PDO $pdo = null): ?array
     {
         $pdo ??= getPDO();
-        $stmt = $pdo->prepare("SELECT p.id, p.updated_at, p.usuario_id, i.provider_id, ws.latitude, ws.longitude
+        $stmt = $pdo->prepare("SELECT p.id, COALESCE(p.cancelado_em, p.criado_em) AS cancelado_at, p.usuario_id, i.provider_id, ws.latitude, ws.longitude
             FROM pedidos p
             JOIN pedido_indicacoes_oficina i ON i.pedido_id = p.id
             JOIN provider_workshop_settings ws ON ws.provider_id = i.provider_id
@@ -29,7 +29,7 @@ final class BypassDetectorService
         $points = $pdo->prepare("SELECT latitude, longitude, precisao_metros, captured_at
             FROM pedido_presenca_localizacoes WHERE pedido_id = ? AND precisao_metros <= ?
             AND captured_at >= ? ORDER BY captured_at ASC");
-        $points->execute([$pedidoId, self::MAX_ACCURACY_METERS, $pedido['updated_at']]);
+        $points->execute([$pedidoId, self::MAX_ACCURACY_METERS, $pedido['cancelado_at']]);
         $valid = [];
         foreach ($points->fetchAll(PDO::FETCH_ASSOC) as $point) {
             $distance = GeoService::haversine((float)$point['latitude'], (float)$point['longitude'], (float)$pedido['latitude'], (float)$pedido['longitude']) * 1000;

@@ -32,7 +32,7 @@ final class PedidoBypassCase
 
     public static function listar(string $status = self::SUSPEITO): array
     {
-        $stmt = getPDO()->prepare('SELECT c.*, p.status AS pedido_status, p.updated_at AS cancelado_at,
+        $stmt = getPDO()->prepare('SELECT c.*, p.status AS pedido_status, COALESCE(p.cancelado_em, p.criado_em) AS cancelado_at,
                 pr.trade_name, pr.legal_name FROM pedido_bypass_cases c
             JOIN pedidos p ON p.id = c.pedido_id JOIN providers pr ON pr.id = c.provider_id
             WHERE c.status = ? ORDER BY c.created_at ASC');
