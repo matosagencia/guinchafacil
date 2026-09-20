@@ -1,7 +1,9 @@
 <?php
 declare(strict_types=1);
 
-require_once __DIR__ . '/config.php';
+require_once __DIR__ . '/config.php';
+
+$bp = defined('BASE_PATH') ? BASE_PATH : '';
 
 $companyName = 'GuinchaFácil';
 $whatsDigits = preg_replace('/\D+/', '', (string)COMPANY_WHATSAPP);
@@ -28,9 +30,12 @@ function h(string $value): string
         a:hover { text-decoration: underline; }
         .muted { color: #6b7280; }
         .box { background: #f8fafc; border: 1px solid #e5e7eb; border-radius: 8px; padding: 14px 16px; margin: 18px 0; }
-    </style>
+</style>
+<link rel="stylesheet" href="<?php echo h($bp); ?>/public/assets/css/tokens.css">
+<link rel="stylesheet" href="<?php echo h($bp); ?>/public/assets/css/pages/public-landing.css">
 </head>
-<body>
+<body class="gf-landing">
+<header class="gf-nav"><a class="gf-brand" href="<?php echo h($bp); ?>/"><img src="<?php echo h($bp); ?>/public/assets/img/logo-48.png" alt="" width="40" height="40"><span>Guincha<strong>F&aacute;cil</strong></span></a><nav aria-label="Navegação principal"><a href="<?php echo h($bp); ?>/pre-cotacao">Fazer cotação</a><a class="gf-login" href="<?php echo h($bp); ?>/login">Entrar</a></nav></header>
 <div class="container">
     <h1>Termos de Serviço - <?php echo h($companyName); ?></h1>
     <p class="muted">Última atualização: <?php echo date('d/m/Y'); ?></p>
@@ -124,5 +129,7 @@ function h(string $value): string
         E-mail administrativo: <a href="mailto:<?php echo h($adminEmail); ?>"><?php echo h($adminEmail); ?></a>
     </p>
 </div>
-</body>
+</div>
+<footer class="gf-footer"><span>&copy; <?php echo date('Y'); ?> GuinchaF&aacute;cil</span><div><a href="<?php echo h($bp); ?>/">Página inicial</a><a href="<?php echo h($bp); ?>/termos-servico.php">Termos</a><a href="<?php echo h($bp); ?>/politica-privacidade.php">Privacidade</a></div></footer>
+</body>
 </html>
