@@ -180,7 +180,48 @@ final class ChargePolicyService
         }
     }
 
-    private static function item(
+    public static function itemIndicacaoOficina(float $feeAmount, array $snapshot = []): array
+    {
+        if ($feeAmount < 0) {
+            throw new \InvalidArgumentException('A taxa de indicação não pode ser negativa.');
+        }
+
+        return [
+            'phase_code' => ChargeCodes::PHASE_WORKSHOP_REFERRAL,
+            'charge_type' => ChargeCodes::TYPE_REFERRAL_FEE,
+            'description' => 'Taxa por indicação de oficina parceira',
+            'quantity' => 1.0,
+            'unit_amount' => round($feeAmount, 2),
+            'gross_amount' => round($feeAmount, 2),
+            'platform_fee_amount' => round($feeAmount, 2),
+            'provider_net_amount' => 0.0,
+            'charge_status' => ChargeCodes::CHARGE_PENDING,
+            'payable_status' => ChargeCodes::PAYABLE_NOT_ELIGIBLE,
+            'calculation_version' => (string)($snapshot['rule_version'] ?? self::POLICY_VERSION),
+            'calculation_context' => $snapshot,
+            'evidence_required' => true,
+        ];
+    }
+
+    public static function criarCobrancaIndicacaoOficina(
+        int $orderId,
+        int $providerId,
+        float $feeAmount,
+        array $snapshot,
+        string $idempotencyKey
+    ): array {
+        require_once __DIR__ . '/../../Models/Financial/OrderChargeItem.php';
+        return OrderChargeItem::criar(array_merge(
+            self::itemIndicacaoOficina($feeAmount, $snapshot),
+            [
+                'order_id' => $orderId,
+                'provider_id' => $providerId,
+                'idempotency_key' => $idempotencyKey,
+            ]
+        ));
+    }
+
+    private static function item(
         string $phaseCode,
         string $chargeType,
         string $payableStatus = ChargeCodes::PAYABLE_PENDING_EVIDENCE
