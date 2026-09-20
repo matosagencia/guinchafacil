@@ -89,6 +89,7 @@ final class IndicacaoOficinaService
     {
         self::ensureAtivo();
         $pdo = getPDO();
+        $indicacaoId = 0;
         $pdo->beginTransaction();
         try {
             $row = PedidoIndicacaoOficina::buscarPorPedido($pedidoId, true);
@@ -97,6 +98,7 @@ final class IndicacaoOficinaService
             if (!$row || !$pedido) {
                 throw new InvalidArgumentException('IND-001: indicação inexistente.');
             }
+            $indicacaoId = (int)$row['id'];
             if ($guinchoId <= 0 || (int)($pedido['guincho_id'] ?? 0) !== $guinchoId) {
                 throw new RuntimeException('IND-001: guincho não vinculado ao pedido.');
             }
@@ -110,7 +112,8 @@ final class IndicacaoOficinaService
                 $guinchoId,
                 'CHECKIN_OFICINA',
                 $payload['file'] ?? [],
-                (string)($payload['qr_token'] ?? '')
+                (string)($payload['qr_token'] ?? ''),
+                (float)($row['raio_checkin_m'] ?? ProviderWorkshopService::DEFAULT_CHECKIN_RADIUS_METERS)
             );
             $snapshot = json_decode((string)($row['regra_comissao_snapshot_json'] ?? ''), true) ?: [];
             $fee = (float)($snapshot['fee_amount'] ?? $row['taxa_indicacao_fixa'] ?? 30);
@@ -122,11 +125,12 @@ final class IndicacaoOficinaService
                 'referral_fee:' . $pedidoId
             );
             PedidoIndicacaoOficina::atualizar((int)$row['id'], [
-                'status' => PedidoIndicacaoOficina::COBRANCA_GERADA,
+                'status' => PedidoIndicacaoOficina::QUALIFICADA,
                 'checkin_evidencia_id' => $evidencia['id'],
                 'checkin_geofence_ok' => 1,
                 'order_charge_item_id' => $item['id'],
             ]);
+            PedidoIndicacaoOficina::atualizar((int)$row['id'], ['status' => PedidoIndicacaoOficina::COBRANCA_GERADA]);
             $pdo->commit();
             AuditTrailService::evento('indicacao_oficina_cobranca_gerada', __CLASS__, __FUNCTION__, [
                 'pedido_id' => $pedidoId,
@@ -137,6 +141,16 @@ final class IndicacaoOficinaService
         } catch (Throwable $e) {
             if ($pdo->inTransaction()) {
                 $pdo->rollBack();
+            }
+            if ($indicacaoId > 0) {
+                try {
+                    PedidoIndicacaoOficina::atualizar($indicacaoId, [
+                        'status' => PedidoIndicacaoOficina::CHECKIN_PENDENTE,
+                        'checkin_geofence_ok' => 0,
+                    ]);
+                } catch (Throwable $stateError) {
+                    error_log('[IndicacaoOficina] falha ao marcar CHECKIN_PENDENTE: ' . $stateError->getMessage());
+                }
             }
             throw $e;
         }

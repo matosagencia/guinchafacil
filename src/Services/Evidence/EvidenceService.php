@@ -33,7 +33,14 @@ class EvidenceService
         ];
     }
 
-    public static function storeUploadedEvidence(array $pedido, int $guinchoId, string $tipo, array $file, string $nonceToken): array
+    public static function storeUploadedEvidence(
+        array $pedido,
+        int $guinchoId,
+        string $tipo,
+        array $file,
+        string $nonceToken,
+        ?float $destinationRadiusOverride = null
+    ): array
     {
         if (($file['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) {
             throw new RuntimeException('Arquivo de evidência ausente.');
@@ -58,9 +65,9 @@ class EvidenceService
         // Diagnóstico/orçamento ocorre no local de origem. Essas evidências
         // devem usar a mesma geofence de chegada, e não a do destino.
         $naOrigem = in_array($tipo, ['coleta', 'diagnostico', 'orcamento'], true);
-        $radius = $naOrigem
-            ? PorThresholds::arrivalRadiusM()
-            : PorThresholds::destinationRadiusM();
+        $radius = $naOrigem
+            ? PorThresholds::arrivalRadiusM()
+            : ($destinationRadiusOverride ?? PorThresholds::destinationRadiusM());
 
         $isNear = $naOrigem
             ? GeofenceService::isNearOrigin($pedido, (float)$point['latitude'], (float)$point['longitude'], $radius)
