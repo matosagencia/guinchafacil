@@ -79,7 +79,12 @@
 
         </form>
 
-        <div class="text-center mt-2 small">
+        <?php if (defined('GOOGLE_CLIENT_ID') && GOOGLE_CLIENT_ID !== ''): ?>
+        <div class="text-center text-muted small my-3">ou</div>
+        <a class="btn btn-outline-dark w-100 py-2" href="<?php echo htmlspecialchars($bp); ?>/auth/google?retorno=<?php echo rawurlencode($retorno ?? '/'); ?>">Continuar com Google</a>
+        <?php endif; ?>
+
+        <div class="text-center mt-2 small">
 
             <a href="<?php echo htmlspecialchars($bp); ?>/senha/esqueceu">Esqueceu sua senha?</a>
 

@@ -29,7 +29,10 @@ define('DB_CHARSET', 'utf8mb4');
 // ------------------------------------------------------------
 // Aplicação
 // ------------------------------------------------------------
-define('APP_URL',        env('APP_URL', 'https://guinchafacil.com.br'));
+define('APP_URL',        env('APP_URL', 'https://guinchafacil.com.br'));
+define('GOOGLE_CLIENT_ID', env('GOOGLE_CLIENT_ID', ''));
+define('GOOGLE_CLIENT_SECRET', env('GOOGLE_CLIENT_SECRET', ''));
+define('GOOGLE_REDIRECT_URI', env('GOOGLE_REDIRECT_URI', APP_URL . '/auth/google/callback'));
 if (!defined('PUBLIC_PATH')) define('PUBLIC_PATH',    __DIR__ . '/public');
 if (!defined('UPLOAD_PATH')) define('UPLOAD_PATH',    PUBLIC_PATH . '/uploads');
 // §SEC-UPL-02 (correção): doc_cnh_frente/doc_cnh_verso/foto_veiculo do

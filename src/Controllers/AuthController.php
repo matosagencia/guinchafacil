@@ -323,7 +323,7 @@ class AuthController extends BaseController
         return 6371.0 * 2 * asin(min(1.0, sqrt($a)));
     }
 
-    public function loginForm(): void
+    public function loginForm(): void
 
     {
 
@@ -341,9 +341,63 @@ class AuthController extends BaseController
         $flash = $this->pullFlash();
         $retorno = AuthService::sanitizeReturnPath((string)($_GET['retorno'] ?? '/'));
 
-        require __DIR__ . '/../Views/auth/login.php';
-
-    }
+        require __DIR__ . '/../Views/auth/login.php';
+
+    }
+
+    public function googleRedirect(): void
+    {
+        if ($this->isAuthenticated()) {
+            $this->redirectByProfile();
+            return;
+        }
+        try {
+            require_once __DIR__ . '/../Services/GoogleOAuthService.php';
+            header('Location: ' . GoogleOAuthService::createAuthorizationUrl((string)($_GET['retorno'] ?? '/')), true, 302);
+            exit;
+        } catch (Throwable $e) {
+            error_log('[GoogleAuth] redirect: ' . $e->getMessage());
+            $this->setFlashMessage('O cadastro com Google ainda não está disponível.', 'error');
+            $this->redirect('/login');
+        }
+    }
+
+    public function googleCallback(): void
+    {
+        require_once __DIR__ . '/../Services/GoogleOAuthService.php';
+        $returnPath = GoogleOAuthService::consumeState((string)($_GET['state'] ?? ''));
+        if ($returnPath === null || isset($_GET['error'])) {
+            $this->setFlashMessage('Não foi possível validar o acesso pelo Google. Tente novamente.', 'error');
+            $this->redirect('/login');
+            return;
+        }
+        try {
+            $identity = GoogleOAuthService::fetchIdentity((string)($_GET['code'] ?? ''));
+            $pdo = getPDO();
+            $pdo->beginTransaction();
+            $stmt = $pdo->prepare('SELECT * FROM usuarios WHERE google_subject = ? OR email = ? LIMIT 1 FOR UPDATE');
+            $stmt->execute([$identity['subject'], $identity['email']]);
+            $user = $stmt->fetch(PDO::FETCH_ASSOC);
+            if ($user && (int)$user['ativo'] !== 1) throw new DomainException('Esta conta está desativada.');
+            if ($user) {
+                $pdo->prepare('UPDATE usuarios SET google_subject = ?, ultimo_login = NOW() WHERE id = ?')
+                    ->execute([$identity['subject'], (int)$user['id']]);
+                $user['google_subject'] = $identity['subject'];
+            } else {
+                $stmt = $pdo->prepare("INSERT INTO usuarios (nome, email, google_subject, senha_hash, telefone, cpf, tipo, ativo, criado_em) VALUES (?, ?, ?, ?, NULL, NULL, 'cliente', 1, NOW())");
+                $stmt->execute([$identity['name'], $identity['email'], $identity['subject'], password_hash(bin2hex(random_bytes(32)), PASSWORD_DEFAULT)]);
+                $user = ['id' => (int)$pdo->lastInsertId(), 'nome' => $identity['name'], 'email' => $identity['email'], 'tipo' => 'cliente', 'ativo' => 1];
+            }
+            $pdo->commit();
+            AuthService::initializeAuthenticatedSession($user);
+            $this->redirect($returnPath ?: '/cliente/dashboard');
+        } catch (Throwable $e) {
+            if (isset($pdo) && $pdo instanceof PDO && $pdo->inTransaction()) $pdo->rollBack();
+            error_log('[GoogleAuth] callback: ' . $e->getMessage());
+            $this->setFlashMessage('Não foi possível concluir o cadastro pelo Google.', 'error');
+            $this->redirect('/login');
+        }
+    }
 
 
 
@@ -1073,7 +1127,7 @@ class AuthController extends BaseController
 
         $email = filter_var(trim($_POST['email'] ?? ''), FILTER_VALIDATE_EMAIL);
 
-        $this->setFlashMessage('Se esse email existir, enviaremos um link de redefinição.', 'success');
+        $emailEnviado = false;
 
 
 
@@ -1127,7 +1181,7 @@ class AuthController extends BaseController
 
                     
 
-                    $this->enviarEmail(
+                    $emailEnviado = $this->enviarEmail(
 
                         $email, 
 
@@ -1149,7 +1203,12 @@ class AuthController extends BaseController
 
         
 
-        $this->redirect('/login');
+        if ($email && isset($user) && !$emailEnviado) {
+            $this->setFlashMessage('Não foi possível enviar o email agora. Verifique a configuração SMTP ou tente novamente mais tarde.', 'error');
+        } else {
+            $this->setFlashMessage('Se esse email existir, enviaremos um link de redefinição.', 'success');
+        }
+        $this->redirect('/login');
 
     }
 
@@ -1226,7 +1285,7 @@ class AuthController extends BaseController
 
         
 
-        $token = preg_replace('/[^a-f0-9]/', '', $_POST['token'] ?? '');
+        $token = strtolower(trim((string)($_POST['token'] ?? '')));
 
         $senha = $_POST['senha'] ?? '';
 
@@ -1234,7 +1293,7 @@ class AuthController extends BaseController
 
 
 
-        if (strlen($senha) < 8 || $senha !== $confirma) {
+        if (!preg_match('/\A[a-f0-9]{64}\z/', $token) || strlen($senha) < 8 || $senha !== $confirma) {
 
             $this->setFlashMessage('Senha inválida ou as senhas não conferem (mínimo 8 caracteres).', 'error');
 

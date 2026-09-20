@@ -161,10 +161,10 @@ HTML;
 
             $mail->send();
             return true;
-        } catch (MailerException $e) {
-            error_log('[NotificacaoService] Falha ao enviar email para ' . $para . ': ' . $mail->ErrorInfo);
-            return false;
-        }
+        } catch (\Throwable $e) {
+            error_log('[NotificacaoService] Falha ao enviar email para ' . $para . ': ' . $mail->ErrorInfo);
+            return false;
+        }
     }
 
     // ── Emails de negócio ──────────────────────────────────────────────────

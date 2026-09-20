@@ -251,7 +251,9 @@ $rotas = [
         '/login'            => ['AuthController', 'loginForm', null],
         '/pre-cotacao'      => ['AuthController', 'preCotacaoForm', null],
         '/logout'           => ['AuthController', 'logout', null],
-        '/auth/session-status' => ['AuthController', 'sessionStatus', null],
+        '/auth/session-status' => ['AuthController', 'sessionStatus', null],
+        '/auth/google' => ['AuthController', 'googleRedirect', null],
+        '/auth/google/callback' => ['AuthController', 'googleCallback', null],
         '/senha/esqueceu'         => ['AuthController', 'esqueceuSenhaForm', null],
 
         '/registro/cliente' => ['AuthController', 'registroClienteForm', null],
