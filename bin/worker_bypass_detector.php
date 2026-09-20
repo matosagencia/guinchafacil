@@ -2,6 +2,17 @@
 
 declare(strict_types=1);
 
+$lockPath = rtrim(sys_get_temp_dir(), DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . 'guinchafacil-bypass-detector.lock';
+$lockHandle = fopen($lockPath, 'c');
+if ($lockHandle === false || !flock($lockHandle, LOCK_EX | LOCK_NB)) {
+    fwrite(STDOUT, json_encode(['processed' => 0, 'errors' => 0, 'skipped' => 'already_running'], JSON_UNESCAPED_UNICODE) . PHP_EOL);
+    exit(0);
+}
+register_shutdown_function(static function () use ($lockHandle): void {
+    flock($lockHandle, LOCK_UN);
+    fclose($lockHandle);
+});
+
 require_once __DIR__ . '/../config.php';
 require_once __DIR__ . '/../src/Services/CronMonitorService.php';
 require_once __DIR__ . '/../src/Services/BypassDetectorService.php';
