@@ -63,7 +63,8 @@ final class ProviderWorkshopService
     {
         $stmt = getPDO()->query(
             "SELECT p.*, ws.taxa_indicacao_fixa, ws.regra_versao,
-                    ws.status_parceria, ws.raio_checkin_m
+                    ws.status_parceria, ws.raio_checkin_m,
+                    ws.address, ws.latitude, ws.longitude
                FROM providers p
                JOIN provider_workshop_settings ws ON ws.provider_id = p.id
               WHERE p.provider_type = 'WORKSHOP'
@@ -73,6 +74,11 @@ final class ProviderWorkshopService
               ORDER BY COALESCE(p.trade_name, p.legal_name), p.id"
         );
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public static function listarOficinasElegiveis(): array
+    {
+        return self::listarElegiveis();
     }
 
     public static function obterRegras(int $providerId): ?array
@@ -106,10 +112,19 @@ final class ProviderWorkshopService
 
             $stmt = $pdo->prepare(
                 'INSERT INTO provider_workshop_settings
-                    (provider_id, taxa_indicacao_fixa, regra_versao, status_parceria, raio_checkin_m, created_at, updated_at)
-                 VALUES (?, ?, ?, \'ATIVO\', ?, NOW(), NOW())'
+                    (provider_id, taxa_indicacao_fixa, regra_versao, status_parceria, raio_checkin_m,
+                     address, latitude, longitude, created_at, updated_at)
+                 VALUES (?, ?, ?, \'ATIVO\', ?, ?, ?, ?, NOW(), NOW())'
             );
-            $stmt->execute([$providerId, $rules['fee_amount'], $rules['rule_version'], $rules['checkin_radius_meters']]);
+            $stmt->execute([
+                $providerId,
+                $rules['fee_amount'],
+                $rules['rule_version'],
+                $rules['checkin_radius_meters'],
+                trim((string)($dados['address'] ?? '')) ?: null,
+                $dados['latitude'] ?? null,
+                $dados['longitude'] ?? null,
+            ]);
             $pdo->commit();
         } catch (Throwable $e) {
             if ($pdo->inTransaction()) {

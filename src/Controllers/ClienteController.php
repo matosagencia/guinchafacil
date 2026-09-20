@@ -11,6 +11,7 @@ require_once __DIR__ . '/../Models/Avaliacao.php';
 require_once __DIR__ . '/../Models/Configuracao.php';
 require_once __DIR__ . '/../Models/PedidoIndicacaoOficina.php';
 require_once __DIR__ . '/../Services/IndicacaoOficinaService.php';
+require_once __DIR__ . '/../Services/ProviderWorkshopService.php';
 require_once __DIR__ . '/../Services/PedidoService.php';
 require_once __DIR__ . '/../Models/PedidoEvidencia.php';
 require_once __DIR__ . '/../Services/POR/ProofOfRoadService.php';
@@ -269,7 +270,7 @@ class ClienteController extends BaseController
         AuthService::requireAuth('cliente');
         $uid     = $this->usuarioId();
         $oficinas = Oficina::listarPorUsuario($uid);
-        $oficinasParceiras = IndicacaoOficinaService::ativo() ? PedidoIndicacaoOficina::listarOficinasAtivas() : [];
+        $oficinasParceiras = IndicacaoOficinaService::ativo() ? ProviderWorkshopService::listarOficinasElegiveis() : [];
         $csrfToken = AuthService::gerarCsrfToken();
         require __DIR__ . '/../Views/cliente/oficinas.php';
     }
@@ -683,7 +684,7 @@ class ClienteController extends BaseController
         $lngDest   = (float)($_POST['lng_destino'] ?? 0);
         $oficinaParceiraProviderId = (int)($_POST['oficina_parceira_provider_id'] ?? 0);
         if ($oficinaParceiraProviderId > 0 && IndicacaoOficinaService::ativo()) {
-            foreach (PedidoIndicacaoOficina::listarOficinasAtivas() as $partner) {
+            foreach (ProviderWorkshopService::listarOficinasElegiveis() as $partner) {
                 if ((int)$partner['id'] === $oficinaParceiraProviderId) {
                     $latDest = (float)($partner['latitude'] ?? $latDest);
                     $lngDest = (float)($partner['longitude'] ?? $lngDest);
@@ -852,6 +853,8 @@ class ClienteController extends BaseController
         $pdo = getPDO();
         require_once __DIR__ . '/../Services/MarketingAttributionService.php';
         $atribuicao = MarketingAttributionService::forPedido();
+        $pdo->beginTransaction();
+        try {
         $stmt = $pdo->prepare(
             "INSERT INTO pedidos (cliente_id, veiculo_id, tipo_problema, descricao_problema,
              lat_origem, lng_origem, endereco_origem, lat_destino, lng_destino, endereco_destino,
@@ -880,8 +883,17 @@ class ClienteController extends BaseController
             try {
                 IndicacaoOficinaService::registrarSelecao($pedidoId, $oficinaParceiraProviderId, $uid);
             } catch (Throwable $indicacaoError) {
+                throw $indicacaoError;
                 error_log('[IndicacaoOficina] seleção não registrada: ' . $indicacaoError->getMessage());
             }
+        }
+        $pdo->commit();
+        } catch (Throwable $pedidoError) {
+            if ($pdo->inTransaction()) {
+                $pdo->rollBack();
+            }
+            error_log('[PedidoCriar] falha ao criar pedido/indicação: ' . $pedidoError->getMessage());
+            $this->redirect('/cliente/pedido/novo?erro=pedido');
         }
 
         // Etapa 15 — congela o cenário veicular/situacional deste pedido. É
