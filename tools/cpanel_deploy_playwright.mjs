@@ -42,6 +42,7 @@ const deployEntries = [
   'phpunit.xml',
   'public/assets',
   'src',
+  'bin',
   'vendor',
   'database',
   'install',

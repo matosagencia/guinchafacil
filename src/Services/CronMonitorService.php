@@ -14,12 +14,24 @@ final class CronMonitorService
                 'tolerancia_atraso_min' => 3,
                 'script_path' => 'tools/cron_cancelar_pedidos_expirados.php',
             ],
-            'cron_reprocessar_pix' => [
+            'cron_reprocessar_pix' => [
                 'descricao' => 'Reprocessa payment jobs de repasse PIX.',
                 'schedule_hint' => '*/5 * * * *',
                 'tolerancia_atraso_min' => 10,
                 'script_path' => 'tools/cron_reprocessar_pix.php',
-            ],
+            ],
+
+            'cron_bypass_detector' => [
+
+                'descricao' => 'Analisa presença pós-cancelamento e cria casos suspeitos de bypass de oficina.',
+
+                'schedule_hint' => '*/5 * * * *',
+
+                'tolerancia_atraso_min' => 10,
+
+                'script_path' => 'bin/worker_bypass_detector.php',
+
+            ],
             'cron_limpar_tokens' => [
                 'descricao' => 'Limpa tokens expirados de redefinição de senha.',
                 'schedule_hint' => '0 3 * * *',
