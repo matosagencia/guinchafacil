@@ -25,6 +25,9 @@ require_once __DIR__ . '/../Services/Dispatch/OrderVehicleRequirementService.php
 require_once __DIR__ . '/../Services/Diagnostico/DiagnosticoService.php';
 require_once __DIR__ . '/../Services/Conversion/ConversionService.php';
 require_once __DIR__ . '/../Services/EnderecoFormatter.php';
+require_once __DIR__ . '/../Models/PedidoOrcamentoPrevio.php';
+require_once __DIR__ . '/../Services/ResgateDiretoOficinaService.php';
+require_once __DIR__ . '/../Services/OrcamentoPrevioService.php';
 
 class ClienteController extends BaseController
 {
@@ -683,6 +686,10 @@ class ClienteController extends BaseController
         $latDest   = (float)($_POST['lat_destino'] ?? 0);
         $lngDest   = (float)($_POST['lng_destino'] ?? 0);
         $oficinaParceiraProviderId = (int)($_POST['oficina_parceira_provider_id'] ?? 0);
+        $modalidadeSocorro = strtoupper(trim((string)($_POST['modalidade_socorro'] ?? 'REBOQUE_TRADICIONAL')));
+        if (!in_array($modalidadeSocorro, ['REBOQUE_TRADICIONAL', ResgateDiretoOficinaService::MODALIDADE], true)) {
+            $modalidadeSocorro = 'REBOQUE_TRADICIONAL';
+        }
         if ($oficinaParceiraProviderId > 0 && IndicacaoOficinaService::ativo()) {
             foreach (ProviderWorkshopService::listarOficinasElegiveis() as $partner) {
                 if ((int)$partner['id'] === $oficinaParceiraProviderId) {
@@ -848,6 +855,29 @@ class ClienteController extends BaseController
         $dificilAcesso = isset($_POST['local_dificil_acesso']) ? (int)!!$_POST['local_dificil_acesso'] : null;
         $garagemSubsolo = isset($_POST['em_garagem_subsolo']) ? (int)!!$_POST['em_garagem_subsolo'] : null;
 
+        if ($modalidadeSocorro === ResgateDiretoOficinaService::MODALIDADE) {
+            if (!IndicacaoOficinaService::ativo() || $oficinaParceiraProviderId <= 0) {
+                $this->redirect('/cliente/pedido/novo?erro=resgate_direto_indisponivel');
+            }
+            try {
+                ResgateDiretoOficinaService::validarElegibilidade([
+                    'modalidade_socorro' => $modalidadeSocorro,
+                    'local_resgate_lat' => $localResgateLat,
+                    'local_resgate_lng' => $localResgateLng,
+                    'veiculo_esta_batido' => $veiculoBatido,
+                    'rodas_travadas' => $rodasTravadas,
+                    'local_dificil_acesso' => $dificilAcesso,
+                    'em_garagem_subsolo' => $garagemSubsolo,
+                ], Provider::buscarPorId($oficinaParceiraProviderId) ?: [], ProviderWorkshopService::obterRegras($oficinaParceiraProviderId) ?: []);
+            } catch (Throwable $e) {
+                $this->redirect('/cliente/pedido/novo?erro=resgate_direto_bloqueado');
+            }
+            if ((float)($_POST['estimativa_maxima'] ?? -1) < (float)($_POST['estimativa_minima'] ?? -1)
+                || trim((string)($_POST['descricao_avaria'] ?? $descricao)) === '') {
+                $this->redirect('/cliente/pedido/novo?erro=orcamento_previo_invalido');
+            }
+        }
+
         $pService = new PedidoService();
         $statusInicial = $pService->statusInicialPedido();
         $pdo = getPDO();
@@ -861,9 +891,10 @@ class ClienteController extends BaseController
              distancia_km, custo_estimado, status, raio_atual_km, score_minimo_atual,
              expiracao_aceite, criado_em, service_type_id, attendance_mode,
              veiculo_esta_batido, rodas_travadas, local_dificil_acesso, em_garagem_subsolo,
-             utm_source, utm_medium, utm_campaign, utm_content, utm_term, canal_aquisicao, referrer_url, landing_page, cidade_id, pricing_zone_id)
+             utm_source, utm_medium, utm_campaign, utm_content, utm_term, canal_aquisicao, referrer_url, landing_page, cidade_id, pricing_zone_id,
+             modalidade_socorro, local_resgate_lat, local_resgate_lng)
              VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,10,0.5000,
-             DATE_ADD(NOW(), INTERVAL 30 MINUTE), NOW(), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? )"
+             DATE_ADD(NOW(), INTERVAL 30 MINUTE), NOW(), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? )"
         );
         $stmt->execute([
             $uid, $veiculoId, $tipo, $descricao,
@@ -876,6 +907,7 @@ class ClienteController extends BaseController
             $atribuicao['utm_content'] ?? null, $atribuicao['utm_term'] ?? null, $atribuicao['canal_aquisicao'] ?? 'organico',
             $atribuicao['referrer_url'] ?? null, $atribuicao['landing_page'] ?? null,
             $cidadeIdPreco, $pricingZoneId,
+            $modalidadeSocorro, $localResgateLat, $localResgateLng,
         ]);
         $pedidoId = (int)$pdo->lastInsertId();
 
@@ -886,6 +918,17 @@ class ClienteController extends BaseController
                 throw $indicacaoError;
                 error_log('[IndicacaoOficina] seleção não registrada: ' . $indicacaoError->getMessage());
             }
+        }
+        if ($modalidadeSocorro === ResgateDiretoOficinaService::MODALIDADE) {
+            PedidoOrcamentoPrevio::criar([
+                'pedido_id' => $pedidoId,
+                'provider_id' => $oficinaParceiraProviderId,
+                'taxa_diagnostico_local' => (float)($_POST['taxa_diagnostico_local'] ?? 0),
+                'estimativa_minima' => (float)$_POST['estimativa_minima'],
+                'estimativa_maxima' => (float)$_POST['estimativa_maxima'],
+                'descricao_avaria' => trim((string)($_POST['descricao_avaria'] ?? $descricao)),
+                'abater_diagnostico_na_os' => 1,
+            ], $pdo);
         }
         $pdo->commit();
         } catch (Throwable $pedidoError) {
@@ -936,6 +979,24 @@ class ClienteController extends BaseController
      * §3: cliente só pode cancelar em aguardando_pagamento ou aguardando_guincho
      * §4.4: estorno automático é disparado pelo PedidoService
      */
+
+    public function orcamentoPrevioAprovar(): void
+    {
+        AuthService::requireAuth('cliente');
+        header('Content-Type: application/json; charset=UTF-8');
+        if (!AuthService::validarCsrfToken((string)($_POST['csrf_token'] ?? ''))) {
+            http_response_code(403);
+            echo json_encode(['ok' => false, 'erro' => 'Token inválido.'], JSON_UNESCAPED_UNICODE);
+            return;
+        }
+        try {
+            $result = OrcamentoPrevioService::aprovarPeloCliente((int)($_POST['pedido_id'] ?? 0), $this->usuarioId());
+            echo json_encode(['ok' => true, 'orcamento' => $result], JSON_UNESCAPED_UNICODE);
+        } catch (Throwable $e) {
+            http_response_code(422);
+            echo json_encode(['ok' => false, 'erro' => $e->getMessage()], JSON_UNESCAPED_UNICODE);
+        }
+    }
 
     public function cancelarPedido(int $id): void
     {

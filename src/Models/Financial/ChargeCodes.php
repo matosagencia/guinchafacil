@@ -21,7 +21,8 @@ final class ChargeCodes
     public const PHASE_CANCELLATION = 'CANCELLATION';
     public const PHASE_NO_SHOW = 'NO_SHOW';
     public const PHASE_CONVERSION = 'CONVERSION';
-    public const PHASE_WORKSHOP_REFERRAL = 'WORKSHOP_REFERRAL';
+    public const PHASE_WORKSHOP_REFERRAL = 'WORKSHOP_REFERRAL';
+    public const PHASE_DIRECT_RESCUE = 'DIRECT_RESCUE';
 
     public const PHASES = [
         self::PHASE_INITIAL_ASSISTANCE,
@@ -32,7 +33,8 @@ final class ChargeCodes
         self::PHASE_CANCELLATION,
         self::PHASE_NO_SHOW,
         self::PHASE_CONVERSION,
-        self::PHASE_WORKSHOP_REFERRAL,
+        self::PHASE_WORKSHOP_REFERRAL,
+        self::PHASE_DIRECT_RESCUE,
     ];
 
     // --- charge_type ---
@@ -52,7 +54,8 @@ final class ChargeCodes
     public const TYPE_CANCELLATION_FEE = 'CANCELLATION_FEE';
     public const TYPE_ADJUSTMENT = 'ADJUSTMENT';
     public const TYPE_REFUND = 'REFUND';
-    public const TYPE_REFERRAL_FEE = 'REFERRAL_FEE';
+    public const TYPE_REFERRAL_FEE = 'REFERRAL_FEE';
+    public const TYPE_DIRECT_RESCUE_FEE = 'DIRECT_RESCUE_FEE';
 
     public const CHARGE_TYPES = [
         self::TYPE_DISPATCH_FEE, self::TYPE_TRAVEL_FEE, self::TYPE_ATTENDANCE_FEE,
@@ -60,7 +63,7 @@ final class ChargeCodes
         self::TYPE_PARTS_FEE, self::TYPE_TOWING_BASE_FEE, self::TYPE_TOWING_DISTANCE_FEE,
         self::TYPE_TOLL_FEE, self::TYPE_NIGHT_SURCHARGE, self::TYPE_HOLIDAY_SURCHARGE,
         self::TYPE_CONVERSION_BONUS, self::TYPE_CANCELLATION_FEE, self::TYPE_ADJUSTMENT,
-        self::TYPE_REFUND, self::TYPE_REFERRAL_FEE,
+        self::TYPE_REFUND, self::TYPE_REFERRAL_FEE, self::TYPE_DIRECT_RESCUE_FEE,
     ];
 
     // --- charge_status --- (dimensão: o que aconteceu com a cobrança em si)
@@ -109,9 +112,10 @@ final class ChargeCodes
     public const SITUATION_PLATFORM_FAILURE_AFTER_ARRIVAL = 'PLATFORM_FAILURE_AFTER_ARRIVAL';
     public const SITUATION_OTHER_PROVIDER_EXECUTES_TOWING = 'OTHER_PROVIDER_EXECUTES_TOWING';
 
-    public const SITUATION_WORKSHOP_DELIVERY_QUALIFIED = 'WORKSHOP_DELIVERY_QUALIFIED';
+    public const SITUATION_WORKSHOP_DELIVERY_QUALIFIED = 'WORKSHOP_DELIVERY_QUALIFIED';
+    public const SITUATION_DIRECT_RESCUE_QUALIFIED = 'DIRECT_RESCUE_QUALIFIED';
 
-    public const SITUATIONS = [
+    public const SITUATIONS = [
         self::SITUATION_RESOLVED_ON_SITE,
         self::SITUATION_TOWING_RECOMMENDED_ACCEPTED,
         self::SITUATION_CANCELLED_DURING_SERVICE,
@@ -124,7 +128,8 @@ final class ChargeCodes
         self::SITUATION_SAFETY_RISK_INTERRUPTION,
         self::SITUATION_PLATFORM_FAILURE_AFTER_ARRIVAL,
         self::SITUATION_OTHER_PROVIDER_EXECUTES_TOWING,
-        self::SITUATION_WORKSHOP_DELIVERY_QUALIFIED,
+        self::SITUATION_WORKSHOP_DELIVERY_QUALIFIED,
+        self::SITUATION_DIRECT_RESCUE_QUALIFIED,
     ];
 }
 

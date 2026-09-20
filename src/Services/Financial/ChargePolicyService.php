@@ -221,6 +221,42 @@ final class ChargePolicyService
         ));
     }
 
+    public static function itemResgateDireto(float $feeAmount, array $snapshot = []): array
+    {
+        if ($feeAmount < 0) {
+            throw new \InvalidArgumentException('A taxa de resgate direto não pode ser negativa.');
+        }
+        return [
+            'phase_code' => ChargeCodes::PHASE_DIRECT_RESCUE,
+            'charge_type' => ChargeCodes::TYPE_DIRECT_RESCUE_FEE,
+            'description' => 'Intermediação de resgate direto por oficina',
+            'quantity' => 1,
+            'unit_amount' => $feeAmount,
+            'gross_amount' => $feeAmount,
+            'discount_amount' => 0,
+            'platform_fee_amount' => $feeAmount,
+            'provider_net_amount' => 0,
+            'charge_status' => ChargeCodes::CHARGE_PENDING,
+            'payable_status' => ChargeCodes::PAYABLE_NOT_ELIGIBLE,
+            'calculation_version' => (string)($snapshot['rule_version'] ?? self::POLICY_VERSION),
+            'calculation_context' => $snapshot,
+            'evidence_required' => true,
+        ];
+    }
+
+    public static function criarCobrancasResgateDireto(int $orderId, int $providerId, float $referralFee, float $directFee, array $snapshot): array
+    {
+        require_once __DIR__ . '/../../Models/Financial/OrderChargeItem.php';
+        return [
+            'referral' => self::criarCobrancaIndicacaoOficina($orderId, $providerId, $referralFee, $snapshot, 'referral_fee:' . $orderId),
+            'direct_rescue' => OrderChargeItem::criar(array_merge(self::itemResgateDireto($directFee, $snapshot), [
+                'order_id' => $orderId,
+                'provider_id' => $providerId,
+                'idempotency_key' => 'direct_rescue_fee:' . $orderId,
+            ])),
+        ];
+    }
+
     private static function item(
         string $phaseCode,
         string $chargeType,

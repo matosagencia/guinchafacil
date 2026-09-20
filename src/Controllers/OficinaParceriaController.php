@@ -8,6 +8,8 @@ require_once __DIR__.'/../Models/Pedido.php';
 require_once __DIR__.'/../Models/Guincho.php';
 require_once __DIR__.'/../Services/Evidence/EvidenceService.php';
 require_once __DIR__.'/../Models/PedidoIndicacaoOficina.php';
+require_once __DIR__.'/../Models/PedidoBypassCase.php';
+require_once __DIR__.'/../Services/AuditTrailService.php';
 
 final class OficinaParceriaController extends BaseController
 {
@@ -24,4 +26,6 @@ final class OficinaParceriaController extends BaseController
  public function atualizar():void{AuthService::requireAuth('admin');$this->csrf();try{$u=AuthService::getCurrentUser();$this->json(['ok'=>true,'settings'=>ProviderWorkshopService::atualizarRegras((int)($_POST['provider_id']??0),$_POST,(int)($u['id']??0))]);}catch(Throwable $e){$this->json(['ok'=>false,'erro'=>$e->getMessage()],422);}}
  public function revisar():void{AuthService::requireAuth('admin');$this->csrf();try{$u=AuthService::getCurrentUser();$this->json(['ok'=>true,'indicacao'=>IndicacaoOficinaService::revisarManualmente((int)($_POST['id']??0),(int)($u['id']??0),(string)($_POST['veredito']??''),(string)($_POST['nota']??''))]);}catch(Throwable $e){$this->json(['ok'=>false,'erro'=>$e->getMessage()],422);}}
  public function estornar():void{AuthService::requireAuth('admin');$this->csrf();try{$u=AuthService::getCurrentUser();$this->json(['ok'=>true,'estorno'=>IndicacaoOficinaService::estornar((int)($_POST['id']??0),(int)($u['id']??0),(string)($_POST['motivo']??''))]);}catch(Throwable $e){$this->json(['ok'=>false,'erro'=>$e->getMessage()],422);}}
+ public function bypassCasos():void{AuthService::requireAuth('admin');$this->json(['ok'=>true,'casos'=>PedidoBypassCase::listar()]);}
+ public function bypassDecidir():void{AuthService::requireAuth('admin');$this->csrf();try{$u=AuthService::getCurrentUser();$id=(int)($_POST['id']??0);$status=strtoupper((string)($_POST['status']??''));$ok=PedidoBypassCase::decidir($id,(int)($u['id']??0),$status,(string)($_POST['nota']??''));AuditTrailService::evento('pedido_bypass_decidido',__CLASS__,__FUNCTION__,['case_id'=>$id,'status'=>$status,'admin_id'=>(int)($u['id']??0)]);$this->json(['ok'=>$ok]);}catch(Throwable $e){$this->json(['ok'=>false,'erro'=>$e->getMessage()],422);}}
 }
