@@ -32,9 +32,9 @@ class OrderChargeItem
             "INSERT INTO " . self::TBL . "
                 (order_id, provider_id, service_execution_id, phase_code, charge_type, description,
                  quantity, unit_amount, gross_amount, discount_amount, platform_fee_amount, provider_net_amount,
-                 charge_status, payable_status, calculation_version, calculation_context_json,
-                 evidence_required, idempotency_key, created_at, updated_at)
-             VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP)";
+                 charge_status, payable_status, calculation_version, calculation_context_json,
+                 reverses_charge_item_id, evidence_required, idempotency_key, created_at, updated_at)
+             VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP)";
         if ($driver !== 'sqlite') {
             $sql .= " ON DUPLICATE KEY UPDATE id = LAST_INSERT_ID(id)";
         }
@@ -55,8 +55,9 @@ class OrderChargeItem
             $dados['charge_status'] ?? ChargeCodes::CHARGE_PENDING,
             $dados['payable_status'] ?? ChargeCodes::PAYABLE_NOT_ELIGIBLE,
             $dados['calculation_version'],
-            isset($dados['calculation_context']) ? json_encode($dados['calculation_context'], JSON_UNESCAPED_UNICODE) : null,
-            !empty($dados['evidence_required']) ? 1 : 0,
+            isset($dados['calculation_context']) ? json_encode($dados['calculation_context'], JSON_UNESCAPED_UNICODE) : null,
+            $dados['reverses_charge_item_id'] ?? null,
+            !empty($dados['evidence_required']) ? 1 : 0,
             $dados['idempotency_key'],
         ]);
 

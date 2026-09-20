@@ -6,6 +6,7 @@ use PHPUnit\Framework\TestCase;
 
 require_once __DIR__ . '/../../src/Services/ProviderWorkshopService.php';
 require_once __DIR__ . '/../../src/Services/Financial/ChargePolicyService.php';
+require_once __DIR__ . '/../../src/Services/Financial/WorkshopSettlementService.php';
 
 final class ProviderWorkshopServiceTest extends TestCase
 {
@@ -69,5 +70,20 @@ final class ProviderWorkshopServiceTest extends TestCase
         self::assertSame('v1', $item['calculation_version']);
         self::assertTrue($item['evidence_required']);
         self::assertSame(9, $item['calculation_context']['provider_id']);
+    }
+
+    public function testSettlementAmountsAreDerivedFromImmutableChargeSnapshot(): void
+    {
+        $values = WorkshopSettlementService::calcularValores([
+            'gross_amount' => 30,
+            'platform_fee_amount' => 30,
+            'provider_net_amount' => 0,
+        ]);
+
+        self::assertSame(30.0, $values['gross_amount']);
+        self::assertSame(30.0, $values['platform_fee_amount']);
+        self::assertSame(0.0, $values['net_amount']);
+        self::assertSame('PAID', $values['settlement_status']);
+        self::assertSame('WORKSHOP_REFERRAL_ZERO_NET', $values['eligibility_reason_code']);
     }
 }

@@ -8,6 +8,7 @@ require_once __DIR__ . '/../Models/PedidoIndicacaoOficina.php';
 require_once __DIR__ . '/../Models/Financial/ChargeCodes.php';
 require_once __DIR__ . '/../Models/Configuracao.php';
 require_once __DIR__ . '/../Services/Financial/ChargePolicyService.php';
+require_once __DIR__ . '/../Services/Financial/WorkshopSettlementService.php';
 require_once __DIR__ . '/../Services/Evidence/EvidenceService.php';
 require_once __DIR__ . '/ProviderWorkshopService.php';
 require_once __DIR__ . '/AuditTrailService.php';
@@ -124,6 +125,8 @@ final class IndicacaoOficinaService
                 $snapshot,
                 'referral_fee:' . $pedidoId
             );
+            OrderChargeItem::marcarEvidenciaValidada((int)$item['id']);
+            OrderChargeItem::atualizarPayableStatus((int)$item['id'], ChargeCodes::PAYABLE_ELIGIBLE, null);
             PedidoIndicacaoOficina::atualizar((int)$row['id'], [
                 'status' => PedidoIndicacaoOficina::QUALIFICADA,
                 'checkin_evidencia_id' => $evidencia['id'],
@@ -188,25 +191,11 @@ final class IndicacaoOficinaService
         if (!$row || empty($row['order_charge_item_id'])) {
             throw new InvalidArgumentException('Cobrança da indicação não encontrada.');
         }
-        $orig = OrderChargeItem::buscarPorId((int)$row['order_charge_item_id']);
-        if (!$orig) {
-            throw new InvalidArgumentException('Item de cobrança original não encontrado.');
-        }
-        $rev = OrderChargeItem::criar([
-            'order_id' => (int)$row['pedido_id'],
-            'provider_id' => (int)$row['provider_id'],
-            'phase_code' => ChargeCodes::PHASE_WORKSHOP_REFERRAL,
-            'charge_type' => ChargeCodes::TYPE_REFUND,
-            'description' => 'Estorno de taxa de indicação de oficina',
-            'gross_amount' => -(float)$orig['gross_amount'],
-            'platform_fee_amount' => -(float)$orig['platform_fee_amount'],
-            'provider_net_amount' => 0,
-            'charge_status' => ChargeCodes::CHARGE_REFUNDED,
-            'payable_status' => ChargeCodes::PAYABLE_REVERSED,
-            'calculation_version' => 'reversal-v1',
-            'calculation_context' => ['original_charge_item_id' => (int)$orig['id'], 'motivo' => $motivo, 'admin_id' => $adminId],
-            'idempotency_key' => 'referral_fee_reversal:' . $id,
-        ]);
+        $rev = WorkshopSettlementService::criarEstorno(
+            (int)$row['order_charge_item_id'],
+            $adminId,
+            $motivo
+        );
         PedidoIndicacaoOficina::atualizar($id, ['status' => PedidoIndicacaoOficina::ESTORNADA]);
         AuditTrailService::evento('indicacao_oficina_estornada', __CLASS__, __FUNCTION__, [
             'indicacao_id' => $id,

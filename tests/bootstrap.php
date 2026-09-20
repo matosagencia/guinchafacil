@@ -656,6 +656,7 @@ function getPDO(): PDO
                 blocked_at TEXT,
                 cancelled_at TEXT,
                 block_reason_code TEXT,
+                reverses_charge_item_id INTEGER,
                 idempotency_key TEXT NOT NULL UNIQUE,
                 created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
                 updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
