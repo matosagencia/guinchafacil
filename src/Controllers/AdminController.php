@@ -35,7 +35,9 @@ require_once __DIR__ . '/../Models/Feriado.php';
 require_once __DIR__ . '/../Services/DebugMode.php';
 require_once __DIR__ . '/../Models/Demanda.php';
 require_once __DIR__ . '/../Services/TerritorioMetasService.php';
-require_once __DIR__ . '/../Services/FinancialAttributionReportService.php';
+require_once __DIR__ . '/../Services/FinancialAttributionReportService.php';
+
+require_once __DIR__ . '/../Services/AdminWorkshopFinanceService.php';
 require_once __DIR__ . '/../Services/EnderecoFormatter.php';
 require_once __DIR__ . '/AdminHealthController.php';
 require_once __DIR__ . '/AdminEnvAuditController.php';
@@ -245,7 +247,10 @@ class AdminController extends BaseController
         // Fase 2: painel de detalhe (mapa/timeline/chat) consome a API real
         // do Codex (src/Api/Admin/OrdersApiController.php) via fetch no
         // browser ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â precisa do token CSRF pra poder postar mensagem de chat.
-        $csrfToken = AuthService::gerarCsrfToken();
+        $csrfToken = AuthService::gerarCsrfToken();
+
+        $workshopFinanceiro = AdminWorkshopFinanceService::listarIndicacoes();
+        $workshopResumo = AdminWorkshopFinanceService::resumo();
 
         // ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â§CELULAS-NITEROI-01 (04/08/2026): "Mapa operacional ao vivo" (todos
         // os guinchos disponÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â­veis/em atendimento) movido do Dashboard pra cÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡

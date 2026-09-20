@@ -81,6 +81,20 @@ final class ProviderWorkshopService
         return self::listarElegiveis();
     }
 
+    public static function listarParaAdmin(): array
+    {
+        $stmt = getPDO()->query(
+            "SELECT p.*, ws.taxa_indicacao_fixa, ws.regra_versao,
+                    ws.status_parceria, ws.raio_checkin_m, ws.address,
+                    ws.latitude, ws.longitude
+               FROM providers p
+               LEFT JOIN provider_workshop_settings ws ON ws.provider_id = p.id
+              WHERE p.provider_type = 'WORKSHOP'
+              ORDER BY COALESCE(p.trade_name, p.legal_name), p.id"
+        );
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
     public static function obterRegras(int $providerId): ?array
     {
         $stmt = getPDO()->prepare('SELECT * FROM provider_workshop_settings WHERE provider_id = ? LIMIT 1');

@@ -47,6 +47,23 @@ final class WorkshopOnboardingService
         return Provider::buscarPorId($providerId) ?? [];
     }
 
+    public static function reativar(int $providerId, int $adminId): array
+    {
+        self::assertWorkshop($providerId);
+        $stmt = getPDO()->prepare(
+            "UPDATE provider_workshop_settings ws
+                JOIN providers p ON p.id = ws.provider_id
+                SET ws.status_parceria = 'ATIVO', p.active = 1, p.updated_at = NOW()
+              WHERE ws.provider_id = ?"
+        );
+        $stmt->execute([$providerId]);
+        AuditTrailService::evento('oficina_parceira_reativada', __CLASS__, __FUNCTION__, [
+            'provider_id' => $providerId,
+            'admin_id' => $adminId,
+        ]);
+        return Provider::buscarPorId($providerId) ?? [];
+    }
+
     private static function assertWorkshop(int $providerId): void
     {
         $provider = Provider::buscarPorId($providerId);

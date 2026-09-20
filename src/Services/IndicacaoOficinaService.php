@@ -171,10 +171,26 @@ final class IndicacaoOficinaService
             throw new InvalidArgumentException('Veredito inválido.');
         }
         $status = $veredito === 'APROVAR' ? PedidoIndicacaoOficina::QUALIFICADA : PedidoIndicacaoOficina::REJEITADA;
+        $chargeItem = null;
+        if ($veredito === 'APROVAR' && empty($row['order_charge_item_id'])) {
+            $snapshot = json_decode((string)($row['regra_comissao_snapshot_json'] ?? ''), true) ?: [];
+            $fee = (float)($snapshot['fee_amount'] ?? $row['taxa_indicacao_fixa'] ?? 30);
+            $chargeItem = ChargePolicyService::criarCobrancaIndicacaoOficina(
+                (int)$row['pedido_id'],
+                (int)$row['provider_id'],
+                $fee,
+                $snapshot,
+                'referral_fee:' . (int)$row['pedido_id']
+            );
+            OrderChargeItem::marcarEvidenciaValidada((int)$chargeItem['id']);
+            OrderChargeItem::atualizarPayableStatus((int)$chargeItem['id'], ChargeCodes::PAYABLE_ELIGIBLE, null);
+            $status = PedidoIndicacaoOficina::COBRANCA_GERADA;
+        }
         PedidoIndicacaoOficina::atualizar($id, [
             'status' => $status,
             'revisao_admin_id' => $adminId,
             'revisao_admin_nota' => mb_substr($nota, 0, 255),
+            ...($chargeItem ? ['order_charge_item_id' => (int)$chargeItem['id']] : []),
         ]);
         AuditTrailService::evento('indicacao_oficina_revisada', __CLASS__, __FUNCTION__, [
             'indicacao_id' => $id,

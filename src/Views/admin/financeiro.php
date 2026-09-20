@@ -635,7 +635,7 @@ var FIN_QUERY = <?php echo json_encode('/admin/financeiro?' . http_build_query($
 </script>
 
 <?php
-// Não usa layouts/footer.php: esta página usa .shell-ops (grid próprio),
+// Não usa layouts/footer.php: esta página usa .shell-ops (grid próprio),
 // igual à Central Operacional, Alertas, Documentos, Guinchos, Usuários...
 ?>
 <script<?php echo csp_script_nonce_attr(); ?> src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -728,5 +728,14 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 });
 </script>
-</body>
+<section class="container-fluid mt-4 mb-5" aria-labelledby="workshop-ledger-title">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div><h2 id="workshop-ledger-title" class="h4 mb-1">Oficinas parceiras · extrato e revisão</h2><p class="text-muted mb-0">Indicações, cobranças, liquidações e estornos imutáveis.</p></div>
+        <a class="btn btn-outline-secondary" href="<?= htmlspecialchars($bp) ?>/admin/oficinas-parceiras">Gerenciar oficinas</a>
+    </div>
+    <div class="row g-3 mb-3"><div class="col-md-3"><div class="card"><div class="card-body"><small>Total de indicações</small><div class="h4 mb-0"><?= (int)($workshopResumo['total_indicacoes'] ?? 0) ?></div></div></div></div><div class="col-md-3"><div class="card"><div class="card-body"><small>Check-ins pendentes</small><div class="h4 mb-0"><?= (int)($workshopResumo['checkins_pendentes'] ?? 0) ?></div></div></div></div><div class="col-md-3"><div class="card"><div class="card-body"><small>Taxas geradas</small><div class="h4 mb-0">R$ <?= number_format((float)($workshopResumo['total_taxas'] ?? 0), 2, ',', '.') ?></div></div></div></div><div class="col-md-3"><div class="card"><div class="card-body"><small>Total liquidado</small><div class="h4 mb-0">R$ <?= number_format((float)($workshopResumo['total_liquidado'] ?? 0), 2, ',', '.') ?></div></div></div></div></div>
+    <div class="table-responsive"><table class="table table-sm align-middle"><thead><tr><th>Indicação</th><th>Oficina</th><th>Status</th><th>Cobrança</th><th>Liquidação</th><th>Valores</th><th>Ação</th></tr></thead><tbody>
+    <?php foreach (($workshopFinanceiro ?? []) as $item): ?><tr><td>#<?= (int)$item['id'] ?><br><small>pedido #<?= (int)$item['pedido_id'] ?></small></td><td><?= htmlspecialchars((string)($item['trade_name'] ?: $item['legal_name'])) ?></td><td><?= htmlspecialchars((string)$item['status']) ?></td><td><?= htmlspecialchars((string)($item['charge_status'] ?? '—')) ?><br><small><?= htmlspecialchars((string)($item['payable_status'] ?? '—')) ?></small></td><td><?= htmlspecialchars((string)($item['settlement_status'] ?? '—')) ?></td><td>Bruto R$ <?= number_format((float)($item['gross_amount'] ?? 0), 2, ',', '.') ?><br><small>Líquido R$ <?= number_format((float)($item['settlement_net_amount'] ?? $item['provider_net_amount'] ?? 0), 2, ',', '.') ?></small></td><td><?php if (($item['status'] ?? '') === 'CHECKIN_PENDENTE'): ?><form method="post" action="<?= htmlspecialchars($bp) ?>/admin/oficina/indicacao/revisar" class="d-inline"><input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken) ?>"><input type="hidden" name="id" value="<?= (int)$item['id'] ?>"><input type="hidden" name="veredito" value="APROVAR"><button class="btn btn-sm btn-success">Aprovar</button></form><?php endif; ?><?php if (!empty($item['order_charge_item_id']) && ($item['status'] ?? '') !== 'ESTORNADA'): ?><form method="post" action="<?= htmlspecialchars($bp) ?>/admin/oficina/indicacao/estornar" class="d-inline"><input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken) ?>"><input type="hidden" name="id" value="<?= (int)$item['id'] ?>"><input type="hidden" name="motivo" value="Estorno administrativo"><button class="btn btn-sm btn-outline-danger">Estornar</button></form><?php endif; ?></td></tr><?php endforeach; ?></tbody></table></div>
+</section>
+</body>
 </html>
