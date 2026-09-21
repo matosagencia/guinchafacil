@@ -384,18 +384,93 @@ class AuthController extends BaseController
                     ->execute([$identity['subject'], (int)$user['id']]);
                 $user['google_subject'] = $identity['subject'];
             } else {
-                $stmt = $pdo->prepare("INSERT INTO usuarios (nome, email, google_subject, senha_hash, telefone, cpf, tipo, ativo, criado_em) VALUES (?, ?, ?, ?, NULL, NULL, 'cliente', 1, NOW())");
+                $stmt = $pdo->prepare("INSERT INTO usuarios (nome, email, google_subject, senha_hash, telefone, cpf, tipo, perfil_status, ativo, criado_em) VALUES (?, ?, ?, ?, NULL, NULL, 'cliente', 'PENDENTE', 1, NOW())");
                 $stmt->execute([$identity['name'], $identity['email'], $identity['subject'], password_hash(bin2hex(random_bytes(32)), PASSWORD_DEFAULT)]);
-                $user = ['id' => (int)$pdo->lastInsertId(), 'nome' => $identity['name'], 'email' => $identity['email'], 'tipo' => 'cliente', 'ativo' => 1];
+                $user = ['id' => (int)$pdo->lastInsertId(), 'nome' => $identity['name'], 'email' => $identity['email'], 'tipo' => 'cliente', 'perfil_status' => 'PENDENTE', 'ativo' => 1];
+            }
+            if (($user['perfil_status'] ?? 'COMPLETO') === 'PENDENTE' || (($user['google_subject'] ?? '') !== '' && empty($user['cpf']))) {
+                $pdo->prepare("UPDATE usuarios SET perfil_status = 'PENDENTE', ultimo_login = NOW() WHERE id = ?")->execute([(int)$user['id']]);
+                $user['perfil_status'] = 'PENDENTE';
             }
             $pdo->commit();
             AuthService::initializeAuthenticatedSession($user);
-            $this->redirect($returnPath ?: '/cliente/dashboard');
+            $this->redirect(($user['perfil_status'] ?? '') === 'PENDENTE' ? '/auth/google/profile' : ($returnPath ?: '/cliente/dashboard'));
         } catch (Throwable $e) {
             if (isset($pdo) && $pdo instanceof PDO && $pdo->inTransaction()) $pdo->rollBack();
             error_log('[GoogleAuth] callback: ' . $e->getMessage());
             $this->setFlashMessage('Não foi possível concluir o cadastro pelo Google.', 'error');
             $this->redirect('/login');
+        }
+    }
+
+    public function googleProfileForm(): void
+    {
+        if (!$this->isAuthenticated()) {
+            $this->redirect('/login');
+            return;
+        }
+        $user = AuthService::getCurrentUser();
+        if (!$user) {
+            $this->redirect('/login');
+            return;
+        }
+        $stmt = getPDO()->prepare('SELECT nome, email, perfil_status, perfil_tipo_solicitado FROM usuarios WHERE id = ? LIMIT 1');
+        $stmt->execute([(int)$user['id']]);
+        $perfil = $stmt->fetch(PDO::FETCH_ASSOC) ?: $user;
+        if (($perfil['perfil_status'] ?? 'COMPLETO') === 'COMPLETO') {
+            $this->redirectByProfile((string)($user['tipo'] ?? 'cliente'));
+            return;
+        }
+        $csrf_token = $this->generateCSRFToken();
+        $flash = $this->pullFlash();
+        require __DIR__ . '/../Views/auth/google_profile.php';
+    }
+
+    public function googleProfileSave(): void
+    {
+        if (!$this->isAuthenticated() || !$this->validateCSRFToken($_POST['csrf_token'] ?? '')) {
+            $this->setFlashMessage('Sua sessão expirou. Entre novamente.', 'error');
+            $this->redirect('/login');
+            return;
+        }
+        $user = AuthService::getCurrentUser();
+        $role = strtoupper(trim((string)($_POST['perfil'] ?? '')));
+        $allowed = ['CLIENTE', 'GUINCHO', 'OFICINA', 'ESPECIALISTA'];
+        if (!$user || !in_array($role, $allowed, true)) {
+            $this->setFlashMessage('Escolha uma opção válida para continuar.', 'error');
+            $this->redirect('/auth/google/profile');
+            return;
+        }
+        $telefone = preg_replace('/\D+/', '', (string)($_POST['telefone'] ?? ''));
+        $cpf = preg_replace('/\D+/', '', (string)($_POST['cpf'] ?? ''));
+        if (strlen($telefone) < 10 || strlen($cpf) !== 11) {
+            $this->setFlashMessage('Informe um telefone e CPF válidos para concluir o perfil.', 'error');
+            $this->redirect('/auth/google/profile');
+            return;
+        }
+        try {
+            $pdo = getPDO();
+            $pdo->beginTransaction();
+            $dup = $pdo->prepare('SELECT id FROM usuarios WHERE cpf = ? AND id <> ? LIMIT 1 FOR UPDATE');
+            $dup->execute([$cpf, (int)$user['id']]);
+            if ($dup->fetch()) throw new DomainException('Este CPF já está cadastrado em outra conta.');
+
+            $status = $role === 'CLIENTE' ? 'COMPLETO' : 'PENDENTE_APROVACAO';
+            $pdo->prepare('UPDATE usuarios SET telefone = ?, cpf = ?, perfil_status = ?, perfil_tipo_solicitado = ?, atualizado_em = NOW() WHERE id = ?')
+                ->execute([$telefone, $cpf, $status, $role, (int)$user['id']]);
+            $pdo->commit();
+            if ($role === 'CLIENTE') {
+                $this->setFlashMessage('Perfil concluído. Bem-vindo ao GuinchaFácil!', 'success');
+                $this->redirect('/cliente/dashboard');
+                return;
+            }
+            $this->setFlashMessage('Solicitação recebida. Nossa equipe vai revisar seu cadastro antes de liberar o painel profissional.', 'success');
+            $this->redirect('/auth/google/profile');
+        } catch (Throwable $e) {
+            if (isset($pdo) && $pdo instanceof PDO && $pdo->inTransaction()) $pdo->rollBack();
+            error_log('[GoogleProfile] ' . $e->getMessage());
+            $this->setFlashMessage($e instanceof DomainException ? $e->getMessage() : 'Não foi possível salvar seu perfil agora.', 'error');
+            $this->redirect('/auth/google/profile');
         }
     }
 
@@ -2307,7 +2382,19 @@ class AuthController extends BaseController
 
     {
 
-        $tipo = $tipo ?? ($_SESSION['user']['tipo'] ?? null);
+        $tipo = $tipo ?? ($_SESSION['user']['tipo'] ?? null);
+        if (!empty($_SESSION['user']['id'])) {
+            try {
+                $pending = getPDO()->prepare('SELECT perfil_status FROM usuarios WHERE id = ? LIMIT 1');
+                $pending->execute([(int)$_SESSION['user']['id']]);
+                if ((string)$pending->fetchColumn() !== 'COMPLETO') {
+                    $this->redirect('/auth/google/profile');
+                    return;
+                }
+            } catch (Throwable $e) {
+                // Bases anteriores à migration seguem o fluxo legado.
+            }
+        }
 
         
 

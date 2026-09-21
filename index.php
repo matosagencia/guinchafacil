@@ -254,6 +254,7 @@ $rotas = [
         '/auth/session-status' => ['AuthController', 'sessionStatus', null],
         '/auth/google' => ['AuthController', 'googleRedirect', null],
         '/auth/google/callback' => ['AuthController', 'googleCallback', null],
+        '/auth/google/profile' => ['AuthController', 'googleProfileForm', null],
         '/senha/esqueceu'         => ['AuthController', 'esqueceuSenhaForm', null],
 
         '/registro/cliente' => ['AuthController', 'registroClienteForm', null],
@@ -423,6 +424,7 @@ $rotas = [
         '/pre-cotacao'      => ['AuthController', 'preCotacao', null],
         '/pre-cotacao/aceitar' => ['AuthController', 'aceitarPreCotacao', null],
         '/login'                 => ['AuthController', 'login', null],
+        '/auth/google/profile'   => ['AuthController', 'googleProfileSave', null],
         '/registro/cliente'       => ['AuthController', 'registroCliente', null],
         '/registro/guincho'       => ['AuthController', 'registroGuincho', null],
         '/registro/especialista'  => ['AuthController', 'registroEspecialista', null],
