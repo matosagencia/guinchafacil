@@ -11,7 +11,8 @@ require_once __DIR__ . '/../Models/Oficina.php';
 require_once __DIR__ . '/../Models/Avaliacao.php';
 require_once __DIR__ . '/../Models/Pagamento.php';
 require_once __DIR__ . '/../Models/Catalog/ProviderCapability.php';
-require_once __DIR__ . '/../Models/Configuracao.php';
+require_once __DIR__ . '/../Models/Configuracao.php';
+require_once __DIR__ . '/../Models/Provider/Provider.php';
 require_once __DIR__ . '/../Models/Cidade.php';
 require_once __DIR__ . '/../Models/Chat.php';
 require_once __DIR__ . '/../Models/PedidoLocalizacao.php';
@@ -20,7 +21,8 @@ require_once __DIR__ . '/../Services/PixService.php';
 require_once __DIR__ . '/../Services/PedidoService.php';
 require_once __DIR__ . '/../Services/Pedido/PedidoTransitionService.php';
 require_once __DIR__ . '/../DTO/PedidoTransitionRequest.php';
-require_once __DIR__ . '/../Services/PaymentJobService.php';
+require_once __DIR__ . '/../Services/PaymentJobService.php';
+require_once __DIR__ . '/../Services/OrcamentoPrevioService.php';
 require_once __DIR__ . '/../Services/POR/ProofOfRoadService.php';
 require_once __DIR__ . '/../Services/POR/RoutingSnapshotService.php';
 require_once __DIR__ . '/../Services/Security/ConfigSecurityService.php';
@@ -966,6 +968,50 @@ class AdminController extends BaseController
         }
         $csrfToken = AuthService::gerarCsrfToken();
         require __DIR__ . '/../Views/admin/especialista_form.php';
+    }
+
+    public function prestadoresMoveis(): void
+    {
+        AuthService::requireAuth('admin');
+        $stmt = getPDO()->query(
+            "SELECT p.id AS provider_id, p.legal_name, p.trade_name, p.provider_type, p.active, p.approval_status,
+                    u.nome AS owner_name, u.email AS owner_email,
+                    ws.status_parceria, ws.faz_resgate_direto, ws.recebe_veiculo_patio,
+                    qr.service_code, qr.estimativa_minima, qr.estimativa_maxima, qr.taxa_diagnostico_local
+             FROM providers p
+             LEFT JOIN provider_members pm ON pm.provider_id = p.id AND pm.role = 'OWNER_OPERATOR'
+             LEFT JOIN usuarios u ON u.id = pm.user_id
+             LEFT JOIN provider_workshop_settings ws ON ws.provider_id = p.id
+             LEFT JOIN provider_quote_rules qr ON qr.provider_id = p.id AND qr.service_code = 'DEFAULT' AND qr.active = 1
+             WHERE p.provider_type IN ('INDIVIDUAL', 'WORKSHOP')
+             ORDER BY (p.approval_status = 'PENDING') DESC, p.active DESC, COALESCE(p.trade_name, p.legal_name) ASC"
+        );
+        $prestadoresMoveis = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $csrfToken = AuthService::gerarCsrfToken();
+        require __DIR__ . '/../Views/admin/prestadores_moveis.php';
+    }
+
+    public function salvarRegraOrcamentoPrestador(): void
+    {
+        AuthService::requireAuth('admin');
+        if (!AuthService::validarCsrfToken($_POST['csrf_token'] ?? '')) {
+            http_response_code(403);
+            exit;
+        }
+        try {
+            $u = AuthService::getCurrentUser();
+            OrcamentoPrevioService::salvarRegra(
+                (int)($_POST['provider_id'] ?? 0),
+                (string)($_POST['service_code'] ?? 'DEFAULT'),
+                (float)($_POST['estimativa_minima'] ?? -1),
+                (float)($_POST['estimativa_maxima'] ?? -1),
+                (float)($_POST['taxa_diagnostico_local'] ?? -1),
+                (int)($u['id'] ?? 0)
+            );
+            $this->redirect('/admin/prestadores-moveis?msg=regra_salva');
+        } catch (Throwable $e) {
+            $this->redirect('/admin/prestadores-moveis?erro=' . rawurlencode($e->getMessage()));
+        }
     }
 
         public function especialistaDetalheFragmento(int $id = 0): void

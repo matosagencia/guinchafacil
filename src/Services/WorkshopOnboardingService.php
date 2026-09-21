@@ -67,8 +67,8 @@ final class WorkshopOnboardingService
     private static function assertWorkshop(int $providerId): void
     {
         $provider = Provider::buscarPorId($providerId);
-        if (!$provider || ($provider['provider_type'] ?? null) !== Provider::TYPE_WORKSHOP) {
-            throw new InvalidArgumentException('Provider WORKSHOP não encontrado.');
+        if (!$provider || !in_array(($provider['provider_type'] ?? null), [Provider::TYPE_WORKSHOP, Provider::TYPE_INDIVIDUAL], true)) {
+            throw new InvalidArgumentException('Prestador móvel ou WORKSHOP não encontrado.');
         }
     }
 }

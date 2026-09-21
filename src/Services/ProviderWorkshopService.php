@@ -185,6 +185,12 @@ final class ProviderWorkshopService
                 $dados['latitude'] ?? null,
                 $dados['longitude'] ?? null,
             ]);
+            $pdo->prepare(
+                "INSERT INTO provider_quote_rules
+                    (provider_id, service_code, estimativa_minima, estimativa_maxima, taxa_diagnostico_local, regra_versao, active, created_at, updated_at)
+                 VALUES (?, 'DEFAULT', 0.00, 5000.00, 0.00, 'quote-v1', 1, NOW(), NOW())
+                 ON DUPLICATE KEY UPDATE updated_at = NOW()"
+            )->execute([$providerId]);
             $pdo->commit();
         } catch (Throwable $e) {
             if ($pdo->inTransaction()) {

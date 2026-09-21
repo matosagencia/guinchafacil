@@ -35,8 +35,7 @@ function opsNavActive(string $uri, string $match): string { return strpos($uri, 
         <div class="ops-nav-section__links">
             <a href="<?php echo htmlspecialchars($bp); ?>/admin/guinchos" class="ops-nav-link <?php echo (strpos($cur, '/guinchos') !== false || strpos($cur, '/prestadores') !== false || strpos($cur, '/documentos') !== false || preg_match('#/guincho[-/](?!novo)#', $cur)) ? 'is-active' : ''; ?>"><span class="ops-nav-link__icon"><i class="fas fa-truck"></i></span><span class="ops-nav-link__label">Guinchos</span></a>
             <a href="<?php echo htmlspecialchars($bp); ?>/admin/guincho/novo" class="ops-nav-link"><span class="ops-nav-link__icon"><i class="fas fa-truck-medical"></i></span><span class="ops-nav-link__label">Cadastrar Guincheiro</span></a>
-            <a href="<?php echo htmlspecialchars($bp); ?>/admin/especialistas" class="ops-nav-link <?php echo strpos($cur, '/especialista') !== false ? 'is-active' : ''; ?>"><span class="ops-nav-link__icon"><i class="fas fa-user-gear"></i></span><span class="ops-nav-link__label">Especialistas</span></a>
-            <a href="<?php echo htmlspecialchars($bp); ?>/admin/especialistas/cadastrar" class="ops-nav-link"><span class="ops-nav-link__icon"><i class="fas fa-user-plus"></i></span><span class="ops-nav-link__label">Cadastrar Especialista</span></a>
+            <a href="<?php echo htmlspecialchars($bp); ?>/admin/prestadores-moveis" class="ops-nav-link <?php echo opsNavActive($cur, 'prestadores-moveis'); ?>"><span class="ops-nav-link__icon"><i class="fas fa-bolt"></i></span><span class="ops-nav-link__label">Prestadores móveis</span></a>
             <a href="<?php echo htmlspecialchars($bp); ?>/admin/oficinas-parceiras" class="ops-nav-link <?php echo opsNavActive($cur, 'oficinas-parceiras'); ?>"><span class="ops-nav-link__icon"><i class="fas fa-warehouse"></i></span><span class="ops-nav-link__label">Oficinas parceiras</span></a>
         </div>
     </div>

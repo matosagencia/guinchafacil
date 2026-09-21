@@ -876,6 +876,17 @@ class ClienteController extends BaseController
                 || trim((string)($_POST['descricao_avaria'] ?? $descricao)) === '') {
                 $this->redirect('/cliente/pedido/novo?erro=orcamento_previo_invalido');
             }
+            try {
+                $faixa = OrcamentoPrevioService::validarEstimativa(
+                    $oficinaParceiraProviderId,
+                    (string)($tipoServico['code'] ?? 'DEFAULT'),
+                    (float)($_POST['estimativa_minima'] ?? -1),
+                    (float)($_POST['estimativa_maxima'] ?? -1),
+                    (float)($_POST['taxa_diagnostico_local'] ?? 0)
+                );
+            } catch (Throwable $e) {
+                $this->redirect('/cliente/pedido/novo?erro=faixa_orcamento');
+            }
         }
 
         $pService = new PedidoService();
@@ -923,7 +934,7 @@ class ClienteController extends BaseController
             PedidoOrcamentoPrevio::criar([
                 'pedido_id' => $pedidoId,
                 'provider_id' => $oficinaParceiraProviderId,
-                'taxa_diagnostico_local' => (float)($_POST['taxa_diagnostico_local'] ?? 0),
+                'taxa_diagnostico_local' => (float)($faixa['taxa_diagnostico_local'] ?? 0),
                 'estimativa_minima' => (float)$_POST['estimativa_minima'],
                 'estimativa_maxima' => (float)$_POST['estimativa_maxima'],
                 'descricao_avaria' => trim((string)($_POST['descricao_avaria'] ?? $descricao)),
