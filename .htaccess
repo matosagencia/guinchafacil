@@ -59,7 +59,11 @@ SetEnv TZ America/Sao_Paulo
 # ------------------------------------------------------------
 
 <IfModule mod_rewrite.c>
-    RewriteEngine On
+    RewriteEngine On
+
+    # O Service Worker precisa ser servido na raiz para controlar todo o site.
+    # O arquivo versionado permanece em public/sw.js.
+    RewriteRule ^sw\.js$ public/sw.js [L]
 
     # Bloquear acesso a diretórios de código/sensíveis
     RewriteRule ^(src|install|logs|vendor|tmp|cache|doc|tests|qa|tools|database|files|storage)/ - [F,L]
