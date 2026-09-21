@@ -5,7 +5,9 @@ final class PushVapidService
     public static function publicKey(): string
     {
         $configured = trim((string)(defined('PUSH_VAPID_PUBLIC_KEY') ? PUSH_VAPID_PUBLIC_KEY : ''));
-        if ($configured !== '') {
+        // O navegador e o protocolo Web Push exigem o ponto EC bruto (65 bytes,
+        // iniciando por 0x04), não um SubjectPublicKeyInfo DER/PEM.
+        if (self::isValidApplicationServerKey($configured)) {
             return $configured;
         }
 
@@ -25,6 +27,15 @@ final class PushVapidService
         }
 
         return self::base64UrlEncode("\x04" . $details['ec']['x'] . $details['ec']['y']);
+    }
+
+    private static function isValidApplicationServerKey(string $value): bool
+    {
+        if ($value === '') {
+            return false;
+        }
+        $decoded = base64_decode(strtr($value, '-_', '+/'), true);
+        return $decoded !== false && strlen($decoded) === 65 && $decoded[0] === "\x04";
     }
 
     public static function privateKeyPem(): string

@@ -2,7 +2,8 @@
 $bp = defined('BASE_PATH') ? BASE_PATH : '';
 include __DIR__ . '/../layouts/header.php';
 $operadorNome = trim((string)($_SESSION['user']['nome'] ?? 'Operador'));
-$pushPublicKey = defined('PUSH_VAPID_PUBLIC_KEY') ? (string)PUSH_VAPID_PUBLIC_KEY : '';
+require_once __DIR__ . '/../../Services/PushVapidService.php';
+$pushPublicKey = PushVapidService::publicKey();
 ?>
 <script<?= function_exists('csp_script_nonce_attr') ? csp_script_nonce_attr() : '' ?>>
 window.GFPushConfig = <?= json_encode([

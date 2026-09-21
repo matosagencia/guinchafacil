@@ -8,7 +8,8 @@ $online = $especialista && (int)$especialista['disponivel'] === 1;
 $reputacao = (float)($especialista['reputacao'] ?? 0);
 $avaliacoes = (int)($especialista['total_avaliacoes'] ?? 0);
 $atendimentos = is_array($atendimentos ?? null) ? $atendimentos : [];
-$pushPublicKey = defined('PUSH_VAPID_PUBLIC_KEY') ? (string)PUSH_VAPID_PUBLIC_KEY : '';
+require_once __DIR__ . '/../../Services/PushVapidService.php';
+$pushPublicKey = PushVapidService::publicKey();
 ?>
 <link rel="stylesheet" href="<?= htmlspecialchars($bp) ?>/public/assets/css/themes/especialista.css">
 <script<?= function_exists('csp_script_nonce_attr') ? csp_script_nonce_attr() : '' ?> src="<?= htmlspecialchars($bp) ?>/public/assets/js/especialista-localizacao.js" defer></script>
