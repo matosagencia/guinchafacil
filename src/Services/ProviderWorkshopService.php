@@ -16,10 +16,11 @@ final class ProviderWorkshopService
 
     public static function isEligible(array $provider, array $settings = []): bool
     {
-        return ($provider['provider_type'] ?? null) === Provider::TYPE_WORKSHOP
+        return in_array(($provider['provider_type'] ?? null), [Provider::TYPE_WORKSHOP, Provider::TYPE_INDIVIDUAL], true)
             && ($provider['approval_status'] ?? null) === 'APPROVED'
             && (int)($provider['active'] ?? 0) === 1
-            && ($settings['status_parceria'] ?? 'ATIVO') === 'ATIVO';
+            && ($settings['status_parceria'] ?? 'ATIVO') === 'ATIVO'
+            && (int)($settings['faz_resgate_direto'] ?? $settings['permite_resgate_direto'] ?? 1) === 1;
     }
 
     public static function normalizeRules(array $rules): array
@@ -100,6 +101,25 @@ final class ProviderWorkshopService
     public static function listarOficinasElegiveis(): array
     {
         return self::listarElegiveis();
+    }
+
+    public static function listarPrestadoresMoveisElegiveis(): array
+    {
+        $stmt = getPDO()->query(
+            "SELECT p.*, ws.taxa_indicacao_fixa, ws.taxa_resgate_direto, ws.permite_resgate_direto,
+                    ws.recebe_veiculo_patio, ws.faz_resgate_direto, ws.regra_versao,
+                    ws.status_parceria, ws.raio_checkin_m
+               FROM providers p
+               JOIN provider_workshop_settings ws ON ws.provider_id = p.id
+              WHERE p.provider_type IN ('INDIVIDUAL', 'WORKSHOP')
+                AND p.approval_status = 'APPROVED'
+                AND p.active = 1
+                AND ws.status_parceria = 'ATIVO'
+                AND ws.faz_resgate_direto = 1
+                AND ws.recebe_veiculo_patio = 0
+              ORDER BY COALESCE(p.trade_name, p.legal_name), p.id"
+        );
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     public static function listarParaAdmin(): array

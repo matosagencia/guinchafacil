@@ -40,7 +40,7 @@ final class ProviderWorkshopServiceTest extends TestCase
         ProviderWorkshopService::normalizeRules(['fee_amount' => -1]);
     }
 
-    public function testEligibilityRequiresApprovedActiveWorkshopAndActivePartnership(): void
+    public function testEligibilityRequiresApprovedActiveProviderAndActivePartnership(): void
     {
         self::assertTrue(ProviderWorkshopService::isEligible(
             ['provider_type' => 'WORKSHOP', 'approval_status' => 'APPROVED', 'active' => 1],
@@ -50,9 +50,13 @@ final class ProviderWorkshopServiceTest extends TestCase
             ['provider_type' => 'WORKSHOP', 'approval_status' => 'PENDING', 'active' => 1],
             ['status_parceria' => 'ATIVO']
         ));
-        self::assertFalse(ProviderWorkshopService::isEligible(
+        self::assertTrue(ProviderWorkshopService::isEligible(
             ['provider_type' => 'INDIVIDUAL', 'approval_status' => 'APPROVED', 'active' => 1],
             ['status_parceria' => 'ATIVO']
+        ));
+        self::assertFalse(ProviderWorkshopService::isEligible(
+            ['provider_type' => 'INDIVIDUAL', 'approval_status' => 'APPROVED', 'active' => 1],
+            ['status_parceria' => 'ATIVO', 'faz_resgate_direto' => 0]
         ));
     }
 
