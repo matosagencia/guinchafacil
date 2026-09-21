@@ -979,7 +979,7 @@ class AdminController extends BaseController
                     ws.status_parceria, ws.faz_resgate_direto, ws.recebe_veiculo_patio,
                     qr.service_code, qr.estimativa_minima, qr.estimativa_maxima, qr.taxa_diagnostico_local
              FROM providers p
-             LEFT JOIN provider_members pm ON pm.provider_id = p.id AND pm.role = 'OWNER_OPERATOR'
+             LEFT JOIN provider_members pm ON pm.provider_id = p.id AND pm.role_code = 'OWNER_OPERATOR'
              LEFT JOIN usuarios u ON u.id = pm.user_id
              LEFT JOIN provider_workshop_settings ws ON ws.provider_id = p.id
              LEFT JOIN provider_quote_rules qr ON qr.provider_id = p.id AND qr.service_code = 'DEFAULT' AND qr.active = 1
