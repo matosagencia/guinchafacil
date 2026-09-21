@@ -34,7 +34,7 @@ $pending = ($perfil['perfil_status'] ?? '') === 'PENDENTE_APROVACAO';
     </section>
     <?php if (!empty($flash)): ?><div class="alert alert-<?= $flash['type'] === 'error' ? 'danger' : 'success' ?>"><?= $esc($flash['message']) ?></div><?php endif; ?>
     <?php if ($pending): ?>
-        <div class="card-panel status"><strong>Solicitação em análise</strong><br>Seu perfil profissional foi recebido. O acesso de guincho, oficina ou especialista será liberado depois da validação administrativa.</div>
+        <div class="card-panel status"><strong>Solicitação em análise</strong><br>Seu perfil profissional foi recebido. O acesso de guincho, oficina ou prestador móvel será liberado depois da validação administrativa.</div>
     <?php else: ?>
     <form class="card-panel" method="post" action="<?= $esc($bp) ?>/auth/google/profile">
         <input type="hidden" name="csrf_token" value="<?= $esc($csrf_token ?? '') ?>">
@@ -43,7 +43,7 @@ $pending = ($perfil['perfil_status'] ?? '') === 'PENDENTE_APROVACAO';
             <div class="role"><input required type="radio" id="cliente" name="perfil" value="CLIENTE"><label for="cliente"><span class="role-icon">🚗</span><strong>Cliente</strong><small>Solicitar socorro e acompanhar atendimentos.</small></label></div>
             <div class="role"><input type="radio" id="guincho" name="perfil" value="GUINCHO"><label for="guincho"><span class="role-icon">🚛</span><strong>Guincho</strong><small>Receber chamados e trabalhar na estrada.</small></label></div>
             <div class="role"><input type="radio" id="oficina" name="perfil" value="OFICINA"><label for="oficina"><span class="role-icon">🔧</span><strong>Oficina</strong><small>Atender clientes como oficina parceira.</small></label></div>
-            <div class="role"><input type="radio" id="especialista" name="perfil" value="ESPECIALISTA"><label for="especialista"><span class="role-icon">⚡</span><strong>Especialista</strong><small>Oferecer serviços técnicos no local.</small></label></div>
+            <div class="role"><input type="radio" id="prestador-movel" name="perfil" value="PRESTADOR_MOVEL"><label for="prestador-movel"><span class="role-icon">⚡</span><strong>Prestador móvel</strong><small>Oferecer serviços técnicos diretamente no local.</small></label></div>
         </div>
         <div class="row g-3">
             <div class="col-md-6"><label class="form-label fw-semibold" for="telefone">Celular</label><input class="form-control" id="telefone" name="telefone" placeholder="(21) 99999-9999" required></div>

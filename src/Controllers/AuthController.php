@@ -435,7 +435,7 @@ class AuthController extends BaseController
         }
         $user = AuthService::getCurrentUser();
         $role = strtoupper(trim((string)($_POST['perfil'] ?? '')));
-        $allowed = ['CLIENTE', 'GUINCHO', 'OFICINA', 'ESPECIALISTA'];
+        $allowed = ['CLIENTE', 'GUINCHO', 'OFICINA', 'PRESTADOR_MOVEL'];
         if (!$user || !in_array($role, $allowed, true)) {
             $this->setFlashMessage('Escolha uma opção válida para continuar.', 'error');
             $this->redirect('/auth/google/profile');

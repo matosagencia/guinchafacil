@@ -53,6 +53,12 @@ final class ProviderWorkshopService
             'allows_direct_rescue' => !array_key_exists('allows_direct_rescue', $rules) && !array_key_exists('permite_resgate_direto', $rules)
                 ? true
                 : (bool)($rules['allows_direct_rescue'] ?? $rules['permite_resgate_direto']),
+            'receives_vehicle_at_yard' => !array_key_exists('receives_vehicle_at_yard', $rules) && !array_key_exists('recebe_veiculo_patio', $rules)
+                ? true
+                : (bool)($rules['receives_vehicle_at_yard'] ?? $rules['recebe_veiculo_patio']),
+            'does_direct_rescue' => !array_key_exists('does_direct_rescue', $rules) && !array_key_exists('faz_resgate_direto', $rules)
+                ? true
+                : (bool)($rules['does_direct_rescue'] ?? $rules['faz_resgate_direto']),
         ];
     }
 
@@ -68,13 +74,16 @@ final class ProviderWorkshopService
             'rule_version' => $rules['rule_version'],
             'direct_rescue_fee' => $rules['direct_rescue_fee'],
             'allows_direct_rescue' => $rules['allows_direct_rescue'],
+            'receives_vehicle_at_yard' => $rules['receives_vehicle_at_yard'],
+            'does_direct_rescue' => $rules['does_direct_rescue'],
         ];
     }
 
     public static function listarElegiveis(): array
     {
         $stmt = getPDO()->query(
-            "SELECT p.*, ws.taxa_indicacao_fixa, ws.taxa_resgate_direto, ws.permite_resgate_direto, ws.regra_versao,
+            "SELECT p.*, ws.taxa_indicacao_fixa, ws.taxa_resgate_direto, ws.permite_resgate_direto,
+                    ws.recebe_veiculo_patio, ws.faz_resgate_direto, ws.regra_versao,
                     ws.status_parceria, ws.raio_checkin_m,
                     ws.address, ws.latitude, ws.longitude
                FROM providers p
@@ -96,7 +105,8 @@ final class ProviderWorkshopService
     public static function listarParaAdmin(): array
     {
         $stmt = getPDO()->query(
-            "SELECT p.*, ws.taxa_indicacao_fixa, ws.taxa_resgate_direto, ws.permite_resgate_direto, ws.regra_versao,
+            "SELECT p.*, ws.taxa_indicacao_fixa, ws.taxa_resgate_direto, ws.permite_resgate_direto,
+                    ws.recebe_veiculo_patio, ws.faz_resgate_direto, ws.regra_versao,
                     ws.status_parceria, ws.raio_checkin_m, ws.address,
                     ws.latitude, ws.longitude
                FROM providers p
@@ -138,15 +148,17 @@ final class ProviderWorkshopService
 
             $stmt = $pdo->prepare(
                 'INSERT INTO provider_workshop_settings
-                    (provider_id, taxa_indicacao_fixa, taxa_resgate_direto, permite_resgate_direto, regra_versao, status_parceria, raio_checkin_m,
+                    (provider_id, taxa_indicacao_fixa, taxa_resgate_direto, permite_resgate_direto, recebe_veiculo_patio, faz_resgate_direto, regra_versao, status_parceria, raio_checkin_m,
                      address, latitude, longitude, created_at, updated_at)
-                 VALUES (?, ?, ?, ?, ?, \'ATIVO\', ?, ?, ?, ?, NOW(), NOW())'
+                 VALUES (?, ?, ?, ?, ?, ?, ?, \'ATIVO\', ?, ?, ?, ?, NOW(), NOW())'
             );
             $stmt->execute([
                 $providerId,
                 $rules['fee_amount'],
                 $rules['direct_rescue_fee'],
                 $rules['allows_direct_rescue'] ? 1 : 0,
+                $rules['receives_vehicle_at_yard'] ? 1 : 0,
+                $rules['does_direct_rescue'] ? 1 : 0,
                 $rules['rule_version'],
                 $rules['checkin_radius_meters'],
                 trim((string)($dados['address'] ?? '')) ?: null,
@@ -178,10 +190,10 @@ final class ProviderWorkshopService
         $normalized = self::normalizeRules($rules);
         $stmt = getPDO()->prepare(
             'UPDATE provider_workshop_settings
-                SET taxa_indicacao_fixa = ?, taxa_resgate_direto = ?, permite_resgate_direto = ?, regra_versao = ?, raio_checkin_m = ?, updated_at = NOW()
+                SET taxa_indicacao_fixa = ?, taxa_resgate_direto = ?, permite_resgate_direto = ?, recebe_veiculo_patio = ?, faz_resgate_direto = ?, regra_versao = ?, raio_checkin_m = ?, updated_at = NOW()
               WHERE provider_id = ?'
         );
-        $stmt->execute([$normalized['fee_amount'], $normalized['direct_rescue_fee'], $normalized['allows_direct_rescue'] ? 1 : 0, $normalized['rule_version'], $normalized['checkin_radius_meters'], $providerId]);
+        $stmt->execute([$normalized['fee_amount'], $normalized['direct_rescue_fee'], $normalized['allows_direct_rescue'] ? 1 : 0, $normalized['receives_vehicle_at_yard'] ? 1 : 0, $normalized['does_direct_rescue'] ? 1 : 0, $normalized['rule_version'], $normalized['checkin_radius_meters'], $providerId]);
         if ($stmt->rowCount() === 0 && self::obterRegras($providerId) === null) {
             throw new RuntimeException('Configuração comercial da oficina não encontrada.');
         }
