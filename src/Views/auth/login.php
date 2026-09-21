@@ -4,7 +4,12 @@
 
 <html lang="pt-BR">
 
-<head>
+<head>
+<style>
+.google-login-btn{display:flex;align-items:center;justify-content:center;gap:.7rem;background:#fff;border:1px solid #dadce0;border-radius:6px;color:#3c4043;font-weight:600;box-shadow:0 1px 2px rgba(60,64,67,.15);text-decoration:none;transition:background .15s,box-shadow .15s}
+.google-login-btn:hover{background:#f8fafd;color:#202124;box-shadow:0 1px 3px rgba(60,64,67,.25)}
+.google-login-icon{display:grid;place-items:center;width:20px;height:20px;font:700 18px Arial,sans-serif;color:#4285f4}
+</style>
     <?php require __DIR__ . '/../components/marketing_tracking.php'; ?>
 
     <meta charset="UTF-8">
@@ -81,7 +86,7 @@
 
         <?php if (defined('GOOGLE_CLIENT_ID') && GOOGLE_CLIENT_ID !== ''): ?>
         <div class="text-center text-muted small my-3">ou</div>
-        <a class="btn btn-outline-dark w-100 py-2" href="<?php echo htmlspecialchars($bp); ?>/auth/google?retorno=<?php echo rawurlencode($retorno ?? '/'); ?>">Continuar com Google</a>
+        <a class="google-login-btn w-100 py-2" href="<?php echo htmlspecialchars($bp); ?>/auth/google?retorno=<?php echo rawurlencode($retorno ?? '/'); ?>"><span class="google-login-icon" aria-hidden="true">G</span><span>Continuar com Google</span></a>
         <?php endif; ?>
 
         <div class="text-center mt-2 small">
