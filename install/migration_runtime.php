@@ -67,7 +67,22 @@ final class MigrationRuntime
             }
 
             $checksum = hash('sha256', $sql);
-            $applied = self::fetchAppliedMigration($pdo, $filename);
+            $applied = self::fetchAppliedMigration($pdo, $filename);
+
+            // Legacy migrations sometimes registered only version, without
+            // the canonical filename. Normalize that row before attempting
+            // INSERT, avoiding a UNIQUE(version) collision.
+            if (!$applied) {
+                $legacyStmt = $pdo->prepare('SELECT id, success FROM schema_migrations WHERE version = ? ORDER BY id DESC LIMIT 1');
+                $legacyStmt->execute([$version]);
+                $legacy = $legacyStmt->fetch(PDO::FETCH_ASSOC) ?: null;
+                $legacyStmt->closeCursor();
+                if ($legacy && (int)$legacy['success'] === 1) {
+                    $normalize = $pdo->prepare('UPDATE schema_migrations SET filename = ?, checksum_sha256 = ?, error_message = NULL WHERE id = ?');
+                    $normalize->execute([$filename, $checksum, (int)$legacy['id']]);
+                    $applied = self::fetchAppliedMigration($pdo, $filename);
+                }
+            }
             if ($applied) {
                 $results[] = [
                     'filename' => $filename,
@@ -110,7 +125,19 @@ final class MigrationRuntime
             $checksum = hash('sha256', $sql);
             $applied = self::fetchAppliedMigration($pdo, $filename);
 
-            if ($applied && (string)$applied['checksum_sha256'] === $checksum && (int)$applied['success'] === 1) {
+            if (!$applied) {
+                $legacyStmt = $pdo->prepare('SELECT id, success FROM schema_migrations WHERE version = ? ORDER BY id DESC LIMIT 1');
+                $legacyStmt->execute([$version]);
+                $legacy = $legacyStmt->fetch(PDO::FETCH_ASSOC) ?: null;
+                $legacyStmt->closeCursor();
+                if ($legacy && (int)$legacy['success'] === 1) {
+                    $normalize = $pdo->prepare('UPDATE schema_migrations SET filename = ?, checksum_sha256 = ?, error_message = NULL WHERE id = ?');
+                    $normalize->execute([$filename, $checksum, (int)$legacy['id']]);
+                    $applied = self::fetchAppliedMigration($pdo, $filename);
+                }
+            }
+
+            if ($applied && (string)$applied['checksum_sha256'] === $checksum && (int)$applied['success'] === 1) {
                 $results[] = [
                     'filename' => $filename,
                     'status' => 'skipped',
