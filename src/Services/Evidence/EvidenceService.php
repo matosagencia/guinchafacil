@@ -69,9 +69,11 @@ class EvidenceService
             ? PorThresholds::arrivalRadiusM()
             : ($destinationRadiusOverride ?? PorThresholds::destinationRadiusM());
 
-        $isNear = $naOrigem
-            ? GeofenceService::isNearOrigin($pedido, (float)$point['latitude'], (float)$point['longitude'], $radius)
-            : GeofenceService::isNearDestination($pedido, (float)$point['latitude'], (float)$point['longitude'], $radius);
+        $isNear = $naOrigem
+            ? (($pedido['modalidade_socorro'] ?? '') === 'RESGATE_DIRETO_OFICINA'
+                ? GeofenceService::isNearRescueLocation($pedido, (float)$point['latitude'], (float)$point['longitude'], $radius)
+                : GeofenceService::isNearOrigin($pedido, (float)$point['latitude'], (float)$point['longitude'], $radius))
+            : GeofenceService::isNearDestination($pedido, (float)$point['latitude'], (float)$point['longitude'], $radius);
 
         if (!$isNear) {
             throw new RuntimeException('Evidência rejeitada fora da geofence permitida.');

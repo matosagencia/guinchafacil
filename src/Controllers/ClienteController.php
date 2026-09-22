@@ -273,7 +273,7 @@ class ClienteController extends BaseController
         AuthService::requireAuth('cliente');
         $uid     = $this->usuarioId();
         $oficinas = Oficina::listarPorUsuario($uid);
-        $oficinasParceiras = IndicacaoOficinaService::ativo() ? ProviderWorkshopService::listarOficinasElegiveis() : [];
+        $oficinasParceiras = IndicacaoOficinaService::ativo() ? ProviderWorkshopService::listarParceirosOperacionais() : [];
         $csrfToken = AuthService::gerarCsrfToken();
         require __DIR__ . '/../Views/cliente/oficinas.php';
     }
@@ -678,6 +678,13 @@ class ClienteController extends BaseController
         );
         $latOrigem = (float)($_POST['lat_origem'] ?? 0);
         $lngOrigem = (float)($_POST['lng_origem'] ?? 0);
+        // O resgate direto ocorre no mesmo ponto da avaria. Aceitamos campos
+        // explícitos para clientes futuros, mas mantemos a origem como fonte
+        // compatível enquanto o formulário não possui um segundo marcador.
+        $localResgateLat = isset($_POST['local_resgate_lat']) && $_POST['local_resgate_lat'] !== ''
+            ? (float)$_POST['local_resgate_lat'] : $latOrigem;
+        $localResgateLng = isset($_POST['local_resgate_lng']) && $_POST['local_resgate_lng'] !== ''
+            ? (float)$_POST['local_resgate_lng'] : $lngOrigem;
         $numeroDestino = trim((string)($_POST['numero_destino'] ?? ''));
         $endDest   = EnderecoFormatter::comNumeroNoTexto(
             (string)($_POST['endereco_destino'] ?? ''),
@@ -691,7 +698,7 @@ class ClienteController extends BaseController
             $modalidadeSocorro = 'REBOQUE_TRADICIONAL';
         }
         if ($oficinaParceiraProviderId > 0 && IndicacaoOficinaService::ativo()) {
-            foreach (ProviderWorkshopService::listarOficinasElegiveis() as $partner) {
+            foreach (ProviderWorkshopService::listarParceirosOperacionais() as $partner) {
                 if ((int)$partner['id'] === $oficinaParceiraProviderId) {
                     $latDest = (float)($partner['latitude'] ?? $latDest);
                     $lngDest = (float)($partner['longitude'] ?? $lngDest);

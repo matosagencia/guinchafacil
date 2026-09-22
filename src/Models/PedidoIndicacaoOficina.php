@@ -29,7 +29,7 @@ final class PedidoIndicacaoOficina
     }
     public static function listarOficinasAtivas(): array
     {
-        $s=getPDO()->query("SELECT p.*,ws.taxa_indicacao_fixa,ws.raio_checkin_m FROM providers p JOIN provider_workshop_settings ws ON ws.provider_id=p.id WHERE p.provider_type='WORKSHOP' AND p.approval_status='APPROVED' AND p.active=1 AND ws.status_parceria='ATIVO' ORDER BY COALESCE(p.trade_name,p.legal_name)");return $s->fetchAll(PDO::FETCH_ASSOC);
+        $s=getPDO()->query("SELECT p.*,ws.taxa_indicacao_fixa,ws.taxa_resgate_direto,ws.permite_resgate_direto,ws.recebe_veiculo_patio,ws.faz_resgate_direto,ws.raio_checkin_m,ws.address,ws.latitude,ws.longitude FROM providers p JOIN provider_workshop_settings ws ON ws.provider_id=p.id WHERE p.provider_type IN ('WORKSHOP','INDIVIDUAL') AND p.approval_status='APPROVED' AND p.active=1 AND ws.status_parceria='ATIVO' AND (ws.recebe_veiculo_patio=1 OR ws.faz_resgate_direto=1) ORDER BY COALESCE(p.trade_name,p.legal_name)");return $s->fetchAll(PDO::FETCH_ASSOC);
     }
     public static function listarPendentes(): array
     {

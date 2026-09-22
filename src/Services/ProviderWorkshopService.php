@@ -103,6 +103,16 @@ final class ProviderWorkshopService
         return self::listarElegiveis();
     }
 
+    /** Parceiros físicos e prestadores móveis migrados para o domínio provider. */
+    public static function listarParceirosOperacionais(): array
+    {
+        $byId = [];
+        foreach (array_merge(self::listarElegiveis(), self::listarPrestadoresMoveisElegiveis()) as $provider) {
+            $byId[(int)($provider['id'] ?? 0)] = $provider;
+        }
+        return array_values($byId);
+    }
+
     public static function listarPrestadoresMoveisElegiveis(): array
     {
         $stmt = getPDO()->query(

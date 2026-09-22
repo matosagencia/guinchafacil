@@ -15,14 +15,23 @@ final class BypassDetectorService
     public static function analisarPermanenciaPosCancelamento(int $pedidoId, ?PDO $pdo = null): ?array
     {
         $pdo ??= getPDO();
-        $stmt = $pdo->prepare("SELECT p.id, COALESCE(p.cancelado_em, p.criado_em) AS cancelado_at, p.usuario_id, i.provider_id, ws.latitude, ws.longitude
+        $stmt = $pdo->prepare("SELECT p.id, COALESCE(p.cancelado_em, p.criado_em) AS cancelado_at, p.usuario_id, i.provider_id,
+                p.modalidade_socorro, p.local_resgate_lat, p.local_resgate_lng,
+                ws.latitude, ws.longitude
             FROM pedidos p
             JOIN pedido_indicacoes_oficina i ON i.pedido_id = p.id
             JOIN provider_workshop_settings ws ON ws.provider_id = i.provider_id
             WHERE p.id = ? AND p.status = 'cancelado' LIMIT 1");
         $stmt->execute([$pedidoId]);
         $pedido = $stmt->fetch(PDO::FETCH_ASSOC);
-        if (!$pedido || $pedido['latitude'] === null || $pedido['longitude'] === null) {
+        if (!$pedido) {
+            return null;
+        }
+
+        $isDirectRescue = ($pedido['modalidade_socorro'] ?? '') === 'RESGATE_DIRETO_OFICINA';
+        $targetLat = $isDirectRescue ? $pedido['local_resgate_lat'] : $pedido['latitude'];
+        $targetLng = $isDirectRescue ? $pedido['local_resgate_lng'] : $pedido['longitude'];
+        if ($targetLat === null || $targetLng === null) {
             return null;
         }
 
@@ -32,7 +41,7 @@ final class BypassDetectorService
         $points->execute([$pedidoId, self::MAX_ACCURACY_METERS, $pedido['cancelado_at']]);
         $valid = [];
         foreach ($points->fetchAll(PDO::FETCH_ASSOC) as $point) {
-            $distance = GeoService::haversine((float)$point['latitude'], (float)$point['longitude'], (float)$pedido['latitude'], (float)$pedido['longitude']) * 1000;
+            $distance = GeoService::haversine((float)$point['latitude'], (float)$point['longitude'], (float)$targetLat, (float)$targetLng) * 1000;
             if ($distance <= 150.0) {
                 $point['distance_meters'] = $distance;
                 $valid[] = $point;

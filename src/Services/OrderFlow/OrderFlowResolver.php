@@ -28,13 +28,13 @@ final class OrderFlowResolver
     public static function forAttendanceMode(string $attendanceMode): FlowDefinitionInterface
     {
         $modo = strtoupper(trim($attendanceMode)) ?: 'TOWING';
-        if (!in_array($modo, ['TOWING', 'ON_SITE', 'HYBRID', 'SPECIALIST'], true)) {
+        if (!in_array($modo, ['TOWING', 'ON_SITE', 'HYBRID'], true)) {
             $modo = 'TOWING';
         }
 
         if (!isset(self::$instances[$modo])) {
             self::$instances[$modo] = match ($modo) {
-                'ON_SITE', 'SPECIALIST' => new OnSiteFlowDefinition(),
+                'ON_SITE' => new OnSiteFlowDefinition(),
                 'HYBRID' => new HybridFlowDefinition(),
                 default => new TowingFlowDefinition(),
             };
