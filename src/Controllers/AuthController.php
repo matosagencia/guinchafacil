@@ -64,6 +64,12 @@ class AuthController extends BaseController
         return $resultado;
     }
 
+    public function cidadesPublicas(): void
+    {
+        $cidadesSeo = $this->cidadesComCoberturaSeo();
+        require __DIR__ . '/../Views/public/cidades.php';
+    }
+
     public function parceirosInteresse(): void
     {
         $this->redirect('/#parceiros');
