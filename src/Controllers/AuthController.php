@@ -45,7 +45,23 @@ class AuthController extends BaseController
             $this->redirectByProfile();
             return;
         }
+        $cidadesSeo = $this->cidadesComCoberturaSeo();
         require __DIR__ . '/../Views/public/landing.php';
+    }
+
+    /** Cidades públicas que já possuem pelo menos uma zona pedra_viva. */
+    private function cidadesComCoberturaSeo(): array
+    {
+        $resultado = [];
+        foreach (Cidade::listarAtivas() as $cidade) {
+            foreach (PricingZone::listarPorOrdemExpansao((int)$cidade['id'], true) as $zona) {
+                if (($zona['status_expansao'] ?? '') === 'pedra_viva' && !empty($cidade['slug'])) {
+                    $resultado[] = $cidade;
+                    break;
+                }
+            }
+        }
+        return $resultado;
     }
 
     public function parceirosInteresse(): void
@@ -108,19 +124,9 @@ class AuthController extends BaseController
             ['loc' => 'https://guinchafacil.com.br/pre-cotacao', 'freq' => 'weekly', 'priority' => '0.9'],
         ];
 
-        foreach (Cidade::listarAtivas() as $cidade) {
-            $zonas = PricingZone::listarPorOrdemExpansao((int)$cidade['id'], true);
-            $temPedraViva = false;
-            foreach ($zonas as $zona) {
-                if (($zona['status_expansao'] ?? '') === 'pedra_viva') {
-                    $temPedraViva = true;
-                    break;
-                }
-            }
-            if ($temPedraViva && !empty($cidade['slug'])) {
-                $urls[] = ['loc' => 'https://guinchafacil.com.br/guincho/' . rawurlencode((string)$cidade['slug']), 'freq' => 'weekly', 'priority' => '0.8'];
-            }
-        }
+        foreach ($this->cidadesComCoberturaSeo() as $cidade) {
+            $urls[] = ['loc' => 'https://guinchafacil.com.br/guincho/' . rawurlencode((string)$cidade['slug']), 'freq' => 'weekly', 'priority' => '0.8'];
+        }
 
         echo '<?xml version="1.0" encoding="UTF-8"?>';
         echo '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">';
