@@ -166,7 +166,8 @@ class AuthController extends BaseController
             $prefillLat = null;
             $prefillLng = null;
         }
-        $flash = $this->pullFlash();
+        $cidadesSeo = $this->cidadesComCoberturaSeo();
+        $flash = $this->pullFlash();
         require __DIR__ . '/../Views/public/pre-cotacao.php';
     }
 
