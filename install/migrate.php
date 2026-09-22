@@ -125,7 +125,8 @@ try {
     $dsn = 'mysql:host=' . DB_HOST . ';charset=utf8mb4';
     $pdo = new PDO($dsn, DB_USER, DB_PASS, [
         PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
-        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+        PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => true,
     ]);
     $db = DB_NAME;
     $pdo->exec("CREATE DATABASE IF NOT EXISTS `{$db}` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
@@ -1354,7 +1355,9 @@ out('');
 out('── FASE 6: Correções de dados ──────────────────────────────────────────');
 
 // comissao_plataforma: se estiver como percentual (>1), converter para decimal
-$row = $pdo->query("SELECT valor FROM configuracoes WHERE chave = 'comissao_plataforma'")->fetch();
+$rowStmt = $pdo->query("SELECT valor FROM configuracoes WHERE chave = 'comissao_plataforma'");
+$row = $rowStmt->fetch();
+$rowStmt->closeCursor();
 if ($row && (float)$row['valor'] > 1) {
     $fixado = round((float)$row['valor'] / 100, 4);
     $pdo->prepare("UPDATE configuracoes SET valor = ? WHERE chave = 'comissao_plataforma'")->execute([$fixado]);
