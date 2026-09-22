@@ -1,11 +1,15 @@
--- install/migration_categoria_tarifa_veiculo_v1.sql
--- §A6 (auditoria 21/07): TarifaService::categoriaDeVeiculo() já lia
--- $veiculo['categoria_tarifa'] preferencialmente, mas a coluna nunca
--- existiu na tabela veiculos — isset() sempre dava falso, então a
--- categoria sempre vinha do ENUM `tipo` (carro/moto/caminhao/van/onibus/
--- outro), tornando as categorias 'suv' e 'eletrico' inalcançáveis na
--- prática. Coluna separada do ENUM `tipo` (usado em outros lugares, ex.
--- compatibilidade de reboque) para não misturar os dois conceitos.
-
-ALTER TABLE veiculos
-    ADD COLUMN IF NOT EXISTS categoria_tarifa VARCHAR(20) NULL AFTER tipo;
+-- migration_categoria_tarifa_veiculo_v1.sql
+-- Adds the optional tariff category using MySQL-compatible dynamic DDL.
+
+SET @db_name := DATABASE();
+SET @has_categoria_tarifa := (
+    SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS
+    WHERE TABLE_SCHEMA=@db_name AND TABLE_NAME='veiculos' AND COLUMN_NAME='categoria_tarifa'
+);
+SET @sql_categoria_tarifa := IF(@has_categoria_tarifa=0,
+    'ALTER TABLE veiculos ADD COLUMN categoria_tarifa VARCHAR(20) NULL AFTER tipo',
+    'SELECT 1'
+);
+PREPARE stmt_categoria_tarifa FROM @sql_categoria_tarifa;
+EXECUTE stmt_categoria_tarifa;
+DEALLOCATE PREPARE stmt_categoria_tarifa;

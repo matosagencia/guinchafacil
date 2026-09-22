@@ -1,17 +1,18 @@
--- install/migration_evidencia_nonce_dedupe_v1.sql
--- §A2 (auditoria 21/07): o nonce de evidência (EvidenceService::issueNonce)
--- era um token HMAC stateless — válido pra reuso até expirar (5min), sem
--- nada impedindo duas submissões aceitas com o mesmo token. Também não
--- havia dedupe por conteúdo (sha256 calculado mas nunca checado), então a
--- mesma foto podia ser registrada mais de uma vez para o mesmo
--- pedido+etapa. As duas UNIQUE KEYs abaixo fecham os dois gaps via
--- constraint de banco: EvidenceService::storeUploadedEvidence() passa a
--- tratar a violação como "nonce já utilizado"/"evidência já registrada"
--- (idempotente), não como erro genérico.
--- Idempotente: pode ser reexecutada sem erro.
-
-ALTER TABLE pedido_evidencias
-    ADD UNIQUE INDEX IF NOT EXISTS uk_nonce_token (nonce_token);
-
-ALTER TABLE pedido_evidencias
-    ADD UNIQUE INDEX IF NOT EXISTS uk_pedido_tipo_sha256 (pedido_id, tipo, sha256);
+-- Idempotent evidence nonce and content deduplication indexes.
+SET @db_name := DATABASE();
+
+SET @has_nonce_index := (
+    SELECT COUNT(*) FROM INFORMATION_SCHEMA.STATISTICS
+    WHERE TABLE_SCHEMA=@db_name AND TABLE_NAME='pedido_evidencias' AND INDEX_NAME='uk_nonce_token'
+);
+SET @sql_nonce_index := IF(@has_nonce_index=0,
+    'ALTER TABLE pedido_evidencias ADD UNIQUE INDEX uk_nonce_token (nonce_token)', 'SELECT 1');
+PREPARE stmt_nonce_index FROM @sql_nonce_index; EXECUTE stmt_nonce_index; DEALLOCATE PREPARE stmt_nonce_index;
+
+SET @has_sha_index := (
+    SELECT COUNT(*) FROM INFORMATION_SCHEMA.STATISTICS
+    WHERE TABLE_SCHEMA=@db_name AND TABLE_NAME='pedido_evidencias' AND INDEX_NAME='uk_pedido_tipo_sha256'
+);
+SET @sql_sha_index := IF(@has_sha_index=0,
+    'ALTER TABLE pedido_evidencias ADD UNIQUE INDEX uk_pedido_tipo_sha256 (pedido_id, tipo, sha256)', 'SELECT 1');
+PREPARE stmt_sha_index FROM @sql_sha_index; EXECUTE stmt_sha_index; DEALLOCATE PREPARE stmt_sha_index;

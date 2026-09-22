@@ -1207,7 +1207,17 @@ addIndex($pdo, $db, 'simulation_steps', 'idx_run_id',          '`run_id`');
 addIndex($pdo, $db, 'simulation_steps', 'idx_criado',          '`criado_em`');
 addIndex($pdo, $db, 'simulation_artifacts', 'idx_run_id',      '`run_id`');
 addIndex($pdo, $db, 'simulation_artifacts', 'idx_step_id',     '`step_id`');
-addUniqueIndex($pdo, $db, 'geocoding_cache', 'uk_cache_key',   '`cache_key`');
+// Cache rows created before cache_key became mandatory may contain the empty
+// string. Normalize those legacy rows before enforcing uniqueness.
+if (tableExists($pdo, $db, 'geocoding_cache') && columnExists($pdo, $db, 'geocoding_cache', 'cache_key')) {
+    try {
+        $pdo->exec("UPDATE geocoding_cache SET cache_key = CONCAT('__legacy__', id) WHERE cache_key = ''");
+        out('[OK]   geocoding_cache.cache_key legado normalizado');
+    } catch (Throwable $e) {
+        fail('Normalização de geocoding_cache.cache_key: ' . $e->getMessage());
+    }
+}
+addUniqueIndex($pdo, $db, 'geocoding_cache', 'uk_cache_key',   '`cache_key`');
 addIndex($pdo, $db, 'geocoding_cache', 'idx_tipo_expires',     '`tipo`, `expires_at`');
 addIndex($pdo, $db, 'pedido_localizacoes', 'idx_pedido_ts',    '`pedido_id`, `server_timestamp`');
 addIndex($pdo, $db, 'pedido_localizacoes', 'idx_guincho_ts',   '`guincho_id`, `server_timestamp`');
