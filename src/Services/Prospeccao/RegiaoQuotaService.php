@@ -64,6 +64,19 @@ final class RegiaoQuotaService
         return $row ?: null;
     }
 
+    public function buscarAtivaPorCidadeUf(string $cidade, string $uf): ?array
+    {
+        $stmt = $this->pdo->prepare(
+            "SELECT * FROM prospeccao_regioes
+             WHERE status = 'ativa' AND cidade = ? AND uf = ?
+             ORDER BY prioridade_fuseki ASC, id ASC LIMIT 1"
+        );
+        $stmt->execute([trim($cidade), strtoupper(trim($uf))]);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        return $row ?: null;
+    }
+
     public function salvarOuAtualizar(array $dados): int
     {
         $nome = trim((string)($dados['nome'] ?? ''));

@@ -61,6 +61,10 @@ SetEnv TZ America/Sao_Paulo
 <IfModule mod_rewrite.c>
     RewriteEngine On
 
+    # O sitemap Ã© gerado por AuthController::sitemap(); nÃ£o permitir que
+    # um arquivo estÃ¡tico futuro mascare a rota dinÃ¢mica.
+    RewriteRule ^sitemap\.xml$ index.php [QSA,L]
+
     # O Service Worker precisa ser servido na raiz para controlar todo o site.
     # O arquivo versionado permanece em public/sw.js.
     RewriteRule ^sw\.js$ public/sw.js [L]

@@ -137,8 +137,74 @@ class Guincho
         }
     }
 
-    public static function aprovar(int $id): bool
-    {
+    /**
+     * Recalcula a disponibilidade por zona usando o mesmo resolvedor
+     * geogrÃ¡fico do motor de preÃ§os. Deve ser executado por cron, nunca no
+     * request da landing page.
+     *
+     * @return array<int,int> mapa pricing_zone_id => quantidade
+     */
+    public static function recalcularDisponibilidadePorZonaCache(): array
+    {
+        require_once __DIR__ . '/../Services/Pricing/ZonePricingService.php';
+
+        $stmt = getPDO()->query(
+            "SELECT lat_atual, lng_atual
+             FROM " . self::TBL . "
+             WHERE disponivel = 1 AND aprovado = 1
+               AND lat_atual IS NOT NULL AND lng_atual IS NOT NULL"
+        );
+
+        $contagem = [];
+        foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $guincho) {
+            $zona = ZonePricingService::resolverZonaPorCoordenada(
+                (float)$guincho['lat_atual'],
+                (float)$guincho['lng_atual']
+            );
+            if ($zona !== null) {
+                $zonaId = (int)($zona['id'] ?? 0);
+                if ($zonaId > 0) $contagem[$zonaId] = ($contagem[$zonaId] ?? 0) + 1;
+            }
+        }
+
+        $payload = json_encode([
+            'generated_at' => time(),
+            'counts' => $contagem,
+        ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        if ($payload === false) throw new RuntimeException('NÃ£o foi possÃ­vel serializar o cache de disponibilidade.');
+
+        $path = self::availabilityCachePath();
+        $tmp = $path . '.' . getmypid() . '.tmp';
+        if (file_put_contents($tmp, $payload, LOCK_EX) === false || !rename($tmp, $path)) {
+            @unlink($tmp);
+            throw new RuntimeException('NÃ£o foi possÃ­vel gravar o cache de disponibilidade.');
+        }
+
+        return $contagem;
+    }
+
+    /**
+     * LÃª o cache gerado pelo worker. Null significa cache ausente/expirado;
+     * assim a landing page nÃ£o executa point-in-polygon em loop.
+     */
+    public static function disponibilidadePorZonasCache(array $zonaIds, int $maxAgeSeconds = 600): ?int
+    {
+        $raw = @file_get_contents(self::availabilityCachePath());
+        $cache = $raw !== false ? json_decode($raw, true) : null;
+        if (!is_array($cache) || (int)($cache['generated_at'] ?? 0) < time() - $maxAgeSeconds) return null;
+
+        $total = 0;
+        foreach ($zonaIds as $zonaId) $total += (int)($cache['counts'][(string)(int)$zonaId] ?? 0);
+        return $total;
+    }
+
+    private static function availabilityCachePath(): string
+    {
+        return rtrim(sys_get_temp_dir(), DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . 'guinchafacil-availability-by-zone.json';
+    }
+
+    public static function aprovar(int $id): bool
+    {
         try {
             getPDO()->prepare("UPDATE " . self::TBL . " SET aprovado=1 WHERE id=?")->execute([$id]);
             // Se o prestador oferece reboque, a aprovação também libera o

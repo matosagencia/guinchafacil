@@ -88,7 +88,15 @@ class AuthController extends BaseController
             header('X-Robots-Tag: noindex, follow');
         }
 
-        require __DIR__ . '/../Views/public/cidade.php';
+        require_once __DIR__ . '/../Models/Catalog/ServiceType.php';
+        require_once __DIR__ . '/../Models/Guincho.php';
+        $servicosCatalogo = ServiceType::listarAtivos();
+        $zonasVivas = array_values(array_filter($zonas, static fn(array $zona): bool => ($zona['status_expansao'] ?? '') === 'pedra_viva'));
+        $guinchosAtivosCidade = Guincho::disponibilidadePorZonasCache(
+            array_map(static fn(array $zona): int => (int)$zona['id'], $zonasVivas)
+        );
+
+        require __DIR__ . '/../Views/public/cidade.php';
     }
 
     /** Sitemap público derivado das cidades que têm cobertura ativa. */
@@ -134,7 +142,18 @@ class AuthController extends BaseController
             return;
         }
         $csrf_token = $this->generateCSRFToken();
-        $cotacao = $_SESSION['pre_cotacao'] ?? null;
+        $cotacao = $_SESSION['pre_cotacao'] ?? null;
+
+        $prefillLat = filter_var($_GET['lat'] ?? null, FILTER_VALIDATE_FLOAT);
+        $prefillLng = filter_var($_GET['lng'] ?? null, FILTER_VALIDATE_FLOAT);
+        $prefillLat = ($prefillLat !== false && $prefillLat >= -34 && $prefillLat <= 5) ? (float)$prefillLat : null;
+        $prefillLng = ($prefillLng !== false && $prefillLng >= -74 && $prefillLng <= -28) ? (float)$prefillLng : null;
+        $prefillOrigemSeo = strtolower(trim((string)($_GET['origem_seo'] ?? '')));
+        if (!preg_match('/^[a-z0-9]+(?:-[a-z0-9]+)*$/', $prefillOrigemSeo)) $prefillOrigemSeo = null;
+        if ($prefillLat === null || $prefillLng === null) {
+            $prefillLat = null;
+            $prefillLng = null;
+        }
         $flash = $this->pullFlash();
         require __DIR__ . '/../Views/public/pre-cotacao.php';
     }

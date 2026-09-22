@@ -674,7 +674,15 @@ if (isset($rotas[$metodo][$uri])) {
 } else {
     // Página local SEO: somente o slug de cidade é dinâmico; dashboards têm
     // rotas explícitas e continuam sendo resolvidos antes desta regra.
-    if ($controller === null && $metodo === 'GET'
+    if ($controller === null && in_array($metodo, ['GET', 'POST'], true)
+        && preg_match('~^/parceiros/oficinas-([a-z0-9]+(?:-[a-z0-9]+)*)$~', $uri, $m)) {
+        $controller = 'SeoPartnerController';
+        $action = $metodo === 'POST' ? 'capturar' : 'landing';
+        $perfil = null;
+        $id = $m[1];
+    }
+
+    if ($controller === null && $metodo === 'GET'
         && preg_match('~^/guincho/([a-z0-9]+(?:-[a-z0-9]+)*)$~', $uri, $m)) {
         $controller = 'AuthController';
         $action = 'cidadePublica';
