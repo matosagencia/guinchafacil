@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 // Worker cron: reprocessa incidentes de especialista presos após pagamento aprovado.
 require_once __DIR__ . '/../config.php';
+require_once __DIR__ . '/../src/Services/CronMonitorService.php';
 require_once __DIR__ . '/../src/Models/Configuracao.php';
 require_once __DIR__ . '/../src/Services/Logger.php';
 require_once __DIR__ . '/../src/Services/IncidenteFinanceiroService.php';
@@ -13,6 +14,17 @@ $limit = max(1, min((int)($argv[1] ?? 100), 500));
 $maxTentativas = max(1, min(20, (int)Configuracao::get('especialista_dispatch_retry_max_attempts', '3')));
 $minutos = max(1, min(1440, (int)Configuracao::get('especialista_dispatch_retry_after_minutes', '10')));
 $pdo = getPDO();
+$run = CronMonitorService::start('cron_especialista_dispatch_retry');
+$financeProcessados = 0;
+$financeSucessos = 0;
+$financeFalhas = 0;
+$financeEsgotados = 0;
+$processados = 0;
+$sucessos = 0;
+$falhas = 0;
+$esgotados = 0;
+
+try {
 
 $corte = $pdo->getAttribute(PDO::ATTR_DRIVER_NAME) === 'sqlite'
 
@@ -65,11 +77,6 @@ $financeRows = $pdo->query(
       LIMIT {$limit}"
 
 )->fetchAll(PDO::FETCH_ASSOC);
-
-$financeProcessados = 0;
-$financeSucessos = 0;
-$financeFalhas = 0;
-$financeEsgotados = 0;
 
 foreach ($financeRows as $row) {
 
@@ -241,11 +248,6 @@ $rows = $pdo->query(
 
 )->fetchAll(PDO::FETCH_ASSOC);
 
-$processados = 0;
-$sucessos = 0;
-$falhas = 0;
-$esgotados = 0;
-
 foreach ($rows as $row) {
 
     $processados++;
@@ -350,6 +352,18 @@ foreach ($rows as $row) {
     }
 }
 
+$errors = $financeFalhas + $falhas + $financeEsgotados + $esgotados;
+CronMonitorService::finish($run, $errors > 0 ? 'warning' : 'ok', 'Retry de despacho de especialista concluído.', [
+    'finance_processados' => $financeProcessados,
+    'finance_sucessos' => $financeSucessos,
+    'finance_falhas' => $financeFalhas,
+    'finance_esgotados' => $financeEsgotados,
+    'processados' => $processados,
+    'sucessos' => $sucessos,
+    'falhas' => $falhas,
+    'esgotados' => $esgotados,
+]);
+
 echo sprintf(
 
     "finance_processados=%d finance_sucessos=%d finance_falhas=%d finance_esgotados=%d processados=%d sucessos=%d falhas=%d esgotados=%d\n",
@@ -364,3 +378,17 @@ echo sprintf(
     $esgotados
 
 );
+} catch (Throwable $e) {
+    CronMonitorService::finish($run, 'error', $e->getMessage(), [
+        'finance_processados' => $financeProcessados,
+        'finance_sucessos' => $financeSucessos,
+        'finance_falhas' => $financeFalhas,
+        'finance_esgotados' => $financeEsgotados,
+        'processados' => $processados,
+        'sucessos' => $sucessos,
+        'falhas' => $falhas,
+        'esgotados' => $esgotados,
+    ]);
+    fwrite(STDERR, '[especialista_dispatch_retry] ' . $e->getMessage() . PHP_EOL);
+    exit(1);
+}
