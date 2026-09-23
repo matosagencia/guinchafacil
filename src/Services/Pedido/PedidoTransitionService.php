@@ -195,9 +195,13 @@ final class PedidoTransitionService
                     IncidenteFinanceiroService::registrar($incidenteCriado, 'cobranca_cliente', 'pagamento', (int)$pag['id'], $total);
                     IncidenteFinanceiroService::registrar($incidenteCriado, 'taxa_plataforma', 'pagamento', (int)$pag['id'], $taxaEspecialista);
                     $atendimentoId = EspecialistaDispatchService::disparar($incidenteCriado, $codigoServicoEspecialista, $repasseEspecialista, $total, $taxaEspecialista);
-                    if ($atendimentoId) IncidenteFinanceiroService::registrar($incidenteCriado, 'repasse_especialista', 'atendimento_especialista', $atendimentoId, $repasseEspecialista, 'pendente');
+                    if ($atendimentoId) {
+                        IncidenteFinanceiroService::registrar($incidenteCriado, 'repasse_especialista', 'atendimento_especialista', $atendimentoId, $repasseEspecialista, 'pendente');
+                    } else {
+                        error_log('[EspecialistaDispatch] falha pós-pagamento: retorno nulo; pedido_id=' . $pedidoId . ' incidente_id=' . $incidenteCriado . ' service_code=' . $codigoServicoEspecialista);
+                    }
                 } catch (Throwable $dispatchError) {
-                    error_log('[EspecialistaDispatch] falha pós-pagamento: ' . $dispatchError->getMessage());
+                    error_log('[EspecialistaDispatch] falha pós-pagamento: exceção; pedido_id=' . $pedidoId . ' incidente_id=' . $incidenteCriado . ' service_code=' . $codigoServicoEspecialista . ' erro=' . $dispatchError->getMessage());
                 }
             }
 
