@@ -1,6 +1,8 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types=1);
+
+require_once __DIR__ . '/../Models/Configuracao.php';
 
 /**
  * src/Services/AdminAlertService.php
@@ -34,8 +36,10 @@ class AdminAlertService
             self::pixFalhou($limitePorCategoria),
             self::conclusoesManuaisPendentes($limitePorCategoria),
             self::demandasPendentesAntigas($limitePorCategoria),
-            self::cnhProximaVencimento()
-        );
+            self::cnhProximaVencimento(),
+            self::incidentesEspecialistaTravados($limitePorCategoria),
+
+        );
 
         usort($alertas, static function (array $a, array $b): int {
             $peso = ['erro' => 0, 'aviso' => 1, 'info' => 2];
@@ -232,7 +236,105 @@ class AdminAlertService
         }, $rows);
     }
 
-    private static function cnhProximaVencimento(): array
+    private static function incidentesEspecialistaTravados(int $limite = 5): array
+
+    {
+
+        $minutos = max(1, min(1440, (int)Configuracao::get('especialista_dispatch_retry_after_minutes', '10')));
+
+        $maxTentativas = max(1, min(20, (int)Configuracao::get('especialista_dispatch_retry_max_attempts', '3')));
+
+        $pdo = getPDO();
+
+        $corte = $pdo->getAttribute(PDO::ATTR_DRIVER_NAME) === 'sqlite'
+
+            ? "datetime('now', '-{$minutos} minutes')"
+
+            : "DATE_SUB(NOW(), INTERVAL {$minutos} MINUTE)";
+
+        try {
+
+            $stmt = $pdo->prepare(
+
+                "SELECT i.id AS incidente_id, p.id AS pedido_id, i.criado_em,
+
+                        (SELECT COUNT(*)
+
+                           FROM app_logs al
+
+                          WHERE al.code = 'especialista_dispatch_retry'
+
+                            AND al.pedido_id = p.id) AS tentativas
+
+                   FROM incidentes i
+
+                   JOIN pedidos p ON p.incidente_id = i.id
+
+                  WHERE i.status = 'procurando_especialista'
+
+                    AND i.criado_em < {$corte}
+
+                    AND NOT EXISTS (
+
+                        SELECT 1
+
+                          FROM atendimentos_especialista ae
+
+                         WHERE ae.incidente_id = i.id
+
+                    )
+
+                  ORDER BY i.criado_em ASC
+
+                  LIMIT " . max(1, min(500, $limite))
+
+            );
+
+            $stmt->execute();
+
+            $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        } catch (Throwable $e) {
+
+            return [];
+
+        }
+
+
+
+        return array_map(static function (array $r) use ($maxTentativas): array {
+
+            $tentativas = (int)($r['tentativas'] ?? 0);
+
+            $esgotado = $tentativas >= $maxTentativas;
+
+            return [
+
+                'label' => $esgotado
+
+                    ? 'Despacho de especialista esgotado — requer ação manual'
+
+                    : 'Despacho de especialista travado',
+
+                'info' => 'Incidente #' . (int)$r['incidente_id']
+
+                    . ' · Pedido #' . (int)$r['pedido_id']
+
+                    . ' · tentativas ' . $tentativas . '/' . $maxTentativas,
+
+                'nivel' => $esgotado ? 'erro' : 'aviso',
+
+                'quando' => (string)($r['criado_em'] ?? ''),
+
+            ];
+
+        }, $rows);
+
+    }
+
+
+
+    private static function cnhProximaVencimento(): array
     {
         try {
             $stmt = getPDO()->prepare(
