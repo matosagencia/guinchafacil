@@ -39,6 +39,8 @@ class AdminAlertService
             self::cnhProximaVencimento(),
             self::incidentesEspecialistaTravados($limitePorCategoria),
 
+            self::repassesEspecialistaAusentes($limitePorCategoria),
+
         );
 
         usort($alertas, static function (array $a, array $b): int {
@@ -323,6 +325,96 @@ class AdminAlertService
                     . ' · tentativas ' . $tentativas . '/' . $maxTentativas,
 
                 'nivel' => $esgotado ? 'erro' : 'aviso',
+
+                'quando' => (string)($r['criado_em'] ?? ''),
+
+            ];
+
+        }, $rows);
+
+    }
+
+
+
+    private static function repassesEspecialistaAusentes(int $limite = 5): array
+
+    {
+
+        $minutos = max(1, min(1440, (int)Configuracao::get('especialista_dispatch_retry_after_minutes', '10')));
+
+        $pdo = getPDO();
+
+        $corte = $pdo->getAttribute(PDO::ATTR_DRIVER_NAME) === 'sqlite'
+
+            ? "datetime('now', '-{$minutos} minutes')"
+
+            : "DATE_SUB(NOW(), INTERVAL {$minutos} MINUTE)";
+
+        try {
+
+            $stmt = $pdo->prepare(
+
+                "SELECT i.id AS incidente_id, p.id AS pedido_id, ae.id AS atendimento_id,
+
+                        fl.status AS financeiro_status, i.criado_em
+
+                   FROM incidentes i
+
+                   JOIN pedidos p ON p.incidente_id = i.id
+
+                   JOIN atendimentos_especialista ae ON ae.incidente_id = i.id
+
+                   LEFT JOIN financeiro_lancamentos fl
+
+                     ON fl.incidente_id = i.id
+
+                    AND fl.tipo = 'repasse_especialista'
+
+                    AND fl.referencia_tipo = 'atendimento_especialista'
+
+                    AND fl.referencia_id = ae.id
+
+                  WHERE i.status = 'especialista_designado'
+
+                    AND i.criado_em < {$corte}
+
+                    AND (fl.id IS NULL OR fl.status = 'falhou')
+
+                  ORDER BY i.criado_em ASC
+
+                  LIMIT " . max(1, min(500, $limite))
+
+            );
+
+            $stmt->execute();
+
+            $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        } catch (Throwable $e) {
+
+            return [];
+
+        }
+
+
+
+        return array_map(static function (array $r): array {
+
+            return [
+
+                'label' => (($r['financeiro_status'] ?? null) === 'falhou')
+
+                    ? 'Repasse de especialista falhou — requer ação manual'
+
+                    : 'Repasse de especialista ausente',
+
+                'info' => 'Incidente #' . (int)$r['incidente_id']
+
+                    . ' · Pedido #' . (int)$r['pedido_id']
+
+                    . ' · Atendimento #' . (int)$r['atendimento_id'],
+
+                'nivel' => 'erro',
 
                 'quando' => (string)($r['criado_em'] ?? ''),
 
