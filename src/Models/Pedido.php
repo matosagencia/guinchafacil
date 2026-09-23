@@ -6,7 +6,7 @@
 class Pedido {
 
     /** Cria pedido (cliente) */
-    public static function criar(array $dados): int|false
+    public static function criar(array $dados): int|false
     {
         try {
             $pdo = getPDO();
@@ -55,7 +55,109 @@ class Pedido {
         } catch (PDOException $e) {
             error_log("Pedido::criar: " . $e->getMessage()); return false;
         }
-    }
+    }
+
+
+
+    /** Cria pedido com os campos completos do fluxo autenticado. */
+
+    public static function criarCompleto(array $dados): int
+
+    {
+
+        $pdo = getPDO();
+
+        $driver = (string)$pdo->getAttribute(PDO::ATTR_DRIVER_NAME);
+
+        $expiracaoExpr = $driver === 'sqlite'
+
+            ? "datetime('now', '+30 minutes')"
+
+            : 'DATE_ADD(NOW(), INTERVAL 30 MINUTE)';
+
+        $criadoEmExpr = $driver === 'sqlite' ? "datetime('now')" : 'NOW()';
+
+        $stmt = $pdo->prepare(
+
+            "INSERT INTO pedidos (
+
+                cliente_id, veiculo_id, tipo_problema, descricao_problema,
+
+                lat_origem, lng_origem, endereco_origem, lat_destino, lng_destino, endereco_destino,
+
+                distancia_km, custo_estimado, status, raio_atual_km, score_minimo_atual,
+
+                expiracao_aceite, criado_em, service_type_id, attendance_mode,
+
+                veiculo_esta_batido, rodas_travadas, local_dificil_acesso, em_garagem_subsolo,
+
+                utm_source, utm_medium, utm_campaign, utm_content, utm_term, canal_aquisicao,
+
+                referrer_url, landing_page, cidade_id, pricing_zone_id,
+
+                modalidade_socorro, local_resgate_lat, local_resgate_lng
+
+             ) VALUES (
+
+                :cliente_id, :veiculo_id, :tipo_problema, :descricao_problema,
+
+                :lat_origem, :lng_origem, :endereco_origem, :lat_destino, :lng_destino, :endereco_destino,
+
+                :distancia_km, :custo_estimado, :status, 10, 0.5000,
+
+                {$expiracaoExpr}, {$criadoEmExpr}, :service_type_id, :attendance_mode,
+
+                :veiculo_esta_batido, :rodas_travadas, :local_dificil_acesso, :em_garagem_subsolo,
+
+                :utm_source, :utm_medium, :utm_campaign, :utm_content, :utm_term, :canal_aquisicao,
+
+                :referrer_url, :landing_page, :cidade_id, :pricing_zone_id,
+
+                :modalidade_socorro, :local_resgate_lat, :local_resgate_lng
+
+             )"
+
+        );
+
+        $stmt->execute([
+
+            ':cliente_id' => $dados['cliente_id'],
+            ':veiculo_id' => $dados['veiculo_id'],
+            ':tipo_problema' => $dados['tipo_problema'],
+            ':descricao_problema' => $dados['descricao_problema'],
+            ':lat_origem' => $dados['lat_origem'],
+            ':lng_origem' => $dados['lng_origem'],
+            ':endereco_origem' => $dados['endereco_origem'],
+            ':lat_destino' => $dados['lat_destino'],
+            ':lng_destino' => $dados['lng_destino'],
+            ':endereco_destino' => $dados['endereco_destino'],
+            ':distancia_km' => $dados['distancia_km'],
+            ':custo_estimado' => $dados['custo_estimado'],
+            ':status' => $dados['status'],
+            ':service_type_id' => $dados['service_type_id'],
+            ':attendance_mode' => $dados['attendance_mode'],
+            ':veiculo_esta_batido' => $dados['veiculo_esta_batido'],
+            ':rodas_travadas' => $dados['rodas_travadas'],
+            ':local_dificil_acesso' => $dados['local_dificil_acesso'],
+            ':em_garagem_subsolo' => $dados['em_garagem_subsolo'],
+            ':utm_source' => $dados['utm_source'],
+            ':utm_medium' => $dados['utm_medium'],
+            ':utm_campaign' => $dados['utm_campaign'],
+            ':utm_content' => $dados['utm_content'],
+            ':utm_term' => $dados['utm_term'],
+            ':canal_aquisicao' => $dados['canal_aquisicao'],
+            ':referrer_url' => $dados['referrer_url'],
+            ':landing_page' => $dados['landing_page'],
+            ':cidade_id' => $dados['cidade_id'],
+            ':pricing_zone_id' => $dados['pricing_zone_id'],
+            ':modalidade_socorro' => $dados['modalidade_socorro'],
+            ':local_resgate_lat' => $dados['local_resgate_lat'],
+            ':local_resgate_lng' => $dados['local_resgate_lng'],
+
+        ]);
+
+        return (int)$pdo->lastInsertId();
+    }
 
     /** Busca pedido completo por ID */
     public static function buscarPorId(int $id): ?array

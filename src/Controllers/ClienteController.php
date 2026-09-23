@@ -903,31 +903,40 @@ class ClienteController extends BaseController
         $atribuicao = MarketingAttributionService::forPedido();
         $pdo->beginTransaction();
         try {
-        $stmt = $pdo->prepare(
-            "INSERT INTO pedidos (cliente_id, veiculo_id, tipo_problema, descricao_problema,
-             lat_origem, lng_origem, endereco_origem, lat_destino, lng_destino, endereco_destino,
-             distancia_km, custo_estimado, status, raio_atual_km, score_minimo_atual,
-             expiracao_aceite, criado_em, service_type_id, attendance_mode,
-             veiculo_esta_batido, rodas_travadas, local_dificil_acesso, em_garagem_subsolo,
-             utm_source, utm_medium, utm_campaign, utm_content, utm_term, canal_aquisicao, referrer_url, landing_page, cidade_id, pricing_zone_id,
-             modalidade_socorro, local_resgate_lat, local_resgate_lng)
-             VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,10,0.5000,
-             DATE_ADD(NOW(), INTERVAL 30 MINUTE), NOW(), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? )"
-        );
-        $stmt->execute([
-            $uid, $veiculoId, $tipo, $descricao,
-            $latOrigem, $lngOrigem, $endOrigem,
-            $latDest,   $lngDest,   $endDest,
-            $distancia, $custo, $statusInicial,
-            $serviceTypeId, $attendanceMode,
-            $veiculoBatido, $rodasTravadas, $dificilAcesso, $garagemSubsolo,
-            $atribuicao['utm_source'] ?? null, $atribuicao['utm_medium'] ?? null, $atribuicao['utm_campaign'] ?? null,
-            $atribuicao['utm_content'] ?? null, $atribuicao['utm_term'] ?? null, $atribuicao['canal_aquisicao'] ?? 'organico',
-            $atribuicao['referrer_url'] ?? null, $atribuicao['landing_page'] ?? null,
-            $cidadeIdPreco, $pricingZoneId,
-            $modalidadeSocorro, $localResgateLat, $localResgateLng,
+        $pedidoId = Pedido::criarCompleto([
+            'cliente_id' => $uid,
+            'veiculo_id' => $veiculoId,
+            'tipo_problema' => $tipo,
+            'descricao_problema' => $descricao,
+            'lat_origem' => $latOrigem,
+            'lng_origem' => $lngOrigem,
+            'endereco_origem' => $endOrigem,
+            'lat_destino' => $latDest,
+            'lng_destino' => $lngDest,
+            'endereco_destino' => $endDest,
+            'distancia_km' => $distancia,
+            'custo_estimado' => $custo,
+            'status' => $statusInicial,
+            'service_type_id' => $serviceTypeId,
+            'attendance_mode' => $attendanceMode,
+            'veiculo_esta_batido' => $veiculoBatido,
+            'rodas_travadas' => $rodasTravadas,
+            'local_dificil_acesso' => $dificilAcesso,
+            'em_garagem_subsolo' => $garagemSubsolo,
+            'utm_source' => $atribuicao['utm_source'] ?? null,
+            'utm_medium' => $atribuicao['utm_medium'] ?? null,
+            'utm_campaign' => $atribuicao['utm_campaign'] ?? null,
+            'utm_content' => $atribuicao['utm_content'] ?? null,
+            'utm_term' => $atribuicao['utm_term'] ?? null,
+            'canal_aquisicao' => $atribuicao['canal_aquisicao'] ?? 'organico',
+            'referrer_url' => $atribuicao['referrer_url'] ?? null,
+            'landing_page' => $atribuicao['landing_page'] ?? null,
+            'cidade_id' => $cidadeIdPreco,
+            'pricing_zone_id' => $pricingZoneId,
+            'modalidade_socorro' => $modalidadeSocorro,
+            'local_resgate_lat' => $localResgateLat,
+            'local_resgate_lng' => $localResgateLng,
         ]);
-        $pedidoId = (int)$pdo->lastInsertId();
 
         if ($oficinaParceiraProviderId > 0 && IndicacaoOficinaService::ativo()) {
             try {
