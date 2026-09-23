@@ -9,6 +9,10 @@ final class EspecialistaDispatchFailureBaselineTest extends TestCase
 {
     private const NULL_SERVICE_CODE = 'TEST_DISPATCH_NULL';
     private const THROW_SERVICE_CODE = 'TEST_DISPATCH_THROW';
+    private const CLIENT_ID = 9601;
+    private const VEHICLE_ID = 9601;
+    private const SPECIALIST_ID = 9701;
+    private const SPECIALIST_USER_ID = 9702;
 
     protected function setUp(): void
     {
@@ -37,26 +41,37 @@ final class EspecialistaDispatchFailureBaselineTest extends TestCase
         $pdo->exec('CREATE TABLE IF NOT EXISTS especialistas (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             usuario_id INTEGER NOT NULL,
+            nome_profissional TEXT,
+            cpf_cnpj TEXT,
+            documento_tipo TEXT,
+            documento_numero TEXT,
+            chave_pix TEXT,
+            chave_pix_tipo TEXT,
+            bio TEXT,
             aprovado INTEGER NOT NULL DEFAULT 0,
             disponivel INTEGER NOT NULL DEFAULT 0,
             lat_atual REAL,
             lng_atual REAL,
             raio_atendimento_km REAL NOT NULL DEFAULT 10,
-            reputacao REAL NOT NULL DEFAULT 0
+            reputacao REAL NOT NULL DEFAULT 0,
+            criado_em TEXT,
+            atualizado_em TEXT
         )');
         $pdo->exec('CREATE TABLE IF NOT EXISTS servicos_especialista (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             codigo TEXT NOT NULL UNIQUE,
-            nome TEXT NOT NULL,
-            categoria TEXT NOT NULL,
-            tipo_cobranca TEXT NOT NULL,
+            nome TEXT,
+            categoria TEXT,
+            tipo_cobranca TEXT,
             ativo INTEGER NOT NULL DEFAULT 1
         )');
         $pdo->exec('CREATE TABLE IF NOT EXISTS especialista_servicos (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
             especialista_id INTEGER NOT NULL,
             servico_id INTEGER NOT NULL,
             habilitado INTEGER NOT NULL DEFAULT 1,
-            PRIMARY KEY (especialista_id, servico_id)
+            created_at TEXT,
+            updated_at TEXT
         )');
         $pdo->exec('CREATE TABLE IF NOT EXISTS atendimentos_especialista (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -68,12 +83,17 @@ final class EspecialistaDispatchFailureBaselineTest extends TestCase
             expiracao_oferta TEXT,
             provider_amount REAL NOT NULL DEFAULT 0,
             platform_amount REAL NOT NULL DEFAULT 0,
-            customer_amount REAL NOT NULL DEFAULT 0
+            customer_amount REAL NOT NULL DEFAULT 0,
+            criado_em TEXT
         )');
 
-        foreach (['incidentes', 'especialistas', 'especialista_servicos', 'servicos_especialista', 'atendimentos_especialista'] as $table) {
-            $pdo->exec("DELETE FROM {$table}");
-        }
+        $pdo->exec('DELETE FROM atendimentos_especialista WHERE incidente_id IN (SELECT incidente_id FROM pedidos WHERE id IN (601, 602))');
+        $pdo->exec('DELETE FROM incidentes WHERE id IN (SELECT incidente_id FROM pedidos WHERE id IN (601, 602))');
+        $pdo->exec('DELETE FROM pagamentos WHERE pedido_id IN (601, 602)');
+        $pdo->exec('DELETE FROM pedidos WHERE id IN (601, 602)');
+        $pdo->exec('DELETE FROM especialista_servicos WHERE especialista_id = ' . self::SPECIALIST_ID);
+        $pdo->exec('DELETE FROM especialistas WHERE id = ' . self::SPECIALIST_ID);
+        $pdo->exec('DELETE FROM servicos_especialista WHERE codigo IN (\'TEST_DISPATCH_NULL\', \'TEST_DISPATCH_THROW\')');
         $pdo->exec('DELETE FROM app_logs WHERE pedido_id IN (601, 602)');
         $pdo->exec('DELETE FROM service_types WHERE code IN (\'TEST_DISPATCH_NULL\', \'TEST_DISPATCH_THROW\')');
 
@@ -92,11 +112,11 @@ final class EspecialistaDispatchFailureBaselineTest extends TestCase
         }
 
         $pdo->exec("INSERT OR IGNORE INTO usuarios (id, nome, email, senha_hash, telefone, cpf, tipo)
-                    VALUES (1, 'Cliente Dispatch Teste', 'dispatch-client@example.com', 'hash', '11999999991', '11111111191', 'cliente')");
+                    VALUES (" . self::CLIENT_ID . ", 'Cliente Dispatch Teste', 'dispatch-client@example.com', 'hash', '11999999991', '11111111191', 'cliente')");
         $pdo->exec("INSERT OR IGNORE INTO usuarios (id, nome, email, senha_hash, telefone, cpf, tipo)
-                    VALUES (2, 'Especialista Dispatch Teste', 'dispatch-specialist@example.com', 'hash', '11999999992', '22222222292', 'especialista')");
+                    VALUES (" . self::SPECIALIST_USER_ID . ", 'Especialista Dispatch Teste', 'dispatch-specialist@example.com', 'hash', '11999999992', '22222222292', 'especialista')");
         $pdo->exec("INSERT OR IGNORE INTO veiculos (id, usuario_id, placa, marca, modelo, ano, cor, tipo)
-                    VALUES (1, 1, 'DSP1A23', 'Teste', 'Dispatch', 2024, 'Prata', 'carro')");
+                    VALUES (" . self::VEHICLE_ID . ", " . self::CLIENT_ID . ", 'DSP1A23', 'Teste', 'Dispatch', 2024, 'Prata', 'carro')");
     }
 
     protected function tearDown(): void
@@ -126,8 +146,8 @@ final class EspecialistaDispatchFailureBaselineTest extends TestCase
         $servicoId = $this->criarServicoEspecialista(self::THROW_SERVICE_CODE);
 
         $pdo->exec("INSERT INTO especialistas (id, usuario_id, aprovado, disponivel, lat_atual, lng_atual, raio_atendimento_km, reputacao)
-                    VALUES (701, 2, 1, 1, -23.5501, -46.6301, 10, 1)");
-        $pdo->prepare('INSERT INTO especialista_servicos (especialista_id, servico_id) VALUES (?, ?)')->execute([701, $servicoId]);
+                    VALUES (" . self::SPECIALIST_ID . ", " . self::SPECIALIST_USER_ID . ", 1, 1, -23.5501, -46.6301, 10, 1)");
+        $pdo->prepare('INSERT INTO especialista_servicos (especialista_id, servico_id) VALUES (?, ?)')->execute([self::SPECIALIST_ID, $servicoId]);
         $pdo->exec("UPDATE service_types SET code = 'TEST_DISPATCH_THROW' WHERE id = {$serviceTypeId}");
         $this->criarPedidoEPagamento(602, $serviceTypeId);
         $pdo->exec("CREATE TRIGGER fail_especialista_dispatch_insert
@@ -150,7 +170,7 @@ final class EspecialistaDispatchFailureBaselineTest extends TestCase
             (id, status, custo_estimado, cliente_id, veiculo_id, tipo_problema, descricao_problema,
              lat_origem, lng_origem, endereco_origem, lat_destino, lng_destino, endereco_destino,
              service_type_id, attendance_mode)
-            VALUES (?, \'aguardando_pagamento\', 100, 1, 1, \'bateria\', \'Falha de bateria\',
+            VALUES (?, \'aguardando_pagamento\', 100, " . self::CLIENT_ID . ", " . self::VEHICLE_ID . ", \'bateria\', \'Falha de bateria\',
                     -23.55, -46.63, \'Origem\', -23.56, -46.64, \'Destino\', ?, \'ON_SITE\')')
             ->execute([$pedidoId, $serviceTypeId]);
         $pdo->prepare('INSERT INTO pagamentos (pedido_id, metodo, status, valor_total) VALUES (?, \'mercadopago\', \'pendente\', 100)')
