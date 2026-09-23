@@ -14,12 +14,23 @@ register_shutdown_function(static function () use ($lockHandle): void {
 });
 
 require_once __DIR__ . '/../config.php';
+require_once __DIR__ . '/../src/Services/CronMonitorService.php';
 require_once __DIR__ . '/../src/Models/Guincho.php';
+
+$run = CronMonitorService::start('cron_city_availability');
+$zones = 0;
 
 try {
     $counts = Guincho::recalcularDisponibilidadePorZonaCache();
+    $zones = count($counts);
+    CronMonitorService::finish($run, 'ok', 'Disponibilidade por cidade atualizada.', [
+        'zones' => $zones,
+    ]);
     fwrite(STDOUT, json_encode(['updated' => true, 'zones' => count($counts)], JSON_UNESCAPED_UNICODE) . PHP_EOL);
 } catch (Throwable $e) {
+    CronMonitorService::finish($run, 'error', $e->getMessage(), [
+        'zones' => $zones,
+    ]);
     fwrite(STDERR, '[city_availability] ' . $e->getMessage() . PHP_EOL);
     exit(1);
 }

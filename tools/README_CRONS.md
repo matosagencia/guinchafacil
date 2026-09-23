@@ -11,6 +11,7 @@ devem ser expostos como endpoints HTTP.
 | Reprocessar repasses Pix | a cada 5 minutos | `tools/cron_reprocessar_pix.php` |
 | Detectar bypass de oficinas | a cada 5 minutos | `bin/worker_bypass_detector.php` |
 | Retry de despacho de especialista | a cada 5 minutos | `bin/worker_especialista_dispatch_retry.php` |
+| Recalcular disponibilidade por cidade | a cada 5 minutos | `bin/worker_city_availability.php` |
 | Expirar ofertas de especialista | a cada minuto | `tools/cron_expirar_ofertas_especialista.php` |
 | Limpar tokens de senha | diariamente às 03:00 | `tools/cron_limpar_tokens.php` |
 | Limpar logs e cache | diariamente às 00:30 | `tools/cron_limpar_logs.php` |
@@ -30,6 +31,7 @@ binário do PHP para a versão usada em produção:
 */5 * * * * /usr/bin/php /caminho/do/projeto/tools/cron_reprocessar_pix.php >> /caminho/do/projeto/storage/logs/cron_reprocessar_pix.log 2>&1
 */5 * * * * mkdir -p /caminho/do/projeto/storage/logs && cd /caminho/do/projeto && flock -n /tmp/guinchafacil_bypass_detector.lock /usr/bin/php bin/worker_bypass_detector.php >> /caminho/do/projeto/storage/logs/cron_bypass_detector.log 2>&1
 */5 * * * * mkdir -p /caminho/do/projeto/storage/logs && cd /caminho/do/projeto && flock -n /tmp/guinchafacil_especialista_dispatch_retry.lock /usr/bin/php bin/worker_especialista_dispatch_retry.php >> /caminho/do/projeto/storage/logs/cron_especialista_dispatch_retry.log 2>&1
+*/5 * * * * mkdir -p /caminho/do/projeto/storage/logs && cd /caminho/do/projeto && flock -n /tmp/guinchafacil_city_availability.lock /usr/bin/php bin/worker_city_availability.php >> /caminho/do/projeto/storage/logs/cron_city_availability.log 2>&1
 0 3 * * * /usr/bin/php /caminho/do/projeto/tools/cron_limpar_tokens.php >> /caminho/do/projeto/storage/logs/cron_limpar_tokens.log 2>&1
 30 0 * * * /usr/bin/php /caminho/do/projeto/tools/cron_limpar_logs.php >> /caminho/do/projeto/storage/logs/cron_limpar_logs.log 2>&1
 30 1 * * * /usr/bin/php /caminho/do/projeto/tools/cron_retencao_operacional.php >> /caminho/do/projeto/storage/logs/cron_retencao_operacional.log 2>&1
