@@ -1146,6 +1146,7 @@ class ClienteController extends BaseController
 
         // Etapa 5 — orçamento complementar pendente de decisão do cliente.
         $orcamentoPendente = null;
+        $decisaoReboquePendente = false;
         $conversaoPendente = false;
         $diagnosticoAtual = null;
         if ((string)($pedido['attendance_mode'] ?? 'TOWING') !== 'TOWING') {
@@ -1153,6 +1154,7 @@ class ClienteController extends BaseController
             if ($orc && $orc['status'] === PedidoOrcamento::PENDENTE) {
                 $orcamentoPendente = $orc;
             }
+            $decisaoReboquePendente = (string)$pedido['status'] === 'decisao_reboque_pendente';
             $conversaoPendente = (string)$pedido['status'] === 'conversao_reboque_pendente';
             $diagnosticoAtual = $conversaoPendente ? PedidoDiagnostico::buscarPorPedido($id) : null;
         }
@@ -1184,6 +1186,10 @@ class ClienteController extends BaseController
         } else {
             $this->setFlashMessage($aprovado ? 'Orçamento aprovado — o prestador foi liberado para executar o serviço.' : 'Orçamento recusado.', $aprovado ? 'success' : 'info');
         }
+        if ($result->ok && $aprovado && !empty($result->context['decisao_reboque_pendente'])) {
+            $this->setFlashMessage('Orçamento aprovado. Você precisa de reboque?', 'success');
+            $this->redirect("/cliente/pedido/{$id}");
+        }
         if ($result->ok && $aprovado) {
             require_once __DIR__ . '/../Models/Financial/OrderChargeItem.php';
             require_once __DIR__ . '/../Services/Financial/SupplementalChargeService.php';
@@ -1194,6 +1200,52 @@ class ClienteController extends BaseController
                 $this->redirect('/pagamento/complementar/' . (int)$charge['id']);
             }
         }
+        $this->redirect("/cliente/pedido/{$id}");
+    }
+
+    /** Cliente decide se o atendimento móvel aprovado também precisa de reboque. */
+    public function decidirNecessidadeReboque(int $id): void
+    {
+        AuthService::requireAuth('cliente');
+        if (!AuthService::validarCsrfToken($_POST['csrf_token'] ?? '')) {
+            $this->redirect("/cliente/pedido/{$id}");
+        }
+        $uid = $this->usuarioId();
+        $pedido = Pedido::buscarPorId($id);
+        if (!$pedido || (int)$pedido['cliente_id'] !== $uid || (string)$pedido['status'] !== 'decisao_reboque_pendente') {
+            $this->redirect('/cliente/historico');
+        }
+
+        $precisaReboque = ($_POST['decisao'] ?? '') === 'sim';
+        require_once __DIR__ . '/../Services/Pedido/PedidoTransitionService.php';
+        require_once __DIR__ . '/../DTO/PedidoTransitionRequest.php';
+        require_once __DIR__ . '/../Models/PedidoDecisaoSocorro.php';
+        $target = $precisaReboque ? 'conversao_reboque_pendente' : 'aguardando_pagamento_orcamento';
+        $result = PedidoTransitionService::transition(new PedidoTransitionRequest('cliente', $uid, $id, $target));
+        if (!$result->ok) {
+            $this->setFlashMessage((string)$result->error, 'error');
+            $this->redirect("/cliente/pedido/{$id}");
+        }
+        PedidoDecisaoSocorro::registrar(
+            $id,
+            $precisaReboque ? PedidoDecisaoSocorro::REBOQUE_SOLICITADO : PedidoDecisaoSocorro::REBOQUE_NAO_NECESSARIO,
+            'cliente',
+            $uid
+        );
+        if ($precisaReboque) {
+            $this->setFlashMessage('Informe o destino para calcular o reboque.', 'success');
+            $this->redirect("/cliente/pedido/{$id}");
+        }
+
+        require_once __DIR__ . '/../Models/Financial/OrderChargeItem.php';
+        require_once __DIR__ . '/../Services/Financial/SupplementalChargeService.php';
+        $charges = OrderChargeItem::listarPorPedido($id);
+        $charge = array_values(array_filter($charges, static fn(array $c): bool => ($c['charge_status'] ?? '') === 'AWAITING_CUSTOMER_APPROVAL'))[0] ?? null;
+        if ($charge) {
+            SupplementalChargeService::criarCheckout($id, (int)$charge['id'], 'mercadopago');
+            $this->redirect('/pagamento/complementar/' . (int)$charge['id']);
+        }
+        $this->setFlashMessage('Atendimento liberado para execução.', 'success');
         $this->redirect("/cliente/pedido/{$id}");
     }
 
@@ -1313,6 +1365,8 @@ class ClienteController extends BaseController
             'aguardando_guincho' => 'Aguardando guincho',
             'a_caminho' => 'Guincho a caminho',
             'no_local' => 'Guincho no local',
+            'decisao_reboque_pendente' => 'Decisão sobre reboque',
+            'conversao_reboque_pendente' => 'Cotação de reboque pendente',
             'em_reboque' => 'Em reboque',
             'concluido' => 'Concluido',
             'cancelado' => 'Cancelado',

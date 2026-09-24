@@ -76,6 +76,23 @@ final class ProviderWorkshopServiceTest extends TestCase
         self::assertSame(9, $item['calculation_context']['provider_id']);
     }
 
+    public function testMobileQuoteApprovalChargesOnlyTheConfiguredPlatformFee(): void
+    {
+        $item = ChargePolicyService::itemOrcamentoOficinaMovelAprovado(25.00, [
+            'pedido_id' => 74,
+            'provider_id' => 12,
+            'rule_version' => 'mobile-quote-approval-v1',
+        ]);
+
+        self::assertSame('MOBILE_QUOTE_APPROVAL', $item['phase_code']);
+        self::assertSame('MOBILE_QUOTE_APPROVED_FEE', $item['charge_type']);
+        self::assertSame(25.0, $item['gross_amount']);
+        self::assertSame(25.0, $item['platform_fee_amount']);
+        self::assertSame(0, $item['provider_net_amount']);
+        self::assertTrue($item['evidence_required']);
+        self::assertSame(74, $item['calculation_context']['pedido_id']);
+    }
+
     public function testSettlementAmountsAreDerivedFromImmutableChargeSnapshot(): void
     {
         $values = WorkshopSettlementService::calcularValores([
