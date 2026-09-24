@@ -452,7 +452,7 @@ class PagamentoController extends BaseController
         }
         $diagnostico = CoberturaService::diagnosticarAtendimento($pedido);
         if (($diagnostico['pode_cobrar'] ?? true) !== true) {
-            return [null, (string)($diagnostico['mensagem'] ?? 'No momento não há cobertura para esta ocorrência.')];
+            return [null, (string)($diagnostico['mensagem'] ?? 'Recebemos sua localização e seguimos ampliando as alternativas de atendimento nessa região. Revise o endereço ou tente novamente em alguns instantes.')];
         }
         return [$pedido, null];
     }

@@ -270,7 +270,7 @@ class AuthController extends BaseController
                 'tipo_problema' => $tipo,
                 'categoria' => $categoria,
             ]);
-            $this->setFlashMessage((string)($diagnosticoCobertura['mensagem'] ?? 'No momento não há cobertura para essa ocorrência.'), 'error');
+            $this->setFlashMessage((string)($diagnosticoCobertura['mensagem'] ?? 'Recebemos sua localização e seguimos ampliando as alternativas de atendimento nessa região. Revise o endereço ou tente novamente em alguns instantes.'), 'error');
             $this->redirect('/pre-cotacao');
             return;
         }

@@ -17,8 +17,9 @@ class GeocodeController extends BaseController
         $agora = microtime(true); $ultimo = (float)($_SESSION['public_geocode_last'] ?? 0);
         if (($agora - $ultimo) < 0.35) { http_response_code(429); echo json_encode(['ok'=>false,'erro'=>'aguarde']); exit; }
         $_SESSION['public_geocode_last'] = $agora;
-        $result = (new GeocodingService())->geocode($query);
-        echo json_encode($result ? ['ok'=>true,'items'=>[$result],'result'=>$result] : ['ok'=>false,'items'=>[],'erro'=>'nao_encontrado'], JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES); exit;
+        $items = (new GeocodingService())->suggestions($query);
+        $result = $items[0] ?? null;
+        echo json_encode($result ? ['ok'=>true,'items'=>$items,'result'=>$result] : ['ok'=>false,'items'=>[],'erro'=>'nao_encontrado'], JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES); exit;
     }
 
     public function search(): void

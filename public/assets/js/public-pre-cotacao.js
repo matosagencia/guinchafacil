@@ -12,9 +12,14 @@
 
     if (!gps || !status || !lat || !lng) return;
 
+    function extractHouseNumber(value) {
+        const matches = String(value || '').match(/(?:^|,|\s)(\d+[A-Za-z]?)(?=\s*(?:,|$))/g);
+        return matches && matches.length ? matches[matches.length - 1].replace(/[^0-9A-Za-z]/g, '') : '';
+    }
+
     function composeQuery(input, numberInput) {
         const base = input ? input.value.trim() : '';
-        const num = numberInput ? numberInput.value.trim() : '';
+        const num = (numberInput ? numberInput.value.trim() : '') || extractHouseNumber(base);
         return base && num ? base + ', nº ' + num : base;
     }
 
@@ -38,18 +43,24 @@
 
         function choose(item) {
             input.value = item.display_name || '';
+            if (numberInput) numberInput.value = item.house_number || extractHouseNumber(input.value);
             latInput.value = item.lat;
             lngInput.value = item.lng;
             selected = true;
             clearList();
             if (label === 'origem') {
-                status.textContent = 'Endereço selecionado. Agora informe a situação.';
+                status.textContent = 'Endereço confirmado' + (item.cidade ? ' em ' + item.cidade : '') + '. Agora escolha como resolver.';
             }
         }
 
         async function search() {
             const query = composeQuery(input, numberInput);
             if (query.length < 4 || selected) {
+                clearList();
+                return;
+            }
+            if (!extractHouseNumber(query)) {
+                status.textContent = 'Informe também o número da rua para localizar o ponto exato.';
                 clearList();
                 return;
             }
@@ -88,6 +99,7 @@
             selected = false;
             latInput.value = '';
             lngInput.value = '';
+            if (numberInput) numberInput.value = extractHouseNumber(input.value);
             clearTimeout(timer);
             timer = setTimeout(search, 500);
         });

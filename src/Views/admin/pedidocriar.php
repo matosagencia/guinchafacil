@@ -16,7 +16,9 @@ include __DIR__ . '/../layouts/header.php';
         <a href="<?php echo $bp; ?>/admin/pedidos" class="btn btn-secondary btn-sm">
             <i class="fas fa-arrow-left me-1"></i>Voltar
         </a>
-    </header>
+    </header>
+
+    <?php $decisionAudience = 'admin'; include __DIR__ . '/../components/modelo_atendimento.php'; ?>
 
     <div class="row g-4">
         <!-- Formulário -->
@@ -31,7 +33,7 @@ include __DIR__ . '/../layouts/header.php';
 
                 <!-- 1. Cliente (AJAX search) -->
                 <div class="card mb-4">
-                    <div class="card-header"><i class="fas fa-user me-2"></i>1. Selecionar Cliente</div>
+                    <div class="card-header"><i class="fas fa-location-dot me-2"></i>Localização: cliente do chamado</div>
                     <div class="card-body">
                         <input type="hidden" name="cliente_id" id="clienteIdHidden">
                         <div class="position-relative mb-2">
@@ -52,7 +54,7 @@ include __DIR__ . '/../layouts/header.php';
 
                 <!-- 2. Veículo -->
                 <div class="card mb-4">
-                    <div class="card-header"><i class="fas fa-car me-2"></i>2. Veículo do Cliente</div>
+                    <div class="card-header"><i class="fas fa-car me-2"></i>Veículo do cliente</div>
                     <div class="card-body">
                         <select class="form-select" name="veiculo_id" id="veiculoSelect" required>
                             <option value="">Selecione o cliente primeiro...</option>
@@ -62,7 +64,7 @@ include __DIR__ . '/../layouts/header.php';
 
                 <!-- 3. Problema -->
                 <div class="card mb-4">
-                    <div class="card-header"><i class="fas fa-tools me-2"></i>3. Tipo de Problema</div>
+                    <div class="card-header"><i class="fas fa-comments me-2"></i>Situação: o que precisa?</div>
                     <div class="card-body">
                         <div class="row g-2 mb-3">
                             <?php $problemas = [
@@ -135,7 +137,7 @@ include __DIR__ . '/../layouts/header.php';
 
                 <!-- 4. Endereços -->
                 <div class="card mb-4">
-                    <div class="card-header"><i class="fas fa-map-marker-alt me-2"></i>4. Origem e Destino</div>
+                    <div class="card-header"><i class="fas fa-route me-2"></i>Confirmar: solução e rota</div>
                     <div class="card-body">
                         <div class="mb-3">
                             <label class="form-label">Endereço de Origem *
@@ -145,9 +147,9 @@ include __DIR__ . '/../layouts/header.php';
                             </label>
                             <div class="input-group">
                                 <input type="text" class="form-control" name="endereco_origem" id="endOrigem"
-                                       placeholder="Rua, número, cidade..." required
+                                       placeholder="Rua, número, bairro e cidade" required
                                        >
-                                <input type="text" class="form-control mt-2" name="numero_origem" id="numOrigem"
+                                <input type="hidden" name="numero_origem" id="numOrigem"
                                        placeholder="Número" maxlength="20">
                                 <button type="button" class="btn btn-outline-secondary" id="btnMapOrigemInput" title="Clique no mapa">
                                     <i class="fas fa-map-pin"></i>
@@ -169,9 +171,9 @@ include __DIR__ . '/../layouts/header.php';
                             </div>
                             <div class="input-group">
                                 <input type="text" class="form-control" name="endereco_destino" id="endDestino"
-                                       placeholder="Oficina ou destino (obrigatório para reboque)..."
+                                       placeholder="Rua, número, bairro e cidade"
                                        >
-                                <input type="text" class="form-control mt-2" name="numero_destino" id="numDestino"
+                                <input type="hidden" name="numero_destino" id="numDestino"
                                        placeholder="Número" maxlength="20">
                                 <button type="button" class="btn btn-outline-secondary" id="btnMapDestinoInput" title="Clique no mapa">
                                     <i class="fas fa-flag"></i>

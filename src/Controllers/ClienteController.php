@@ -751,6 +751,29 @@ class ClienteController extends BaseController
         // incluído); 3) só cai no cálculo de reboque quando for
         // efetivamente TOWING ou quando o serviço não tiver tarifa própria
         // configurada (rede de segurança — nunca trava a criação do pedido).
+        // Se a triagem sugeriu atendimento local, mas não há especialista
+        // alcançável, convertemos imediatamente para cotação de reboque.
+        // O cliente informa o destino e não recebe uma tela de "sem serviço".
+        $forcarReboquePorCobertura = false;
+        require_once __DIR__ . '/../Services/CoberturaService.php';
+        if ($attendanceMode === 'ON_SITE' && $latOrigem !== 0.0 && $lngOrigem !== 0.0) {
+            $preDiagnostico = CoberturaService::diagnosticarAtendimento([
+                'attendance_mode' => $attendanceMode,
+                'lat_origem' => $latOrigem,
+                'lng_origem' => $lngOrigem,
+                'service_type_id' => $serviceTypeId,
+            ]);
+            if (($preDiagnostico['status'] ?? '') === 'somente_reboque') {
+                $tipoReboque = ServiceType::buscarPorCodigo('TOW_CAR');
+                if ($tipoReboque && !empty($tipoReboque['active'])) {
+                    $tipoServico = $tipoReboque;
+                    $serviceTypeId = (int)$tipoReboque['id'];
+                    $attendanceMode = 'TOWING';
+                    $forcarReboquePorCobertura = true;
+                }
+            }
+        }
+
         require_once __DIR__ . '/../Services/TarifaService.php';
         require_once __DIR__ . '/../Services/Pricing/ZonePricingService.php';
         require_once __DIR__ . '/../Models/Cidade.php';
@@ -820,7 +843,7 @@ class ClienteController extends BaseController
             $this->redirect('/cliente/pedido/novo?erro=coordenadas_origem');
         }
         if ($latDest === 0.0 || $lngDest === 0.0 || !$latValida($latDest) || !$lngValida($lngDest)) {
-            $this->redirect('/cliente/pedido/novo?erro=coordenadas_destino');
+            $this->redirect('/cliente/pedido/novo?erro=' . ($forcarReboquePorCobertura ? 'destino_reboque' : 'coordenadas_destino'));
         }
 
         // §COBERTURA-RAIO-01 (05/08/2026): não deixa nem abrir o pedido se

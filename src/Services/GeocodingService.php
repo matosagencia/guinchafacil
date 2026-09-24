@@ -19,6 +19,37 @@ class GeocodingService
      * Geocoding via Nominatim com normalizacao e fallback progressivo.
      * Retorna ['lat'=>..., 'lng'=>..., 'display_name'=>...] ou null.
      */
+    /** Retorna alternativas completas para desambiguar ruas com o mesmo nome. */
+    public function suggestions(string $address): array
+    {
+        $query = self::normalizeAddress($address);
+        if ($query === '') return [];
+
+        $url = 'https://nominatim.openstreetmap.org/search?format=jsonv2&addressdetails=1&countrycodes=br&limit=5&q=' . urlencode($query);
+        $json = self::httpGet($url, [
+            'User-Agent: ' . self::USER_AGENT,
+            'Accept-Language: pt-BR,pt;q=0.9,en;q=0.8',
+        ]);
+        $items = json_decode((string)$json, true);
+        if (!is_array($items)) return [];
+
+        $out = [];
+        foreach ($items as $item) {
+            if (!isset($item['lat'], $item['lon'])) continue;
+            $addressData = is_array($item['address'] ?? null) ? $item['address'] : [];
+            $cidade = (string)($addressData['city'] ?? $addressData['town'] ?? $addressData['municipality'] ?? $addressData['village'] ?? '');
+            $uf = (string)($addressData['state'] ?? '');
+            $out[] = self::preserveHouseNumber($address, [
+                'lat' => (float)$item['lat'],
+                'lng' => (float)$item['lon'],
+                'display_name' => (string)($item['display_name'] ?? $query),
+                'cidade' => $cidade,
+                'uf' => $uf,
+            ]);
+        }
+        return $out;
+    }
+
     public function geocode(string $address): ?array
     {
         $originalAddress = trim($address);
