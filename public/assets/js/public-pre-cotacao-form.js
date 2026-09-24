@@ -9,6 +9,7 @@
     var gpsButton = document.getElementById('btnGps');
     var originMapPanel = document.getElementById('originMapPanel');
     var originForm = addressStage ? addressStage.querySelector(':scope > .col-12:first-child') : null;
+    var addressToggle = document.createElement('button'); addressToggle.type='button'; addressToggle.className='address-toggle'; addressToggle.setAttribute('aria-expanded','true'); addressToggle.textContent='Recolher busca';
     var orientationStage = document.createElement('div'); orientationStage.id = 'orientationStage'; orientationStage.className = 'col-12 choice-fieldset orientation-stage'; orientationStage.hidden = true; orientationStage.innerHTML = '<fieldset><legend class="label">Como podemos orientar você?</legend><p class="muted mb-3">Para este problema, escolha o caminho que faz mais sentido agora.</p><div class="choice-grid"><button type="button" class="choice-card" data-solution="workshop"><strong>Oficina próxima</strong><small>Uma oficina parceira vai até você ou recebe o veículo.</small></button><button type="button" class="choice-card" data-solution="mobile"><strong>Mecânico no local</strong><small>Um profissional avalia a pane onde o veículo está.</small></button><button type="button" class="choice-card" data-solution="tow"><strong>Reboque</strong><small>Leve o veículo para o destino que você escolher.</small></button></div></fieldset>';
     var solutionInput = document.createElement('input'); solutionInput.type = 'hidden'; solutionInput.name = 'solucao_preferida'; solutionInput.id = 'solucao_preferida';
     var form = document.querySelector('form[data-marketing-event="generate_lead"]'); if (form) form.appendChild(solutionInput);
@@ -40,7 +41,8 @@
     }
     tipo.addEventListener('change', atualizar);
     document.addEventListener('prequote:type-change', atualizar);
-    if (originForm && gpsButton) { var addressLabel = originForm.querySelector('label.label[for="localizacao"]'); if (addressLabel) addressLabel.insertAdjacentElement('afterend', gpsButton); }
+    if (originForm && gpsButton) { var addressLabel = originForm.querySelector('label.label[for="localizacao"]'); if (addressLabel) addressLabel.insertAdjacentElement('afterend', gpsButton); originForm.insertBefore(addressToggle, originForm.firstElementChild); }
+    addressToggle.addEventListener('click', function () { var collapsed = originForm.classList.toggle('is-collapsed'); addressToggle.setAttribute('aria-expanded', collapsed ? 'false' : 'true'); addressToggle.textContent = collapsed ? 'Expandir busca' : 'Recolher busca'; });
     if (originForm && originMapPanel) { originForm.classList.add('origin-address-card'); originMapPanel.insertBefore(originForm, originMapPanel.firstElementChild); }
     if (situacaoStage) situacaoStage.parentNode.insertBefore(orientationStage, vehicleStage);
     orientationStage.querySelectorAll('[data-solution]').forEach(function (card) { card.addEventListener('click', function () { solutionInput.value = card.dataset.solution; orientationStage.querySelectorAll('[data-solution]').forEach(function (item) { item.classList.toggle('is-selected', item === card); }); }); });

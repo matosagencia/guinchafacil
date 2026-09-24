@@ -38,6 +38,10 @@ test.describe('motor de decisão da cotação pública', () => {
     await expect(page.locator('#originMap')).toBeVisible();
     await expect(page.locator('#originMapPanel #btnGps')).toBeVisible();
     await expect(page.locator('#originMapPanel label[for="localizacao"] + #btnGps')).toBeVisible();
+    await page.locator('#originMapPanel .address-toggle').click();
+    await expect(page.locator('#originMapPanel .address-toggle')).toHaveText('Expandir busca');
+    await page.locator('#originMapPanel .address-toggle').click();
+    await expect(page.locator('#originMapPanel #localizacao')).toBeVisible();
 
     await origem.fill('Rua do Mercado');
     await expect(status).toContainText('número');

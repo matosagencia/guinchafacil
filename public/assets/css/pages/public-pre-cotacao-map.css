@@ -1,6 +1,9 @@
 .origin-map-composition { position: relative; }
 #originMapPanel { position:relative; }
 #originMapPanel > .origin-address-card { position:absolute; z-index:999!important; top:26px; right:26px; width:min(780px,calc(100% - 52px))!important; padding:14px; border:1px solid #2fb34a; border-radius:14px; background:rgba(234,247,237,.98); box-shadow:0 5px 16px rgba(20,80,35,.16); }
+.address-toggle { display:block; width:100%; margin-bottom:10px; padding:6px 10px; border:0; border-radius:8px; background:#176d2c; color:#fff; font-size:.78rem; font-weight:700; text-align:left; }
+.origin-address-card.is-collapsed > *:not(.address-toggle) { display:none!important; }
+.origin-address-card.is-collapsed .address-toggle { margin-bottom:0; }
 @media(max-width:520px){#originMapPanel > .origin-address-card{position:relative;top:auto;right:auto;width:auto!important;margin-top:10px;padding:0;border:0;background:transparent;box-shadow:none;}}
 #btnGps { display:block; position:relative; z-index:1000; margin-top:8px; margin-bottom:10px; }
 .address-no-number { display:block; margin-top:6px; color:#55705b; font-size:.72rem; line-height:1.2; }
