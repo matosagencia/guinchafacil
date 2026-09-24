@@ -155,6 +155,8 @@ class AuthController extends BaseController
         }
         $csrf_token = $this->generateCSRFToken();
         $cotacao = $_SESSION['pre_cotacao'] ?? null;
+        $forceTowDraft = $_SESSION['pre_cotacao_force_tow'] ?? null;
+        unset($_SESSION['pre_cotacao_force_tow']);
 
         $prefillLat = filter_var($_GET['lat'] ?? null, FILTER_VALIDATE_FLOAT);
         $prefillLng = filter_var($_GET['lng'] ?? null, FILTER_VALIDATE_FLOAT);
@@ -258,6 +260,24 @@ class AuthController extends BaseController
             'categoria' => $categoria,
         ]) : ['status' => 'sem_servico', 'pode_cobrar' => false, 'mensagem' => 'Não conseguimos identificar o tipo de atendimento para validar a cobertura.'];
         if (($diagnosticoCobertura['pode_cobrar'] ?? true) !== true) {
+            if (($diagnosticoCobertura['status'] ?? '') === 'somente_reboque' && ($serviceType['attendance_mode'] ?? '') !== 'TOWING') {
+                $_SESSION['pre_cotacao_force_tow'] = [
+                    'localizacao' => $localizacao,
+                    'numero_origem' => $numeroOrigem,
+                    'lat_origem' => (float)$lat,
+                    'lng_origem' => (float)$lng,
+                    'categoria' => $categoria,
+                ];
+                PreQuoteDemandService::registrar([
+                    'lat_origem' => (float)$lat,
+                    'lng_origem' => (float)$lng,
+                    'tipo_problema' => 'reboque',
+                    'categoria' => $categoria,
+                ], 'quote');
+                $this->redirect('/pre-cotacao?modo=reboque');
+
+                return;
+            }
             PreQuoteDemandService::registrar([
                 'lat_origem' => (float)$lat,
                 'lng_origem' => (float)$lng,

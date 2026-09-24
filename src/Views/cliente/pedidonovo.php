@@ -4,7 +4,9 @@ $bp    = defined('BASE_PATH') ? BASE_PATH : '';
 $osrmBaseUrl = PorThresholds::routingFrontendBaseUrl();
 $erro  = $_GET['erro'] ?? '';
 $pedidoRascunho = $pedidoRascunho ?? ($_SESSION['pedido_rascunho'] ?? null);
-$triagemServiceType = $triagemServiceType ?? null;
+$triagemServiceType = $triagemServiceType ?? null;
+
+$reboqueServiceType = class_exists('ServiceType') ? ServiceType::buscarPorCodigo('TOW_CAR') : null;
 
 // Serializa oficinas com coordenadas para JS
 $oficinasJs = array_values(array_map(fn($o) => [
@@ -27,7 +29,7 @@ include __DIR__ . '/../layouts/header.php';
 <?php include __DIR__ . '/../layouts/sidebar_cliente.php'; ?>
 <main class="main-content">
 
-<?php if ($erro): ?>
+<?php if ($erro && $erro !== 'somente_reboque'): ?>
 <div class="alert alert-danger mb-3" role="alert">
     <?php
     $msgs = [
@@ -1060,7 +1062,25 @@ document.addEventListener('DOMContentLoaded', function () {
         if (!Number.isNaN(lat) && !Number.isNaN(lng)) setOrigem(lat, lng, PEDIDO_RASCUNHO.endereco_origem || '');
     }
 
-    <?php if (!empty($triagemServiceType)): ?>
+    <?php if ($erro === 'somente_reboque'): ?>
+
+    document.getElementById('service_type_id').value = <?php echo json_encode((int)($reboqueServiceType['id'] ?? 0)); ?> || '';
+
+    document.getElementById('tipo_problema').value = 'reboque';
+
+    aplicarDestinoNecessario(true);
+
+    document.getElementById('resultadoTriagem').innerHTML =
+        '<div class="socorro-reco"><i class="fas fa-truck-pickup text-success me-1"></i><strong>Vamos calcular o reboque.</strong><br><span class="small">Informe para onde o veiculo deve ser levado para ver o valor antes de confirmar.</span></div>';
+
+    renderizarGuiaDecisao({ name: 'Reboque direto', requires_destination: true }, '');
+
+    mostrarStep('confirmar');
+
+    <?php endif; ?>
+
+
+    <?php if (!empty($triagemServiceType)): ?>
     // Veio de /cliente/triagem/resultado (link direto) — já pula pro passo 3.
     aplicarDestinoNecessario(<?php echo ServiceType::requiresDestination($triagemServiceType) ? 'true' : 'false'; ?>);
     document.getElementById('resultadoTriagem').innerHTML =
