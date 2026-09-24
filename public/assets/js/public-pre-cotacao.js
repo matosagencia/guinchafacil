@@ -62,12 +62,22 @@
 
         function choose(item) {
             input.value = item.display_name || '';
-            if (numberInput) { numberInput.disabled = false; numberInput.value = item.house_number || extractHouseNumber(input.value); numberInput.required = true; }
+            var resolvedNumber = item.house_number || extractHouseNumber(input.value);
+            if (numberInput) { numberInput.disabled = false; numberInput.value = resolvedNumber || ''; numberInput.required = true; }
             if (noNumber) noNumber.checked = false;
             latInput.value = item.lat;
             lngInput.value = item.lng;
-            selected = true;
+            selected = Boolean(resolvedNumber || (noNumber && noNumber.checked));
             clearList();
+            if (!selected) {
+                latInput.value = '';
+                lngInput.value = '';
+                status.textContent = 'Rua encontrada. Informe o n\u00famero ou marque "Sem n\u00famero neste local" para continuar.';
+                if (numberInput) numberInput.focus();
+                return;
+            }
+            latInput.value = item.lat;
+            lngInput.value = item.lng;
             if (label === 'origem') {
                 status.textContent = 'Endereço confirmado' + (item.cidade ? ' em ' + item.cidade : '') + '. Agora escolha como resolver.';
                 showOriginMap(Number(item.lat), Number(item.lng), 16);
@@ -85,7 +95,7 @@
                 clearList();
                 return;
             }
-            if (!hasAddress || !hasNumber) {
+            if (!hasAddress) {
                 status.textContent = 'Informe também o número da rua para localizar o ponto exato.';
                 clearList();
                 return;
