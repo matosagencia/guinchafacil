@@ -54,9 +54,15 @@ async function enviarCartaoSandbox(page, codigo) {
   if (await consentir.isVisible().catch(() => false)) {
     await consentir.click();
   }
-  await page.frameLocator('iframe[name="cardNumber"]').locator('#cardNumber').fill('5031433215406351');
-  await page.frameLocator('iframe[name="expirationDate"]').locator('#expirationDate').fill('11/30');
-  await page.frameLocator('iframe[name="securityCode"]').locator('#securityCode').fill('123');
+  const cardNumber = page.frameLocator('iframe[name="cardNumber"]').locator('#cardNumber');
+  const expirationDate = page.frameLocator('iframe[name="expirationDate"]').locator('#expirationDate');
+  const securityCode = page.frameLocator('iframe[name="securityCode"]').locator('#securityCode');
+  await cardNumber.fill('');
+  await cardNumber.pressSequentially('5031433215406351');
+  await expirationDate.fill('');
+  await expirationDate.pressSequentially('1130');
+  await securityCode.fill('');
+  await securityCode.pressSequentially('123');
   await page.getByRole('textbox', { name: /Maria Santos Pereira/i }).fill(codigo);
   await page.getByRole('textbox', { name: /999\.999\.999-99/ }).fill('12345678909');
   await page.getByRole('textbox', { name: /exemplo@email\.com/i }).fill(cliente.email);
@@ -92,6 +98,10 @@ test.describe('socorro completo', () => {
   for (const [codigo, nome] of Object.entries({ APRO: 'aprovado', OTHE: 'recusado geral', FUND: 'fundos insuficientes', SECU: 'CVV inválido', CONT: 'pendente' })) {
     test(`Mercado Pago Sandbox - ${codigo} (${nome})`, async ({ page }) => {
       test.skip(!process.env.MP_SANDBOX_E2E, 'Defina MP_SANDBOX_E2E=1 e configure o Payment Brick para executar chamadas reais ao Sandbox.');
+      let brickError = '';
+      page.on('console', (message) => {
+        if (/\[Brick\]\[onError\]/i.test(message.text())) brickError = message.text();
+      });
       await abrirPedido(page);
       await page.locator('#btnSubmit').click();
       await expect(page).toHaveURL(/pagamento|checkout/);
@@ -102,6 +112,10 @@ test.describe('socorro completo', () => {
       await expect(page.getByText(/Número do cartão/i)).toBeVisible({ timeout: 30_000 });
       if (process.env.MP_SANDBOX_SUBMIT === '1') {
         await enviarCartaoSandbox(page, codigo);
+        await page.waitForTimeout(1_000);
+        if (brickError) {
+          throw new Error(`Payment Brick rejeitou os dados: ${brickError}`);
+        }
         await expect(page.locator('#mp-payment-status')).toContainText(/Pagamento aprovado|Pagamento pendente|Pagamento não aprovado|Pagamento recusado/i, { timeout: 30_000 });
       }
       // Os campos de cartão são iframes gerenciados pelo Payment Brick.
