@@ -45,6 +45,7 @@ test.describe('motor de decisão da cotação pública', () => {
     await numero.fill('280');
     const sugestoes = page.locator('.public-address-suggestion');
     await expect(sugestoes).toHaveCount(2);
+    await expect(page.locator('.public-address-suggestions.col-12').first()).toBeVisible();
     await expect(sugestoes.nth(0)).toContainText('Rio de Janeiro');
     await expect(sugestoes.nth(1)).toContainText('Fortaleza');
 
