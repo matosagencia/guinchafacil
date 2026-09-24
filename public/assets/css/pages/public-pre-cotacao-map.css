@@ -3,7 +3,7 @@
 .address-no-number { display:block; margin-top:6px; color:#55705b; font-size:.72rem; line-height:1.2; }
 .address-no-number input { margin-right:4px; accent-color:#2fb34a; }
 .origin-map-composition:has(#originMapPanel:not([hidden])) > .col-12:first-child { z-index:999!important; }
-.origin-map-composition > .col-12:first-child { position:absolute; z-index:30; top:26px; right:26px; width:min(390px,calc(100% - 52px)); padding:14px; border:1px solid #2fb34a; border-radius:14px; background:rgba(234,247,237,.98); box-shadow:0 5px 16px rgba(20,80,35,.16); }
+.origin-map-composition > .col-12:first-child { position:absolute; z-index:999!important; top:26px; right:26px; width:min(780px,calc(100% - 52px))!important; padding:14px; border:1px solid #2fb34a; border-radius:14px; background:rgba(234,247,237,.98); box-shadow:0 5px 16px rgba(20,80,35,.16); }
 .origin-map-composition > .col-12:first-child .label,.origin-map-composition > .col-12:first-child .address-number-label { color:#176d2c; }
 .origin-map-composition > .col-12:first-child .mt-2 { margin-top:8px!important; }
 .address-fields { align-items:start; }
@@ -14,4 +14,4 @@
 #destinoBox { position:relative; z-index:999; padding:14px; border:1px solid #202a25; border-radius:14px; background:#111815; color:#fff; box-shadow:0 5px 16px rgba(10,16,13,.16); }
 #destinoBox .label,#destinoBox .address-number-label,#destinoBox .muted { color:#fff; }
 #destinoBox .address-fields > div:first-child::before { color:#fff; }
-@media(max-width:520px){.address-fields > div:first-child{padding-top:0}.origin-map-composition > .col-12:first-child{position:relative;top:auto;right:auto;width:auto;margin-top:10px;padding:0;border:0;background:transparent;box-shadow:none;}}
+@media(max-width:520px){.address-fields > div:first-child{padding-top:0}.origin-map-composition > .col-12:first-child{position:relative;top:auto;right:auto;width:auto!important;margin-top:10px;padding:0;border:0;background:transparent;box-shadow:none;}}
