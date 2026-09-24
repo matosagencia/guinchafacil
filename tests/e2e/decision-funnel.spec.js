@@ -32,13 +32,15 @@ test.describe('motor de decisão da cotação pública', () => {
 
     await page.goto('/pre-cotacao');
     const origem = page.locator('#localizacao');
+    const numero = page.locator('#numero_origem');
     const status = page.locator('#gpsStatus');
 
     await origem.fill('Rua do Mercado');
     await expect(status).toContainText('número');
     await expect(page.locator('.public-address-suggestion')).toHaveCount(0);
 
-    await origem.fill('Rua do Mercado, 280');
+    await origem.fill('Rua do Mercado');
+    await numero.fill('280');
     const sugestoes = page.locator('.public-address-suggestion');
     await expect(sugestoes).toHaveCount(2);
     await expect(sugestoes.nth(0)).toContainText('Rio de Janeiro');
@@ -48,6 +50,14 @@ test.describe('motor de decisão da cotação pública', () => {
     await expect(status).toContainText('Rio de Janeiro');
     await expect(page.locator('#lat_origem')).toHaveValue('-22.9068');
     await expect(page.locator('#lng_origem')).toHaveValue('-43.1729');
+    await expect(page.locator('#originMapPanel')).toBeVisible();
+    await expect(page.locator('#originMap')).toBeVisible();
+    await expect(page.locator('#situacaoStage')).toBeVisible();
+    await expect(page.locator('#vehicleStage')).toBeHidden();
+    await page.locator('#btnSituacaoAvancar').click();
+    await expect(page.locator('#vehicleStage')).toBeVisible();
+    await page.locator('#btnSituacaoVoltar').click();
+    await expect(page.locator('#situacaoStage')).toBeVisible();
   });
 
   test('apresenta a mesma sequência de decisão na pré-cotação', async ({ page }) => {

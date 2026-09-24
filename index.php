@@ -282,7 +282,8 @@ $rotas = [
         '/cliente/perfil'       => ['ClienteController', 'perfilForm', 'cliente'],
         '/cliente/pedido/custo' => ['ClienteController', 'calcularCusto', 'cliente'],
         '/geocode'              => ['GeocodeController', 'search', null],
-        '/geocode/public'       => ['GeocodeController', 'searchPublic', null],
+        '/geocode/public'       => ['GeocodeController', 'searchPublic', null],
+        '/geocode/public/reverse' => ['GeocodeController', 'reversePublic', null],
         '/geocode/reverse'      => ['GeocodeController', 'reverse', null],
         '/comunicados/carousel' => ['ComunicadoController', 'carousel', null],
         '/sse/pedidos'          => ['SseController', 'pedidosDisponiveis', null],

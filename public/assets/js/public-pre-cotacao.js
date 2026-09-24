@@ -9,6 +9,10 @@
     const number = document.getElementById('numero_origem');
     const destination = document.getElementById('destino');
     const destinationNumber = document.getElementById('numero_destino');
+    const mapPanel = document.getElementById('originMapPanel');
+    const mapAddress = document.getElementById('pinAddressStatus');
+    let originMap = null;
+    let originMarker = null;
 
     if (!gps || !status || !lat || !lng) return;
 
@@ -19,8 +23,20 @@
 
     function composeQuery(input, numberInput) {
         const base = input ? input.value.trim() : '';
-        const num = (numberInput ? numberInput.value.trim() : '') || extractHouseNumber(base);
+        const num = numberInput ? numberInput.value.trim() : '';
         return base && num ? base + ', nº ' + num : base;
+    }
+
+    function streetOnly(value) { return String(value || '').split(',')[0].replace(/\s+(?:n[ºo°.]?\s*)?\d+[A-Za-z]?\s*$/i, '').trim(); }
+    async function reversePin(latValue, lngValue) {
+        try { const res = await fetch((document.body.dataset.basePath || '') + '/geocode/public/reverse?lat=' + encodeURIComponent(latValue) + '&lng=' + encodeURIComponent(lngValue), { headers: { Accept: 'application/json' } }); const result = (await res.json()).result || {}; if (result.display_name) address.value = streetOnly(result.display_name); if (result.house_number) { number.value = result.house_number; if (mapAddress) mapAddress.textContent = 'Endereço confirmado pelo pin. Número encontrado: ' + result.house_number + '.'; } else if (mapAddress) mapAddress.textContent = 'Ponto confirmado. Revise o número informado.'; } catch (e) { if (mapAddress) mapAddress.textContent = 'Ponto ajustado no mapa. Revise rua e número antes de continuar.'; }
+    }
+    function showOriginMap(latValue, lngValue, zoom) {
+        if (!mapPanel || !window.L || !Number.isFinite(Number(latValue)) || !Number.isFinite(Number(lngValue))) return;
+        mapPanel.hidden = false;
+        if (!originMap) { originMap = L.map('originMap', { zoomControl: true }).setView([latValue, lngValue], zoom || 16); L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '&copy; OpenStreetMap contributors', maxZoom: 19 }).addTo(originMap); } else originMap.setView([latValue, lngValue], Math.max(originMap.getZoom(), zoom || 16));
+        if (!originMarker) { originMarker = L.marker([latValue, lngValue], { draggable: true }).addTo(originMap); originMarker.on('dragend', function () { const point = originMarker.getLatLng(); lat.value = point.lat.toFixed(7); lng.value = point.lng.toFixed(7); if (mapAddress) mapAddress.textContent = 'Pin ajustado. Confirmando o endereço…'; reversePin(point.lat, point.lng); }); } else originMarker.setLatLng([latValue, lngValue]);
+        setTimeout(function () { originMap.invalidateSize(); }, 50); document.dispatchEvent(new Event('prequote:location-confirmed'));
     }
 
     function setupAddressAutocomplete(input, latInput, lngInput, label, numberInput) {
@@ -50,16 +66,20 @@
             clearList();
             if (label === 'origem') {
                 status.textContent = 'Endereço confirmado' + (item.cidade ? ' em ' + item.cidade : '') + '. Agora escolha como resolver.';
+                showOriginMap(Number(item.lat), Number(item.lng), 16);
+                document.dispatchEvent(new Event('prequote:location-confirmed'));
             }
         }
 
         async function search() {
             const query = composeQuery(input, numberInput);
+            const hasAddress = Boolean(input && input.value.trim());
+            const hasNumber = Boolean(numberInput && numberInput.value.trim());
             if (query.length < 4 || selected) {
                 clearList();
                 return;
             }
-            if (!extractHouseNumber(query)) {
+            if (!hasAddress || !hasNumber) {
                 status.textContent = 'Informe também o número da rua para localizar o ponto exato.';
                 clearList();
                 return;
@@ -99,7 +119,6 @@
             selected = false;
             latInput.value = '';
             lngInput.value = '';
-            if (numberInput) numberInput.value = extractHouseNumber(input.value);
             clearTimeout(timer);
             timer = setTimeout(search, 500);
         });
@@ -151,6 +170,7 @@
             lng.value = position.coords.longitude;
             if (address) address.value = 'Localizacao atual confirmada';
             status.textContent = 'Localizacao confirmada. Agora informe a situacao.';
+            showOriginMap(position.coords.latitude, position.coords.longitude, 16);
             gps.disabled = false;
         }, function () {
             status.textContent = 'Nao foi possivel obter o GPS. Autorize a localizacao e tente novamente.';

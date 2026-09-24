@@ -20,7 +20,19 @@ class GeocodeController extends BaseController
         $items = (new GeocodingService())->suggestions($query);
         $result = $items[0] ?? null;
         echo json_encode($result ? ['ok'=>true,'items'=>$items,'result'=>$result] : ['ok'=>false,'items'=>[],'erro'=>'nao_encontrado'], JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES); exit;
-    }
+    }
+
+    /** Reverse geocoding público usado para confirmar o pin antes do cadastro. */
+    public function reversePublic(): void
+    {
+        header('Content-Type: application/json; charset=utf-8');
+        $lat = (float)($_GET['lat'] ?? 0);
+        $lng = (float)($_GET['lng'] ?? 0);
+        if ($lat < -34 || $lat > 6 || $lng < -74 || $lng > -28) { http_response_code(422); echo json_encode(['ok' => false, 'erro' => 'coordenadas_invalidas']); exit; }
+        $result = (new GeocodingService())->reverseGeocode($lat, $lng);
+        echo json_encode($result ? ['ok' => true, 'result' => $result] : ['ok' => false, 'erro' => 'nao_encontrado'], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        exit;
+    }
 
     public function search(): void
     {
