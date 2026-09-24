@@ -44,7 +44,7 @@
         const wrapper = input.parentElement;
         wrapper.style.position = 'relative';
         const list = document.createElement('div');
-        list.className = 'public-address-suggestions';
+        list.className = 'public-address-suggestions col-12';
         list.setAttribute('role', 'listbox');
         list.hidden = true;
         wrapper.appendChild(list);
