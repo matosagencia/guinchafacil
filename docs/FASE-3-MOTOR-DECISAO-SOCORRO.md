@@ -42,6 +42,21 @@ npx playwright test socorro-flow.spec.js --project=chromium
 
 Os cenários APRO, OTHE, FUND, SECU e CONT só executam chamadas reais quando `MP_SANDBOX_E2E=1` estiver definido e as chaves Sandbox estiverem disponíveis. Sem isso, o teste estrutural valida a cotação e a abertura do checkout sem movimentar pagamentos.
 
+## Validação no XAMPP
+
+Em 24/09/2026, a suíte Chromium foi executada contra `http://localhost:8080` com o MySQL `guinchafacil_dev`: 6/6 testes passaram. A cotação de reboque do cenário Riachuelo/Gamboa foi exibida como R$ 135,00.
+
+Para executar:
+
+```powershell
+$env:PW_HEADLESS='true'
+$env:MP_SANDBOX_E2E='1'
+Remove-Item Env:MP_SANDBOX_SUBMIT -ErrorAction SilentlyContinue
+npx playwright test tests/e2e/socorro-flow.spec.js --project=chromium
+```
+
+O envio real de cartão permanece opcional com `MP_SANDBOX_SUBMIT=1`. Durante a validação, o Payment Brick retornou `no_payment_method_for_provided_bin` antes da chamada ao endpoint PHP, embora o Access Token Sandbox e a Public Key tenham sido validados na API do Mercado Pago. Por isso, esse erro é tratado como limitação do lookup de BIN do SDK/browser, e não como aprovação fictícia: os testes padrão validam a montagem do Brick e não movimentam pagamento.
+
 ## Observações
 
 - O teste local confirmou cotação de R$ 135,00 no cenário utilizado.
