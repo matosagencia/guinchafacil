@@ -65,10 +65,7 @@ test.describe('motor de decisão da cotação pública', () => {
     await expect(page.locator('.origin-map-composition')).toBeHidden();
     await expect(page.locator('#situacaoStage')).toBeVisible();
     await expect(page.locator('#vehicleStage')).toBeHidden();
-    await page.locator('#btnSituacaoAvancar').click();
-    await expect(page.locator('#orientationStage')).toBeVisible();
-    await page.locator('[data-solution="tow"]').click();
-    await page.locator('#btnSituacaoAvancar').click();
+    await page.locator('[data-choice-value="colisao"]').click();
     await expect(page.locator('#destinationStage')).toBeVisible();
     await expect(page.locator('#destinationMap')).toBeVisible();
     await page.locator('#destino').fill('Rua da Gamboa');
