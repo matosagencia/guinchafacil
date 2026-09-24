@@ -72,6 +72,8 @@
                 status.textContent = 'Endereço confirmado' + (item.cidade ? ' em ' + item.cidade : '') + '. Agora escolha como resolver.';
                 showOriginMap(Number(item.lat), Number(item.lng), 16);
                 document.dispatchEvent(new Event('prequote:location-confirmed'));
+            } else if (label === 'destino') {
+                document.dispatchEvent(new CustomEvent('prequote:destination-confirmed', { detail: { lat: Number(item.lat), lng: Number(item.lng) } }));
             }
         }
 

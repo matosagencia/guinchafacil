@@ -69,9 +69,15 @@ test.describe('motor de decisão da cotação pública', () => {
     await expect(page.locator('#orientationStage')).toBeVisible();
     await page.locator('[data-solution="tow"]').click();
     await page.locator('#btnSituacaoAvancar').click();
+    await expect(page.locator('#destinationStage')).toBeVisible();
+    await expect(page.locator('#destinationMap')).toBeVisible();
+    await page.locator('#destino').fill('Rua da Gamboa');
+    await page.locator('#numero_destino').fill('247');
+    await page.locator('.destination-map-panel .public-address-suggestion').first().click();
+    await page.locator('#btnSituacaoAvancar').click();
     await expect(page.locator('#vehicleStage')).toBeVisible();
     await page.locator('#btnSituacaoVoltar').click();
-    await expect(page.locator('#orientationStage')).toBeVisible();
+    await expect(page.locator('#destinationStage')).toBeVisible();
   });
 
   test('apresenta a mesma sequência de decisão na pré-cotação', async ({ page }) => {
