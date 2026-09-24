@@ -85,14 +85,14 @@ test.describe('socorro completo', () => {
     // para o processo local; nesse caso o Brick não é montado.
     await expect(page.getByText(/Checkout do Pagamento/i)).toBeVisible();
     await screenshot(page, 'checkout');
-    // Sem token Sandbox, o sistema mantém a cotação e informa que o provedor
-    // não está disponível; com token, o Payment Brick deve aparecer.
-    if (await page.locator('#mp-payment-brick-container').count()) {
-      await expect(page.locator('#mp-payment-brick-container')).toBeVisible();
+    // Com credenciais Sandbox válidas, o Payment Brick é montado; sem elas,
+    // o checkout permanece acessível e exibe a indisponibilidade do provedor.
+    const brick = page.locator('#mp-payment-brick-container');
+    if (await brick.count()) {
+      await expect(brick).toBeVisible();
     } else {
-      await expect(page.getByText('Nenhum provedor de pagamento está disponível no momento.')).toBeVisible();
+      await expect(page.getByText(/Nenhum provedor de pagamento está disponível no momento/i)).toBeVisible();
     }
-    await screenshot(page, 'checkout');
   });
 
   for (const [codigo, nome] of Object.entries({ APRO: 'aprovado', OTHE: 'recusado geral', FUND: 'fundos insuficientes', SECU: 'CVV inválido', CONT: 'pendente' })) {
