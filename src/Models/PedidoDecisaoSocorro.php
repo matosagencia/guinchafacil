@@ -74,4 +74,19 @@ final class PedidoDecisaoSocorro
         $read->execute([$key]);
         return $read->fetch(PDO::FETCH_ASSOC) ?: ['idempotency_key' => $key, 'decision_code' => $decisionCode];
     }
+
+    public static function possuiDecisao(int $pedidoId, string $decisionCode): bool
+    {
+        try {
+            $stmt = getPDO()->prepare(
+                'SELECT 1 FROM pedido_decisoes_socorro WHERE pedido_id = ? AND decision_code = ? LIMIT 1'
+            );
+            $stmt->execute([$pedidoId, $decisionCode]);
+            return (bool)$stmt->fetchColumn();
+        } catch (Throwable) {
+            // Suites legadas com SQLite podem não ter recebido a migration
+            // nova; nesse caso o caminho antigo continua sem desconto.
+            return false;
+        }
+    }
 }

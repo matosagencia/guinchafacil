@@ -1147,6 +1147,7 @@ class ClienteController extends BaseController
         // Etapa 5 — orçamento complementar pendente de decisão do cliente.
         $orcamentoPendente = null;
         $decisaoReboquePendente = false;
+        $saidaOficinaPendente = false;
         $conversaoPendente = false;
         $diagnosticoAtual = null;
         if ((string)($pedido['attendance_mode'] ?? 'TOWING') !== 'TOWING') {
@@ -1155,6 +1156,7 @@ class ClienteController extends BaseController
                 $orcamentoPendente = $orc;
             }
             $decisaoReboquePendente = (string)$pedido['status'] === 'decisao_reboque_pendente';
+            $saidaOficinaPendente = (string)$pedido['status'] === 'saida_oficina_pendente';
             $conversaoPendente = (string)$pedido['status'] === 'conversao_reboque_pendente';
             $diagnosticoAtual = $conversaoPendente ? PedidoDiagnostico::buscarPorPedido($id) : null;
         }
@@ -1199,6 +1201,38 @@ class ClienteController extends BaseController
                 SupplementalChargeService::criarCheckout($id, (int)$charge['id'], 'mercadopago');
                 $this->redirect('/pagamento/complementar/' . (int)$charge['id']);
             }
+        }
+        $this->redirect("/cliente/pedido/{$id}");
+    }
+
+    /** Cliente decide se retira o veiculo apos recusar o orcamento informado. */
+    public function decidirSaidaOficina(int $id): void
+    {
+        AuthService::requireAuth('cliente');
+        if (!AuthService::validarCsrfToken($_POST['csrf_token'] ?? '')) {
+            $this->redirect("/cliente/pedido/{$id}");
+        }
+        $uid = $this->usuarioId();
+        $pedido = Pedido::buscarPorId($id);
+        if (!$pedido || (int)$pedido['cliente_id'] !== $uid || (string)$pedido['status'] !== 'saida_oficina_pendente') {
+            $this->redirect('/cliente/historico');
+        }
+
+        $retirar = ($_POST['decisao'] ?? '') === 'retirar';
+        require_once __DIR__ . '/../Services/Pedido/PedidoTransitionService.php';
+        require_once __DIR__ . '/../DTO/PedidoTransitionRequest.php';
+        require_once __DIR__ . '/../Models/PedidoDecisaoSocorro.php';
+        $target = $retirar ? 'conversao_reboque_pendente' : 'autorizacao_servico_pendente';
+        $result = PedidoTransitionService::transition(new PedidoTransitionRequest('cliente', $uid, $id, $target));
+        if (!$result->ok) {
+            $this->setFlashMessage((string)$result->error, 'error');
+            $this->redirect("/cliente/pedido/{$id}");
+        }
+        if ($retirar) {
+            PedidoDecisaoSocorro::registrar($id, PedidoDecisaoSocorro::SAIDA_OFICINA_COM_DESCONTO, 'cliente', $uid);
+            $this->setFlashMessage('Vamos cotar outro reboque com 21% de desconto. A comissao de permanencia da oficina nao sera cobrada.', 'success');
+        } else {
+            $this->setFlashMessage('O atendimento permanece aberto para voce decidir com calma. Nenhuma comissao de permanencia sera cobrada.', 'info');
         }
         $this->redirect("/cliente/pedido/{$id}");
     }

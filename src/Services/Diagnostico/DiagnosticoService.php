@@ -171,7 +171,15 @@ final class DiagnosticoService
             "Orçamento " . ($aprovado ? 'aprovado' : 'recusado') . " pelo cliente — pedido #{$pedidoId}",
             ['pedido_id' => $pedidoId, 'cliente_id' => $clienteId, 'status' => $novoStatus]);
 
-        if (!$aprovado) {
+        if (!$aprovado) {
+            if ($orcamentoSemValores && (string)($pedidoAtual['attendance_mode'] ?? 'TOWING') !== 'TOWING') {
+                $transicaoSaida = PedidoTransitionService::transition(new PedidoTransitionRequest(
+                    'cliente', $clienteId, $pedidoId, 'saida_oficina_pendente'
+                ));
+                if (!$transicaoSaida->ok) return $transicaoSaida;
+                $transicaoSaida->context['saida_oficina_pendente'] = true;
+                return $transicaoSaida;
+            }
             return PedidoTransitionResult::success(Pedido::buscarPorId($pedidoId) ?? [], ['orcamento' => 'recusado']);
         }
 

@@ -17,6 +17,7 @@ $statusEquivalenteProgresso = [
     'diagnostico_concluido' => 'no_local',
     'autorizacao_servico_pendente' => 'no_local',
     'decisao_reboque_pendente' => 'no_local',
+    'saida_oficina_pendente' => 'no_local',
     'em_execucao_servico' => 'no_local',
     'teste_final' => 'no_local',
     'conversao_reboque_pendente' => 'em_reboque',
@@ -101,7 +102,29 @@ require_once __DIR__ . '/../components/vehicle_brand_badge.php';
     </div>
     <?php endif; ?>
 
-    <?php if (!empty($conversaoPendente)): ?>
+    <?php if (!empty($saidaOficinaPendente)): ?>
+    <div class="card border-info mb-4">
+        <div class="card-header bg-info-subtle"><i class="fas fa-scale-balanced me-2"></i>Escolha o próximo passo</div>
+        <div class="card-body">
+            <p class="mb-2">Você não aprovou o orçamento informado pela oficina.</p>
+            <p class="mb-3">Deseja retirar o veículo e cotar outro reboque? A nova cotação terá <strong>21% de desconto</strong> e nenhuma comissão de permanência será cobrada da oficina.</p>
+            <div class="d-flex gap-2 flex-wrap">
+                <form method="post" action="<?php echo $bp; ?>/cliente/pedido/saida-oficina/decidir/<?php echo $pedidoId; ?>">
+                    <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($csrfToken); ?>">
+                    <input type="hidden" name="decisao" value="retirar">
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-truck me-1"></i>Sim, cotar outro reboque com desconto</button>
+                </form>
+                <form method="post" action="<?php echo $bp; ?>/cliente/pedido/saida-oficina/decidir/<?php echo $pedidoId; ?>">
+                    <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($csrfToken); ?>">
+                    <input type="hidden" name="decisao" value="manter">
+                    <button type="submit" class="btn btn-outline-secondary">Não, manter atendimento em aberto</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <?php endif; ?>
+
+    <?php if (!empty($conversaoPendente)): ?>
     <!-- Etapa 7 — conversão de socorro local para reboque aguardando decisão do cliente -->
     <div class="card border-warning mb-4">
         <div class="card-header bg-warning-subtle"><i class="fas fa-truck-ramp-box me-2"></i>Este atendimento precisa de reboque</div>

@@ -576,6 +576,7 @@ $rotasDinamicas = [
     ['GET',  '/cliente/pedido/status-json/', 'ClienteController', 'pedidoStatusJson', 'cliente'],
     ['POST', '/cliente/orcamento/decidir/', 'ClienteController', 'orcamentoDecidir', 'cliente'],
     ['POST', '/cliente/pedido/reboque/decidir/', 'ClienteController', 'decidirNecessidadeReboque', 'cliente'],
+    ['POST', '/cliente/pedido/saida-oficina/decidir/', 'ClienteController', 'decidirSaidaOficina', 'cliente'],
     ['POST', '/cliente/conversao/decidir/', 'ClienteController', 'conversaoDecidir', 'cliente'],
     ['GET',  '/sse/pedido/',             'SseController', 'pedido', null],
 

@@ -1141,10 +1141,13 @@ final class PedidoTransitionService
             if ((int)($pedido['cliente_id'] ?? 0) !== (int)$request->actorId) {
                 return false;
             }
-            if ((string)$pedido['status'] === 'autorizacao_servico_pendente' && in_array($request->targetStatus, ['decisao_reboque_pendente', 'aguardando_pagamento_orcamento', 'em_execucao_servico'], true)) {
+            if ((string)$pedido['status'] === 'autorizacao_servico_pendente' && in_array($request->targetStatus, ['decisao_reboque_pendente', 'saida_oficina_pendente', 'aguardando_pagamento_orcamento', 'em_execucao_servico'], true)) {
                 return true;
             }
             if ((string)$pedido['status'] === 'decisao_reboque_pendente' && in_array($request->targetStatus, ['aguardando_pagamento_orcamento', 'conversao_reboque_pendente'], true)) {
+                return true;
+            }
+            if ((string)$pedido['status'] === 'saida_oficina_pendente' && in_array($request->targetStatus, ['autorizacao_servico_pendente', 'conversao_reboque_pendente'], true)) {
                 return true;
             }
             if ((string)$pedido['status'] === 'conversao_reboque_pendente' && $request->targetStatus === 'conversao_aprovada_cliente') {
