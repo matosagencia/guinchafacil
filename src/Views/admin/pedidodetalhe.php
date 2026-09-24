@@ -25,9 +25,11 @@ $statusLabels = [
     <div class="alert alert-<?php echo ($flash['type'] ?? '') === 'success' ? 'success' : 'danger'; ?> mb-3"><i class="fas fa-<?php echo ($flash['type'] ?? '') === 'success' ? 'check-circle' : 'triangle-exclamation'; ?> me-2"></i><?php echo htmlspecialchars((string)($flash['message'] ?? '')); ?></div>
     <?php endforeach; ?>
 
-    <?php if (!empty($_GET['criado'])): ?>
+    <?php if (!empty($_GET['criado'])): ?>
     <div class="alert alert-success mb-3"><i class="fas fa-check-circle me-2"></i>Pedido criado com sucesso!</div>
-    <?php endif; ?>
+    <?php endif; ?>
+
+    <?php $decisionAudience = 'admin'; include __DIR__ . '/../components/modelo_atendimento.php'; ?>
 
     <?php if (($_GET['msg'] ?? '') === 'pix_reprocessado' || ($_GET['msg'] ?? '') === 'payment_job_reenfileirado'): ?>
     <div class="alert alert-success mb-3"><i class="fas fa-check-circle me-2"></i>Repasse reenfileirado com sucesso!</div>

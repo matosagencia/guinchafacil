@@ -81,7 +81,9 @@ $resumoPedidos = $resumoPedidos ?? [];
     </a>
 </section>
 
-<div class="shell-ops" id="pedShell">
+<?php $decisionAudience = 'admin'; include __DIR__ . '/../components/modelo_atendimento.php'; ?>
+
+<div class="shell-ops" id="pedShell">
 
     <aside class="shell-ops-sidebar" id="pedSidebar">
         <?php include __DIR__ . '/../components/admin_nav_operacional.php'; ?>
