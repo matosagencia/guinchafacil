@@ -16,10 +16,10 @@ WHERE NOT EXISTS (SELECT 1 FROM veiculos WHERE usuario_id=@cliente_id AND placa=
 
 INSERT INTO oficinas_favoritas (usuario_id,nome,telefone,endereco,lat,lng,criado_em,atualizado_em)
 SELECT @cliente_id,'Mecânica Especializada Rio','2122222222','Rua do Riachuelo, 450, Rio de Janeiro - RJ',-22.9145,-43.1862,NOW(),NOW()
-WHERE NOT EXISTS (SELECT 1 FROM oficinas_favoritas WHERE usuario_id=@cliente_id AND nome='Mecânica Especializada Rio');
+WHERE NOT EXISTS (SELECT 1 FROM oficinas_favoritas WHERE usuario_id=@cliente_id AND endereco='Rua do Riachuelo, 450, Rio de Janeiro - RJ');
 INSERT INTO oficinas_favoritas (usuario_id,nome,telefone,endereco,lat,lng,criado_em,atualizado_em)
 SELECT @cliente_id,'Auto Center Gamboa','2123333333','Av. Rodrigues Alves, 200, Rio de Janeiro - RJ',-22.8955,-43.1950,NOW(),NOW()
-WHERE NOT EXISTS (SELECT 1 FROM oficinas_favoritas WHERE usuario_id=@cliente_id AND nome='Auto Center Gamboa');
+WHERE NOT EXISTS (SELECT 1 FROM oficinas_favoritas WHERE usuario_id=@cliente_id AND endereco='Av. Rodrigues Alves, 200, Rio de Janeiro - RJ');
 
 INSERT INTO usuarios (nome,email,senha_hash,telefone,cpf,tipo,ativo,criado_em)
 SELECT 'Guincho Teste Plataforma','guincho.plataforma@guinchafacil.dev',
