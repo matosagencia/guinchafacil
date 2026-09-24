@@ -57,6 +57,7 @@
     if (btnNext) btnNext.addEventListener('click', function () { if (currentStage === 'situation') showStage(tipo.value === 'outro' ? 'orientation' : tipo.value === 'colisao' ? 'destination' : 'vehicle'); else if (currentStage === 'orientation' && solutionInput.value) showStage(solutionInput.value === 'tow' ? 'destination' : 'vehicle'); else if (currentStage === 'destination' && destino && destino.value.trim()) showStage('vehicle'); });
     if (btnBack) btnBack.addEventListener('click', function () { showStage(currentStage === 'vehicle' ? (tipo.value === 'colisao' || solutionInput.value === 'tow' ? 'destination' : 'situation') : currentStage === 'destination' ? 'situation' : currentStage === 'orientation' ? 'situation' : 'address'); });
     document.addEventListener('prequote:location-confirmed', function () { showStage('situation'); });
+    document.addEventListener('prequote:go-destination', function () { showStage('destination'); });
     document.addEventListener('prequote:destination-confirmed', function (event) { if (destinationMap && event.detail) { destinationMap.setView([event.detail.lat,event.detail.lng],16); if (destinationMarker) destinationMarker.setLatLng([event.detail.lat,event.detail.lng]); else destinationMarker=L.marker([event.detail.lat,event.detail.lng],{draggable:true}).addTo(destinationMap); } });
     atualizar();
 }());

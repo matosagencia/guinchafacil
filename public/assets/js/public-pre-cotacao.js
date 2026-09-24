@@ -162,7 +162,7 @@
                 item.classList.toggle('is-selected', active);
                 item.setAttribute('aria-pressed', active ? 'true' : 'false');
             });
-            if (group === 'tipo_problema') document.dispatchEvent(new Event('prequote:type-change'));
+            if (group === 'tipo_problema') { document.dispatchEvent(new Event('prequote:type-change')); if (card.dataset.choiceValue === 'colisao') document.dispatchEvent(new Event('prequote:go-destination')); }
         });
     });
 

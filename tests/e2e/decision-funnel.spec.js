@@ -91,4 +91,36 @@ test.describe('motor de decisão da cotação pública', () => {
     await expect(motor).toContainText('Veículo');
     await expect(motor).toContainText('Confirmar');
   });
+
+  test('Levar o carro abre diretamente o mapa de destino', async ({ page }) => {
+    await page.route('**/geocode/public**', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          ok: true,
+          items: [{
+            display_name: 'Rua do Mercado, Centro, Rio de Janeiro, RJ, Brasil',
+            cidade: 'Rio de Janeiro',
+            uf: 'Rio de Janeiro',
+            house_number: '280',
+            lat: '-22.9068',
+            lng: '-43.1729',
+          }],
+        }),
+      });
+    });
+
+    await page.goto('/pre-cotacao');
+    await page.locator('#localizacao').fill('Rua do Mercado');
+    await page.locator('#numero_origem').fill('280');
+    await page.locator('.public-address-suggestion').first().click();
+    await expect(page.locator('#situacaoStage')).toBeVisible();
+
+    await page.locator('[data-choice-value="colisao"]').click();
+    await expect(page.locator('#destinationStage')).toBeVisible();
+    await expect(page.locator('#destinationMap')).toBeVisible();
+    await expect(page.locator('#destinationStage #destino')).toBeVisible();
+    await expect(page.locator('#situacaoStage')).toBeHidden();
+  });
 });
