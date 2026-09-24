@@ -31,12 +31,12 @@
     async function reversePin(latValue, lngValue) {
         try { const res = await fetch((document.body.dataset.basePath || '') + '/geocode/public/reverse?lat=' + encodeURIComponent(latValue) + '&lng=' + encodeURIComponent(lngValue), { headers: { Accept: 'application/json' } }); const result = (await res.json()).result || {}; if (result.display_name) address.value = streetOnly(result.display_name); if (result.house_number) { number.value = result.house_number; if (mapAddress) mapAddress.textContent = 'Endereço confirmado pelo pin. Número encontrado: ' + result.house_number + '.'; } else if (mapAddress) mapAddress.textContent = 'Ponto confirmado. Revise o número informado.'; } catch (e) { if (mapAddress) mapAddress.textContent = 'Ponto ajustado no mapa. Revise rua e número antes de continuar.'; }
     }
-    function showOriginMap(latValue, lngValue, zoom) {
+    function showOriginMap(latValue, lngValue, zoom, announce) {
         if (!mapPanel || !window.L || !Number.isFinite(Number(latValue)) || !Number.isFinite(Number(lngValue))) return;
         mapPanel.hidden = false;
         if (!originMap) { originMap = L.map('originMap', { zoomControl: true }).setView([latValue, lngValue], zoom || 16); L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '&copy; OpenStreetMap contributors', maxZoom: 19 }).addTo(originMap); } else originMap.setView([latValue, lngValue], Math.max(originMap.getZoom(), zoom || 16));
         if (!originMarker) { originMarker = L.marker([latValue, lngValue], { draggable: true }).addTo(originMap); originMarker.on('dragend', function () { const point = originMarker.getLatLng(); lat.value = point.lat.toFixed(7); lng.value = point.lng.toFixed(7); if (mapAddress) mapAddress.textContent = 'Pin ajustado. Confirmando o endereço…'; reversePin(point.lat, point.lng); }); } else originMarker.setLatLng([latValue, lngValue]);
-        setTimeout(function () { originMap.invalidateSize(); }, 50); document.dispatchEvent(new Event('prequote:location-confirmed'));
+        setTimeout(function () { originMap.invalidateSize(); }, 50); if (announce !== false) document.dispatchEvent(new Event('prequote:location-confirmed'));
     }
 
     function setupAddressAutocomplete(input, latInput, lngInput, label, numberInput) {
@@ -143,6 +143,7 @@
 
     setupAddressAutocomplete(address, lat, lng, 'origem', number);
     setupAddressAutocomplete(destination, document.getElementById('lat_destino'), document.getElementById('lng_destino'), 'destino', destinationNumber);
+    showOriginMap(-22.9068, -43.1729, 11, false);
 
     document.querySelectorAll('[data-choice-group][data-choice-value]').forEach(function (card) {
         card.addEventListener('click', function () {

@@ -34,6 +34,8 @@ test.describe('motor de decisão da cotação pública', () => {
     const origem = page.locator('#localizacao');
     const numero = page.locator('#numero_origem');
     const status = page.locator('#gpsStatus');
+    await expect(page.locator('#originMapPanel')).toBeVisible();
+    await expect(page.locator('#originMap')).toBeVisible();
 
     await origem.fill('Rua do Mercado');
     await expect(status).toContainText('número');
@@ -50,8 +52,7 @@ test.describe('motor de decisão da cotação pública', () => {
     await expect(status).toContainText('Rio de Janeiro');
     await expect(page.locator('#lat_origem')).toHaveValue('-22.9068');
     await expect(page.locator('#lng_origem')).toHaveValue('-43.1729');
-    await expect(page.locator('#originMapPanel')).toBeVisible();
-    await expect(page.locator('#originMap')).toBeVisible();
+    await expect(page.locator('.origin-map-composition')).toBeHidden();
     await expect(page.locator('#situacaoStage')).toBeVisible();
     await expect(page.locator('#vehicleStage')).toBeHidden();
     await page.locator('#btnSituacaoAvancar').click();

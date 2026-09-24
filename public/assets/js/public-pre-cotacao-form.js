@@ -5,20 +5,24 @@
     var destino = document.getElementById('destino');
     var situacaoStage = document.getElementById('situacaoStage');
     var vehicleStage = document.getElementById('vehicleStage');
+    var addressStage = document.querySelector('.origin-map-composition');
     var btnBack = document.getElementById('btnSituacaoVoltar');
     var btnNext = document.getElementById('btnSituacaoAvancar');
     var btnQuote = document.getElementById('btnCotacao');
     if (!tipo || !box) return;
 
+    var currentStage = 'address';
     function showStage(stage) {
+        currentStage = stage;
+        var isAddress = stage === 'address';
         var isSituation = stage === 'situation';
+        if (addressStage) addressStage.hidden = !isAddress;
         if (situacaoStage) situacaoStage.hidden = !isSituation;
-        if (vehicleStage) vehicleStage.hidden = isSituation;
-        if (btnBack) btnBack.style.display = isSituation ? 'none' : '';
+        if (vehicleStage) vehicleStage.hidden = stage !== 'vehicle';
+        if (btnBack) btnBack.style.display = isAddress ? 'none' : '';
         if (btnNext) btnNext.style.display = isSituation ? '' : 'none';
-        if (btnQuote) btnQuote.style.display = isSituation ? 'none' : '';
-        var target = isSituation ? situacaoStage : vehicleStage;
-        if (target) window.scrollTo({ top: target.offsetTop - 20, behavior: 'smooth' });
+        if (btnQuote) btnQuote.style.display = stage === 'vehicle' ? '' : 'none';
+        document.body.classList.toggle('public-funnel-carousel', !isAddress);
     }
     function atualizar() {
         var exige = ['colisao', 'reboque'].indexOf(tipo.value) !== -1;
@@ -27,11 +31,9 @@
     }
     tipo.addEventListener('change', atualizar);
     document.addEventListener('prequote:type-change', atualizar);
-    if (situacaoStage) situacaoStage.hidden = true;
-    if (vehicleStage) vehicleStage.hidden = true;
-    if (btnQuote) btnQuote.style.display = 'none';
+    showStage('address');
     if (btnNext) btnNext.addEventListener('click', function () { showStage('vehicle'); });
-    if (btnBack) btnBack.addEventListener('click', function () { showStage('situation'); });
+    if (btnBack) btnBack.addEventListener('click', function () { showStage(currentStage === 'vehicle' ? 'situation' : 'address'); });
     document.addEventListener('prequote:location-confirmed', function () { showStage('situation'); });
     atualizar();
 }());
