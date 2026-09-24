@@ -53,6 +53,7 @@
         let requestId = 0;
         let selected = false;
         const noNumber = ensureNoNumberOption(numberInput);
+        if (noNumber) noNumber.addEventListener('change', function () { selected = false; latInput.value = ''; lngInput.value = ''; clearTimeout(timer); timer = setTimeout(search, 500); });
 
         function clearList() {
             list.innerHTML = '';

@@ -42,6 +42,9 @@ test.describe('motor de decisão da cotação pública', () => {
     await origem.fill('Rua do Mercado');
     await expect(status).toContainText('número');
     await expect(page.locator('.public-address-suggestion')).toHaveCount(0);
+    await page.locator('#numero_origem_sem_numero').check();
+    await expect(page.locator('.public-address-suggestion')).toHaveCount(2);
+    await page.locator('#numero_origem_sem_numero').uncheck();
 
     await origem.fill('Rua do Mercado');
     await numero.fill('280');
