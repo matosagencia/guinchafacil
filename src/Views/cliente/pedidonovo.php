@@ -96,9 +96,9 @@ include __DIR__ . '/../layouts/header.php';
 
         <div class="socorro-sheet-handle"></div>
         <div class="socorro-progress" id="socorroProgress" aria-label="Progresso do pedido">
-            <div class="socorro-progress-head"><strong id="socorroProgressTitle">Passo 1 de 3</strong><span id="socorroProgressState">Localiza&ccedil;&atilde;o</span></div>
-            <div class="socorro-progress-track" role="progressbar" aria-valuemin="1" aria-valuemax="3" aria-valuenow="1" aria-label="Passo 1 de 3"><span id="socorroProgressBar"></span></div>
-            <div class="socorro-progress-labels"><span class="is-current" data-progress-label="1">Localiza&ccedil;&atilde;o</span><span data-progress-label="2">Situa&ccedil;&atilde;o</span><span data-progress-label="3">Confirmar</span></div>
+            <div class="socorro-progress-head"><strong id="socorroProgressTitle">Passo 1 de 4</strong><span id="socorroProgressState">Localiza&ccedil;&atilde;o</span></div>
+            <div class="socorro-progress-track" role="progressbar" aria-valuemin="1" aria-valuemax="4" aria-valuenow="1" aria-label="Passo 1 de 4"><span id="socorroProgressBar"></span></div>
+            <div class="socorro-progress-labels"><span class="is-current" data-progress-label="1">Localiza&ccedil;&atilde;o</span><span data-progress-label="2">Situa&ccedil;&atilde;o</span><span data-progress-label="3">Ve&iacute;culo</span><span data-progress-label="4">Confirmar</span></div>
         </div>
 
         <!-- STEP 1: sintoma -->
@@ -365,7 +365,7 @@ include __DIR__ . '/../layouts/header.php';
 .socorro-progress-head { display: flex; justify-content: space-between; gap: 1rem; font-size: .78rem; color: var(--theme-muted, #777); margin-bottom: .45rem; }
 .socorro-progress-head strong { color: var(--theme-text, #172018); }
 .socorro-progress-track { height: 6px; background: var(--theme-border, #ddd); border-radius: 99px; overflow: hidden; }
-.socorro-progress-track span { display: block; width: 33.333%; height: 100%; background: var(--primary, #2fb34a); border-radius: inherit; transition: width .2s ease; }
+.socorro-progress-track span { display: block; width: 25%; height: 100%; background: var(--primary, #2fb34a); border-radius: inherit; transition: width .2s ease; }
 .socorro-progress-labels { display: flex; justify-content: space-between; gap: .5rem; margin-top: .4rem; font-size: .67rem; color: var(--theme-muted, #888); }
 .socorro-progress-labels span.is-current { color: var(--primary, #2fb34a); font-weight: 700; }
 .socorro-trust-note { display: none !important; }
@@ -856,16 +856,16 @@ async function selecionarOficina(sel) {
 
 // ── WIZARD ────────────────────────────────────────────────────────────────
 function atualizarProgresso(nome) {
-    const mapa = { sintoma: 1, detalhes: 2, confirmar: 3 };
-    const titulos = { sintoma: 'Localiza&ccedil;&atilde;o', detalhes: 'Situa&ccedil;&atilde;o', confirmar: 'Confirmar' };
+    const mapa = { sintoma: 2, detalhes: 2, veiculo: 3, confirmar: 4 };
+    const titulos = { sintoma: 'Situa&ccedil;&atilde;o', detalhes: 'Situa&ccedil;&atilde;o', veiculo: 'Ve&iacute;culo', confirmar: 'Confirmar' };
     const passo = mapa[nome] || 1;
     const title = document.getElementById('socorroProgressTitle');
     const state = document.getElementById('socorroProgressState');
     const bar = document.getElementById('socorroProgressBar');
     const track = document.querySelector('.socorro-progress-track');
-    if (title) title.textContent = 'Passo ' + passo + ' de 3';
+    if (title) title.textContent = 'Passo ' + passo + ' de 4';
     if (state) state.innerHTML = titulos[nome] || titulos.sintoma;
-    if (bar) bar.style.width = ((passo / 3) * 100) + '%';
+    if (bar) bar.style.width = ((passo / 4) * 100) + '%';
     if (track) track.setAttribute('aria-valuenow', String(passo));
     document.querySelectorAll('[data-progress-label]').forEach(label => {
         label.classList.toggle('is-current', Number(label.dataset.progressLabel) === passo);
