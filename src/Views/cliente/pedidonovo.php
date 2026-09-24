@@ -181,7 +181,11 @@ include __DIR__ . '/../layouts/header.php';
         <div class="socorro-step d-none" data-step="confirmar">
             <button type="button" class="socorro-back" data-back="auto"><i class="fas fa-arrow-left"></i> Voltar</button>
 
-            <div id="resultadoTriagem"></div>
+            <div id="resultadoTriagem"></div>
+            <div id="guiaDecisaoSocorro" class="socorro-decision-guide d-none" aria-live="polite">
+                <div class="socorro-decision-guide__title"><i class="fas fa-route me-1"></i>Como funciona este atendimento</div>
+                <div class="socorro-decision-options" id="opcoesDecisaoSocorro"></div>
+            </div>
 
             <?php if (count($veiculosJs) > 1): ?>
             <div class="mb-3">
@@ -392,9 +396,16 @@ include __DIR__ . '/../layouts/header.php';
 .socorro-pular { border: none; background: transparent; color: var(--theme-muted, #888); font-size: .8rem; text-decoration: underline; padding: .5rem; }
 
 #resultadoTriagem:not(:empty) { margin-bottom: 1rem; }
-.socorro-reco { border: 1px solid var(--theme-border, #ddd); border-radius: 12px; padding: .85rem 1rem; margin-bottom: .5rem; }
-.socorro-reco.is-risco { border-color: #dc3545; background: rgba(220,53,69,.08); }
-</style>
+.socorro-reco { border: 1px solid var(--theme-border, #ddd); border-radius: 12px; padding: .85rem 1rem; margin-bottom: .5rem; }
+.socorro-reco.is-risco { border-color: #dc3545; background: rgba(220,53,69,.08); }
+.socorro-decision-guide { border: 1px solid rgba(249,115,22,.35); border-radius: 14px; padding: .85rem; margin: .75rem 0 1rem; background: rgba(249,115,22,.07); }
+.socorro-decision-guide__title { font-weight: 700; margin-bottom: .65rem; }
+.socorro-decision-options { display: grid; gap: .55rem; }
+.socorro-decision-option { display: flex; gap: .65rem; align-items: flex-start; padding: .65rem .7rem; border-radius: 10px; background: var(--theme-surface, #fff); border: 1px solid var(--theme-border, #ddd); }
+.socorro-decision-option i { color: #f97316; margin-top: .15rem; }
+.socorro-decision-option strong { display: block; font-size: .92rem; }
+.socorro-decision-option span { display: block; color: var(--theme-muted, #666); font-size: .8rem; line-height: 1.35; }
+</style>
 
 <!-- Leaflet -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
@@ -866,10 +877,11 @@ async function avaliarTriagemEIrParaConfirmar() {
         dados = await r.json();
     } catch { dados = null; }
 
-    if (!dados || !dados.ok) {
-        document.getElementById('resultadoTriagem').innerHTML =
-            '<div class="socorro-reco"><i class="fas fa-circle-info me-1"></i>Não conseguimos analisar automaticamente agora — sem problema, escolha o veículo e o destino abaixo que um atendente vai te ajudar.</div>';
-        aplicarDestinoNecessario(true);
+    if (!dados || !dados.ok) {
+        document.getElementById('resultadoTriagem').innerHTML =
+            '<div class="socorro-reco"><i class="fas fa-circle-info me-1"></i>Não conseguimos analisar automaticamente agora — sem problema, escolha o veículo e o destino abaixo que um atendente vai te ajudar.</div>';
+        renderizarGuiaDecisao(null, '');
+        aplicarDestinoNecessario(true);
         document.getElementById('tipo_problema').value = TIPO_LEGADO[sintomaAtual] || 'outro';
         checkSubmit();
         return;
@@ -898,8 +910,9 @@ async function avaliarTriagemEIrParaConfirmar() {
         html += '</div>';
     }
 
-    document.getElementById('resultadoTriagem').innerHTML = html;
-    checkSubmit();
+    document.getElementById('resultadoTriagem').innerHTML = html;
+    renderizarGuiaDecisao(dados.recomendado, dados.explicacao || '');
+    checkSubmit();
 }
 window.__selecionarAlternativa = function (id, requiresDestino) {
     document.getElementById('service_type_id').value = id;
@@ -907,7 +920,7 @@ window.__selecionarAlternativa = function (id, requiresDestino) {
     checkSubmit();
 };
 
-function aplicarDestinoNecessario(necessario) {
+function aplicarDestinoNecessario(necessario) {
     destinoNecessario = necessario;
     const bloco = document.getElementById('destinoBlock');
     const nota = document.getElementById('destinoLocalNota');
@@ -923,7 +936,33 @@ function aplicarDestinoNecessario(necessario) {
         nota.classList.remove('d-none');
         recalcularOuCopiar();
     }
-}
+}
+
+function renderizarGuiaDecisao(recomendado, explicacao) {
+    const guia = document.getElementById('guiaDecisaoSocorro');
+    const opcoes = document.getElementById('opcoesDecisaoSocorro');
+    if (!guia || !opcoes) return;
+
+    const exigeDestino = !!(recomendado && recomendado.requires_destination);
+    const nome = recomendado && recomendado.name ? String(recomendado.name) : '';
+    const local = /local|diagn|partida|pneu|combust|chave/i.test(nome) && !exigeDestino;
+    const itens = local
+        ? [
+            ['fa-user-cog', 'Atendimento no local', 'Um profissional avalia o veículo onde você está e informa o orçamento antes de qualquer decisão.'],
+            ['fa-check-circle', 'Você decide com transparência', 'Se aprovar, o atendimento segue. Se o carro precisar ser levado, o reboque será cotado separadamente.'],
+            ['fa-truck-pickup', 'Se preferir rebocar', 'Você pode escolher uma oficina ou outro destino e verá o valor do reboque antes de confirmar.']
+          ]
+        : [
+            ['fa-truck-pickup', 'Reboque direto', 'O veículo será transportado para o destino escolhido e o valor aparece antes da confirmação.'],
+            ['fa-warehouse', 'Oficina parceira', 'Quando houver uma oficina próxima disponível, ela pode ser selecionada como destino do veículo.'],
+            ['fa-shield-heart', 'Sem surpresa no pagamento', 'A cotação exibida nesta tela fica registrada no pedido e é revalidada antes do pagamento.']
+          ];
+
+    opcoes.innerHTML = itens.map(([icone, titulo, texto]) =>
+        `<div class="socorro-decision-option"><i class="fas ${icone}" aria-hidden="true"></i><div><strong>${titulo}</strong><span>${texto}</span></div></div>`
+    ).join('');
+    guia.classList.remove('d-none');
+}
 
 document.addEventListener('DOMContentLoaded', function () {
     initMap();
@@ -972,9 +1011,10 @@ document.addEventListener('DOMContentLoaded', function () {
         sintomaAtual = sintomaAtual || 'NAO_SEI';
         document.getElementById('tipo_problema').value = TIPO_LEGADO[sintomaAtual] || 'outro';
         aplicarDestinoNecessario(true);
-        document.getElementById('resultadoTriagem').innerHTML =
-            '<div class="socorro-reco"><i class="fas fa-circle-info me-1"></i>Sem problema — preencha destino e veículo abaixo.</div>';
-        mostrarStep('confirmar');
+        document.getElementById('resultadoTriagem').innerHTML =
+            '<div class="socorro-reco"><i class="fas fa-circle-info me-1"></i>Sem problema — preencha destino e veículo abaixo.</div>';
+        renderizarGuiaDecisao(null, '');
+        mostrarStep('confirmar');
         checkSubmit();
     });
 
