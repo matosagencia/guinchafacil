@@ -21,7 +21,6 @@ async function abrirPedido(page) {
   await page.goto('/cliente/pedido/novo');
   await expect(page.locator('#formPedido')).toBeVisible();
   await page.locator('#inputOrigem').fill('Rua do Riachuelo, 280, Rio de Janeiro - RJ');
-  await page.locator('#numeroOrigem').fill('280');
   await page.locator('#btnBuscarOrigem').click();
   await expect(page.locator('#lat_origem')).not.toHaveValue('');
   await page.locator('[data-symptom="PRECISA_TRANSPORTAR"]').click();

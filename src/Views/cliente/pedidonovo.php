@@ -56,10 +56,10 @@ include __DIR__ . '/../layouts/header.php';
     <div class="socorro-topbar">
         <div class="socorro-search-pill">
             <i class="fas fa-circle-dot text-danger"></i>
-            <input type="text" id="inputOrigem" placeholder="Onde você está agora?"
+            <input type="text" id="inputOrigem" placeholder="Rua, número, bairro e cidade"
                    value="<?php echo htmlspecialchars((string)($pedidoRascunho['endereco_origem'] ?? '')); ?>"
                    autocomplete="off">
-            <input type="text" id="numeroOrigem" name="numero_origem" placeholder="Nº"
+            <input type="hidden" id="numeroOrigem" name="numero_origem" placeholder="Nº"
                    value="<?php echo htmlspecialchars((string)($pedidoRascunho['numero_origem'] ?? '')); ?>"
                    maxlength="20">
 
@@ -102,16 +102,16 @@ include __DIR__ . '/../layouts/header.php';
 
         <!-- STEP 1: sintoma -->
         <div class="socorro-step" data-step="sintoma">
-            <h1 class="socorro-title">O que aconteceu?</h1>
-            <p class="socorro-subtitle">Toque na opção mais parecida — vamos te ajudar rapidinho.</p>
+            <h1 class="socorro-title">Como você quer resolver?</h1>
+            <p class="socorro-subtitle">Escolha o caminho mais próximo. A gente organiza o restante.</p>
             <div class="socorro-chips">
-                <button type="button" class="socorro-chip" data-symptom="NAO_LIGA"><i class="fas fa-car-battery"></i><span>Não liga</span></button>
-                <button type="button" class="socorro-chip" data-symptom="PNEU"><i class="fas fa-circle-notch"></i><span>Pneu furado</span></button>
-                <button type="button" class="socorro-chip" data-symptom="PAROU_TRAJETO"><i class="fas fa-car-burst"></i><span>Parou no trajeto</span></button>
+                <button type="button" class="socorro-chip" data-symptom="NAO_SEI"><i class="fas fa-comments"></i><span>Me orientem</span></button>
+                <button type="button" class="socorro-chip" data-symptom="PNEU"><i class="fas fa-screwdriver-wrench"></i><span>Resolver no local</span></button>
+                <button type="button" class="socorro-chip" data-symptom="PAROU_TRAJETO"><i class="fas fa-user-cog"></i><span>O carro parou</span></button>
                 <button type="button" class="socorro-chip" data-symptom="CHAVE"><i class="fas fa-key"></i><span>Chave presa/perdida</span></button>
                 <button type="button" class="socorro-chip" data-symptom="SEM_COMBUSTIVEL"><i class="fas fa-gas-pump"></i><span>Sem combustível</span></button>
                 <button type="button" class="socorro-chip socorro-chip-risco" data-symptom="COLISAO"><i class="fas fa-triangle-exclamation"></i><span>Sofri colisão</span></button>
-                <button type="button" class="socorro-chip" data-symptom="PRECISA_TRANSPORTAR"><i class="fas fa-truck-pickup"></i><span>Preciso transportar</span></button>
+                <button type="button" class="socorro-chip" data-symptom="PRECISA_TRANSPORTAR"><i class="fas fa-truck-pickup"></i><span>Levar o carro</span></button>
                 <button type="button" class="socorro-chip" data-symptom="NAO_SEI"><i class="fas fa-circle-question"></i><span>Não sei dizer</span></button>
             </div>
         </div>
@@ -229,16 +229,16 @@ include __DIR__ . '/../layouts/header.php';
                     </div>
                     <div class="tab-pane fade" id="paneOutro">
                         <div class="input-group">
-                            <input type="text" class="form-control" id="inputDest" placeholder="Rua, número, bairro, cidade…" autocomplete="off">
-                            <input type="text" class="form-control mt-2" id="numeroDest" name="numero_destino" placeholder="Nº" maxlength="20">
+                            <input type="text" class="form-control" id="inputDest" placeholder="Rua, número, bairro e cidade" autocomplete="off">
+                            <input type="hidden" id="numeroDest" name="numero_destino" maxlength="20">
                             <button type="button" class="btn btn-outline-secondary" id="btnBuscarDestinoTab"><i class="fas fa-search"></i></button>
                         </div>
                     </div>
                 </div>
                 <?php else: ?>
                 <div class="input-group">
-                    <input type="text" class="form-control" id="inputDest" placeholder="Rua, número, bairro, cidade…" autocomplete="off">
-                    <input type="text" class="form-control mt-2" id="numeroDest" name="numero_destino" placeholder="Nº" maxlength="20">
+                    <input type="text" class="form-control" id="inputDest" placeholder="Rua, número, bairro e cidade" autocomplete="off">
+                    <input type="hidden" id="numeroDest" name="numero_destino" maxlength="20">
                     <button type="button" class="btn btn-outline-secondary" id="btnBuscarDestinoLivre"><i class="fas fa-search"></i></button>
                 </div>
                 <div class="form-text">Ou toque no mapa para marcar o ponto exato.</div>
@@ -367,7 +367,7 @@ include __DIR__ . '/../layouts/header.php';
 .socorro-progress-track span { display: block; width: 33.333%; height: 100%; background: var(--primary, #2fb34a); border-radius: inherit; transition: width .2s ease; }
 .socorro-progress-labels { display: flex; justify-content: space-between; gap: .5rem; margin-top: .4rem; font-size: .67rem; color: var(--theme-muted, #888); }
 .socorro-progress-labels span.is-current { color: var(--primary, #2fb34a); font-weight: 700; }
-.socorro-trust-note { display: flex; gap: .45rem; align-items: flex-start; padding: .7rem .8rem; margin: 0 0 1rem; border: 1px solid rgba(47,179,74,.28); border-radius: 10px; background: rgba(47,179,74,.07); color: var(--theme-muted, #55705b); font-size: .78rem; }
+.socorro-trust-note { display: none !important; }
 .socorro-trust-note i { color: var(--primary, #2fb34a); margin-top: .1rem; }
 .socorro-trust-note strong { color: var(--theme-text, #172018); }
 .socorro-title { font-size: 1.25rem; font-weight: 700; margin-bottom: .15rem; }
@@ -405,6 +405,7 @@ include __DIR__ . '/../layouts/header.php';
 .socorro-decision-option i { color: #f97316; margin-top: .15rem; }
 .socorro-decision-option strong { display: block; font-size: .92rem; }
 .socorro-decision-option span { display: block; color: var(--theme-muted, #666); font-size: .8rem; line-height: 1.35; }
+.socorro-city-badge { display: inline-flex; gap: .25rem; align-items: center; margin-left: .35rem; padding: .15rem .45rem; border-radius: 999px; background: rgba(47,179,74,.12); color: #237a36; font-size: .74rem; font-weight: 700; }
 </style>
 
 <!-- Leaflet -->
@@ -504,12 +505,32 @@ function initMap() {
 function setMapMode(modo) { mapMode = modo; }
 
 // ── Set Origem ──────────────────────────────────────────────────────────────
-function setOrigem(lat, lng, endereco) {
+function preencherNumeroDoEndereco(endereco, campoId) {
+    const campo = document.getElementById(campoId);
+    if (!campo || !endereco) return;
+    const partes = String(endereco).match(/(?:^|,|\s)(\d+[A-Za-z]?)(?=\s*(?:,|$))/g);
+    if (partes && partes.length) campo.value = partes[partes.length - 1].replace(/[^0-9A-Za-z]/g, '');
+}
+
+function mostrarCidadeDetectada(endereco) {
+    const feedback = document.getElementById('origemFeedback');
+    if (!feedback || !endereco) return;
+    const texto = String(endereco);
+    let cidade = '';
+    if (/niter[oó]i/i.test(texto)) cidade = 'Niterói';
+    else if (/rio de janeiro/i.test(texto)) cidade = 'Rio de Janeiro';
+    const cidadeTexto = cidade ? ` <span class="socorro-city-badge"><i class="fas fa-location-dot"></i> ${cidade}</span>` : '';
+    feedback.innerHTML = `<i class="fas fa-check-circle"></i> Endereço identificado.${cidadeTexto}`;
+}
+
+function setOrigem(lat, lng, endereco) {
     document.getElementById('lat_origem').value = lat;
     document.getElementById('lng_origem').value = lng;
     if (endereco) {
         document.getElementById('endereco_origem').value = endereco;
-        document.getElementById('inputOrigem').value     = endereco;
+        document.getElementById('inputOrigem').value     = endereco;
+        preencherNumeroDoEndereco(endereco, 'numeroOrigem');
+        mostrarCidadeDetectada(endereco);
     }
 
     if (markerOrigem) markerOrigem.setLatLng([lat, lng]);
@@ -712,16 +733,18 @@ async function reverseGeocode(lat, lng) {
 }
 
 async function geocodeOrigem() {
-    const q = ((document.getElementById('inputOrigem')?.value || '').trim() && (document.getElementById('numeroOrigem')?.value || '').trim())
+    const legacyAddressQuery = ((document.getElementById('inputOrigem')?.value || '').trim() && (document.getElementById('numeroOrigem')?.value || '').trim())
         ? document.getElementById('inputOrigem').value.trim() + ', nº ' + document.getElementById('numeroOrigem').value.trim()
         : document.getElementById('inputOrigem').value.trim();
+    const q = (document.getElementById('inputOrigem')?.value || '').trim();
     if (!q) return;
     const btn = document.getElementById('btnBuscarOrigem');
     btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>'; btn.disabled = true;
     const res = await nominatim(q);
     btn.innerHTML = '<i class="fas fa-search"></i>'; btn.disabled = false;
     if (res) {
-        setOrigem(res.lat, res.lng, res.display);
+        setOrigem(res.lat, res.lng, res.display);
+        mostrarCidadeDetectada(res.display);
         document.getElementById('origemFeedback').innerHTML = '<i class="fas fa-check-circle"></i> Localização encontrada.';
     } else {
         document.getElementById('origemFeedback').innerHTML = '<i class="fas fa-triangle-exclamation"></i> Não encontramos esse endereço — toque no mapa para marcar.';
@@ -857,9 +880,9 @@ function mostrarStep(nome) {
     document.getElementById('socorroShell').scrollIntoView({ block: 'start', behavior: 'smooth' });
 }
 
-function temPerguntasExtras(sintoma) {
-    return ['NAO_LIGA', 'PNEU', 'PAROU_TRAJETO'].includes(sintoma);
-}
+function temPerguntasExtras(sintoma) {
+    return false;
+}
 
 async function avaliarTriagemEIrParaConfirmar() {
     document.getElementById('resultadoTriagem').innerHTML = '<p class="text-muted small"><i class="fas fa-spinner fa-spin me-1"></i>Analisando…</p>';

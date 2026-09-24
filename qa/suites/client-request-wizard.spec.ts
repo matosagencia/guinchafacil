@@ -27,7 +27,7 @@ test.describe('Cliente — assistente de novo pedido', () => {
   test('E2E-CLI-WIZ-002 | triagem inicial e campos de veículo/tipo presentes', async ({ page }) => {
     // Primeiro passo do wizard: triagem "O que aconteceu?".
     await expect(page.locator('[data-step="sintoma"]')).toBeVisible();
-    await expect(page.locator('.socorro-title', { hasText: /o que aconteceu/i }).first()).toBeVisible();
+    await expect(page.locator('.socorro-title', { hasText: /como você quer resolver/i }).first()).toBeVisible();
     // Veículo e tipo de problema seguem no form como campos que o JS preenche
     // (veículo único = hidden #veiculo_id; múltiplos = select #veiculo_id_select).
     const veiculoCount = await page.locator('#veiculo_id, #veiculo_id_select').count();
