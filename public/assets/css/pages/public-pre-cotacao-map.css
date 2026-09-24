@@ -1,4 +1,7 @@
 .origin-map-composition { position: relative; }
+#originMapPanel { position:relative; }
+#originMapPanel > .origin-address-card { position:absolute; z-index:999!important; top:26px; right:26px; width:min(780px,calc(100% - 52px))!important; padding:14px; border:1px solid #2fb34a; border-radius:14px; background:rgba(234,247,237,.98); box-shadow:0 5px 16px rgba(20,80,35,.16); }
+@media(max-width:520px){#originMapPanel > .origin-address-card{position:relative;top:auto;right:auto;width:auto!important;margin-top:10px;padding:0;border:0;background:transparent;box-shadow:none;}}
 #btnGps { position:relative; z-index:1000; margin-bottom:10px; }
 .address-no-number { display:block; margin-top:6px; color:#55705b; font-size:.72rem; line-height:1.2; }
 .address-no-number input { margin-right:4px; accent-color:#2fb34a; }
