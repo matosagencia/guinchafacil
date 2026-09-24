@@ -37,7 +37,7 @@ test.describe('motor de decisão da cotação pública', () => {
     await expect(page.locator('#originMapPanel')).toBeVisible();
     await expect(page.locator('#originMap')).toBeVisible();
     await expect(page.locator('#originMapPanel #btnGps')).toBeVisible();
-    await expect(page.locator('#originMapPanel #btnGps + label')).toContainText('Onde está');
+    await expect(page.locator('#originMapPanel label[for="localizacao"] + #btnGps')).toBeVisible();
 
     await origem.fill('Rua do Mercado');
     await expect(status).toContainText('número');

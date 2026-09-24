@@ -40,7 +40,7 @@
     }
     tipo.addEventListener('change', atualizar);
     document.addEventListener('prequote:type-change', atualizar);
-    if (originForm && gpsButton) originForm.insertBefore(gpsButton, originForm.firstElementChild);
+    if (originForm && gpsButton) { var addressLabel = originForm.querySelector('label.label[for="localizacao"]'); if (addressLabel) addressLabel.insertAdjacentElement('afterend', gpsButton); }
     if (originForm && originMapPanel) { originForm.classList.add('origin-address-card'); originMapPanel.insertBefore(originForm, originMapPanel.firstElementChild); }
     if (situacaoStage) situacaoStage.parentNode.insertBefore(orientationStage, vehicleStage);
     orientationStage.querySelectorAll('[data-solution]').forEach(function (card) { card.addEventListener('click', function () { solutionInput.value = card.dataset.solution; orientationStage.querySelectorAll('[data-solution]').forEach(function (item) { item.classList.toggle('is-selected', item === card); }); }); });
