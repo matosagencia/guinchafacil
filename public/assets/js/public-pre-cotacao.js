@@ -26,6 +26,7 @@
         const num = numberInput ? numberInput.value.trim() : '';
         return base && num ? base + ', nº ' + num : base;
     }
+    function ensureNoNumberOption(numberInput) { if (!numberInput) return null; const id = numberInput.id + '_sem_numero'; if (document.getElementById(id)) return document.getElementById(id); const wrap = document.createElement('label'); wrap.className = 'address-no-number'; const check = document.createElement('input'); check.type = 'checkbox'; check.id = id; check.name = id; wrap.appendChild(check); wrap.appendChild(document.createTextNode(' Sem número neste local')); numberInput.parentElement.appendChild(wrap); check.addEventListener('change', function () { numberInput.required = !check.checked; numberInput.disabled = check.checked; if (check.checked) numberInput.value = ''; }); return check; }
 
     function streetOnly(value) { return String(value || '').split(',')[0].replace(/\s+(?:n[ºo°.]?\s*)?\d+[A-Za-z]?\s*$/i, '').trim(); }
     async function reversePin(latValue, lngValue) {
@@ -51,6 +52,7 @@
         let timer = null;
         let requestId = 0;
         let selected = false;
+        const noNumber = ensureNoNumberOption(numberInput);
 
         function clearList() {
             list.innerHTML = '';
@@ -59,7 +61,8 @@
 
         function choose(item) {
             input.value = item.display_name || '';
-            if (numberInput) numberInput.value = item.house_number || extractHouseNumber(input.value);
+            if (numberInput) { numberInput.disabled = false; numberInput.value = item.house_number || extractHouseNumber(input.value); numberInput.required = true; }
+            if (noNumber) noNumber.checked = false;
             latInput.value = item.lat;
             lngInput.value = item.lng;
             selected = true;
@@ -74,7 +77,7 @@
         async function search() {
             const query = composeQuery(input, numberInput);
             const hasAddress = Boolean(input && input.value.trim());
-            const hasNumber = Boolean(numberInput && numberInput.value.trim());
+            const hasNumber = Boolean((numberInput && numberInput.value.trim()) || (noNumber && noNumber.checked));
             if (query.length < 4 || selected) {
                 clearList();
                 return;
@@ -143,6 +146,7 @@
 
     setupAddressAutocomplete(address, lat, lng, 'origem', number);
     setupAddressAutocomplete(destination, document.getElementById('lat_destino'), document.getElementById('lng_destino'), 'destino', destinationNumber);
+    status.textContent = 'Preencha a rua e o número. Se não houver número, marque “Sem número neste local”.';
     showOriginMap(-22.9068, -43.1729, 11, false);
 
     document.querySelectorAll('[data-choice-group][data-choice-value]').forEach(function (card) {
