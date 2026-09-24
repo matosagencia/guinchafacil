@@ -49,6 +49,20 @@ async function abrirPedido(page) {
   await screenshot(page, 'confirmacao');
 }
 
+async function enviarCartaoSandbox(page, codigo) {
+  const consentir = page.getByRole('button', { name: /^Aceitar$/i });
+  if (await consentir.isVisible().catch(() => false)) {
+    await consentir.click();
+  }
+  await page.frameLocator('iframe[name="cardNumber"]').locator('#cardNumber').fill('5031433215406351');
+  await page.frameLocator('iframe[name="expirationDate"]').locator('#expirationDate').fill('11/30');
+  await page.frameLocator('iframe[name="securityCode"]').locator('#securityCode').fill('123');
+  await page.getByRole('textbox', { name: /Maria Santos Pereira/i }).fill(codigo);
+  await page.getByRole('textbox', { name: /999\.999\.999-99/ }).fill('12345678909');
+  await page.getByRole('textbox', { name: /exemplo@email\.com/i }).fill(cliente.email);
+  await page.getByRole('button', { name: /Pagar/i }).click();
+}
+
 test.describe('socorro completo', () => {
   test.beforeEach(async ({ page }) => {
     await login(page);
@@ -65,7 +79,6 @@ test.describe('socorro completo', () => {
     // para o processo local; nesse caso o Brick não é montado.
     await expect(page.getByText(/Checkout do Pagamento/i)).toBeVisible();
     await screenshot(page, 'checkout');
-    return;
     // Sem token Sandbox, o sistema mantém a cotação e informa que o provedor
     // não está disponível; com token, o Payment Brick deve aparecer.
     if (await page.locator('#mp-payment-brick-container').count()) {
@@ -84,6 +97,13 @@ test.describe('socorro completo', () => {
       await expect(page).toHaveURL(/pagamento|checkout/);
       const brick = page.locator('#mp-payment-brick-container');
       await expect(brick).toBeVisible();
+      await expect(brick.locator('iframe').first()).toBeVisible({ timeout: 30_000 });
+      await page.getByText('Cartão de crédito', { exact: true }).click();
+      await expect(page.getByText(/Número do cartão/i)).toBeVisible({ timeout: 30_000 });
+      if (process.env.MP_SANDBOX_SUBMIT === '1') {
+        await enviarCartaoSandbox(page, codigo);
+        await expect(page.locator('#mp-payment-status')).toContainText(/Pagamento aprovado|Pagamento pendente|Pagamento não aprovado|Pagamento recusado/i, { timeout: 30_000 });
+      }
       // Os campos de cartão são iframes gerenciados pelo Payment Brick.
       // A automação real deve usar os frames do SDK e o token gerado no browser.
       await screenshot(page, `mp-${codigo.toLowerCase()}`);
