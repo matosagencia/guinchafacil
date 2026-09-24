@@ -44,7 +44,7 @@ Os cenários APRO, OTHE, FUND, SECU e CONT só executam chamadas reais quando `M
 
 ## Validação no XAMPP
 
-Em 24/09/2026, a suíte Chromium foi executada contra `http://localhost:8080` com o MySQL `guinchafacil_dev`: 6/6 testes passaram. A cotação de reboque do cenário Riachuelo/Gamboa foi exibida como R$ 135,00.
+Em 24/09/2026, as suítes Chromium e Firefox foram executadas contra `http://localhost:8080` com o MySQL `guinchafacil_dev`: 6/6 testes passaram em cada navegador. A cotação de reboque foi exibida como R$ 135,00 no Chromium e R$ 207,30 em uma execução Firefox com rota geocodificada de 7,2 km; essa variação confirma que o preço depende da distância calculada, e não de um valor fixo.
 
 Para executar:
 
