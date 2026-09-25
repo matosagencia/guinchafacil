@@ -75,6 +75,19 @@ final class OrcamentoPrevioService
         return PedidoOrcamentoPrevio::buscarPorPedido((int)$dados['pedido_id']) ?? ['id' => $id];
     }
 
+    public static function criarOrcamentoProvider(array $dados, int $actorId): array
+    {
+        $id = PedidoOrcamentoPrevio::criarProviderOrcamento($dados);
+        AuditTrailService::evento('orcamento_provider_criado', __CLASS__, __FUNCTION__, [
+            'orcamento_id' => $id,
+            'pedido_id' => (int)$dados['pedido_id'],
+            'provider_id' => (int)$dados['provider_id'],
+            'actor_id' => $actorId,
+            'valor_total' => (float)($dados['valor_total'] ?? 0),
+        ]);
+        return PedidoOrcamentoPrevio::buscarPorPedido((int)$dados['pedido_id']) ?? ['id' => $id];
+    }
+
     public static function aprovarPeloCliente(int $pedidoId, int $clienteId): array
     {
         $orcamento = PedidoOrcamentoPrevio::buscarPorPedido($pedidoId);
@@ -86,6 +99,33 @@ final class OrcamentoPrevioService
             throw new RuntimeException('Orçamento prévio não está pendente de aceite.');
         }
         AuditTrailService::evento('orcamento_previo_aprovado', __CLASS__, __FUNCTION__, [
+            'orcamento_id' => (int)$orcamento['id'], 'pedido_id' => $pedidoId, 'cliente_id' => $clienteId,
+        ]);
+        return PedidoOrcamentoPrevio::buscarPorPedido($pedidoId) ?? $orcamento;
+    }
+
+    public static function recusarSolicitandoReboque(int $pedidoId, int $clienteId): array
+    {
+        $orcamento = PedidoOrcamentoPrevio::buscarPorPedido($pedidoId);
+        $pedido = Pedido::buscarPorId($pedidoId);
+        if (!$orcamento || !$pedido || (int)($pedido['cliente_id'] ?? 0) !== $clienteId) {
+            throw new InvalidArgumentException('Orçamento prévio não encontrado.');
+        }
+        if (!PedidoOrcamentoPrevio::recusarSolicitandoReboque((int)$orcamento['id'])) {
+            throw new RuntimeException('Orçamento prévio não está pendente de decisão.');
+        }
+
+        require_once __DIR__ . '/PedidoCoreService.php';
+        require_once __DIR__ . '/Pricing/PedidoPricingService.php';
+        require_once __DIR__ . '/Financial/ChargePolicyService.php';
+        require_once __DIR__ . '/Pedido/PedidoTransitionService.php';
+        (new PedidoCoreService(getPDO(), new PedidoPricingService(), new ChargePolicyService(), new PedidoTransitionService()))
+            ->transicionar($pedidoId, 'ORCAMENTO_RECUSADO', [
+                'cliente_id' => $clienteId,
+                'orcamento_id' => (int)$orcamento['id'],
+            ]);
+
+        AuditTrailService::evento('orcamento_previo_recusado_solicitando_reboque', __CLASS__, __FUNCTION__, [
             'orcamento_id' => (int)$orcamento['id'], 'pedido_id' => $pedidoId, 'cliente_id' => $clienteId,
         ]);
         return PedidoOrcamentoPrevio::buscarPorPedido($pedidoId) ?? $orcamento;

@@ -30,7 +30,57 @@ require_once __DIR__ . '/../../Models/Financial/ChargeCodes.php';
 
 final class ChargePolicyService
 {
-    public const POLICY_VERSION = 'v1';
+    public const POLICY_VERSION = 'v1';
+    public const DIRECT_RESCUE_FEE = 'DIRECT_RESCUE_FEE';
+    public const TOWING_INTERMEDIATION_FEE = 'TOWING_INTERMEDIATION_FEE';
+    public const WORKSHOP_REFERRAL = 'WORKSHOP_REFERRAL';
+    public const CONTINUITY_DISCOUNT_RATE = 0.21;
+
+    public static function getDirectRescueFee(): float
+    {
+        return self::moneyFromConfig(['direct_rescue_fee', 'taxa_resgate_direto_padrao'], 0.0);
+    }
+
+    public static function getTowingIntermediationFee(): float
+    {
+        return self::moneyFromConfig(['towing_intermediation_fee', 'taxa_intermediacao_reboque'], 0.0);
+    }
+
+    public static function getWorkshopReferralFee(): float
+    {
+        return self::moneyFromConfig(['workshop_referral_fee', 'taxa_indicacao_oficina'], 30.0);
+    }
+
+    public static function calculateContinuityDiscount(float $intermediation): float
+    {
+        return round(max(0.0, $intermediation) * self::CONTINUITY_DISCOUNT_RATE, 2);
+    }
+
+    public static function applyContinuityDiscount(float $freight, float $intermediation): array
+    {
+        $discount = self::calculateContinuityDiscount($intermediation);
+        $finalIntermediation = round(max(0.0, $intermediation - $discount), 2);
+
+        return [
+            'frete' => round(max(0.0, $freight), 2),
+            'intermediacao_original' => round(max(0.0, $intermediation), 2),
+            'desconto_continuidade' => $discount,
+            'intermediacao_final' => $finalIntermediation,
+            'total' => round(max(0.0, $freight) + $finalIntermediation, 2),
+        ];
+    }
+
+    private static function moneyFromConfig(array $keys, float $default): float
+    {
+        require_once __DIR__ . '/../../Models/Configuracao.php';
+        foreach ($keys as $key) {
+            $value = Configuracao::get($key, null);
+            if ($value !== null && $value !== '') {
+                return round(max(0.0, (float)$value), 2);
+            }
+        }
+        return round(max(0.0, $default), 2);
+    }
 
     /**
      * @param string $situationCode Um dos ChargeCodes::SITUATION_*.
