@@ -29,7 +29,13 @@ class OnSiteFlowDefinition implements FlowDefinitionInterface
         'no_local' => ['diagnostico_iniciado', 'cancelado'],
         'diagnostico_iniciado' => ['diagnostico_concluido', 'cancelado'],
         'diagnostico_concluido' => ['autorizacao_servico_pendente', 'em_execucao_servico', 'conversao_reboque_pendente', 'cancelado'],
-        'autorizacao_servico_pendente' => ['aguardando_pagamento_orcamento', 'em_execucao_servico', 'conversao_reboque_pendente', 'cancelado'],
+        'autorizacao_servico_pendente' => ['decisao_reboque_pendente', 'saida_oficina_pendente', 'aguardando_pagamento_orcamento', 'em_execucao_servico', 'conversao_reboque_pendente', 'recusado_solicitando_reboque', 'cancelado'],
+        'decisao_reboque_pendente' => ['aguardando_pagamento_orcamento', 'conversao_reboque_pendente', 'recusado_solicitando_reboque', 'cancelado'],
+
+        'saida_oficina_pendente' => ['autorizacao_servico_pendente', 'conversao_reboque_pendente', 'recusado_solicitando_reboque', 'cancelado'],
+
+        'recusado_solicitando_reboque' => ['aguardando_guincho', 'aguardando_pagamento', 'cancelado'],
+
         'aguardando_pagamento_orcamento' => ['em_execucao_servico', 'cancelado'],
         'em_execucao_servico' => ['teste_final', 'cancelado'],
         'teste_final' => ['concluido', 'conversao_reboque_pendente', 'cancelado'],

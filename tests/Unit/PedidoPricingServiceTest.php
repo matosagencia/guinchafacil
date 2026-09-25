@@ -19,14 +19,14 @@ final class PedidoPricingServiceTest extends TestCase
 
     public function testContinuidadeNaoDescontaFrete(): void
     {
-        $quote = (new PedidoPricingService())->cotar(new PedidoQuoteRequest([
-            'tipo_problema' => 'roda travada',
-            'lat_origem' => -22.9,
-            'lng_origem' => -43.1,
-            'distancia_km' => 10,
+        $request = new PedidoQuoteRequest([
             'continuidade' => true,
-            'modalidade_socorro' => 'REBOQUE_PRANCHA',
-        ]));
+        ]);
+
+        $quote = (new PedidoPricingService())->cotar($request->toArray() + [
+            'distancia_km_oficial' => 10,
+            'modalidade_resolvida' => 'REBOQUE_PRANCHA',
+        ]);
 
         $this->assertEqualsWithDelta(200.00, $quote['frete'], 0.001);
         $this->assertEqualsWithDelta(30.00, $quote['intermediacao'], 0.001);

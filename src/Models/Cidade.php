@@ -184,7 +184,7 @@ final class Cidade
         $melhor = null;
         $melhorDistancia = null;
         foreach (self::listarAtivas() as $cidade) {
-            if ($cidade['lat_centro'] === null || $cidade['lng_centro'] === null) {
+            if (!array_key_exists('lat_centro', $cidade) || !array_key_exists('lng_centro', $cidade) || $cidade['lat_centro'] === null || $cidade['lng_centro'] === null) {
                 continue;
             }
             $raio = (int)($cidade['raio_km'] ?? 30);

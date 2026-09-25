@@ -21,4 +21,11 @@ final class PedidoStateMachine
     {
         return OrderFlowResolver::forAttendanceMode($attendanceMode ?? 'TOWING')->proximoStatusPadrao($from);
     }
-}
+    public static function targetForEvent(string $event): ?string
+    {
+        return match ($event) {
+            'ORCAMENTO_RECUSADO' => 'recusado_solicitando_reboque',
+            default => null,
+        };
+    }
+}

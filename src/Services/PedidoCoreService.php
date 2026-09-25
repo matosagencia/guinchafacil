@@ -10,6 +10,9 @@ require_once __DIR__ . '/Pedido/PedidoTransitionService.php';
 require_once __DIR__ . '/GeoService.php';
 require_once __DIR__ . '/../Models/Pedido.php';
 require_once __DIR__ . '/../Models/Veiculo.php';
+require_once __DIR__ . '/../Models/Cidade.php';
+require_once __DIR__ . '/../Services/TarifaService.php';
+require_once __DIR__ . '/../DTO/PedidoTransitionRequest.php';
 
 final class PedidoCoreService
 {
@@ -23,25 +26,29 @@ final class PedidoCoreService
         $this->modalidadeResolver ??= new ModalidadeResolver();
     }
 
-    public function cotar(PedidoQuoteRequest $request): array
+    public function cotar(PedidoQuoteRequest $request, array $context = []): array
     {
         $this->validarCoordenadas($request);
-        $modalidade = $this->modalidadeResolver->resolver($request->tipoProblema, [
-            'modalidade_socorro' => $request->modalidadeSocorro,
-            'endereco_destino' => $request->enderecoDestino,
-        ]);
+        $modalidade = $this->resolverModalidadeOficial($request, $context);
 
         if ($modalidade === ModalidadeResolver::REBOQUE_PRANCHA && $request->enderecoDestino === '' && $request->destinoLat === null) {
             throw new InvalidArgumentException('Destino e obrigatorio para reboque.');
         }
 
-        return $this->pricing->cotar($request->toArray() + ['modalidade_socorro' => $modalidade]);
+        return $this->pricing->cotar($this->dadosPrecificacaoOficial($request, $modalidade, $context));
     }
 
     public function criar(PedidoCreateRequest $request): int
     {
-        $quote = $this->cotar($request->quote);
         $this->validarClienteVeiculo($request);
+        $quote = $this->cotar($request->quote, [
+            'actor_type' => $request->actorType,
+            'actor_id' => $request->actorId,
+            'allow_modalidade_override' => $request->actorType === 'admin',
+            'modalidade_override' => $request->quote->modalidadeSocorro,
+            'allow_priority' => $request->actorType === 'admin',
+            'prioridade' => $request->quote->prioridade,
+        ]);
 
         $started = !$this->pdo->inTransaction();
         if ($started) {
@@ -57,8 +64,8 @@ final class PedidoCoreService
                 'lat_origem' => (float)$request->quote->localResgateLat,
                 'lng_origem' => (float)$request->quote->localResgateLng,
                 'endereco_origem' => $request->quote->enderecoOrigem,
-                'lat_destino' => (float)($request->quote->destinoLat ?? $request->quote->localResgateLat),
-                'lng_destino' => (float)($request->quote->destinoLng ?? $request->quote->localResgateLng),
+                'lat_destino' => $quote['modalidade_socorro'] === ModalidadeResolver::SOCORRO_LOCAL ? null : (float)$request->quote->destinoLat,
+                'lng_destino' => $quote['modalidade_socorro'] === ModalidadeResolver::SOCORRO_LOCAL ? null : (float)$request->quote->destinoLng,
                 'endereco_destino' => $request->quote->enderecoDestino,
                 'distancia_km' => (float)$quote['km_cobrado'],
                 'custo_estimado' => (float)$quote['total'],
@@ -110,14 +117,68 @@ final class PedidoCoreService
 
     public function transicionar(int $pedidoId, string $event, array $context): void
     {
-        if ($event === 'ORCAMENTO_RECUSADO') {
-            $this->pdo->prepare("UPDATE pedidos SET status = 'recusado_solicitando_reboque', attendance_mode = 'TOWING' WHERE id = ?")
-                ->execute([$pedidoId]);
-            $this->registrarEvento($pedidoId, $event, $context);
+        $target = PedidoStateMachine::targetForEvent($event);
+        if ($target !== null) {
+            $result = PedidoTransitionService::transition(new PedidoTransitionRequest(
+                (string)($context['actor_type'] ?? 'system'),
+                (int)($context['actor_id'] ?? 0),
+                $pedidoId,
+                $target,
+                null,
+                $context
+            ));
+            if (!$result->ok) {
+                throw new RuntimeException($result->message);
+            }
+            $this->registrarEvento($pedidoId, $event, $context + ['status_novo' => $target]);
             return;
         }
 
         $this->registrarEvento($pedidoId, $event, $context);
+    }
+
+    private function resolverModalidadeOficial(PedidoQuoteRequest $request, array $context): string
+    {
+        $resolvida = $this->modalidadeResolver->resolver($request->tipoProblema, [
+            'endereco_destino' => $request->enderecoDestino,
+        ]);
+
+        $isAdmin = ($context['actor_type'] ?? '') === 'admin';
+        $override = strtoupper(trim((string)($context['modalidade_override'] ?? '')));
+        if ($isAdmin && !empty($context['allow_modalidade_override']) && in_array($override, [ModalidadeResolver::SOCORRO_LOCAL, ModalidadeResolver::REBOQUE_PRANCHA, 'REBOQUE_TRADICIONAL'], true)) {
+            return $override === 'REBOQUE_TRADICIONAL' ? ModalidadeResolver::REBOQUE_PRANCHA : $override;
+        }
+
+        return $resolvida;
+    }
+
+    private function dadosPrecificacaoOficial(PedidoQuoteRequest $request, string $modalidade, array $context): array
+    {
+        $veiculo = $request->veiculoId ? Veiculo::buscarPorId((int)$request->veiculoId) : null;
+        $categoria = is_array($veiculo) ? TarifaService::categoriaDeVeiculo($veiculo) : null;
+        $cidade = Cidade::resolverPorCoordenada((float)$request->localResgateLat, (float)$request->localResgateLng);
+        $distancia = 0.0;
+
+        if ($modalidade === ModalidadeResolver::REBOQUE_PRANCHA) {
+            if ($request->destinoLat === null || $request->destinoLng === null) {
+                throw new InvalidArgumentException('Coordenadas de destino sao obrigatorias para reboque.');
+            }
+            $distancia = round(GeoService::haversine(
+                (float)$request->localResgateLat,
+                (float)$request->localResgateLng,
+                (float)$request->destinoLat,
+                (float)$request->destinoLng
+            ), 2);
+        }
+
+        return [
+            'distancia_km_oficial' => $distancia,
+            'categoria_veiculo_oficial' => $categoria,
+            'cidade_id_oficial' => isset($cidade['id']) ? (int)$cidade['id'] : null,
+            'prioridade_oficial' => (($context['actor_type'] ?? '') === 'admin') && !empty($context['allow_priority']) && !empty($context['prioridade']),
+            'modalidade_resolvida' => $modalidade,
+            'continuidade' => $request->continuidade,
+        ];
     }
 
     private function validarCoordenadas(PedidoQuoteRequest $request): void

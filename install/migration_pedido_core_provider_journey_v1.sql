@@ -122,11 +122,19 @@ SET @sql := IF(@exists = 0,
 );
 PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
 
+SET @exists := (
+    SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS
+    WHERE TABLE_SCHEMA = @db AND TABLE_NAME = 'pedido_orcamentos_previos' AND COLUMN_NAME = 'modelo_orcamento'
+);
+SET @sql := IF(@exists = 0,
+    'ALTER TABLE pedido_orcamentos_previos ADD COLUMN modelo_orcamento VARCHAR(40) NOT NULL DEFAULT ''PROVIDER_QUOTE'' AFTER rejected_at',
+    'SELECT 1'
+);
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
 UPDATE pedido_orcamentos_previos
-   SET valor_mao_obra = COALESCE(valor_mao_obra, estimativa_minima),
-       valor_pecas = COALESCE(valor_pecas, 0),
-       valor_total = COALESCE(valor_total, estimativa_maxima, estimativa_minima),
-       taxa_saida_abater = COALESCE(taxa_saida_abater, taxa_diagnostico_local, 0),
-       descricao = COALESCE(descricao, descricao_avaria)
- WHERE valor_total IS NULL
-   AND (estimativa_minima IS NOT NULL OR estimativa_maxima IS NOT NULL);
+   SET modelo_orcamento = 'LEGACY_ESTIMATE'
+ WHERE (estimativa_minima IS NOT NULL OR estimativa_maxima IS NOT NULL)
+   AND valor_mao_obra IS NULL
+   AND valor_pecas IS NULL
+   AND valor_total IS NULL;

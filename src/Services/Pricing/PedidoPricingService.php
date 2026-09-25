@@ -11,11 +11,11 @@ final class PedidoPricingService
     public function cotar(array|PedidoQuoteRequest $request): array
     {
         $data = $request instanceof PedidoQuoteRequest ? $request->toArray() : $request;
-        $distanciaKm = max(0.0, (float)($data['distanciaKm'] ?? $data['distancia_km'] ?? 0));
-        $categoria = $data['categoriaVeiculo'] ?? $data['categoria_veiculo'] ?? null;
-        $prioridade = !empty($data['prioridade']);
-        $cidadeId = isset($data['cidadeId']) ? $data['cidadeId'] : ($data['cidade_id'] ?? null);
-        $modalidade = (string)($data['modalidadeSocorro'] ?? $data['modalidade_socorro'] ?? ModalidadeResolver::REBOQUE_PRANCHA);
+        $distanciaKm = max(0.0, (float)($data['distancia_km_oficial'] ?? 0));
+        $categoria = $data['categoria_veiculo_oficial'] ?? null;
+        $prioridade = !empty($data['prioridade_oficial']);
+        $cidadeId = $data['cidade_id_oficial'] ?? null;
+        $modalidade = (string)($data['modalidade_resolvida'] ?? ModalidadeResolver::REBOQUE_PRANCHA);
 
         $tarifa = TarifaService::calcularDetalhado($distanciaKm, $categoria, $prioridade, null, $cidadeId !== null ? (int)$cidadeId : null);
         $taxaSaida = (float)($tarifa['taxa_fixa_aplicada'] ?? 0);

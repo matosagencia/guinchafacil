@@ -20,13 +20,6 @@ final class ModalidadeResolver
 
     public function resolver(string $tipoProblema, array $context = []): string
     {
-        if (!empty($context['modalidade_socorro'])) {
-            $forced = strtoupper(trim((string)$context['modalidade_socorro']));
-            if (in_array($forced, [self::SOCORRO_LOCAL, self::REBOQUE_PRANCHA, 'REBOQUE_TRADICIONAL'], true)) {
-                return $forced === 'REBOQUE_TRADICIONAL' ? self::REBOQUE_PRANCHA : $forced;
-            }
-        }
-
         $texto = $this->normalizar($tipoProblema . ' ' . implode(' ', array_map('strval', $context)));
         foreach (self::REBOQUE_TERMS as $term) {
             if (str_contains($texto, $this->normalizar($term))) {

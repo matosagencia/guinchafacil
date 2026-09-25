@@ -304,7 +304,11 @@ final class PedidoTransitionService
                 && !empty($pedido['guincho_id']);
 
             $params = [$request->targetStatus];
-            $sql = "UPDATE pedidos SET status = ?";
+            $sql = "UPDATE pedidos SET status = ?";
+
+            if ($request->targetStatus === 'recusado_solicitando_reboque') {
+                $sql .= ", attendance_mode = 'TOWING'";
+            }
             if ($request->targetStatus === 'em_reboque' && !empty($request->context['foto_plataforma'])) {
                 $sql .= ", foto_plataforma = ?";
                 $params[] = (string)$request->context['foto_plataforma'];
@@ -1141,7 +1145,7 @@ final class PedidoTransitionService
             if ((int)($pedido['cliente_id'] ?? 0) !== (int)$request->actorId) {
                 return false;
             }
-            if ((string)$pedido['status'] === 'autorizacao_servico_pendente' && in_array($request->targetStatus, ['aguardando_pagamento_orcamento', 'em_execucao_servico'], true)) {
+            if ((string)$pedido['status'] === 'autorizacao_servico_pendente' && in_array($request->targetStatus, ['decisao_reboque_pendente', 'saida_oficina_pendente', 'aguardando_pagamento_orcamento', 'em_execucao_servico', 'recusado_solicitando_reboque'], true)) {
                 return true;
             }
             if ((string)$pedido['status'] === 'conversao_reboque_pendente' && $request->targetStatus === 'conversao_aprovada_cliente') {

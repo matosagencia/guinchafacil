@@ -15,7 +15,20 @@ final class PedidoController
     public function cotar(): void
     {
         $this->json(function (): array {
-            return $this->core()->cotar(new PedidoQuoteRequest($this->payload()));
+            $tipoUsuario = (string)($_SESSION['usuario_tipo'] ?? $_SESSION['tipo'] ?? '');
+            $usuarioId = (int)($_SESSION['usuario_id'] ?? 0);
+            $payload = $this->payload();
+            if ($tipoUsuario === 'cliente') {
+                $payload['cliente_id'] = $usuarioId;
+            }
+            return $this->core()->cotar(new PedidoQuoteRequest($payload), [
+                'actor_type' => $tipoUsuario !== '' ? $tipoUsuario : 'public',
+                'actor_id' => $usuarioId,
+                'allow_modalidade_override' => $tipoUsuario === 'admin',
+                'modalidade_override' => $payload['modalidade_socorro'] ?? null,
+                'allow_priority' => $tipoUsuario === 'admin',
+                'prioridade' => !empty($payload['prioridade']),
+            ]);
         });
     }
 
