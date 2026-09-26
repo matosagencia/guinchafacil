@@ -9,9 +9,58 @@ require_once __DIR__ . '/../Services/Pricing/PedidoPricingService.php';
 require_once __DIR__ . '/../Services/Financial/ChargePolicyService.php';
 require_once __DIR__ . '/../Services/Pedido/PedidoTransitionService.php';
 require_once __DIR__ . '/../Services/AuthService.php';
+require_once __DIR__ . '/../Services/DecisaoAtendimentoService.php';
+require_once __DIR__ . '/../Models/PedidoDecisaoSocorro.php';
 
 final class PedidoController
 {
+    public function decisaoPreCotacao(): void
+    {
+        $this->json(function (): array {
+            $payload = $this->payload();
+            $draft = is_array($payload['pedido_draft'] ?? null) ? $payload['pedido_draft'] : $payload;
+            $lat = filter_var($draft['lat_origem'] ?? $draft['lat'] ?? null, FILTER_VALIDATE_FLOAT);
+            $lng = filter_var($draft['lng_origem'] ?? $draft['lng'] ?? null, FILTER_VALIDATE_FLOAT);
+            if ($lat === false || $lng === false) {
+                throw new InvalidArgumentException('Informe a localizacao de origem para comparar as opcoes.');
+            }
+
+            $service = new DecisaoAtendimentoService();
+            $decisao = $service->avaliar(
+                (int)($draft['pedido_id'] ?? 0),
+                (string)($draft['tipo_problema'] ?? $draft['tipo'] ?? 'outro'),
+                (float)$lat,
+                (float)$lng,
+                [
+                    'categoria' => (string)($draft['categoria'] ?? 'popular'),
+                    'distancia_km' => (float)($draft['distancia_km'] ?? 5.0),
+                    'custo_total' => (float)($draft['custo_total'] ?? $draft['valor'] ?? 0.0),
+                ]
+            );
+
+            $escolha = strtolower(trim((string)($payload['escolha'] ?? '')));
+            if (in_array($escolha, ['assistencia', 'reboque'], true)) {
+                $_SESSION['pre_cotacao_decisao'] = [
+                    'escolha' => $escolha,
+                    'payload' => $decisao,
+                    'registrado_em' => date('c'),
+                ];
+                $pedidoId = (int)($draft['pedido_id'] ?? 0);
+                if ($pedidoId > 0) {
+                    $codigo = $escolha === 'assistencia'
+                        ? PedidoDecisaoSocorro::ORCAMENTO_INFORMADO
+                        : PedidoDecisaoSocorro::REBOQUE_SOLICITADO;
+                    PedidoDecisaoSocorro::registrar($pedidoId, $codigo, 'cliente', (int)($_SESSION['usuario_id'] ?? 0) ?: null, null, [
+                        'origem' => 'pre_cotacao',
+                        'recomendacao' => $decisao['recomendacao'] ?? null,
+                    ]);
+                }
+            }
+
+            return $decisao + ['escolha' => $escolha !== '' ? $escolha : null];
+        });
+    }
+
     public function cotar(): void
     {
         $this->json(function (): array {

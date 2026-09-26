@@ -425,6 +425,7 @@ $rotas = [
     'POST' => [
         '/pre-cotacao'      => ['AuthController', 'preCotacao', null],
         '/pre-cotacao/aceitar' => ['AuthController', 'aceitarPreCotacao', null],
+        '/api/pre-cotacao/decisao' => ['PedidoController', 'decisaoPreCotacao', null],
         '/pedido/cotar' => ['PedidoController', 'cotar', null],
         '/pedido/criar' => ['PedidoController', 'criar', null],
         '/login'                 => ['AuthController', 'login', null],
@@ -701,6 +702,13 @@ if (isset($rotas[$metodo][$uri])) {
         $action = 'route';
         $perfil = null;
         $id = $m[1];
+    }
+    if ($controller === null && $metodo === 'POST'
+        && preg_match('~^/api/pedido/(\d+)/converter-reboque$~', $uri, $m)) {
+        $controller = 'ClienteController';
+        $action = 'converterReboqueComDesconto';
+        $perfil = 'cliente';
+        $id = (int)$m[1];
     }
     if (preg_match('~^/api/admin/orders/(\d+)(?:/(tracking|timeline|messages))?$~', $uri, $m)) {
         $controller = 'OrdersApiController';

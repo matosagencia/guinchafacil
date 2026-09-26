@@ -45,7 +45,16 @@ $guinchoPlacaUf = trim((string)($pedido['guincho_placa'] ?? '')) . ($guinchoUf !
 
 $cancelPreview = $cancelPreview ?? ['pode' => false, 'taxa' => 0.0, 'motivo_bloqueio' => null, 'isento_ate' => null];
 $routingSnapshot = $routingSnapshot ?? ['mode' => 'overview', 'current_street' => '', 'target_label' => 'Destino', 'target_address' => '', 'remaining_distance_label' => '', 'remaining_distance_m' => 0, 'eta_minutes' => 0, 'eta_label' => '', 'progress_percent' => 0, 'trail_points' => [], 'recent_streets' => []];
-$pedidoAtivo   = !in_array($status, ['concluido', 'cancelado'], true);
+$pedidoAtivo   = !in_array($status, ['concluido', 'cancelado'], true);
+
+$descontoSaidaOficina = 0.21;
+try {
+    $rawDescontoSaida = (float)Configuracao::get('desconto_saida_oficina_percentual', '0.21');
+    $descontoSaidaOficina = $rawDescontoSaida > 1 ? $rawDescontoSaida / 100 : max(0.0, $rawDescontoSaida);
+} catch (Throwable) {
+    $descontoSaidaOficina = 0.21;
+}
+$descontoSaidaOficinaLabel = rtrim(rtrim(number_format($descontoSaidaOficina * 100, 2, ',', '.'), '0'), ',') . '%';
 
 include __DIR__ . '/../layouts/header.php';
 require_once __DIR__ . '/../components/vehicle_brand_badge.php';
@@ -79,7 +88,20 @@ require_once __DIR__ . '/../components/vehicle_brand_badge.php';
     </div>
     <?php endif; ?>
 
-    <?php if (!empty($conversaoPendente)): ?>
+    <?php if ($status === 'diagnostico_concluido' && (string)($pedido['attendance_mode'] ?? '') !== 'TOWING'): ?>
+    <div class="card border-success mb-4" id="cardConverterReboqueDesconto">
+        <div class="card-header bg-success-subtle"><i class="fas fa-gift me-2"></i>Reboque com desconto disponivel</div>
+        <div class="card-body">
+            <p class="mb-2">Se o profissional nao conseguir resolver no local, voce pode converter para reboque com <?php echo htmlspecialchars($descontoSaidaOficinaLabel); ?> de desconto.</p>
+            <button type="button" class="btn btn-success" id="btnConverterReboqueDesconto" data-url="<?php echo $bp; ?>/api/pedido/<?php echo $pedidoId; ?>/converter-reboque">
+                <i class="fas fa-truck-ramp-box me-1"></i>Converter para reboque com <?php echo htmlspecialchars($descontoSaidaOficinaLabel); ?> de desconto
+            </button>
+            <p class="text-muted small mb-0 mt-2" id="converterReboqueResultado"></p>
+        </div>
+    </div>
+    <?php endif; ?>
+
+    <?php if (!empty($conversaoPendente)): ?>
     <!-- Etapa 7 — conversão de socorro local para reboque aguardando decisão do cliente -->
     <div class="card border-warning mb-4">
         <div class="card-header bg-warning-subtle"><i class="fas fa-truck-ramp-box me-2"></i>Este atendimento precisa de reboque</div>
@@ -1236,7 +1258,37 @@ require_once __DIR__ . '/../components/vehicle_brand_badge.php';
         });
     }
 
-    function escHtml(str) {
+    function initConverterReboqueDesconto() {
+        var btn = document.getElementById('btnConverterReboqueDesconto');
+        if (!btn) return;
+        var output = document.getElementById('converterReboqueResultado');
+        function brl(v) {
+            return Number(v || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        }
+        btn.addEventListener('click', function () {
+            btn.disabled = true;
+            if (output) output.textContent = 'Convertendo para reboque...';
+            requestJson(btn.dataset.url, {
+                method: 'POST',
+                headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
+            }).then(function (data) {
+                if (!data.ok) {
+                    throw new Error(data.erro || 'Falha ao converter.');
+                }
+                if (output) {
+                    output.textContent = 'Reboque convertido: ' + brl(data.valor_final) + ' (era ' + brl(data.valor_original) + ' - voce economizou ' + brl(data.desconto) + ')';
+                }
+                setTimeout(function () { window.location.reload(); }, 1200);
+            }).catch(function (e) {
+                if (output) output.textContent = e.message || 'Nao foi possivel converter agora.';
+                btn.disabled = false;
+            });
+        });
+    }
+
+    initConverterReboqueDesconto();
+
+    function escHtml(str) {
         var d = document.createElement('div');
         d.appendChild(document.createTextNode(str));
         return d.innerHTML;

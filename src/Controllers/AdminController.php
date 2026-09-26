@@ -1864,7 +1864,8 @@ class AdminController extends BaseController
 
         // --- CONFIGURAÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ES DE TARIFAS ---
         $campos = [
-            "tarifa_por_km", "taxa_fixa", "comissao_plataforma",
+            "tarifa_por_km", "taxa_fixa", "comissao_plataforma",
+            "custo_saida_profissional_padrao", "comissao_assistencia_percentual",
             "tarifa_noturna_km", "tarifa_noturna_fixa", "taxa_prioridade",
             "turno_noturno_inicio", "turno_noturno_fim",
             "tempo_expiracao_min", "raio_inicial_km", "raio_maximo_km",

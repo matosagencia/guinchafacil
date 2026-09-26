@@ -203,7 +203,11 @@ class AuthController extends BaseController
             (string)($_POST['destino'] ?? ''),
             $numeroDestino !== '' ? $numeroDestino : null
         );
-        $tipo = trim((string)($_POST['tipo_problema'] ?? ''));
+        $tipo = trim((string)($_POST['tipo_problema'] ?? ''));
+        $decisaoAtendimento = strtolower(trim((string)($_POST['decisao_atendimento'] ?? '')));
+        if ($decisaoAtendimento === 'reboque') {
+            $tipo = 'reboque';
+        }
         $categoria = trim((string)($_POST['categoria'] ?? 'popular'));
         $categorias = ['moto', 'popular', 'suv', 'caminhonete', 'eletrico'];
 

@@ -34,6 +34,11 @@ require_once __DIR__ . '/../Services/Pricing/PedidoPricingService.php';
 require_once __DIR__ . '/../Services/Financial/ChargePolicyService.php';
 require_once __DIR__ . '/../Services/Pedido/PedidoTransitionService.php';
 require_once __DIR__ . '/../Services/Pedido/ModalidadeResolver.php';
+require_once __DIR__ . '/../Services/DecisaoAtendimentoService.php';
+require_once __DIR__ . '/../Models/PedidoDecisaoSocorro.php';
+require_once __DIR__ . '/../DTO/PedidoTransitionRequest.php';
+require_once __DIR__ . '/../Services/TarifaService.php';
+require_once __DIR__ . '/../Services/GeoService.php';
 
 class ClienteController extends BaseController
 {
@@ -1234,6 +1239,78 @@ class ClienteController extends BaseController
             );
         }
         $this->redirect("/cliente/pedido/{$id}");
+    }
+
+    public function converterReboqueComDesconto(int $id): void
+    {
+        AuthService::requireAuth('cliente', false);
+        header('Content-Type: application/json; charset=UTF-8');
+
+        $uid = $this->usuarioId();
+        $pedido = Pedido::buscarPorId($id);
+        if (!$pedido || (int)$pedido['cliente_id'] !== $uid) {
+            http_response_code(404);
+            echo json_encode(['ok' => false, 'erro' => 'Pedido nao encontrado.'], JSON_UNESCAPED_UNICODE);
+            exit;
+        }
+
+        try {
+            PedidoDecisaoSocorro::registrar($id, PedidoDecisaoSocorro::SAIDA_OFICINA_COM_DESCONTO, 'cliente', $uid, (int)($pedido['guincho_id'] ?? 0) ?: null, [
+                'origem' => 'fallback_assistencia_reboque',
+            ]);
+            PedidoDecisaoSocorro::registrar($id, PedidoDecisaoSocorro::REBOQUE_SOLICITADO, 'cliente', $uid, (int)($pedido['guincho_id'] ?? 0) ?: null, [
+                'origem' => 'fallback_assistencia_reboque',
+            ]);
+
+            $distancia = (float)($pedido['distancia_km'] ?? 0);
+            if ($distancia <= 0 && isset($pedido['lat_origem'], $pedido['lng_origem'], $pedido['lat_destino'], $pedido['lng_destino'])
+                && $pedido['lat_destino'] !== null && $pedido['lng_destino'] !== null) {
+                $distancia = GeoService::haversine((float)$pedido['lat_origem'], (float)$pedido['lng_origem'], (float)$pedido['lat_destino'], (float)$pedido['lng_destino']);
+            }
+            $distancia = max(0.5, round($distancia > 0 ? $distancia : 5.0, 2));
+            $valorOriginal = (float)TarifaService::calcularDetalhado($distancia, 'popular', false)['valor'];
+
+            $abatimentoOs = OrcamentoPrevioService::calcularAbatimentoOS($id, $valorOriginal);
+            $calc = (new DecisaoAtendimentoService())->calcularValorComDesconto($valorOriginal);
+            if ($abatimentoOs > 0) {
+                $calc['desconto'] = round($abatimentoOs, 2);
+                $calc['valor_final'] = round(max(0.0, $valorOriginal - $abatimentoOs), 2);
+            }
+
+            $transition = new PedidoTransitionService();
+            $steps = ['conversao_reboque_pendente', 'conversao_aprovada_cliente', 'aguardando_guincho'];
+            foreach ($steps as $target) {
+                $atual = Pedido::buscarPorId($id) ?: $pedido;
+                if ((string)($atual['status'] ?? '') === $target) {
+                    continue;
+                }
+                $result = $transition->transition(new PedidoTransitionRequest('system', $uid, $id, $target, (int)($pedido['guincho_id'] ?? 0) ?: null, [
+                    'liberar_guincho_anterior' => true,
+                    'origem' => 'conversao_reboque_com_desconto',
+                ]));
+                if (!$result->ok && $target !== 'conversao_reboque_pendente') {
+                    throw new RuntimeException((string)$result->error);
+                }
+            }
+
+            getPDO()->prepare("UPDATE pedidos SET custo_estimado = ?, custo_final = ?, distancia_km = ?, attendance_mode = 'TOWING' WHERE id = ?")
+                ->execute([(float)$calc['valor_final'], (float)$calc['valor_final'], $distancia, $id]);
+
+            Logger::log(Logger::LEVEL_INFO, __CLASS__, __FUNCTION__, 'conversao_reboque_com_desconto', 'Cliente converteu assistencia em reboque com desconto.', [
+                'pedido_id' => $id,
+                'cliente_id' => $uid,
+                'valor_original' => $calc['valor_original'],
+                'valor_final' => $calc['valor_final'],
+                'desconto' => $calc['desconto'],
+            ]);
+
+            echo json_encode(['ok' => true] + $calc, JSON_UNESCAPED_UNICODE);
+        } catch (Throwable $e) {
+            Logger::exception(__CLASS__, __FUNCTION__, 'conversao_reboque_com_desconto', $e, ['pedido_id' => $id, 'cliente_id' => $uid]);
+            http_response_code(422);
+            echo json_encode(['ok' => false, 'erro' => 'Nao foi possivel converter para reboque agora.'], JSON_UNESCAPED_UNICODE);
+        }
+        exit;
     }
 
     public function pedidoStatusAjax(int $id): void
