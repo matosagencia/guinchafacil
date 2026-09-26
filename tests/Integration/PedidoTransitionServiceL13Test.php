@@ -17,7 +17,7 @@ final class PedidoTransitionServiceL13Test extends TestCase
     protected function setUp(): void
     {
         $pdo = getPDO();
-        foreach (['pedido_evidencias', 'pedido_localizacoes', 'pedido_idempotency', 'pagamentos', 'pedidos', 'guinchos', 'veiculos', 'usuarios', 'configuracoes', 'app_logs'] as $table) {
+        foreach (['pedido_evidencias', 'pedido_localizacoes', 'pedido_idempotency', 'pagamentos', 'pedidos', 'provider_capabilities', 'service_types', 'guinchos', 'veiculos', 'usuarios', 'configuracoes', 'app_logs'] as $table) {
             try {
                 $pdo->exec("DELETE FROM {$table}");
             } catch (Throwable) {
@@ -39,6 +39,16 @@ final class PedidoTransitionServiceL13Test extends TestCase
         ");
         $pdo->exec("
             INSERT INTO guinchos (id, usuario_id, aprovado, disponivel) VALUES (1, 2, 1, 1)
+        ");
+        try {
+            $pdo->exec("UPDATE guinchos SET reboque_aprovado = 1 WHERE id = 1");
+        } catch (Throwable) {
+        }
+        $pdo->exec("
+            INSERT INTO service_types (id, code, name, attendance_mode, active) VALUES (9001, 'TOW_TEST', 'Reboque Teste', 'TOWING', 1)
+        ");
+        $pdo->exec("
+            INSERT INTO provider_capabilities (provider_id, service_type_id, enabled, approval_status) VALUES (1, 9001, 1, 'APPROVED')
         ");
     }
 

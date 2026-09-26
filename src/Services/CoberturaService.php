@@ -165,7 +165,7 @@ class CoberturaService
             'pode_cobrar' => false,
             'pode_especialista' => false,
             'pode_reboque' => false,
-            'mensagem' => 'No momento não há cobertura para esta ocorrência. Estamos expandindo a rede nesta região.',
+            'mensagem' => 'Ainda não há cobertura para esta localização. Recebemos sua localização e seguimos ampliando as alternativas de atendimento nessa região. Revise o endereço ou tente novamente em alguns instantes.',
             'service_code' => $serviceCode,
         ];
     }

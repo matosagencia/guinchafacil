@@ -897,6 +897,13 @@ class ClienteController extends BaseController
             'actor_id' => $uid,
         ]));
 
+        $pedidoCriado = Pedido::buscarPorId($pedidoId) ?: [];
+        $modalidadeOficial = (string)($pedidoCriado['modalidade_socorro'] ?? '');
+        $resgateDiretoConfirmado = $resgateDiretoSolicitado && $modalidadeOficial === ModalidadeResolver::SOCORRO_LOCAL;
+        if ($resgateDiretoSolicitado && !$resgateDiretoConfirmado) {
+            throw new InvalidArgumentException('Resgate direto incompativel com a modalidade oficial do pedido.');
+        }
+
         $metadata = [
             'veiculo_esta_batido' => $veiculoBatido,
             'rodas_travadas' => $rodasTravadas,
@@ -915,6 +922,9 @@ class ClienteController extends BaseController
             'local_resgate_lat' => $localResgateLat,
             'local_resgate_lng' => $localResgateLng,
         ];
+        if ($resgateDiretoConfirmado) {
+            $metadata['modalidade_socorro'] = ResgateDiretoOficinaService::MODALIDADE;
+        }
         $sets = [];
         $params = [];
         foreach ($metadata as $column => $value) {
@@ -927,7 +937,7 @@ class ClienteController extends BaseController
         $params[] = $pedidoId;
         $pdo->prepare('UPDATE pedidos SET ' . implode(', ', $sets) . ' WHERE id = ?')->execute($params);
 
-        if ($oficinaParceiraProviderId > 0 && IndicacaoOficinaService::ativo()) {
+        if ($resgateDiretoConfirmado && $oficinaParceiraProviderId > 0 && IndicacaoOficinaService::ativo()) {
             try {
                 IndicacaoOficinaService::registrarSelecao($pedidoId, $oficinaParceiraProviderId, $uid);
             } catch (Throwable $indicacaoError) {
@@ -935,7 +945,7 @@ class ClienteController extends BaseController
                 error_log('[IndicacaoOficina] seleção não registrada: ' . $indicacaoError->getMessage());
             }
         }
-        if ($resgateDiretoSolicitado) {
+        if ($resgateDiretoConfirmado) {
             PedidoOrcamentoPrevio::criar([
                 'pedido_id' => $pedidoId,
                 'provider_id' => $oficinaParceiraProviderId,

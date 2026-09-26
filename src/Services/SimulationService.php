@@ -157,7 +157,7 @@ class SimulationService
         if (!$pedidoId) {
             $this->failStep('3-criar-pedido', 'Falha ao criar pedido no banco.');
         }
-        $this->step('3-criar-pedido', true, "Pedido id={$pedidoId}, custo=R${$custo}");
+        $this->step('3-criar-pedido', true, 'Pedido id=' . $pedidoId . ', custo=R$' . $custo);
         return ['pedido_id' => (int)$pedidoId, 'custo' => $custo];
     }
 
@@ -191,7 +191,7 @@ class SimulationService
         }
         Pedido::definirExpiracao($pedidoId, date('Y-m-d H:i:s', strtotime('+5 minutes')), 50);
 
-        $this->step('4-pagamento', true, "Aprovado. split: guincho=R${$valGuincho} plataforma=R${$valPlat}");
+        $this->step('4-pagamento', true, 'Aprovado. split: guincho=R$' . $valGuincho . ' plataforma=R$' . $valPlat);
     }
 
     private function fase5Guincho(): array

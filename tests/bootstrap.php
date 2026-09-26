@@ -145,6 +145,7 @@ function getPDO(): PDO
                 score_minimo_atual REAL DEFAULT 0,
                 service_type_id  INTEGER,
                 attendance_mode  TEXT DEFAULT 'TOWING',
+                incidente_id      INTEGER,
                 veiculo_esta_batido INTEGER,
                 rodas_travadas   INTEGER,
                 local_dificil_acesso INTEGER,

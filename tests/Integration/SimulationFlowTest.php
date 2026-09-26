@@ -13,7 +13,7 @@ final class SimulationFlowTest extends TestCase
     protected function setUp(): void
     {
         $pdo = getPDO();
-        foreach (['simulation_steps','simulation_runs','chat_mensagens','avaliacoes','pagamentos','pedidos','veiculos','guinchos','usuarios','logs_webhook','app_logs'] as $t) {
+        foreach (['simulation_steps','simulation_runs','chat_mensagens','avaliacoes','pagamentos','pedidos','provider_capabilities','service_types','veiculos','guinchos','usuarios','logs_webhook','app_logs'] as $t) {
             try { $pdo->exec("DELETE FROM {$t}"); } catch (Throwable) {}
         }
         $pdo->exec("DELETE FROM configuracoes");
@@ -29,6 +29,12 @@ final class SimulationFlowTest extends TestCase
         $pdo->exec("INSERT INTO usuarios (id,nome,email,senha_hash,telefone,cpf,tipo,ativo) VALUES (2,'Operador Guincho','guincho.sim@test.com','hash','11988880005','50505050505','guincho',1)");
         $pdo->exec("INSERT INTO veiculos (id,usuario_id,placa,marca,modelo,cor) VALUES (1,1,'ABC1234','VW','Gol','Branco')");
         $pdo->exec("INSERT INTO guinchos (id,usuario_id,chave_pix,chave_pix_tipo,aprovado,disponivel,lat_atual,lng_atual) VALUES (1,2,'pix@test.com','email',1,1,-23.55,-46.63)");
+        try {
+            $pdo->exec("UPDATE guinchos SET reboque_aprovado = 1 WHERE id = 1");
+        } catch (Throwable) {
+        }
+        $pdo->exec("INSERT INTO service_types (id, code, name, attendance_mode, active) VALUES (9001, 'TOW_TEST', 'Reboque Teste', 'TOWING', 1)");
+        $pdo->exec("INSERT INTO provider_capabilities (provider_id, service_type_id, enabled, approval_status) VALUES (1, 9001, 1, 'APPROVED')");
     }
 
     /**
