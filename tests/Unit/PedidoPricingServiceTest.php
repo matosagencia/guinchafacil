@@ -33,4 +33,24 @@ final class PedidoPricingServiceTest extends TestCase
         $this->assertEqualsWithDelta(6.30, $quote['desconto_continuidade'], 0.001);
         $this->assertEqualsWithDelta(223.70, $quote['total'], 0.001);
     }
+
+    public function testNaoAceitaRequestCruDoCliente(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        (new PedidoPricingService())->cotar(new PedidoQuoteRequest([
+            'distancia_km' => 1,
+            'categoria_veiculo' => 'popular',
+            'cidade_id' => 1,
+            'prioridade' => true,
+        ]));
+    }
+
+    public function testExigeDadosOficiaisDoCore(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        (new PedidoPricingService())->cotar([
+            'distancia_km' => 1,
+            'modalidade_socorro' => 'SOCORRO_LOCAL',
+        ]);
+    }
 }

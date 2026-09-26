@@ -10,7 +10,17 @@ final class PedidoPricingService
 {
     public function cotar(array|PedidoQuoteRequest $request): array
     {
-        $data = $request instanceof PedidoQuoteRequest ? $request->toArray() : $request;
+        if ($request instanceof PedidoQuoteRequest) {
+            throw new InvalidArgumentException('PedidoPricingService exige dados oficiais derivados pelo PedidoCoreService.');
+        }
+
+        $data = $request;
+        foreach (['distancia_km_oficial', 'modalidade_resolvida'] as $required) {
+            if (!array_key_exists($required, $data)) {
+                throw new InvalidArgumentException('Cotacao sem dados oficiais de precificacao.');
+            }
+        }
+
         $distanciaKm = max(0.0, (float)($data['distancia_km_oficial'] ?? 0));
         $categoria = $data['categoria_veiculo_oficial'] ?? null;
         $prioridade = !empty($data['prioridade_oficial']);

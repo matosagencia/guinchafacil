@@ -153,6 +153,30 @@ final class PedidoCoreFlowTest extends TestCase
         $this->assertEqualsWithDelta(1.0, $quote['valor_km'], 0.001);
     }
 
+    public function testClienteNaoManipulaPrioridadeOuCidade(): void
+    {
+        $quote = $this->core()->cotar(new PedidoQuoteRequest([
+            'cliente_id' => 1,
+            'veiculo_id' => 1,
+            'tipo_problema' => 'roda travada',
+            'lat_origem' => -22.9,
+            'lng_origem' => -43.1,
+            'lat_destino' => -22.91,
+            'lng_destino' => -43.12,
+            'endereco_origem' => 'Origem',
+            'endereco_destino' => 'Destino',
+            'cidade_id' => 999,
+            'prioridade' => true,
+        ]), ['actor_type' => 'cliente', 'actor_id' => 1]);
+
+        $distanciaOficial = round(GeoService::haversine(-22.9, -43.1, -22.91, -43.12), 2);
+        $totalSemPrioridade = round(100 + ($distanciaOficial * 10) + 30, 2);
+
+        $this->assertEqualsWithDelta(100.0, $quote['taxa_saida'], 0.001);
+        $this->assertEqualsWithDelta(10.0, $quote['valor_km'], 0.001);
+        $this->assertEqualsWithDelta($totalSemPrioridade, $quote['total'], 0.001);
+    }
+
     public function testClienteNaoForcaSocorroLocalEmColisao(): void
     {
         $quote = $this->core()->cotar(new PedidoQuoteRequest([
