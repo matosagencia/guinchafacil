@@ -28,6 +28,12 @@ require_once __DIR__ . '/../Services/EnderecoFormatter.php';
 require_once __DIR__ . '/../Models/PedidoOrcamentoPrevio.php';
 require_once __DIR__ . '/../Services/ResgateDiretoOficinaService.php';
 require_once __DIR__ . '/../Services/OrcamentoPrevioService.php';
+require_once __DIR__ . '/../DTO/PedidoCreateRequest.php';
+require_once __DIR__ . '/../Services/PedidoCoreService.php';
+require_once __DIR__ . '/../Services/Pricing/PedidoPricingService.php';
+require_once __DIR__ . '/../Services/Financial/ChargePolicyService.php';
+require_once __DIR__ . '/../Services/Pedido/PedidoTransitionService.php';
+require_once __DIR__ . '/../Services/Pedido/ModalidadeResolver.php';
 
 class ClienteController extends BaseController
 {
@@ -693,10 +699,8 @@ class ClienteController extends BaseController
         $latDest   = (float)($_POST['lat_destino'] ?? 0);
         $lngDest   = (float)($_POST['lng_destino'] ?? 0);
         $oficinaParceiraProviderId = (int)($_POST['oficina_parceira_provider_id'] ?? 0);
-        $modalidadeSocorro = strtoupper(trim((string)($_POST['modalidade_socorro'] ?? 'REBOQUE_TRADICIONAL')));
-        if (!in_array($modalidadeSocorro, ['REBOQUE_TRADICIONAL', ResgateDiretoOficinaService::MODALIDADE], true)) {
-            $modalidadeSocorro = 'REBOQUE_TRADICIONAL';
-        }
+        $modalidadeSolicitada = strtoupper(trim((string)($_POST['modalidade_socorro'] ?? '')));
+        $resgateDiretoSolicitado = $modalidadeSolicitada === ResgateDiretoOficinaService::MODALIDADE;
         if ($oficinaParceiraProviderId > 0 && IndicacaoOficinaService::ativo()) {
             foreach (ProviderWorkshopService::listarParceirosOperacionais() as $partner) {
                 if ((int)$partner['id'] === $oficinaParceiraProviderId) {
@@ -707,8 +711,6 @@ class ClienteController extends BaseController
                 }
             }
         }
-        $distancia = (float)($_POST['distancia_km'] ?? 5);
-
         // Validar que veículo pertence ao cliente
         $veiculo = Veiculo::buscarPorId($veiculoId);
         if (!$veiculo || (int)$veiculo['usuario_id'] !== $uid) {
@@ -751,10 +753,8 @@ class ClienteController extends BaseController
         // incluído); 3) só cai no cálculo de reboque quando for
         // efetivamente TOWING ou quando o serviço não tiver tarifa própria
         // configurada (rede de segurança — nunca trava a criação do pedido).
-        require_once __DIR__ . '/../Services/TarifaService.php';
         require_once __DIR__ . '/../Services/Pricing/ZonePricingService.php';
         require_once __DIR__ . '/../Models/Cidade.php';
-        $categoriaVeiculo = TarifaService::categoriaDeVeiculo($veiculo);
 
         // §PRECO-POR-CIDADE-01: resolve a cidade-alvo do pedido pela
         // coordenada de origem (null quando nenhuma cidade tem geo
@@ -771,36 +771,9 @@ class ClienteController extends BaseController
         // TarifaService (que funde carro+moto em "popular") — é o que
         // permite diferenciar preço de pane elétrica/reboque de moto vs
         // carro, coisa que o TarifaService nunca fez.
-        $custo = null;
         // Especialistas usam o catálogo comercial próprio (atendimento no
-        // local + adicional tabelado). Tarifas de zona/reboque não podem
-        // transformar uma partida simples em R$149 automaticamente.
-        if ($attendanceMode !== 'TOWING' && $serviceTypeId) {
-            require_once __DIR__ . '/../Services/EspecialistaPricingService.php';
-            $codigoEspecialista = (string)($tipoServico['code'] ?? '');
-            $precoEspecialista = EspecialistaPricingService::calcular($codigoEspecialista, $distancia);
-            if ($precoEspecialista !== null) {
-                $custo = (float)$precoEspecialista['customer_amount'];
-            }
-        }
-        $zonaPreco = ZonePricingService::calcularPreco(
-            $latOrigem, $lngOrigem,
-            $serviceTypeId ?: 0,
-            (string)($veiculo['tipo'] ?? ''),
-            $distancia
-        );
-        if ($custo === null && $zonaPreco !== null) {
-            $custo = $zonaPreco['valor'];
-        } elseif ($custo === null && $attendanceMode !== 'TOWING' && $serviceTypeId) {
-            $porServico = ServicePricingRule::calcularTotal($serviceTypeId, $distancia, null, $cidadeIdPreco);
-            if ($porServico !== null) {
-                $custo = $porServico['valor'];
-            }
-        }
-        if ($custo === null) {
-            $custo = TarifaService::calcular($distancia, $categoriaVeiculo, false, null, $cidadeIdPreco);
-        }
-
+        // Pricing legado removido deste endpoint: distancia, categoria, cidade,
+        // prioridade e modalidade agora sao derivados no PedidoCoreService.
         // §CELULAS-NITEROI-01 (04/08/2026): marca em qual célula territorial
         // (pricing_zones) o pedido caiu, independente de existir regra de
         // preço pra essa zona — é só uma tag analítica pro painel de
@@ -819,7 +792,11 @@ class ClienteController extends BaseController
         if ($latOrigem === 0.0 || $lngOrigem === 0.0 || !$latValida($latOrigem) || !$lngValida($lngOrigem)) {
             $this->redirect('/cliente/pedido/novo?erro=coordenadas_origem');
         }
-        if ($latDest === 0.0 || $lngDest === 0.0 || !$latValida($latDest) || !$lngValida($lngDest)) {
+        $modalidadeResolvidaPreview = (new ModalidadeResolver())->resolver($tipo, [
+            'endereco_destino' => $endDest,
+        ]);
+        $reboqueExigeDestino = $modalidadeResolvidaPreview === ModalidadeResolver::REBOQUE_PRANCHA;
+        if ($reboqueExigeDestino && ($latDest === 0.0 || $lngDest === 0.0 || !$latValida($latDest) || !$lngValida($lngDest))) {
             $this->redirect('/cliente/pedido/novo?erro=coordenadas_destino');
         }
 
@@ -862,13 +839,13 @@ class ClienteController extends BaseController
         $dificilAcesso = isset($_POST['local_dificil_acesso']) ? (int)!!$_POST['local_dificil_acesso'] : null;
         $garagemSubsolo = isset($_POST['em_garagem_subsolo']) ? (int)!!$_POST['em_garagem_subsolo'] : null;
 
-        if ($modalidadeSocorro === ResgateDiretoOficinaService::MODALIDADE) {
+        if ($resgateDiretoSolicitado) {
             if (!IndicacaoOficinaService::ativo() || $oficinaParceiraProviderId <= 0) {
                 $this->redirect('/cliente/pedido/novo?erro=resgate_direto_indisponivel');
             }
             try {
                 ResgateDiretoOficinaService::validarElegibilidade([
-                    'modalidade_socorro' => $modalidadeSocorro,
+                    'modalidade_socorro' => ResgateDiretoOficinaService::MODALIDADE,
                     'local_resgate_lat' => $localResgateLat,
                     'local_resgate_lng' => $localResgateLng,
                     'veiculo_esta_batido' => $veiculoBatido,
@@ -897,28 +874,30 @@ class ClienteController extends BaseController
         }
 
         $pService = new PedidoService();
-        $statusInicial = $pService->statusInicialPedido();
         $pdo = getPDO();
         require_once __DIR__ . '/../Services/MarketingAttributionService.php';
         $atribuicao = MarketingAttributionService::forPedido();
+        $pedidoCore = new PedidoCoreService($pdo, new PedidoPricingService(), new ChargePolicyService(), new PedidoTransitionService());
         $pdo->beginTransaction();
         try {
-        $pedidoId = Pedido::criarCompleto([
+        $pedidoId = $pedidoCore->criar(new PedidoCreateRequest([
             'cliente_id' => $uid,
             'veiculo_id' => $veiculoId,
             'tipo_problema' => $tipo,
-            'descricao_problema' => $descricao,
+            'descricao' => $descricao,
             'lat_origem' => $latOrigem,
             'lng_origem' => $lngOrigem,
             'endereco_origem' => $endOrigem,
-            'lat_destino' => $latDest,
-            'lng_destino' => $lngDest,
+            'lat_destino' => $reboqueExigeDestino ? $latDest : null,
+            'lng_destino' => $reboqueExigeDestino ? $lngDest : null,
             'endereco_destino' => $endDest,
-            'distancia_km' => $distancia,
-            'custo_estimado' => $custo,
-            'status' => $statusInicial,
             'service_type_id' => $serviceTypeId,
             'attendance_mode' => $attendanceMode,
+            'actor_type' => 'cliente',
+            'actor_id' => $uid,
+        ]));
+
+        $metadata = [
             'veiculo_esta_batido' => $veiculoBatido,
             'rodas_travadas' => $rodasTravadas,
             'local_dificil_acesso' => $dificilAcesso,
@@ -933,10 +912,20 @@ class ClienteController extends BaseController
             'landing_page' => $atribuicao['landing_page'] ?? null,
             'cidade_id' => $cidadeIdPreco,
             'pricing_zone_id' => $pricingZoneId,
-            'modalidade_socorro' => $modalidadeSocorro,
             'local_resgate_lat' => $localResgateLat,
             'local_resgate_lng' => $localResgateLng,
-        ]);
+        ];
+        $sets = [];
+        $params = [];
+        foreach ($metadata as $column => $value) {
+            $sets[] = $column . ' = ?';
+            $params[] = $value;
+        }
+        if ($pService->podeIniciarAtendimento()) {
+            $sets[] = "status = 'aguardando_guincho'";
+        }
+        $params[] = $pedidoId;
+        $pdo->prepare('UPDATE pedidos SET ' . implode(', ', $sets) . ' WHERE id = ?')->execute($params);
 
         if ($oficinaParceiraProviderId > 0 && IndicacaoOficinaService::ativo()) {
             try {
@@ -946,7 +935,7 @@ class ClienteController extends BaseController
                 error_log('[IndicacaoOficina] seleção não registrada: ' . $indicacaoError->getMessage());
             }
         }
-        if ($modalidadeSocorro === ResgateDiretoOficinaService::MODALIDADE) {
+        if ($resgateDiretoSolicitado) {
             PedidoOrcamentoPrevio::criar([
                 'pedido_id' => $pedidoId,
                 'provider_id' => $oficinaParceiraProviderId,
@@ -982,6 +971,7 @@ class ClienteController extends BaseController
         }
 
         if ($pService->podeIniciarAtendimento()) {
+            $cfg = Configuracao::getAll();
             $expMin = (int)($cfg['tempo_expiracao_min'] ?? 5);
             $raioInicial = (int)($cfg['raio_inicial_km'] ?? 10);
             Pedido::definirExpiracao($pedidoId, date('Y-m-d H:i:s', strtotime("+{$expMin} minutes")), $raioInicial);
@@ -1324,98 +1314,45 @@ class ClienteController extends BaseController
     {
         AuthService::requireAuth('cliente');
         header('Content-Type: application/json; charset=UTF-8');
-        $distancia = (float)($_GET['distancia_km'] ?? 0);
-        if ($distancia <= 0) {
-            echo json_encode(['ok' => false, 'erro' => 'Distância inválida'], JSON_UNESCAPED_UNICODE); exit;
-        }
 
-        $categoria = trim((string)($_GET['categoria'] ?? ''));
-        $tipoVeiculoCru = '';
-        $veiculoId = (int)($_GET['veiculo_id'] ?? 0);
-        if ($veiculoId > 0) {
-            $veiculo = Veiculo::buscarPorId($veiculoId);
-            if (!$veiculo || (int)$veiculo['usuario_id'] !== $this->usuarioId()) {
-                http_response_code(403);
-                echo json_encode(['ok' => false, 'erro' => 'Veículo inválido'], JSON_UNESCAPED_UNICODE);
-                exit;
-            }
-            $tipoVeiculoCru = (string)($veiculo['tipo'] ?? '');
-            $categoria = $categoria !== '' ? $categoria : TarifaService::categoriaDeVeiculo($veiculo);
-        }
+        $uid = $this->usuarioId();
+        $payload = [
+            'cliente_id' => $uid,
+            'veiculo_id' => (int)($_GET['veiculo_id'] ?? 0),
+            'tipo_problema' => (string)($_GET['tipo_problema'] ?? $_GET['tipo'] ?? 'outro'),
+            'lat_origem' => $_GET['lat_origem'] ?? null,
+            'lng_origem' => $_GET['lng_origem'] ?? null,
+            'endereco_origem' => (string)($_GET['endereco_origem'] ?? ''),
+            'lat_destino' => $_GET['lat_destino'] ?? null,
+            'lng_destino' => $_GET['lng_destino'] ?? null,
+            'endereco_destino' => (string)($_GET['endereco_destino'] ?? ''),
+            'continuidade' => !empty($_GET['continuidade']),
+        ];
 
-        $prioridade = (($_GET['prioridade'] ?? '0') === '1');
-        require_once __DIR__ . '/../Services/TarifaService.php';
+        try {
+            $quote = (new PedidoCoreService(getPDO(), new PedidoPricingService(), new ChargePolicyService(), new PedidoTransitionService()))
+                ->cotar(new PedidoQuoteRequest($payload), [
+                    'actor_type' => 'cliente',
+                    'actor_id' => $uid,
+                ]);
 
-        // §DESLOCAMENTO-01: mesma ordem de resolução usada em pedidoCriar()
-        // — zona de precificação primeiro, depois tarifa própria do
-        // serviço (se não for reboque), só então o cálculo de reboque como
-        // rede de segurança. Sem isso, a estimativa mostrada ao cliente
-        // ANTES de confirmar nunca batia com o que um serviço ON_SITE
-        // realmente custava.
-        $serviceTypeId = (int)($_GET['service_type_id'] ?? 0);
-        $latOrigem = isset($_GET['lat_origem']) ? (float)$_GET['lat_origem'] : null;
-        $lngOrigem = isset($_GET['lng_origem']) ? (float)$_GET['lng_origem'] : null;
-        $attendanceMode = 'TOWING';
-        if ($serviceTypeId > 0) {
-            require_once __DIR__ . '/../Models/Catalog/ServiceType.php';
-            $tipoServico = ServiceType::buscarPorId($serviceTypeId);
-            if ($tipoServico && !empty($tipoServico['active'])) {
-                $attendanceMode = (string)($tipoServico['attendance_mode'] ?? 'TOWING');
-            } else {
-                $serviceTypeId = 0;
-            }
+            echo json_encode([
+                'ok' => true,
+                'custo' => (float)$quote['total'],
+                'distancia' => (float)$quote['km_cobrado'],
+                'origem' => 'pedido_core',
+                'modalidade_socorro' => $quote['modalidade_socorro'],
+                'tarifa' => $quote['tarifa'],
+                'quote' => $quote,
+            ], JSON_UNESCAPED_UNICODE);
+        } catch (InvalidArgumentException $e) {
+            http_response_code(422);
+            echo json_encode(['ok' => false, 'erro' => $e->getMessage()], JSON_UNESCAPED_UNICODE);
+        } catch (Throwable $e) {
+            http_response_code(500);
+            error_log('[ClienteController::calcularCusto] ' . $e->getMessage());
+            echo json_encode(['ok' => false, 'erro' => 'Erro ao calcular cotacao.'], JSON_UNESCAPED_UNICODE);
         }
-
-        require_once __DIR__ . '/../Models/Cidade.php';
-        $cidadeIdPreco = null;
-        if ($latOrigem !== null && $lngOrigem !== null) {
-            $cidadeResolvida = Cidade::resolverPorCoordenada($latOrigem, $lngOrigem);
-            $cidadeIdPreco = $cidadeResolvida['id'] ?? null;
-        }
-
-        $origem = 'reboque';
-        $detalhe = null;
-        if ($attendanceMode !== 'TOWING' && $serviceTypeId > 0) {
-            require_once __DIR__ . '/../Services/EspecialistaPricingService.php';
-            $codigoEspecialista = (string)($tipoServico['code'] ?? '');
-            $precoEspecialista = EspecialistaPricingService::calcular($codigoEspecialista, $distancia);
-            if ($precoEspecialista !== null) {
-                $origem = 'especialista_catalogo';
-                $detalhe = $precoEspecialista['detalhe'];
-                $custoFinal = (float)$precoEspecialista['customer_amount'];
-            }
-        }
-        if ($latOrigem !== null && $lngOrigem !== null) {
-            require_once __DIR__ . '/../Services/Pricing/ZonePricingService.php';
-            $zonaPreco = ZonePricingService::calcularPreco($latOrigem, $lngOrigem, $serviceTypeId, $tipoVeiculoCru ?: null, $distancia);
-            if ($detalhe === null && $zonaPreco !== null) {
-                $origem = 'zona';
-                $detalhe = $zonaPreco['detalhe'] + ['zona_nome' => $zonaPreco['zona_nome']];
-                $custoFinal = $zonaPreco['valor'];
-            }
-        }
-        if ($detalhe === null && $attendanceMode !== 'TOWING' && $serviceTypeId > 0) {
-            require_once __DIR__ . '/../Models/Catalog/ServicePricingRule.php';
-            $porServico = ServicePricingRule::calcularTotal($serviceTypeId, $distancia, null, $cidadeIdPreco);
-            if ($porServico !== null) {
-                $origem = 'servico';
-                $detalhe = $porServico['detalhe'];
-                $custoFinal = $porServico['valor'];
-            }
-        }
-        if ($detalhe === null) {
-            $origem = 'reboque';
-            $detalhe = TarifaService::calcularDetalhado($distancia, $categoria, $prioridade, null, $cidadeIdPreco);
-            $custoFinal = (float)$detalhe['valor'];
-        }
-
-        echo json_encode([
-            'ok' => true,
-            'custo' => (float)$custoFinal,
-            'distancia' => $distancia,
-            'origem' => $origem,
-            'tarifa' => $detalhe,
-        ], JSON_UNESCAPED_UNICODE);
         exit;
     }
 
