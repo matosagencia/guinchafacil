@@ -9,8 +9,17 @@
     const number = document.getElementById('numero_origem');
     const destination = document.getElementById('destino');
     const destinationNumber = document.getElementById('numero_destino');
+    const mapPanel = document.getElementById('originMapPanel');
+    const mapAddress = document.getElementById('pinAddressStatus');
+    let originMap = null;
+    let originMarker = null;
 
     if (!gps || !status || !lat || !lng) return;
+
+    function extractHouseNumber(value) {
+        const matches = String(value || '').match(/(?:^|,|\s)(\d+[A-Za-z]?)(?=\s*(?:,|$))/g);
+        return matches && matches.length ? matches[matches.length - 1].replace(/[^0-9A-Za-z]/g, '') : '';
+    }
 
     function composeQuery(input, numberInput) {
         const base = input ? input.value.trim() : '';
@@ -18,18 +27,80 @@
         return base && num ? base + ', nº ' + num : base;
     }
 
+    function ensureNoNumberOption(numberInput) {
+        if (!numberInput) return null;
+        const id = numberInput.id + '_sem_numero';
+        if (document.getElementById(id)) return document.getElementById(id);
+        const wrap = document.createElement('label');
+        wrap.className = 'address-no-number';
+        const check = document.createElement('input');
+        check.type = 'checkbox'; check.id = id; check.name = id;
+        wrap.appendChild(check); wrap.appendChild(document.createTextNode(' Sem número neste local'));
+        numberInput.parentElement.appendChild(wrap);
+        check.addEventListener('change', function () { numberInput.required = !check.checked; numberInput.disabled = check.checked; if (check.checked) numberInput.value = ''; });
+        return check;
+    }
+
+    function streetOnly(value) {
+        return String(value || '').split(',')[0].replace(/\s+(?:n[ºo°.]?\s*)?\d+[A-Za-z]?\s*$/i, '').trim();
+    }
+
+    async function reversePin(latValue, lngValue) {
+        try {
+            const res = await fetch((document.body.dataset.basePath || '') + '/geocode/public/reverse?lat=' + encodeURIComponent(latValue) + '&lng=' + encodeURIComponent(lngValue), { headers: { Accept: 'application/json' } });
+            const payload = await res.json();
+            const result = payload.result || {};
+            if (result.display_name) address.value = streetOnly(result.display_name);
+            if (result.house_number) {
+                number.value = result.house_number;
+                if (mapAddress) mapAddress.textContent = 'Endereço confirmado pelo pin. Número encontrado: ' + result.house_number + '.';
+            } else if (mapAddress) {
+                mapAddress.textContent = 'Ponto confirmado. O número não foi encontrado no mapa; revise o número informado.';
+            }
+        } catch (error) {
+            if (mapAddress) mapAddress.textContent = 'Ponto ajustado no mapa. Revise rua e número antes de continuar.';
+        }
+    }
+
+    function showOriginMap(latValue, lngValue, zoom, announce) {
+        if (!mapPanel || !window.L || !Number.isFinite(Number(latValue)) || !Number.isFinite(Number(lngValue))) return;
+        mapPanel.hidden = false;
+        if (!originMap) {
+            originMap = L.map('originMap', { zoomControl: true }).setView([latValue, lngValue], zoom || 16);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '&copy; OpenStreetMap contributors', maxZoom: 19 }).addTo(originMap);
+        } else {
+            originMap.setView([latValue, lngValue], Math.max(originMap.getZoom(), zoom || 16));
+        }
+        if (!originMarker) {
+            originMarker = L.marker([latValue, lngValue], { draggable: true }).addTo(originMap);
+            originMarker.on('dragend', function () {
+                const point = originMarker.getLatLng();
+                lat.value = point.lat.toFixed(7);
+                lng.value = point.lng.toFixed(7);
+                if (mapAddress) mapAddress.textContent = 'Pin ajustado. Confirmando o endereço…';
+                reversePin(point.lat, point.lng);
+            });
+        } else {
+            originMarker.setLatLng([latValue, lngValue]);
+        }
+        setTimeout(function () { originMap.invalidateSize(); }, 50);
+        if (announce !== false) document.dispatchEvent(new Event('prequote:location-confirmed'));
+    }
+
     function setupAddressAutocomplete(input, latInput, lngInput, label, numberInput) {
         if (!input || !latInput || !lngInput) return;
         const wrapper = input.parentElement;
         wrapper.style.position = 'relative';
         const list = document.createElement('div');
-        list.className = 'public-address-suggestions';
+        list.className = 'public-address-suggestions col-12';
         list.setAttribute('role', 'listbox');
         list.hidden = true;
         wrapper.appendChild(list);
         let timer = null;
         let requestId = 0;
         let selected = false;
+        const noNumber = ensureNoNumberOption(numberInput);
+        if (noNumber) noNumber.addEventListener('change', function () { selected = false; latInput.value = ''; lngInput.value = ''; clearTimeout(timer); timer = setTimeout(search, 500); });
 
         function clearList() {
             list.innerHTML = '';
@@ -38,18 +109,41 @@
 
         function choose(item) {
             input.value = item.display_name || '';
+            var resolvedNumber = item.house_number || extractHouseNumber(input.value);
+            if (numberInput) { numberInput.disabled = false; numberInput.value = resolvedNumber || ''; numberInput.required = true; }
+            if (noNumber) noNumber.checked = false;
             latInput.value = item.lat;
             lngInput.value = item.lng;
-            selected = true;
+            selected = Boolean(resolvedNumber || (noNumber && noNumber.checked));
             clearList();
+            if (!selected) {
+                latInput.value = '';
+                lngInput.value = '';
+                status.textContent = 'Rua encontrada. Informe o n\u00famero ou marque "Sem n\u00famero neste local" para continuar.';
+                if (numberInput) numberInput.focus();
+                return;
+            }
+            latInput.value = item.lat;
+            lngInput.value = item.lng;
             if (label === 'origem') {
-                status.textContent = 'Endereço selecionado. Agora informe a situação.';
+                status.textContent = 'Endereço confirmado' + (item.cidade ? ' em ' + item.cidade : '') + '. Agora escolha como resolver.';
+                showOriginMap(Number(item.lat), Number(item.lng), 16);
+                document.dispatchEvent(new Event('prequote:location-confirmed'));
+            } else if (label === 'destino') {
+                document.dispatchEvent(new CustomEvent('prequote:destination-confirmed', { detail: { lat: Number(item.lat), lng: Number(item.lng) } }));
             }
         }
 
         async function search() {
             const query = composeQuery(input, numberInput);
+            const hasAddress = Boolean(input && input.value.trim());
+            const hasNumber = Boolean((numberInput && numberInput.value.trim()) || (noNumber && noNumber.checked));
             if (query.length < 4 || selected) {
+                clearList();
+                return;
+            }
+            if (!hasAddress) {
+                status.textContent = 'Informe também o número da rua para localizar o ponto exato.';
                 clearList();
                 return;
             }
@@ -112,6 +206,8 @@
 
     setupAddressAutocomplete(address, lat, lng, 'origem', number);
     setupAddressAutocomplete(destination, document.getElementById('lat_destino'), document.getElementById('lng_destino'), 'destino', destinationNumber);
+    status.textContent = 'Preencha a rua e o número. Se não houver número, marque “Sem número neste local”.';
+    showOriginMap(-22.9068, -43.1729, 11, false);
 
     document.querySelectorAll('[data-choice-group][data-choice-value]').forEach(function (card) {
         card.addEventListener('click', function () {
@@ -123,7 +219,7 @@
                 item.classList.toggle('is-selected', active);
                 item.setAttribute('aria-pressed', active ? 'true' : 'false');
             });
-            if (group === 'tipo_problema') document.dispatchEvent(new Event('prequote:type-change'));
+            if (group === 'tipo_problema') { document.dispatchEvent(new Event('prequote:type-change')); if (card.dataset.choiceValue === 'colisao') document.dispatchEvent(new Event('prequote:go-destination')); }
         });
     });
 
@@ -139,6 +235,7 @@
             lng.value = position.coords.longitude;
             if (address) address.value = 'Localizacao atual confirmada';
             status.textContent = 'Localizacao confirmada. Agora informe a situacao.';
+            showOriginMap(position.coords.latitude, position.coords.longitude, 16);
             gps.disabled = false;
         }, function () {
             status.textContent = 'Nao foi possivel obter o GPS. Autorize a localizacao e tente novamente.';
