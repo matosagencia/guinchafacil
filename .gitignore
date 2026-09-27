@@ -42,3 +42,24 @@ qa/.auth/
 # Documentacao e textos locais fora do repositorio publico
 /doc/
 /*.txt
+
+# Credenciais
+.env
+.env.*
+!.env.example
+
+# Backups e temporários
+*.bak-*
+*.bak
+*.broken
+install-*.php
+install-fix-*.php
+
+# Logs e caches
+logs/
+.grok/
+*.md.tmp
+
+# Arquivos soltos na raiz que não pertencem
+/pre-cotacao.php
+/deepseek_markdown_*.md

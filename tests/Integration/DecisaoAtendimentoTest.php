@@ -29,7 +29,9 @@ final class DecisaoAtendimentoTest extends TestCase
         $pdo->exec("CREATE TABLE providers (
             id INTEGER PRIMARY KEY,
             active INTEGER NOT NULL DEFAULT 1,
-            approval_status TEXT NOT NULL DEFAULT 'APPROVED'
+            approval_status TEXT NOT NULL DEFAULT 'APPROVED',
+            trade_name TEXT,
+            legal_name TEXT
         )");
         $pdo->exec("CREATE TABLE provider_workshop_settings (
             provider_id INTEGER PRIMARY KEY,
@@ -37,7 +39,8 @@ final class DecisaoAtendimentoTest extends TestCase
             faz_resgate_direto INTEGER NOT NULL DEFAULT 1,
             latitude REAL,
             longitude REAL,
-            raio_resgate_direto_km REAL
+            raio_resgate_direto_km REAL,
+            taxa_resgate_direto REAL DEFAULT 0
         )");
         $pdo->exec("CREATE TABLE pedido_decisoes_socorro (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -51,12 +54,16 @@ final class DecisaoAtendimentoTest extends TestCase
             created_at TEXT
         )");
         $pdo->exec("INSERT INTO configuracoes (chave, valor) VALUES ('desconto_saida_oficina_percentual', '0.21')");
-        $pdo->exec("INSERT INTO configuracoes (chave, valor) VALUES ('custo_saida_profissional_padrao', '120.00')");
-        $pdo->exec("INSERT INTO configuracoes (chave, valor) VALUES ('taxa_fixa', '80.00')");
+        $pdo->exec("INSERT INTO configuracoes (chave, valor) VALUES ('custo_saida_profissional_padrao', '80.00')");
+        $pdo->exec("INSERT INTO configuracoes (chave, valor) VALUES ('comissao_assistencia_percentual', '0.21')");
+        $pdo->exec("INSERT INTO configuracoes (chave, valor) VALUES ('taxa_fixa', '200.00')");
         $pdo->exec("INSERT INTO configuracoes (chave, valor) VALUES ('tarifa_por_km', '20.00')");
-        $pdo->exec("INSERT INTO providers (id, active, approval_status) VALUES (10, 1, 'APPROVED')");
-        $pdo->exec("INSERT INTO provider_workshop_settings (provider_id, status_parceria, faz_resgate_direto, latitude, longitude, raio_resgate_direto_km)
-                    VALUES (10, 'ATIVO', 1, -22.9068, -43.1729, 30)");
+        $pdo->exec("INSERT INTO configuracoes (chave, valor) VALUES ('habilitar_comparativo_assistencia', '1')");
+        $pdo->exec("INSERT INTO providers (id, active, approval_status, trade_name, legal_name)
+                    VALUES (10, 1, 'APPROVED', 'Barao Car', 'Barao Car Oficina LTDA')");
+        $pdo->exec("INSERT INTO provider_workshop_settings
+                    (provider_id, status_parceria, faz_resgate_direto, latitude, longitude, raio_resgate_direto_km, taxa_resgate_direto)
+                    VALUES (10, 'ATIVO', 1, -22.9068, -43.1729, 30, 0)");
         $pdo->exec("INSERT INTO pedidos (id, status, cliente_id, custo_estimado, lat_origem, lng_origem, distancia_km, attendance_mode)
                     VALUES (900, 'diagnostico_concluido', 1, 180.00, -22.9068, -43.1729, 5.0, 'ON_SITE')");
     }
@@ -71,13 +78,59 @@ final class DecisaoAtendimentoTest extends TestCase
         $this->assertSame('assistencia', $bateria['recomendacao']);
         $this->assertSame('assistencia', $pneu['recomendacao']);
         $this->assertStringContainsString('21%', $bateria['justificativa']);
+        $this->assertSame('Barao Car', $bateria['oficina_mais_proxima']['nome'] ?? null);
     }
 
-    public function testRecomendaReboqueParaColisao(): void
+    public function testColisaoComVeiculoTravadoForcaSomenteReboque(): void
     {
-        $decisao = (new DecisaoAtendimentoService())->avaliar(0, 'colisao', -22.9068, -43.1729, ['custo_total' => 180.00]);
+        $decisao = (new DecisaoAtendimentoService())->avaliar(0, 'colisao', -22.9068, -43.1729, [
+            'veiculo_pode_mover' => false,
+        ]);
 
+        $this->assertSame(['reboque'], $decisao['opcoes_disponiveis']);
+        $this->assertFalse($decisao['opcao_assistencia']['disponivel']);
         $this->assertSame('reboque', $decisao['recomendacao']);
+        $this->assertStringContainsString('nao pode se mover', $decisao['justificativa']);
+    }
+
+    public function testSemOficinasRetornaSomenteReboque(): void
+    {
+        getPDO()->exec('DELETE FROM provider_workshop_settings');
+        getPDO()->exec('DELETE FROM providers');
+
+        $decisao = (new DecisaoAtendimentoService())->avaliar(0, 'bateria', -22.9068, -43.1729);
+
+        $this->assertSame(['reboque'], $decisao['opcoes_disponiveis']);
+        $this->assertFalse($decisao['opcao_assistencia']['disponivel']);
+        $this->assertNull($decisao['oficina_mais_proxima']);
+    }
+
+    public function testFlagComparativoDesligadaRetornaSomenteReboque(): void
+    {
+        getPDO()->exec("UPDATE configuracoes SET valor = '0' WHERE chave = 'habilitar_comparativo_assistencia'");
+
+        $decisao = (new DecisaoAtendimentoService())->avaliar(0, 'bateria', -22.9068, -43.1729);
+
+        $this->assertSame(['reboque'], $decisao['opcoes_disponiveis']);
+        $this->assertSame('reboque', $decisao['recomendacao']);
+        $this->assertStringContainsString('desabilitado', $decisao['justificativa']);
+    }
+
+    public function testMeOrientemEncaminhaSuporte(): void
+    {
+        $decisao = (new DecisaoAtendimentoService())->avaliar(0, 'outro', -22.9068, -43.1729);
+
+        $this->assertSame('encaminhar_suporte', $decisao['acao']);
+        $this->assertSame([], $decisao['opcoes_disponiveis']);
+    }
+
+    public function testUsaTaxaResgateDiretoDaOficinaQuandoInformada(): void
+    {
+        getPDO()->exec("UPDATE provider_workshop_settings SET taxa_resgate_direto = 95.00 WHERE provider_id = 10");
+
+        $decisao = (new DecisaoAtendimentoService())->avaliar(0, 'bateria', -22.9068, -43.1729);
+
+        $this->assertEqualsWithDelta(95.00, $decisao['opcao_assistencia']['custo_saida'], 0.01);
     }
 
     public function testAplicaDescontoConfiguradoAoConverter(): void

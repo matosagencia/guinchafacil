@@ -1040,9 +1040,7 @@ class GuinchoController extends BaseController
         AuditTrailService::evento('status_pedido_atualizado', 'GuinchoController', 'atualizarStatus', ['pedido_id' => $id, 'status' => $novoStatus]);
 
         // Se concluído: fecha operacionalmente e enfileira repasse (§13)
-        if ($novoStatus === 'concluido') {
-        $valorTotal   = (float)($pedido['custo_final'] ?: $pedido['custo_estimado']);
-        [$valorGuincho, $valorPlat] = $this->splitRepasseParaConclusao($id, $valorTotal, $cfg);
+        if ($novoStatus === 'concluido') {        $valorTotal   = (float)($pedido['custo_final'] ?: $pedido['custo_estimado']);  // <-- sem indentação        [$valorGuincho, $valorPlat] = $this->splitRepasseParaConclusao($id, $valorTotal, $cfg);
 
         // Verifica se é Freeflow para gerar registro financeiro manualmente
         if (($cfg['system_mode'] ?? 'production') === 'freeflow') {

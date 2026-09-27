@@ -1161,7 +1161,9 @@ class ClienteController extends BaseController
             $conversaoPendente = (string)$pedido['status'] === 'conversao_reboque_pendente';
             $diagnosticoAtual = $conversaoPendente ? PedidoDiagnostico::buscarPorPedido($id) : null;
         }
-
+        // ─── ORÇAMENTO DA OFICINA (fluxo nova oficina parceira) ─────
+        require_once __DIR__ . '/../Models/OficinaOrcamento.php';
+        $orcamentoOficina = OficinaOrcamento::buscarPendentePorPedido($id);
         require __DIR__ . '/../Views/cliente/pedidostatus.php';
     }
 
@@ -1554,5 +1556,116 @@ class ClienteController extends BaseController
             Guincho::atualizarReputacao($guinchoId);
         }
         $this->redirect('/cliente/historico?avaliado=1');
+    }
+    
+        /**
+     * Cliente responde ao orçamento da oficina.
+     * - Aprovar → oficina pode iniciar o serviço
+     * - Recusar → sistema oferece guincho com desconto (usa endpoint já existente
+     *   /cliente/pedido/{id}/converter-reboque-com-desconto)
+     */
+    public function responderOrcamentoOficina(int $pedidoId): void
+    {
+        AuthService::requireAuth('cliente');
+        header('Content-Type: application/json; charset=UTF-8');
+        header('Cache-Control: no-store');
+
+        if (!AuthService::validarCsrfToken((string)($_POST['csrf_token'] ?? ''))) {
+            http_response_code(403);
+            echo json_encode(['ok' => false, 'erro' => 'Token inválido.'], JSON_UNESCAPED_UNICODE);
+            exit;
+        }
+
+        $uid = $this->usuarioId();
+        $pedido = Pedido::buscarPorId($pedidoId);
+        if (!$pedido || (int)$pedido['cliente_id'] !== $uid) {
+            http_response_code(404);
+            echo json_encode(['ok' => false, 'erro' => 'Pedido não encontrado.'], JSON_UNESCAPED_UNICODE);
+            exit;
+        }
+
+        require_once __DIR__ . '/../Models/OficinaOrcamento.php';
+
+        $orcamentoId = (int)($_POST['orcamento_id'] ?? 0);
+        $decisao     = (string)($_POST['decisao'] ?? '');
+
+        if (!in_array($decisao, ['aprovar', 'recusar'], true)) {
+            http_response_code(422);
+            echo json_encode(['ok' => false, 'erro' => 'Decisão inválida.'], JSON_UNESCAPED_UNICODE);
+            exit;
+        }
+
+        $orcamento = OficinaOrcamento::buscarPorId($orcamentoId);
+        if (!$orcamento
+            || (int)$orcamento['pedido_id'] !== $pedidoId
+            || $orcamento['status'] !== 'pendente') {
+            http_response_code(409);
+            echo json_encode(['ok' => false, 'erro' => 'Orçamento não está mais pendente.'], JSON_UNESCAPED_UNICODE);
+            exit;
+        }
+
+        try {
+            $pdo = getPDO();
+
+            if ($decisao === 'aprovar') {
+                $ok = OficinaOrcamento::aprovar($orcamentoId);
+                if (!$ok) {
+                    throw new RuntimeException('Não foi possível aprovar (concorrência).');
+                }
+                $pdo->prepare("UPDATE pedidos SET status = 'orcamento_aprovado' WHERE id = ?")
+                    ->execute([$pedidoId]);
+
+                echo json_encode([
+                    'ok' => true,
+                    'acao' => 'aprovado',
+                    'mensagem' => 'Orçamento aprovado — a oficina foi liberada para iniciar o serviço.',
+                ], JSON_UNESCAPED_UNICODE);
+                exit;
+            }
+
+            // ── RECUSAR ─────────────────────────────────────────
+            $ok = OficinaOrcamento::recusar($orcamentoId);
+            if (!$ok) {
+                throw new RuntimeException('Não foi possível recusar (concorrência).');
+            }
+
+            // Status intermediário — o cliente vê a oferta do guincho com desconto
+            // e precisa confirmar (endpoint /cliente/pedido/{id}/converter-reboque-com-desconto).
+            $pdo->prepare("UPDATE pedidos SET status = 'conversao_reboque_pendente' WHERE id = ?")
+                ->execute([$pedidoId]);
+
+            // Calcula o valor do guincho com desconto pra já mostrar na tela
+            require_once __DIR__ . '/../Services/PricingService.php';
+            require_once __DIR__ . '/../Services/GeoService.php';
+
+            $valorOriginal = (float)($pedido['custo_estimado'] ?? 0);
+            if ($valorOriginal <= 0) {
+                $distancia = 0.0;
+                if (!empty($pedido['lat_origem']) && !empty($pedido['lng_origem'])
+                    && !empty($pedido['lat_destino']) && !empty($pedido['lng_destino'])) {
+                    $distancia = GeoService::haversine(
+                        (float)$pedido['lat_origem'], (float)$pedido['lng_origem'],
+                        (float)$pedido['lat_destino'], (float)$pedido['lng_destino']
+                    );
+                }
+                $valorOriginal = max(50.0, $distancia * 8.0 + 80.0); // fallback
+            }
+
+            $pricing = new PricingService($pdo);
+            $desconto = $pricing->aplicarDescontoRecusa($valorOriginal);
+
+            echo json_encode([
+                'ok' => true,
+                'acao' => 'recusado',
+                'desconto' => $desconto,
+                'endpoint_converter' => BASE_PATH . '/cliente/pedido/' . $pedidoId . '/converter-reboque-com-desconto',
+                'mensagem' => $desconto['mensagem'],
+            ], JSON_UNESCAPED_UNICODE);
+        } catch (Throwable $e) {
+            error_log('[ClienteController][responderOrcamentoOficina] ' . $e->getMessage());
+            http_response_code(500);
+            echo json_encode(['ok' => false, 'erro' => 'Erro ao processar decisão.'], JSON_UNESCAPED_UNICODE);
+        }
+        exit;
     }
 }
