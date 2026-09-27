@@ -261,6 +261,7 @@ class AuthController extends BaseController
             'tipo_problema' => $tipo,
             'categoria' => $categoria,
         ]) : ['status' => 'sem_servico', 'pode_cobrar' => false, 'mensagem' => 'Não conseguimos identificar o tipo de atendimento para validar a cobertura.'];
+                $_SESSION['pre_cotacao_sem_cobertura'] = null;
         if (($diagnosticoCobertura['pode_cobrar'] ?? true) !== true) {
             PreQuoteDemandService::registrar([
                 'lat_origem' => (float)$lat,
@@ -274,9 +275,11 @@ class AuthController extends BaseController
                 'tipo_problema' => $tipo,
                 'categoria' => $categoria,
             ]);
-            $this->setFlashMessage((string)($diagnosticoCobertura['mensagem'] ?? 'No momento não há cobertura para essa ocorrência.'), 'error');
-            $this->redirect('/pre-cotacao');
-            return;
+            $_SESSION['pre_cotacao_sem_cobertura'] = [
+                'status' => (string)($diagnosticoCobertura['status'] ?? 'sem_cobertura'),
+                'mensagem' => (string)($diagnosticoCobertura['mensagem'] ?? ''),
+                'timestamp' => time(),
+            ];
         }
 
         require_once __DIR__ . '/../Services/TarifaService.php';
@@ -2454,7 +2457,8 @@ class AuthController extends BaseController
             // (ERR_TOO_MANY_REDIRECTS). Isso pegou tipos novos (funcionario/
             // gerente) que ainda não existiam neste match. Melhor destino
             // seguro pra um tipo desconhecido é logout, não login.
-            default       => '/logout',
+            'oficina'      => '/oficina/dashboard',
+            default        => '/logout',
 
         };
 

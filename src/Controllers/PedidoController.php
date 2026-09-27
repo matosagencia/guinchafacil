@@ -148,4 +148,22 @@ final class PedidoController
     {
         return new PedidoCoreService(getPDO(), new PedidoPricingService(), new ChargePolicyService(), new PedidoTransitionService());
     }
+
+    /** GET /api/pre-cotacao/oficinas-proximas?lat=X&lng=Y&tipo=Z */
+    public function oficinasProximas(): void
+    {
+        $this->json(function (): array {
+            $lat = filter_var($_GET['lat'] ?? null, FILTER_VALIDATE_FLOAT);
+            $lng = filter_var($_GET['lng'] ?? null, FILTER_VALIDATE_FLOAT);
+            $tipo = strtolower(trim((string)($_GET['tipo'] ?? '')));
+            if ($lat === false || $lng === false) {
+                throw new InvalidArgumentException('Informe lat/lng.');
+            }
+            $svc = new DecisaoAtendimentoService();
+            return [
+                'ok' => true,
+                'oficinas' => $svc->oficinasProximasPublico((float)$lat, (float)$lng, $tipo),
+            ];
+        });
+    }
 }

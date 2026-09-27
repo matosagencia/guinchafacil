@@ -549,4 +549,69 @@ class OficinaController extends BaseController
         }
         $this->redirect('/oficina/pedido/' . $pedidoId);
     }
+
+    
+
+    /** Financeiro com filtro + tabela. */
+    public function financeiroPage(): void
+    {
+        $oficina = $this->getOficina();
+        $oficinaId = (int)$oficina['id'];
+
+        $mes = (int)($_GET['mes'] ?? date('m'));
+        $ano = (int)($_GET['ano'] ?? date('Y'));
+        $inicio = sprintf('%04d-%02d-01', $ano, $mes);
+        $fim    = date('Y-m-t', strtotime($inicio));
+
+        $pdo = getPDO();
+        $stmt = $pdo->prepare(
+            "SELECT * FROM oficina_repasses
+             WHERE oficina_id = ? AND criado_em BETWEEN ? AND ?
+             ORDER BY criado_em DESC"
+        );
+        $stmt->execute([$oficinaId, $inicio . ' 00:00:00', $fim . ' 23:59:59']);
+        $repasses = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+
+        $totais = ['bruto'=>0.0,'taxa'=>0.0,'liquido'=>0.0,'pago'=>0.0,'a_receber'=>0.0];
+        foreach ($repasses as $r) {
+            $totais['bruto']   += (float)$r['valor_bruto'];
+            $totais['taxa']    += (float)$r['taxa_plataforma'];
+            $totais['liquido'] += (float)$r['valor_liquido'];
+            if ($r['status'] === 'pago')         $totais['pago']      += (float)$r['valor_liquido'];
+            elseif ($r['status'] === 'pendente') $totais['a_receber'] += (float)$r['valor_liquido'];
+        }
+
+        $csrfToken = AuthService::gerarCsrfToken();
+        require __DIR__ . '/../Views/oficina/financeiro.php';
+    }
+
+    /** Recusa um pedido (adiciona a uma lista de skip por sessão). */
+    public function recusar(int $id): void
+    {
+        $oficina = $this->getOficina();
+        if (!AuthService::validarCsrfToken($_POST['csrf_token'] ?? '')) {
+            $this->redirect('/oficina/dashboard');
+        }
+        if (!isset($_SESSION['oficina_recusados']) || !is_array($_SESSION['oficina_recusados'])) {
+            $_SESSION['oficina_recusados'] = [];
+        }
+        $_SESSION['oficina_recusados'][(int)$id] = time();
+        // Expira lista em 1h
+        foreach ($_SESSION['oficina_recusados'] as $pid => $ts) {
+            if (time() - $ts > 3600) unset($_SESSION['oficina_recusados'][$pid]);
+        }
+        $this->setFlashMessage('Pedido recusado.', 'info');
+        $this->redirect($_SERVER['HTTP_REFERER'] ?? '/oficina/dashboard');
+    }
+
+    /** Página HTML com todos os pedidos disponíveis. */
+    public function pedidosPage(): void
+    {
+        $oficina = $this->getOficina();
+        $todos = $this->buscarPedidosProximos($oficina);
+        $recusados = $_SESSION['oficina_recusados'] ?? [];
+        $pedidos = array_values(array_filter($todos, fn($p) => !isset($recusados[(int)$p['id']])));
+        $csrfToken = AuthService::gerarCsrfToken();
+        require __DIR__ . '/../Views/oficina/pedidos.php';
+    }
 }

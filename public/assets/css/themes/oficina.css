@@ -1,157 +1,264 @@
 /* ============================================================
-   Tema OFICINA â€” alaranjado quase marrom
-   Escopo: .theme-oficina (aplicado no <body> via JS)
+   GuinchaFácil — Tema OFICINA (âmbar escuro / marrom)
+   Override AGRESSIVO de themes/tow.css + style.css
+   Paleta: só marrom, âmbar, laranja, vermelho-terra, amarelo.
+   Verde apenas na logo (externa).
    ============================================================ */
-.theme-oficina {
-    --ofi-primary:        #B45309;
-    --ofi-primary-dark:   #7C2D12;
-    --ofi-primary-darker: #5C1F0A;
-    --ofi-accent:         #F59E0B;
-    --ofi-bg-soft:        #FFF7ED;
-    --ofi-bg-page:        #FDF6EE;
-    --ofi-border:         #E7D3BE;
-    --ofi-text:           #3B1F0A;
-    --primary: var(--ofi-primary);
-    --primary-hover: var(--ofi-primary-dark);
-    --theme-bg: var(--ofi-bg-page);
-    --theme-surf: #FFFFFF;
-    --theme-border: var(--ofi-border);
-    --theme-text: var(--ofi-text);
-    --theme-muted: #7C6B5C;
-    background: var(--ofi-bg-page);
-    color: var(--ofi-text);
+
+/* ─── Vars — seletor com alta especificidade pra ganhar do tow.css ─── */
+html body.guincho.oficina,
+html body.oficina.guincho,
+html body.oficina {
+  --theme-bg:           #1a0f08;
+  --theme-surface:      #2a1810;
+  --theme-surface-2:    #3a2318;
+  --theme-border:       #5c3d28;
+  --theme-text:         #fef3e8;
+  --theme-muted:        #d4b8a0;
+  --theme-accent:       #d97706;
+  --theme-accent-hover: #b45309;
+  --theme-on-accent:    #1a0f08;
+  --theme-nav:          #140a05;
+  --theme-sidebar:      #1f0f08;
+
+  --surface-light-bg:    #fef9f3;
+  --surface-light-text:  #2a1810;
+  --surface-light-muted: #8b6f5c;
+
+  --primary:        #d97706;
+  --primary-hover:  #b45309;
+  --bs-success:     #d97706;
+  --bs-success-rgb: 217,119,6;
 }
-.theme-oficina .ofi-sidebar {
-    background: var(--ofi-primary-darker);
-    color: #FFF7ED;
-    width: 240px; min-height: 100vh;
-    display: flex; flex-direction: column;
+
+/* ─── Fundo geral ─── */
+html body.oficina,
+html body.oficina .main-content,
+html body.oficina .app-dashboard {
+  background: #1a0f08 !important;
+  color: #fef3e8 !important;
 }
-.theme-oficina .ofi-sidebar-header {
-    padding: 1.25rem 1rem;
-    background: var(--ofi-primary-dark);
-    border-bottom: 1px solid rgba(255,255,255,.08);
+
+/* ─── Sidebar — marrom escuro ─── */
+html body.oficina .sidebar {
+  background: #1f0f08 !important;
+  border-right: 1px solid #3a2318;
 }
-.theme-oficina .ofi-sidebar-brand {
-    display: flex; align-items: center; gap: .6rem;
-    font-weight: 700; font-size: 1rem;
-    color: #FFF7ED; text-decoration: none;
+html body.oficina .sidebar .sidebar-title {
+  color: #8b6f5c !important;
 }
-.theme-oficina .ofi-sidebar-brand i { color: var(--ofi-accent); font-size: 1.4rem; }
-.theme-oficina .ofi-sidebar-sub { font-size: .72rem; color: #E7D3BE; margin-top: .2rem; }
-.theme-oficina .ofi-sidebar-nav { flex: 1; padding: .75rem .5rem; overflow-y: auto; }
-.theme-oficina .ofi-nav-item {
-    display: flex; align-items: center; gap: .65rem;
-    padding: .65rem .85rem; border-radius: 8px;
-    color: #F5E6D3; text-decoration: none; font-size: .88rem;
-    margin-bottom: 2px; position: relative;
-    transition: background .15s ease;
+html body.oficina .sidebar .sidebar-link {
+  color: #fef3e8 !important;
+  border-radius: 8px;
 }
-.theme-oficina .ofi-nav-item:hover { background: rgba(255,255,255,.06); color: #FFF7ED; }
-.theme-oficina .ofi-nav-item.is-active {
-    background: var(--ofi-primary);
-    color: #FFF7ED; font-weight: 600;
+html body.oficina .sidebar .sidebar-link:hover {
+  background: rgba(217,119,6,.15) !important;
+  color: #d97706 !important;
 }
-.theme-oficina .ofi-nav-item.is-active::before {
-    content: ''; position: absolute; left: -0.5rem; top: 20%; bottom: 20%;
-    width: 3px; border-radius: 2px; background: var(--ofi-accent);
+html body.oficina .sidebar .sidebar-link.active {
+  background: #d97706 !important;
+  color: #1a0f08 !important;
+  font-weight: 700;
 }
-.theme-oficina .ofi-nav-item i { width: 1.2rem; text-align: center; font-size: 1rem; }
-.theme-oficina .ofi-sidebar-footer {
-    padding: .85rem 1rem; border-top: 1px solid rgba(255,255,255,.08);
-    font-size: .78rem; color: #E7D3BE;
+html body.oficina .sidebar .sidebar-link.active i {
+  color: #1a0f08 !important;
 }
-.theme-oficina .ofi-card {
-    background: #FFFFFF; border: 1px solid var(--ofi-border);
-    border-radius: 12px; box-shadow: 0 1px 3px rgba(92,31,10,.06);
-    padding: 1.25rem;
+
+/* ─── Badge "OFICINA" no header — âmbar ─── */
+html body.oficina .gf-role-badge,
+html body.oficina .role-badge,
+html body.oficina .badge-role,
+html body.oficina header .badge {
+  background: #d97706 !important;
+  color: #1a0f08 !important;
+  font-weight: 700;
 }
-.theme-oficina .ofi-card-title {
-    font-size: 1rem; font-weight: 700; color: var(--ofi-primary-darker);
-    margin-bottom: .25rem;
+
+/* ─── Botões success — viram âmbar ─── */
+html body.oficina .btn-success,
+html body.oficina .btn.btn-success {
+  background: #d97706 !important;
+  border-color: #d97706 !important;
+  color: #1a0f08 !important;
+  font-weight: 600;
 }
-.theme-oficina .ofi-card-sub { font-size: .82rem; color: #7C6B5C; }
-.theme-oficina .btn-ofi-primary {
-    background: var(--ofi-primary); color: #FFF7ED;
-    border: none; border-radius: 8px; padding: .55rem 1.1rem;
-    font-weight: 600; font-size: .88rem; display: inline-block; text-decoration: none;
+html body.oficina .btn-success:hover,
+html body.oficina .btn.btn-success:hover {
+  background: #b45309 !important;
+  border-color: #b45309 !important;
+  color: #fef3e8 !important;
 }
-.theme-oficina .btn-ofi-primary:hover { background: var(--ofi-primary-dark); color: #FFF7ED; }
-.theme-oficina .btn-ofi-outline {
-    background: transparent; color: var(--ofi-primary);
-    border: 1px solid var(--ofi-primary);
-    border-radius: 8px; padding: .5rem 1rem; font-weight: 600; font-size: .88rem;
-    display: inline-block; text-decoration: none;
+html body.oficina .btn-outline-success {
+  color: #d97706 !important;
+  border-color: #d97706 !important;
 }
-.theme-oficina .btn-ofi-outline:hover { background: var(--ofi-bg-soft); }
-.theme-oficina .ofi-toggle { display: inline-flex; align-items: center; gap: .5rem; }
-.theme-oficina .ofi-toggle input { display: none; }
-.theme-oficina .ofi-toggle-track {
-    width: 44px; height: 24px; border-radius: 12px;
-    background: #C9B8A6; position: relative; transition: background .2s; cursor: pointer;
+html body.oficina .btn-outline-success:hover {
+  background: #d97706 !important;
+  color: #1a0f08 !important;
 }
-.theme-oficina .ofi-toggle input:checked + .ofi-toggle-track { background: var(--ofi-primary); }
-.theme-oficina .ofi-toggle-track::after {
-    content: ''; position: absolute; top: 3px; left: 3px;
-    width: 18px; height: 18px; border-radius: 50%;
-    background: #fff; transition: transform .2s;
+
+/* ─── Inputs / forms — fundo marrom ─── */
+html body.oficina .form-control,
+html body.oficina .form-select,
+html body.oficina input[type="text"],
+html body.oficina input[type="tel"],
+html body.oficina input[type="email"],
+html body.oficina input[type="number"],
+html body.oficina textarea,
+html body.oficina select {
+  background: #3a2318 !important;
+  border: 1px solid #5c3d28 !important;
+  color: #fef3e8 !important;
 }
-.theme-oficina .ofi-toggle input:checked + .ofi-toggle-track::after { transform: translateX(20px); }
-.theme-oficina .ofi-badge {
-    display: inline-block; padding: .2rem .55rem;
-    border-radius: 99px; font-size: .72rem; font-weight: 600;
+html body.oficina .form-control:focus,
+html body.oficina .form-select:focus {
+  background: #3a2318 !important;
+  border-color: #d97706 !important;
+  box-shadow: 0 0 0 3px rgba(217,119,6,.2) !important;
+  color: #fef3e8 !important;
 }
-.theme-oficina .ofi-badge--online  { background: #DCFCE7; color: #166534; }
-.theme-oficina .ofi-badge--offline { background: #FEE2E2; color: #991B1B; }
-.theme-oficina .ofi-badge--info    { background: var(--ofi-bg-soft); color: var(--ofi-primary-dark); }
-.theme-oficina .ofi-stats {
-    display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-    gap: .75rem; margin-bottom: 1.25rem;
+html body.oficina .form-control::placeholder { color: #8b6f5c; }
+html body.oficina .form-label,
+html body.oficina label { color: #d4b8a0; }
+html body.oficina .form-range::-webkit-slider-thumb { background: #d97706; }
+
+/* ─── Cards tow — fundo marrom, não preto ─── */
+html body.oficina .tow-card {
+  background: #2a1810 !important;
+  border: 1px solid #3a2318 !important;
+  border-radius: 12px;
 }
-.theme-oficina .ofi-stat {
-    background: #fff; border: 1px solid var(--ofi-border);
-    border-radius: 10px; padding: .85rem 1rem; text-align: center;
+html body.oficina .tow-panel-title { color: #fef3e8; }
+html body.oficina .tow-panel-subtitle { color: #d4b8a0; }
+
+/* ─── Hero ─── */
+html body.oficina .tow-hero {
+  background: linear-gradient(135deg, #2a1810 0%, #3a2318 100%) !important;
+  border: 1px solid #5c3d28 !important;
+  border-radius: 14px;
 }
-.theme-oficina .ofi-stat-value { font-size: 1.4rem; font-weight: 700; color: var(--ofi-primary-dark); }
-.theme-oficina .ofi-stat-label { font-size: .72rem; color: #7C6B5C; text-transform: uppercase; letter-spacing: .03em; }
-.theme-oficina .ofi-pedido {
-    border: 1px solid var(--ofi-border); border-radius: 10px;
-    padding: 1rem; margin-bottom: .75rem; background: #fff;
-    display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap;
+html body.oficina .tow-hero-title { color: #fef3e8 !important; }
+html body.oficina .tow-hero-eyebrow { color: #d97706 !important; }
+html body.oficina .tow-hero-subtitle { color: #d4b8a0 !important; }
+
+/* ─── Toggle online/offline — âmbar quando ativo ─── */
+html body.oficina .toggle-switch input:checked + .toggle-slider,
+html body.oficina .toggle-slider::before { /* fallback */ }
+html body.oficina .toggle-switch input:checked ~ .toggle-slider {
+  background: #d97706 !important;
 }
-.theme-oficina .ofi-pedido:hover { border-color: var(--ofi-primary); }
-.theme-oficina .ofi-pedido-info strong { color: var(--ofi-primary-darker); }
-.theme-oficina .ofi-pedido-meta { font-size: .8rem; color: #7C6B5C; margin-top: .2rem; }
-.theme-oficina .ofi-pedido-actions { display: flex; gap: .5rem; align-items: center; }
-.theme-oficina .ofi-servico-item {
-    display: flex; align-items: center; gap: .6rem;
-    border: 1px solid var(--ofi-border); border-radius: 10px;
-    padding: .75rem .9rem; cursor: pointer;
-    transition: all .15s ease; background: #fff;
+
+/* ─── Stat cards — fundo âmbar destaque + hint ─── */
+html body.oficina .tow-stat {
+  background: linear-gradient(135deg, #d97706 0%, #b45309 100%) !important;
+  color: #1a0f08 !important;
+  border: none !important;
+  border-radius: 12px;
+  position: relative;
+  padding-bottom: 1.8rem;
+  box-shadow: 0 4px 14px rgba(217,119,6,.25);
+  transition: transform .15s ease;
 }
-.theme-oficina .ofi-servico-item:hover {
-    border-color: var(--ofi-primary); background: var(--ofi-bg-soft);
+html body.oficina .tow-stat:hover { transform: translateY(-2px); }
+html body.oficina .tow-stat-value {
+  color: #1a0f08 !important;
+  font-weight: 800;
 }
-.theme-oficina .ofi-servico-item.is-checked {
-    border-color: var(--ofi-primary); background: var(--ofi-bg-soft);
-    box-shadow: 0 0 0 2px rgba(180,83,9,.15);
+html body.oficina .tow-stat-label {
+  color: rgba(26,15,8,.75) !important;
+  font-weight: 600;
 }
-.theme-oficina .ofi-servico-item input { accent-color: var(--ofi-primary); }
-.theme-oficina .ofi-servico-item i { color: var(--ofi-primary); width: 1.2rem; text-align: center; }
-.theme-oficina .ofi-servico-item span { font-size: .88rem; font-weight: 500; }
-.theme-oficina .ofi-fluxo {
-    display: flex; justify-content: space-between; gap: .5rem;
-    position: relative; padding: .5rem 0;
+html body.oficina .tow-stat-icon {
+  color: #1a0f08 !important;
 }
-.theme-oficina .ofi-fluxo-step { flex: 1; text-align: center; position: relative; }
-.theme-oficina .ofi-fluxo-dot {
-    width: 40px; height: 40px; border-radius: 50%;
-    background: #E7D3BE; color: #fff;
-    display: inline-flex; align-items: center; justify-content: center;
-    font-size: 1rem; margin-bottom: .35rem; transition: all .2s ease;
+html body.oficina .tow-stat-hint {
+  position: absolute;
+  bottom: .35rem;
+  left: .75rem;
+  right: .75rem;
+  font-size: .68rem;
+  line-height: 1.2;
+  color: rgba(26,15,8,.6);
+  text-align: center;
+  font-style: italic;
 }
-.theme-oficina .ofi-fluxo-step.is-active .ofi-fluxo-dot { background: var(--ofi-primary); }
-.theme-oficina .ofi-fluxo-step.is-done .ofi-fluxo-dot { background: #166534; }
-.theme-oficina .ofi-fluxo-label { font-size: .72rem; color: #7C6B5C; font-weight: 600; }
-.theme-oficina .ofi-fluxo-step.is-active .ofi-fluxo-label { color: var(--ofi-primary-darker); }
-.theme-oficina .ofi-fluxo-step.is-done .ofi-fluxo-label { color: #166534; }
+
+/* ─── Tabelas ─── */
+html body.oficina .ofi-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: .88rem;
+}
+html body.oficina .ofi-table thead th {
+  background: #3a2318 !important;
+  color: #fef3e8 !important;
+  padding: .65rem .75rem;
+  text-align: left;
+  font-weight: 600;
+  font-size: .76rem;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  border-bottom: 1px solid #5c3d28;
+}
+html body.oficina .ofi-table tbody td {
+  padding: .75rem;
+  border-bottom: 1px solid #3a2318;
+  color: #fef3e8;
+  vertical-align: middle;
+}
+html body.oficina .ofi-table tbody tr:hover { background: rgba(217,119,6,.08); }
+
+/* ─── Badges de status ─── */
+html body.oficina .badge-info { background: #d97706 !important; color: #1a0f08 !important; }
+html body.oficina .badge-ok { background: #166534 !important; color: #dcfce7 !important; }
+html body.oficina .badge-warn { background: #92400e !important; color: #fef3c7 !important; }
+html body.oficina .badge-off { background: #7c2d12 !important; color: #fee2e2 !important; }
+
+/* ─── Filtros ─── */
+html body.oficina .ofi-filter {
+  display: flex; flex-wrap: wrap; gap: .5rem; align-items: flex-end; margin-bottom: 1rem;
+}
+html body.oficina .ofi-filter input,
+html body.oficina .ofi-filter select {
+  min-height: 38px; border-radius: 8px; border: 1px solid #5c3d28;
+  background: #3a2318; color: #fef3e8; padding: .35rem .65rem;
+}
+
+/* ─── Empty state ─── */
+html body.oficina .ofi-empty {
+  text-align: center; padding: 3rem 1rem; color: #d4b8a0;
+}
+html body.oficina .ofi-empty i {
+  font-size: 2.5rem; display: block; margin-bottom: .75rem; opacity: .5;
+}
+
+/* ─── Offer card ─── */
+html body.oficina .tow-offer {
+  background: #fef9f3 !important;
+  color: #2a1810 !important;
+  border: 1px solid #d97706 !important;
+  border-radius: 14px;
+  padding: 1rem 1.15rem;
+  margin-bottom: 1rem;
+  box-shadow: 0 6px 20px rgba(217,119,6,.2);
+}
+html body.oficina .tow-offer .tow-offer-eyebrow { color: #b45309 !important; font-weight: 700; font-size: .72rem; text-transform: uppercase; letter-spacing: .06em; }
+html body.oficina .tow-offer .tow-offer-title { color: #2a1810 !important; margin: .2rem 0 .1rem; font-weight: 800; }
+html body.oficina .tow-offer .tow-offer-subtitle { color: #8b6f5c !important; font-size: .85rem; }
+html body.oficina .tow-offer .tow-offer-timer {
+  background: #d97706; color: #fff; padding: .3rem .65rem; border-radius: 999px;
+  font-family: monospace; font-weight: 700; font-size: .85rem;
+}
+html body.oficina .tow-offer .tow-offer-metrics { display: flex; gap: 1rem; margin: .75rem 0; flex-wrap: wrap; }
+html body.oficina .tow-offer .tow-offer-metric {
+  flex: 1 1 100px; background: rgba(217,119,6,.08); border-radius: 8px; padding: .5rem .7rem;
+}
+html body.oficina .tow-offer .tow-offer-metric span { display: block; font-size: .7rem; color: #8b6f5c; text-transform: uppercase; }
+html body.oficina .tow-offer .tow-offer-metric strong { color: #2a1810; font-size: 1rem; }
+html body.oficina .tow-offer .tow-offer-actions { display: flex; gap: .5rem; margin-top: .75rem; }
+html body.oficina .tow-offer .tow-offer-actions .btn-outline-secondary {
+  background: transparent !important; color: #8b6f5c !important; border: 1px solid #8b6f5c !important;
+}
+html body.oficina .tow-offer .tow-offer-actions .btn-outline-secondary:hover {
+  background: #8b6f5c !important; color: #fef9f3 !important;
+}
