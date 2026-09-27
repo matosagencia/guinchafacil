@@ -25,7 +25,7 @@
     var decisionReboque = document.getElementById('decisionReboque');
     var assistenciaPrice = document.getElementById('assistenciaPrice');
     var assistenciaSaida = document.getElementById('assistenciaSaida');
-    var reboquePrice = document.getElementById('reboquePrice');
+    var reboquePrice = document.getElementById('reboquePrice') || document.getElementById('reboqueDeslocamento');
     var decisionFallbackText = document.getElementById('decisionFallbackText');
     var destinationStage = document.createElement('div');
     var destinationMap = null;
@@ -75,10 +75,18 @@
 
     function tipoParaDecisao() {
         var value = tipo.value || 'outro';
-        if (value === 'mecanica' || value === 'outro') return 'pane_mecanica';
+        if (value === 'outro' || value === 'orientacao' || value === 'me_orientem') return value;
+        if (value === 'mecanica') return 'pane_mecanica';
         if (value === 'eletrica') return 'pane_eletrica';
         if (value === 'combustivel') return 'pane_seca';
         return value;
+    }
+
+    function formatDescontoPercentual(raw) {
+        var pct = Number(raw);
+        if (!isFinite(pct) || pct < 0) pct = 0;
+        if (pct > 0 && pct <= 1) pct = pct * 100;
+        return String(pct).replace(/\.0+$/, '').replace('.', ',') + '%';
     }
 
     async function carregarDecisao() {
@@ -113,6 +121,23 @@
     function renderDecisao(data) {
         var assist = data.opcao_assistencia || {};
         var tow = data.opcao_reboque || {};
+        var descontoLabel = formatDescontoPercentual(data.desconto_fallback_percentual);
+
+        if (data.acao === 'encaminhar_suporte') {
+            if (decisionAssistencia) decisionAssistencia.hidden = true;
+            if (decisionReboque) decisionReboque.hidden = true;
+            if (decisionRecommendation) {
+                decisionRecommendation.textContent = data.justificativa
+                    || data.mensagem_suporte
+                    || 'Vamos te orientar pelo suporte. Nao e necessario cotar agora.';
+            }
+            if (decisionFallbackText) {
+                decisionFallbackText.textContent = 'Acesse o chat apos o login ou fale com o suporte para receber orientacao.';
+            }
+            return;
+        }
+
+        if (decisionReboque) decisionReboque.hidden = false;
         if (assistenciaPrice) assistenciaPrice.textContent = money(assist.custo_saida);
         if (assistenciaSaida) assistenciaSaida.textContent = money(assist.custo_saida);
         if (reboquePrice) reboquePrice.textContent = money(tow.custo_total);
@@ -122,7 +147,8 @@
             card.classList.remove('is-recommended', 'is-selected');
         });
         if (!assist.disponivel) {
-            if (decisionRecommendation) decisionRecommendation.textContent = 'Nao encontramos profissionais proximos. Reboque e o caminho mais rapido.';
+            if (decisionRecommendation) decisionRecommendation.textContent = data.justificativa
+                || 'Nao encontramos profissionais proximos. Reboque e o caminho mais rapido.';
             if (decisionReboque) decisionReboque.classList.add('is-recommended');
         } else if (data.recomendacao === 'assistencia') {
             if (decisionRecommendation) decisionRecommendation.textContent = 'Recomendamos resolver no local - mais rapido e mais barato';
@@ -135,7 +161,7 @@
         }
         if (decisionFallbackText) {
             decisionFallbackText.textContent = assist.disponivel && data.recomendacao === 'assistencia'
-                ? 'Se o profissional nao conseguir resolver no local, voce pode converter para reboque com 21% de desconto.'
+                ? 'Se o profissional nao conseguir resolver no local, voce pode converter para reboque com ' + descontoLabel + ' de desconto.'
                 : '';
         }
     }
@@ -218,6 +244,10 @@ tipo.addEventListener('change', async function () {
     if (!lat || !lng || !lat.value || !lng.value) return;
 
     var preCheck = await carregarDecisao();
+    if (preCheck && preCheck.acao === 'encaminhar_suporte') {
+        semOficinaProxima = false;
+        return;
+    }
     if (preCheck && preCheck.opcoes_disponiveis && preCheck.opcoes_disponiveis.length === 1
         && preCheck.opcoes_disponiveis[0] === 'reboque') {
         semOficinaProxima = true;
@@ -235,8 +265,17 @@ document.addEventListener('prequote:type-change', function () {
 });
 
     if (btnNext) {
-    btnNext.addEventListener('click', function () {
+    btnNext.addEventListener('click', async function () {
         if (currentStage === 'situation') {
+            if (!decisionPayload) {
+                await carregarDecisao();
+            }
+            if (decisionPayload && decisionPayload.acao === 'encaminhar_suporte') {
+                showStage('decision');
+                if (btnNext) btnNext.style.display = 'none';
+                if (btnQuote) btnQuote.style.display = 'none';
+                return;
+            }
             if (semOficinaProxima) {
                 escolherDecisao('reboque');
                 if (destino && !destino.value.trim()) {
@@ -254,6 +293,9 @@ document.addEventListener('prequote:type-change', function () {
                 showStage('decision');
             }
         } else if (currentStage === 'decision') {
+            if (decisionPayload && decisionPayload.acao === 'encaminhar_suporte') {
+                return;
+            }
             if (!decisionInput || !decisionInput.value) {
                 escolherDecisao((decisionPayload && decisionPayload.recomendacao === 'assistencia') ? 'assistencia' : 'reboque');
             }

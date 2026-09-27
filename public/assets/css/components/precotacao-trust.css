@@ -1,0 +1,95 @@
+/* ============================================================
+   Trust badges + WhatsApp float — pré-cotação
+   Arquivo: public/assets/css/components/precotacao-trust.css
+   ============================================================ */
+
+/* ─── Barra de trust badges (3 itens com ícone) ─── */
+.preco-trust-bar {
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+    margin-top: 1rem;
+    padding: .75rem 1rem;
+    background: rgba(47, 179, 74, .06);
+    border: 1px solid rgba(47, 179, 74, .18);
+    border-radius: 12px;
+    font-size: .82rem;
+    color: var(--theme-muted, #55705b);
+}
+.preco-trust-item {
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+    white-space: nowrap;
+}
+.preco-trust-item i {
+    color: var(--primary, #2fb34a);
+    font-size: 1rem;
+}
+.preco-trust-item strong {
+    color: var(--theme-text, #172018);
+}
+
+/* Em telas estreitas, empilha */
+@media (max-width: 575.98px) {
+    .preco-trust-bar {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: .5rem;
+    }
+}
+
+/* ─── Botão flutuante do WhatsApp ─── */
+.pc-whats-float {
+    position: fixed;
+    right: 20px;
+    bottom: 20px;
+    z-index: 9500;
+    display: inline-flex;
+    align-items: center;
+    gap: .55rem;
+    padding: .75rem 1.1rem;
+    background: #25D366;
+    color: #fff !important;
+    border-radius: 999px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: .9rem;
+    box-shadow: 0 6px 20px rgba(37, 211, 102, .35), 0 2px 6px rgba(0,0,0,.15);
+    transition: transform .15s ease, box-shadow .15s ease;
+    max-width: calc(100vw - 40px);
+}
+.pc-whats-float:hover {
+    background: #20b359;
+    color: #fff !important;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 26px rgba(37, 211, 102, .45);
+}
+.pc-whats-float i.fa-whatsapp {
+    font-size: 1.3rem;
+}
+.pc-whats-float .pc-whats-label {
+    display: inline-block;
+}
+.pc-whats-float .pc-whats-eyebrow {
+    display: block;
+    font-size: .7rem;
+    font-weight: 400;
+    opacity: .9;
+    line-height: 1;
+    margin-bottom: 2px;
+}
+
+/* Mobile: vira só ícone */
+@media (max-width: 575.98px) {
+    .pc-whats-float {
+        padding: .85rem;
+    }
+    .pc-whats-float .pc-whats-label { display: none; }
+}
+
+/* Quando o wizard estiver em tela cheia, afasta o botão do bottom-sheet */
+body.preco-wizard-active .pc-whats-float {
+    bottom: 90px;
+}

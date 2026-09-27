@@ -25,6 +25,11 @@ final class PedidoController
                 throw new InvalidArgumentException('Informe a localizacao de origem para comparar as opcoes.');
             }
 
+            $veiculoPodeMover = filter_var(
+                $draft['veiculo_pode_mover'] ?? true,
+                FILTER_VALIDATE_BOOLEAN,
+                FILTER_NULL_ON_FAILURE
+            );
             $service = new DecisaoAtendimentoService();
             $decisao = $service->avaliar(
                 (int)($draft['pedido_id'] ?? 0),
@@ -35,6 +40,7 @@ final class PedidoController
                     'categoria' => (string)($draft['categoria'] ?? 'popular'),
                     'distancia_km' => (float)($draft['distancia_km'] ?? 5.0),
                     'custo_total' => (float)($draft['custo_total'] ?? $draft['valor'] ?? 0.0),
+                    'veiculo_pode_mover' => $veiculoPodeMover ?? true,
                 ]
             );
 

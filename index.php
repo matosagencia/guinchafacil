@@ -244,7 +244,18 @@ $metodo = $_SERVER['REQUEST_METHOD'] ?? 'GET';
 // Formato: $rotas[METODO][PATH] = [Controller, action, perfil]
 // ─────────────────────────────────────────────────────────────────────────────
 $rotas = [
-    'GET' => [
+    'GET' => [
+        // === ROUTES OFICINA GET ===
+        '/oficina/pedido/{id}/aceitar'   => ['OficinaController', 'aceitar',             'oficina'],
+        '/oficina/pedido/{id}/status'    => ['OficinaController', 'statusJson',          'oficina'],
+        '/oficina/pedido/{id}'           => ['OficinaController', 'atendimento',         'oficina'],
+        '/oficina/arquivo/{nome}'        => ['OficinaController', 'servirFoto',          'oficina'],
+        '/oficina/dashboard'             => ['OficinaController', 'dashboard',           'oficina'],
+        '/oficina/pedidos'               => ['OficinaController', 'pedidosDisponiveis',  'oficina'],
+        '/oficina/financeiro'            => ['OficinaController', 'financeiro',          'oficina'],
+        '/oficina/historico'             => ['OficinaController', 'historico',           'oficina'],
+        '/oficina/perfil'                => ['OficinaController', 'perfilForm',          'oficina'],
+
         '/'                 => ['AuthController', 'landing', null],
         '/parceiros/interesse' => ['AuthController', 'parceirosInteresse', null],
         '/sitemap.xml'      => ['AuthController', 'sitemap', null],
@@ -314,8 +325,8 @@ $rotas = [
         '/especialista/perfil/salvar' => ['EspecialistaController', 'perfilSalvar', 'especialista'],
         '/especialista/atendimento/{id}/aceitar' => ['EspecialistaController', 'aceitar', 'especialista'],
         '/especialista/atendimento/{id}/status' => ['EspecialistaController', 'transicionar', 'especialista'],
-        '/guincho/tornar-se-guincho' => ['GuinchoController', 'tornarSeGuincho', 'guincho'],
-
+        '/guincho/tornar-se-guincho' => ['GuinchoController', 'tornarSeGuincho', 'guincho'],                // ─── OFICINA ─────────────────────────────────────────────        '/oficina/dashboard'             => ['OficinaController', 'dashboard', 'oficina'],        '/oficina/pedidos'               => ['OficinaController', 'pedidosDisponiveis', 'oficina'],        '/oficina/pedido/{id}'           => ['OficinaController', 'atendimento', 'oficina'],        '/oficina/pedido/{id}/aceitar'   => ['OficinaController', 'aceitar', 'oficina'],        '/oficina/pedido/{id}/status'    => ['OficinaController', 'statusJson', 'oficina'],        '/oficina/historico'             => ['OficinaController', 'historico', 'oficina'],        '/oficina/perfil'                => ['OficinaController', 'perfilForm', 'oficina'],        '/oficina/financeiro' => ['OficinaController', 'financeiro', 'oficina'],
+        // ─── OFICINA ─────────────────────────────────────────────
         '/admin/central'             => ['AdminController', 'centralOperacional', 'admin'],
         '/admin/alertas'             => ['AdminController', 'alertasOperacionais', 'admin'],
         '/admin/despacho'            => ['AdminController', 'despacho', 'admin'],
@@ -423,6 +434,16 @@ $rotas = [
         '/pagamento/pendente' => ['PagamentoController', 'pendente', 'cliente'],
     ],
     'POST' => [
+        // === ROUTES OFICINA POST ===
+        '/oficina/perfil/salvar'          => ['OficinaController', 'perfilSalvar',        'oficina'],
+        '/oficina/servicos/salvar'        => ['OficinaController', 'salvarServicos',      'oficina'],
+        '/oficina/disponibilidade'        => ['OficinaController', 'disponibilidade',     'oficina'],
+        '/oficina/localizacao'            => ['OficinaController', 'atualizarLocalizacao','oficina'],
+        '/oficina/pedido/{id}/atualizar'  => ['OficinaController', 'atualizarStatus',     'oficina'],
+        '/oficina/pedido/{id}/evidencia'  => ['OficinaController', 'registrarEvidencia',  'oficina'],
+        '/oficina/pedido/{id}/orcamento'  => ['OficinaController', 'enviarOrcamento',     'oficina'],
+        '/cliente/pedido/{id}/orcamento-oficina/responder' => ['ClienteController', 'responderOrcamentoOficina', 'cliente'],
+
         '/pre-cotacao'      => ['AuthController', 'preCotacao', null],
         '/pre-cotacao/aceitar' => ['AuthController', 'aceitarPreCotacao', null],
         '/api/pre-cotacao/decisao' => ['PedidoController', 'decisaoPreCotacao', null],
@@ -433,7 +454,7 @@ $rotas = [
         '/push/subscribe'         => ['PushSubscriptionController', 'subscribe', null],
         '/push/unsubscribe'       => ['PushSubscriptionController', 'unsubscribe', null],
         '/registro/cliente'       => ['AuthController', 'registroCliente', null],
-        '/registro/guincho'       => ['AuthController', 'registroGuincho', null],
+        '/registro/guincho'       => ['AuthController', 'registroGuincho', null],        // ─── OFICINA ─────────────────────────────────────────────                // ─── OFICINA ─────────────────────────────────────────────        '/oficina/disponibilidade'        => ['OficinaController', 'disponibilidade',     'oficina'],        '/oficina/localizacao'            => ['OficinaController', 'atualizarLocalizacao','oficina'],        '/oficina/perfil/salvar'          => ['OficinaController', 'perfilSalvar',        'oficina'],        '/oficina/servicos/salvar'        => ['OficinaController', 'salvarServicos',      'oficina'],        '/oficina/pedido/{id}/atualizar'  => ['OficinaController', 'atualizarStatus',     'oficina'],        '/oficina/pedido/{id}/evidencia'  => ['OficinaController', 'registrarEvidencia',  'oficina'],        '/oficina/pedido/{id}/orcamento'  => ['OficinaController', 'enviarOrcamento',     'oficina'],        '/cliente/pedido/{id}/orcamento-oficina/responder'=> ['ClienteController', 'responderOrcamentoOficina', 'cliente'],
         '/registro/especialista'  => ['AuthController', 'registroEspecialista', null],
         '/especialista/disponibilidade' => ['EspecialistaController', 'disponibilidade', 'especialista'],
         '/especialista/atendimento/aceitar/' => ['EspecialistaController', 'aceitar', 'especialista'],

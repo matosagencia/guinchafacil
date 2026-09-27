@@ -1,0 +1,157 @@
+/* ============================================================
+   Tema OFICINA â€” alaranjado quase marrom
+   Escopo: .theme-oficina (aplicado no <body> via JS)
+   ============================================================ */
+.theme-oficina {
+    --ofi-primary:        #B45309;
+    --ofi-primary-dark:   #7C2D12;
+    --ofi-primary-darker: #5C1F0A;
+    --ofi-accent:         #F59E0B;
+    --ofi-bg-soft:        #FFF7ED;
+    --ofi-bg-page:        #FDF6EE;
+    --ofi-border:         #E7D3BE;
+    --ofi-text:           #3B1F0A;
+    --primary: var(--ofi-primary);
+    --primary-hover: var(--ofi-primary-dark);
+    --theme-bg: var(--ofi-bg-page);
+    --theme-surf: #FFFFFF;
+    --theme-border: var(--ofi-border);
+    --theme-text: var(--ofi-text);
+    --theme-muted: #7C6B5C;
+    background: var(--ofi-bg-page);
+    color: var(--ofi-text);
+}
+.theme-oficina .ofi-sidebar {
+    background: var(--ofi-primary-darker);
+    color: #FFF7ED;
+    width: 240px; min-height: 100vh;
+    display: flex; flex-direction: column;
+}
+.theme-oficina .ofi-sidebar-header {
+    padding: 1.25rem 1rem;
+    background: var(--ofi-primary-dark);
+    border-bottom: 1px solid rgba(255,255,255,.08);
+}
+.theme-oficina .ofi-sidebar-brand {
+    display: flex; align-items: center; gap: .6rem;
+    font-weight: 700; font-size: 1rem;
+    color: #FFF7ED; text-decoration: none;
+}
+.theme-oficina .ofi-sidebar-brand i { color: var(--ofi-accent); font-size: 1.4rem; }
+.theme-oficina .ofi-sidebar-sub { font-size: .72rem; color: #E7D3BE; margin-top: .2rem; }
+.theme-oficina .ofi-sidebar-nav { flex: 1; padding: .75rem .5rem; overflow-y: auto; }
+.theme-oficina .ofi-nav-item {
+    display: flex; align-items: center; gap: .65rem;
+    padding: .65rem .85rem; border-radius: 8px;
+    color: #F5E6D3; text-decoration: none; font-size: .88rem;
+    margin-bottom: 2px; position: relative;
+    transition: background .15s ease;
+}
+.theme-oficina .ofi-nav-item:hover { background: rgba(255,255,255,.06); color: #FFF7ED; }
+.theme-oficina .ofi-nav-item.is-active {
+    background: var(--ofi-primary);
+    color: #FFF7ED; font-weight: 600;
+}
+.theme-oficina .ofi-nav-item.is-active::before {
+    content: ''; position: absolute; left: -0.5rem; top: 20%; bottom: 20%;
+    width: 3px; border-radius: 2px; background: var(--ofi-accent);
+}
+.theme-oficina .ofi-nav-item i { width: 1.2rem; text-align: center; font-size: 1rem; }
+.theme-oficina .ofi-sidebar-footer {
+    padding: .85rem 1rem; border-top: 1px solid rgba(255,255,255,.08);
+    font-size: .78rem; color: #E7D3BE;
+}
+.theme-oficina .ofi-card {
+    background: #FFFFFF; border: 1px solid var(--ofi-border);
+    border-radius: 12px; box-shadow: 0 1px 3px rgba(92,31,10,.06);
+    padding: 1.25rem;
+}
+.theme-oficina .ofi-card-title {
+    font-size: 1rem; font-weight: 700; color: var(--ofi-primary-darker);
+    margin-bottom: .25rem;
+}
+.theme-oficina .ofi-card-sub { font-size: .82rem; color: #7C6B5C; }
+.theme-oficina .btn-ofi-primary {
+    background: var(--ofi-primary); color: #FFF7ED;
+    border: none; border-radius: 8px; padding: .55rem 1.1rem;
+    font-weight: 600; font-size: .88rem; display: inline-block; text-decoration: none;
+}
+.theme-oficina .btn-ofi-primary:hover { background: var(--ofi-primary-dark); color: #FFF7ED; }
+.theme-oficina .btn-ofi-outline {
+    background: transparent; color: var(--ofi-primary);
+    border: 1px solid var(--ofi-primary);
+    border-radius: 8px; padding: .5rem 1rem; font-weight: 600; font-size: .88rem;
+    display: inline-block; text-decoration: none;
+}
+.theme-oficina .btn-ofi-outline:hover { background: var(--ofi-bg-soft); }
+.theme-oficina .ofi-toggle { display: inline-flex; align-items: center; gap: .5rem; }
+.theme-oficina .ofi-toggle input { display: none; }
+.theme-oficina .ofi-toggle-track {
+    width: 44px; height: 24px; border-radius: 12px;
+    background: #C9B8A6; position: relative; transition: background .2s; cursor: pointer;
+}
+.theme-oficina .ofi-toggle input:checked + .ofi-toggle-track { background: var(--ofi-primary); }
+.theme-oficina .ofi-toggle-track::after {
+    content: ''; position: absolute; top: 3px; left: 3px;
+    width: 18px; height: 18px; border-radius: 50%;
+    background: #fff; transition: transform .2s;
+}
+.theme-oficina .ofi-toggle input:checked + .ofi-toggle-track::after { transform: translateX(20px); }
+.theme-oficina .ofi-badge {
+    display: inline-block; padding: .2rem .55rem;
+    border-radius: 99px; font-size: .72rem; font-weight: 600;
+}
+.theme-oficina .ofi-badge--online  { background: #DCFCE7; color: #166534; }
+.theme-oficina .ofi-badge--offline { background: #FEE2E2; color: #991B1B; }
+.theme-oficina .ofi-badge--info    { background: var(--ofi-bg-soft); color: var(--ofi-primary-dark); }
+.theme-oficina .ofi-stats {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: .75rem; margin-bottom: 1.25rem;
+}
+.theme-oficina .ofi-stat {
+    background: #fff; border: 1px solid var(--ofi-border);
+    border-radius: 10px; padding: .85rem 1rem; text-align: center;
+}
+.theme-oficina .ofi-stat-value { font-size: 1.4rem; font-weight: 700; color: var(--ofi-primary-dark); }
+.theme-oficina .ofi-stat-label { font-size: .72rem; color: #7C6B5C; text-transform: uppercase; letter-spacing: .03em; }
+.theme-oficina .ofi-pedido {
+    border: 1px solid var(--ofi-border); border-radius: 10px;
+    padding: 1rem; margin-bottom: .75rem; background: #fff;
+    display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap;
+}
+.theme-oficina .ofi-pedido:hover { border-color: var(--ofi-primary); }
+.theme-oficina .ofi-pedido-info strong { color: var(--ofi-primary-darker); }
+.theme-oficina .ofi-pedido-meta { font-size: .8rem; color: #7C6B5C; margin-top: .2rem; }
+.theme-oficina .ofi-pedido-actions { display: flex; gap: .5rem; align-items: center; }
+.theme-oficina .ofi-servico-item {
+    display: flex; align-items: center; gap: .6rem;
+    border: 1px solid var(--ofi-border); border-radius: 10px;
+    padding: .75rem .9rem; cursor: pointer;
+    transition: all .15s ease; background: #fff;
+}
+.theme-oficina .ofi-servico-item:hover {
+    border-color: var(--ofi-primary); background: var(--ofi-bg-soft);
+}
+.theme-oficina .ofi-servico-item.is-checked {
+    border-color: var(--ofi-primary); background: var(--ofi-bg-soft);
+    box-shadow: 0 0 0 2px rgba(180,83,9,.15);
+}
+.theme-oficina .ofi-servico-item input { accent-color: var(--ofi-primary); }
+.theme-oficina .ofi-servico-item i { color: var(--ofi-primary); width: 1.2rem; text-align: center; }
+.theme-oficina .ofi-servico-item span { font-size: .88rem; font-weight: 500; }
+.theme-oficina .ofi-fluxo {
+    display: flex; justify-content: space-between; gap: .5rem;
+    position: relative; padding: .5rem 0;
+}
+.theme-oficina .ofi-fluxo-step { flex: 1; text-align: center; position: relative; }
+.theme-oficina .ofi-fluxo-dot {
+    width: 40px; height: 40px; border-radius: 50%;
+    background: #E7D3BE; color: #fff;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 1rem; margin-bottom: .35rem; transition: all .2s ease;
+}
+.theme-oficina .ofi-fluxo-step.is-active .ofi-fluxo-dot { background: var(--ofi-primary); }
+.theme-oficina .ofi-fluxo-step.is-done .ofi-fluxo-dot { background: #166534; }
+.theme-oficina .ofi-fluxo-label { font-size: .72rem; color: #7C6B5C; font-weight: 600; }
+.theme-oficina .ofi-fluxo-step.is-active .ofi-fluxo-label { color: var(--ofi-primary-darker); }
+.theme-oficina .ofi-fluxo-step.is-done .ofi-fluxo-label { color: #166534; }
