@@ -67,7 +67,7 @@ body.stage-destino  .origin-map-composition,
 body.stage-sintoma  .origin-map-composition { display: none !important; }
 
 /* Mostra botão Ver cotação só no estágio destino */
-body.stage-destino #btnCotacao { display: block !important; }
+body.stage-destino #btnCotacao, body.stage-veiculo #btnCotacao { display: block !important; }
 
 /* Esconde Voltar em address */
 body.stage-address #btnSituacaoVoltar { display: none !important; }
@@ -119,7 +119,7 @@ body.stage-destino  .origin-map-composition,
 body.stage-sintoma  .origin-map-composition { display: none !important; }
 
 /* Mostra botão Ver cotação só no estágio destino */
-body.stage-destino #btnCotacao { display: block !important; }
+body.stage-destino #btnCotacao, body.stage-veiculo #btnCotacao { display: block !important; }
 
 /* Esconde Voltar em address */
 body.stage-address #btnSituacaoVoltar { display: none !important; }
@@ -166,8 +166,10 @@ body.stage-address #btnSituacaoVoltar { display: none !important; }
 <form method="post" action="<?= $e($bp) ?>/pre-cotacao" class="row g-3" data-marketing-event="generate_lead">
 <input type="hidden" name="csrf_token" value="<?= $e((string)($csrf_token ?? '')) ?>">
 <div class="origin-map-composition"><div class="col-12"><label class="label" for="localizacao">Onde est&aacute; o ve&iacute;culo?</label><div class="address-fields"><div><input class="form-control" id="localizacao" name="localizacao" maxlength="220" placeholder="Rua, bairro e cidade" autocomplete="street-address" value="<?= $e($draftLocalizacao) ?>"></div><div><label class="address-number-label" for="numero_origem">N&uacute;mero</label><input class="form-control" id="numero_origem" name="numero_origem" maxlength="20" inputmode="numeric" placeholder="Ex.: 280" autocomplete="address-line2" required value="<?= $e($draftNumeroOrigem) ?>"></div></div><button class="btn btn-outline-success mt-2" id="btnGps" type="button">Usar minha localiza&ccedil;&atilde;o</button><small class="muted d-block mt-1" id="gpsStatus">Digite a rua e o n&uacute;mero. Se houver endere&ccedil;os iguais, escolha a cidade correta.</small></div>
-<input type="hidden" id="lat_origem" name="lat_origem"><input type="hidden" id="lng_origem" name="lng_origem"><div id="originMapPanel" class="regional-map-panel" hidden><div class="regional-map-head"><strong>Confirme o ponto no mapa</strong><span id="mapAccuracyStatus">Arraste o pin até o local exato.</span></div><div id="originMap" class="regional-map" aria-label="Mapa regional para ajustar a localização"></div><small id="pinAddressStatus" class="muted">O endereço será atualizado a partir do pin. Se o número for estimado, você poderá revisá-lo.</small></div></div>
-<div class="col-12" id="situacaoStage"><fieldset class="choice-fieldset"><legend class="label">O que aconteceu?</legend><input type="hidden" id="tipo_problema" name="tipo_problema" value="outro"><div class="choice-grid choice-grid-help">
+<input type="hidden" id="lat_origem" name="lat_origem">
+<input type="hidden" id="uf_origem_detectada" value="">
+<input type="hidden" id="uf_destino_detectada" value=""><input type="hidden" id="lng_origem" name="lng_origem"><div id="originMapPanel" class="regional-map-panel" hidden><div class="regional-map-head"><strong>Confirme o ponto no mapa</strong><span id="mapAccuracyStatus">Arraste o pin até o local exato.</span></div><div id="originMap" class="regional-map" aria-label="Mapa regional para ajustar a localização"></div><small id="pinAddressStatus" class="muted">O endereço será atualizado a partir do pin. Se o número for estimado, você poderá revisá-lo.</small></div></div>
+<div class="col-12" id="situacaoStage"><fieldset class="choice-fieldset"><legend class="label">O que aconteceu?</legend><input type="hidden" id="tipo_problema" name="tipo_problema" value="me_orientem"><div class="choice-grid choice-grid-help">
 <?php $ajudas = [['me_orientem','fa-comments','Me orientem','Nao sei qual caminho escolher.'],['resolver_local','fa-user-cog','Resolver no local','Quero uma avaliacao onde estou.'],['levar_carro','fa-truck-pickup','Levar o carro','Preciso de uma oficina ou destino.']]; foreach($ajudas as $i=>$a): ?><button type="button" class="choice-card<?= $i===0?' is-selected':'' ?>" data-choice-group="tipo_problema" data-choice-value="<?= $e($a[0]) ?>" aria-pressed="<?= $i===0?'true':'false' ?>"><i class="fas <?= $e($a[1]) ?>" aria-hidden="true"></i><strong><?= $a[2] ?></strong><small><?= $a[3] ?></small></button><?php endforeach; ?></div></fieldset></div>
 <div class="col-12" id="fieldVeiculoPodeMover" hidden><fieldset class="choice-fieldset"><legend class="label">O veículo pode se mover com segurança?</legend><input type="hidden" id="veiculo_pode_mover" name="veiculo_pode_mover" value="1"><div class="choice-grid choice-grid-help"><button type="button" class="choice-card is-selected" data-choice-group="veiculo_pode_mover" data-choice-value="1" aria-pressed="true"><i class="fas fa-check-circle" aria-hidden="true"></i><strong>Sim</strong><small>Ele ainda pode rodar com segurança.</small></button><button type="button" class="choice-card" data-choice-group="veiculo_pode_mover" data-choice-value="0" aria-pressed="false"><i class="fas fa-triangle-exclamation" aria-hidden="true"></i><strong>Não</strong><small>Precisa ser removido por reboque.</small></button></div></fieldset></div>
 
@@ -242,9 +244,22 @@ body.stage-address #btnSituacaoVoltar { display: none !important; }
 <p class="muted small mb-0 mt-2" id="decisionFallbackText"></p>
 </fieldset>
 </div>
-<div class="col-12" id="vehicleStage"><fieldset class="choice-fieldset"><legend class="label">Qual &eacute; o tipo de ve&iacute;culo?</legend><input type="hidden" id="categoria" name="categoria" value="popular"><div class="choice-grid choice-grid-vehicle">
+<div class="col-12" id="vehicleStage" hidden><fieldset class="choice-fieldset"><legend class="label">Qual &eacute; o tipo de ve&iacute;culo?</legend><input type="hidden" id="categoria" name="categoria" value="popular"><div class="choice-grid choice-grid-vehicle">
 <?php $veiculos = [['popular','fa-car','Carro','Ve&iacute;culo de passeio comum.'],['moto','fa-motorcycle','Moto','Motocicleta ou scooter.'],['suv','fa-car-side','SUV','Ve&iacute;culo alto ou utilit&aacute;rio esportivo.'],['caminhonete','fa-truck-pickup','Caminhonete','Picape ou ve&iacute;culo de carga leve.'],['eletrico','fa-charging-station','El&eacute;trico','Ve&iacute;culo 100% el&eacute;trico.']]; foreach($veiculos as $i=>$v): ?><button type="button" class="choice-card<?= $i===0?' is-selected':'' ?>" data-choice-group="categoria" data-choice-value="<?= $e($v[0]) ?>" aria-pressed="<?= $i===0?'true':'false' ?>"><i class="fas <?= $e($v[1]) ?>" aria-hidden="true"></i><strong><?= $v[2] ?></strong><small><?= $v[3] ?></small></button><?php endforeach; ?></div></fieldset></div>
-<div class="col-12" id="destinoBox" hidden><label class="label" for="destino">Para onde deve levar o ve&iacute;culo?</label><div class="address-fields"><div><input class="form-control" id="destino" name="destino" maxlength="220" placeholder="Rua, bairro e cidade" autocomplete="street-address"></div><div><label class="address-number-label" for="numero_destino">N&uacute;mero</label><input class="form-control" id="numero_destino" name="numero_destino" maxlength="20" inputmode="numeric" placeholder="Ex.: 247" autocomplete="address-line2"><input type="hidden" id="lat_destino" name="lat_destino"><input type="hidden" id="lng_destino" name="lng_destino"></div></div><small class="muted">Digite o endere&ccedil;o e o n&uacute;mero; depois escolha a cidade sugerida para calcular a rota.</small></div>
+<div class="col-12" id="destinoBox" hidden>
+<div class="col-12 mt-3" id="precoDestinoWrap" hidden>
+    <div class="alert alert-info d-flex justify-content-between align-items-center" style="margin-bottom:0">
+        <div>
+            <span style="font-size:.85rem;color:#607066">Valor do reboque (origem → destino)</span>
+            <div style="font-size:1.5rem;font-weight:800;color:#2fb34a" id="precoReboqueDestino">R$ --</div>
+        </div>
+        <div style="font-size:.8rem;color:#607066;text-align:right">
+            Toque no mapa para ajustar<br>
+            o ponto de entrega
+        </div>
+    </div>
+</div>
+<label class="label" for="destino">Para onde deve levar o ve&iacute;culo?</label><div class="address-fields"><div><input class="form-control" id="destino" name="destino" maxlength="220" placeholder="Rua, bairro e cidade" autocomplete="street-address"></div><div><label class="address-number-label" for="numero_destino">N&uacute;mero</label><input class="form-control" id="numero_destino" name="numero_destino" maxlength="20" inputmode="numeric" placeholder="Ex.: 247" autocomplete="address-line2"><input type="hidden" id="lat_destino" name="lat_destino"><input type="hidden" id="lng_destino" name="lng_destino"></div></div><small class="muted">Digite o endere&ccedil;o e o n&uacute;mero; depois escolha a cidade sugerida para calcular a rota.</small></div>
 <div class="col-12 funnel-navigation"><button class="btn btn-outline-secondary" id="btnSituacaoVoltar" type="button">Voltar</button><button class="btn btn-success" id="btnSituacaoAvancar" type="button">Avan&ccedil;ar</button><button class="btn-main flex-grow-1" id="btnCotacao" type="submit">Ver minha cota&ccedil;&atilde;o</button></div></form>
 <?php else: ?>
 <p class="eyebrow">Sua cota&ccedil;&atilde;o est&aacute; pronta</p><h1 id="title" class="title">Confira o valor antes de se cadastrar.</h1>
@@ -261,8 +276,6 @@ body.stage-address #btnSituacaoVoltar { display: none !important; }
 <a class="back d-block text-center mt-3" href="<?= $e($bp) ?>/registro/cliente?retorno=%2Fcliente%2Fpedido%2Fnovo">Ir direto para o cadastro</a>
 <a class="back d-block text-center mt-3" href="<?= $e($bp) ?>/pre-cotacao">Voltar e revisar os dados</a>
 <?php endif; ?></section></main><script<?php echo function_exists('csp_script_nonce_attr') ? csp_script_nonce_attr() : ''; ?> src="<?= $e($bp) ?>/public/assets/js/public-pre-cotacao.js"></script><!-- form.js DESATIVADO v14 — sintomas.js faz tudo --><script<?php echo function_exists('csp_script_nonce_attr') ? csp_script_nonce_attr() : ''; ?>><?php if ($prefillLat !== null && $prefillLng !== null): ?>document.addEventListener('DOMContentLoaded',function(){var lat=document.getElementById('lat_origem'),lng=document.getElementById('lng_origem'),status=document.getElementById('gpsStatus');if(lat&&lng){lat.value=<?= json_encode($prefillLat) ?>;lng.value=<?= json_encode($prefillLng) ?>;}if(status)status.textContent='Localização aproximada da região selecionada. Confirme o ponto exato pelo GPS ou pelo endereço.';});<?php endif; ?><?php if ($forceTowDraft): ?>document.addEventListener('DOMContentLoaded',function(){var tipo=document.getElementById('tipo_problema'),categoria=document.getElementById('categoria'),lat=document.getElementById('lat_origem'),lng=document.getElementById('lng_origem'),status=document.getElementById('gpsStatus');if(tipo)tipo.value='colisao';if(categoria)categoria.value=<?= json_encode($draftCategoria) ?>;if(lat)lat.value=<?= json_encode($draftLatOrigem) ?>;if(lng)lng.value=<?= json_encode($draftLngOrigem) ?>;if(status)status.textContent='Informe agora para onde o veiculo deve ser levado para calcular o reboque.';document.dispatchEvent(new Event('prequote:type-change'));document.dispatchEvent(new Event('prequote:go-destination'));});<?php endif; ?></script>
-<script<?php echo function_exists("csp_script_nonce_attr") ? csp_script_nonce_attr() : ""; ?> src="<?= $e($bp) ?>/public/assets/js/public-pre-cotacao-sintomas.js"></script>
-<?php require __DIR__ . '/../cliente/_precotacao_extras.php'; ?>
 <script<?php echo function_exists('csp_script_nonce_attr') ? csp_script_nonce_attr() : ''; ?>>
 window.__preCotacaoSemCobertura = <?= json_encode($_SESSION['pre_cotacao_sem_cobertura'] ?? null) ?>;
 window.__preCotacaoWhatsApp = <?= json_encode(
@@ -271,5 +284,7 @@ window.__preCotacaoWhatsApp = <?= json_encode(
         : ''
 ) ?>;
 </script>
+<script<?php echo function_exists("csp_script_nonce_attr") ? csp_script_nonce_attr() : ""; ?> src="<?= $e($bp) ?>/public/assets/js/public-pre-cotacao-sintomas.js"></script>
+<?php require __DIR__ . '/../cliente/_precotacao_extras.php'; ?>
 </body></html>
 <?php include __DIR__ . '/../components/modelo_atendimento.php'; ?>

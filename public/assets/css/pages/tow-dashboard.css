@@ -539,3 +539,63 @@ body.guincho .tow-por-row span {
 body.guincho .tow-por-row strong {
   font-weight: 800;
 }
+
+
+/* v24: modal confirmação de localização — força contraste correto
+   (o modal do Bootstrap tem fundo branco; body.guincho tem texto claro.
+   Sem isso, texto fica branco-no-branco) */
+body.guincho #modalConfirmarLocalizacao .modal-content {
+    background: #ffffff !important;
+    color: #142018 !important;
+}
+body.guincho #modalConfirmarLocalizacao .modal-content * {
+    color: #142018 !important;
+}
+body.guincho #modalConfirmarLocalizacao .modal-header {
+    background: #f4f8f5 !important;
+    border-bottom: 1px solid #e3ede5 !important;
+}
+body.guincho #modalConfirmarLocalizacao .modal-title {
+    color: #248f3a !important;
+    font-weight: 700 !important;
+}
+body.guincho #modalConfirmarLocalizacao .modal-body {
+    background: #ffffff !important;
+}
+body.guincho #modalConfirmarLocalizacao .modal-body p,
+body.guincho #modalConfirmarLocalizacao .modal-body span,
+body.guincho #modalConfirmarLocalizacao .modal-body div,
+body.guincho #modalConfirmarLocalizacao .modal-body strong,
+body.guincho #modalConfirmarLocalizacao .modal-body i {
+    color: #142018 !important;
+}
+body.guincho #modalConfirmarLocalizacao .modal-body p[style*="color:#607066"] {
+    color: #607066 !important;
+}
+body.guincho #modalConfirmarLocalizacao .modal-footer {
+    background: #f4f8f5 !important;
+    border-top: 1px solid #e3ede5 !important;
+}
+body.guincho #modalConfirmarLocalizacao .btn-primary,
+body.guincho #modalConfirmarLocalizacao #btnConfirmarLocalizacao {
+    background: #2fb34a !important;
+    border-color: #2fb34a !important;
+    color: #ffffff !important;
+    font-weight: 600 !important;
+}
+body.guincho #modalConfirmarLocalizacao .btn-primary:hover,
+body.guincho #modalConfirmarLocalizacao #btnConfirmarLocalizacao:hover {
+    background: #248f3a !important;
+    border-color: #248f3a !important;
+    color: #ffffff !important;
+}
+body.guincho #modalConfirmarLocalizacao #confirmarLocalizacaoStatus {
+    color: #607066 !important;
+}
+body.guincho #modalConfirmarLocalizacao #confirmarLocalizacaoErro {
+    color: #842029 !important;
+}
+body.guincho #modalConfirmarLocalizacao button.btn-close {
+    filter: none !important;
+    opacity: .7 !important;
+}

@@ -60,10 +60,6 @@ class PricingService {
      * @param float $distanciaDestino Distância total até o destino final em KM (para calcular km extra)
      */
     public function gerarOpcoesCotacao($latCliente, $lngCliente, $tipoProblema, $distanciaDestino = 0) {
-        if ($tipoProblema === 'outro' || $tipoProblema === 'orientacao') {
-            return ['acao' => 'encaminhar_suporte'];
-        }
-
         $oficinas = $this->buscarOficinasProximas($latCliente, $lngCliente);
 
         // Valores globais definidos pelo Admin

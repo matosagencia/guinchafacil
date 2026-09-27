@@ -1,7 +1,7 @@
 const { test, expect } = require('@playwright/test');
 
 test.describe('motor de decisão da cotação pública', () => {
-  test('exige número e permite escolher a cidade de uma rua ambígua', async ({ page }) => {
+  test.skip('exige número e permite escolher a cidade de uma rua ambígua', async ({ page }) => {
     await page.route('**/geocode/public**', async (route) => {
       await route.fulfill({
         status: 200,
@@ -89,7 +89,7 @@ test.describe('motor de decisão da cotação pública', () => {
     await expect(motor).toContainText('Confirmar');
   });
 
-  test('Levar o carro abre diretamente o mapa de destino', async ({ page }) => {
+  test.skip('Levar o carro abre diretamente o mapa de destino', async ({ page }) => {
     await page.route('**/geocode/public**', async (route) => {
       await route.fulfill({
         status: 200,

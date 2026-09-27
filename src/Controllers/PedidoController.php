@@ -166,4 +166,146 @@ final class PedidoController
             ];
         });
     }
-}
+
+    /** GET /api/pre-cotacao/validar-uf-destino?lat_origem=&lng_origem=&lat_destino=&lng_destino= */
+    public function validarUfDestino(): void
+    {
+        $this->json(function (): array {
+            $latO = filter_var($_GET['lat_origem']  ?? null, FILTER_VALIDATE_FLOAT);
+            $lngO = filter_var($_GET['lng_origem']  ?? null, FILTER_VALIDATE_FLOAT);
+            $latD = filter_var($_GET['lat_destino'] ?? null, FILTER_VALIDATE_FLOAT);
+            $lngD = filter_var($_GET['lng_destino'] ?? null, FILTER_VALIDATE_FLOAT);
+
+            if ($latO === false || $lngO === false || $latD === false || $lngD === false) {
+                throw new InvalidArgumentException('Informe lat/lng de origem e destino.');
+            }
+
+            $ufO = $this->ufDeCoordenada((float)$latO, (float)$lngO);
+            $ufD = $this->ufDeCoordenada((float)$latD, (float)$lngD);
+
+            // Se não conseguir detectar alguma das UFs, permite (não bloqueia)
+            $ok = ($ufO === null || $ufD === null || $ufO === $ufD);
+
+            return [
+                'ok' => $ok,
+                'uf_origem' => $ufO,
+                'uf_destino' => $ufD,
+                'mensagem' => $ok
+                    ? ''
+                    : "O veículo só pode ser levado para uma oficina no mesmo estado. Sua origem está em {$ufO} e o destino em {$ufD}.",
+            ];
+        });
+    }
+
+    /** Reverse geocode local — retorna UF (ex: "RJ") ou null. */
+    private function ufDeCoordenada(float $lat, float $lng): ?string
+    {
+        try {
+            // 1) Tenta usar GeocodingService diretamente (SEM HTTP)
+            $svcFile = __DIR__ . '/../Services/GeocodingService.php';
+            if (is_file($svcFile)) {
+                require_once $svcFile;
+                if (class_exists('GeocodingService')) {
+                    $svc = new \GeocodingService();
+                    foreach (['reverse', 'reverseGeocode', 'reverseGeocoding', 'geocodificarReverso'] as $method) {
+                        if (method_exists($svc, $method)) {
+                            try {
+                                $r = $svc->$method($lat, $lng);
+                                if (is_array($r)) {
+                                    $uf = $this->extrairUfDeResultado($r);
+                                    if ($uf) return $uf;
+                                }
+                            } catch (Throwable $e) {
+                                error_log("[ufDeCoordenada] método $method falhou: " . $e->getMessage());
+                            }
+                        }
+                    }
+                }
+            }
+
+            // 2) Fallback: chama Nominatim DIRETAMENTE (sem passar pelo nosso servidor)
+            $url = "https://nominatim.openstreetmap.org/reverse?format=json&lat={$lat}&lon={$lng}&addressdetails=1&accept-language=pt-BR";
+            $ch = curl_init($url);
+            curl_setopt_array($ch, [
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_TIMEOUT => 5,
+                CURLOPT_USERAGENT => 'GuinchaFacil/1.0 (contato@guinchafacil.com.br)',
+                CURLOPT_SSL_VERIFYPEER => false,
+            ]);
+            $caPath = defined('CA_BUNDLE_PATH') ? CA_BUNDLE_PATH : null;
+            if ($caPath && is_file($caPath)) {
+                curl_setopt($ch, CURLOPT_CAINFO, $caPath);
+                curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
+            }
+            $raw = curl_exec($ch);
+            $err = curl_error($ch);
+            curl_close($ch);
+
+            if ($raw === false || $err) {
+                error_log('[ufDeCoordenada] cURL Nominatim: ' . $err);
+                return null;
+            }
+
+            $j = json_decode($raw, true);
+            if (!$j) return null;
+
+            return $this->extrairUfDeResultado($j);
+        } catch (Throwable $e) {
+            error_log('[ufDeCoordenada] ' . $e->getMessage());
+            return null;
+        }
+    }
+
+    /** Extrai UF de um array de resposta (Nominatim ou serviço interno). */
+    private function extrairUfDeResultado(array $r): ?string
+    {
+        // address.state_code (ex: "RJ")
+        $uf = $r['address']['state_code'] ?? $r['state_code'] ?? null;
+        if ($uf && preg_match('/^[A-Z]{2}$/', strtoupper((string)$uf))) {
+            return strtoupper((string)$uf);
+        }
+
+        // address.state (nome completo)
+        $nome = $r['address']['state'] ?? $r['state'] ?? null;
+        if ($nome) {
+            $uf = $this->nomeEstadoParaUf((string)$nome);
+            if ($uf) return $uf;
+        }
+
+        // display_name
+        $display = (string)($r['display_name'] ?? '');
+        if ($display !== '') {
+            foreach (array_map('trim', explode(',', $display)) as $p) {
+                $uf = $this->nomeEstadoParaUf($p);
+                if ($uf) return $uf;
+            }
+        }
+
+        return null;
+    }
+
+    /** Converte nome do estado em UF. Cobre todos os 27. */
+    private function nomeEstadoParaUf(string $nome): ?string
+    {
+        $nome = trim($nome);
+        if ($nome === '') return null;
+
+        if (preg_match('/^[A-Z]{2}$/', strtoupper($nome))) {
+            $uf = strtoupper($nome);
+            $validas = ['AC','AL','AP','AM','BA','CE','DF','ES','GO','MA','MT','MS','MG','PA','PB','PR','PE','PI','RJ','RN','RS','RO','RR','SC','SP','SE','TO'];
+            return in_array($uf, $validas, true) ? $uf : null;
+        }
+
+        static $mapa = [
+            'acre'=>'AC','alagoas'=>'AL','amapá'=>'AP','amapa'=>'AP','amazonas'=>'AM','bahia'=>'BA',
+            'ceará'=>'CE','ceara'=>'CE','distrito federal'=>'DF','espírito santo'=>'ES','espirito santo'=>'ES',
+            'goiás'=>'GO','goias'=>'GO','maranhão'=>'MA','maranhao'=>'MA','mato grosso'=>'MT',
+            'mato grosso do sul'=>'MS','minas gerais'=>'MG','pará'=>'PA','para'=>'PA','paraíba'=>'PB','paraiba'=>'PB',
+            'paraná'=>'PR','parana'=>'PR','pernambuco'=>'PE','piauí'=>'PI','piaui'=>'PI','rio de janeiro'=>'RJ',
+            'rio grande do norte'=>'RN','rio grande do sul'=>'RS','rondônia'=>'RO','rondonia'=>'RO','roraima'=>'RR',
+            'santa catarina'=>'SC','são paulo'=>'SP','sao paulo'=>'SP','sergipe'=>'SE','tocantins'=>'TO',
+        ];
+        return $mapa[mb_strtolower($nome, 'UTF-8')] ?? null;
+    }
+
+    }

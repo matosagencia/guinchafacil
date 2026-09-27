@@ -254,6 +254,7 @@ $rotas = [
         '/oficina/pedidos'               => ['OficinaController', 'pedidosPage',         'oficina'],
         '/oficina/financeiro'            => ['OficinaController', 'financeiro',          'oficina'],
         '/api/pre-cotacao/oficinas-proximas' => ['PedidoController', 'oficinasProximas', null],
+        '/api/pre-cotacao/validar-uf-destino' => ['PedidoController', 'validarUfDestino', null],
         '/oficina/historico'             => ['OficinaController', 'historico',           'oficina'],
         '/oficina/perfil'                => ['OficinaController', 'perfilForm',          'oficina'],
 

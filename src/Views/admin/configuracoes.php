@@ -297,6 +297,19 @@ function maskEnvValue(string $value): string {
 
                         <div class="mb-3">
 
+                            <label class="form-label">Habilitar comparativo assistência vs reboque</label>
+
+                            <select class="form-select" name="habilitar_comparativo_assistencia">
+                                <?php $flagComparativo = (string)($config['habilitar_comparativo_assistencia'] ?? '1'); ?>
+                                <option value="1" <?php echo $flagComparativo === '1' ? 'selected' : ''; ?>>Sim — mostrar comparativo quando houver oficina no raio</option>
+                                <option value="0" <?php echo $flagComparativo === '0' ? 'selected' : ''; ?>>Não — seguir apenas com reboque</option>
+                            </select>
+                            <small class="text-muted d-block">Desliga o fluxo Diego de assistência no local na pré-cotação.</small>
+
+                        </div>
+
+                        <div class="mb-3">
+
                             <label class="form-label">Reserva de gateway (decimal 0 a 1) — média conservadora descontada do bruto antes de calcular comissão/repasse</label>
 
                             <input type="number" step="0.001" class="form-control" min="0" max="0.5" name="reserva_gateway_percentual"

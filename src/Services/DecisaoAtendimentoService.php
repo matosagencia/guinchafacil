@@ -8,8 +8,7 @@ require_once __DIR__ . '/Logger.php';
 
 final class DecisaoAtendimentoService
 {
-    // Me orientem NAO e suporte: precisa triagem + comparativo.
-    private const TIPOS_SUPORTE = ['outro', 'orientacao'];
+    private const TIPOS_SUPORTE = [];
 
     public function avaliar(int $pedidoId, string $tipoProblema, float $lat, float $lng, array $opcoes = []): array
     {
@@ -38,6 +37,23 @@ final class DecisaoAtendimentoService
         }
 
         $oficinas = $this->oficinasNoRaio($lat, $lng, $tipo);
+        // v22: se precisa de reboque e não há guincho online → WhatsApp
+        $reboquesOnline = $this->reboquesOnlineNoRaio($lat, $lng);
+        $precisaReboque = ($tipo === 'reboque') || (count($oficinas) === 0);
+        if ($precisaReboque && $reboquesOnline === 0) {
+            return [
+                'acao' => 'encaminhar_whatsapp',
+                'opcoes_disponiveis' => [],
+                'opcao_assistencia' => ['disponivel' => false],
+                'opcao_reboque' => ['disponivel' => false],
+                'recomendacao' => null,
+                'justificativa' => 'Nenhum guincho online na sua região agora. Vamos te ajudar direto pelo WhatsApp.',
+                'mensagem_suporte' => 'Fale com nossa central no WhatsApp para solicitar um guincho.',
+                'reboques_online' => 0,
+                'desconto_fallback_percentual' => $this->descontoPercentual(),
+                'oficina_mais_proxima' => null,
+            ];
+        }
 
         if (count($oficinas) === 0) {
             $distanciaFallback = max(5.0, (float)($opcoes['distancia_km'] ?? 5.0));
@@ -275,5 +291,32 @@ final class DecisaoAtendimentoService
             'distancia_km' => round((float)($o['distancia_km'] ?? 0), 2),
             'taxa_saida' => $this->calcularAssistencia($o),
         ], $oficinas);
+    }
+
+    /**
+     * v22: conta guinchos aprovados, disponíveis e dentro do raio de cobertura.
+     * Retorna 1 em caso de erro (não bloqueia o fluxo por falha de schema).
+     */
+    private function reboquesOnlineNoRaio(float $lat, float $lng): int
+    {
+        try {
+            $stmt = getPDO()->query(
+                "SELECT id, lat_atual, lng_atual, COALESCE(raio_cobertura_km, 50) AS raio
+                   FROM guinchos
+                  WHERE aprovado = 1
+                    AND disponivel = 1
+                    AND lat_atual IS NOT NULL
+                    AND lng_atual IS NOT NULL"
+            );
+            $count = 0;
+            foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $g) {
+                $dist = GeoService::haversine($lat, $lng, (float)$g['lat_atual'], (float)$g['lng_atual']);
+                if ($dist <= (float)$g['raio']) $count++;
+            }
+            return $count;
+        } catch (Throwable $e) {
+            error_log('[reboquesOnlineNoRaio] ' . $e->getMessage());
+            return 1; // erro de schema → não bloqueia
+        }
     }
 }

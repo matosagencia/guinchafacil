@@ -262,3 +262,55 @@ html body.oficina .tow-offer .tow-offer-actions .btn-outline-secondary {
 html body.oficina .tow-offer .tow-offer-actions .btn-outline-secondary:hover {
   background: #8b6f5c !important; color: #fef9f3 !important;
 }
+
+/* v23: modal de confirmação de localização — força contraste correto
+   (o modal do Bootstrap tem fundo branco; body.guincho tem texto claro.
+   Isso resolvia em branco-no-branco) */
+#modalConfirmarLocalizacao .modal-content {
+    background: #ffffff !important;
+    color: #142018 !important;
+}
+#modalConfirmarLocalizacao .modal-content * {
+    color: #142018 !important;
+}
+#modalConfirmarLocalizacao .modal-header {
+    background: #f4f8f5;
+    border-bottom: 1px solid #e3ede5;
+}
+#modalConfirmarLocalizacao .modal-title {
+    color: #248f3a !important;
+    font-weight: 700;
+}
+#modalConfirmarLocalizacao .modal-body {
+    background: #ffffff;
+}
+#modalConfirmarLocalizacao .modal-body p {
+    color: #405247 !important;
+}
+#modalConfirmarLocalizacao .modal-body .text-muted {
+    color: #607066 !important;
+}
+#modalConfirmarLocalizacao .modal-body .text-primary-custom,
+#modalConfirmarLocalizacao .modal-body i.text-primary-custom {
+    color: #248f3a !important;
+}
+#modalConfirmarLocalizacao .modal-footer {
+    background: #f4f8f5;
+    border-top: 1px solid #e3ede5;
+}
+#modalConfirmarLocalizacao .btn-primary {
+    background: #2fb34a !important;
+    border-color: #2fb34a !important;
+    color: #ffffff !important;
+    font-weight: 600;
+}
+#modalConfirmarLocalizacao .btn-primary:hover {
+    background: #248f3a !important;
+    border-color: #248f3a !important;
+}
+#modalConfirmarLocalizacao #confirmarLocalizacaoStatus {
+    color: #607066 !important;
+}
+#modalConfirmarLocalizacao #confirmarLocalizacaoErro {
+    color: #842029 !important;
+}
