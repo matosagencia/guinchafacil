@@ -74,3 +74,15 @@ logs/*.log
 # OS
 .DS_Store
 Thumbs.db
+
+# Backups de index antes de limpeza
+index.php.antes-*
+
+# Specs de diagnostico
+tests/e2e/diag-*.spec.js
+
+# Backups de index antes de limpeza
+index.php.antes-*
+
+# Specs de diagnostico
+tests/e2e/diag-*.spec.js
