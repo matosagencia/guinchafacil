@@ -48,7 +48,7 @@ qa/.auth/
 .env.*
 !.env.example
 
-# Backups e temporários
+# Backups e temporï¿½rios
 *.bak-*
 *.bak
 *.broken
@@ -60,6 +60,17 @@ logs/
 .grok/
 *.md.tmp
 
-# Arquivos soltos na raiz que não pertencem
+# Arquivos soltos na raiz que nï¿½o pertencem
 /pre-cotacao.php
 /deepseek_markdown_*.md
+# Testes / Playwright
+tests/e2e/screenshots/
+# Backups de refatoracao
+install/
+# Storage privado
+storage/cacert.pem
+storage/private/
+logs/*.log
+# OS
+.DS_Store
+Thumbs.db

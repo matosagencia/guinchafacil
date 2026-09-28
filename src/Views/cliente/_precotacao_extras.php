@@ -1,4 +1,6 @@
 <?php
+// FASE G: whatsUrl pode nao existir em contexto publico
+if (!isset($whatsUrl)) { $whatsUrl = ''; }
 // File: guinchafacil/src/Views/cliente/_precotacao_extras.php
 // Renderiza: (1) barra de trust badges e (2) botao flutuante do WhatsApp.
 //

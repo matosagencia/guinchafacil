@@ -1,6 +1,13 @@
 <?php
 $bp = defined('BASE_PATH') ? BASE_PATH : '';
 $e = static fn(string $v): string => htmlspecialchars($v, ENT_QUOTES, 'UTF-8');
+// Flag precotacao_funil_v2: quando '1', usa o partial novo (funil v2).
+if (!isset($funilV2On)) {
+    $funilV2On = false;
+    if (class_exists('Configuracao')) {
+        try { $funilV2On = (string)Configuracao::get('precotacao_funil_v2', '0') === '1'; } catch (Throwable $e) {}
+    }
+}
 $flash = $flash ?? null;
 $resultado = ($_GET['resultado'] ?? '') === '1' && !empty($cotacao) && (int)($cotacao['expira_em'] ?? 0) > time();
 
@@ -28,6 +35,7 @@ $draftCategoria = (string)($forceTowDraft['categoria'] ?? 'popular');
 <link rel="stylesheet" href="<?= $e($bp) ?>/public/assets/css/pages/public-pre-cotacao.css?v=20260812-3">
 <link rel="stylesheet" href="<?= $e($bp) ?>/public/assets/css/pages/public-landing.css?v=20260922-cities-menu">
 <link rel="stylesheet" href="<?= $e($bp) ?>/public/assets/css/pages/public-pre-cotacao-map.css?v=20260924-1">
+<?php if ($funilV2On): ?><link rel="stylesheet" href="<?= $e($bp) ?>/public/assets/css/components/address-picker.css?v=20260929-11"><?php endif; ?>
 <style>.address-fields{display:grid;grid-template-columns:minmax(0,1fr) 120px;gap:8px;position:relative}.address-number-label{display:block;font-size:.74rem;font-weight:700;color:#55705b;margin:0 0 4px}.regional-map-panel{margin-top:12px;padding:12px;border:1px solid #cfe3d3;border-radius:14px;background:#f7fbf7}.regional-map-panel[hidden]{display:none}.regional-map-head{display:flex;justify-content:space-between;gap:12px;font-size:.82rem;margin-bottom:8px}.regional-map-head span{color:#607066}.regional-map{height:280px;border-radius:10px;overflow:hidden}.funnel-navigation{display:flex;gap:8px;align-items:center}@media(max-width:520px){.address-fields{grid-template-columns:minmax(0,1fr) 94px}.regional-map-head{display:block}.regional-map{height:240px}.funnel-navigation{flex-wrap:wrap}.funnel-navigation .btn-main{flex-basis:100%}}</style>
 <script<?php echo function_exists('csp_script_nonce_attr') ? csp_script_nonce_attr() : ''; ?> src="<?= $e($bp) ?>/public/assets/vendor/leaflet/leaflet.js"></script>
 <script<?php echo function_exists('csp_script_nonce_attr') ? csp_script_nonce_attr() : ''; ?> src="<?= $e($bp) ?>/public/assets/js/public-quote-result.js"></script>
@@ -163,6 +171,7 @@ body.stage-address #btnSituacaoVoltar { display: none !important; }
 <p class="eyebrow">Sem cadastro nesta etapa</p><h1 id="title" class="title">Veja sua cota&ccedil;&atilde;o antes de criar sua conta.</h1>
 <p class="muted">Informe os dados essenciais. Mostraremos as condi&ccedil;&otilde;es antes de voc&ecirc; decidir. Nada ser&aacute; cobrado agora.</p>
 <?php if (!empty($flash)): ?><div class="alert alert-danger"><?= htmlspecialchars((string)($flash['message'] ?? ''), ENT_QUOTES, 'UTF-8') ?></div><?php endif; ?>
+<?php if (!$funilV2On): ?>
 <form method="post" action="<?= $e($bp) ?>/pre-cotacao" class="row g-3" data-marketing-event="generate_lead">
 <input type="hidden" name="csrf_token" value="<?= $e((string)($csrf_token ?? '')) ?>">
 <div class="origin-map-composition"><div class="col-12"><label class="label" for="localizacao">Onde est&aacute; o ve&iacute;culo?</label><div class="address-fields"><div><input class="form-control" id="localizacao" name="localizacao" maxlength="220" placeholder="Rua, bairro e cidade" autocomplete="street-address" value="<?= $e($draftLocalizacao) ?>"></div><div><label class="address-number-label" for="numero_origem">N&uacute;mero</label><input class="form-control" id="numero_origem" name="numero_origem" maxlength="20" inputmode="numeric" placeholder="Ex.: 280" autocomplete="address-line2" required value="<?= $e($draftNumeroOrigem) ?>"></div></div><button class="btn btn-outline-success mt-2" id="btnGps" type="button">Usar minha localiza&ccedil;&atilde;o</button><small class="muted d-block mt-1" id="gpsStatus">Digite a rua e o n&uacute;mero. Se houver endere&ccedil;os iguais, escolha a cidade correta.</small></div>
@@ -262,6 +271,9 @@ body.stage-address #btnSituacaoVoltar { display: none !important; }
 <label class="label" for="destino">Para onde deve levar o ve&iacute;culo?</label><div class="address-fields"><div><input class="form-control" id="destino" name="destino" maxlength="220" placeholder="Rua, bairro e cidade" autocomplete="street-address"></div><div><label class="address-number-label" for="numero_destino">N&uacute;mero</label><input class="form-control" id="numero_destino" name="numero_destino" maxlength="20" inputmode="numeric" placeholder="Ex.: 247" autocomplete="address-line2"><input type="hidden" id="lat_destino" name="lat_destino"><input type="hidden" id="lng_destino" name="lng_destino"></div></div><small class="muted">Digite o endere&ccedil;o e o n&uacute;mero; depois escolha a cidade sugerida para calcular a rota.</small></div>
 <div class="col-12 funnel-navigation"><button class="btn btn-outline-secondary" id="btnSituacaoVoltar" type="button">Voltar</button><button class="btn btn-success" id="btnSituacaoAvancar" type="button">Avan&ccedil;ar</button><button class="btn-main flex-grow-1" id="btnCotacao" type="submit">Ver minha cota&ccedil;&atilde;o</button></div></form>
 <?php else: ?>
+<?php require __DIR__ . '/partials/_precotacao_funil.php'; ?>
+<?php endif; ?>
+<?php else: ?>
 <p class="eyebrow">Sua cota&ccedil;&atilde;o est&aacute; pronta</p><h1 id="title" class="title">Confira o valor antes de se cadastrar.</h1>
 <div class="quote mt-4"><span class="muted"><?= htmlspecialchars((string)($cotacao['service_code'] ?? 'TOW_CAR'), ENT_QUOTES, 'UTF-8') ?> Â· <?= number_format((float)$cotacao['distancia_km'], 1, ',', '.') ?> km</span><br><strong>R$ <?= number_format((float)$cotacao['valor'], 2, ',', '.') ?></strong><p class="muted mb-0 mt-2">Calculada pelas regras vigentes da plataforma. V&aacute;lida por 15 minutos; o valor ser&aacute; revalidado antes do pagamento.</p></div>
 <?php if (isset($cotacao['lat_origem'], $cotacao['lng_origem'], $cotacao['lat_destino'], $cotacao['lng_destino']) && $cotacao['lat_destino'] !== null && $cotacao['lng_destino'] !== null): ?>
@@ -284,7 +296,13 @@ window.__preCotacaoWhatsApp = <?= json_encode(
         : ''
 ) ?>;
 </script>
+<?php if ($funilV2On): ?>
+<script<?php echo function_exists("csp_script_nonce_attr") ? csp_script_nonce_attr() : ""; ?>>window.__gfBasePath = <?= json_encode($bp) ?>;</script>
+<script<?php echo function_exists("csp_script_nonce_attr") ? csp_script_nonce_attr() : ""; ?> src="<?= $e($bp) ?>/public/assets/js/components/address-picker.js?v=20260929-11"></script>
+<script<?php echo function_exists("csp_script_nonce_attr") ? csp_script_nonce_attr() : ""; ?> src="<?= $e($bp) ?>/public/assets/js/public-pre-cotacao-flow.js?v=20260929-11"></script>
+<?php else: ?>
 <script<?php echo function_exists("csp_script_nonce_attr") ? csp_script_nonce_attr() : ""; ?> src="<?= $e($bp) ?>/public/assets/js/public-pre-cotacao-sintomas.js"></script>
+<?php endif; ?>
 <?php require __DIR__ . '/../cliente/_precotacao_extras.php'; ?>
 </body></html>
 <?php include __DIR__ . '/../components/modelo_atendimento.php'; ?>

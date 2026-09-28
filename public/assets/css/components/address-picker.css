@@ -1,0 +1,324 @@
+/* ═══════════════════════════════════════════════════════════════════
+   address-picker v2: mapa grande + painel flutuante
+   ═══════════════════════════════════════════════════════════════════ */
+.gf-ap {
+    position: relative;
+    width: 100%;
+    min-height: 480px;
+    border-radius: 16px;
+    overflow: hidden;
+    background: #eef3ee;
+    border: 1px solid #cfe3d3;
+    margin-top: 8px;
+}
+.gf-ap__map {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+}
+.gf-ap__pin-overlay {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -100%);
+    z-index: 450;
+    pointer-events: none;
+    font-size: 2.4rem;
+    color: #2fb34a;
+    text-shadow: 0 2px 6px rgba(0,0,0,.35), 0 0 3px rgba(255,255,255,.95);
+    line-height: 1;
+}
+.gf-ap__map-title {
+    position: absolute;
+    top: 16px;
+    left: 16px;
+    z-index: 400;
+    background: rgba(255,255,255,.95);
+    padding: 8px 14px;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,.08);
+    max-width: 300px;
+}
+.gf-ap__map-title strong {
+    display: block;
+    font-size: .88rem;
+    color: #142018;
+    font-weight: 700;
+}
+.gf-ap__map-title span {
+    display: block;
+    font-size: .74rem;
+    color: #607066;
+    margin-top: 2px;
+}
+.gf-ap__panel {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    width: min(390px, calc(100% - 32px));
+    background: rgba(255,255,255,.98);
+    border-radius: 14px;
+    padding: 16px;
+    box-shadow: 0 8px 24px rgba(20,80,35,.16);
+    z-index: 500;
+    transition: transform .25s ease;
+    max-height: calc(100% - 32px);
+    overflow-y: auto;
+}
+.gf-ap__panel.is-collapsed {
+    transform: translateY(calc(100% - 60px));
+}
+.gf-ap__panel-toggle {
+    display: block;
+    width: 100%;
+    padding: 8px;
+    border: 0;
+    background: #2fb34a;
+    color: #fff;
+    border-radius: 8px;
+    margin-bottom: 14px;
+    cursor: pointer;
+    font-size: .85rem;
+    font-weight: 700;
+    text-align: center;
+}
+.gf-ap__panel-toggle:hover {
+    background: #248f3a;
+}
+.gf-ap__label {
+    display: block;
+    font-size: .92rem;
+    font-weight: 700;
+    color: #142018;
+    margin: 0 0 8px;
+}
+.gf-ap__field-label {
+    display: block;
+    font-size: .72rem;
+    font-weight: 700;
+    color: #55705b;
+    margin: 0 0 4px;
+}
+.gf-ap__gps {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 38px;
+    padding: 8px 14px;
+    border: 1px solid #2fb34a;
+    border-radius: 10px;
+    background: #fff;
+    color: #248f3a;
+    font-weight: 600;
+    font-size: .85rem;
+    cursor: pointer;
+    margin-bottom: 12px;
+}
+.gf-ap__gps:hover {
+    background: #edf8ef;
+}
+.gf-ap__row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 110px;
+    gap: 8px;
+    margin-top: 4px;
+}
+.gf-ap__input,
+.gf-ap__number {
+    width: 100%;
+    min-height: 44px;
+    padding: 10px 12px;
+    border: 1px solid #cfe3d3;
+    border-radius: 10px;
+    font-size: .92rem;
+    background: #fff;
+    color: #142018;
+}
+.gf-ap__input:focus,
+.gf-ap__number:focus {
+    border-color: #2fb34a;
+    box-shadow: 0 0 0 3px rgba(47,179,74,.15);
+    outline: 0;
+}
+.gf-ap__status {
+    display: block;
+    font-size: .76rem;
+    color: #607066;
+    margin-top: 8px;
+    min-height: 16px;
+}
+.gf-ap__list {
+    margin-top: 8px;
+    background: #fff;
+    border: 1px solid #cfe3d3;
+    border-radius: 10px;
+    overflow: hidden;
+    max-height: 240px;
+    overflow-y: auto;
+}
+.gf-ap__item {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 10px 12px;
+    border: 0;
+    border-bottom: 1px solid #edf3ee;
+    background: #fff;
+    cursor: pointer;
+    font-family: inherit;
+}
+.gf-ap__item:last-child { border-bottom: 0; }
+.gf-ap__item:hover,
+.gf-ap__item:focus { background: #edf8ef; outline: 0; }
+.gf-ap__item strong {
+    display: block;
+    font-size: .88rem;
+    color: #142018;
+    font-weight: 600;
+}
+.gf-ap__item small {
+    display: block;
+    font-size: .76rem;
+    color: #607066;
+    margin-top: 2px;
+}
+.gf-ap__confirm {
+    margin-top: 12px;
+    padding: 12px 14px;
+    background: #f4f8f5;
+    border: 1px solid #cfe3d3;
+    border-radius: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+.gf-ap__confirm-text {
+    flex: 1 1 60%;
+    font-size: .86rem;
+    color: #142018;
+    line-height: 1.35;
+}
+.gf-ap__confirm-sub {
+    color: #607066;
+    font-size: .78rem;
+}
+.gf-ap__confirm-btn {
+    padding: 10px 18px;
+    border: 0;
+    border-radius: 10px;
+    background: #2fb34a;
+    color: #fff;
+    font-weight: 700;
+    cursor: pointer;
+    font-size: .88rem;
+    white-space: nowrap;
+}
+.gf-ap__confirm-btn:hover { background: #248f3a; }
+
+@media (max-width: 767px) {
+    .gf-ap { min-height: 400px; }
+    .gf-ap__panel {
+        position: relative;
+        top: auto;
+        right: auto;
+        width: 100%;
+        margin: 12px;
+        max-height: none;
+    }
+    .gf-ap__map-title {
+        position: relative;
+        top: auto;
+        left: auto;
+        margin: 12px;
+        max-width: none;
+    }
+    .gf-ap__row { grid-template-columns: 1fr; }
+}
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+   FASE C: cards do sintoma no estilo choice-card (igual ao veiculo)
+   + card-price maior + economia dentro do grid
+   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+
+#stage-sintoma .choice-grid-sintoma {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)) !important;
+    gap: 10px !important;
+}
+#stage-sintoma .choice-card {
+    min-height: 110px !important;
+    padding: 14px 12px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-align: center !important;
+    border: 2px solid #cfe3d3 !important;
+    border-radius: 12px !important;
+    background: #fff !important;
+    cursor: pointer !important;
+    transition: transform .15s, border-color .15s, box-shadow .15s !important;
+    box-sizing: border-box !important;
+}
+#stage-sintoma .choice-card i {
+    font-size: 1.6rem !important;
+    color: #2fb34a !important;
+    margin-bottom: 6px !important;
+}
+#stage-sintoma .choice-card strong {
+    display: block !important;
+    font-size: .95rem !important;
+    color: #142018 !important;
+    margin-bottom: 2px !important;
+    font-weight: 700 !important;
+}
+#stage-sintoma .choice-card small {
+    display: block !important;
+    font-size: .75rem !important;
+    color: #607066 !important;
+    line-height: 1.25 !important;
+}
+#stage-sintoma .choice-card:hover {
+    transform: translateY(-2px) !important;
+    border-color: #2fb34a !important;
+    box-shadow: 0 6px 20px rgba(47,179,74,.15) !important;
+}
+#stage-sintoma .choice-card.is-selected,
+#stage-sintoma .choice-card[aria-pressed="true"] {
+    border-color: #2fb34a !important;
+    background: #edf8ef !important;
+    box-shadow: 0 0 0 2px rgba(47,179,74,.15) !important;
+}
+
+/* â”€â”€â”€ card-price maior + melhor organizacao â”€â”€â”€ */
+#opcoes-wrap .decision-card .card-price {
+    font-size: 2.6rem !important;
+    line-height: 1.05 !important;
+    letter-spacing: -.03em !important;
+    margin: 6px 0 2px !important;
+}
+#opcoes-wrap .decision-card h3 {
+    font-size: 1.35rem !important;
+    margin: 0 0 4px !important;
+}
+#opcoes-wrap .decision-card .card-prazo {
+    font-size: .9rem !important;
+    color: #405247 !important;
+    margin-bottom: 18px !important;
+    font-weight: 500 !important;
+}
+
+/* â”€â”€â”€ economia-box dentro do grid (ocupa linha inteira) â”€â”€â”€ */
+#opcoes-wrap .decision-grid .economia-box {
+    grid-column: 1 / -1 !important;
+    margin-top: 8px !important;
+    margin-bottom: 0 !important;
+}
+/* FASE H */
+.gf-ap__status { display: block; font-size: 1rem; font-weight: 500; color: #405247; margin-top: 10px; min-height: 22px; }
+.gf-ap__status.is-loading { color: #2fb34a; display: flex; align-items: center; gap: 8px; }
+.gf-ap__spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid #cfe3d3; border-top-color: #2fb34a; border-radius: 50%; animation: gf-ap-spin .8s linear infinite; flex: 0 0 auto; }
+@keyframes gf-ap-spin { to { transform: rotate(360deg); } }

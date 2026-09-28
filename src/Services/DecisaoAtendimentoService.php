@@ -228,6 +228,13 @@ final class DecisaoAtendimentoService
         ];
         $servicoTipo = $mapaServico[$tipoProblema] ?? null;
 
+        // FASE A v2: se o servico NAO e reconhecido, retorna vazio (nao faz match cego).
+        if ($tipoProblema !== '' && $servicoTipo === null) {
+            Logger::log(Logger::LEVEL_INFO, __CLASS__, __FUNCTION__, 'decisao_atendimento',
+                'Servico nao mapeado — sem match.', ['tipo_problema' => $tipoProblema]);
+            return [];
+        }
+
         try {
             $sql = "SELECT o.id AS provider_id, o.nome, o.latitude, o.longitude,
                            COALESCE(o.raio_atendimento_km, 10) AS raio_resgate_direto_km,

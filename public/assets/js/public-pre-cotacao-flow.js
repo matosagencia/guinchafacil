@@ -1,0 +1,469 @@
+/**
+ * public-pre-cotacao-flow.js
+ *
+ * Maquina de estados do funil de pre-cotacao v2.
+ *
+ * Ordem dos estagios (segue a UX pedida):
+ *   endereco -> modo -> veiculo -> opcoes -> destino -> cotacao
+ *                 (fallback WhatsApp se sem cobertura)
+ *
+ * Depende de:
+ *   - window.gfAddressPicker (components/address-picker.js)
+ *   - containers <div id="stage-XXX"> no HTML
+ *   - atributos [data-mode], [data-servico], [data-categoria],
+ *     [data-action="voltar"], [data-action="aceitar-reboque"]
+ *
+ * Emite:
+ *   gf:flow-stage  { stage, prev }   a cada transicao
+ */
+(function () {
+    'use strict';
+
+    var DEBUG = true;
+    var API = (window.__gfBasePath || '').replace(/\/$/, '') + '/api/pre-cotacao';
+
+    function log() {
+        if (!DEBUG) return;
+        var args = Array.prototype.slice.call(arguments);
+        console.log.apply(console, ['[flow]'].concat(args));
+    }
+
+    var STAGES = ['endereco', 'modo', 'veiculo', 'sintoma', 'opcoes', 'destino', 'cotacao'];
+
+    var STATE = {
+        role: 'cliente',
+        endereco: null,
+        cobertura: null,
+        modo: null,
+        servico: null,
+        veiculo: null,
+        destino: null,
+        opcoes: null,
+        whatsappLink: null,
+    };
+
+    var currentStage = null;
+
+    // ----------------------------------------------------------------
+    // Helpers
+    // ----------------------------------------------------------------
+    function $(id) { return document.getElementById(id); }
+    function $$(sel, root) { return (root || document).querySelectorAll(sel); }
+
+    function showStage(name) {
+        if (STAGES.indexOf(name) === -1) return;
+        var prev = currentStage;
+        STAGES.forEach(function (s) {
+            var el = $('stage-' + s);
+            if (!el) return;
+            if (s === name) {
+                el.hidden = false;
+                el.classList.add('is-active');
+            } else {
+                el.hidden = true;
+                el.classList.remove('is-active');
+            }
+        });
+        // Body class para o CSS de v19 continuar funcionando
+        Array.prototype.forEach.call(document.body.classList, function (c) {
+            if (c.indexOf('stage-') === 0) document.body.classList.remove(c);
+        });
+        document.body.classList.add('stage-' + name);
+        currentStage = name;
+        log('stage ->', name, '(prev:', prev + ')');
+        try {
+            document.dispatchEvent(new CustomEvent('gf:flow-stage', { detail: { stage: name, prev: prev } }));
+        } catch (e) {}
+    }
+
+    function apiGet(path, params) {
+        var qs = params ? '?' + Object.keys(params).map(function (k) {
+            return encodeURIComponent(k) + '=' + encodeURIComponent(params[k]);
+        }).join('&') : '';
+        return fetch(API + path + qs, { headers: { 'Accept': 'application/json' } })
+            .then(function (r) { return r.json(); });
+    }
+
+    function apiPost(path, body) {
+        var csrf = (document.querySelector('input[name="csrf_token"]') || {}).value || '';
+        var params = new URLSearchParams();
+        Object.keys(body || {}).forEach(function (k) { params.append(k, body[k]); });
+        params.append('csrf_token', csrf);
+        return fetch(API + path, {
+            method: 'POST',
+            headers: { 'Accept': 'application/json', 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: params.toString(),
+        }).then(function (r) { return r.json(); });
+    }
+
+    function escapeHtml(s) {
+        return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    function money(n) {
+        var v = Number(n) || 0;
+        return 'R$ ' + v.toFixed(2).replace('.', ',');
+    }
+
+    function setStatus(id, msg, isErr) {
+        var el = $(id);
+        if (!el) return;
+        el.textContent = msg || '';
+        el.style.color = isErr ? '#b02a37' : '';
+    }
+
+    // ----------------------------------------------------------------
+    // Endereco (origem)
+    // ----------------------------------------------------------------
+    document.addEventListener('gf:address-confirmed', function (ev) {
+        var d = ev.detail || {};
+        if (d.role !== 'origem') return;
+        log('origem confirmada', d);
+        STATE.endereco = d;
+        showStage('modo');
+    });
+
+    // ----------------------------------------------------------------
+    // Modo (Me orientem / Resolver local / Levar carro)
+    // ----------------------------------------------------------------
+    document.addEventListener('click', function (ev) {
+        var btn = ev.target.closest && ev.target.closest('[data-mode]');
+        if (!btn) return;
+        ev.preventDefault();
+        var modo = btn.getAttribute('data-mode');
+        STATE.modo = modo;
+        log('modo ->', modo);
+        if (modo === 'levar_carro') {
+            showStage('veiculo');
+        } else {
+            showStage('veiculo'); // triagem de servico agora acontece DEPOIS do veiculo
+        }
+    });
+
+    // ----------------------------------------------------------------
+    // Veiculo
+    // ----------------------------------------------------------------
+    document.addEventListener('click', function (ev) {
+        var btn = ev.target.closest && ev.target.closest('[data-categoria]');
+        if (!btn) return;
+        ev.preventDefault();
+        var cat = btn.getAttribute('data-categoria');
+        STATE.veiculo = cat;
+        $$('[data-categoria]').forEach(function (b) { b.classList.toggle('is-selected', b === btn); });
+        log('veiculo ->', cat);
+        // Se for "levar_carro" nao precisa triagem de servico
+        if (STATE.modo === 'levar_carro') {
+            // Levar o carro: pula direto pro destino (sem cards A/B)
+            showStage('destino');
+            inicializarDestino();
+        } else {
+            showStage('sintoma');
+            carregarTriagemServico();
+        }
+    });
+
+    // ----------------------------------------------------------------
+    // Triagem de servico (cards vem da API)
+    // ----------------------------------------------------------------
+    function carregarTriagemServico() {
+        var container = $('triagem-servicos');
+        if (!container) { log('sem #triagem-servicos — pulando'); return; }
+        container.innerHTML = '<p class="text-muted small">Carregando servicos...</p>';
+         // permanece em veiculo ate escolher
+        apiGet('/triagem-servicos').then(function (j) {
+            var servicos = (j && j.data && j.data.servicos) || [];
+            if (!servicos.length) {
+                container.innerHTML = '<p class="text-muted small">Nenhum servico disponivel.</p>';
+                return;
+            }
+            container.innerHTML = servicos.map(function (s) {
+                return '<button type="button" class="choice-card" data-servico="' + escapeHtml(s.slug) + '">' +
+                    '<i class="fas ' + escapeHtml(s.icone || 'fa-wrench') + '"></i>' +
+                    '<strong>' + escapeHtml(s.nome) + '</strong>' +
+                    '<small>' + escapeHtml(s.descricao || '') + '</small>' +
+                    '</button>';
+            }).join('');
+        }).catch(function (e) {
+            log('erro triagem', e);
+            container.innerHTML = '<p class="text-danger small">Falha ao carregar servicos.</p>';
+        });
+    }
+
+    document.addEventListener('click', function (ev) {
+        var btn = ev.target.closest && ev.target.closest('[data-servico]');
+        if (!btn) return;
+        ev.preventDefault();
+        var slug = btn.getAttribute('data-servico');
+        STATE.servico = slug;
+        log('servico ->', slug);
+        carregarOpcoes(slug);
+    });
+
+    // ----------------------------------------------------------------
+    // Opcoes (comparativa A/B) + botao Ver cotacao
+    // ----------------------------------------------------------------
+    function carregarOpcoes(slug) {
+        var wrap = $('opcoes-wrap');
+        if (!wrap) { log('sem #opcoes-wrap'); return; }
+        wrap.innerHTML = '<p class="text-muted small">Calculando opcoes...</p>';
+        showStage('opcoes');
+
+        var modo = STATE.modo === 'local' ? 'local' : 'orientacao';
+        apiGet('/opcoes', {
+            modo: modo,
+            servico: slug || '',
+            lat: STATE.endereco.lat,
+            lng: STATE.endereco.lng,
+        }).then(function (j) {
+            if (!j || !j.ok) throw new Error((j && j.error) || 'Falha');
+            var d = j.data || {};
+            STATE.opcoes = d;
+            log('opcoes ->', d);
+
+            if (!d.disponivel) {
+                // Sem oficina para o servico. Se tem guincho, oferece reboque; senao WhatsApp.
+                if (d.fallback_tipo === 'guincho') {
+                    wrap.innerHTML = '<div class="alert alert-warning">' +
+                        'Sem assistencia para ' + escapeHtml(slug || 'esse servico') +
+                        ' na sua regiao agora. Mas temos guincho disponivel.</div>' +
+                        '<button type="button" class="btn-main w-100" data-action="aceitar-reboque">Quero rebocar</button>';
+                    return;
+                }
+                renderWhatsApp(wrap, d.mensagem);
+                return;
+            }
+
+            renderOpcoes(wrap, d, slug);
+        }).catch(function (e) {
+            log('erro opcoes', e);
+            wrap.innerHTML = '<p class="text-danger small">Falha ao calcular opcoes.</p>';
+        });
+    }
+
+    function renderOpcoes(wrap, d, slug) {
+        var html = '<div class="decision-grid">';
+
+        // ── Card A — Resolver no local ──
+        if (d.valor_deslocamento != null) {
+            var valorAssist = Number(d.valor_deslocamento) || 0;
+            var taxaReboque = Number(d.taxa_base_reboque) || 0;
+            var economia = Number(d.economia_estimada) || Math.max(0, taxaReboque - valorAssist);
+            var reboqueComparacao = taxaReboque > 0 ? money(taxaReboque) : 'R$ 150,00';
+
+            html += '<button type="button" class="decision-card is-recommended" data-action="aceitar-local">' +
+                '<div class="card-icon"><i class="fas fa-user-cog"></i></div>' +
+                '<h3>Resolver no local</h3>' +
+                '<span class="card-price">' + money(valorAssist) + '</span>' +
+                '<span class="card-prazo">Mecanico chega em ~15-20 min</span>' +
+                '<ul>' +
+                    '<li><i class="fas fa-truck-pickup"></i><span>So a <strong>saida do guincho</strong> ate voce custa <strong>' + reboqueComparacao + '</strong>. Voce economiza <strong>' + money(economia) + '</strong>.</span></li>' +
+                    '<li><i class="fas fa-screwdriver-wrench"></i><span>Se o mecanico <strong>nao conseguir resolver no local</strong>, ele mesmo reboca seu carro ate a oficina dele e <strong>abate o valor do socorro do conserto final</strong>.</span></li>' +
+                    '<li><i class="fas fa-handshake"></i><span>Voce <strong>nao e obrigado</strong> a aceitar o orcamento. Pode pedir o <strong>guincho depois com desconto</strong>.</span></li>' +
+                    '<li><i class="fas fa-shield-halved"></i><span><strong>Risco zero</strong>: so paga a saida. Nada mais e cobrado sem sua aprovacao.</span></li>' +
+                '</ul>' +
+                '<span class="btn-main">Quero resolver no local</span>' +
+                '</button>';
+        }
+
+        // ── Card B — Reboque (sem preco) ──
+        html += '<button type="button" class="decision-card" data-action="aceitar-reboque">' +
+            '<div class="card-icon">' +
+                '<svg viewBox="0 0 24 24" width="48" height="48" aria-hidden="true">' +
+                    '<path fill="#2fb34a" d="M20 8h-3V4H3c-1.1 0-2 .9-2 2v11h2c0 1.66 1.34 3 3 3s3-1.34 3-3h6c0 1.66 1.34 3 3 3s3-1.34 3-3h2v-5l-3-4zM6 18.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm13.5-9l1.96 2.5H17V9.5h2.5zm-1.5 9c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/>' +
+                '</svg>' +
+            '</div>' +
+            '<h3>Rebocar</h3>' +
+            '<ul>' +
+                '<li><i class="fas fa-bolt"></i><span>Um <strong>guincho plataforma</strong> remove seu veiculo <strong>imediatamente</strong>.</span></li>' +
+                '<li><i class="fas fa-route"></i><span>Voce escolhe o <strong>destino final</strong> — oficina, casa ou outro endereco.</span></li>' +
+                '<li><i class="fas fa-lock"></i><span>O valor exato e calculado pelo <strong>trajeto completo</strong>, sem surpresas.</span></li>' +
+            '</ul>' +
+            '<span class="btn-main">Pedir guincho agora</span>' +
+            '</button>';
+
+        if (d.economia_estimada != null && d.economia_estimada > 0) {
+            html += '<div class="economia-box">' +
+                '<i class="fas fa-piggy-bank me-1"></i> ' +
+                'Escolhendo <strong>resolver no local</strong> voce economiza <strong>' + money(d.economia_estimada) + '</strong>.' +
+                '</div>';
+        }
+
+        html += '</div>';
+
+        html += '<div class="mt-3 d-flex gap-2">' +
+            '<button type="button" class="btn btn-outline-secondary" data-action="voltar">Voltar</button>' +
+            '</div>';
+
+        wrap.innerHTML = html;
+    }
+
+    // ----------------------------------------------------------------
+    // Aceitar opcao
+    // ----------------------------------------------------------------
+    document.addEventListener('click', function (ev) {
+        var btn = ev.target.closest && ev.target.closest('[data-action]');
+        if (!btn) return;
+        var action = btn.getAttribute('data-action');
+        if (action === 'aceitar-local') {
+            ev.preventDefault();
+            log('aceitou local');
+            STATE.valorCotado = (STATE.opcoes && STATE.opcoes.valor_deslocamento) || null;
+            // Local nao exige destino: vai direto pra tela final
+            preencherHiddenFields('assistencia');
+            showStage('cotacao');
+        } else if (action === 'aceitar-reboque') {
+            ev.preventDefault();
+            log('aceitou reboque');
+            showStage('destino');
+            inicializarDestino();
+        } else if (action === 'voltar') {
+            ev.preventDefault();
+            if (currentStage === 'opcoes') showStage('veiculo');
+            else if (currentStage === 'destino') showStage('opcoes');
+            else if (currentStage === 'veiculo') showStage('modo');
+        }
+    });
+
+    // ----------------------------------------------------------------
+    // Destino
+    // ----------------------------------------------------------------
+    function inicializarDestino() {
+        if (!STATE.endereco) return;
+        var wrap = document.querySelector('.gf-ap[data-role="destino"]');
+        if (!wrap) return;
+        var mapEl = wrap.querySelector('[data-ap-map]');
+        if (mapEl && !mapEl.__gfMapBound) {
+            wrap.setAttribute('data-ap-init-lat', STATE.endereco.lat);
+            wrap.setAttribute('data-ap-init-lng', STATE.endereco.lng);
+            if (window.gfAddressPicker && window.gfAddressPicker.boot) {
+                wrap.removeAttribute('__gfApBooted');
+                window.gfAddressPicker.boot();
+            }
+        }
+    }
+
+    document.addEventListener('gf:address-confirmed', function (ev) {
+        var d = ev.detail || {};
+        if (d.role !== 'destino') return;
+        log('destino confirmado', d);
+        STATE.destino = d;
+        apiGet('/opcoes', {
+            modo: 'reboque',
+            lat: STATE.endereco.lat,
+            lng: STATE.endereco.lng,
+            lat_destino: d.lat,
+            lng_destino: d.lng,
+        }).then(function (j) {
+            if (j && j.ok && j.data && j.data.disponivel && j.data.valor_reboque != null) {
+                STATE.valorCotado = j.data.valor_reboque;
+            } else {
+                STATE.valorCotado = null;
+            }
+            preencherHiddenFields('reboque');
+            showStage('cotacao');
+        }).catch(function () {
+            STATE.valorCotado = null;
+            preencherHiddenFields('reboque');
+            showStage('cotacao');
+        });
+    });
+
+    // ----------------------------------------------------------------
+    // Submissao final
+    // ----------------------------------------------------------------
+    function preencherHiddenFields(decisao) {
+        var form = document.querySelector('form[data-precotacao-form]') || document.querySelector('form');
+        if (!form) { log('sem form'); return; }
+        var set = function (name, val) {
+            var el = form.querySelector('[name="' + name + '"]');
+            if (!el) {
+                el = document.createElement('input');
+                el.type = 'hidden';
+                el.name = name;
+                form.appendChild(el);
+            }
+            el.value = val == null ? '' : val;
+        };
+        set('tipo_problema', STATE.servico || (decisao === 'reboque' ? 'reboque' : 'me_orientem'));
+        set('decisao_atendimento', decisao);
+        set('categoria', STATE.veiculo || 'popular');
+        set('lat_origem', STATE.endereco && STATE.endereco.lat);
+        set('lng_origem', STATE.endereco && STATE.endereco.lng);
+        set('localizacao', STATE.endereco && STATE.endereco.label);
+        set('numero_origem', STATE.endereco && STATE.endereco.numero);
+        set('valor_cotado', STATE.valorCotado || '');
+        if (STATE.destino) {
+            set('lat_destino', STATE.destino.lat);
+            set('lng_destino', STATE.destino.lng);
+            set('destino', STATE.destino.label);
+            set('numero_destino', STATE.destino.numero);
+        }
+    }
+
+    // ----------------------------------------------------------------
+    // WhatsApp fallback
+    // ----------------------------------------------------------------
+    function renderWhatsApp(wrap, mensagemCustom) {
+        apiPost('/whatsapp', {
+            modo: STATE.modo || '',
+            servico: STATE.servico || '',
+            veiculo: STATE.veiculo || '',
+            origem_texto: (STATE.endereco && STATE.endereco.label) || '',
+            origem_lat: STATE.endereco ? STATE.endereco.lat : '',
+            origem_lng: STATE.endereco ? STATE.endereco.lng : '',
+            destino_texto: (STATE.destino && STATE.destino.label) || '',
+        }).then(function (j) {
+            var link = j && j.ok && j.data && j.data.link;
+            if (!link) {
+                wrap.innerHTML = '<div class="alert alert-warning">Fale com a central no WhatsApp.</div>';
+                return;
+            }
+            STATE.whatsappLink = link;
+            wrap.innerHTML = '<div class="alert alert-info">' +
+                (mensagemCustom || 'Nenhuma oficina ou guincho disponivel agora. Vamos te atender pelo WhatsApp.') +
+                '</div>' +
+                '<a class="btn-main w-100 d-block text-center" href="' + escapeHtml(link) +
+                '" target="_blank" rel="noopener">Abrir WhatsApp</a>';
+        }).catch(function () {
+            wrap.innerHTML = '<div class="alert alert-warning">Nao conseguimos gerar o link agora.</div>';
+        });
+    }
+
+    // ----------------------------------------------------------------
+    // Cobertura (chamada inicial quando o endereco e confirmado)
+    // ----------------------------------------------------------------
+    document.addEventListener('gf:address-confirmed', function (ev) {
+        var d = ev.detail || {};
+        if (d.role !== 'origem') return;
+        // Reacao paralela: consulta cobertura e guarda no STATE
+        apiGet('/cobertura', { lat: d.lat, lng: d.lng }).then(function (j) {
+            if (j && j.ok) {
+                STATE.cobertura = j.data;
+                log('cobertura ->', j.data);
+                if (!j.data.tem_guincho && !j.data.qtd_oficinas) {
+                    // Sem nada: cai no WhatsApp direto
+                    var wrap = $('opcoes-wrap');
+                    if (wrap) { showStage('opcoes'); renderWhatsApp(wrap); }
+                }
+            }
+        }).catch(function () {});
+    });
+
+    // ----------------------------------------------------------------
+    // Boot
+    // ----------------------------------------------------------------
+    function boot() {
+        log('flow v2 pronto. Aguardando gf:address-confirmed.');
+        // Deixa a view no estagio inicial
+        showStage('endereco');
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', boot);
+    } else {
+        boot();
+    }
+
+    window.__gfFlow = { STATE: STATE, showStage: showStage, API: API };
+})();

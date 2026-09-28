@@ -284,6 +284,13 @@ class AuthController extends BaseController
 
         require_once __DIR__ . '/../Services/TarifaService.php';
         $detalhe = null;
+
+        // FASE A v2: valor_cotado do front tem prioridade sobre recálculo
+        $valorCotadoFront = filter_var($_POST['valor_cotado'] ?? null, FILTER_VALIDATE_FLOAT);
+        if ($valorCotadoFront !== false && $valorCotadoFront > 0) {
+            $detalhe = ['valor' => (float)$valorCotadoFront, 'fonte' => 'front_precotacao'];
+            $origemTarifa = 'front_precotacao';
+        }
         $origemTarifa = 'reboque';
         if ($serviceTypeId > 0 && (($serviceType['attendance_mode'] ?? '') === 'ON_SITE')) {
             require_once __DIR__ . '/../Services/EspecialistaPricingService.php';
