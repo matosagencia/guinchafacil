@@ -116,13 +116,13 @@ $valorCotado = (float)($cotacao['valor'] ?? 0);
         <div class="row g-3 mb-3">
             <div class="col-md-6">
                 <label for="marca">Marca</label>
-                <input class="form-control" id="marca" name="marca" list="marcas-lista" autocomplete="off" required>
+                <input class="form-control" id="marca" name="marca" list="marcas-lista" required>
                 <datalist id="marcas-lista"></datalist>
                 <input type="hidden" id="vehicle_brand_id" name="vehicle_brand_id">
             </div>
             <div class="col-md-6">
                 <label for="modelo">Modelo</label>
-                <input class="form-control" id="modelo" name="modelo" list="modelos-lista" autocomplete="off" required disabled>
+                <input class="form-control" id="modelo" name="modelo" list="modelos-lista" required disabled>
                 <datalist id="modelos-lista"></datalist>
                 <input type="hidden" id="vehicle_model_id" name="vehicle_model_id">
             </div>
