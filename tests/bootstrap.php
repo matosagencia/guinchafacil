@@ -220,17 +220,56 @@ function getPDO(): PDO
         ");
 
         $pdo->exec("
-            CREATE TABLE IF NOT EXISTS usuarios (
-                id         INTEGER,
-                nome       TEXT,
-                email      TEXT,
-                senha_hash TEXT,
-                telefone   TEXT,
-                cpf        TEXT,
-                tipo       TEXT    DEFAULT 'guincho',
-                ativo      INTEGER DEFAULT 1
-            )
-        ");
+                    CREATE TABLE IF NOT EXISTS usuarios (
+                        id             INTEGER,
+                        nome           TEXT,
+                        email          TEXT,
+                        senha_hash     TEXT,
+                        telefone       TEXT,
+                        cpf            TEXT,
+                        google_subject TEXT,
+                        tipo           TEXT    DEFAULT 'guincho',
+                        ativo          INTEGER DEFAULT 1
+                    )
+                ");
+                
+                $pdo->exec("
+    CREATE TABLE IF NOT EXISTS triage_sessions (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        session_token TEXT NOT NULL UNIQUE,
+        cliente_id INTEGER,
+        veiculo_id INTEGER,
+        pedido_id INTEGER,
+        symptom_code TEXT NOT NULL,
+        respostas_json TEXT,
+        resultado TEXT,
+        recommended_service_code TEXT,
+        alternative_service_codes_json TEXT,
+        safety_risk INTEGER NOT NULL DEFAULT 0,
+        explicacao TEXT,
+        rule_version TEXT NOT NULL DEFAULT 'v1',
+        created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+        completed_at TEXT
+    )
+");
+
+$pdo->exec("
+    CREATE TABLE IF NOT EXISTS enderecos (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        usuario_id INTEGER NOT NULL,
+        cep TEXT NOT NULL,
+        logradouro TEXT NOT NULL,
+        numero TEXT NOT NULL,
+        complemento TEXT,
+        bairro TEXT NOT NULL,
+        cidade TEXT NOT NULL,
+        estado TEXT NOT NULL,
+        latitude REAL,
+        longitude REAL,
+        principal INTEGER DEFAULT 0,
+        criado_em TEXT
+    )
+");
 
         $pdo->exec("
             CREATE TABLE IF NOT EXISTS logs_webhook (
@@ -877,6 +916,7 @@ function getPDO(): PDO
                 updated_at TEXT
             )
         ");
+        
 
         // Seeds de configuração padrão
         $pdo->exec("INSERT OR IGNORE INTO configuracoes (chave, valor) VALUES ('comissao_plataforma', '0.15')");
