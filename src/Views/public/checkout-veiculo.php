@@ -4,6 +4,17 @@ $esc = static fn($v) => htmlspecialchars((string)$v, ENT_QUOTES, 'UTF-8');
 $cotacao = $_SESSION['pre_cotacao'] ?? [];
 $valorCotado = (float)($cotacao['valor'] ?? 0);
 $temVeiculos = !empty($veiculos);
+<<<<<<< HEAD
+=======
+$categoriaFunil = (string)($cotacao['categoria'] ?? 'popular');
+$tipoMap = ['moto'=>'moto','caminhonete'=>'van','popular'=>'carro','suv'=>'carro','eletrico'=>'carro'];
+$tipoPreSelecionado = $tipoMap[$categoriaFunil] ?? 'carro';
+
+$coresVeiculo = [
+    'Branco','Preto','Prata','Cinza','Vermelho','Azul','Azul Escuro','Verde','Amarelo',
+    'Laranja','Marrom','Bege','Dourado','Vinho','Grafite','Bordô','Rosa','Roxo','Bronze','Verde Musgo'
+];
+>>>>>>> main
 ?>
 <!doctype html>
 <html lang="pt-BR">
@@ -90,12 +101,16 @@ $temVeiculos = !empty($veiculos);
                     <span><strong>Cadastrar outro veiculo</strong></span>
                 </label>
             </div>
+<<<<<<< HEAD
             <div class="divisor" id="divisor-novo">- ou cadastre um novo abaixo -</div>
+=======
+>>>>>>> main
         <?php else: ?>
             <input type="hidden" name="veiculo_id" value="0">
         <?php endif; ?>
 
         <div id="form-novo-veiculo">
+<<<<<<< HEAD
             <label>Tipo</label>
             <div class="tipo-grid">
                 <?php
@@ -152,6 +167,68 @@ $temVeiculos = !empty($veiculos);
                 <div class="col-md-4">
                     <label for="uf_placa">UF do emplacamento</label>
                     <select class="form-select" id="uf_placa" name="uf_placa" required>
+=======
+            <?php if ($temVeiculos): ?>
+                <div class="divisor" id="divisor-novo">- ou cadastre um novo abaixo -</div>
+            <?php endif; ?>
+
+            <label>Tipo</label>
+            <div class="tipo-grid">
+                <input type="radio" id="tipo-carro" name="tipo" value="carro" <?= $tipoPreSelecionado === 'carro' ? 'checked' : '' ?>>
+                <label for="tipo-carro">Carro</label>
+                <input type="radio" id="tipo-moto" name="tipo" value="moto" <?= $tipoPreSelecionado === 'moto' ? 'checked' : '' ?>>
+                <label for="tipo-moto">Moto</label>
+                <input type="radio" id="tipo-caminhao" name="tipo" value="caminhao" <?= $tipoPreSelecionado === 'caminhao' ? 'checked' : '' ?>>
+                <label for="tipo-caminhao">Caminhao</label>
+                <input type="radio" id="tipo-van" name="tipo" value="van" <?= $tipoPreSelecionado === 'van' ? 'checked' : '' ?>>
+                <label for="tipo-van">Van</label>
+            </div>
+
+            <div class="row g-3 mb-3">
+                <div class="col-md-6">
+                    <label for="marca">Marca</label>
+                    <input class="form-control" id="marca" name="marca" list="marcas-lista" autocomplete="new-password" required>
+                    <datalist id="marcas-lista"></datalist>
+                    <input type="hidden" id="vehicle_brand_id" name="vehicle_brand_id">
+                </div>
+                <div class="col-md-6">
+                    <label for="modelo">Modelo</label>
+                    <input class="form-control" id="modelo" name="modelo" list="modelos-lista" autocomplete="new-password" required disabled>
+                    <datalist id="modelos-lista"></datalist>
+                    <input type="hidden" id="vehicle_model_id" name="vehicle_model_id">
+                </div>
+            </div>
+
+            <div class="row g-3 mb-3">
+                <div class="col-md-4">
+                    <label for="ano">Ano</label>
+                    <select class="form-select" id="ano" name="ano" required>
+                        <option value="">Ano</option>
+                        <?php for ($a = (int)date('Y') + 1; $a >= 1990; $a--): ?>
+                            <option value="<?= $a ?>"><?= $a ?></option>
+                        <?php endfor; ?>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label for="cor">Cor</label>
+                    <select class="form-select" id="cor" name="cor" required>
+                        <option value="">Cor</option>
+                        <?php foreach ($coresVeiculo as $c): ?>
+                            <option value="<?= $c ?>"><?= $c ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label for="placa">Placa</label>
+                    <input class="form-control" id="placa" name="placa" maxlength="8" style="text-transform:uppercase" placeholder="ABC1D23" required>
+                </div>
+            </div>
+
+            <div class="row g-3 mb-4">
+                <div class="col-md-4">
+                    <label for="uf_placa">UF do emplacamento</label>
+                    <select class="form-select" id="uf_placa" name="uf_placa">
+>>>>>>> main
                         <option value="">UF</option>
                         <?php foreach (['AC','AL','AP','AM','BA','CE','DF','ES','GO','MA','MT','MS','MG','PA','PB','PR','PE','PI','RJ','RN','RS','RO','RR','SC','SP','SE','TO'] as $uf): ?>
                             <option value="<?= $uf ?>"><?= $uf ?></option>
@@ -169,8 +246,12 @@ $temVeiculos = !empty($veiculos);
     </form>
 </div>
 
+<<<<<<< HEAD
 <script src="<?= $esc($bp) ?>/public/assets/js/checkout-veiculo.js?v=4" defer<?php echo function_exists('csp_script_nonce_attr') ? csp_script_nonce_attr() : ''; ?>></script>
 
 
+=======
+<script src="<?= $esc($bp) ?>/public/assets/js/checkout-veiculo.js?v=10" defer<?php echo function_exists('csp_script_nonce_attr') ? csp_script_nonce_attr() : ''; ?>></script>
+>>>>>>> main
 </body>
 </html>

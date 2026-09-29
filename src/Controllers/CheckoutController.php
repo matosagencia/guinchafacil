@@ -273,17 +273,28 @@ class CheckoutController extends BaseController
      */
     private function pullFlash(): ?array
     {
-        if (empty($_SESSION['_flash']) || !is_array($_SESSION['_flash'])) {
+        if (empty($_SESSION['_flash'])) {
             return null;
         }
-        $flash = array_pop($_SESSION['_flash']);
-        if (empty($_SESSION['_flash'])) {
-            unset($_SESSION['_flash']);
+        $raw = $_SESSION['_flash'];
+        unset($_SESSION['_flash']);
+        if (is_array($raw)) {
+            if (isset($raw[0]) && is_array($raw[0])) {
+                return array_pop($raw);
+            }
+            return $raw;
         }
+<<<<<<< HEAD
         // BaseController grava string; AuthController grava array.
         if (is_string($flash)) {
             return ['message' => $flash, 'type' => 'info', 'time' => time()];
         }
         return is_array($flash) ? $flash : null;
+=======
+        if (is_string($raw) && $raw !== '') {
+            return ['message' => $raw, 'type' => 'info', 'time' => time()];
+        }
+        return null;
+>>>>>>> main
     }
 }
