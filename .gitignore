@@ -1,16 +1,16 @@
-.env
-.env.local
-.env.*.local
-.env.backup
-files/qa-runs/
-logs/*.jsonl
-logs/
-public/uploads/
-uploads/
-qa/node_modules/
-qa/playwright-report/
-qa/test-results/
-qa/.cache/
+.env
+.env.local
+.env.*.local
+.env.backup
+files/qa-runs/
+logs/*.jsonl
+logs/
+public/uploads/
+uploads/
+qa/node_modules/
+qa/playwright-report/
+qa/test-results/
+qa/.cache/
 qa/.auth/
 *.trace.zip
 *.webm
@@ -86,3 +86,5 @@ index.php.antes-*
 
 # Specs de diagnostico
 tests/e2e/diag-*.spec.js
+installers/
+diag-fluxo.php
