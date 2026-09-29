@@ -1,4 +1,4 @@
-﻿-- Checkout rapido pos-cotacao - v1
+-- Checkout rapido pos-cotacao - v1
 -- Idempotente: pode rodar multiplas vezes sem quebrar.
 -- Aplicado por install/migrate.php (que ja gerencia transacao e registro
 -- em schema_migrations).
