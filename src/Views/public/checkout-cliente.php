@@ -17,7 +17,7 @@ $valorCotado = (float)($cotacao['valor'] ?? 0);
         body { min-height:100vh; margin:0; background:var(--gf-bg); color:#fff; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; }
         .topbar { display:flex; align-items:center; justify-content:space-between; padding:16px 24px; border-bottom:1px solid rgba(47,179,74,.15); }
         .topbar .brand { display:flex; align-items:center; gap:10px; color:#fff; text-decoration:none; font-weight:700; }
-        .topbar .brand img { width:34px; height:34px; border-radius:10px; }
+        .topbar .brand img { width:42px; height:42px; border-radius:10px; }
         .topbar .brand span { color:var(--gf-green); }
         .topbar .btn-outline { border:1px solid rgba(47,179,74,.3); color:#7dff96; text-decoration:none; font-size:.85rem; padding:.4rem .9rem; border-radius:8px; transition:.15s; }
         .topbar .btn-outline:hover { background:rgba(47,179,74,.1); color:#fff; }
@@ -41,7 +41,7 @@ $valorCotado = (float)($cotacao['valor'] ?? 0);
 </head>
 <body>
 <div class="topbar">
-    <a class="brand" href="<?= $esc($bp) ?>/"><img src="<?= $esc($bp) ?>/public/assets/img/logo-48.png" alt=""> Guincha<span>Facil</span></a>
+    <a class="brand" href="<?= $esc($bp) ?>/"><img src="<?= $esc($bp) ?>/public/assets/img/logo-128.png" alt=""> Guincha<span>Facil</span></a>
     <a class="btn-outline" href="<?= $esc($bp) ?>/login?retorno=<?= urlencode('/checkout/veiculo') ?>">Ja tenho conta</a>
 </div>
 

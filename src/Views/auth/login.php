@@ -17,7 +17,7 @@
 <div class="container d-flex justify-content-center align-items-center" style="min-height:100vh;">
     <div class="card p-4 shadow" style="width:100%;max-width:420px;">
         <div class="text-center mb-4">
-            <img src="<?php echo htmlspecialchars($bp); ?>/public/assets/img/logo-128.png" alt="GuinchaFacil" width="72" height="72" class="mb-2">
+            <img src="<?php echo htmlspecialchars($bp); ?>/public/assets/img/logo-128.png" alt="GuinchaFacil" width="88" height="88" class="mb-2">
             <h2 class="fw-bold">Guincha<span style="color:var(--primary)">Facil</span></h2>
             <p class="text-muted">Acesse sua conta</p>
         </div>

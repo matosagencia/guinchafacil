@@ -280,6 +280,10 @@ class CheckoutController extends BaseController
         if (empty($_SESSION['_flash'])) {
             unset($_SESSION['_flash']);
         }
-        return $flash;
+        // BaseController grava string; AuthController grava array.
+        if (is_string($flash)) {
+            return ['message' => $flash, 'type' => 'info', 'time' => time()];
+        }
+        return is_array($flash) ? $flash : null;
     }
 }
