@@ -6,16 +6,101 @@ declare(strict_types=1);
  * Checkout rapido pos-cotacao.
  *
  * Fluxo:
- *   1. Cliente aceita cotacao em /pre-cotacao → redireciona pra /checkout/veiculo
- *   2. Se nao logado, /login → Google ou magic link → volta pra /checkout/veiculo
- *   3. formVeiculo() renderiza form com cascata
- *   4. salvarVeiculo() cria veiculo + pedido + pagamento pendente
- *   5. pagar() redireciona pra /pagamento/checkout/{id} (rota existente, ja tem Brick)
- *
- * Zero codigo MP novo. Reusa PagamentoController::checkout existente.
+ *   1. /pre-cotacao aceitar  -> /checkout/cliente (se anonimo)
+ *   2. /checkout/cliente     -> cria usuario (nome + tel + email), loga
+ *   3. /checkout/veiculo     -> cria veiculo + pedido + pagamento pendente
+ *   4. /pagamento/checkout/N -> Brick MP existente
  */
 class CheckoutController extends BaseController
 {
+    public function formCliente(): void
+    {
+        if (AuthService::isLoggedIn()) {
+            $this->redirect('/checkout/veiculo');
+            return;
+        }
+        $csrf_token = $this->generateCSRFToken();
+        $flash = $this->pullFlash();
+        require __DIR__ . '/../Views/public/checkout-cliente.php';
+    }
+
+    public function salvarCliente(): void
+    {
+        if (AuthService::isLoggedIn()) {
+            $this->redirect('/checkout/veiculo');
+            return;
+        }
+
+        if (!$this->validateCSRFToken($_POST['csrf_token'] ?? '')) {
+            http_response_code(419);
+            $this->setFlashMessage('Sessao expirada. Tente novamente.', 'error');
+            $this->redirect('/checkout/cliente');
+            return;
+        }
+
+        $nome     = trim((string)($_POST['nome'] ?? ''));
+        $telefone = preg_replace('/\D+/', '', (string)($_POST['telefone'] ?? ''));
+        $email    = strtolower(trim((string)($_POST['email'] ?? '')));
+
+        if (mb_strlen($nome) < 3) {
+            $this->setFlashMessage('Informe seu nome completo.', 'error');
+            $this->redirect('/checkout/cliente');
+            return;
+        }
+        if (strlen((string)$telefone) < 10 || strlen((string)$telefone) > 11) {
+            $this->setFlashMessage('Telefone invalido. Use DDD + numero.', 'error');
+            $this->redirect('/checkout/cliente');
+            return;
+        }
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            $this->setFlashMessage('Email invalido.', 'error');
+            $this->redirect('/checkout/cliente');
+            return;
+        }
+
+        try {
+            $pdo = getPDO();
+            $stmt = $pdo->prepare('SELECT id, nome, email, telefone, tipo, ativo FROM usuarios WHERE LOWER(email) = ? OR telefone = ? LIMIT 1');
+            $stmt->execute([$email, $telefone]);
+            $existente = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if ($existente && (int)$existente['ativo'] !== 1) {
+                $this->setFlashMessage('Esta conta esta desativada.', 'error');
+                $this->redirect('/checkout/cliente');
+                return;
+            }
+
+            if ($existente) {
+                require_once __DIR__ . '/../Services/Auth/MagicLinkService.php';
+                $resultado = MagicLinkService::solicitar($telefone !== '' ? (string)$telefone : $email, '/checkout/veiculo');
+                if (!empty($resultado['ok'])) {
+                    $canal = (string)($resultado['canal'] ?? '');
+                    $this->redirect('/auth/magic?canal=' . urlencode($canal));
+                } else {
+                    $this->setFlashMessage($resultado['erro'] ?? 'Nao foi possivel enviar o link.', 'error');
+                    $this->redirect('/checkout/cliente');
+                }
+                return;
+            }
+
+            $stmt = $pdo->prepare(
+                "INSERT INTO usuarios (nome, email, senha_hash, telefone, cpf, google_subject, tipo, perfil_status, ativo, criado_em)
+                 VALUES (?, ?, NULL, ?, NULL, NULL, 'cliente', 'COMPLETO', 1, NOW())"
+            );
+            $stmt->execute([$nome, $email, $telefone]);
+            $userId = (int)$pdo->lastInsertId();
+
+            $user = ['id' => $userId, 'nome' => $nome, 'email' => $email, 'telefone' => $telefone, 'tipo' => 'cliente', 'ativo' => 1];
+            AuthService::initializeAuthenticatedSession($user);
+
+            $this->redirect('/checkout/veiculo');
+        } catch (Throwable $e) {
+            error_log('[CheckoutController][salvarCliente] ' . $e->getMessage());
+            $this->setFlashMessage('Nao foi possivel criar sua conta. Tente novamente.', 'error');
+            $this->redirect('/checkout/cliente');
+        }
+    }
+
     public function formVeiculo(): void
     {
         AuthService::requireAuth('cliente');
@@ -58,7 +143,6 @@ class CheckoutController extends BaseController
         $uid = (int)($_SESSION['user']['id'] ?? 0);
         $veiculoId = (int)($_POST['veiculo_id'] ?? 0);
 
-        // Se o cliente nao escolheu veiculo existente, cria um novo.
         if ($veiculoId <= 0) {
             $tipoPost = (string)($_POST['tipo'] ?? 'carro');
             if (!in_array($tipoPost, ['carro','moto','caminhao','van'], true)) {
@@ -101,7 +185,6 @@ class CheckoutController extends BaseController
             }
             $veiculoId = (int)$novoId;
         } else {
-            // Garante que o veiculo pertence ao usuario
             $v = Veiculo::buscarPorId($veiculoId);
             if (!$v || (int)$v['usuario_id'] !== $uid) {
                 $this->setFlashMessage('Veiculo invalido.', 'error');
@@ -110,7 +193,6 @@ class CheckoutController extends BaseController
             }
         }
 
-        // Cria o pedido a partir da cotacao + veiculo
         try {
             $pedidoId = Pedido::criarCompleto([
                 'cliente_id'            => $uid,
@@ -159,10 +241,7 @@ class CheckoutController extends BaseController
             return;
         }
 
-        // Cria registro de pagamento pendente
         Pagamento::criar($pedidoId, 'mercadopago', (float)($cotacao['valor'] ?? 0), 0, 0);
-
-        // Consome a cotacao (ja virou pedido). Fica so o pedido na sessao.
         unset($_SESSION['pre_cotacao']);
 
         $this->redirect('/pagamento/checkout/' . $pedidoId);
@@ -185,7 +264,6 @@ class CheckoutController extends BaseController
             return;
         }
 
-        // Redireciona pra rota existente que ja sabe renderizar o Brick MP.
         $this->redirect('/pagamento/checkout/' . $pedidoId);
     }
 }

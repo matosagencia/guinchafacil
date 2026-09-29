@@ -449,6 +449,9 @@ $rotas = [
         '/admin/planejamento'        => ['AdminPlanejamentoController', 'index', 'admin'],
         '/guincho/estoque'           => ['GuinchoController', 'estoque', 'guincho'],
 
+        '/checkout/cliente' => ['CheckoutController', 'formCliente', null],
+
+
         '/checkout/veiculo' => ['CheckoutController', 'formVeiculo', 'cliente'],
 
 
@@ -584,6 +587,9 @@ $rotas = [
         '/admin/cidade/salvar'       => ['AdminController', 'cidadeSalvar', 'admin'],
         '/admin/cidade/alternar'     => ['AdminController', 'cidadeAlternar', 'admin'],
         '/admin/cidade/geo/salvar'   => ['AdminController', 'cidadeGeoSalvar', 'admin'],
+
+        '/checkout/cliente' => ['CheckoutController', 'salvarCliente', null],
+
 
         '/checkout/veiculo' => ['CheckoutController', 'salvarVeiculo', 'cliente'],
 
