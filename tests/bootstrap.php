@@ -228,6 +228,9 @@ function getPDO(): PDO
                         telefone       TEXT,
                         cpf            TEXT,
                         google_subject TEXT,
+                        magic_token_hash TEXT,
+                        magic_token_expira_em TEXT,
+                        magic_token_canal TEXT,
                         tipo           TEXT    DEFAULT 'guincho',
                         ativo          INTEGER DEFAULT 1
                     )
