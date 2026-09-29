@@ -171,8 +171,8 @@ class CheckoutController extends BaseController
                 'operational_category' => $vehicleType,
             ];
 
-            if ($dadosVeiculo['marca'] === '' || $dadosVeiculo['modelo'] === '' || $dadosVeiculo['ano'] < 1950) {
-                $this->setFlashMessage('Preencha marca, modelo e ano do veiculo.', 'error');
+            if ($dadosVeiculo['marca'] === '' || $dadosVeiculo['modelo'] === '' || $dadosVeiculo['ano'] < 1950 || $dadosVeiculo['cidade_placa'] === '') {
+                $this->setFlashMessage('Preencha marca, modelo, ano e cidade do emplacamento.', 'error');
                 $this->redirect('/checkout/veiculo');
                 return;
             }
@@ -265,5 +265,21 @@ class CheckoutController extends BaseController
         }
 
         $this->redirect('/pagamento/checkout/' . $pedidoId);
+    }
+
+    /**
+     * Le e consome a ultima flash da sessao.
+     * Duplicado do AuthController porque ele e private la.
+     */
+    private function pullFlash(): ?array
+    {
+        if (empty($_SESSION['_flash']) || !is_array($_SESSION['_flash'])) {
+            return null;
+        }
+        $flash = array_pop($_SESSION['_flash']);
+        if (empty($_SESSION['_flash'])) {
+            unset($_SESSION['_flash']);
+        }
+        return $flash;
     }
 }
