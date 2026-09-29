@@ -520,7 +520,7 @@ class AuthController extends BaseController
         }
     }
 
-
+    public function magicSolicitar(): void    {        if ($this->isAuthenticated()) {            $this->redirectByProfile();            return;        }        if (!$this->validateCSRFToken($_POST['csrf_token'] ?? '')) {            http_response_code(419);            echo json_encode(['ok' => false, 'erro' => 'Sessao expirada.']);            return;        }        $identificador = trim((string)($_POST['identificador'] ?? ''));        $retorno = (string)($_POST['retorno'] ?? '/');        require_once __DIR__ . '/../Services/Auth/MagicLinkService.php';        $resultado = MagicLinkService::solicitar($identificador, $retorno);        header('Content-Type: application/json; charset=utf-8');        echo json_encode($resultado, JSON_UNESCAPED_UNICODE);    }    public function magicEnviado(): void    {        $canal = (string)($_GET['canal'] ?? '');        $csrf_token = $this->generateCSRFToken();        require __DIR__ . '/../Views/auth/magic_enviado.php';    }    public function magicConsumir(string $token): void    {        require_once __DIR__ . '/../Services/Auth/MagicLinkService.php';        $user = MagicLinkService::consumir($token);        if (!$user) {            $this->setFlashMessage('Este link expirou ou ja foi usado. Solicite um novo.', 'error');            $this->redirect('/login');            return;        }        $retorno = AuthService::sanitizeReturnPath((string)($_GET['retorno'] ?? '/cliente/dashboard'));        AuthService::initializeAuthenticatedSession($user);        $this->redirect($retorno);    }
 
     public function login(): void
 

@@ -137,6 +137,12 @@ define('SMTP_USER',       env('SMTP_USER'));
 define('SMTP_PASS',       env('SMTP_PASS'));
 define('SMTP_FROM_EMAIL', env('SMTP_FROM_EMAIL'));
 define('SMTP_FROM_NAME',  env('SMTP_FROM_NAME', 'GuinchaFácil'));
+
+// ------------------------------------------------------------
+// Brevo (SMS transacional — magic link fallback)
+// ------------------------------------------------------------
+define('BREVO_API_KEY',    env('BREVO_API_KEY'));
+define('BREVO_SMS_SENDER', env('BREVO_SMS_SENDER', 'GuinchaFacil'));
 
 // ------------------------------------------------------------
 // Simulado / testes
