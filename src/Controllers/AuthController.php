@@ -330,6 +330,10 @@ class AuthController extends BaseController
             'service_type_id' => $serviceTypeId,
             'service_code' => $serviceType['code'] ?? 'TOW_CAR',
             'requires_destination' => $requiresDestination,
+            'endereco_origem'  => substr($localizacao, 0, 500),
+
+            'endereco_destino' => substr($destino, 0, 500),
+
             'destino' => substr($destino, 0, 220),
             'distancia_km' => $distancia,
             'valor' => (float)$detalhe['valor'],
@@ -358,7 +362,7 @@ class AuthController extends BaseController
         $_SESSION['pre_cotacao']['status'] = 'aceita';
         require_once __DIR__ . '/../Services/PreQuoteDemandService.php';
         PreQuoteDemandService::registrar($_SESSION['pre_cotacao'], 'accepted');
-        $this->redirect('/registro/cliente?retorno=%2Fcliente%2Fpedido%2Fnovo');
+        $destinoCheckout = '/checkout/veiculo';        if (AuthService::isLoggedIn()) {            $this->redirect($destinoCheckout);        } else {            $this->redirect('/login?retorno=' . rawurlencode($destinoCheckout));        }
     }
 
     private static function distanciaKm(float $lat1, float $lng1, float $lat2, float $lng2): float

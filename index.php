@@ -449,6 +449,12 @@ $rotas = [
         '/admin/planejamento'        => ['AdminPlanejamentoController', 'index', 'admin'],
         '/guincho/estoque'           => ['GuinchoController', 'estoque', 'guincho'],
 
+        '/checkout/veiculo' => ['CheckoutController', 'formVeiculo', 'cliente'],
+
+
+        '/checkout/pagar'   => ['CheckoutController', 'pagar', 'cliente'],
+
+
         '/pagamento/sucesso'  => ['PagamentoController', 'sucesso', 'cliente'],
         '/pagamento/falha'    => ['PagamentoController', 'falha', 'cliente'],
         '/pagamento/pendente' => ['PagamentoController', 'pendente', 'cliente'],
@@ -578,6 +584,9 @@ $rotas = [
         '/admin/cidade/salvar'       => ['AdminController', 'cidadeSalvar', 'admin'],
         '/admin/cidade/alternar'     => ['AdminController', 'cidadeAlternar', 'admin'],
         '/admin/cidade/geo/salvar'   => ['AdminController', 'cidadeGeoSalvar', 'admin'],
+
+        '/checkout/veiculo' => ['CheckoutController', 'salvarVeiculo', 'cliente'],
+
 
         '/pagamento/mercadopago' => ['PagamentoController', 'iniciarMercadoPago', 'cliente'],
         '/pagamento/pagseguro'   => ['PagamentoController', 'iniciarPagSeguro', 'cliente'],
