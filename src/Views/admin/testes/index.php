@@ -12,7 +12,7 @@
         .node.ok { fill: #2ecc71; }
         .node.fail { fill: #e74c3c; }
         @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
-        .edge { stroke: #ccc; stroke-width: 3; fill: none; stroke-dasharray: 5; transition: stroke-dashoffset 0.5s; }
+        .edge { stroke: #ccc; stroke-width: 3; fill: none; stroke-dasharray: 5; }
         button { padding: 10px 15px; background: #27ae60; color: white; border: none; border-radius: 4px; cursor: pointer; }
         button:hover { background: #219653; }
         .log-box { background: #222; color: #0f0; padding: 10px; font-family: monospace; height: 150px; overflow-y: scroll; margin-top: 15px; border-radius: 4px; }
@@ -20,8 +20,8 @@
 </head>
 <body>
     <div class="container">
-        <h1>Console de Testes & Diagrama Animado</h1>
-        <p>Monitoramento em tempo real dos cenários E2E e de integração com polling real.</p>
+        <h1>Console de Testes & Diagrama Animado (Mutação Real)</h1>
+        <p>Monitoramento E2E com avaliação de probes por backend e polling ativo.</p>
         
         <select id="scenario-select" style="padding: 8px; margin-right: 10px;">
             <option value="fluxo-1a">fluxo-1a</option>
@@ -34,12 +34,13 @@
         <button onclick="runScenario()">Executar Cenário</button>
 
         <div style="margin-top: 20px;">
-            <svg width="800" height="200" style="background:#fafafa; border:1px solid #ddd; border-radius:4px;">
-                <path class="edge" d="M 100 100 L 300 100 L 500 100 L 700 100" />
-                <circle id="node-precotacao" class="node" cx="100" cy="100" r="20" />
-                <circle id="node-decisao" class="node" cx="300" cy="100" r="20" />
-                <circle id="node-pagamento" class="node" cx="500" cy="100" r="20" />
-                <circle id="node-pedido" class="node" cx="700" cy="100" r="20" />
+            <svg width="900" height="200" style="background:#fafafa; border:1px solid #ddd; border-radius:4px;">
+                <path class="edge" d="M 80 100 L 240 100 L 400 100 L 560 100 L 720 100" />
+                <circle id="node-precotacao" class="node" cx="80" cy="100" r="18" />
+                <circle id="node-decisao" class="node" cx="240" cy="100" r="18" />
+                <circle id="node-pagamento" class="node" cx="400" cy="100" r="18" />
+                <circle id="node-webhook" class="node" cx="560" cy="100" r="18" />
+                <circle id="node-pedido" class="node" cx="720" cy="100" r="18" />
             </svg>
         </div>
 
@@ -48,52 +49,43 @@
 
     <script>
         let pollInterval = null;
-
         function log(msg) {
             const box = document.getElementById('log-output');
             box.innerHTML += `<div>[${new Date().toLocaleTimeString()}] ${msg}</div>`;
             box.scrollTop = box.scrollHeight;
         }
-
         function resetNodes() {
             document.querySelectorAll('.node').forEach(n => n.className.baseVal = 'node');
         }
-
         async function runScenario() {
             resetNodes();
             const scenario = document.getElementById('scenario-select').value;
             log(`Iniciando execução do cenário: ${scenario}`);
-            
             try {
                 const res = await fetch(`/admin/testes/executar?scenario=${scenario}`);
                 const data = await res.json();
-                if (data.status === 'ok') {
-                    log(`Run ID ${data.run_id} iniciado. Monitorando eventos...`);
+                if (data.status === 'ok' || data.status === 'fail') {
+                    log(`Run ID ${data.run_id} criado. Monitorando eventos...`);
                     pollEvents(data.run_id);
                 } else {
-                    log(`Erro ao iniciar: ${data.message}`);
+                    log(`Erro: ${data.message}`);
                 }
             } catch (e) {
                 log(`Falha na requisição: ${e.message}`);
             }
         }
-
         function pollEvents(runId) {
             if (pollInterval) clearInterval(pollInterval);
             pollInterval = setInterval(async () => {
                 try {
                     const res = await fetch(`/admin/testes/eventos?run_id=${runId}`);
                     const data = await res.json();
-                    
                     if (data.steps) {
                         data.steps.forEach(step => {
                             const el = document.getElementById(step.node);
-                            if (el) {
-                                el.className.baseVal = `node ${step.status}`;
-                            }
+                            if (el) el.className.baseVal = `node ${step.status}`;
                         });
                     }
-
                     if (data.run_status === 'ok' || data.run_status === 'fail') {
                         log(`Cenário finalizado com status: ${data.run_status}`);
                         clearInterval(pollInterval);
