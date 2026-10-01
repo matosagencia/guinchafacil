@@ -1,0 +1,10 @@
+{
+    "scenario":  "oficina-alertas",
+    "steps":  [
+                  {
+                      "probe":  "status_ok",
+                      "key":  "step-1",
+                      "node":  "node-precotacao"
+                  }
+              ]
+}
