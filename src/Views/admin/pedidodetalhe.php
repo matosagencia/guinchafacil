@@ -1,12 +1,11 @@
-<?php
-require_once __DIR__ . '/../../Services/POR/PorThresholds.php';
+﻿<?php
+
 $bp = defined('BASE_PATH') ? BASE_PATH : '';
 $osrmBaseUrl = PorThresholds::routingFrontendBaseUrl();
 $flashMessages = $_SESSION['_flash'] ?? [];
 if (isset($flashMessages['message'])) $flashMessages = [$flashMessages];
 unset($_SESSION['_flash']);
-include __DIR__ . '/../layouts/header.php';
-$statusLabels = [
+include __DIR__ . '/../layouts/header.php';require_once __DIR__ . '/../../Services/POR/PorThresholds.php';$statusLabels = [
     'aguardando_pagamento' => 'Aguardando Pagamento',
     'aguardando_guincho'   => 'Aguardando Guincho',
     'a_caminho'            => 'A Caminho',
@@ -172,6 +171,8 @@ $statusLabels = [
         </div>
     </header>
 
+    <?php require __DIR__ . '/partials/_pedido_oficina_detalhe.php'; ?>
+
     <!-- Prova de Serviço: Fotos -->
     <?php
     $evidenciaColeta = $evidenciaColeta ?? null;

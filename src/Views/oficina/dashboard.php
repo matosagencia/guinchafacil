@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 $bp = defined('BASE_PATH') ? BASE_PATH : '';
 include __DIR__ . '/../layouts/header.php';
 function ofi_saudacao(): string { $h = (int)date('G'); if ($h < 12) return 'Bom dia'; if ($h < 18) return 'Boa tarde'; return 'Boa noite'; }
@@ -10,6 +10,7 @@ $pedidosVisiveis = array_values(array_filter($pedidos ?? [], fn($p) => !isset($r
 $primeiroPedido = $pedidosVisiveis[0] ?? null;
 ?>
 <link rel="stylesheet" href="<?= $bp ?>/public/assets/css/themes/oficina.css">
+<link rel="stylesheet" href="<?= $bp ?>/public/assets/css/components/communications.css">
 <link rel="stylesheet" href="<?= $bp ?>/public/assets/css/components/dashboard.css">
 <link rel="stylesheet" href="<?= $bp ?>/public/assets/css/pages/tow-dashboard.css">
 <script<?= function_exists('csp_script_nonce_attr') ? csp_script_nonce_attr() : '' ?>>document.addEventListener('DOMContentLoaded',function(){document.body.classList.add('guincho','oficina');});</script>
@@ -176,3 +177,6 @@ $primeiroPedido = $pedidosVisiveis[0] ?? null;
 })();
 </script>
 <?php include __DIR__ . '/../layouts/footer.php'; ?>
+<script<?= function_exists('csp_script_nonce_attr') ? csp_script_nonce_attr() : '' ?> src="<?= $bp ?>/public/assets/js/core/offline-queue.js"></script>
+<script<?= function_exists('csp_script_nonce_attr') ? csp_script_nonce_attr() : '' ?> src="<?= $bp ?>/public/assets/js/atendimento-status.js"></script>
+<script<?= function_exists('csp_script_nonce_attr') ? csp_script_nonce_attr() : '' ?> src="<?= $bp ?>/public/assets/js/communications.js"></script>
