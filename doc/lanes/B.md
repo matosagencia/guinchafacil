@@ -25,6 +25,8 @@
 
 ## 2. Estado atual (verificado em 2026-10-01)
 
+> **Verificação 2026-10-01:** itens 1 (assets no `oficina/dashboard.php`), 2 (partial `_pedido_oficina_detalhe.php` já incluído em `pedidodetalhe.php:348`, consumindo os 7 campos do Contrato Pedido v1) e 3 (badge `origem_funil` em `admin/pedidos.php` via closure `$getOrigemFunilBadge`) **já estão implementados**. `php -l` limpo no partial. Item 1 **não alterar** (Opção A: só muda se o ChatGPT apontar falha no cenário `oficina-alertas`).
+
 | Item | Estado |
 | --- | --- |
 | `AuthController.php` | Existe. Cobre Google, login, magic link e `preCotacao`. |
@@ -81,14 +83,13 @@ A faixa B **não escreve** os testes da própria faixa (R5).
 
 | Item | Situação |
 | --- | --- |
-| Migration da faixa A (`oficina_nome`, `triagem`, `custo_assistencia`, `custo_reboque`, `recomendacao`, `origem_funil`) | **Aguardando execução no ambiente local.** Enquanto não rodar, o partial exibe `—` nos campos. |
-| Confirmação de `Pedido::buscarPorId()` / `Pedido::listarPorStatus()` continuam com `SELECT p.*` | **Não verificado** — pedir confirmação à faixa A. |
-| Autoload de `Services/POR/PorThresholds` | **Não verificado** — o arquivo `pedidodetalhe.php` tem `require_once` explícito; se o autoloader cobrir, o require é redundante (mas inofensivo). |
-| Contrato Pedido v1 final | Aguardando faixa A publicar versão definitiva. |
-| Fronteira `CheckoutController::cliente` (A) × `/checkout/cliente` (B) | Decisão D9 pendente. |
-| Arquivos sem faixa | Decisão D10 pendente. |
-| Pasta `docs/` × `doc/` | Decisão D3 — pasta real é `doc/` (singular). `docs/lanes.json` e `lane_guard.ps1` ainda referenciam `docs/`. Não renomear sem decisão do dono. |
-| Auth (item 5) | Sem mudança de comportamento. Em espera do relatório do ChatGPT. |
+| Contrato Pedido v1 final | Aguardando faixa A |
+| **B-001 - 404 nas rotas B em localhost** | **RESOLVIDO** - causa: URL com prefixo `/guinchafacil`; docroot ja e a raiz do projeto. Ver `doc/BLOCKERS.md`. |
+| **B-002 — tipo de `triagem`** | **Ativo** — `CONTRATO_PEDIDO` emitido para A |
+| **B-004 - migration dos 7 campos do Contrato Pedido v1** | **Ativo** - `CONTRATO_PEDIDO` emitido para A |
+| Fronteira `CheckoutController::cliente` (A) × `/checkout/cliente` (B) | Decisão D9 pendente |
+| Arquivos sem faixa | Decisão D10 pendente |
+| Pasta `docs/` × `doc/` | Decisão D3 pendente |
 
 Ao terminar uma entrega: atualizar este arquivo (estado, contratos, pendências) e parar.
 
@@ -101,3 +102,5 @@ Ao terminar uma entrega: atualizar este arquivo (estado, contratos, pendências)
 | 2026-10-01 | Require do partial no `pedidodetalhe.php` | OK — dentro do `<main>` (linha 348) |
 | 2026-10-01 | Badge `origem_funil` em `admin/pedidos.php` | OK — já estava implementado |
 | 2026-10-01 | Verificação de hrefs em `sidebar_oficina.php` | OK — nenhuma violação |
+| 2026-10-01 | B-001 fechado (URL com prefixo /guinchafacil; docroot ja e a raiz); doc/BLOCKERS.md populado com B-001/B-002/B-004 | OK - sem alteracao de codigo PHP |
+| 2026-10-01 | Verificação do estado da faixa B; `php -l` nos arquivos | Itens 1–3 já prontos; B-001 (404) e B-002 (`triagem`) abertos; sem diff de código PHP |

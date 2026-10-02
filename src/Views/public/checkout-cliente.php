@@ -87,7 +87,7 @@ $valorCotado = (float)($cotacao['valor'] ?? 0);
     </form>
 </div>
 
-<script>
+<script<?= function_exists('csp_script_nonce_attr') ? csp_script_nonce_attr() : '' ?>>
 (function () {
     'use strict';
     var tel = document.getElementById('telefone');

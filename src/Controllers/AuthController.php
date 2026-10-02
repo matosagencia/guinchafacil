@@ -560,17 +560,17 @@ class AuthController extends BaseController
             return;
 
         }
-
+        
         $_SESSION['pre_cotacao']['aceita_em'] = date('c');
-
         $_SESSION['pre_cotacao']['status'] = 'aceita';
-
+        
         require_once __DIR__ . '/../Services/PreQuoteDemandService.php';
-
+        
         PreQuoteDemandService::registrar($_SESSION['pre_cotacao'], 'accepted');
 
         $destinoCheckout = '/checkout/veiculo';
         if (AuthService::isLoggedIn()) {
+            AuthService::touchActivity();
             $this->redirect($destinoCheckout);
         } else {
             $this->redirect('/login?retorno=' . rawurlencode($destinoCheckout));
@@ -968,6 +968,17 @@ class AuthController extends BaseController
 
                 return;
 
+            }
+
+            // §GF-CHECKOUT-FLOW: se existe pre-cotacao ativa na sessao, o destino
+            // obrigatorio e /checkout/veiculo — o cliente ja aceitou um valor e
+            // precisa apenas cadastrar o veiculo para o pedido. Sem este gate,
+            // sanitizeReturnPath() pode rebaixar /checkout/veiculo para / e
+            // redirectByProfile() levaria o cliente direto pra /cliente/dashboard,
+            // pulando a etapa de veiculo.
+            if (!empty($_SESSION['pre_cotacao']) && (int)($_SESSION['pre_cotacao']['expira_em'] ?? 0) > time()) {
+                $this->redirect('/checkout/veiculo');
+                return;
             }
 
             $this->redirectByProfile($user['tipo']);
