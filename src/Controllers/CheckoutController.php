@@ -193,18 +193,40 @@ class CheckoutController extends BaseController
             }
         }
 
+        // FIX-CHECKOUT-VEICULO: normaliza tipo_problema (enum do banco)
+        // e preenche lat_destino/lng_destino (NOT NULL) quando a cotacao
+        // for assistencia no local (sem destino).
+        $tipoProblemaMap = [
+            'mecanica'    => 'mecanico',
+            'eletrica'    => 'eletrico',
+            'pneu'        => 'pneu',
+            'bateria'     => 'bateria',
+            'combustivel' => 'combustivel',
+            'acidente'    => 'acidente',
+            'outro'       => 'outro',
+            'mecanico'    => 'mecanico',
+            'eletrico'    => 'eletrico',
+        ];
+        $tipoProblema = $tipoProblemaMap[(string)($cotacao['tipo_problema'] ?? 'outro')] ?? 'outro';
+
+        $latOrigemFix  = (float)($cotacao['lat_origem'] ?? 0);
+        $lngOrigemFix  = (float)($cotacao['lng_origem'] ?? 0);
+        $latDestinoFix = $cotacao['lat_destino'] !== null ? (float)$cotacao['lat_destino'] : $latOrigemFix;
+        $lngDestinoFix = $cotacao['lng_destino'] !== null ? (float)$cotacao['lng_destino'] : $lngOrigemFix;
+        $enderecoDestinoFix = (string)($cotacao['endereco_destino'] ?? $cotacao['destino'] ?? $cotacao['endereco_origem'] ?? '');
+
         try {
             $pedidoId = Pedido::criarCompleto([
                 'cliente_id'            => $uid,
                 'veiculo_id'            => $veiculoId,
-                'tipo_problema'         => (string)($cotacao['tipo_problema'] ?? 'outro'),
+                'tipo_problema'         => $tipoProblema,
                 'descricao_problema'    => '',
                 'lat_origem'            => (float)($cotacao['lat_origem'] ?? 0),
                 'lng_origem'            => (float)($cotacao['lng_origem'] ?? 0),
                 'endereco_origem'       => (string)($cotacao['endereco_origem'] ?? ''),
-                'lat_destino'           => $cotacao['lat_destino'] ?? null,
-                'lng_destino'           => $cotacao['lng_destino'] ?? null,
-                'endereco_destino'      => (string)($cotacao['endereco_destino'] ?? $cotacao['destino'] ?? ''),
+                'lat_destino'           => $latDestinoFix,
+                'lng_destino'           => $lngDestinoFix,
+                'endereco_destino'      => $enderecoDestinoFix,
                 'distancia_km'          => (float)($cotacao['distancia_km'] ?? 5),
                 'custo_estimado'        => (float)($cotacao['valor'] ?? 0),
                 'status'                => 'aguardando_pagamento',

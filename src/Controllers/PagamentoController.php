@@ -111,7 +111,7 @@ class PagamentoController extends BaseController
             return 'MP-CONFIG-02: APP_URL nao configurado.';
         }
 
-        if (str_starts_with((string)MP_ACCESS_TOKEN, 'APP_USR-') && !$this->appUrlEhHttpsPublica()) {
+        if (strtolower((string)(defined('MP_ENV') ? MP_ENV : 'sandbox')) === 'production' && !$this->appUrlEhHttpsPublica()) {
             return 'MP-CONFIG-03: token MercadoPago de producao exige APP_URL publica com HTTPS; atual=' . $this->appUrlBase();
         }
 
