@@ -1,0 +1,44 @@
+{
+    "name":  "admin-pedido-pagamento-online",
+    "lane":  "C",
+    "owned_by":  "Gemini",
+    "tested_by":  "DeepSeek",
+    "steps":  [
+                  {
+                      "probe":  {
+                                    "url":  "/admin/pedido/novo/v2",
+                                    "expect_status":  200,
+                                    "type":  "http_get"
+                                },
+                      "key":  "login_admin",
+                      "node":  "auth"
+                  },
+                  {
+                      "probe":  {
+                                    "method":  "POST",
+                                    "url":  "/admin/pedido/novo/contexto",
+                                    "expect_json_ok":  true,
+                                    "type":  "ajax"
+                                },
+                      "key":  "ctx",
+                      "node":  "admin_ctx"
+                  },
+                  {
+                      "probe":  {
+                                    "expect_flash_regex":  "Envie este link ao cliente: .+",
+                                    "method":  "POST",
+                                    "url":  "/admin/pedido/criar",
+                                    "expect_json_ok":  true,
+                                    "type":  "ajax"
+                                },
+                      "key":  "criar_online",
+                      "node":  "link_gerado"
+                  }
+              ],
+    "guards":  {
+                   "prefix_test_data":  "E2E_",
+                   "admin_only":  true,
+                   "no_secrets_in_output":  true,
+                   "csrf_required":  true
+               }
+}

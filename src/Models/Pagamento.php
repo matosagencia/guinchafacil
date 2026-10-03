@@ -165,6 +165,120 @@ class Pagamento
         }
     }
 
+    /**
+     * Aplica o destino financeiro escolhido pelo administrador ao pedido.
+     * A mesma chamada e idempotente; trocar um destino jÃ¡ gravado Ã© bloqueado.
+     *
+     * @return array{ok:bool,erro:?string,link:?string,evento:string,pagamento_id:?int,idempotente?:bool}
+     */
+    public static function aplicarDestinoPagamento(int $pedidoId, string $destino, ?string $provedor = null, ?int $adminId = null): array
+    {
+        $method = __FUNCTION__;
+        $destino = strtolower(trim($destino));
+        $provedor = $provedor === null ? null : strtolower(trim($provedor));
+        $eventos = [
+            'pago_agora' => 'pagamento_baixa_manual_registrada',
+            'pago_na_chegada' => 'pagamento_na_chegada_definido',
+            'online' => 'pagamento_online_definido',
+            'sem_cobranca' => 'pagamento_isento',
+        ];
+
+        if (!isset($eventos[$destino])) {
+            self::logErr($method, 'validate', 'Destino financeiro invÃ¡lido.', ['pedido_id' => $pedidoId, 'destino' => $destino]);
+            return ['ok' => false, 'erro' => 'Destino financeiro invÃ¡lido.', 'link' => null, 'evento' => '', 'pagamento_id' => null];
+        }
+        if ($pedidoId <= 0) {
+            self::logErr($method, 'validate', 'Pedido invÃ¡lido.', ['pedido_id' => $pedidoId]);
+            return ['ok' => false, 'erro' => 'Pedido invÃ¡lido.', 'link' => null, 'evento' => '', 'pagamento_id' => null];
+        }
+        if ($destino !== 'online' && $provedor !== null && $provedor !== '') {
+            self::logErr($method, 'validate', 'Provedor sÃ³ Ã© permitido para pagamento online.', ['pedido_id' => $pedidoId, 'destino' => $destino]);
+            return ['ok' => false, 'erro' => 'Provedor sÃ³ Ã© permitido para pagamento online.', 'link' => null, 'evento' => '', 'pagamento_id' => null];
+        }
+
+        $pdo = getPDO();
+        $started = !$pdo->inTransaction();
+        try {
+            foreach (['forma_pagamento_escolhida', 'provedor_pagamento_escolhido', 'pagamento_destino_admin_id', 'pagamento_destino_registrado_em', 'pagamento_destino_evento'] as $column) {
+                if (!self::hasColumn('pedidos', $column)) {
+                    throw new LogicException('Migration admin_payment_destination_v1 nÃ£o aplicada: coluna pedidos.' . $column . ' ausente.');
+                }
+            }
+
+            if ($started) {
+                $pdo->beginTransaction();
+            }
+            $lock = $pdo->getAttribute(PDO::ATTR_DRIVER_NAME) === 'sqlite' ? '' : ' FOR UPDATE';
+            $stmt = $pdo->prepare('SELECT id, custo_estimado, forma_pagamento_escolhida, provedor_pagamento_escolhido, pagamento_destino_evento FROM pedidos WHERE id = :id' . $lock);
+            $stmt->execute([':id' => $pedidoId]);
+            $pedido = $stmt->fetch(PDO::FETCH_ASSOC);
+            if (!$pedido) {
+                throw new RuntimeException('Pedido nÃ£o encontrado.');
+            }
+
+            $evento = $eventos[$destino];
+            $escolhaExistente = strtolower(trim((string)($pedido['forma_pagamento_escolhida'] ?? '')));
+            $provedorExistente = strtolower(trim((string)($pedido['provedor_pagamento_escolhido'] ?? '')));
+            if ($escolhaExistente !== '') {
+                if ($escolhaExistente === $destino && $provedorExistente === (string)($provedor ?? '')) {
+                    if ($started) {
+                        $pdo->commit();
+                    }
+                    self::logErr($method, 'idempotent', 'Destino financeiro jÃ¡ aplicado.', ['pedido_id' => $pedidoId, 'destino' => $destino]);
+                    return ['ok' => true, 'erro' => null, 'link' => $destino === 'online' ? (defined('BASE_PATH') ? BASE_PATH : '') . '/pagamento/checkout/' . $pedidoId : null, 'evento' => (string)($pedido['pagamento_destino_evento'] ?: $evento), 'pagamento_id' => null, 'idempotente' => true];
+                }
+                throw new LogicException('O pedido jÃ¡ possui outro destino financeiro e nÃ£o pode ser alterado por reenvio.');
+            }
+
+            if ($destino === 'online') {
+                require_once __DIR__ . '/../Services/Payment/PaymentProviderFactory.php';
+                $ativo = PaymentProviderFactory::gatewayAtivoRaw();
+                if ($provedor === null || $provedor === '' || $provedor !== $ativo || PaymentProviderFactory::forGateway($ativo) === null) {
+                    throw new LogicException('O provedor online informado nÃ£o corresponde ao gateway ativo.');
+                }
+            } else {
+                $provedor = null;
+            }
+
+            $pagamentoId = null;
+            if ($destino === 'online') {
+                $pagamentoId = self::criar($pedidoId, $provedor, (float)$pedido['custo_estimado'], 0.0, 0.0);
+                if ($pagamentoId === false) {
+                    throw new RuntimeException('NÃ£o foi possÃ­vel criar a cobranÃ§a online pendente.');
+                }
+            } elseif ($destino === 'pago_agora') {
+                $pagamentoId = self::criar($pedidoId, 'dinheiro', (float)$pedido['custo_estimado'], 0.0, 0.0);
+                if ($pagamentoId === false || !self::aprovar((int)$pagamentoId, 'admin-manual:' . $pedidoId)) {
+                    throw new RuntimeException('NÃ£o foi possÃ­vel registrar a baixa manual.');
+                }
+            }
+
+            $contexto = json_encode([
+                'destino_pagamento' => $destino,
+                'provedor_online' => $provedor,
+                'admin_id' => $adminId,
+                'pagamento_id' => $pagamentoId,
+            ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR);
+
+            $pdo->prepare('UPDATE pedidos SET forma_pagamento_escolhida = :destino, provedor_pagamento_escolhido = :provedor, pagamento_destino_admin_id = :admin_id, pagamento_destino_registrado_em = NOW(), pagamento_destino_evento = :evento WHERE id = :id')
+                ->execute([':destino' => $destino, ':provedor' => $provedor, ':admin_id' => $adminId, ':evento' => $evento, ':id' => $pedidoId]);
+            $pdo->prepare('INSERT INTO pedido_eventos (pedido_id, evento, context_json) VALUES (:pedido_id, :evento, :context_json)')
+                ->execute([':pedido_id' => $pedidoId, ':evento' => $evento, ':context_json' => $contexto]);
+
+            if ($started) {
+                $pdo->commit();
+            }
+            $link = $destino === 'online' ? (defined('BASE_PATH') ? BASE_PATH : '') . '/pagamento/checkout/' . $pedidoId : null;
+            self::logErr($method, 'applied', 'Destino financeiro aplicado.', ['pedido_id' => $pedidoId, 'destino' => $destino, 'provedor' => $provedor, 'evento' => $evento]);
+            return ['ok' => true, 'erro' => null, 'link' => $link, 'evento' => $evento, 'pagamento_id' => $pagamentoId];
+        } catch (Throwable $e) {
+            if ($started && $pdo->inTransaction()) {
+                $pdo->rollBack();
+            }
+            self::logErr($method, 'error', $e->getMessage(), ['pedido_id' => $pedidoId, 'destino' => $destino, 'provedor' => $provedor]);
+            return ['ok' => false, 'erro' => $e->getMessage(), 'link' => null, 'evento' => '', 'pagamento_id' => null];
+        }
+    }
     public static function criar(int $pedido_id, string $metodo, float $valor_total, float $valor_guincho, float $valor_plataforma): int|false
     {
         try {

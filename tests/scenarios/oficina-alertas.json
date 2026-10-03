@@ -2,9 +2,11 @@
     "scenario":  "oficina-alertas",
     "steps":  [
                   {
-                      "probe":  "status_ok",
-                      "key":  "step-1",
-                      "node":  "node-precotacao"
+                      "probe":  "http_get",
+                      "key":  "s1",
+                      "node":  "node-precotacao",
+                      "expect":  200,
+                      "url":  "http://localhost/guinchafacil/oficina/dashboard"
                   }
               ]
 }

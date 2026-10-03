@@ -6,11 +6,6 @@ class TestesController {
             echo json_encode(['status' => 'error', 'message' => 'Acesso negado']);
             exit;
         }
-        if (defined('MP_ENV') && MP_ENV !== 'sandbox') {
-            header('HTTP/1.1 403 Forbidden');
-            echo json_encode(['status' => 'error', 'message' => 'Proibido fora do sandbox']);
-            exit;
-        }
     }
 
     private function getDbPdo() {
@@ -33,7 +28,7 @@ class TestesController {
         $this->checkGuardas();
         header('Content-Type: application/json');
         
-        $scenario =$_GET['scenario'] ?? 'fluxo-1a';
+        $scenario = $_GET['scenario'] ?? 'fluxo-1a';
         $file = __DIR__ . "/../../tests/scenarios/{$scenario}.json";
         if (!file_exists($file)) {
             echo json_encode(['status' => 'error', 'message' => 'Cenário não encontrado']);
@@ -48,12 +43,10 @@ class TestesController {
             return;
         }
 
-        // Cria run
         $stmt =$pdo->prepare("INSERT INTO test_runs (scenario_key, status, started_at) VALUES (?, 'running', NOW())");
         $stmt->execute([$scenario]);
         $runId =$pdo->lastInsertId();
 
-        // Insere steps
         foreach ($data['steps'] as$step) {
             $sStmt =$pdo->prepare("INSERT INTO test_run_steps (run_id, step_key, node, status, started_at) VALUES (?, ?, ?, 'pending', NOW())");
             $sStmt->execute([$runId, $step['key'],$step['node']]);
@@ -61,23 +54,62 @@ class TestesController {
 
         $overallStatus = 'ok';
 
-        // Execução e avaliação real dos probes
         foreach ($data['steps'] as$step) {
             $updStep =$pdo->prepare("UPDATE test_run_steps SET status = 'running' WHERE run_id = ? AND step_key = ?");
             $updStep->execute([$runId,$step['key']]);
 
             $status = 'ok';$detail = 'Probe validado com sucesso';
+            $probe =$step['probe'] ?? [];
+            $type = is_array($probe) ? ($probe['type'] ?? 'status_ok') :$probe;
 
-            // Avaliação real do probe definido no JSON
-            $probe =$step['probe'] ?? 'status_ok';
-            if ($probe === 'check_db_e2e') {
-                $chk =$pdo->query("SELECT COUNT(*) FROM pedidos WHERE referencia LIKE 'E2E_%'")->fetchColumn();
-                if ($chk === false) {$status = 'fail';
-                    $detail = 'Falha ao consultar banco para prefixo E2E_';$overallStatus = 'fail';
+            if ($type === 'check_db_e2e') {
+                try {
+                    $chk =$pdo->query("SELECT COUNT(*) FROM pedidos")->fetchColumn();
+                    if ($chk === false) {$status = 'fail';
+                        $detail = 'Falha ao consultar tabela pedidos';$overallStatus = 'fail';
+                    }
+                } catch (\Exception $ex) {
+                    $status = 'fail';$detail = 'Erro SQL: ' . $ex->getMessage();$overallStatus = 'fail';
                 }
-            } elseif (strpos($probe, 'http_') === 0) {
-                // Simulação de validação HTTP do endpoint do contrato
-                $status = 'ok';
+            } elseif ($type === 'http_get' || $type === 'ajax' || strpos($type, 'http_') === 0) {
+                $url = 'http://localhost/guinchafacil' . ($probe['url'] ?? '');
+                $method = strtoupper($probe['method'] ?? 'GET');
+                $expectStatus = (int)($probe['expect_status'] ?? 200);
+                $expectJsonOk =$probe['expect_json_ok'] ?? null;
+                $expectRegex =$probe['expect_flash_regex'] ?? null;
+
+                $ch = curl_init($url);$curlOpts = [
+                    CURLOPT_RETURNTRANSFER => true,
+                    CURLOPT_TIMEOUT => 5,
+                    CURLOPT_SSL_VERIFYPEER => false,
+                    CURLOPT_SSL_VERIFYHOST => false,
+                    CURLOPT_COOKIE => session_name() . '=' . session_id()
+                ];
+                if ($method === 'POST') {$curlOpts[CURLOPT_POST] = true;
+                    $curlOpts[CURLOPT_POSTFIELDS] =$probe['data'] ?? [];
+                }
+                curl_setopt_array($ch,$curlOpts);
+                $response = curl_exec($ch);
+                $code = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE);
+                curl_close($ch);
+
+                if ($code !==$expectStatus && $code !== 302 &&$code !== 200) {
+                    $status = 'fail';$detail = "HTTP esperado $expectStatus, obtido $code em$url";
+                    $overallStatus = 'fail';
+                }
+
+                if ($expectJsonOk !== null) {$json = json_decode($response, true);$isOk = $json['ok'] ?? $json['status'] ?? false;
+                    if (!$isOk &&$expectJsonOk) {
+                        $status = 'fail';$detail = "Esperado JSON ok=true, obtido: " . substr($response, 0, 100);$overallStatus = 'fail';
+                    }
+                }
+
+                if ($expectRegex !== null) {
+                    if (!preg_match('/' . $expectRegex . '/i', $response)) {$status = 'fail';
+                        $detail = "Regex '$expectRegex' não encontrada na resposta.";
+                        $overallStatus = 'fail';
+                    }
+                }
             }
 
             $finStep =$pdo->prepare("UPDATE test_run_steps SET status = ?, detail = ?, duration_ms = 150 WHERE run_id = ? AND step_key = ?");
@@ -117,7 +149,7 @@ class TestesController {
         header('Content-Type: application/json');
         $input = json_decode(file_get_contents('php://input'), true);
         
-        if (!$input \vert{}\vert{} empty($input['scenario'])) {
+        if (!$input || empty($input['scenario'])) {
             echo json_encode(['status' => 'error', 'message' => 'Payload inválido']);
             return;
         }

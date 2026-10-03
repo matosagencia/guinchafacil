@@ -1,0 +1,71 @@
+{
+  "A": [
+    "src/Controllers/PreCotacaoApiController.php",
+    "src/Controllers/CheckoutController.php",
+    "src/Controllers/PagamentoController.php",
+    "src/Controllers/WebhookController.php",
+    "src/Services/DecisaoAtendimentoService.php",
+    "src/Services/PedidoCoreService.php",
+    "src/Services/PricingService.php",
+    "src/Services/PagamentoAprovacaoService.php",
+    "src/Services/Payment/*",
+    "src/Models/Pedido.php",
+    "src/Models/Pagamento.php",
+    "src/Models/Veiculo.php",
+    "src/Views/public/checkout-veiculo.php",
+    "src/Views/pagamento/*",
+    "public/assets/js/public-pre-cotacao-flow.js",
+    "public/assets/js/checkout-veiculo.js",
+    "docs/lanes/A.md",
+    "docs/BLOCKERS.md"
+  ],
+  "B": [
+    "src/Controllers/AuthController.php",
+    "src/Controllers/OficinaController.php",
+    "src/Services/Auth/MagicLinkService.php",
+    "src/Views/auth/*",
+    "src/Views/cliente/*",
+    "src/Views/oficina/*",
+    "src/Views/guincho/*",
+    "src/Views/public/checkout-cliente.php",
+    "src/Views/admin/pedidos.php",
+    "src/Views/admin/pedidodetalhe.php",
+    "src/Views/admin/partials/_pedido_oficina_detalhe.php",
+    "docs/lanes/B.md",
+    "docs/BLOCKERS.md"
+  ],
+  "C": [
+    "tests/*",
+    "playwright.config.js",
+    "tools/smoke.*",
+    "tools/lane_guard.*",
+    "tools/deploy.*",
+    "src/Controllers/Admin/TestesController.php",
+    "src/Views/admin/testes/*",
+    "install/migration_testes_v1.sql",
+    ".htaccess",
+    "docs/lanes/C.md",
+    "docs/BUGS.md",
+    "docs/BLOCKERS.md"
+  ],
+  "_compartilhados_somente_dono": [
+    "index.php",
+    "config.php",
+    "docs/CONTRATOS.md",
+    "docs/DECISOES.md",
+    "docs/ARQUITETURA.md",
+    "docs/lanes.json"
+  ],
+  "_sem_faixa_definida": [
+    "src/Models/Configuracao.php",
+    "src/Services/Address/*",
+    "src/Services/PreCotacao/PreCotacaoOpcoesService.php",
+    "src/Services/CoberturaService.php"
+  ],
+  "_notas": [
+    "Chaves A, B e C sao lidas por tools/lane_guard.ps1 (comparacao -like com caminhos no formato do git, barra normal).",
+    "Chaves iniciadas por _ sao documentacao: o lane_guard nao as usa como faixa.",
+    "tests/* e .htaccess sao da faixa C; se o C0 confirmar que qa/ tambem deve ser da C, o dono adiciona qa/* aqui.",
+    "Se a pasta de docs for renomeada para doc/ (DECISOES D3), trocar o prefixo docs/ em todas as entradas."
+  ]
+}

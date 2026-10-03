@@ -1,0 +1,24 @@
+{
+    "name":  "admin-modal-csrf",
+    "lane":  "C",
+    "owned_by":  "Gemini",
+    "tested_by":  "DeepSeek",
+    "steps":  [
+                  {
+                      "probe":  {
+                                    "method":  "POST",
+                                    "url":  "/admin/pedido/novo/api/cliente",
+                                    "expect_status":  403,
+                                    "type":  "ajax"
+                                },
+                      "key":  "csrf_test",
+                      "node":  "modal_cliente"
+                  }
+              ],
+    "guards":  {
+                   "prefix_test_data":  "E2E_",
+                   "admin_only":  true,
+                   "no_secrets_in_output":  true,
+                   "csrf_required":  true
+               }
+}

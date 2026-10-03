@@ -3483,7 +3483,7 @@ class AuthController extends BaseController
 
 
 
-        if (strlen($dados['telefone']) < 10 || strlen($dados['telefone']) > 11) {
+        if (!$this->validarTelefoneBr($dados['telefone'])) {
 
 
 
@@ -3955,6 +3955,22 @@ class AuthController extends BaseController
 
 
 
+    /** Valida telefone brasileiro: 10 ou 11 digitos, DDD 11-99, celular comeca com 9. */
+    private function validarTelefoneBr(string $tel): bool
+    {
+        $d = preg_replace('/\D/', '', $tel);
+        if (strlen($d) < 10 || strlen($d) > 11) {
+            return false;
+        }
+        $ddd = (int)substr($d, 0, 2);
+        if ($ddd < 11 || $ddd > 99) {
+            return false;
+        }
+        if (strlen($d) === 11 && $d[2] !== '9') {
+            return false;
+        }
+        return true;
+    }
     private function validarChavePix(string $chave, string $tipo): bool
 
 
@@ -3975,7 +3991,7 @@ class AuthController extends BaseController
 
 
 
-            'telefone' => strlen(preg_replace('/\D/', '', $chave)) >= 10,
+            'telefone' => $this->validarTelefoneBr($chave),
 
 
 

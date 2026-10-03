@@ -1,0 +1,41 @@
+{
+    "name":  "admin-pedido-funil-modal",
+    "lane":  "C",
+    "owned_by":  "Gemini",
+    "tested_by":  "DeepSeek",
+    "steps":  [
+                  {
+                      "probe":  {
+                                    "url":  "/admin/pedido/novo/v2",
+                                    "expect_status":  200,
+                                    "type":  "http_get"
+                                },
+                      "key":  "login_admin",
+                      "node":  "auth"
+                  },
+                  {
+                      "probe":  {
+                                    "url":  "/admin/pedido/novo/v2",
+                                    "expect_status":  200,
+                                    "type":  "http_get"
+                                },
+                      "key":  "modal_cli",
+                      "node":  "modal_cliente"
+                  },
+                  {
+                      "probe":  {
+                                    "url":  "/admin/pedido/novo/v2",
+                                    "expect_status":  200,
+                                    "type":  "http_get"
+                                },
+                      "key":  "titulo_din",
+                      "node":  "title_swap"
+                  }
+              ],
+    "guards":  {
+                   "prefix_test_data":  "E2E_",
+                   "admin_only":  true,
+                   "no_secrets_in_output":  true,
+                   "csrf_required":  true
+               }
+}

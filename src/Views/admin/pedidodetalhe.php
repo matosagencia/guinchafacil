@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 
 $bp = defined('BASE_PATH') ? BASE_PATH : '';
 $osrmBaseUrl = PorThresholds::routingFrontendBaseUrl();
@@ -165,7 +165,7 @@ include __DIR__ . '/../layouts/header.php';require_once __DIR__ . '/../../Servi
                 <i class="fas fa-ban me-1"></i>Cancelar
             </button>
             <?php endif; ?>
-            <a href="<?php echo $bp; ?>/admin/pedido/novo" class="btn btn-primary btn-sm">
+            <a href="<?php echo $bp; ?>/admin/pedido/novo/v2" class="btn btn-primary btn-sm">
                 <i class="fas fa-plus me-1"></i>Novo Pedido
             </a>
         </div>

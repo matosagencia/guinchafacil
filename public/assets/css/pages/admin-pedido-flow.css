@@ -1,0 +1,234 @@
+/* admin-pedido-flow.css
+ * Overrides do admin sobre o funil v2 publico (Caminho 3).
+ * Carrega DEPOIS de public-pre-cotacao.css.
+ */
+
+/* Banner "criando em nome de X" */
+.admin-flow-context {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+    padding: 12px 16px;
+    margin-bottom: 20px;
+    background: #edf8ef;
+    border: 1px solid #b9dfc0;
+    border-radius: 12px;
+    font-size: .92rem;
+}
+
+.admin-flow-context__label {
+    color: #405247;
+    font-weight: 600;
+    margin-right: 6px;
+}
+
+/* Etapa 1 - card de escolha de cliente/veiculo/guincho */
+.admin-flow-card {
+    max-width: 640px;
+    background: #fff;
+    border: 1px solid #d4e6d8;
+    border-radius: 18px;
+    padding: 24px;
+    box-shadow: 0 12px 32px rgba(20, 80, 35, .08);
+}
+.admin-flow-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    flex-wrap: wrap;
+    padding-top: 16px;
+    border-top: 1px solid #edf3ee;
+}
+
+/* O funil v2 dentro do admin continua usando os mesmos
+ * elementos #stage-XXX e cards .decision-card do publico.
+ * Ajustes pra caber no shell-main do admin sem estourar
+ * a largura nem colidir com a sidebar. */
+.shell-content .wrap,
+.shell-main .wrap {
+    max-width: 100%;
+}
+.shell-content .card,
+.shell-main .card {
+    margin-top: 0;
+    box-shadow: 0 8px 24px rgba(20, 80, 35, .06);
+}
+.shell-content .decision-card,
+.shell-main .decision-card {
+    /* mantem o mesmo visual, so ajusta padding se ficar apertado em telas grandes */
+}
+
+/* Placeholder enquanto E3 nao entra (pode remover depois) */
+.admin-flow-placeholder {
+    max-width: 640px;
+    margin: 40px auto;
+    padding: 40px 28px;
+    text-align: center;
+    background: #fff;
+    border: 1px dashed #cfe3d3;
+    border-radius: 18px;
+}
+.admin-flow-placeholder h2 {
+    font-size: 1.4rem;
+    margin-bottom: 12px;
+    color: #142018;
+}
+
+/* admin-flow-destino-pagamento
+ * Radios de destino financeiro na Etapa 1 do funil admin.
+ */
+.admin-flow-destino-pagamento {
+    display: grid;
+    gap: 10px;
+}
+.admin-flow-destino-opt {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px 14px;
+    border: 1.5px solid #d4e6d8;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: border-color .12s, background .12s;
+}
+.admin-flow-destino-opt:hover {
+    border-color: #2fb34a;
+    background: #f7fbf7;
+}
+.admin-flow-destino-opt input[type="radio"] {
+    margin-top: 3px;
+    accent-color: #2fb34a;
+}
+.admin-flow-destino-opt input[type="radio"]:checked + span strong {
+    color: #176d2c;
+}
+.admin-flow-destino-opt input[type="radio"]:checked ~ span small {
+    color: #405247;
+}
+.admin-flow-destino-opt span {
+    display: block;
+    line-height: 1.35;
+}
+.admin-flow-destino-opt span strong {
+    display: block;
+    font-size: .95rem;
+    color: #142018;
+    margin-bottom: 2px;
+}
+.admin-flow-destino-opt span small {
+    display: block;
+    font-size: .82rem;
+    color: #607066;
+}
+.admin-flow-destino-aviso {
+    padding: 10px 14px;
+    background: #fff8e6;
+    border: 1px solid #f0d999;
+    border-radius: 10px;
+    font-size: .84rem;
+    color: #7a5a00;
+}
+
+/* Pagamento na ultima etapa do funil admin  contraste garantido.
+ * Background branco + texto escuro fixo, independente do tema escuro
+ * do shell admin.
+ */
+.pag-destino-grid {
+    display: grid;
+    gap: 10px;
+}
+.pag-destino-opt {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px 14px;
+    border: 1.5px solid #cfe3d3;
+    border-radius: 12px;
+    background-color: #ffffff !important;
+    color: #142018 !important;
+    cursor: pointer;
+    transition: border-color .12s, background-color .12s;
+}
+.pag-destino-opt:hover {
+    border-color: #2fb34a;
+    background-color: #f4fbf5 !important;
+}
+.pag-destino-opt input[type="radio"] {
+    margin-top: 3px;
+    accent-color: #2fb34a;
+    flex-shrink: 0;
+}
+.pag-destino-opt > span {
+    display: block;
+    line-height: 1.35;
+    color: #142018 !important;
+}
+.pag-destino-opt > span > strong {
+    display: block;
+    font-size: .95rem;
+    color: #142018 !important;
+    margin-bottom: 2px;
+}
+.pag-destino-opt > span > small {
+    display: block;
+    font-size: .82rem;
+    color: #4a5a50 !important;
+}
+.pag-destino-aviso {
+    padding: 10px 14px;
+    background-color: #fff8e6 !important;
+    border: 1px solid #f0d999;
+    border-radius: 10px;
+    font-size: .84rem;
+    color: #5c4400 !important;
+}
+
+/* Reforço de contraste no card do funil admin  qualquer label dentro
+ * do <main> deve ter texto escuro em fundo claro. */
+.admin-shell .card label,
+.admin-shell .card .label,
+.admin-shell .card legend.label {
+    color: #142018 !important;
+}
+.admin-shell .card .muted,
+.admin-shell .card small.text-muted {
+    color: #4a5a50 !important;
+}
+/* Botao final do funil admin — "Criar pedido em nome do cliente". */
+#gfBtnFinal,
+.admin-shell #gfBtnFinal,
+button#gfBtnFinal.btn-main {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100% !important;
+    min-height: 60px;
+    padding: 18px 24px;
+    border: 0;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #2fb34a 0%, #1f8a36 100%) !important;
+    color: #ffffff !important;
+    font-size: 1.05rem;
+    font-weight: 800;
+    letter-spacing: .01em;
+    text-shadow: 0 1px 0 rgba(0, 0, 0, .15);
+    box-shadow: 0 8px 20px rgba(47, 179, 74, .35);
+    cursor: pointer;
+    transition: transform .12s, box-shadow .12s, filter .12s;
+}
+#gfBtnFinal:hover {
+    filter: brightness(1.05);
+    box-shadow: 0 10px 26px rgba(47, 179, 74, .45);
+    transform: translateY(-1px);
+}
+#gfBtnFinal:active {
+    transform: translateY(0);
+    box-shadow: 0 4px 12px rgba(47, 179, 74, .3);
+}
+#gfBtnFinal i {
+    color: #ffffff !important;
+    font-size: 1.1em;
+}

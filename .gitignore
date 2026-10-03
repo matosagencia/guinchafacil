@@ -1,12 +1,13 @@
-# Produção e backups — nunca no repo
-.well-known/
+﻿.backup-admin-payment-destination/
+fix-B-*.ps1
+fix-A-*.ps1
+fix-C-*.ps1
+commit-a-*.ps1
+playwright-report/
+test-results/
 .deploy-state/
-database/backups/
-database/seeds/
-bin/
-osrm.guinchafacil.com.br/
-index.php.backup-*
-_debug_route.php
-SESSION-CHECKPOINT-*.md
+.env
+.env.*
+!.env.example
 *.bak-*
 *.bak_*

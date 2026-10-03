@@ -2,9 +2,16 @@
     "scenario":  "idempotencia-pagamento",
     "steps":  [
                   {
-                      "probe":  "status_ok",
-                      "key":  "step-1",
-                      "node":  "node-precotacao"
+                      "probe":  "http_post",
+                      "key":  "s1",
+                      "node":  "node-pagamento",
+                      "expect":  200,
+                      "url":  "http://localhost/guinchafacil/pagamento/mercadopago/pagar"
+                  },
+                  {
+                      "probe":  "check_db_e2e",
+                      "key":  "s2",
+                      "node":  "node-webhook"
                   }
               ]
 }

@@ -1,4 +1,5 @@
 <?php
+
 // File: guinchafacil/src/Controllers/AdminController.php
 require_once __DIR__ . '/../../config.php';
 require_once __DIR__ . '/../Services/AuthService.php';
@@ -46,6 +47,11 @@ require_once __DIR__ . '/AdminEnvAuditController.php';
 require_once __DIR__ . '/AdminChatController.php';
 require_once __DIR__ . '/AdminLogsController.php';
 
+require_once __DIR__ . '/../Services/PedidoCoreService.php';
+require_once __DIR__ . '/../Services/Pricing/PedidoPricingService.php';
+require_once __DIR__ . '/../Services/Financial/ChargePolicyService.php';
+require_once __DIR__ . '/../DTO/PedidoCreateRequest.php';
+require_once __DIR__ . '/../DTO/PedidoQuoteRequest.php';
 /**
  * Controller do painel administrativo
  * Admin pode acessar e gerenciar TODOS os perfis.
@@ -54,6 +60,42 @@ class AdminController extends BaseController
 {
     public function __construct() { parent::__construct(); }
 
+    /** Valida CPF brasileiro (algoritmo oficial dos digitos verificadores). */
+    private static function validarCpfBr(string $cpf): bool
+    {
+        $cpf = preg_replace('/\D/', '', $cpf);
+        if (strlen($cpf) !== 11 || preg_match('/^(\d)\1{10}$/', $cpf)) {
+            return false;
+        }
+        for ($t = 9; $t < 11; $t++) {
+            $soma = 0;
+            for ($i = 0; $i < $t; $i++) {
+                $soma += (int)$cpf[$i] * (($t + 1) - $i);
+            }
+            $dig = ((10 * $soma) % 11) % 10;
+            if ((int)$cpf[$t] !== $dig) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /** Valida telefone brasileiro: 10 ou 11 digitos, DDD 11-99, celular comeca com 9. */
+    private static function validarTelefoneBr(string $tel): bool
+    {
+        $d = preg_replace('/\D/', '', $tel);
+        if (strlen($d) < 10 || strlen($d) > 11) {
+            return false;
+        }
+        $ddd = (int)substr($d, 0, 2);
+        if ($ddd < 11 || $ddd > 99) {
+            return false;
+        }
+        if (strlen($d) === 11 && $d[2] !== '9') {
+            return false;
+        }
+        return true;
+    }
     private static function normalizeUtf8(string $value): string
     {
         $value = trim($value);
@@ -1441,9 +1483,6 @@ class AdminController extends BaseController
             "SELECT u.id, u.nome, u.email FROM usuarios u WHERE u.tipo='cliente' AND u.ativo=1 ORDER BY u.nome"
         )->fetchAll(PDO::FETCH_ASSOC);
         $veiculos = [];   // carregados via AJAX ao selecionar cliente
-        $guinchos = $pdo->query(
-            "SELECT g.id, u.nome, g.placa_guincho FROM guinchos g JOIN usuarios u ON g.usuario_id=u.id WHERE g.aprovado=1 AND g.disponivel=1 AND u.ativo=1 ORDER BY u.nome"
-        )->fetchAll(PDO::FETCH_ASSOC);
         $cfg      = Configuracao::getAll();
         // Paridade com o painel do cliente: catÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡logo de tipos de serviÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â§o
         // (define attendance_mode e alimenta matching/compatibilidade).
@@ -1459,138 +1498,214 @@ class AdminController extends BaseController
             http_response_code(403); exit;
         }
 
-        $pdo         = getPDO();
         $clienteId   = (int)($_POST['cliente_id']   ?? 0);
         $veiculoId   = (int)($_POST['veiculo_id']   ?? 0);
         $guinchoId   = (int)($_POST['guincho_id']   ?? 0) ?: null;
         $tipo        = $_POST['tipo_problema'] ?? 'outro';
-        $descricao   = trim($_POST['descricao'] ?? '');
+        $descricao   = trim((string)($_POST['descricao'] ?? ''));
         $numeroOrigem = trim((string)($_POST['numero_origem'] ?? ''));
         $numeroDestino = trim((string)($_POST['numero_destino'] ?? ''));
-        $endOrigem   = EnderecoFormatter::comNumeroNoTexto(
-            (string)($_POST['endereco_origem'] ?? ''),
+        $endOrigem = EnderecoFormatter::comNumeroNoTexto(
+            (string)($_POST['endereco_origem'] ?? $_POST['localizacao'] ?? ''),
             $numeroOrigem !== '' ? $numeroOrigem : null
         );
-        $endDestino  = EnderecoFormatter::comNumeroNoTexto(
-            (string)($_POST['endereco_destino'] ?? ''),
+        $endDestino = EnderecoFormatter::comNumeroNoTexto(
+            (string)($_POST['endereco_destino'] ?? $_POST['destino'] ?? ''),
             $numeroDestino !== '' ? $numeroDestino : null
         );
-        $latOrigem   = (float)($_POST['lat_origem']  ?? -23.5505);
-        $lngOrigem   = (float)($_POST['lng_origem']  ?? -46.6333);
-        $latDestino  = (float)($_POST['lat_destino'] ?? -23.5505);
-        $lngDestino  = (float)($_POST['lng_destino'] ?? -46.6333);
+        $latOrigem  = (float)($_POST['lat_origem']  ?? -23.5505);
+        $lngOrigem  = (float)($_POST['lng_origem']  ?? -46.6333);
+        $latDestino = (float)($_POST['lat_destino'] ?? -23.5505);
+        $lngDestino = (float)($_POST['lng_destino'] ?? -46.6333);
 
-        // CÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡lculo bÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡sico de custo
-        $dist = (float)($_POST['distancia_km'] ?? 5);
-        require_once __DIR__ . '/../Services/TarifaService.php';
         $veiculo = $veiculoId > 0 ? Veiculo::buscarPorId($veiculoId) : null;
-        $categoriaTarifa = is_array($veiculo) ? TarifaService::categoriaDeVeiculo($veiculo) : null;
-        $cfg  = Configuracao::getAll();
 
-
-        $tiposValidos = ['eletrica','pneu','colisao','bateria','combustivel','outro'];
-        if (!in_array($tipo, $tiposValidos)) $tipo = 'outro';
-
-        // Paridade com o painel do cliente (Etapa 2/14/15) ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â
-        // tipo de serviÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â§o do catÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡logo (define attendance_mode) e as
-        // condiÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Âµes situacionais da ocorrÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Âªncia.
+        // Modalidade e service_type resolvidos a partir do catálogo, iguais
+        // ao fluxo do cliente — o motor único revalida de qualquer forma.
         $serviceTypeId = null;
-        $attendanceMode = 'TOWING';
         $serviceTypeIdPost = (int)($_POST['service_type_id'] ?? 0);
         if ($serviceTypeIdPost > 0) {
             $tipoServico = ServiceType::buscarPorId($serviceTypeIdPost);
             if ($tipoServico && !empty($tipoServico['active'])) {
                 $serviceTypeId = (int)$tipoServico['id'];
-                $attendanceMode = (string)($tipoServico['attendance_mode'] ?? 'TOWING');
             }
         }
-        if ($attendanceMode !== 'TOWING' && $endDestino === '') {
-            $endDestino = $endOrigem;
-            $latDestino = $latOrigem;
-            $lngDestino = $lngOrigem;
-        }
-        if ($attendanceMode !== 'TOWING' && $serviceTypeId) {
-            $pricing = EspecialistaPricingService::calcular((string)($tipoServico['code'] ?? ''), $dist);
-            $custo = $pricing ? (float)$pricing['customer_amount'] : TarifaService::calcular($dist, $categoriaTarifa);
-        } else {
-            $custo = TarifaService::calcular($dist, $categoriaTarifa);
-        }
-        $veiculoBatido  = isset($_POST['veiculo_esta_batido']) ? (int)!!$_POST['veiculo_esta_batido'] : null;
-        $rodasTravadas  = isset($_POST['rodas_travadas']) ? (int)!!$_POST['rodas_travadas'] : null;
-        $dificilAcesso  = isset($_POST['local_dificil_acesso']) ? (int)!!$_POST['local_dificil_acesso'] : null;
-        $garagemSubsolo = isset($_POST['em_garagem_subsolo']) ? (int)!!$_POST['em_garagem_subsolo'] : null;
 
-        $pedidoService = new PedidoService();
-        $paymentRequired = $pedidoService->pagamentoObrigatorio();
-        $statusInicial = $pedidoService->statusInicialPedido();
+        $veiculoBatido   = isset($_POST['veiculo_esta_batido'])   ? (int)!!$_POST['veiculo_esta_batido']   : null;
+        $rodasTravadas   = isset($_POST['rodas_travadas'])        ? (int)!!$_POST['rodas_travadas']        : null;
+        $dificilAcesso   = isset($_POST['local_dificil_acesso'])  ? (int)!!$_POST['local_dificil_acesso']  : null;
+        $garagemSubsolo  = isset($_POST['em_garagem_subsolo'])    ? (int)!!$_POST['em_garagem_subsolo']    : null;
 
-        $stmt = $pdo->prepare(
-            "INSERT INTO pedidos (cliente_id,veiculo_id,guincho_id,tipo_problema,descricao_problema,
-              lat_origem,lng_origem,endereco_origem,lat_destino,lng_destino,endereco_destino,
-              distancia_km,custo_estimado,status,service_type_id,attendance_mode,
-              veiculo_esta_batido,rodas_travadas,local_dificil_acesso,em_garagem_subsolo,criado_em)
-             VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,NOW())"
+        $actorId = (int)($_SESSION['usuario_id'] ?? 0);
+
+        // §UNIFY-FLOWS: cria pelo motor único, igual ao pre-cotação e ao
+        // cliente. Isso garante snapshot financeiro (pedido_financial_snapshots),
+        // evento auditável (pedido_eventos) e modalidade coerente.
+        $pdo = getPDO();
+        $pedidoCore = new PedidoCoreService(
+            $pdo,
+            new PedidoPricingService(),
+            new ChargePolicyService(),
+            new PedidoTransitionService()
         );
-        $stmt->execute([
-            $clienteId, $veiculoId, $guinchoId, $tipo, $descricao,
-            $latOrigem, $lngOrigem, $endOrigem,
-            $latDestino, $lngDestino, $endDestino,
-            $dist, $custo, $statusInicial,
-            $serviceTypeId, $attendanceMode,
-            $veiculoBatido, $rodasTravadas, $dificilAcesso, $garagemSubsolo,
-        ]);
-        $pedidoId = (int)$pdo->lastInsertId();
 
-        // Etapa 15 ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â snapshot veicular/situacional do pedido, igual ao fluxo
-        // do cliente, para a compatibilidade prestadorÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚ÂveÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â­culo funcionar
-        // tambÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â©m em pedidos abertos pelo admin.
-        if (is_array($veiculo)) {
+        $started = !$pdo->inTransaction();
+        if ($started) { $pdo->beginTransaction(); }
+
+        try {
+            $pedidoId = $pedidoCore->criar(new PedidoCreateRequest([
+                'cliente_id'         => $clienteId,
+                'veiculo_id'         => $veiculoId,
+                'tipo_problema'      => $tipo,
+                'descricao'          => $descricao,
+                'lat_origem'         => $latOrigem,
+                'lng_origem'         => $lngOrigem,
+                'endereco_origem'    => $endOrigem,
+                'lat_destino'        => $latDestino,
+                'lng_destino'        => $lngDestino,
+                'endereco_destino'   => $endDestino,
+                'service_type_id'    => $serviceTypeId,
+                'actor_type'         => 'admin',
+                'actor_id'           => $actorId,
+                'provider_id'        => $guinchoId,
+            ]));
+
+            // Campos que PedidoCoreService ainda não conhece (mesmo padrão
+            // usado em ClienteController::pedidoCriar).
+            $metadata = [
+                'veiculo_esta_batido'  => $veiculoBatido,
+                'rodas_travadas'       => $rodasTravadas,
+                'local_dificil_acesso' => $dificilAcesso,
+                'em_garagem_subsolo'   => $garagemSubsolo,
+            ];
+            $sets = []; $params = [];
+            foreach ($metadata as $col => $val) {
+                $sets[] = $col . ' = ?';
+                $params[] = $val;
+            }
+            if ($sets !== []) {
+                $params[] = $pedidoId;
+                $pdo->prepare('UPDATE pedidos SET ' . implode(', ', $sets) . ' WHERE id = ?')
+                    ->execute($params);
+            }
+
+            if ($started) { $pdo->commit(); }
+        } catch (Throwable $e) {
+            if ($started && $pdo->inTransaction()) { $pdo->rollBack(); }
+            error_log('[AdminController::pedidoCriar] ' . $e->getMessage());
+            $_SESSION['_flash'][] = ['message' => 'Não foi possível criar o pedido: ' . $e->getMessage(), 'type' => 'error'];
+            $this->redirect('/admin/pedido/novo');
+        }
+
+        // Snapshot veicular/situacional — mesmo padrão do cliente.
+        if ($pedidoId > 0 && is_array($veiculo)) {
             try {
                 require_once __DIR__ . '/../Services/Dispatch/OrderVehicleRequirementService.php';
                 OrderVehicleRequirementService::registrar($pedidoId, $veiculo, [
-                    'batido' => $veiculoBatido,
-                    'rodas_travadas' => $rodasTravadas,
-                    'dificil_acesso' => $dificilAcesso,
+                    'batido'          => $veiculoBatido,
+                    'rodas_travadas'  => $rodasTravadas,
+                    'dificil_acesso'  => $dificilAcesso,
                     'garagem_subsolo' => $garagemSubsolo,
                 ]);
-            } catch (\Throwable $e) {
+            } catch (Throwable $e) {
                 error_log('[AdminPedidoCriar] snapshot veicular falhou p/ pedido ' . $pedidoId . ': ' . $e->getMessage());
             }
         }
 
-        if ($statusInicial === 'aguardando_guincho') {
+        // Se o status inicial do motor único for aguardando_guincho (fluxo
+        // freeflow / sem pagamento obrigatório), define expiração e
+        // assignment do guincho — mesma paridade do cliente.
+        // Fechamento igual ao fluxo do cliente:
+        //  (a) freeflow / payment_required=0 -> aguardando_guincho + expiracao + guincho
+        //  (b) payment_required=1 -> cria Pagamento pendente + devolve link ao admin
+        $pService = new PedidoService();
+        $modoOperacao = $pService->modoOperacao();
+
+        if ($pService->podeIniciarAtendimento()) {
+            $cfg = Configuracao::getAll();
             $expMin = (int)($cfg['tempo_expiracao_min'] ?? 5);
             $raioInicial = (int)($cfg['raio_inicial_km'] ?? 10);
-            Pedido::definirExpiracao($pedidoId, date('Y-m-d H:i:s', strtotime("+{$expMin} minutes")), $raioInicial);
-        }
 
-        // Se guincho foi selecionado e nÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â£o precisa de pagamento, jÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡ atribui pela mÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡quina de estados
-        if ($guinchoId && !$paymentRequired) {
-            $actorId = (int)($_SESSION['usuario_id'] ?? 0);
-            $assign = PedidoTransitionService::assignByAdmin($pedidoId, (int)$guinchoId, $actorId);
-            if (!$assign->ok) {
-                Logger::log(Logger::LEVEL_WARN, __CLASS__, __FUNCTION__, 'pedido_criar_assign', (string)$assign->error, [
-                    'pedido_id' => $pedidoId,
-                    'guincho_id' => $guinchoId,
-                ]);
+            $pdo->prepare("UPDATE pedidos SET status = 'aguardando_guincho' WHERE id = ?")
+                ->execute([$pedidoId]);
+            Pedido::definirExpiracao(
+                $pedidoId,
+                date('Y-m-d H:i:s', strtotime("+{$expMin} minutes")),
+                $raioInicial
+            );
+
+            if ($guinchoId) {
+                $assign = PedidoTransitionService::assignByAdmin($pedidoId, (int)$guinchoId, $actorId);
+                if (!$assign->ok) {
+                    Logger::log(Logger::LEVEL_WARN, __CLASS__, __FUNCTION__, 'pedido_criar_assign', (string)$assign->error, [
+                        'pedido_id'  => $pedidoId,
+                        'guincho_id' => $guinchoId,
+                    ]);
+                }
             }
+
+            error_log(sprintf(
+                '[AdminPedidoCriar] Flow Mode = %s | Pedido %d liberado sem gateway.',
+                strtoupper($modoOperacao),
+                $pedidoId
+            ));
+
+            unset($_SESSION['admin_pedido_ctx']);
+            $_SESSION['_flash'][] = [
+                'message' => 'Pedido #' . $pedidoId . ' criado. Fluxo ' . $modoOperacao . ' - sem pagamento antecipado.',
+                'type' => 'success',
+            ];
+        } else {
+            require_once __DIR__ . '/../Models/Pagamento.php';
+            $pedidoCriado = Pedido::buscarPorId($pedidoId) ?: [];
+            $valorPedido = (float)($pedidoCriado['custo_estimado'] ?? 0);
+
+            $destinoPag = strtolower(trim((string)($_POST['destino_pagamento'] ?? 'pago_na_chegada')));
+            $provedorOnline = isset($_POST['provedor_online']) ? strtolower(trim((string)$_POST['provedor_online'])) : null;
+            if ($destinoPag !== 'online') {
+                $provedorOnline = null;
+            }
+
+            $resPag = Pagamento::aplicarDestinoPagamento($pedidoId, $destinoPag, $provedorOnline, $actorId);
+
+            unset($_SESSION['admin_pedido_ctx']);
+
+            if (empty($resPag['ok'])) {
+                $erroMsg = (string)($resPag['erro'] ?? 'Falha ao aplicar destino financeiro.');
+                $_SESSION['_flash'][] = [
+                    'message' => 'Pedido #' . $pedidoId . ' criado, mas o pagamento falhou: ' . $erroMsg,
+                    'type' => 'error',
+                ];
+                $this->redirect('/admin/pedidos');
+                return;
+            }
+
+            $msgMap = [
+                'online'          => 'Pedido #' . $pedidoId . ' criado. Envie este link ao cliente: ' . (string)($resPag['link'] ?? ''),
+                'pago_agora'      => 'Pedido #' . $pedidoId . ' criado com baixa manual registrada.',
+                'pago_na_chegada' => 'Pedido #' . $pedidoId . ' criado. Cobranca combinada com o cliente.',
+                'sem_cobranca'    => 'Pedido #' . $pedidoId . ' criado com isencao registrada.',
+            ];
+            $_SESSION['_flash'][] = [
+                'message' => $msgMap[$destinoPag] ?? ('Pedido #' . $pedidoId . ' criado.'),
+                'type' => 'success',
+            ];
         }
-
-        $this->redirect("/admin/pedido/{$pedidoId}?criado=1");
-    }
-
-    public function pedidoCalcularCusto(): void
+        $this->redirect('/admin/pedidos');    }
+    
+        public function pedidoCalcularCusto(): void
     {
         AuthService::requireAuth('admin');
         header('Content-Type: application/json; charset=UTF-8');
 
         $distancia = (float)($_GET['distancia_km'] ?? 0);
         if ($distancia <= 0) {
-            echo json_encode(['ok' => false, 'erro' => 'DistÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ncia invÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡lida'], JSON_UNESCAPED_UNICODE);
+            echo json_encode(['ok' => false, 'erro' => 'Distância inválida'], JSON_UNESCAPED_UNICODE);
             exit;
         }
 
         require_once __DIR__ . '/../Models/Veiculo.php';
+        require_once __DIR__ . '/../Models/Catalog/ServiceType.php';
         require_once __DIR__ . '/../Services/TarifaService.php';
 
         $categoria = trim((string)($_GET['categoria'] ?? ''));
@@ -1599,36 +1714,73 @@ class AdminController extends BaseController
             $veiculo = Veiculo::buscarPorId($veiculoId);
             if (!$veiculo) {
                 http_response_code(404);
-                echo json_encode(['ok' => false, 'erro' => 'VeÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â­culo nÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â£o encontrado'], JSON_UNESCAPED_UNICODE);
+                echo json_encode(['ok' => false, 'erro' => 'Veículo não encontrado'], JSON_UNESCAPED_UNICODE);
                 exit;
             }
-            $categoria = $categoria !== '' ? $categoria : TarifaService::categoriaDeVeiculo($veiculo);
-        }
-
-        $serviceTypeId = (int)($_GET['service_type_id'] ?? 0);
-        if ($serviceTypeId > 0) {
-            $serviceType = ServiceType::buscarPorId($serviceTypeId);
-            if ($serviceType && (int)$serviceType['active'] === 1 && (string)$serviceType['attendance_mode'] !== 'TOWING') {
-                $pricing = EspecialistaPricingService::calcular((string)$serviceType['code'], $distancia);
-                if ($pricing) {
-                    echo json_encode(['ok'=>true,'custo'=>(float)$pricing['customer_amount'],'distancia'=>$distancia,'origem'=>'especialista_catalogo','tarifa'=>['tipo'=>'especialista','codigo'=>$pricing['codigo'],'detalhe'=>$pricing['detalhe'],'provider_amount'=>$pricing['provider_amount'],'platform_amount'=>$pricing['platform_amount']]], JSON_UNESCAPED_UNICODE);
-                    exit;
-                }
+            if ($categoria === '') {
+                $categoria = TarifaService::categoriaDeVeiculo($veiculo);
             }
         }
 
-        $prioridade = (($_GET['prioridade'] ?? '0') === '1');
-        $detalhe = TarifaService::calcularDetalhado($distancia, $categoria, $prioridade);
+        // §UNIFY-FLOWS: cálculo oficial passa a vir do PedidoCoreService,
+        // mesma fonte usada por ClienteController::calcularCusto e pelo
+        // funil /pre-cotacao. Lat/lng são opcionais para retro-compat (form
+        // antigo que só mandava distancia_km); quando ausentes, cai no
+        // centro geográfico padrão (SP) só para preencher a validação do
+        // ModalidadeResolver — o valor cobrado de fato sai do cálculo
+        // interno do motor único.
+        $latOrigem  = isset($_GET['lat_origem'])  && $_GET['lat_origem']  !== '' ? (float)$_GET['lat_origem']  : -23.5505;
+        $lngOrigem  = isset($_GET['lng_origem'])  && $_GET['lng_origem']  !== '' ? (float)$_GET['lng_origem']  : -46.6333;
+        $latDestino = isset($_GET['lat_destino']) && $_GET['lat_destino'] !== '' ? (float)$_GET['lat_destino'] : null;
+        $lngDestino = isset($_GET['lng_destino']) && $_GET['lng_destino'] !== '' ? (float)$_GET['lng_destino'] : null;
 
-        echo json_encode([
-            'ok' => true,
-            'custo' => (float)$detalhe['valor'],
-            'distancia' => (float)$detalhe['distancia_km'],
-            'tarifa' => $detalhe,
-        ], JSON_UNESCAPED_UNICODE);
+        $serviceTypeId = (int)($_GET['service_type_id'] ?? 0);
+        $prioridade    = (($_GET['prioridade'] ?? '0') === '1');
+        $actorId       = (int)($_SESSION['usuario_id'] ?? 0);
+
+        try {
+            $quote = (new PedidoCoreService(
+                getPDO(),
+                new PedidoPricingService(),
+                new ChargePolicyService(),
+                new PedidoTransitionService()
+            ))->cotar(new PedidoQuoteRequest([
+                'cliente_id'            => 0,
+                'veiculo_id'            => $veiculoId,
+                'tipo_problema'         => (string)($_GET['tipo_problema'] ?? $_GET['tipo'] ?? 'outro'),
+                'lat_origem'            => $latOrigem,
+                'lng_origem'            => $lngOrigem,
+                'lat_destino'           => $latDestino,
+                'lng_destino'           => $lngDestino,
+                'distancia_km'          => $distancia,
+                'categoria_veiculo'     => $categoria ?: null,
+            ]), [
+                'actor_type'                => 'admin',
+                'actor_id'                  => $actorId,
+                'allow_modalidade_override' => true,
+                'allow_priority'            => true,
+                'prioridade'                => $prioridade,
+            ]);
+
+            echo json_encode([
+                'ok'                 => true,
+                'custo'              => (float)$quote['total'],
+                'distancia'          => (float)$quote['km_cobrado'],
+                'origem'             => 'pedido_core',
+                'modalidade_socorro' => $quote['modalidade_socorro'],
+                'tarifa'             => $quote['tarifa'],
+                'quote'              => $quote,
+            ], JSON_UNESCAPED_UNICODE);
+        } catch (InvalidArgumentException $e) {
+            http_response_code(422);
+            echo json_encode(['ok' => false, 'erro' => $e->getMessage()], JSON_UNESCAPED_UNICODE);
+        } catch (Throwable $e) {
+            error_log('[AdminController::pedidoCalcularCusto] ' . $e->getMessage());
+            http_response_code(500);
+            echo json_encode(['ok' => false, 'erro' => 'Erro ao calcular cotação.'], JSON_UNESCAPED_UNICODE);
+        }
         exit;
     }
-
     // ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ FINANCEIRO ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬
     public function financeiro(): void
     {
@@ -3788,6 +3940,238 @@ class AdminController extends BaseController
             ]);
             $this->redirect('/admin/cidades?erro=excluir');
         }
+    }
+    
+        // ─── FUNIL ADMIN (Caminho 3) ──────────────────────────────────
+    /** GET /admin/pedido/novo/v2 — Etapa 1: cliente + veículo + guincho. */
+    public function pedidoNovoV2(): void
+    {
+        AuthService::requireAuth('admin');
+        $pdo = getPDO();
+        $clientes = $pdo->query(
+            "SELECT id, nome, email FROM usuarios WHERE tipo='cliente' AND ativo=1 ORDER BY nome"
+        )->fetchAll(PDO::FETCH_ASSOC);
+        $csrf_token = AuthService::gerarCsrfToken();
+        $flash = null;
+        if (!empty($_SESSION['_flash'])) {
+            $candidate = array_pop($_SESSION['_flash']);
+            if (is_array($candidate) && isset($candidate['message'])) {
+                $flash = $candidate;
+            } elseif (is_array($candidate) && !empty($candidate)) {
+                $flash = array_pop($candidate);
+            }
+            if (empty($_SESSION['_flash'])) { unset($_SESSION['_flash']); }
+        }
+        require __DIR__ . '/../Views/admin/pedidonovo_etapa1.php';
+    }
+
+    /** POST /admin/pedido/novo/contexto — valida escolhas e salva em $_SESSION. */
+    public function pedidoNovoContexto(): void
+    {
+        AuthService::requireAuth('admin');
+        if (!AuthService::validarCsrfToken($_POST['csrf_token'] ?? '')) {
+            http_response_code(403); exit;
+        }
+
+        $clienteId = (int)($_POST['cliente_id'] ?? 0);
+        $veiculoId = (int)($_POST['veiculo_id'] ?? 0);
+        $guinchoId = (int)($_POST['guincho_id'] ?? 0) ?: null;
+
+        if ($clienteId <= 0 || $veiculoId <= 0) {
+            $this->redirect('/admin/pedido/novo/v2?erro=1');
+        }
+
+        $veiculo = Veiculo::buscarPorId($veiculoId);
+        if (!$veiculo || (int)($veiculo['usuario_id'] ?? 0) !== $clienteId) {
+            $this->redirect('/admin/pedido/novo/v2?erro=veiculo');
+        }
+
+        $_SESSION['admin_pedido_ctx'] = [
+            'cliente_id' => $clienteId,
+            'veiculo_id' => $veiculoId,
+            'guincho_id' => $guinchoId,
+            'criado_em'  => time(),
+        ];
+
+        $this->redirect('/admin/pedido/novo/funil');
+    }
+
+    /**
+     * POST /admin/pedido/novo/api/cliente
+     * Cria um cliente rapido pelo modal do funil admin (AJAX).
+     * Senha provisoria aleatoria: o cliente a redefine via "esqueceu senha".
+     */
+    public function pedidoNovoApiClienteCriar(): void
+    {
+        AuthService::requireAuth('admin');
+        if (!headers_sent()) header('Content-Type: application/json; charset=UTF-8');
+        if (!AuthService::validarCsrfToken($_POST['csrf_token'] ?? '')) {
+            http_response_code(403);
+            echo json_encode(['ok' => false, 'erro' => 'CSRF invalido.']);
+            exit;
+        }
+
+        $nome  = trim((string)($_POST['nome']  ?? ''));
+        $email = trim((string)($_POST['email'] ?? ''));
+        $tel   = preg_replace('/\D/', '', (string)($_POST['telefone'] ?? ''));
+        $cpf   = preg_replace('/\D/', '', (string)($_POST['cpf'] ?? ''));
+        if (strlen($nome) < 3) {
+            echo json_encode(['ok' => false, 'erro' => 'Nome precisa ter ao menos 3 caracteres.']);
+            exit;
+        }
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            echo json_encode(['ok' => false, 'erro' => 'Informe um e-mail valido.']);
+            exit;
+        }
+        if ($tel !== '' && !self::validarTelefoneBr($tel)) {
+            echo json_encode(['ok' => false, 'erro' => 'Telefone invalido. Use DDD + numero (10 ou 11 digitos).']);
+            exit;
+        }
+        if ($cpf !== '' && !self::validarCpfBr($cpf)) {
+            echo json_encode(['ok' => false, 'erro' => 'CPF invalido (digito verificador).']);
+            exit;
+        }
+
+        $pdo = getPDO();
+        try {
+            if ($cpf !== '') {
+                $dup = $pdo->prepare('SELECT id FROM usuarios WHERE email = ? OR cpf = ? LIMIT 1');
+                $dup->execute([$email, $cpf]);
+            } else {
+                $dup = $pdo->prepare('SELECT id FROM usuarios WHERE email = ? LIMIT 1');
+                $dup->execute([$email]);
+            }
+            if ($dup->fetch()) {
+                echo json_encode(['ok' => false, 'erro' => 'Ja existe usuario com este e-mail ou CPF.']);
+                exit;
+            }
+
+            $senhaProvisoria = bin2hex(random_bytes(12));
+            $hash = password_hash($senhaProvisoria, PASSWORD_BCRYPT);
+
+            $pdo->prepare('INSERT INTO usuarios (nome, email, senha_hash, telefone, cpf, tipo, ativo, criado_em) VALUES (?,?,?,?,?,"cliente",1,NOW())')
+                ->execute([
+                    $nome,
+                    $email,
+                    $hash,
+                    $tel !== '' ? $tel : null,
+                    $cpf !== '' ? $cpf : null,
+                ]);
+            $clienteId = (int)$pdo->lastInsertId();
+        } catch (Throwable $e) {
+            Logger::exception(__CLASS__, __FUNCTION__, 'admin_funil', $e, ['email' => $email]);
+            echo json_encode(['ok' => false, 'erro' => 'Falha ao criar cliente.']);
+            exit;
+        }
+
+        echo json_encode([
+            'ok'      => true,
+            'cliente' => ['id' => $clienteId, 'nome' => $nome, 'email' => $email],
+        ], JSON_UNESCAPED_UNICODE);
+        exit;
+    }
+
+    /**
+     * POST /admin/pedido/novo/api/veiculo
+     * Cria veiculo rapido pro cliente escolhido no funil admin (AJAX).
+     */
+    public function pedidoNovoApiVeiculoCriar(): void
+    {
+        AuthService::requireAuth('admin');
+        if (!headers_sent()) header('Content-Type: application/json; charset=UTF-8');
+        if (!AuthService::validarCsrfToken($_POST['csrf_token'] ?? '')) {
+            http_response_code(403);
+            echo json_encode(['ok' => false, 'erro' => 'CSRF invalido.']);
+            exit;
+        }
+
+        $clienteId = (int)($_POST['cliente_id'] ?? 0);
+        $marca     = trim((string)($_POST['marca']  ?? ''));
+        $modelo    = trim((string)($_POST['modelo'] ?? ''));
+        $ano       = (int)($_POST['ano'] ?? 0);
+        $placa     = strtoupper(preg_replace('/[^A-Z0-9]/i', '', (string)($_POST['placa'] ?? '')));
+        $cor       = trim((string)($_POST['cor'] ?? ''));
+
+        if ($clienteId <= 0 || $marca === '' || $modelo === '') {
+            echo json_encode(['ok' => false, 'erro' => 'Cliente, marca e modelo sao obrigatorios.']);
+            exit;
+        }
+
+        $cliente = Usuario::buscarPorId($clienteId);
+        if (!$cliente || (string)($cliente['tipo'] ?? '') !== 'cliente') {
+            echo json_encode(['ok' => false, 'erro' => 'Cliente invalido.']);
+            exit;
+        }
+
+        try {
+            $pdo = getPDO();
+            $pdo->prepare('INSERT INTO veiculos (usuario_id, marca, modelo, ano, placa, cor, criado_em) VALUES (?,?,?,?,?,?,NOW())')
+                ->execute([
+                    $clienteId,
+                    $marca,
+                    $modelo,
+                    $ano > 0 ? $ano : null,
+                    $placa !== '' ? $placa : null,
+                    $cor !== '' ? $cor : null,
+                ]);
+            $veiculoId = (int)$pdo->lastInsertId();
+        } catch (Throwable $e) {
+            Logger::exception(__CLASS__, __FUNCTION__, 'admin_funil', $e, ['cliente_id' => $clienteId]);
+            echo json_encode(['ok' => false, 'erro' => 'Falha ao criar veiculo.']);
+            exit;
+        }
+
+        echo json_encode([
+            'ok'      => true,
+            'veiculo' => ['id' => $veiculoId, 'marca' => $marca, 'modelo' => $modelo, 'placa' => $placa],
+        ], JSON_UNESCAPED_UNICODE);
+        exit;
+    }
+    /** GET /admin/pedido/novo/funil — Etapa 2 (placeholder enquanto E3-E5 não chegam). */
+    public function pedidoNovoFunil(): void
+    {
+        AuthService::requireAuth('admin');
+        $ctx = $_SESSION['admin_pedido_ctx'] ?? null;
+        if (!$ctx) {
+            $this->redirect('/admin/pedido/novo/v2');
+        }
+        // Expira contexto depois de 30min parado (mesma política do cliente)
+        if (time() - (int)($ctx['criado_em'] ?? 0) > 1800) {
+            unset($_SESSION['admin_pedido_ctx']);
+            $this->redirect('/admin/pedido/novo/v2?erro=expirado');
+        }
+
+        $cliente = Usuario::buscarPorId((int)$ctx['cliente_id']);
+        $veiculo = Veiculo::buscarPorId((int)$ctx['veiculo_id']);
+        $guincho = $ctx['guincho_id'] ? Guincho::buscarPorId((int)$ctx['guincho_id']) : null;
+
+        $veiculoResumo = '';
+        if ($veiculo) {
+            $veiculoResumo = trim(($veiculo['marca'] ?? '') . ' ' . ($veiculo['modelo'] ?? ''));
+            if (!empty($veiculo['placa'])) { $veiculoResumo .= ' — ' . $veiculo['placa']; }
+        }
+
+        $contexto = [
+            'cliente_nome'   => $cliente['nome'] ?? '—',
+            'veiculo_resumo' => $veiculoResumo ?: '—',
+            'guincho_nome'   => $guincho['nome_operador'] ?? ($guincho['nome'] ?? null),
+        ];
+        $csrf_token = AuthService::gerarCsrfToken();
+        $provedorHabilitado = '';
+        if (defined('PAYMENT_GATEWAY_ACTIVE')) {
+            $provedorHabilitado = strtolower(trim((string)PAYMENT_GATEWAY_ACTIVE));
+        }
+        if (!in_array($provedorHabilitado, ['mercadopago', 'pagseguro'], true)) {
+            $provedorHabilitado = '';
+        }
+
+        $adminCtx = [
+            'cliente_id' => (int)($ctx['cliente_id'] ?? 0),
+            'veiculo_id' => (int)($ctx['veiculo_id'] ?? 0),
+            'guincho_id' => (int)($ctx['guincho_id'] ?? 0),
+        ];
+
+        require __DIR__ . '/../Views/admin/pedidonovo_funil.php';
     }
 }
 

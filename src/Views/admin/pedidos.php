@@ -183,7 +183,7 @@ $getOrigemFunilBadge = static function ($origem): string {
                 $bp,
                 ENT_QUOTES,
                 'UTF-8'
-            ); ?>/admin/pedido/novo"
+            ); ?>/admin/pedido/novo/v2"
             class="ops-dashboard-link"
         >
             <i class="fas fa-plus me-1"></i>

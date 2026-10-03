@@ -374,8 +374,10 @@ $rotas = [
         '/admin/guincho/novo'        => ['AdminController', 'guinchoNovoForm', 'admin'],
         '/admin/pedidos'             => ['AdminController', 'pedidos', 'admin'],
         '/admin/pedidos/json'        => ['AdminController', 'pedidosJson', 'admin'],
-        '/admin/pedido/novo'         => ['AdminController', 'pedidoCriarForm', 'admin'],
-        '/admin/pedido/criar'        => ['AdminController', 'pedidoCriarForm', 'admin'],
+        '/admin/pedido/novo'         => ['AdminController', 'pedidoNovoV2', 'admin'],
+        '/admin/pedido/novo/v2'       => ['AdminController', 'pedidoNovoV2',    'admin'],
+        '/admin/pedido/novo/funil'    => ['AdminController', 'pedidoNovoFunil', 'admin'],
+        '/admin/pedido/criar'        => ['AdminController', 'pedidoCriar',     'admin'],
         '/admin/pedido/custo'        => ['AdminController', 'pedidoCalcularCusto', 'admin'],
         '/admin/veiculos/ajax'       => ['AdminController', 'veiculosAjax', 'admin'],
         '/admin/clientes/ajax'       => ['AdminController', 'clientesAjax', 'admin'],
@@ -464,6 +466,9 @@ $rotas = [
     ],
 
     'POST' => [
+        '/admin/pedido/novo/contexto' => ['AdminController', 'pedidoNovoContexto', 'admin'],
+                '/admin/pedido/novo/api/cliente' => ['AdminController', 'pedidoNovoApiClienteCriar', 'admin'],
+        '/admin/pedido/novo/api/veiculo' => ['AdminController', 'pedidoNovoApiVeiculoCriar', 'admin'],
         // === ROUTES OFICINA POST ===
         '/oficina/perfil/salvar'          => ['OficinaController', 'perfilSalvar',        'oficina'],
         '/oficina/servicos/salvar'        => ['OficinaController', 'salvarServicos',      'oficina'],

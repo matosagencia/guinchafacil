@@ -1,0 +1,24 @@
+{
+    "name":  "admin-pedido-pagamento-provedor-errado",
+    "lane":  "C",
+    "owned_by":  "Gemini",
+    "tested_by":  "DeepSeek",
+    "steps":  [
+                  {
+                      "probe":  {
+                                    "method":  "POST",
+                                    "url":  "/admin/pedido/criar",
+                                    "expect_json_ok":  false,
+                                    "type":  "ajax"
+                                },
+                      "key":  "criar_errado",
+                      "node":  "admin_pedido_criar"
+                  }
+              ],
+    "guards":  {
+                   "prefix_test_data":  "E2E_",
+                   "admin_only":  true,
+                   "no_secrets_in_output":  true,
+                   "csrf_required":  true
+               }
+}

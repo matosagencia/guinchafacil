@@ -2,9 +2,30 @@
     "scenario":  "fluxo-1a",
     "steps":  [
                   {
-                      "probe":  "status_ok",
-                      "key":  "step-1",
-                      "node":  "node-precotacao"
+                      "probe":  "http_get",
+                      "key":  "s1",
+                      "node":  "node-precotacao",
+                      "expect":  200,
+                      "url":  "http://localhost/guinchafacil/pre-cotacao"
+                  },
+                  {
+                      "probe":  "http_get",
+                      "key":  "s2",
+                      "node":  "node-decisao",
+                      "expect":  200,
+                      "url":  "http://localhost/guinchafacil/checkout/cliente"
+                  },
+                  {
+                      "probe":  "http_get",
+                      "key":  "s3",
+                      "node":  "node-pagamento",
+                      "expect":  200,
+                      "url":  "http://localhost/guinchafacil/pagamento/checkout/1"
+                  },
+                  {
+                      "probe":  "check_db_e2e",
+                      "key":  "s4",
+                      "node":  "node-pedido"
                   }
               ]
 }

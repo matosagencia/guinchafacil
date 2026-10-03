@@ -1,0 +1,25 @@
+{
+    "name":  "admin-pedido-pagamento-online-idem",
+    "lane":  "C",
+    "owned_by":  "Gemini",
+    "tested_by":  "DeepSeek",
+    "steps":  [
+                  {
+                      "probe":  {
+                                    "expect_flash_regex":  "Envie este link ao cliente: .+",
+                                    "method":  "POST",
+                                    "url":  "/admin/pedido/criar",
+                                    "expect_json_ok":  true,
+                                    "type":  "ajax"
+                                },
+                      "key":  "criar_idem",
+                      "node":  "api_pedido_criar_idem"
+                  }
+              ],
+    "guards":  {
+                   "prefix_test_data":  "E2E_",
+                   "admin_only":  true,
+                   "no_secrets_in_output":  true,
+                   "csrf_required":  true
+               }
+}
