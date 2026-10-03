@@ -1,90 +1,12 @@
-.env
-.env.local
-.env.*.local
-.env.backup
-files/qa-runs/
-logs/*.jsonl
-logs/
-public/uploads/
-uploads/
-qa/node_modules/
-qa/playwright-report/
-qa/test-results/
-qa/.cache/
-qa/.auth/
-*.trace.zip
-*.webm
-
-# Dependencias e artefatos locais
-/node_modules/
-/vendor/
-/storage/
-/test-results/
-/screenshot/
-/deploy_min/
-/deploy_*.zip
-/.ftpquota
-
-# Diagnosticos e dados operacionais locais
-/_cleanup.php
-/_diag_env_temp.php
-/_test_db.php
-/PROSPECCAO_CELULA_1.csv
-/especialista.txt
-
-# Credenciais e configuracoes privadas
-/google-services.json
-/id_rsa.ppk
-*.pem
-*.key
-*.ppk
-
-# Documentacao e textos locais fora do repositorio publico
-/doc/
-/*.txt
-
-# Credenciais
-.env
-.env.*
-!.env.example
-
-# Backups e tempor�rios
+# Produção e backups — nunca no repo
+.well-known/
+.deploy-state/
+database/backups/
+database/seeds/
+bin/
+osrm.guinchafacil.com.br/
+index.php.backup-*
+_debug_route.php
+SESSION-CHECKPOINT-*.md
 *.bak-*
-*.bak
-*.broken
-install-*.php
-install-fix-*.php
-
-# Logs e caches
-logs/
-.grok/
-*.md.tmp
-
-# Arquivos soltos na raiz que n�o pertencem
-/pre-cotacao.php
-/deepseek_markdown_*.md
-# Testes / Playwright
-tests/e2e/screenshots/
-# Backups de refatoracao
-install/
-# Storage privado
-storage/cacert.pem
-storage/private/
-logs/*.log
-# OS
-.DS_Store
-Thumbs.db
-
-# Backups de index antes de limpeza
-index.php.antes-*
-
-# Specs de diagnostico
-tests/e2e/diag-*.spec.js
-
-# Backups de index antes de limpeza
-index.php.antes-*
-
-# Specs de diagnostico
-tests/e2e/diag-*.spec.js
-installers/
-diag-fluxo.php
+*.bak_*
