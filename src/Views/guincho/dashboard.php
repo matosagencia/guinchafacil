@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 $bp = defined('BASE_PATH') ? BASE_PATH : '';
 include __DIR__ . '/../layouts/header.php';
 $operadorNome = trim((string)($_SESSION['user']['nome'] ?? 'Operador'));
@@ -825,16 +825,84 @@ document.addEventListener('DOMContentLoaded', () => {
         pedidosSseRetry = setTimeout(iniciarPedidosSse, 4000);
     }
 
-    async function checarPedidos() {
-        if (!toggle.checked) return;
-        try {
-            const data = await window.apiFetch(BP + '/guincho/pedidos-disponiveis?_=' + Date.now());
-
-            if (data.ok) {
-                renderOferta(data.pedidos.length > 0 ? data.pedidos[0] : null);
-                renderFila(data.pedidos);
-            }
-        } catch (e) { console.error('Falha ao checar pedidos', e); }
+        // gf-alerta-novos-pedidos-v1 (fix-B-11 v2)
+    const GF_PEDIDOS_VISTOS_KEY = 'gf_pedidos_vistos_v1';
+    let gfPedidosPrimeiraRodada = true;
+
+    function gfLerVistos() {
+        try {
+            const raw = sessionStorage.getItem(GF_PEDIDOS_VISTOS_KEY);
+            return raw ? new Set(JSON.parse(raw)) : new Set();
+        } catch (e) { return new Set(); }
+    }
+    function gfSalvarVistos(set) {
+        try { sessionStorage.setItem(GF_PEDIDOS_VISTOS_KEY, JSON.stringify(Array.from(set))); } catch (e) {}
+    }
+    function gfBeep() {
+        try {
+            const AC = window.AudioContext || window.webkitAudioContext;
+            if (!AC) return;
+            const ctx = new AC();
+            const osc = ctx.createOscillator();
+            const g = ctx.createGain();
+            osc.type = 'sine'; osc.frequency.value = 880; g.gain.value = 0.15;
+            osc.connect(g).connect(ctx.destination);
+            osc.start();
+            setTimeout(() => { osc.stop(); ctx.close(); }, 250);
+        } catch (e) {}
+    }
+    function gfToastNovos(qtd, primeiro) {
+        const id = 'gf-toast-novos-pedidos';
+        const old = document.getElementById(id);
+        if (old) old.remove();
+        const box = document.createElement('div');
+        box.id = id;
+        box.style.cssText = [
+            'position:fixed','top:16px','left:50%','transform:translateX(-50%)',
+            'background:#2fb34a','color:#fff','padding:12px 20px','border-radius:10px',
+            'box-shadow:0 8px 24px rgba(0,0,0,.35)','z-index:2147483647',
+            'font:600 14px/1.3 system-ui,sans-serif','cursor:pointer','max-width:92vw'
+        ].join(';');
+        const titulo = qtd === 1 ? 'Novo pedido disponivel!' : qtd + ' novos pedidos disponiveis!';
+        const sub = primeiro ? [primeiro.marca, primeiro.modelo].filter(Boolean).join(' ') : '';
+        box.innerHTML = '<div>' + titulo + '</div>' +
+            (sub ? '<div style="font-weight:400;font-size:12px;margin-top:3px;opacity:.9">' + sub + '</div>' : '') +
+            '<div style="font-weight:400;font-size:11px;margin-top:6px;opacity:.85">Toque para fechar</div>';
+        box.addEventListener('click', () => box.remove());
+        document.body.appendChild(box);
+        setTimeout(() => { if (box.parentNode) box.remove(); }, 20000);
+    }
+    function gfPiscarTitulo(n) {
+        const original = document.title.replace(/^\(\d+\)\s*/, '');
+        let state = false, count = 0;
+        const iv = setInterval(() => {
+            state = !state;
+            document.title = state ? '(' + n + ') ' + original : original;
+            if (++count > 6) { clearInterval(iv); document.title = original; }
+        }, 700);
+    }
+
+    async function checarPedidos() {
+        if (!toggle.checked) return;
+        try {
+            const data = await window.apiFetch(BP + '/guincho/pedidos-disponiveis?_=' + Date.now());
+            if (data.ok && Array.isArray(data.pedidos)) {
+                const vistos = gfLerVistos();
+                const novos  = data.pedidos.filter(p => !vistos.has(String(p.id)));
+                data.pedidos.forEach(p => vistos.add(String(p.id)));
+                gfSalvarVistos(vistos);
+
+                renderOferta(data.pedidos.length > 0 ? data.pedidos[0] : null);
+                renderFila(data.pedidos);
+
+                if (!gfPedidosPrimeiraRodada && novos.length > 0) {
+                    gfBeep();
+                    gfToastNovos(novos.length, novos[0]);
+                    if (document.hidden) gfPiscarTitulo(novos.length);
+                }
+                gfPedidosPrimeiraRodada = false;
+            }
+        } catch (e) { console.error('Falha ao checar pedidos', e); }
     }
 
     function iniciarPedidosSse() {
