@@ -5,14 +5,14 @@ deployment:
     - export STAMP=$(date +%Y%m%d-%H%M%S)
     - /bin/mkdir -p "$DEPLOYPATH"
 
-    # ---- [A] Backup dos .env de producao ----
+    # [A] Backup dos .env de producao
     - /bin/cp -pf "$DEPLOYPATH/.env" "$DEPLOYPATH/.env.production-$STAMP"
     - /bin/cp -pf "$DEPLOYPATH/.env.local" "$DEPLOYPATH/.env.local.production-$STAMP" || true
 
-    # ---- [B] Copiar projeto ----
+    # [B] Copiar projeto
     - find . -mindepth 1 -maxdepth 1 -exec /bin/cp -Rf {} "$DEPLOYPATH" \;
 
-    # ---- [C] Restaurar .env de producao ----
+    # [C] Restaurar .env de producao
     - /bin/cp -pf "$DEPLOYPATH/.env.production-$STAMP" "$DEPLOYPATH/.env"
     - /bin/rm -f "$DEPLOYPATH/.env.production-$STAMP"
     - |
@@ -21,6 +21,6 @@ deployment:
         /bin/rm -f "$DEPLOYPATH/.env.local.production-$STAMP"
       fi
 
-    # ---- [D] Limpeza ----
+    # [D] Limpeza
     - /bin/rm -rf "$DEPLOYPATH/.git" "$DEPLOYPATH/.cpanel.yml" "$DEPLOYPATH/DOC"
     - find "$DEPLOYPATH" -maxdepth 1 -type f -name "SESSION-CHECKPOINT-*.md" -delete
