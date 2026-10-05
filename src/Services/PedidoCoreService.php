@@ -141,6 +141,7 @@ final class PedidoCoreService
     {
         $resolvida = $this->modalidadeResolver->resolver($request->tipoProblema, [
             'endereco_destino' => $request->enderecoDestino,
+            'decisao_atendimento' => $context['decisao_atendimento'] ?? null,
         ]);
 
         $isAdmin = ($context['actor_type'] ?? '') === 'admin';
@@ -186,12 +187,32 @@ final class PedidoCoreService
         if ($request->localResgateLat === null || $request->localResgateLng === null) {
             throw new InvalidArgumentException('Localizacao de resgate obrigatoria.');
         }
-        if (!GeoService::coordenadasValidas($request->localResgateLat, $request->localResgateLng)) {
+        if (!$this->coordenadasGlobaisValidas($request->localResgateLat, $request->localResgateLng)) {
+            error_log('[PedidoCoreService::validarCoordenadas][phase=validate] coordenadas de origem invalidas');
             throw new InvalidArgumentException('Coordenadas de origem fora do limite aceito.');
         }
-        if ($request->destinoLat !== null && $request->destinoLng !== null && !GeoService::coordenadasValidas($request->destinoLat, $request->destinoLng)) {
+        if ($request->destinoLat !== null && $request->destinoLng !== null && !$this->coordenadasGlobaisValidas($request->destinoLat, $request->destinoLng)) {
+            error_log('[PedidoCoreService::validarCoordenadas][phase=validate] coordenadas de destino invalidas');
             throw new InvalidArgumentException('Coordenadas de destino fora do limite aceito.');
         }
+    }
+
+    private function coordenadasGlobaisValidas(mixed $latitude, mixed $longitude): bool
+    {
+        if (!is_numeric($latitude) || !is_numeric($longitude)) {
+            return false;
+        }
+
+        $latitude = (float)$latitude;
+        $longitude = (float)$longitude;
+
+        return is_finite($latitude)
+            && is_finite($longitude)
+            && $latitude >= -90.0
+            && $latitude <= 90.0
+            && $longitude >= -180.0
+            && $longitude <= 180.0
+            && !($latitude === 0.0 && $longitude === 0.0);
     }
 
     private function validarClienteVeiculo(PedidoCreateRequest $request): void
