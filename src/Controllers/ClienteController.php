@@ -589,20 +589,23 @@ class ClienteController extends BaseController
     public function pedidoNovo(): void
     {
         AuthService::requireAuth('cliente');
-        $uid     = $this->usuarioId();
-        $veiculos = Veiculo::listarPorUsuario($uid);
-        $oficinas = Oficina::listarPorUsuario($uid);
-        $oficinasParceiras = IndicacaoOficinaService::ativo() ? PedidoIndicacaoOficina::listarOficinasAtivas() : [];
-        $cfg      = Configuracao::getAll();
-        $pedidoRascunho = $_SESSION['pedido_rascunho'] ?? null;
-        if (!empty($pedidoRascunho['criado_em']) && strtotime($pedidoRascunho['criado_em']) < strtotime('-30 minutes')) {
-            unset($_SESSION['pedido_rascunho']);
-            $pedidoRascunho = null;
-        }
+        $uid = $this->usuarioId();
 
-        // ROADMAP socorro automotivo — Etapa 2: recomendação vinda da triagem
-        // (/cliente/triagem) chega aqui como service_type_id na querystring.
-        // Sempre revalidada contra o catálogo ativo — nunca confiar no valor cru.
+        // Motor unico: reaproveita public-pre-cotacao-flow.js. Cliente ja
+        // esta identificado e veiculo e passado por hidden input.
+        $veiculos = Veiculo::listarPorUsuario($uid);
+        if (empty($veiculos)) {
+            $this->redirect('/cliente/veiculo/novo?retorno=pedido');
+        }
+        $veiculo = null;
+        foreach ($veiculos as $v) {
+            if (!empty($v['ativo'])) { $veiculo = $v; break; }
+        }
+        if (!$veiculo) { $veiculo = $veiculos[0]; }
+
+        require_once __DIR__ . '/../Services/TarifaService.php';
+        $veiculoCategoria = TarifaService::categoriaDeVeiculo($veiculo) ?: 'popular';
+
         $triagemServiceType = null;
         $tsId = (int)($_GET['service_type_id'] ?? 0);
         if ($tsId > 0) {
@@ -615,7 +618,6 @@ class ClienteController extends BaseController
         $csrfToken = AuthService::gerarCsrfToken();
         require __DIR__ . '/../Views/cliente/pedidonovo.php';
     }
-
     public function pedidoRascunho(): void
     {
         AuthService::requireAuth('cliente');
@@ -628,7 +630,7 @@ class ClienteController extends BaseController
 
         $numero = trim((string)($_POST['numero_origem'] ?? ''));
         $endereco = EnderecoFormatter::comNumeroNoTexto(
-            (string)($_POST['endereco_origem'] ?? ''),
+            (string)($_POST['endereco_origem'] ?? $_POST['localizacao'] ?? ''),
             $numero !== '' ? $numero : null
         );
         $lat = isset($_POST['lat_origem']) ? (float)$_POST['lat_origem'] : 0.0;
@@ -684,7 +686,7 @@ class ClienteController extends BaseController
         $descricao = trim($_POST['descricao'] ?? '');
         $numeroOrigem = trim((string)($_POST['numero_origem'] ?? ''));
         $endOrigem = EnderecoFormatter::comNumeroNoTexto(
-            (string)($_POST['endereco_origem'] ?? ''),
+            (string)($_POST['endereco_origem'] ?? $_POST['localizacao'] ?? ''),
             $numeroOrigem !== '' ? $numeroOrigem : null
         );
         $latOrigem = (float)($_POST['lat_origem'] ?? 0);
@@ -698,7 +700,7 @@ class ClienteController extends BaseController
             ? (float)$_POST['local_resgate_lng'] : $lngOrigem;
         $numeroDestino = trim((string)($_POST['numero_destino'] ?? ''));
         $endDest   = EnderecoFormatter::comNumeroNoTexto(
-            (string)($_POST['endereco_destino'] ?? ''),
+            (string)($_POST['endereco_destino'] ?? $_POST['destino'] ?? ''),
             $numeroDestino !== '' ? $numeroDestino : null
         );
         $latDest   = (float)($_POST['lat_destino'] ?? 0);
@@ -797,12 +799,33 @@ class ClienteController extends BaseController
         if ($latOrigem === 0.0 || $lngOrigem === 0.0 || !$latValida($latOrigem) || !$lngValida($lngOrigem)) {
             $this->redirect('/cliente/pedido/novo?erro=coordenadas_origem');
         }
-        $modalidadeResolvidaPreview = (new ModalidadeResolver())->resolver($tipo, [
-            'endereco_destino' => $endDest,
-        ]);
-        $reboqueExigeDestino = $modalidadeResolvidaPreview === ModalidadeResolver::REBOQUE_PRANCHA;
+        // §MOTOR-UNICO-02: quando o motor publico manda decisao_atendimento
+        // = 'assistencia' ou 'local', o cliente escolheu "Resolver no local"
+        // no stage opcoes  nao forcar destino mesmo que ModalidadeResolver
+        // do tipo_problema diga REBOQUE_PRANCHA.
+        $decisaoAtendimentoMotor = strtolower(trim((string)($_POST['decisao_atendimento'] ?? '')));
+        $motorForcouAssistenciaLocal = in_array($decisaoAtendimentoMotor, ['assistencia', 'local'], true);
+
+        if ($motorForcouAssistenciaLocal) {
+            $reboqueExigeDestino = false;
+        } else {
+            $modalidadeResolvidaPreview = (new ModalidadeResolver())->resolver($tipo, [
+                'endereco_destino' => $endDest,
+            ]);
+            $reboqueExigeDestino = $modalidadeResolvidaPreview === ModalidadeResolver::REBOQUE_PRANCHA;
+        }
+
         if ($reboqueExigeDestino && ($latDest === 0.0 || $lngDest === 0.0 || !$latValida($latDest) || !$lngValida($lngDest))) {
             $this->redirect('/cliente/pedido/novo?erro=coordenadas_destino');
+        }
+
+        // Pedido ON_SITE: espelha origem nas coords de destino (mesmo ponto).
+        if (!$reboqueExigeDestino && ($latDest === 0.0 || $lngDest === 0.0)) {
+            $latDest = $latOrigem;
+            $lngDest = $lngOrigem;
+            if ($endDest === '' || $endDest === 'Destino informado') {
+                $endDest = $endOrigem;
+            }
         }
 
         // §COBERTURA-RAIO-01 (05/08/2026): não deixa nem abrir o pedido se
@@ -893,13 +916,16 @@ class ClienteController extends BaseController
             'lat_origem' => $latOrigem,
             'lng_origem' => $lngOrigem,
             'endereco_origem' => $endOrigem,
-            'lat_destino' => $reboqueExigeDestino ? $latDest : null,
-            'lng_destino' => $reboqueExigeDestino ? $lngDest : null,
+            'lat_destino' => $reboqueExigeDestino ? $latDest : ($latDest != 0.0 ? $latDest : $latOrigem),
+            'lng_destino' => $reboqueExigeDestino ? $lngDest : ($lngDest != 0.0 ? $lngDest : $lngOrigem),
             'endereco_destino' => $endDest,
             'service_type_id' => $serviceTypeId,
             'attendance_mode' => $attendanceMode,
             'actor_type' => 'cliente',
             'actor_id' => $uid,
+            'context' => [
+                'decisao_atendimento' => $decisaoAtendimentoMotor,
+            ],
         ]));
 
         $pedidoCriado = Pedido::buscarPorId($pedidoId) ?: [];
@@ -967,7 +993,17 @@ class ClienteController extends BaseController
                 $pdo->rollBack();
             }
             error_log('[PedidoCriar] falha ao criar pedido/indicação: ' . $pedidoError->getMessage());
-            $this->redirect('/cliente/pedido/novo?erro=pedido');
+            // DEBUG TEMPORARIO — imprime a excecao real antes do redirect
+            if (!headers_sent()) {
+                header('Content-Type: text/plain; charset=UTF-8');
+            }
+            echo "=== PEDIDO CRIAR — EXCEPTION ===\n";
+            echo get_class($pedidoError) . "\n";
+            echo $pedidoError->getMessage() . "\n";
+            echo "@ " . $pedidoError->getFile() . ":" . $pedidoError->getLine() . "\n";
+            echo "\n=== TRACE ===\n";
+            echo $pedidoError->getTraceAsString() . "\n";
+            exit;
         }
 
         // Etapa 15 — congela o cenário veicular/situacional deste pedido. É

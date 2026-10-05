@@ -186,7 +186,7 @@ $adminCtx = $adminCtx ?? [];
 
             <div class="pag-destino-grid">
                 <label class="pag-destino-opt">
-                    <input type="radio" name="destino_pagamento" value="pago_agora" required>
+                    <input type="radio" name="destino_pagamento" value="pago_agora">
                     <span>
                         <strong><i class="fas fa-money-bill-wave me-1"></i>Pago agora</strong>
                         <small>Baixa manual auditável  o admin confirma o pagamento.</small>
