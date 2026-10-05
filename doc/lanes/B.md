@@ -115,3 +115,16 @@ Ao terminar uma entrega: atualizar este arquivo (estado, contratos, pendências)
 | 2026-10-04 | diag-B-018c: #182 expirado (`diff=-2237s`) + guincho 17 com `disponivel=0`. Capability descartada (`TOWING` + `service_type_id=NULL`). | Causa = operacao + janela. Sem bug de codigo |
 | 2026-10-04 | **B-005 FECHADO com evidencia visual**: pedido #183 apareceu como NOVA SOLICITACAO no /guincho/dashboard com countdown 29:28; atendimento carregado com rota, cliente e valor. `fix-B-11 v2` (toast+beep) funcionou | OK - nenhum diff de codigo nesta rodada |
 | 2026-10-04 | Observacao (nao bloqueia): 404 em `public/assets/vendor/leaflet-routing-machine/routing-icon.png` referenciado por `leaflet-routing-machine.css`. Icone de manobra fica vazio. Dono decide: adicionar ao bundle ou incluir na fila D10 | Pendente decisao do dono |
+| 2026-10-04 | fix-B-11 v2 — toast+beep no `/guincho/dashboard` | OK — B-005 fechado com evidência visual (#183) |
+| 2026-10-04 | `OficinaController::buscarPedidosProximos` passa a consumir `Pedido::listarFilaElegivelParaOficina` | OK — ganha `expiracao_aceite > NOW()` + JOINs |
+| 2026-10-04 | Rota `/oficina/pedidos-disponiveis` registrada em `index.php` | OK — método já existia; dono colou a linha |
+| 2026-10-04 | `/oficina/pedido/{id}/aceitar` migrada para POST + CSRF guard em `OficinaController::aceitar` | OK — `<a>` → `<form method=post>` em `_offer_card.php`; rota duplicada removida |
+| 2026-10-04 | Card de oferta sem endereço (evita overrun do prestador) | OK |
+| 2026-10-04 | Refactor visual de `src/Views/oficina/atendimento.php` (stepper + cards `tow-card`) | OK — hooks JS preservados |
+| 2026-10-04 | **B-008** Cancelamento de oficina — `CancelamentoService::cancelarPorOficina` + `PedidoTransitionService::requeueByOficina` + `OficinaController::cancelarAtendimento` + modal | OK — auditoria em `pedido_cancelamentos` |
+| 2026-10-04 | Migration `install/migration_oficina_reputacao_v1.sql` — enum `ator_tipo`+`oficina`, `oficinas.reputacao`, `oficinas.total_cancelamentos`, config `penalidade_reputacao_cancelamento_oficina` | OK — corrigiu bug silencioso (enum antigo) |
+| 2026-10-04 | Dispatcher genérico `{id}`/`{nome}` em `index.php` | OK — destrava 7+ rotas; preserva fallbacks |
+| 2026-10-04 | Cast defensivo `lat_destino`/`lng_destino` no `AdminController::pedidoCriar` | OK — `(float)""` = 0.0 era o bug; agora `""` → `null` |
+| 2026-10-04 | Listener `gf:address-confirmed` + `id=` nos hidden em `_precotacao_funil_admin.php` | OK |
+| 2026-10-04 | `decisao_atendimento` movida para dentro de `context` do `PedidoCreateRequest` | OK — #185 com `attendance_mode=ON_SITE`, `lat_destino=NULL` |
+| 2026-10-04 | Arquivamento de 274 `.bak` + 31 zumbis em `_archive/` + bloco `.gitignore` (D6) | OK — commits `4ed2bf4`, `d42dc34`, `639c1b8` |
