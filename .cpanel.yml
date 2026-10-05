@@ -2,9 +2,25 @@
 deployment:
   tasks:
     - export DEPLOYPATH=/home/oawqoqml/public_html/
+    - export STAMP=$(date +%Y%m%d-%H%M%S)
     - /bin/mkdir -p "$DEPLOYPATH"
-    - find . -mindepth 1 -maxdepth 1 -exec /bin/cp -R {} "$DEPLOYPATH" \;
+
+    # ---- [A] Backup dos .env de producao ----
+    - /bin/cp -pf "$DEPLOYPATH/.env" "$DEPLOYPATH/.env.production-$STAMP"
+    - /bin/cp -pf "$DEPLOYPATH/.env.local" "$DEPLOYPATH/.env.local.production-$STAMP" || true
+
+    # ---- [B] Copiar projeto ----
+    - find . -mindepth 1 -maxdepth 1 -exec /bin/cp -Rf {} "$DEPLOYPATH" \;
+
+    # ---- [C] Restaurar .env de producao ----
+    - /bin/cp -pf "$DEPLOYPATH/.env.production-$STAMP" "$DEPLOYPATH/.env"
+    - /bin/rm -f "$DEPLOYPATH/.env.production-$STAMP"
+    - |
+      if [ -f "$DEPLOYPATH/.env.local.production-$STAMP" ]; then
+        /bin/cp -pf "$DEPLOYPATH/.env.local.production-$STAMP" "$DEPLOYPATH/.env.local"
+        /bin/rm -f "$DEPLOYPATH/.env.local.production-$STAMP"
+      fi
+
+    # ---- [D] Limpeza ----
     - /bin/rm -rf "$DEPLOYPATH/.git" "$DEPLOYPATH/.cpanel.yml" "$DEPLOYPATH/DOC"
-    - /bin/rm -f "$DEPLOYPATH/.env" "$DEPLOYPATH/.env.local" "$DEPLOYPATH/.env.backup"
     - find "$DEPLOYPATH" -maxdepth 1 -type f -name "SESSION-CHECKPOINT-*.md" -delete
-    - find "$DEPLOYPATH" -maxdepth 1 -type f -name "*.txt" -delete
