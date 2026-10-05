@@ -104,3 +104,14 @@ Ao terminar uma entrega: atualizar este arquivo (estado, contratos, pendências)
 | 2026-10-01 | Verificação de hrefs em `sidebar_oficina.php` | OK — nenhuma violação |
 | 2026-10-01 | B-001 fechado (URL com prefixo /guinchafacil; docroot ja e a raiz); doc/BLOCKERS.md populado com B-001/B-002/B-004 | OK - sem alteracao de codigo PHP |
 | 2026-10-01 | Verificação do estado da faixa B; `php -l` nos arquivos | Itens 1–3 já prontos; B-001 (404) e B-002 (`triagem`) abertos; sem diff de código PHP |
+| 2026-10-04 | fix-B-11 v2 â€” alerta toast+beep no /guincho/dashboard | OK â€” `checarPedidos()` passa a diffar IDs vistos (sessionStorage) e disparar toast+beep+blink de titulo; B-005 fechado |
+| 2026-10-04 | D3 confirmado pelo dono: pasta real e `doc/` (singular) | Sem impacto no codigo; `lanes.json` continua com `docs/` e fica pendente para o dono |
+| 2026-10-01 | Verificação do estado da faixa B; `php -l` nos arquivos | Itens 1–3 já prontos; B-001 (404) e B-002 (`triagem`) abertos; sem diff de código PHP |
+| 2026-10-04 | fix-B-11 — causa raiz: pedido expirado, não bug de código | OK — front (dashboard.php L1614+) e backend (montarOfertasDisponiveis) corretos; `Pedido::listarAguardandoGuincho()` filtra por `expiracao_aceite > NOW()`; HAR foi feito 2h após a janela de 30min fechar. B-005 fechado com causa real. |
+| 2026-10-04 | CONTRATO_PEDIDO para Faixa A — UX de expiração + fallback NULL | Pendente — R1 (status não muda após expirar) e R2 (`expiracao_aceite IS NULL` retorna NULL). Emitido em `docs/BLOCKERS.md`. |
+| 2026-10-01 | Verificação do estado da faixa B; `php -l` nos arquivos | Itens 1–3 já prontos; B-001 (404) e B-002 (`triagem`) abertos; sem diff de código PHP |
+| 2026-10-04 | diag-B-018c: #182 expirado (`diff=-2237s`); guincho 17 com `disponivel=0`; `attendance_mode=TOWING`+`service_type_id=NULL` -> gate capability NAO se aplica | Causa: expirado + guincho offline. B-005 confirmado como mesmo padrao |
+| 2026-10-04 | CONTRATO_PEDIDO sobre "capability ON_SITE" para #182: **cancelado** — attendance_mode=TOWING, gate capability nao roda. Nao emitir | Retirado antes de virar contrato |
+| 2026-10-04 | diag-B-018c: #182 expirado (`diff=-2237s`) + guincho 17 com `disponivel=0`. Capability descartada (`TOWING` + `service_type_id=NULL`). | Causa = operacao + janela. Sem bug de codigo |
+| 2026-10-04 | **B-005 FECHADO com evidencia visual**: pedido #183 apareceu como NOVA SOLICITACAO no /guincho/dashboard com countdown 29:28; atendimento carregado com rota, cliente e valor. `fix-B-11 v2` (toast+beep) funcionou | OK - nenhum diff de codigo nesta rodada |
+| 2026-10-04 | Observacao (nao bloqueia): 404 em `public/assets/vendor/leaflet-routing-machine/routing-icon.png` referenciado por `leaflet-routing-machine.css`. Icone de manobra fica vazio. Dono decide: adicionar ao bundle ou incluir na fila D10 | Pendente decisao do dono |

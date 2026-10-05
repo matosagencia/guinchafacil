@@ -320,4 +320,59 @@ class CancelamentoService
 
         return ['ok' => true, 'erro' => null, 'penalidade_reputacao' => $penalidade];
     }
+    // --- Cancelamento pela OFICINA ---
+    public static function cancelarPorOficina(int $pedidoId, int $oficinaId, string $motivo = ''): array
+    {
+        $pdo = getPDO();
+        $cfg = Configuracao::getAll();
+        $penalidade = (float)($cfg['penalidade_reputacao_cancelamento_oficina'] ?? 0.25);
+
+        try {
+            $pdo->beginTransaction();
+            $stmt = $pdo->prepare("SELECT * FROM pedidos WHERE id = ?" . self::lockClause($pdo));
+            $stmt->execute([$pedidoId]);
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$row || (int)($row['oficina_id'] ?? 0) !== $oficinaId) {
+                $pdo->rollBack();
+                return ['ok' => false, 'erro' => 'Pedido nao encontrado ou nao pertence a voce.', 'penalidade_reputacao' => 0.0];
+            }
+            if (!in_array((string)$row['status'], ['oficina_aceitou', 'oficina_a_caminho'], true)) {
+                $pdo->rollBack();
+                return ['ok' => false, 'erro' => 'So e possivel cancelar antes de chegar ao local. Fale com o suporte.', 'penalidade_reputacao' => 0.0];
+            }
+            $pdo->commit();
+        } catch (Throwable $e) {
+            if ($pdo->inTransaction()) $pdo->rollBack();
+            error_log('[CancelamentoService::cancelarPorOficina] ' . $e->getMessage());
+            return ['ok' => false, 'erro' => 'Erro interno ao cancelar.', 'penalidade_reputacao' => 0.0];
+        }
+
+        $tempoExp = (int)($cfg['tempo_expiracao_min'] ?? 5);
+        $transition = PedidoTransitionService::requeueByOficina($pedidoId, $oficinaId, $oficinaId, $motivo, $tempoExp, $penalidade);
+        if (!$transition->ok) {
+            return ['ok' => false, 'erro' => $transition->error, 'penalidade_reputacao' => 0.0];
+        }
+
+        AuditTrailService::evento('atendimento_cancelado_oficina', 'CancelamentoService', 'cancelarPorOficina', [
+            'pedido_id' => $pedidoId, 'oficina_id' => $oficinaId,
+            'penalidade_reputacao' => $penalidade, 'motivo' => $motivo,
+        ]);
+
+        try {
+            $completo = Pedido::buscarPorId($pedidoId);
+            if ($completo) {
+                NotificacaoService::pedidoCancelado(
+                    $completo,
+                    ['nome' => $completo['cliente_nome'] ?? '', 'email' => $completo['cliente_email'] ?? ''],
+                    'A oficina precisou cancelar o atendimento. Seu pedido voltou para a fila - sem custo adicional para voce.',
+                    false
+                );
+            }
+        } catch (Throwable $e) {
+            error_log('[CancelamentoService] Falha notificando cliente: ' . $e->getMessage());
+        }
+
+        return ['ok' => true, 'erro' => null, 'penalidade_reputacao' => $penalidade];
+    }
 }

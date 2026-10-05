@@ -248,7 +248,6 @@ $rotas = [
 
     'GET' => [
         // === ROUTES OFICINA GET ===
-        '/oficina/pedido/{id}/aceitar'   => ['OficinaController', 'aceitar',             'oficina'],
         '/oficina/pedido/{id}/status'    => ['OficinaController', 'statusJson',          'oficina'],
         '/oficina/pedido/{id}'           => ['OficinaController', 'atendimento',         'oficina'],
         '/oficina/arquivo/{nome}'        => ['OficinaController', 'servirFoto',          'oficina'],
@@ -322,6 +321,8 @@ $rotas = [
 
         '/guincho/dashboard'  => ['GuinchoController', 'dashboard', 'guincho'],
         '/guincho/pedidos-disponiveis' => ['GuinchoController', 'pedidosDisponiveis', 'guincho'],
+        '/oficina/pedidos-disponiveis' => ['OficinaController', 'pedidosDisponiveis', 'oficina'],
+
         '/guincho/pedidos'    => ['GuinchoController', 'pedidosDisponiveis', 'guincho'],
         '/guincho/historico'  => ['GuinchoController', 'historico', 'guincho'],
         '/guincho/financeiro' => ['GuinchoController', 'financeiro', 'guincho'],
@@ -339,13 +340,6 @@ $rotas = [
         '/especialista/atendimento/{id}/status' => ['EspecialistaController', 'transicionar', 'especialista'],
         '/guincho/tornar-se-guincho' => ['GuinchoController', 'tornarSeGuincho', 'guincho'],
         
-        // ——— OFICINA —————————————————————————————————————————————
-        '/oficina/pedido/{id}'           => ['OficinaController', 'atendimento', 'oficina'],
-        '/oficina/pedido/{id}/aceitar'   => ['OficinaController', 'aceitar', 'oficina'],
-        '/oficina/pedido/{id}/status'    => ['OficinaController', 'statusJson', 'oficina'],
-
-        // ——— OFICINA —————————————————————————————————————————————
-
         '/admin/central'             => ['AdminController', 'centralOperacional', 'admin'],
         '/admin/alertas'             => ['AdminController', 'alertasOperacionais', 'admin'],
         '/admin/despacho'            => ['AdminController', 'despacho', 'admin'],
@@ -466,6 +460,8 @@ $rotas = [
     ],
 
     'POST' => [
+    
+    '/oficina/pedido/{id}/cancelar' => ['OficinaController', 'cancelarAtendimento', 'oficina'],
         '/admin/pedido/novo/contexto' => ['AdminController', 'pedidoNovoContexto', 'admin'],
                 '/admin/pedido/novo/api/cliente' => ['AdminController', 'pedidoNovoApiClienteCriar', 'admin'],
         '/admin/pedido/novo/api/veiculo' => ['AdminController', 'pedidoNovoApiVeiculoCriar', 'admin'],
@@ -478,6 +474,7 @@ $rotas = [
         '/oficina/recusar/{id}'           => ['OficinaController', 'recusar',             'oficina'],
         '/oficina/pedido/{id}/evidencia'  => ['OficinaController', 'registrarEvidencia',  'oficina'],
         '/oficina/pedido/{id}/orcamento'  => ['OficinaController', 'enviarOrcamento',     'oficina'],
+        '/oficina/pedido/{id}/aceitar'    => ['OficinaController', 'aceitar',             'oficina'],
         '/cliente/pedido/{id}/orcamento-oficina/responder' => ['ClienteController', 'responderOrcamentoOficina', 'cliente'],
 
         '/pre-cotacao'      => ['AuthController', 'preCotacao', null],
@@ -494,12 +491,6 @@ $rotas = [
         '/registro/cliente'       => ['AuthController', 'registroCliente', null],
         '/registro/guincho'       => ['AuthController', 'registroGuincho', null],
         
-        // ——— OFICINA —————————————————————————————————————————————
-        '/oficina/pedido/{id}/atualizar'  => ['OficinaController', 'atualizarStatus',     'oficina'],
-        '/oficina/recusar/{id}'           => ['OficinaController', 'recusar',             'oficina'],
-        '/oficina/pedido/{id}/evidencia'  => ['OficinaController', 'registrarEvidencia',  'oficina'],
-        '/oficina/pedido/{id}/orcamento'  => ['OficinaController', 'enviarOrcamento',     'oficina'],
-        '/cliente/pedido/{id}/orcamento-oficina/responder'=> ['ClienteController', 'responderOrcamentoOficina', 'cliente'],
         
         '/registro/especialista'  => ['AuthController', 'registroEspecialista', null],
         '/especialista/atendimento/aceitar/' => ['EspecialistaController', 'aceitar', 'especialista'],
@@ -747,6 +738,31 @@ $controller = null; $action = null; $perfil = null; $id = null;
 if (isset($rotas[$metodo][$uri])) {
     [$controller, $action, $perfil] = $rotas[$metodo][$uri];
 } else {
+    // Match por template: {id} -> digitos, {nome} -> [\w.-]+
+    // Resolve rotas dinamicas registradas em $rotas[METODO].
+    // So roda se $controller ainda for null; fallbacks abaixo intactos.
+    foreach ($rotas[$metodo] as $template => $target) {
+        if (strpos($template, '{') === false) continue;
+        // Placeholders ANTES do preg_quote; named groups para distinguir id/nome
+        $regex = str_replace(['{id}', '{nome}'], ["\x01", "\x02"], $template);
+        $regex = preg_quote($regex, '~');
+        $regex = str_replace(
+            ["\x01", "\x02"],
+            ['(?P<id>\d+)', '(?P<nome>[\w.-]+)'],
+            $regex
+        );
+        if (preg_match('~^' . $regex . '$~', $uri, $m)) {
+            [$controller, $action, $perfil] = $target;
+            if (isset($m['id']) && $m['id'] !== '') {
+                $id = (int)$m['id'];
+            } elseif (isset($m['nome']) && $m['nome'] !== '') {
+                $id = $m['nome'];
+            } else {
+                $id = null;
+            }
+            break;
+        }
+    }
     // Página local SEO: somente o slug de cidade é dinâmico; dashboards têm
     // rotas explícitas e continuam sendo resolvidos antes desta regra.
     if ($controller === null && in_array($metodo, ['GET', 'POST'], true)

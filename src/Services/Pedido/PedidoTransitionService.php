@@ -1285,5 +1285,79 @@ final class PedidoTransitionService
 
         return "DATE_ADD(NOW(), INTERVAL " . $minutes . " MINUTE)";
     }
+    public static function requeueByOficina(int $pedidoId, int $oficinaId, int $actorId, string $justificativa, int $expMin, float $penalidadeReputacao = 0.0): PedidoTransitionResult
+    {
+        $pdo = getPDO();
+        try {
+            $pdo->beginTransaction();
+            $stmtPedido = $pdo->prepare("SELECT * FROM pedidos WHERE id = ?" . self::lockClause($pdo));
+            $stmtPedido->execute([$pedidoId]);
+            $pedido = $stmtPedido->fetch(PDO::FETCH_ASSOC);
+
+            if (!$pedido) {
+                $pdo->rollBack();
+                return PedidoTransitionResult::failure('Pedido nao encontrado.');
+            }
+            if ((int)($pedido['oficina_id'] ?? 0) !== $oficinaId) {
+                $pdo->rollBack();
+                return PedidoTransitionResult::failure('Pedido nao pertence a esta oficina.');
+            }
+            if (!in_array((string)$pedido['status'], ['oficina_aceitou', 'oficina_a_caminho'], true)) {
+                $pdo->rollBack();
+                return PedidoTransitionResult::failure('So e possivel cancelar antes de chegar ao local.');
+            }
+
+            $attendanceMode = (string)($pedido['attendance_mode'] ?? 'TOWING');
+            $statusFila = 'aguardando_guincho';
+            if ($attendanceMode === 'ON_SITE' || $attendanceMode === 'HYBRID') {
+                $statusFila = 'aguardando_oficina';
+            }
+
+            $pdo->prepare("
+                UPDATE pedidos
+                   SET status = ?, oficina_id = NULL, motivo_cancelamento = ?, expiracao_aceite = ?
+                 WHERE id = ?
+            ")->execute([
+                $statusFila,
+                mb_substr('[oficina] ' . $justificativa, 0, 255),
+                date('Y-m-d H:i:s', strtotime("+{$expMin} minutes")),
+                $pedidoId,
+            ]);
+
+            if ($penalidadeReputacao > 0) {
+                try {
+                    $pdo->prepare("
+                        UPDATE oficinas
+                           SET total_cancelamentos = total_cancelamentos + 1,
+                               reputacao = GREATEST(0, reputacao - ?)
+                         WHERE id = ?
+                    ")->execute([$penalidadeReputacao, $oficinaId]);
+                } catch (Throwable $eRep) {
+                    Logger::exception(__CLASS__, __FUNCTION__, 'requeue_oficina_reputacao', $eRep, [
+                        'pedido_id' => $pedidoId, 'oficina_id' => $oficinaId,
+                    ]);
+                }
+            }
+
+            self::registrarCancelamentoAuditado($pdo, $pedidoId, 'oficina', $actorId, $justificativa, (string)$pedido['status'], $penalidadeReputacao);
+            $pdo->commit();
+
+            AuditTrailService::evento('pedido_reenfileirado_oficina', __CLASS__, __FUNCTION__, [
+                'pedido_id' => $pedidoId, 'actor_type' => 'oficina', 'actor_id' => $actorId,
+                'oficina_id' => $oficinaId, 'event_code' => 'ORD-REQ-OFI-001',
+                'status_anterior' => $pedido['status'], 'status_novo' => $statusFila,
+            ]);
+
+            return PedidoTransitionResult::success(Pedido::buscarPorId($pedidoId) ?? $pedido, [
+                'status_anterior' => $pedido['status'], 'status_novo' => $statusFila,
+            ]);
+        } catch (Throwable $e) {
+            if ($pdo->inTransaction()) { $pdo->rollBack(); }
+            Logger::exception(__CLASS__, __FUNCTION__, 'requeue_oficina', $e, [
+                'pedido_id' => $pedidoId, 'oficina_id' => $oficinaId, 'actor_id' => $actorId,
+            ]);
+            return PedidoTransitionResult::failure('Erro interno ao devolver o pedido para a fila.');
+        }
+    }
 }
 

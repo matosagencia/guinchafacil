@@ -8,8 +8,7 @@
       <span class="tow-offer-eyebrow"><i class="fas fa-bolt me-1"></i>Nova solicitação</span>
       <h4 class="tow-offer-title">Pedido #<?= (int)$p['id'] ?></h4>
       <p class="tow-offer-subtitle mb-0">
-        <?= htmlspecialchars((string)($p['tipo_problema'] ?? 'Socorro')) ?> ·
-        <?= htmlspecialchars(mb_substr((string)($p['endereco_origem'] ?? ''), 0, 60)) ?>
+        <?= htmlspecialchars((string)($p['tipo_problema'] ?? 'Socorro')) ?>
       </p>
     </div>
     <?php if (!empty($p['expira_em'])): ?>
@@ -39,8 +38,11 @@
         <i class="fas fa-xmark me-1"></i>Recusar
       </button>
     </form>
-    <a href="<?= $bp ?>/oficina/pedido/<?= (int)$p['id'] ?>/aceitar" class="btn btn-success flex-grow-1">
-      <i class="fas fa-check me-1"></i>Aceitar
-    </a>
+        <form method="post" action="<?= $bp ?>/oficina/pedido/<?= (int)$p['id'] ?>/aceitar" class="flex-grow-1 m-0">
+      <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken) ?>">
+      <button type="submit" class="btn btn-success w-100">
+        <i class="fas fa-check me-1"></i>Aceitar
+      </button>
+    </form>
   </div>
 </div>

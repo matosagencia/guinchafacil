@@ -1501,7 +1501,8 @@ class AdminController extends BaseController
         $clienteId   = (int)($_POST['cliente_id']   ?? 0);
         $veiculoId   = (int)($_POST['veiculo_id']   ?? 0);
         $guinchoId   = (int)($_POST['guincho_id']   ?? 0) ?: null;
-        $tipo        = $_POST['tipo_problema'] ?? 'outro';
+        $tipoRaw     = trim((string)($_POST['tipo_problema'] ?? ''));
+        $tipo        = $tipoRaw !== '' ? $tipoRaw : 'outro';
         $descricao   = trim((string)($_POST['descricao'] ?? ''));
         $numeroOrigem = trim((string)($_POST['numero_origem'] ?? ''));
         $numeroDestino = trim((string)($_POST['numero_destino'] ?? ''));
@@ -1515,8 +1516,11 @@ class AdminController extends BaseController
         );
         $latOrigem  = (float)($_POST['lat_origem']  ?? -23.5505);
         $lngOrigem  = (float)($_POST['lng_origem']  ?? -46.6333);
-        $latDestino = (float)($_POST['lat_destino'] ?? -23.5505);
-        $lngDestino = (float)($_POST['lng_destino'] ?? -46.6333);
+        // Modo "local" (assistencia) nao passa pelo estagio destino. Sem
+// coordenadas validas, PedidoCoreService rejeita (0,0). Envia null
+// para pular a checagem de destino - o motor so exige destino em reboque.
+$latDestino = ($_POST['lat_destino'] ?? '') !== '' ? (float)$_POST['lat_destino'] : null;
+$lngDestino = ($_POST['lng_destino'] ?? '') !== '' ? (float)$_POST['lng_destino'] : null;
 
         $veiculo = $veiculoId > 0 ? Veiculo::buscarPorId($veiculoId) : null;
 
@@ -1680,8 +1684,42 @@ class AdminController extends BaseController
                 return;
             }
 
+            // CONTRATO-LINK-EXTERNO (2026-10-04): consome 'link_externo' que a
+            // Faixa A passa a devolver em Pagamento::aplicarDestinoPagamento()
+            // para destino='online'. Se ausente, cai no 'link' interno com
+            // aviso de que o cliente precisa estar autenticado para pagar.
+            $linkExterno = isset($resPag['link_externo']) ? trim((string)$resPag['link_externo']) : '';
+            $linkInterno = isset($resPag['link'])         ? trim((string)$resPag['link'])         : '';
+            $msgOnline = '';
+
+            if ($destinoPag === 'online') {
+                if ($linkExterno !== '') {
+                    $msgOnline = 'Pedido #' . $pedidoId . ' criado. Link do gateway (copie e envie ao cliente): ' . $linkExterno;
+                    $linkUsado = $linkExterno;
+                    $linkEhExterno = true;
+                } elseif ($linkInterno !== '') {
+                    $msgOnline = 'Pedido #' . $pedidoId . ' criado. Link interno: ' . $linkInterno
+                               . ' - o cliente precisa entrar na conta dele para pagar.';
+                    $linkUsado = $linkInterno;
+                    $linkEhExterno = false;
+                } else {
+                    $msgOnline = 'Pedido #' . $pedidoId . ' criado, mas o gateway nao retornou link de pagamento.'
+                               . ' Abra o pedido para investigar ou tente reenviar a operacao.';
+                    $linkUsado = '';
+                    $linkEhExterno = false;
+                }
+
+                $_SESSION['admin_link_pagamento_gerado'] = [
+                    'pedido_id' => $pedidoId,
+                    'link'      => $linkUsado,
+                    'externo'   => $linkEhExterno,
+                    'provedor'  => $provedorOnline,
+                    'criado_em' => time(),
+                ];
+            }
+
             $msgMap = [
-                'online'          => 'Pedido #' . $pedidoId . ' criado. Envie este link ao cliente: ' . (string)($resPag['link'] ?? ''),
+                'online'          => $msgOnline !== '' ? $msgOnline : ('Pedido #' . $pedidoId . ' criado.'),
                 'pago_agora'      => 'Pedido #' . $pedidoId . ' criado com baixa manual registrada.',
                 'pago_na_chegada' => 'Pedido #' . $pedidoId . ' criado. Cobranca combinada com o cliente.',
                 'sem_cobranca'    => 'Pedido #' . $pedidoId . ' criado com isencao registrada.',

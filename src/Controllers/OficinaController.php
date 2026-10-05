@@ -60,32 +60,39 @@ class OficinaController extends BaseController
         if (empty($oficina['latitude']) || empty($oficina['longitude'])) {
             return [];
         }
-        $raio = (int)($oficina['raio_atendimento_km'] ?? $raioPadrao);
-        $pdo = getPDO();
+        $raio = (float)($oficina['raio_atendimento_km'] ?? $raioPadrao);
 
-        $stmt = $pdo->prepare(
-            "SELECT * FROM pedidos
-             WHERE status IN ('aguardando_guincho','aguardando_oficina')
-               AND oficina_id IS NULL
-               AND lat_origem IS NOT NULL AND lng_origem IS NOT NULL
-             ORDER BY criado_em DESC LIMIT 50"
+        // Fonte unica: Pedido::listarFilaElegivelParaOficina (contrato A->B).
+        // Inclui expiracao_aceite > NOW() e JOINs de cliente/veiculo que a
+        // versao anterior (SQL inline) nao tinha.
+        $pedidos = Pedido::listarFilaElegivelParaOficina(
+            (float)$oficina['latitude'],
+            (float)$oficina['longitude'],
+            $raio
         );
-        $stmt->execute();
-        $candidatos = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
 
-        $proximos = [];
-        foreach ($candidatos as $p) {
-            $dist = GeoService::haversine(
-                (float)$oficina['latitude'],  (float)$oficina['longitude'],
-                (float)$p['lat_origem'],      (float)$p['lng_origem']
-            );
-            if ($dist <= $raio) {
-                $p['distancia_km'] = round($dist, 2);
-                $proximos[] = $p;
-            }
+        // Compat com _offer_card.php: distancia_oficina_km -> distancia_km
+        foreach ($pedidos as &$p) {
+            $p['distancia_km'] = $p['distancia_oficina_km'] ?? null;
         }
-        usort($proximos, fn($a, $b) => $a['distancia_km'] <=> $b['distancia_km']);
-        return $proximos;
+        unset($p);
+
+        // Preserva ordem "mais perto primeiro" da versao anterior.
+        usort($pedidos, static fn(array $a, array $b): int =>
+            ((float)($a['distancia_km'] ?? PHP_FLOAT_MAX))
+            <=> ((float)($b['distancia_km'] ?? PHP_FLOAT_MAX))
+        );
+
+        // Recusados e' estado de sessao de B — filtro vive aqui.
+        $recusados = $_SESSION['oficina_recusados'] ?? [];
+        if (!empty($recusados) && is_array($recusados)) {
+            $pedidos = array_values(array_filter(
+                $pedidos,
+                static fn(array $p): bool => !isset($recusados[(int)$p['id']])
+            ));
+        }
+
+        return $pedidos;
     }
 
     public function pedidosDisponiveis(): void
@@ -102,6 +109,11 @@ class OficinaController extends BaseController
     // --- ACEITAR ---
     public function aceitar(int $id): void
     {
+        if (!AuthService::validarCsrfToken($_POST['csrf_token'] ?? '')) {
+            http_response_code(403);
+            $this->setFlashMessage('Sessao expirada. Tente novamente.', 'error');
+            $this->redirect('/oficina/dashboard');
+        }
         $oficina = $this->getOficina();
         $pedido = Pedido::buscarPorId($id);
         if (!$pedido) {
@@ -130,6 +142,47 @@ class OficinaController extends BaseController
             $this->setFlashMessage('Erro ao aceitar pedido.', 'error');
             $this->redirect('/oficina/dashboard');
         }
+    }
+
+    // --- CANCELAR (post) ---
+    /**
+     * Espelha GuinchoController::cancelarAtendimento. Sempre JSON.
+     * Regras de negócio vivem em CancelamentoService::cancelarPorOficina.
+     */
+    public function cancelarAtendimento(int $id): void
+    {
+        header('Content-Type: application/json; charset=UTF-8');
+        header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+
+        if (!AuthService::validarCsrfToken((string)($_POST['csrf_token'] ?? ''))) {
+            http_response_code(403);
+            echo json_encode(['ok' => false, 'erro' => 'Token inválido.', 'penalidade_reputacao' => 0], JSON_UNESCAPED_UNICODE);
+            exit;
+        }
+
+        $oficina = $this->getOficina();
+        $motivo = trim((string)($_POST['motivo'] ?? ''));
+        if ($motivo === '') {
+            http_response_code(422);
+            echo json_encode(['ok' => false, 'erro' => 'Informe o motivo do cancelamento.', 'penalidade_reputacao' => 0], JSON_UNESCAPED_UNICODE);
+            exit;
+        }
+
+        require_once __DIR__ . '/../Services/CancelamentoService.php';
+        try {
+            $resultado = CancelamentoService::cancelarPorOficina($id, (int)$oficina['id'], $motivo);
+            http_response_code($resultado['ok'] ? 200 : 409);
+            echo json_encode([
+                'ok' => (bool)$resultado['ok'],
+                'erro' => $resultado['erro'],
+                'penalidade_reputacao' => (float)($resultado['penalidade_reputacao'] ?? 0.0),
+            ], JSON_UNESCAPED_UNICODE);
+        } catch (Throwable $e) {
+            error_log('[OficinaController][cancelarAtendimento] ' . $e->getMessage());
+            http_response_code(500);
+            echo json_encode(['ok' => false, 'erro' => 'Erro interno ao cancelar.', 'penalidade_reputacao' => 0], JSON_UNESCAPED_UNICODE);
+        }
+        exit;
     }
 
     // --- ATENDIMENTO ---
@@ -608,9 +661,7 @@ class OficinaController extends BaseController
     public function pedidosPage(): void
     {
         $oficina = $this->getOficina();
-        $todos = $this->buscarPedidosProximos($oficina);
-        $recusados = $_SESSION['oficina_recusados'] ?? [];
-        $pedidos = array_values(array_filter($todos, fn($p) => !isset($recusados[(int)$p['id']])));
+        $pedidos = $this->buscarPedidosProximos($oficina);
         $csrfToken = AuthService::gerarCsrfToken();
         require __DIR__ . '/../Views/oficina/pedidos.php';
     }

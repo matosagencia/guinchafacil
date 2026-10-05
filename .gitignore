@@ -1,4 +1,4 @@
-﻿.backup-admin-payment-destination/
+.backup-admin-payment-destination/
 fix-B-*.ps1
 fix-A-*.ps1
 fix-C-*.ps1
@@ -11,3 +11,12 @@ test-results/
 !.env.example
 *.bak-*
 *.bak_*
+
+# --- _archive / .bak* ---
+_archive/
+*.bak*
+index.php.bak-*
+.patch-backup-*/
+.backup-*/
+patch-a-*.ps1
+.fix-B-*.ps1

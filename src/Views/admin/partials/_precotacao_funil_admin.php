@@ -244,12 +244,12 @@ $adminCtx = $adminCtx ?? [];
     <input type="hidden" name="lng_origem" value="">
     <input type="hidden" name="localizacao" value="">
     <input type="hidden" name="numero_origem" value="">
-    <input type="hidden" name="lat_destino" value="">
-    <input type="hidden" name="lng_destino" value="">
+    <input type="hidden" name="lat_destino" id="lat_destino" value="">
+<input type="hidden" name="lng_destino" id="lng_destino" value="">
     <input type="hidden" name="destino" value="">
     <input type="hidden" name="numero_destino" value="">
     <input type="hidden" name="categoria" value="popular">
-    <input type="hidden" name="tipo_problema" value="">
+    <input type="hidden" name="tipo_problema" value="outro">
     <input type="hidden" name="decisao_atendimento" value="">
     <input type="hidden" name="valor_cotado" value="">
 </form>
@@ -257,6 +257,22 @@ $adminCtx = $adminCtx ?? [];
 <script<?php echo function_exists('csp_script_nonce_attr') ? csp_script_nonce_attr() : '' ?>>
 (function () {
     'use strict';
+
+    // Propaga a confirmacao do address-picker (role=destino) para os
+    // hidden inputs lat_destino/lng_destino. Sem isso o POST envia
+    // strings vazias, o AdminController converte para (0.0, 0.0) e
+    // o PedidoCoreService rejeita com 'Coordenadas de destino fora
+    // do limite aceito.'
+    document.addEventListener('gf:address-confirmed', function (ev) {
+        var d = (ev && ev.detail) || {};
+        if (d.role !== 'destino') return;
+        var lat = document.getElementById('lat_destino');
+        var lng = document.getElementById('lng_destino');
+        if (!lat || !lng) return;
+        if (d.lat != null) lat.value = d.lat;
+        if (d.lng != null) lng.value = d.lng;
+    });
+
     var wrap = document.getElementById('provedorOnlineWrap');
     var radios = document.querySelectorAll('input[name="destino_pagamento"]');
     if (!wrap || !radios.length) return;

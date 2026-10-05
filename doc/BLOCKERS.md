@@ -81,3 +81,52 @@ ja exibe os 7 campos, mas mostra "-" nos que nao existem.
       por_que: a UI da B ja consome os 7 campos; todos aparecem como "-"
       criterio_de_aceite: pedido origem_funil=oficina grava os 6 campos;
                           admin/pedido/{id} exibe sem "-" (exceto nulos legitimos)
+                        
+## BLOCKER B-005 — Alerta de novo pedido nao dispara no dashboard do guincho
+Data: 2026-10-04
+Faixa: B
+Status: ATIVO — investigacao
+Sintoma: pedido criado com status aguardando_guincho nao gera alerta visual no dashboard do guincho logado.
+Ja verificado:
+  - rota /guincho/pedidos-disponiveis existe (index.php L324 -> GuinchoController::pedidosDisponiveis)
+  - status gravado pelo ClienteController (L963) == filtro do controller (L68)
+  - dashboard JA tem poll 45s + SSE (dashboard.php L1620, L1646, L1698)
+Hipotese atual: handler de "novos" no JS nao dispara toast/beep; SSE desligado por toggle; ou estado "vistos" persistido.
+Aguardando: saida do diag-B-11-v2.
+**CAUSA RAIZ CONFIRMADA (2026-10-04, sessao 4):**
+
+Nao era bug de codigo. O front-end (fix-B-11 v2) estava correto. O backend
+(`GuinchoController::pedidosDisponiveis()` + `montarOfertasDisponiveis()`)
+estava correto. Os 4 gates do metodo passavam para o pedido #173:
+  - attendance_mode = TOWING (gate A OK)
+  - reboque_aprovado do guincho = 1 (gate A OK)
+  - service_type_id NULL -> gate C nem entra
+  - distancia_km = 2.553 << raio_cobertura_km = 50 (gate de raio OK)
+
+O pedido simplesmente **expirou**. `Pedido::listarAguardandoGuincho()`
+(L387-425) filtra por `AND p.expiracao_aceite > NOW()`. O pedido #173 foi
+criado as 13:24:25 com `expiracao_aceite = 13:54:25` (30 min de janela).
+As observacoes do HAR foram feitas entre 15:52Z e 16:26Z UTC — ou seja,
+~2h depois da janela de aceite ter fechado. Fila legitimamente vazia.
+
+**Efeitos colaterais identificados (nao bloqueiam o alerta):**
+
+1. `status` do pedido permanece `aguardando_guincho` mesmo apos a janela
+   expirar. `/admin/pedido/173` mostra "Aguardando Guincho" quando ja nao
+   esta. Ninguem move o status para `expirado`. UX enganosa.
+   -> CONTRATO_PEDIDO emitido para Faixa A (recomendacoes R1/R2).
+
+2. `Pedido::listarAguardandoGuincho()` nao tem fallback para
+   `expiracao_aceite IS NULL` (o `>` com NULL retorna NULL = falso).
+   Qualquer pedido com a coluna NULL fica invisivel pra sempre.
+   -> mesma CONTRATO_PEDIDO.
+
+3. `tipo_problema` do pedido #173 veio **vazio** (string ""), o que e
+   anomalo — deveria vir da pre-cotacao ou do funil admin. O
+   `listarAguardandoGuincho()` nao filtra por isso, entao nao foi a
+   causa do alerta nao tocar. Mas e dado sujo.
+   -> investigacao paralela Faixa B, nao bloqueia B-005.
+
+**Teste de validacao (retroativo):** criar pedido novo, abrir o
+`/guincho/dashboard` em ate 30 min, e confirmar beep + toast verde.
+Se o alerta disparar, B-005 esta realmente fechado.
