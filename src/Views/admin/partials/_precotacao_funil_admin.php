@@ -250,7 +250,7 @@ $adminCtx = $adminCtx ?? [];
     <input type="hidden" name="numero_destino" value="">
     <input type="hidden" name="categoria" value="popular">
     <input type="hidden" name="tipo_problema" value="outro">
-    <input type="hidden" name="decisao_atendimento" value="">
+<input type="hidden" name="decisao_atendimento" id="decisao_atendimento" value="">
     <input type="hidden" name="valor_cotado" value="">
 </form>
 
