@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/../Models/Configuracao.php';
+require_once __DIR__ . '/../Models/Pedido.php';
 require_once __DIR__ . '/GeoService.php';
 require_once __DIR__ . '/Logger.php';
 
@@ -80,24 +81,26 @@ final class DecisaoAtendimentoService
 
         $payload = [
             'opcoes_disponiveis' => ['assistencia', 'reboque'],
-            'opcao_assistencia' => [
+            'opcao_assistencia' => $this->comporOpcaoFinanceira([
                 'disponivel' => true,
                 'profissionais_proximos' => count($oficinas),
                 'distancia_km' => round($distanciaOficina, 1),
                 'custo_saida' => $custoAssistencia,
                 'mensagem' => 'Um profissional vai ate voce. Voce paga apenas a saida dele.',
-            ],
-            'opcao_reboque' => [
+            ], 'custo_saida', 'comissao_assistencia_percentual'),
+            'opcao_reboque' => $this->comporOpcaoFinanceira([
                 'distancia_ate_oficina_km' => round($distanciaOficina, 1),
                 'custo_total' => $custoReboque,
                 'mensagem' => 'Vamos levar seu veiculo ate a oficina mais proxima.',
-            ],
+            ], 'custo_total', 'comissao_reboque_percentual'),
             'recomendacao' => $recomendacao,
             'justificativa' => $justificativa,
             'desconto_fallback_percentual' => $this->descontoPercentual(),
             'oficina_mais_proxima' => $this->formatarOficina($oficinaMaisProxima),
             'oficinas_encontradas' => array_map(fn($o) => $this->formatarOficina($o), $oficinas),
         ];
+
+        $this->persistirSnapshotBruto($pedidoId, $payload);
 
         Logger::log(Logger::LEVEL_INFO, __CLASS__, __FUNCTION__, 'decisao_atendimento', 'Comparativo calculado.', [
             'tipo_problema' => $tipo, 'recomendacao' => $recomendacao,
@@ -110,19 +113,81 @@ final class DecisaoAtendimentoService
     private function somenteReboque(int $pedidoId, string $tipo, float $distancia, string $motivo, ?array $oficina = null): array
     {
         if ($distancia <= 0.5) $distancia = 5.0; // nunca zerar
-        return [
+        $custoReboque = $this->calcularReboque($distancia);
+        $payload = [
             'opcoes_disponiveis' => ['reboque'],
             'opcao_assistencia' => ['disponivel' => false],
-            'opcao_reboque' => [
+            'opcao_reboque' => $this->comporOpcaoFinanceira([
                 'distancia_ate_oficina_km' => round($distancia, 1),
-                'custo_total' => $this->calcularReboque($distancia),
+                'custo_total' => $custoReboque,
                 'mensagem' => 'Vamos levar seu veiculo ate a oficina mais proxima.',
-            ],
+            ], 'custo_total', 'comissao_reboque_percentual'),
             'recomendacao' => 'reboque',
             'justificativa' => $motivo,
             'desconto_fallback_percentual' => $this->descontoPercentual(),
             'oficina_mais_proxima' => $oficina ? $this->formatarOficina($oficina) : null,
         ];
+        $this->persistirSnapshotBruto($pedidoId, $payload);
+        return $payload;
+    }
+
+    /**
+     * FINANCIAL-SNAPSHOT-v1
+     * O motor e a fonte exclusiva dos valores do provider. Aceita configuracao
+     * percentual em escala decimal (0.21) ou humana (21), mas sempre devolve
+     * valores monetarios arredondados a dois decimais.
+     *
+     * @param array<string,mixed> $opcao
+     * @return array<string,mixed>
+     */
+    private function comporOpcaoFinanceira(array $opcao, string $campoBruto, string $chaveComissao): array
+    {
+        $bruto = round(max(0.0, (float)($opcao[$campoBruto] ?? 0.0)), 2);
+        $percentual = $this->comissaoPercentual($chaveComissao);
+        $liquido = round($bruto * (1.0 - $percentual), 2);
+        $comissao = round($bruto - $liquido, 2);
+
+        $opcao[$campoBruto . '_bruto'] = $bruto;
+        $opcao['custo_provider_liquido'] = $liquido;
+        $opcao['comissao_valor'] = $comissao;
+        $opcao['comissao_percentual'] = $percentual;
+
+        return $opcao;
+    }
+
+    private function comissaoPercentual(string $chave): float
+    {
+        $fallback = (float)Configuracao::get('comissao_assistencia_percentual', '0.21');
+        $raw = (float)Configuracao::get($chave, (string)$fallback);
+        $percentual = $raw > 1.0 ? $raw / 100.0 : $raw;
+
+        return max(0.0, min(1.0, $percentual));
+    }
+
+    /** @param array<string,mixed> $decisao */
+    private function persistirSnapshotBruto(int $pedidoId, array $decisao): void
+    {
+        if ($pedidoId <= 0) {
+            return;
+        }
+
+        $assistencia = $decisao['opcao_assistencia'] ?? [];
+        $reboque = $decisao['opcao_reboque'] ?? [];
+        $custoAssistencia = !empty($assistencia['disponivel'])
+            ? (float)($assistencia['custo_saida_bruto'] ?? $assistencia['custo_saida'] ?? 0.0)
+            : null;
+        $custoReboque = !empty($reboque)
+            ? (float)($reboque['custo_total_bruto'] ?? $reboque['custo_total'] ?? 0.0)
+            : null;
+
+        if (!Pedido::registrarSnapshotCustos($pedidoId, $custoAssistencia, $custoReboque)) {
+            Logger::log(Logger::LEVEL_INFO, __CLASS__, __FUNCTION__, 'financial_snapshot',
+                'Snapshot bruto nao gravado. Confirme a migration contract_pedido_financial_snapshot_v1.', [
+                    'pedido_id' => $pedidoId,
+                    'custo_assistencia' => $custoAssistencia,
+                    'custo_reboque' => $custoReboque,
+                ]);
+        }
     }
 
     private function calcularAssistencia(?array $oficina = null): float

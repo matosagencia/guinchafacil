@@ -183,6 +183,12 @@ class Pagamento
             'sem_cobranca' => 'pagamento_isento',
         ];
 
+        // FINANCIAL-FILA-01: somente destinos que dispensam aprovacao online liberam a fila.
+        // A promocao abaixo e guardada para nunca reabrir ou regredir outro status.
+        $statusDestinoFila = in_array($destino, ['pago_agora', 'pago_na_chegada', 'sem_cobranca'], true)
+            ? 'aguardando_guincho'
+            : null;
+
         if (!isset($eventos[$destino])) {
             self::logErr($method, 'validate', 'Destino financeiro invÃ¡lido.', ['pedido_id' => $pedidoId, 'destino' => $destino]);
             return ['ok' => false, 'erro' => 'Destino financeiro invÃ¡lido.', 'link' => null, 'evento' => '', 'pagamento_id' => null];
@@ -209,7 +215,7 @@ class Pagamento
                 $pdo->beginTransaction();
             }
             $lock = $pdo->getAttribute(PDO::ATTR_DRIVER_NAME) === 'sqlite' ? '' : ' FOR UPDATE';
-            $stmt = $pdo->prepare('SELECT id, custo_estimado, forma_pagamento_escolhida, provedor_pagamento_escolhido, pagamento_destino_evento FROM pedidos WHERE id = :id' . $lock);
+            $stmt = $pdo->prepare('SELECT id, status, custo_estimado, forma_pagamento_escolhida, provedor_pagamento_escolhido, pagamento_destino_evento FROM pedidos WHERE id = :id' . $lock);
             $stmt->execute([':id' => $pedidoId]);
             $pedido = $stmt->fetch(PDO::FETCH_ASSOC);
             if (!$pedido) {
@@ -221,6 +227,12 @@ class Pagamento
             $provedorExistente = strtolower(trim((string)($pedido['provedor_pagamento_escolhido'] ?? '')));
             if ($escolhaExistente !== '') {
                 if ($escolhaExistente === $destino && $provedorExistente === (string)($provedor ?? '')) {
+                    // Corrige pedido legado que recebeu o destino financeiro, mas ficou na fila de pagamento.
+                    // Nao cria pedido_eventos adicional e nao altera status que ja saiu de aguardando_pagamento.
+                    if ($statusDestinoFila !== null && (string)($pedido['status'] ?? '') === 'aguardando_pagamento') {
+                        $pdo->prepare("UPDATE pedidos SET status = :status_destino WHERE id = :id AND status = 'aguardando_pagamento'")
+                            ->execute([':status_destino' => $statusDestinoFila, ':id' => $pedidoId]);
+                    }
                     if ($started) {
                         $pdo->commit();
                     }
@@ -260,8 +272,19 @@ class Pagamento
                 'pagamento_id' => $pagamentoId,
             ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR);
 
-            $pdo->prepare('UPDATE pedidos SET forma_pagamento_escolhida = :destino, provedor_pagamento_escolhido = :provedor, pagamento_destino_admin_id = :admin_id, pagamento_destino_registrado_em = NOW(), pagamento_destino_evento = :evento WHERE id = :id')
-                ->execute([':destino' => $destino, ':provedor' => $provedor, ':admin_id' => $adminId, ':evento' => $evento, ':id' => $pedidoId]);
+            $setsPedido = 'forma_pagamento_escolhida = :destino, provedor_pagamento_escolhido = :provedor, pagamento_destino_admin_id = :admin_id, pagamento_destino_registrado_em = NOW(), pagamento_destino_evento = :evento';
+            $paramsPedido = [
+                ':destino' => $destino,
+                ':provedor' => $provedor,
+                ':admin_id' => $adminId,
+                ':evento' => $evento,
+                ':id' => $pedidoId,
+            ];
+            if ($statusDestinoFila !== null) {
+                $setsPedido .= ", status = CASE WHEN status = 'aguardando_pagamento' THEN :status_destino ELSE status END";
+                $paramsPedido[':status_destino'] = $statusDestinoFila;
+            }
+            $pdo->prepare('UPDATE pedidos SET ' . $setsPedido . ' WHERE id = :id')->execute($paramsPedido);
             $pdo->prepare('INSERT INTO pedido_eventos (pedido_id, evento, context_json) VALUES (:pedido_id, :evento, :context_json)')
                 ->execute([':pedido_id' => $pedidoId, ':evento' => $evento, ':context_json' => $contexto]);
 

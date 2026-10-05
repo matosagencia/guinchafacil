@@ -3,9 +3,38 @@
 // Alinhado com schema real: tipo_problema, custo_estimado, expiracao_aceite
 // pedidos.guincho_id → guinchos.id (FK está errada no SQL mas usamos guinchos.id)
 
-class Pedido {
-
-    /** Cria pedido (cliente) */
+class Pedido {
+
+    /**
+     * FINANCIAL-SNAPSHOT-v1: os campos armazenam somente o valor bruto
+     * apresentado ao cliente. COALESCE torna o snapshot de criacao imutavel
+     * diante de uma nova avaliacao do mesmo pedido.
+     */
+    public static function registrarSnapshotCustos(int $pedidoId, ?float $custoAssistencia, ?float $custoReboque): bool
+    {
+        if ($pedidoId <= 0) {
+            return false;
+        }
+
+        try {
+            $stmt = getPDO()->prepare(
+                'UPDATE pedidos\n'
+                . 'SET custo_assistencia = COALESCE(custo_assistencia, :custo_assistencia),\n'
+                . '    custo_reboque = COALESCE(custo_reboque, :custo_reboque)\n'
+                . 'WHERE id = :id'
+            );
+            return $stmt->execute([
+                ':custo_assistencia' => $custoAssistencia === null ? null : round(max(0.0, $custoAssistencia), 2),
+                ':custo_reboque' => $custoReboque === null ? null : round(max(0.0, $custoReboque), 2),
+                ':id' => $pedidoId,
+            ]);
+        } catch (Throwable $e) {
+            error_log('[Pedido::registrarSnapshotCustos][phase=update][pedido_id=' . $pedidoId . '] ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    /** Cria pedido (cliente) */
     public static function criar(array $dados): int|false
     {
         try {
@@ -243,8 +272,8 @@ class Pedido {
     }
 
     /** Lista pedidos aguardando guincho (para exibir aos guinchos disponíveis) */
-    public static function listarAguardandoGuincho(): array
-    {
+    public static function listarAguardandoGuincho(): array
+    {
         try {
             $stmt = getPDO()->query(
                 "SELECT p.*,
@@ -261,10 +290,77 @@ class Pedido {
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
             error_log("Pedido::listarAguardandoGuincho: " . $e->getMessage()); return [];
-        }
-    }
-
-    /** Lista paginada para admin com filtros */
+        }
+    }
+
+    /**
+     * OFICINA-FILA-01: fonte única da oferta de atendimento para o painel
+     * da oficina. A controller não consulta pedidos diretamente.
+     *
+     * @return array<int,array<string,mixed>>
+     */
+    public static function listarFilaElegivelParaOficina(float $latitude, float $longitude, float $raioKm): array
+    {
+        $method = __METHOD__;
+        if ($latitude === 0.0 || $longitude === 0.0 || $raioKm <= 0.0) {
+            error_log('[' . $method . '][phase=validate] coordenadas ou raio invalidos.');
+            return [];
+        }
+
+        try {
+            $pdo = getPDO();
+            $agora = (string)$pdo->getAttribute(PDO::ATTR_DRIVER_NAME) === 'sqlite'
+                ? "datetime('now')"
+                : 'NOW()';
+            $stmt = $pdo->prepare(
+                "SELECT p.*,\n"
+                . "       c.nome AS cliente_nome, c.telefone AS cliente_telefone,\n"
+                . "       v.placa, v.marca, v.modelo, v.cor\n"
+                . "FROM pedidos p\n"
+                . "JOIN usuarios c ON c.id = p.cliente_id\n"
+                . "JOIN veiculos v ON v.id = p.veiculo_id\n"
+                . "WHERE p.status IN ('aguardando_guincho', 'aguardando_oficina')\n"
+                . "  AND p.expiracao_aceite > {$agora}\n"
+                . "  AND p.oficina_id IS NULL\n"
+                . "  AND p.lat_origem IS NOT NULL\n"
+                . "  AND p.lng_origem IS NOT NULL\n"
+                . "ORDER BY p.criado_em ASC"
+            );
+            $stmt->execute();
+            $pedidos = [];
+            foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $pedido) {
+                $distanciaKm = self::distanciaKm(
+                    $latitude,
+                    $longitude,
+                    (float)$pedido['lat_origem'],
+                    (float)$pedido['lng_origem']
+                );
+                if ($distanciaKm > $raioKm) {
+                    continue;
+                }
+                $pedido['distancia_oficina_km'] = round($distanciaKm, 2);
+                $pedidos[] = $pedido;
+            }
+
+            return $pedidos;
+        } catch (Throwable $e) {
+            error_log('[' . $method . '][phase=select] ' . $e->getMessage());
+            return [];
+        }
+    }
+
+    private static function distanciaKm(float $lat1, float $lng1, float $lat2, float $lng2): float
+    {
+        $terraKm = 6371.0088;
+        $latDelta = deg2rad($lat2 - $lat1);
+        $lngDelta = deg2rad($lng2 - $lng1);
+        $a = sin($latDelta / 2) ** 2
+            + cos(deg2rad($lat1)) * cos(deg2rad($lat2)) * sin($lngDelta / 2) ** 2;
+
+        return $terraKm * (2 * atan2(sqrt($a), sqrt(max(0.0, 1.0 - $a))));
+    }
+
+    /** Lista paginada para admin com filtros */
     public static function listarPorStatus(string $status = '', int $pagina = 1, array $filtros = [], int $por_pagina = 50): array
     {
         try {

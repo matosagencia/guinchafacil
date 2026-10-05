@@ -22,6 +22,9 @@
     var DEBUG = true;
     var API = (window.__gfBasePath || '').replace(/\/$/, '') + '/api/pre-cotacao';
 
+    var OPTS = window.__gfFlowOptions || {};
+    var VEHICLE_CATEGORIES = ['popular', 'moto', 'suv', 'caminhonete', 'eletrico'];
+
     function log() {
         if (!DEBUG) return;
         var args = Array.prototype.slice.call(arguments);
@@ -134,11 +137,19 @@
         var modo = btn.getAttribute('data-mode');
         STATE.modo = modo;
         log('modo ->', modo);
-        if (modo === 'levar_carro') {
-            showStage('veiculo');
-        } else {
-            showStage('veiculo'); // triagem de servico agora acontece DEPOIS do veiculo
+        var categoriaInformada = String(OPTS.veiculoCategoria || '').toLowerCase();
+        if (OPTS.skipVeiculo === true && VEHICLE_CATEGORIES.indexOf(categoriaInformada) !== -1) {
+            STATE.veiculo = categoriaInformada;
+            $$('[data-categoria]').forEach(function (b) {
+                b.classList.toggle('is-selected', b.getAttribute('data-categoria') === categoriaInformada);
+            });
+            log('vehicle preset ->', categoriaInformada);
+            showStage('sintoma');
+            carregarTriagemServico();
+            return;
         }
+        // Invalid or missing category keeps the manual vehicle selection.
+        showStage('veiculo');
     });
 
     // ----------------------------------------------------------------
@@ -348,27 +359,53 @@
         if (d.role !== 'destino') return;
         log('destino confirmado', d);
         STATE.destino = d;
-        apiGet('/opcoes', {
-            modo: 'reboque',
-            lat: STATE.endereco.lat,
-            lng: STATE.endereco.lng,
+
+        function carregarCotacaoReboque() {
+            apiGet('/opcoes', {
+                modo: 'reboque',
+                lat: STATE.endereco.lat,
+                lng: STATE.endereco.lng,
+                lat_destino: d.lat,
+                lng_destino: d.lng,
+            }).then(function (j) {
+                if (j && j.ok && j.data && j.data.disponivel && j.data.valor_reboque != null) {
+                    STATE.valorCotado = j.data.valor_reboque;
+                } else {
+                    STATE.valorCotado = null;
+                }
+                preencherHiddenFields('reboque');
+                showStage('cotacao');
+            }).catch(function (e) {
+                log('erro cotacao reboque', e);
+                STATE.valorCotado = null;
+                preencherHiddenFields('reboque');
+                showStage('cotacao');
+            });
+        }
+
+        if (OPTS.consultarReboques !== true) {
+            carregarCotacaoReboque();
+            return;
+        }
+
+        apiGet('/reboques-proximos', {
+            lat_origem: STATE.endereco.lat,
+            lng_origem: STATE.endereco.lng,
             lat_destino: d.lat,
             lng_destino: d.lng,
+            categoria: STATE.veiculo || 'popular'
         }).then(function (j) {
-            if (j && j.ok && j.data && j.data.disponivel && j.data.valor_reboque != null) {
-                STATE.valorCotado = j.data.valor_reboque;
-            } else {
-                STATE.valorCotado = null;
-            }
-            preencherHiddenFields('reboque');
-            showStage('cotacao');
-        }).catch(function () {
-            STATE.valorCotado = null;
-            preencherHiddenFields('reboque');
-            showStage('cotacao');
+            STATE.reboquesDisponiveis = (j && j.ok && j.data && j.data.guinchos) || [];
+        }).catch(function (e) {
+            log('erro consulta reboques proximos', e);
+            STATE.reboquesDisponiveis = [];
+        }).then(function () {
+            document.dispatchEvent(new CustomEvent('gf:reboques-loaded', {
+                detail: { guinchos: STATE.reboquesDisponiveis }
+            }));
+            carregarCotacaoReboque();
         });
     });
-
     // ----------------------------------------------------------------
     // Submissao final
     // ----------------------------------------------------------------
