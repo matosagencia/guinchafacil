@@ -1540,6 +1540,84 @@ $lngDestino = ($_POST['lng_destino'] ?? '') !== '' ? (float)$_POST['lng_destino'
         $dificilAcesso   = isset($_POST['local_dificil_acesso'])  ? (int)!!$_POST['local_dificil_acesso']  : null;
         $garagemSubsolo  = isset($_POST['em_garagem_subsolo'])    ? (int)!!$_POST['em_garagem_subsolo']    : null;
 
+
+        // =============================================================
+        // [B-GUARD-01] Defesa de cobertura — CONTRATO_PEDIDO B->A
+        //
+        // Aguardando a Faixa A entregar:
+        //
+        //   GuinchoDisponibilidade::existeNoRaio(
+        //       float  $lat,
+        //       float  $lng,
+        //       ?string $categoria = null,
+        //       ?float  $raioKm    = null
+        //   ): bool
+        //
+        // Enquanto esse metodo nao existir, este bloco fica inativo.
+        // Quando A entregar, substituir o comentario abaixo por:
+        //
+        //     if (!GuinchoDisponibilidade::existeNoRaio(
+        //             $latOrigem, $lngOrigem, null, null
+        //         )) {
+        //         $_SESSION['_flash'][] = [
+        //             'message' => 'Nenhum guincho disponivel no raio agora. '
+        //                        . 'O pedido NAO foi criado — nao queremos '
+        //                        . 'que o cliente espere por um prestador '
+        //                        . 'que nao vira.',
+        //             'type' => 'error',
+        //         ];
+        //         $this->redirect('/admin/pedido/novo/funil');
+        //         return;
+        //     }
+        // =============================================================
+
+        // -------------------------------------------------------------
+        // [B-GUARD-02] Reboque sem cotacao valida -> rejeita
+        //
+        // O public-pre-cotacao-flow.js popula o hidden 'valor_cotado'
+        // SOMENTE quando a API /api/pre-cotacao/opcoes retorna
+        // disponivel=true E valor_reboque != null. Se a decisao foi
+        // 'reboque' mas o valor_cotado veio vazio, significa que o
+        // front-end NAO autorizou a cotacao — logo, nao ha guincho
+        // apto. Nao criamos o pedido.
+        // -------------------------------------------------------------
+        $decisaoPost     = strtolower(trim((string)($_POST['decisao_atendimento'] ?? '')));
+        $valorCotadoPost = trim((string)($_POST['valor_cotado'] ?? ''));
+
+        if ($decisaoPost === 'reboque' && $valorCotadoPost === '') {
+            error_log(sprintf(
+                '[AdminController::pedidoCriar][B-GUARD-02] Rejeitado: decisao=reboque sem valor_cotado. cliente_id=%d veiculo_id=%d',
+                $clienteId,
+                $veiculoId
+            ));
+            $_SESSION['_flash'][] = [
+                'message' => 'Nao foi possivel criar o pedido: nenhum guincho disponivel no raio de atendimento agora. '
+                           . 'Aguarde alguns minutos ou tente outro destino.',
+                'type' => 'error',
+            ];
+            $this->redirect('/admin/pedido/novo/funil');
+            return;
+        }
+
+        // -------------------------------------------------------------
+        // [B-GUARD-03] Reboque sem destino -> rejeita
+        //
+        // PedidoCoreService ja rejeita (0,0) no destino, mas aqui damos
+        // uma mensagem legivel ao admin em vez de erro tecnico.
+        // -------------------------------------------------------------
+        if ($decisaoPost === 'reboque'
+            && ($latDestino === null || $lngDestino === null)) {
+            error_log(sprintf(
+                '[AdminController::pedidoCriar][B-GUARD-03] Rejeitado: decisao=reboque sem lat/lng destino. cliente_id=%d',
+                $clienteId
+            ));
+            $_SESSION['_flash'][] = [
+                'message' => 'Nao foi possivel criar o pedido: o destino do reboque nao foi informado.',
+                'type' => 'error',
+            ];
+            $this->redirect('/admin/pedido/novo/funil');
+            return;
+        }
         $actorId = (int)($_SESSION['usuario_id'] ?? 0);
 
         // §UNIFY-FLOWS: cria pelo motor único, igual ao pre-cotação e ao

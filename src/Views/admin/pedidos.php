@@ -669,5 +669,87 @@ AdminOrderWorkspace.init({
     ); ?>/public/assets/vendor/bootstrap/js/bootstrap.bundle.min.js"
 ></script>
 
+
+<dialog id="modal-link-pagamento" class="gf-dlg" aria-labelledby="gf-dlg-title">
+    <form method="dialog">
+        <h3 id="gf-dlg-title">Link de pagamento</h3>
+        <p class="gf-dlg-sub" id="gf-dlg-sub"></p>
+        <div class="gf-dlg-row">
+            <input type="text" id="gf-dlg-url" readonly>
+            <button type="button" class="gf-dlg-btn" id="gf-dlg-copy">Copiar</button>
+        </div>
+        <div class="gf-dlg-actions">
+            <a id="gf-dlg-wa" class="gf-dlg-btn gf-dlg-btn-wa" href="#" target="_blank" rel="noopener">Enviar no WhatsApp</a>
+            <button type="submit" class="gf-dlg-btn gf-dlg-btn-close">Fechar</button>
+        </div>
+    </form>
+</dialog>
+
+<style>
+dialog.gf-dlg{border:0;border-radius:12px;padding:0;max-width:560px;width:92vw;box-shadow:0 12px 40px rgba(0,0,0,.25)}
+dialog.gf-dlg::backdrop{background:rgba(0,0,0,.45)}
+dialog.gf-dlg form{padding:22px 24px;display:flex;flex-direction:column;gap:12px;margin:0}
+dialog.gf-dlg h3{margin:0;font-size:1.15rem}
+.gf-dlg-sub{margin:0;font-size:.85rem;color:#5b6a76}
+.gf-dlg-row{display:flex;gap:8px}
+.gf-dlg-row input{flex:1;padding:9px 11px;border:1px solid #cfd6de;border-radius:8px;font:inherit;background:#f8fafb;color:#111}
+.gf-dlg-btn{padding:9px 16px;border-radius:8px;border:1px solid #cfd6de;background:#fff;cursor:pointer;font:inherit;font-weight:600;text-decoration:none;color:#111}
+.gf-dlg-btn:hover{border-color:#2fb34a;color:#1f7a34}
+.gf-dlg-actions{display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap;margin-top:4px}
+.gf-dlg-btn-wa{background:#25d366;border-color:#25d366;color:#fff}
+.gf-dlg-btn-wa:hover{background:#1eb257;border-color:#1eb257;color:#fff}
+.gf-dlg-btn-close{background:#2fb34a;border-color:#2fb34a;color:#fff}
+.gf-dlg-btn-close:hover{background:#248f3a;border-color:#248f3a;color:#fff}
+</style>
+
+<script<?php echo csp_script_nonce_attr(); ?>>
+(function () {
+    'use strict';
+    <?php if (!empty($_SESSION['admin_link_pagamento_gerado'])):
+        $lf = $_SESSION['admin_link_pagamento_gerado'];
+        unset($_SESSION['admin_link_pagamento_gerado']);
+    ?>
+    var GF_LINK = <?php echo json_encode([
+        'pedido_id' => (int)($lf['pedido_id'] ?? 0),
+        'link'      => (string)($lf['link'] ?? ''),
+        'externo'   => (bool)($lf['externo'] ?? false),
+        'provedor'  => (string)($lf['provedor'] ?? ''),
+    ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES); ?>;
+
+    document.addEventListener('DOMContentLoaded', function () {
+        var dlg = document.getElementById('modal-link-pagamento');
+        if (!dlg || !GF_LINK.link) return;
+
+        var urlEl = document.getElementById('gf-dlg-url');
+        var subEl = document.getElementById('gf-dlg-sub');
+        var waEl  = document.getElementById('gf-dlg-wa');
+        var copyBtn = document.getElementById('gf-dlg-copy');
+
+        urlEl.value = GF_LINK.link;
+        subEl.textContent = GF_LINK.externo
+            ? 'Pedido #' + GF_LINK.pedido_id + ' - link do gateway ' + (GF_LINK.provedor || '') + '.'
+            : 'Pedido #' + GF_LINK.pedido_id + ' - link interno. O cliente precisa entrar na conta dele para pagar.';
+
+        waEl.href = 'https://wa.me/?text=' + encodeURIComponent(
+            'Pedido #' + GF_LINK.pedido_id + ' - pague aqui: ' + GF_LINK.link
+        );
+
+        copyBtn.addEventListener('click', function () {
+            urlEl.select();
+            urlEl.setSelectionRange(0, 99999);
+            var ok = false;
+            try { ok = document.execCommand('copy'); } catch (e) {}
+            if (navigator.clipboard && !ok) {
+                try { navigator.clipboard.writeText(GF_LINK.link); ok = true; } catch (e2) {}
+            }
+            copyBtn.textContent = ok ? 'Copiado!' : 'Falha';
+            setTimeout(function () { copyBtn.textContent = 'Copiar'; }, 1500);
+        });
+
+        dlg.showModal();
+    });
+    <?php endif; ?>
+})();
+</script>
 </body>
 </html>

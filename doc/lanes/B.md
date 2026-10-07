@@ -90,7 +90,8 @@ A faixa B **não escreve** os testes da própria faixa (R5).
 | Fronteira `CheckoutController::cliente` (A) × `/checkout/cliente` (B) | Decisão D9 pendente |
 | Arquivos sem faixa | Decisão D10 pendente |
 | Pasta `docs/` × `doc/` | Decisão D3 pendente |
-
+| **B-GUARD-01 ativação** | Aguardando merge do PR #1 da Faixa A. Depois do merge, substituir o bloco comentado em `AdminController.php:1545` pela chamada real `GuinchoDisponibilidade::existeNoRaio($latOrigem, $lngOrigem)`. |
+| **Permission denied em `src/Models/Pedido.php`** | Ativo — ver `docs/BLOCKERS.md` B-006. Afeta cron `cron_cancelar_pedidos_expirados.php`, não o fluxo interativo. |
 Ao terminar uma entrega: atualizar este arquivo (estado, contratos, pendências) e parar.
 
 ## 8. Histórico
@@ -128,3 +129,5 @@ Ao terminar uma entrega: atualizar este arquivo (estado, contratos, pendências)
 | 2026-10-04 | Listener `gf:address-confirmed` + `id=` nos hidden em `_precotacao_funil_admin.php` | OK |
 | 2026-10-04 | `decisao_atendimento` movida para dentro de `context` do `PedidoCreateRequest` | OK — #185 com `attendance_mode=ON_SITE`, `lat_destino=NULL` |
 | 2026-10-04 | Arquivamento de 274 `.bak` + 31 zumbis em `_archive/` + bloco `.gitignore` (D6) | OK — commits `4ed2bf4`, `d42dc34`, `639c1b8` |
+| 2026-10-06 | fix-B-guard-reboque.ps1 — defesa em profundidade no AdminController::pedidoCriar | OK — 78 linhas adicionadas em `src/Controllers/AdminController.php`, 0 removidas. B-GUARD-02 disparou 5× em teste real (php_errors.log), nenhum pedido criado. Backup: `AdminController.php.bak-20261006-215749`. |
+| 2026-10-06 | CONTRATO_PEDIDO B→A entregue pelo ChatGPT via PR #1 | OK — Faixa A criou `src/Services/GuinchoDisponibilidade.php` + corrigiu `PreCotacaoOpcoesService.php` (modo=reboque não consulta mais oficinas). Documentado em `doc/CONTRATOS.md` §Contrato de Disponibilidade de Guincho (B→A). |
