@@ -166,3 +166,59 @@ null # quando destino != online
 - Chama o metodo de A e trata os 4 retornos.
 - Redireciona para `/admin/pedido/{id}?criado=1` com flash contextual.
 - Interface da Etapa 1 nao permite escolher provedor desabilitado.
+
+
+## Contrato de Disponibilidade de Guincho (B -> A)
+
+**Status:** implementado pela Faixa A em 2026-10-06.  
+**Dono:** Faixa A (dispatch/cobertura). **Consumidores:** Faixa B (AdminController) e Faixa C (testes).
+
+### Metodo publico
+
+```php
+GuinchoDisponibilidade::existeNoRaio(
+    float $lat,
+    float $lng,
+    ?string $categoria = null,
+    ?float $raioKm = null
+): bool
+```
+
+### Semantica
+
+Retorna `true` somente quando existe pelo menos um prestador apto a receber um atendimento de **reboque/TOWING** nas coordenadas informadas.
+
+O gate pre-pedido exige:
+
+1. `aprovado = 1`;
+2. `disponivel = 1`;
+3. `reboque_aprovado = 1`;
+4. `lat_atual/lng_atual` validos;
+5. nenhum pedido ativo concorrente do mesmo guincho em `a_caminho|no_local|em_reboque`;
+6. distancia dentro de `MIN(raio_cobertura_km, raio_maximo_km global, raioKm opcional)`.
+
+O metodo e **read-only**: nao cria pedido, nao altera estado e nao grava evento/log de pedido. Em erro de banco/configuracao, retorna `false` (fail closed).
+
+### Limites do contrato pre-pedido
+
+- `expiracao_aceite` pertence ao pedido e so existe depois da criacao; portanto nao e aplicavel a esta consulta pre-pedido.
+- `categoria` esta reservada para compatibilidade veicular pre-pedido. O motor atual de compatibilidade usa snapshot ligado a `pedido_id`; a Faixa A nao inventa um gate diferente antes de o pedido existir.
+
+### Integracao de pre-cotacao
+
+`PreCotacaoOpcoesService::montar()`, quando `modo=reboque`, consulta **somente** `GuinchoDisponibilidade::existeNoRaio()` antes de calcular cotacao. Nao consulta oficinas neste modo.
+
+Sem guincho apto, a resposta e:
+
+```json
+{
+  "modo": "reboque",
+  "disponivel": false,
+  "fallback_tipo": "suporte",
+  "mensagem": "Nenhum guincho disponível na sua região agora."
+}
+```
+
+Com guincho apto, retorna `disponivel:true` e `valor_reboque`.
+
+A defesa da Faixa B antes de `PedidoCoreService::criar()` permanece obrigatoria e nao deve ser removida.
