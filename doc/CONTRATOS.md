@@ -234,3 +234,30 @@ Quando nao existir oficina/especialista apto para o servico solicitado:
 Essa regra vale para `modo=orientacao` e `modo=local`.
 
 O front-end `public-pre-cotacao-flow.js` ja interpreta `fallback_tipo="guincho"` exibindo o botao **Quero rebocar**. A Faixa A deve fornecer apenas a semantica correta no payload.
+
+
+## Contrato de Persistencia de tipo_problema (B -> A)
+
+**Status:** implementado pela Faixa A em 2026-10-07.  
+**Dono:** Faixa A (`PedidoCoreService` / `Pedido`). **Consumidores:** Faixa B (AdminController) e Faixa C (testes).
+
+### Regra
+
+Quando a criacao receber `tipo_problema` nao vazio, o valor deve ser persistido integralmente em `pedidos.tipo_problema`.
+
+Exemplos:
+
+- fluxo direto de reboque: `tipo_problema = "reboque"`;
+- fluxo por servico: `tipo_problema = <slug do servico>`.
+
+A coluna `pedidos.tipo_problema` e `VARCHAR(80)`, e nao ENUM, porque o catalogo de servicos e extensivel. Isso impede que MySQL/MariaDB em modo permissivo converta silenciosamente slugs novos para string vazia.
+
+Como defesa adicional:
+
+- `PedidoQuoteRequest` normaliza valor vazio para `outro`;
+- `Pedido::criar()` e `Pedido::criarCompleto()` nunca gravam string vazia;
+- valores historicos vazios nao sao inferidos/backfillados automaticamente.
+
+### Criterio
+
+`tipo_problema="reboque"` deve ser lido como `reboque` apos o INSERT. Nenhum pedido novo criado pelos fluxos atuais deve persistir `tipo_problema = ''`.
