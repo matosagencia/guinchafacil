@@ -38,7 +38,11 @@ class Pedido {
     public static function criar(array $dados): int|false
     {
         try {
-            $pdo = getPDO();
+            $pdo = getPDO();
+            $tipoProblema = trim((string)($dados['tipo_problema'] ?? ''));
+            if ($tipoProblema === '') {
+                $tipoProblema = 'outro';
+            }
             // DATE_ADD/INTERVAL é sintaxe MySQL; sob o SQLite usado pelos testes
             // de integração (tests/bootstrap.php) isso quebrava silenciosamente
             // (capturado pelo catch abaixo como "Falha ao criar pedido no banco").
