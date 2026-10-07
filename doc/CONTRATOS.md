@@ -25,6 +25,20 @@ CONTRATO_PEDIDO:
   o_que_preciso: <campo, método ou comportamento>
   por_que: <uma linha>
   criterio_de_aceite: <como saber que ficou pronto>
+  ## Contrato de Disponibilidade de Guincho (B → A)
+
+**Status:** entregue por A em 2026-10-06 (PR #1, branch própria, commit `main`).
+**Dono da escrita:** A (`src/Services/GuinchoDisponibilidade.php` + `src/Services/PreCotacao/PreCotacaoOpcoesService.php`). **Consumidores:** B (`AdminController::pedidoCriar`), C (cenários E2E).
+
+### Método entregue
+
+```php
+GuinchoDisponibilidade::existeNoRaio(
+    float  $lat,
+    float  $lng,
+    ?string $categoria = null,
+    ?float  $raioKm    = null
+): bool
 ```
 
 O agente emite o bloco e **para essa parte da tarefa**. O dono decide e atualiza este arquivo.

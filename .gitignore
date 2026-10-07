@@ -24,3 +24,7 @@ patch-a-*.ps1
 # --- storage/ (runtime, nao versionado) ---
 storage/*.log
 storage/*.txt
+
+chaves.dev.txt
+*.pre-rollback-*
+logs/
