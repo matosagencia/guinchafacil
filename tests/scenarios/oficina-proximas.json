@@ -1,0 +1,76 @@
+{
+  "name": "oficina-proximas",
+  "lane": "C",
+  "owned_by": "A",
+  "tested_by": "C",
+  "scenarios": {
+    "T1_oficina_elegivel": {
+      "dado": {
+        "provider_ativo": true,
+        "unidade_elegivel_raio": true,
+        "lat": -22.9068,
+        "lng": -43.1729
+      },
+      "esperado": {
+        "http_status": 200,
+        "oficina_elegivel": true
+      }
+    },
+    "T2_fora_do_raio": {
+      "dado": {
+        "provider_ativo": true,
+        "unidade_elegivel_raio": false,
+        "lat": -22.7000,
+        "lng": -43.5000
+      },
+      "esperado": {
+        "http_status": 200,
+        "oficina_elegivel": false
+      }
+    },
+    "T3_unidade_inativa": {
+      "dado": {
+        "provider_ativo": false,
+        "unidade_elegivel_raio": false,
+        "lat": -22.9068,
+        "lng": -43.1729
+      },
+      "esperado": {
+        "http_status": 200,
+        "oficina_elegivel": false
+      }
+    },
+    "T4_multiplas_unidades": {
+      "dado": {
+        "provider_id": 1,
+        "unidades": [
+          { "id": 101, "elegivel": true },
+          { "id": 102, "elegivel": false }
+        ]
+      },
+      "esperado": {
+        "http_status": 200,
+        "sem_duplicacao": true
+      }
+    }
+  },
+  "steps": [
+    {
+      "key": "test_t1_t4_api",
+      "node": "node-decisao",
+      "probe": {
+        "type": "ajax",
+        "method": "POST",
+        "url": "/api/pre-cotacao/decisao",
+        "expect_status": 200,
+        "expect_json_ok": true
+      }
+    }
+  ],
+  "guards": {
+    "admin_only": false,
+    "csrf_required": true,
+    "no_secrets_in_output": true,
+    "prefix_test_data": "E2E_"
+  }
+}
