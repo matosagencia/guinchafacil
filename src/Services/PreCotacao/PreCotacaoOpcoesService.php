@@ -11,7 +11,8 @@ require_once __DIR__ . '/../GuinchoDisponibilidade.php';
  *   - orientacao  → Cards A (assistência) + B (reboque). Fallback: guincho se tem,
  *                   senão WhatsApp suporte.
  *   - local       → Só Card A (sem comparação com reboque).
- *                   Fallback: SEMPRE WhatsApp suporte.
+ *                   Sem assistência: fallback para guincho se houver reboque apto,
+ *                   senão WhatsApp suporte.
  *   - reboque     → Retorna valor do reboque direto (usado no fluxo "levar o carro").
  *                   Fallback: SEMPRE WhatsApp suporte.
  */
@@ -65,7 +66,8 @@ final class PreCotacaoOpcoesService
                 return [
                     'modo' => 'local',
                     'disponivel' => false,
-                    'fallback_tipo' => 'suporte',
+                    'fallback_tipo' => $temGuincho ? 'guincho' : 'suporte',
+                    'taxa_base_reboque' => $taxaReboque,
                     'servico' => $slugServico,
                     'mensagem' => 'Nenhuma oficina para ' . $slugServico . ' na sua região.',
                 ];
