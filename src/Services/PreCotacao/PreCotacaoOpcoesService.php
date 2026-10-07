@@ -2,6 +2,7 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/../../Models/Configuracao.php';
+require_once __DIR__ . '/../GuinchoDisponibilidade.php';
 
 /**
  * Monta o payload de opções da pré-cotação v2.
@@ -27,13 +28,13 @@ final class PreCotacaoOpcoesService
         $modo = in_array($modo, ['orientacao', 'local', 'reboque'], true) ? $modo : 'orientacao';
         $slugServico = trim($slugServico);
 
-        $temGuincho = self::temGuinchoNoRaio($latOrigem, $lngOrigem);
-        $oficinas = self::oficinasParaServico($latOrigem, $lngOrigem, $slugServico);
-        $valorDeslocamento = self::valorDeslocamentoServico($slugServico);
         $taxaReboque = self::taxaBaseReboque();
 
         // ─── Modo REBOQUE (levar o carro) ───
+        // Retorno antecipado: este modo NÃO consulta oficinas. A fonte de
+        // verdade é a disponibilidade imediata de prestador de reboque.
         if ($modo === 'reboque') {
+            $temGuincho = GuinchoDisponibilidade::existeNoRaio($latOrigem, $lngOrigem);
             if (!$temGuincho) {
                 return [
                     'modo' => 'reboque',
@@ -52,6 +53,11 @@ final class PreCotacaoOpcoesService
                 'fallback_tipo' => null,
             ];
         }
+
+        // Só os modos de assistência consultam oficinas/especialistas.
+        $temGuincho = GuinchoDisponibilidade::existeNoRaio($latOrigem, $lngOrigem);
+        $oficinas = self::oficinasParaServico($latOrigem, $lngOrigem, $slugServico);
+        $valorDeslocamento = self::valorDeslocamentoServico($slugServico);
 
         // ─── Modo LOCAL (resolver no local) ───
         if ($modo === 'local') {
@@ -146,26 +152,6 @@ final class PreCotacaoOpcoesService
             + cos($lat1 * $rad) * cos($lat2 * $rad) * sin(($lng2 - $lng1) * $rad / 2) ** 2;
         $d = 6371.0 * 2 * asin(min(1.0, sqrt($a)));
         return max(0.5, round($d, 2));
-    }
-
-    private static function temGuinchoNoRaio(float $lat, float $lng): bool
-    {
-        try {
-            $stmt = getPDO()->query(
-                "SELECT lat_atual, lng_atual, COALESCE(raio_cobertura_km, 50) AS raio
-                   FROM guinchos
-                  WHERE aprovado = 1 AND disponivel = 1
-                    AND lat_atual IS NOT NULL AND lng_atual IS NOT NULL"
-            );
-            foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $g) {
-                $d = self::calcularDistancia($lat, $lng, (float)$g['lat_atual'], (float)$g['lng_atual']);
-                if ($d <= (float)$g['raio']) return true;
-            }
-            return false;
-        } catch (Throwable $e) {
-            error_log('[PreCotacaoOpcoesService::temGuinchoNoRaio] ' . $e->getMessage());
-            return false;
-        }
     }
 
     private static function oficinasParaServico(float $lat, float $lng, string $slug): array
