@@ -222,3 +222,15 @@ Sem guincho apto, a resposta e:
 Com guincho apto, retorna `disponivel:true` e `valor_reboque`.
 
 A defesa da Faixa B antes de `PedidoCoreService::criar()` permanece obrigatoria e nao deve ser removida.
+
+
+### Semantica de fallback em orientacao/local (2026-10-07)
+
+Quando nao existir oficina/especialista apto para o servico solicitado:
+
+- se `GuinchoDisponibilidade::existeNoRaio(...)` retornar `true`, a API deve retornar `fallback_tipo = "guincho"`;
+- se retornar `false`, a API deve retornar `fallback_tipo = "suporte"`.
+
+Essa regra vale para `modo=orientacao` e `modo=local`.
+
+O front-end `public-pre-cotacao-flow.js` ja interpreta `fallback_tipo="guincho"` exibindo o botao **Quero rebocar**. A Faixa A deve fornecer apenas a semantica correta no payload.
