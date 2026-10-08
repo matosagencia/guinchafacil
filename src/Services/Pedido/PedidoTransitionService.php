@@ -19,19 +19,19 @@ require_once __DIR__ . '/../Evidence/EvidenceService.php';
 require_once __DIR__ . '/../DebugMode.php';
 require_once __DIR__ . '/../GeoService.php';
 require_once __DIR__ . '/../../Models/Catalog/ProviderCapability.php';
-require_once __DIR__ . '/../Dispatch/ProviderVehicleCompatibilityService.php';
-require_once __DIR__ . '/../IncidenteService.php';
-require_once __DIR__ . '/../EspecialistaDispatchService.php';
-require_once __DIR__ . '/../EspecialistaPricingService.php';
-require_once __DIR__ . '/../IncidenteFinanceiroService.php';
-
+require_once __DIR__ . '/../Dispatch/ProviderVehicleCompatibilityService.php';
+require_once __DIR__ . '/../IncidenteService.php';
+require_once __DIR__ . '/../EspecialistaDispatchService.php';
+require_once __DIR__ . '/../EspecialistaPricingService.php';
+require_once __DIR__ . '/../IncidenteFinanceiroService.php';
+require_once __DIR__ . '/../ComissaoService.php';
 final class PedidoTransitionService
 {
-    public static function approvePayment(int $pedidoId, string $idExterno, string $payload = '', int $actorId = 0): PedidoTransitionResult
-    {
-        $pdo = getPDO();
-        $incidenteCriado = 0;
-        $codigoServicoEspecialista = '';
+    public static function approvePayment(int $pedidoId, string $idExterno, string $payload = '', int $actorId = 0): PedidoTransitionResult
+    {
+        $pdo = getPDO();
+        $incidenteCriado = 0;
+        $codigoServicoEspecialista = '';
         try {
             $pdo->beginTransaction();
             $stmt = $pdo->prepare("SELECT * FROM pedidos WHERE id = ?" . self::lockClause($pdo));
@@ -96,20 +96,20 @@ final class PedidoTransitionService
 
             Pagamento::aprovar((int)$pag['id'], $idExterno, $payload);
             Pagamento::atualizarSplit((int)$pag['id'], $valorGuincho, $valorPlataforma);
-            PayoutLedgerService::registrarSplitAprovado($pdo, (int)$pag['id'], $pedidoId, $valorGuincho, $valorPlataforma, $idExterno, $valorReservaGateway);
-
-            if ((string)($pedido['attendance_mode'] ?? '') === 'ON_SITE' && empty($pedido['incidente_id'])) {
-                $svc = (int)($pedido['service_type_id'] ?? 0);
-                $st = $svc > 0 ? $pdo->prepare('SELECT code FROM service_types WHERE id=? LIMIT 1') : null;
-                if ($st) { $st->execute([$svc]); $codigoServicoEspecialista = (string)($st->fetchColumn() ?: ''); }
-                $incidenteCriado = Incidente::criar([
-                    'cliente_id' => (int)$pedido['cliente_id'], 'veiculo_id' => (int)$pedido['veiculo_id'],
-                    'tipo_problema' => (string)$pedido['tipo_problema'], 'descricao_problema' => (string)$pedido['descricao_problema'],
-                    'lat_origem' => (float)$pedido['lat_origem'], 'lng_origem' => (float)$pedido['lng_origem'],
-                    'endereco_origem' => (string)$pedido['endereco_origem'], 'status' => 'procurando_especialista'
-                ], $pdo);
-                $pdo->prepare('UPDATE pedidos SET incidente_id=? WHERE id=?')->execute([$incidenteCriado, $pedidoId]);
-            }
+            PayoutLedgerService::registrarSplitAprovado($pdo, (int)$pag['id'], $pedidoId, $valorGuincho, $valorPlataforma, $idExterno, $valorReservaGateway);
+
+            if ((string)($pedido['attendance_mode'] ?? '') === 'ON_SITE' && empty($pedido['incidente_id'])) {
+                $svc = (int)($pedido['service_type_id'] ?? 0);
+                $st = $svc > 0 ? $pdo->prepare('SELECT code FROM service_types WHERE id=? LIMIT 1') : null;
+                if ($st) { $st->execute([$svc]); $codigoServicoEspecialista = (string)($st->fetchColumn() ?: ''); }
+                $incidenteCriado = Incidente::criar([
+                    'cliente_id' => (int)$pedido['cliente_id'], 'veiculo_id' => (int)$pedido['veiculo_id'],
+                    'tipo_problema' => (string)$pedido['tipo_problema'], 'descricao_problema' => (string)$pedido['descricao_problema'],
+                    'lat_origem' => (float)$pedido['lat_origem'], 'lng_origem' => (float)$pedido['lng_origem'],
+                    'endereco_origem' => (string)$pedido['endereco_origem'], 'status' => 'procurando_especialista'
+                ], $pdo);
+                $pdo->prepare('UPDATE pedidos SET incidente_id=? WHERE id=?')->execute([$incidenteCriado, $pedidoId]);
+            }
 
             $expMin = (int)($cfg['tempo_expiracao_min'] ?? 5);
             $raioInicial = (int)($cfg['raio_inicial_km'] ?? 10);
@@ -151,18 +151,18 @@ final class PedidoTransitionService
                 // pela capacidade do serviço original) e entra na fila com
                 // prazo/raio novos.
                 $pdo->prepare("
-                    UPDATE pedidos
-                       SET status = ?,
-                           attendance_mode = 'TOWING',
-                           guincho_id = NULL,
-                           expiracao_aceite = " . self::dateAddMinutesExpression($expMin) . ",
-                           raio_atual_km = ?
-                     WHERE id = ?
-                ")->execute([
-                    $statusNovo,
-                    $raioInicial,
-                    $pedidoId,
-                ]);
+                    UPDATE pedidos
+                       SET status = ?,
+                           attendance_mode = 'TOWING',
+                           guincho_id = NULL,
+                           expiracao_aceite = " . self::dateAddMinutesExpression($expMin) . ",
+                           raio_atual_km = ?
+                     WHERE id = ?
+                ")->execute([
+                    $statusNovo,
+                    $raioInicial,
+                    $pedidoId,
+                ]);
                 if ($guinchoHibridoId > 0) {
                     $pdo->prepare('UPDATE guinchos SET disponivel = 1 WHERE id = ?')->execute([$guinchoHibridoId]);
                 }
@@ -172,38 +172,38 @@ final class PedidoTransitionService
                 // ConversionService) permanecem intactos.
                 $pdo->prepare('UPDATE pedidos SET status = ? WHERE id = ?')->execute([$statusNovo, $pedidoId]);
             } else {
-                $pdo->prepare("
-                    UPDATE pedidos
-                       SET status = 'aguardando_guincho',
-                           expiracao_aceite = " . self::dateAddMinutesExpression($expMin) . ",
-                           raio_atual_km = ?
-                     WHERE id = ?
-                ")->execute([
-                    $raioInicial,
-                    $pedidoId,
-                ]);
-            }
+                $pdo->prepare("
+                    UPDATE pedidos
+                       SET status = 'aguardando_guincho',
+                           expiracao_aceite = " . self::dateAddMinutesExpression($expMin) . ",
+                           raio_atual_km = ?
+                     WHERE id = ?
+                ")->execute([
+                    $raioInicial,
+                    $pedidoId,
+                ]);
+            }
 
-            $pdo->commit();
-
-            if ($incidenteCriado > 0 && $codigoServicoEspecialista !== '') {
-                try {
-                    // O repasse é sempre recalculado sobre o valor efetivamente
-                    // pago pelo cliente (incluindo distância e adicional noturno).
-                    $repasseEspecialista = round((float)$total * 0.75, 2);
-                    $taxaEspecialista = round((float)$total - $repasseEspecialista, 2);
-                    IncidenteFinanceiroService::registrar($incidenteCriado, 'cobranca_cliente', 'pagamento', (int)$pag['id'], $total);
-                    IncidenteFinanceiroService::registrar($incidenteCriado, 'taxa_plataforma', 'pagamento', (int)$pag['id'], $taxaEspecialista);
-                    $atendimentoId = EspecialistaDispatchService::disparar($incidenteCriado, $codigoServicoEspecialista, $repasseEspecialista, $total, $taxaEspecialista);
-                    if ($atendimentoId) {
-                        IncidenteFinanceiroService::registrar($incidenteCriado, 'repasse_especialista', 'atendimento_especialista', $atendimentoId, $repasseEspecialista, 'pendente');
-                    } else {
-                        error_log('[EspecialistaDispatch] falha pós-pagamento: retorno nulo; pedido_id=' . $pedidoId . ' incidente_id=' . $incidenteCriado . ' service_code=' . $codigoServicoEspecialista);
-                    }
-                } catch (Throwable $dispatchError) {
-                    error_log('[EspecialistaDispatch] falha pós-pagamento: exceção; pedido_id=' . $pedidoId . ' incidente_id=' . $incidenteCriado . ' service_code=' . $codigoServicoEspecialista . ' erro=' . $dispatchError->getMessage());
-                }
-            }
+            $pdo->commit();
+
+            if ($incidenteCriado > 0 && $codigoServicoEspecialista !== '') {
+                try {
+                    // O repasse é sempre recalculado sobre o valor efetivamente
+                    // pago pelo cliente (incluindo distância e adicional noturno).
+                    $repasseEspecialista = round((float)$total * 0.75, 2);
+                    $taxaEspecialista = round((float)$total - $repasseEspecialista, 2);
+                    IncidenteFinanceiroService::registrar($incidenteCriado, 'cobranca_cliente', 'pagamento', (int)$pag['id'], $total);
+                    IncidenteFinanceiroService::registrar($incidenteCriado, 'taxa_plataforma', 'pagamento', (int)$pag['id'], $taxaEspecialista);
+                    $atendimentoId = EspecialistaDispatchService::disparar($incidenteCriado, $codigoServicoEspecialista, $repasseEspecialista, $total, $taxaEspecialista);
+                    if ($atendimentoId) {
+                        IncidenteFinanceiroService::registrar($incidenteCriado, 'repasse_especialista', 'atendimento_especialista', $atendimentoId, $repasseEspecialista, 'pendente');
+                    } else {
+                        error_log('[EspecialistaDispatch] falha pós-pagamento: retorno nulo; pedido_id=' . $pedidoId . ' incidente_id=' . $incidenteCriado . ' service_code=' . $codigoServicoEspecialista);
+                    }
+                } catch (Throwable $dispatchError) {
+                    error_log('[EspecialistaDispatch] falha pós-pagamento: exceção; pedido_id=' . $pedidoId . ' incidente_id=' . $incidenteCriado . ' service_code=' . $codigoServicoEspecialista . ' erro=' . $dispatchError->getMessage());
+                }
+            }
 
             AuditTrailService::evento('pagamento_aprovado_pedido', __CLASS__, __FUNCTION__, [
                 'pedido_id' => $pedidoId,
@@ -304,10 +304,10 @@ final class PedidoTransitionService
                 && !empty($pedido['guincho_id']);
 
             $params = [$request->targetStatus];
-            $sql = "UPDATE pedidos SET status = ?";
-
-            if ($request->targetStatus === 'recusado_solicitando_reboque') {
-                $sql .= ", attendance_mode = 'TOWING'";
+            $sql = "UPDATE pedidos SET status = ?";
+
+            if ($request->targetStatus === 'recusado_solicitando_reboque') {
+                $sql .= ", attendance_mode = 'TOWING'";
             }
             if ($request->targetStatus === 'em_reboque' && !empty($request->context['foto_plataforma'])) {
                 $sql .= ", foto_plataforma = ?";
@@ -317,7 +317,7 @@ final class PedidoTransitionService
                 $sql .= ", foto_destino = ?";
                 $params[] = (string)$request->context['foto_destino'];
             }
-            if ($liberarGuinchoAnterior) {
+            if ($request->targetStatus === 'concluido' && ComissaoService::schemaDisponivel($pdo)) {                $comissao = ComissaoService::persistirParaPedido($pdo, $pedido);                Logger::log(Logger::LEVEL_INFO, __CLASS__, __FUNCTION__, 'comissao', 'COMISSAO-OK: comissão persistida na conclusão.', [                    'pedido_id' => $request->pedidoId, 'tipo' => $comissao['tipo'], 'valor' => $comissao['valor'],                ]);            }            if ($liberarGuinchoAnterior) {
                 // attendance_mode -> TOWING é intencional aqui, não só cosmético:
                 // a partir deste ponto o pedido É literalmente um reboque (a fase
                 // de socorro local já terminou). Sem isso, o filtro de capacidade
@@ -330,7 +330,7 @@ final class PedidoTransitionService
                 // dali em diante (a_caminho/no_local/em_reboque/concluido) o
                 // TowingFlowDefinition assume, e são exatamente os mesmos passos
                 // do reboque comum.
-                $sql .= ", guincho_id = NULL, expiracao_aceite = " . self::dateAddMinutesExpression(30) . ", attendance_mode = 'TOWING'";
+                $sql .= ", guincho_id = NULL, expiracao_aceite = " . self::dateAddMinutesExpression(30) . ", attendance_mode = 'TOWING'";
             }
             $sql .= " WHERE id = ?";
             $params[] = $request->pedidoId;
@@ -355,16 +355,16 @@ final class PedidoTransitionService
                 'status_novo' => $request->targetStatus,
             ]);
 
-            // Monetização de oficinas: o pedido já foi commitado acima. Falhas
-            // na indicação nunca podem reverter/bloquear a conclusão do reboque.
-            if ($request->targetStatus === 'concluido') {
-                try {
-                    require_once __DIR__ . '/../IndicacaoOficinaService.php';
-                    IndicacaoOficinaService::processarEntrega((int)$request->pedidoId);
-                } catch (Throwable $indicacaoError) {
-                    Logger::exception(__CLASS__, __FUNCTION__, 'indicacao_oficina_pos_commit', $indicacaoError, ['pedido_id' => $request->pedidoId]);
-                }
-            }
+            // Monetização de oficinas: o pedido já foi commitado acima. Falhas
+            // na indicação nunca podem reverter/bloquear a conclusão do reboque.
+            if ($request->targetStatus === 'concluido') {
+                try {
+                    require_once __DIR__ . '/../IndicacaoOficinaService.php';
+                    IndicacaoOficinaService::processarEntrega((int)$request->pedidoId);
+                } catch (Throwable $indicacaoError) {
+                    Logger::exception(__CLASS__, __FUNCTION__, 'indicacao_oficina_pos_commit', $indicacaoError, ['pedido_id' => $request->pedidoId]);
+                }
+            }
             return PedidoTransitionResult::success(Pedido::buscarPorId($request->pedidoId) ?? $pedido, [
                 'status_anterior' => $pedido['status'],
                 'status_novo' => $request->targetStatus,
@@ -1270,94 +1270,94 @@ final class PedidoTransitionService
         return ProviderCapability::possuiCapacidadeReboqueAprovada($guinchoId);
     }
 
-    private static function lockClause(PDO $pdo): string
-    {
-        return $pdo->getAttribute(PDO::ATTR_DRIVER_NAME) === 'sqlite' ? '' : ' FOR UPDATE';
-    }
-
-    private static function dateAddMinutesExpression(int $minutes): string
-    {
-        $minutes = max(1, $minutes);
-        $pdo = getPDO();
-        if ($pdo->getAttribute(PDO::ATTR_DRIVER_NAME) === 'sqlite') {
-            return "datetime('now', '+" . $minutes . " minutes')";
-        }
-
-        return "DATE_ADD(NOW(), INTERVAL " . $minutes . " MINUTE)";
-    }
-    public static function requeueByOficina(int $pedidoId, int $oficinaId, int $actorId, string $justificativa, int $expMin, float $penalidadeReputacao = 0.0): PedidoTransitionResult
-    {
-        $pdo = getPDO();
-        try {
-            $pdo->beginTransaction();
-            $stmtPedido = $pdo->prepare("SELECT * FROM pedidos WHERE id = ?" . self::lockClause($pdo));
-            $stmtPedido->execute([$pedidoId]);
-            $pedido = $stmtPedido->fetch(PDO::FETCH_ASSOC);
-
-            if (!$pedido) {
-                $pdo->rollBack();
-                return PedidoTransitionResult::failure('Pedido nao encontrado.');
-            }
-            if ((int)($pedido['oficina_id'] ?? 0) !== $oficinaId) {
-                $pdo->rollBack();
-                return PedidoTransitionResult::failure('Pedido nao pertence a esta oficina.');
-            }
-            if (!in_array((string)$pedido['status'], ['oficina_aceitou', 'oficina_a_caminho'], true)) {
-                $pdo->rollBack();
-                return PedidoTransitionResult::failure('So e possivel cancelar antes de chegar ao local.');
-            }
-
-            $attendanceMode = (string)($pedido['attendance_mode'] ?? 'TOWING');
-            $statusFila = 'aguardando_guincho';
-            if ($attendanceMode === 'ON_SITE' || $attendanceMode === 'HYBRID') {
-                $statusFila = 'aguardando_oficina';
-            }
-
-            $pdo->prepare("
-                UPDATE pedidos
-                   SET status = ?, oficina_id = NULL, motivo_cancelamento = ?, expiracao_aceite = ?
-                 WHERE id = ?
-            ")->execute([
-                $statusFila,
-                mb_substr('[oficina] ' . $justificativa, 0, 255),
-                date('Y-m-d H:i:s', strtotime("+{$expMin} minutes")),
-                $pedidoId,
-            ]);
-
-            if ($penalidadeReputacao > 0) {
-                try {
-                    $pdo->prepare("
-                        UPDATE oficinas
-                           SET total_cancelamentos = total_cancelamentos + 1,
-                               reputacao = GREATEST(0, reputacao - ?)
-                         WHERE id = ?
-                    ")->execute([$penalidadeReputacao, $oficinaId]);
-                } catch (Throwable $eRep) {
-                    Logger::exception(__CLASS__, __FUNCTION__, 'requeue_oficina_reputacao', $eRep, [
-                        'pedido_id' => $pedidoId, 'oficina_id' => $oficinaId,
-                    ]);
-                }
-            }
-
-            self::registrarCancelamentoAuditado($pdo, $pedidoId, 'oficina', $actorId, $justificativa, (string)$pedido['status'], $penalidadeReputacao);
-            $pdo->commit();
-
-            AuditTrailService::evento('pedido_reenfileirado_oficina', __CLASS__, __FUNCTION__, [
-                'pedido_id' => $pedidoId, 'actor_type' => 'oficina', 'actor_id' => $actorId,
-                'oficina_id' => $oficinaId, 'event_code' => 'ORD-REQ-OFI-001',
-                'status_anterior' => $pedido['status'], 'status_novo' => $statusFila,
-            ]);
-
-            return PedidoTransitionResult::success(Pedido::buscarPorId($pedidoId) ?? $pedido, [
-                'status_anterior' => $pedido['status'], 'status_novo' => $statusFila,
-            ]);
-        } catch (Throwable $e) {
-            if ($pdo->inTransaction()) { $pdo->rollBack(); }
-            Logger::exception(__CLASS__, __FUNCTION__, 'requeue_oficina', $e, [
-                'pedido_id' => $pedidoId, 'oficina_id' => $oficinaId, 'actor_id' => $actorId,
-            ]);
-            return PedidoTransitionResult::failure('Erro interno ao devolver o pedido para a fila.');
-        }
-    }
-}
-
+    private static function lockClause(PDO $pdo): string
+    {
+        return $pdo->getAttribute(PDO::ATTR_DRIVER_NAME) === 'sqlite' ? '' : ' FOR UPDATE';
+    }
+
+    private static function dateAddMinutesExpression(int $minutes): string
+    {
+        $minutes = max(1, $minutes);
+        $pdo = getPDO();
+        if ($pdo->getAttribute(PDO::ATTR_DRIVER_NAME) === 'sqlite') {
+            return "datetime('now', '+" . $minutes . " minutes')";
+        }
+
+        return "DATE_ADD(NOW(), INTERVAL " . $minutes . " MINUTE)";
+    }
+    public static function requeueByOficina(int $pedidoId, int $oficinaId, int $actorId, string $justificativa, int $expMin, float $penalidadeReputacao = 0.0): PedidoTransitionResult
+    {
+        $pdo = getPDO();
+        try {
+            $pdo->beginTransaction();
+            $stmtPedido = $pdo->prepare("SELECT * FROM pedidos WHERE id = ?" . self::lockClause($pdo));
+            $stmtPedido->execute([$pedidoId]);
+            $pedido = $stmtPedido->fetch(PDO::FETCH_ASSOC);
+
+            if (!$pedido) {
+                $pdo->rollBack();
+                return PedidoTransitionResult::failure('Pedido nao encontrado.');
+            }
+            if ((int)($pedido['oficina_id'] ?? 0) !== $oficinaId) {
+                $pdo->rollBack();
+                return PedidoTransitionResult::failure('Pedido nao pertence a esta oficina.');
+            }
+            if (!in_array((string)$pedido['status'], ['oficina_aceitou', 'oficina_a_caminho'], true)) {
+                $pdo->rollBack();
+                return PedidoTransitionResult::failure('So e possivel cancelar antes de chegar ao local.');
+            }
+
+            $attendanceMode = (string)($pedido['attendance_mode'] ?? 'TOWING');
+            $statusFila = 'aguardando_guincho';
+            if ($attendanceMode === 'ON_SITE' || $attendanceMode === 'HYBRID') {
+                $statusFila = 'aguardando_oficina';
+            }
+
+            $pdo->prepare("
+                UPDATE pedidos
+                   SET status = ?, oficina_id = NULL, motivo_cancelamento = ?, expiracao_aceite = ?
+                 WHERE id = ?
+            ")->execute([
+                $statusFila,
+                mb_substr('[oficina] ' . $justificativa, 0, 255),
+                date('Y-m-d H:i:s', strtotime("+{$expMin} minutes")),
+                $pedidoId,
+            ]);
+
+            if ($penalidadeReputacao > 0) {
+                try {
+                    $pdo->prepare("
+                        UPDATE oficinas
+                           SET total_cancelamentos = total_cancelamentos + 1,
+                               reputacao = GREATEST(0, reputacao - ?)
+                         WHERE id = ?
+                    ")->execute([$penalidadeReputacao, $oficinaId]);
+                } catch (Throwable $eRep) {
+                    Logger::exception(__CLASS__, __FUNCTION__, 'requeue_oficina_reputacao', $eRep, [
+                        'pedido_id' => $pedidoId, 'oficina_id' => $oficinaId,
+                    ]);
+                }
+            }
+
+            self::registrarCancelamentoAuditado($pdo, $pedidoId, 'oficina', $actorId, $justificativa, (string)$pedido['status'], $penalidadeReputacao);
+            $pdo->commit();
+
+            AuditTrailService::evento('pedido_reenfileirado_oficina', __CLASS__, __FUNCTION__, [
+                'pedido_id' => $pedidoId, 'actor_type' => 'oficina', 'actor_id' => $actorId,
+                'oficina_id' => $oficinaId, 'event_code' => 'ORD-REQ-OFI-001',
+                'status_anterior' => $pedido['status'], 'status_novo' => $statusFila,
+            ]);
+
+            return PedidoTransitionResult::success(Pedido::buscarPorId($pedidoId) ?? $pedido, [
+                'status_anterior' => $pedido['status'], 'status_novo' => $statusFila,
+            ]);
+        } catch (Throwable $e) {
+            if ($pdo->inTransaction()) { $pdo->rollBack(); }
+            Logger::exception(__CLASS__, __FUNCTION__, 'requeue_oficina', $e, [
+                'pedido_id' => $pedidoId, 'oficina_id' => $oficinaId, 'actor_id' => $actorId,
+            ]);
+            return PedidoTransitionResult::failure('Erro interno ao devolver o pedido para a fila.');
+        }
+    }
+}
+

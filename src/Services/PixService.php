@@ -10,6 +10,12 @@ class PixService
 {
     private const MP_PAYMENTS_URL = 'https://api.mercadopago.com/v1/payments';
 
+    /** Compatibilidade do contrato de faturas: cobrança PIX idempotente por fatura. */
+    public static function gerar(int $faturaId, float $valor, string $direcao): array
+    {
+        return PixFaturaService::gerar($faturaId, $valor, $direcao);
+    }
+
     /**
      * Mapeia o tipo de chave Pix armazenado no banco para o valor esperado pela API do MercadoPago.
      * DB: cpf | email | telefone | aleatoria

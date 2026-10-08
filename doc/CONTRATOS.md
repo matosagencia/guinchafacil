@@ -275,3 +275,120 @@ Como defesa adicional:
 ### Criterio
 
 `tipo_problema="reboque"` deve ser lido como `reboque` apos o INSERT. Nenhum pedido novo criado pelos fluxos atuais deve persistir `tipo_problema = ''`.
+).
+
+
+CONTRATO_PEDIDO:
+  de: B
+  para: A
+  o_que_preciso:
+    1. Tabela nova `comissoes_cidade` (idempotente, INFORMATION_SCHEMA):
+         id              BIGINT UNSIGNED PK AUTO_INCREMENT
+         cidade_id       BIGINT UNSIGNED NOT NULL (UNIQUE)
+         percentual      DECIMAL(5,4) NOT NULL DEFAULT 0.0000
+         ativo           TINYINT(1) NOT NULL DEFAULT 1
+         created_at, updated_at
+
+    2. Colunas novas em `pedidos` (idempotentes):
+         comissao_valor            DECIMAL(10,2) NULL
+         comissao_tipo             ENUM('faturada','descontada') NULL
+         valor_liquido_parceiro    DECIMAL(10,2) NULL
+         fatura_id                 BIGINT UNSIGNED NULL (FK)
+
+    3. Metodo estatico publico na Faixa A:
+         ComissaoService::calcular(
+             int $pedidoId,
+             string $formaPagamento,   // 'pago_na_chegada' | 'pago_agora' | 'online' | 'sem_cobranca'
+             float $valorTotal,
+             ?int $cidadeId = null
+         ): array
+       Retorna:
+         [
+           'percentual'             => float,   // ex: 0.1500
+           'valor'                  => float,   // ex: 28.50
+           'tipo'                   => string,  // 'faturada' | 'descontada'
+           'valor_liquido_parceiro' => float,   // ex: 189.39 (faturada) ou 160.89 (descontada)
+         ]
+       Regra:
+         percentual_efetivo = config('comissao_plataforma') + comissao_cidade.percentual (se cidade tiver override)
+         Se forma = 'pago_na_chegada':
+             tipo = 'faturada'
+             valor = total * percentual
+             valor_liquido_parceiro = total   // recebe cheio
+         Senão (pago_agora/online/sem_cobranca/outros):
+             tipo = 'descontada'
+             valor = total * percentual
+             valor_liquido_parceiro = total - valor
+
+    4. Quando o pedido for concluido (PedidoTransitionService::concludeByX),
+       gravar os 3 campos via ComissaoService::calcular() + UPDATE pedidos.
+       Isso pode ser feito no mesmo `approvePayment()` (se pagamento for
+       o gatilho) ou no `concludeByX` (se conclusao for o gatilho).
+       Faixa A decide o ponto canonico e documenta aqui.
+
+  por_que:
+    A UI da Faixa B vai ler esses 3 campos em `pedidos` para montar
+    o extrato do parceiro. Sem eles, o front precisaria recalcular
+    a comissao a cada render, o que e caro e sujeito a divergencia.
+
+  criterio_de_aceite:
+    - Migration `install/migration_comissao_v1.sql` idempotente.
+    - Colunas existem em `pedidos` apos rodar 2x.
+    - `ComissaoService::calcular()` retorna os 4 campos.
+    - Pedido concluido com `forma_pagamento_escolhida = 'pago_na_chegada'`
+      grava `comissao_valor`, `comissao_tipo='faturada'`,
+      `valor_liquido_parceiro = valor_total`.
+    - Pedido concluido com `forma_pagamento_escolhida = 'pago_agora'`
+      grava `comissao_tipo='descontada'`,
+      `valor_liquido_parceiro = valor_total - comissao_valor`.
+      
+CONTRATO_PEDIDO:
+  de: B
+  para: A
+  o_que_preciso:
+    1. Tabelas novas (idempotentes, INFORMATION_SCHEMA):
+         faturas_parceiro (schema definido em docs/CONTRATOS.md §Financeiro)
+         faturas_itens
+         faturas_pagamentos
+
+    2. Servico estatico na Faixa A:
+         FaturaService::fecharCiclo(\DateTimeImmutable $cicloInicio): int
+       Comportamento:
+         - Para cada parceiro com pedidos concluidos no ciclo
+           (domingo 00:00 ate sabado 23:59)
+         - Cria faturas_parceiro com status='aberta'
+         - Cria faturas_itens para cada pedido
+         - Calcula saldo
+         - Se saldo > 0: gera PIX via PixService::gerar(...) para GF pagar
+         - Se saldo < 0: gera PIX via PixService::gerar(...) para parceiro pagar
+         - Retorna contagem de faturas criadas
+
+         FaturaService::marcarPaga(int $faturaId, string $transacaoId, string $metodo): bool
+         FaturaService::bloquearPorVencimento(): int  // cron job
+         FaturaService::desbloquear(int $faturaId): bool
+
+    3. Endpoint novo (rota registrada pelo dono):
+         POST /webhook/mercadopago/pix
+       Comportamento:
+         - Valida assinatura HMAC
+         - Localiza fatura por pix_copia_cola ou transacao_id
+         - Chama FaturaService::marcarPaga(...)
+         - Retorna 200 sem reprocessar (idempotencia por transacao_id)
+
+    4. Jobs cron:
+         - fechar_ciclos_semanais (domingo 00:01)
+         - aplicar_bloqueios_vencidos (sabado 00:01)
+
+  por_que:
+    A Faixa B precisa de um servico estavel para consultar fatura,
+    bloquear/desbloquear parceiro, e gerar PIX. Sem contrato escrito,
+    B fica bloqueada.
+
+  criterio_de_aceite:
+    - Migration idempotente, rodar 2x nao altera nada.
+    - Rodar fecharCiclo() em um ciclo com 3 pedidos de teste cria 1 fatura.
+    - Com saldo > 0: fatura tem pix_qrcode preenchido.
+    - Com saldo < 0: fatura tem pix_qrcode + pix_copia_cola.
+    - Webhook com evento repetido retorna 200 e nao reprocessa.
+    - Fatura com saldo > 0 e paga em D+7: status='paga'.
+    - Fatura nao paga em D+7 bloqueia parceiro (bloquearPorVencimento

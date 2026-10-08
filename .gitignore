@@ -28,3 +28,9 @@ storage/*.txt
 chaves.dev.txt
 *.pre-rollback-*
 logs/
+tools/fix-*.php
+tools/patch-*.patch
+tools/fix-*.php
+tools/patch-*.patch
+tools/fix-*.php
+tools/patch-*.patch

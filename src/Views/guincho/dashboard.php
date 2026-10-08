@@ -839,16 +839,32 @@ document.addEventListener('DOMContentLoaded', () => {
         try { sessionStorage.setItem(GF_PEDIDOS_VISTOS_KEY, JSON.stringify(Array.from(set))); } catch (e) {}
     }
     function gfBeep() {
+        // [B-GUINCHO-BEEP-01] Beep sintetico via Web Audio API.
+        // Assinatura sonora do GUINCHO: 3 bipes medios-graves (660Hz, 180ms cada).
+        // Distinta da assinatura da OFICINA (2 bipes agudos 880Hz).
         try {
             const AC = window.AudioContext || window.webkitAudioContext;
             if (!AC) return;
             const ctx = new AC();
-            const osc = ctx.createOscillator();
-            const g = ctx.createGain();
-            osc.type = 'sine'; osc.frequency.value = 880; g.gain.value = 0.15;
-            osc.connect(g).connect(ctx.destination);
-            osc.start();
-            setTimeout(() => { osc.stop(); ctx.close(); }, 250);
+            const now = ctx.currentTime;
+            const freqs = [660, 660, 660];
+            const dur = 0.18;
+            const gap = 0.08;
+            for (let i = 0; i < freqs.length; i++) {
+                const osc = ctx.createOscillator();
+                const g = ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.value = freqs[i];
+                const start = now + i * (dur + gap);
+                const stop = start + dur;
+                g.gain.setValueAtTime(0.0001, start);
+                g.gain.exponentialRampToValueAtTime(0.40, start + 0.012);
+                g.gain.exponentialRampToValueAtTime(0.0001, stop);
+                osc.connect(g).connect(ctx.destination);
+                osc.start(start);
+                osc.stop(stop + 0.02);
+            }
+            setTimeout(() => { try { ctx.close(); } catch (e) {} }, 2000);
         } catch (e) {}
     }
     function gfToastNovos(qtd, primeiro) {
@@ -996,5 +1012,26 @@ function mostrarToast(msg, tipo = 'danger') {
     container.appendChild(toast);
     setTimeout(() => toast.remove(), 5000);
 }
+
+    // [B-GUINCHO-PAGAMENTO-01] Mensagem de forma de pagamento (2026-10-08)
+    // REGRA: parceiro precisa saber como recebe ANTES de aceitar o pedido.
+    function gfMensagemPagamento(pedido) {
+        var forma = String(pedido.forma_pagamento_escolhida || '');
+        var valor = Number(pedido.valor_receber_guincho || pedido.custo_estimado || 0);
+        var valorFmt = 'R$ ' + valor.toFixed(2).replace('.', ',');
+        if (forma === 'pago_na_chegada') {
+            return { icone: '💰', texto: 'Receba ' + valorFmt + ' do cliente no local', cor: '#2fb34a' };
+        }
+        if (forma === 'sem_cobranca') {
+            return { icone: '✓', texto: 'Isento - nao cobre nada do cliente', cor: '#6c757d' };
+        }
+        if (forma === 'pago_agora') {
+            return { icone: '💰', texto: 'Voce recebera ' + valorFmt + ' (ja pago pelo cliente)', cor: '#2fb34a' };
+        }
+        if (forma === 'online') {
+            return { icone: '🌐', texto: 'Pagamento online confirmado. Sua parte: ' + valorFmt, cor: '#0d6efd' };
+        }
+        return { icone: '💰', texto: 'Valor: ' + valorFmt, cor: '#6c757d' };
+    }
 </script>
 

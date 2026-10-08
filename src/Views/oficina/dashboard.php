@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 $bp = defined('BASE_PATH') ? BASE_PATH : '';
 include __DIR__ . '/../layouts/header.php';
 function ofi_saudacao(): string { $h = (int)date('G'); if ($h < 12) return 'Bom dia'; if ($h < 18) return 'Boa tarde'; return 'Boa noite'; }
@@ -172,7 +172,84 @@ $primeiroPedido = $pedidosVisiveis[0] ?? null;
     }
 
     iniciarTimer();
-    setInterval(checarPedidos, 15000);
+    // [B-OFICINA-ALERTA-01] Fallback de alerta (2026-10-07):
+    (function () {
+        'use strict';
+        var SS_KEY = 'oficina_pedidos_vistos_v1';
+        var vistos = {};
+        try { vistos = JSON.parse(sessionStorage.getItem(SS_KEY) || '{}') || {}; } catch (e) { vistos = {}; }
+
+        function tocarAlerta() {
+            try {
+                var AC = window.AudioContext || window.webkitAudioContext;
+                if (!AC) return;
+                var ctx = new AC();
+                var now = ctx.currentTime;
+                var freqs = [880, 880];
+                var dur = 0.12;
+                var gap = 0.08;
+                for (var i = 0; i < freqs.length; i++) {
+                    var osc = ctx.createOscillator();
+                    var gain = ctx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.value = freqs[i];
+                    var start = now + i * (dur + gap);
+                    var stop = start + dur;
+                    gain.gain.setValueAtTime(0.0001, start);
+                    gain.gain.exponentialRampToValueAtTime(0.25, start + 0.01);
+                    gain.gain.exponentialRampToValueAtTime(0.0001, stop);
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.start(start);
+                    osc.stop(stop + 0.02);
+                }
+                setTimeout(function () { try { ctx.close(); } catch (e) {} }, 1500);
+            } catch (e) {}
+            var orig = document.title;
+            var blink = 0;
+            var timer = setInterval(function () {
+                document.title = (blink % 2 === 0) ? 'NOVO PEDIDO! ' + orig : orig;
+                blink++;
+                if (blink >= 10) { clearInterval(timer); document.title = orig; }
+            }, 800);
+        }
+
+        function mostrarToast(msg) {
+            var el = document.getElementById('oficina-toast-novo-pedido');
+            if (!el) {
+                el = document.createElement('div');
+                el.id = 'oficina-toast-novo-pedido';
+                el.style.cssText = 'position:fixed;top:20px;right:20px;background:#2fb34a;color:#fff;padding:14px 20px;border-radius:10px;font-weight:600;box-shadow:0 6px 20px rgba(0,0,0,.2);z-index:9999;font-size:.95rem;transition:opacity .3s;';
+                document.body.appendChild(el);
+            }
+            el.textContent = msg;
+            el.style.opacity = '1';
+            clearTimeout(el.__hideTimer);
+            el.__hideTimer = setTimeout(function () {
+                el.style.opacity = '0';
+                setTimeout(function () { if (el.parentNode) el.parentNode.removeChild(el); }, 300);
+            }, 8000);
+        }
+
+        window.__gfOficinaChecarAlerta = function (pedidos) {
+            if (!Array.isArray(pedidos)) return;
+            var totalNovos = 0;
+            pedidos.forEach(function (p) {
+                var id = String(p.id || p.pedido_id || '');
+                if (id && !vistos[id]) { vistos[id] = true; totalNovos++; }
+            });
+            try { sessionStorage.setItem(SS_KEY, JSON.stringify(vistos)); } catch (e) {}
+            if (totalNovos > 0) { tocarAlerta(); mostrarToast(totalNovos + ' novo(s) pedido(s) na sua fila'); }
+        };
+    })();
+
+    setInterval(function () {
+        checarPedidos().then(function (pedidos) {
+            if (window.__gfOficinaChecarAlerta) {
+                window.__gfOficinaChecarAlerta(pedidos);
+            }
+        });
+    }, 15000);
     checarPedidos();
 })();
 </script>

@@ -74,3 +74,26 @@ ESTADO_FAIXA_A:
     pendencias:
       - "Aplicar a migration no banco antes da integracao da faixa B."
       - "B consome somente o retorno do metodo; A nao altera AdminController, views, CSS ou rotas."
+
+  financeiro_parceiros_v1:
+    status: entregue_para_validacao
+    data: 2026-10-08
+    preambulo_6_0: "Aplicado: congelar valores financeiros na transição canônica; operações repetidas não podem recalcular ou duplicar lançamento."
+    implementacao:
+      migration: install/migration_comissao_v1.sql
+      rollback: "install/rollback_comissao_v1.sql (idempotente; só remove estrutura se não houver dados)"
+      comissao: ComissaoService::calcular e ::persistirParaPedido
+      ponto_canonico: "PedidoTransitionService::transition(targetStatus=concluido)."
+      fatura: "FaturaService::fecharCiclo, ::marcarPaga, ::bloquearPorVencimento e ::desbloquear"
+      pix: PixFaturaService::gerar
+      webhook: FaturaWebhookController::mercadoPagoPix
+      crons:
+        - "domingo 00:01: php cron/fechar_ciclos_semanais.php"
+        - "sábado 00:01: php cron/aplicar_bloqueios_vencidos.php"
+    rota_pedida_ao_dono: |
+      ROTA_PEDIDA:
+        faixa: A
+        metodo: POST
+        caminho: /webhook/mercadopago/pix
+        controller: FaturaWebhookController::mercadoPagoPix
+        motivo: baixa idempotente de fatura PIX após HMAC Mercado Pago
