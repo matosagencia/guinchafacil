@@ -151,7 +151,13 @@ $primeiroPedido = $pedidosVisiveis[0] ?? null;
                 var atual = container.querySelector('[data-pedido-id]');
                 var atualId = atual ? atual.getAttribute('data-pedido-id') : null;
                 if (String(pedidos[0].id) !== String(atualId)) {
-                    location.reload();
+                    // [B-OFICINA-ALERTA-RELOAD] Dispara o alerta ANTES do reload
+                    // para o beep/toast saírem. Sem isso, o location.reload() mata
+                    // o JS antes do alerta rodar.
+                    if (window.__gfOficinaChecarAlerta) {
+                        try { window.__gfOficinaChecarAlerta(pedidos); } catch (e) {}
+                    }
+                    setTimeout(function() { location.reload(); }, 800);
                     return pedidos;
                 }
             }
