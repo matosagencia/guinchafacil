@@ -37,3 +37,6 @@ tools/patch-*.patch
 backup-*.sql
 *.patch
 teste-financeiro-*.ps1
+backup-*.sql
+*.patch
+teste-financeiro-*.ps1
