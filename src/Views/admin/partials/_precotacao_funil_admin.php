@@ -4,6 +4,15 @@
  * com action=/admin/pedido/criar e 3 hidden inputs de contexto).
  *
  * Depende de: $bp, $csrf_token, $adminCtx.
+ *
+ * [B-STID-FIX-2026-10-08] Solucao B:
+ *   - O <script> proprio agora sincroniza TODOS os hidden a partir do
+ *     public-pre-cotacao-flow.js (via window.__gfFlow.STATE).
+ *   - Antes, so lat_destino/lng_destino eram propagados; tipo_problema
+ *     ficava com o default 'outro' e o B-STID-01 nao disparava.
+ *   - Agora, quando o flow atinge o stage 'cotacao', copiamos
+ *     tipo_problema, categoria, valor_cotado e decisao_atendimento.
+ *   - Tambem propagamos origem (lat_origem/lng_origem/localizacao).
  */
 $bp = $bp ?? (defined('BASE_PATH') ? BASE_PATH : '');
 $csrf_token = $csrf_token ?? '';
@@ -245,13 +254,13 @@ $adminCtx = $adminCtx ?? [];
     <input type="hidden" name="localizacao" value="">
     <input type="hidden" name="numero_origem" value="">
     <input type="hidden" name="lat_destino" id="lat_destino" value="">
-<input type="hidden" name="lng_destino" id="lng_destino" value="">
+    <input type="hidden" name="lng_destino" id="lng_destino" value="">
     <input type="hidden" name="destino" value="">
     <input type="hidden" name="numero_destino" value="">
     <input type="hidden" name="categoria" value="popular">
-    <input type="hidden" name="tipo_problema" value="outro">
-<input type="hidden" name="service_type_id" id="service_type_id" value="">
-<input type="hidden" name="decisao_atendimento" id="decisao_atendimento" value="">
+    <input type="hidden" name="tipo_problema" value="">
+    <input type="hidden" name="service_type_id" id="service_type_id" value="">
+    <input type="hidden" name="decisao_atendimento" id="decisao_atendimento" value="">
     <input type="hidden" name="valor_cotado" value="">
 </form>
 
@@ -259,31 +268,113 @@ $adminCtx = $adminCtx ?? [];
 (function () {
     'use strict';
 
-    // Propaga a confirmacao do address-picker (role=destino) para os
-    // hidden inputs lat_destino/lng_destino. Sem isso o POST envia
-    // strings vazias, o AdminController converte para (0.0, 0.0) e
-    // o PedidoCoreService rejeita com 'Coordenadas de destino fora
-    // do limite aceito.'
+    // ----------------------------------------------------------------
+    // Helpers
+    // ----------------------------------------------------------------
+    function getForm() {
+        return document.querySelector('form[data-precotacao-form]');
+    }
+
+    function setHidden(form, name, val) {
+        if (!form) return;
+        var el = form.querySelector('[name="' + name + '"]');
+        if (!el) {
+            el = document.createElement('input');
+            el.type = 'hidden';
+            el.name = name;
+            form.appendChild(el);
+        }
+        el.value = (val == null) ? '' : String(val);
+    }
+
+    // ----------------------------------------------------------------
+    // 1. Origem e destino confirmados (address-picker)
+    //
+    // O public-pre-cotacao-flow.js tambem preenche, mas reforcamos aqui
+    // para o caso de o flow nao rodar (admin com fluxo proprio).
+    // ----------------------------------------------------------------
     document.addEventListener('gf:address-confirmed', function (ev) {
         var d = (ev && ev.detail) || {};
-        if (d.role !== 'destino') return;
-        var lat = document.getElementById('lat_destino');
-        var lng = document.getElementById('lng_destino');
-        if (!lat || !lng) return;
-        if (d.lat != null) lat.value = d.lat;
-        if (d.lng != null) lng.value = d.lng;
+        var form = getForm();
+        if (!form) return;
+
+        if (d.role === 'origem') {
+            setHidden(form, 'lat_origem', d.lat);
+            setHidden(form, 'lng_origem', d.lng);
+            setHidden(form, 'localizacao', d.label);
+            setHidden(form, 'numero_origem', d.numero);
+            return;
+        }
+
+        if (d.role === 'destino') {
+            setHidden(form, 'lat_destino', d.lat);
+            setHidden(form, 'lng_destino', d.lng);
+            setHidden(form, 'destino', d.label);
+            setHidden(form, 'numero_destino', d.numero);
+        }
     });
 
+    // ----------------------------------------------------------------
+    // 2. Sincronizacao final a partir do STATE do flow
+    //
+    // O public-pre-cotacao-flow.js expoe window.__gfFlow.STATE.
+    // Quando o stage atinge 'cotacao', copiamos os campos que o
+    // B-STID-01 do AdminController precisa:
+    //   - tipo_problema (slug: pneu/eletrica/bateria/mecanica/chaveiro)
+    //   - categoria (popular/moto/suv/caminhonete/eletrico)
+    //   - valor_cotado (para o B-GUARD-02)
+    //   - decisao_atendimento (assistencia/reboque)
+    //
+    // Sem isso, o hidden tipo_problema ficava com o default 'outro'
+    // e o B-STID-01 nao disparava -> PedidoCoreService assumia TOWING
+    // -> "Destino e obrigatorio para reboque".
+    // ----------------------------------------------------------------
+    document.addEventListener('gf:flow-stage', function (ev) {
+        var stage = (ev && ev.detail && ev.detail.stage) || '';
+        if (stage !== 'cotacao') return;
+
+        var state = (window.__gfFlow && window.__gfFlow.STATE) || {};
+        var form = getForm();
+        if (!form) return;
+
+        if (state.servico) {
+            setHidden(form, 'tipo_problema', state.servico);
+        }
+        if (state.veiculo) {
+            setHidden(form, 'categoria', state.veiculo);
+        }
+        if (state.valorCotado != null) {
+            setHidden(form, 'valor_cotado', state.valorCotado);
+        }
+
+        // A decisao vem do preencherHiddenFields('assistencia'|'reboque')
+        // do proprio flow. Reforcamos aqui para o caso de o flow nao ter
+        // setado (admin sem o botao "aceitar-local").
+        var decisaoEl = form.querySelector('[name="decisao_atendimento"]');
+        if (decisaoEl && !decisaoEl.value) {
+            setHidden(form, 'decisao_atendimento', 'assistencia');
+        }
+
+        console.log('[admin-funil] hidden sincronizados:', {
+            tipo_problema: state.servico || null,
+            categoria: state.veiculo || null,
+            valor_cotado: state.valorCotado != null ? state.valorCotado : null,
+            decisao_atendimento: (form.querySelector('[name="decisao_atendimento"]') || {}).value || null
+        });
+    });
+
+    // ----------------------------------------------------------------
+    // 3. Provedor online (visibilidade condicional)
+    // ----------------------------------------------------------------
     var wrap = document.getElementById('provedorOnlineWrap');
     var radios = document.querySelectorAll('input[name="destino_pagamento"]');
-    if (!wrap || !radios.length) return;
-
-    function atualizar() {
-        var marcado = document.querySelector('input[name="destino_pagamento"]:checked');
-        var mostrar = marcado && marcado.value === 'online';
-        wrap.hidden = !mostrar;
+    if (wrap && radios.length) {
+        function atualizar() {
+            var marcado = document.querySelector('input[name="destino_pagamento"]:checked');
+            wrap.hidden = !(marcado && marcado.value === 'online');
+        }
+        radios.forEach(function (r) { r.addEventListener('change', atualizar); });
+        atualizar();
     }
-    radios.forEach(function (r) { r.addEventListener('change', atualizar); });
-    atualizar();
 })();
 </script>

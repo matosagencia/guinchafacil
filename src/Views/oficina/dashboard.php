@@ -118,6 +118,33 @@ $primeiroPedido = $pedidosVisiveis[0] ?? null;
     var CSRF = '<?= htmlspecialchars($csrfToken ?? '') ?>';
     var ONLINE = <?= $online ? 'true' : 'false' ?>;
 
+    // [B-OFICINA-AUDIO-UNLOCK] Desbloqueia AudioContext no 1o clique
+    // (o Chrome bloqueia som ate o usuario interagir com a pagina).
+    (function () {
+        var unlocked = false;
+        function unlock() {
+            if (unlocked) return;
+            try {
+                var AC = window.AudioContext || window.webkitAudioContext;
+                if (!AC) return;
+                var ctx = new AC();
+                if (ctx.state === 'suspended') { ctx.resume(); }
+                var o = ctx.createOscillator();
+                var g = ctx.createGain();
+                g.gain.value = 0.0001;
+                o.connect(g).connect(ctx.destination);
+                o.start();
+                o.stop(ctx.currentTime + 0.05);
+                unlocked = true;
+                document.removeEventListener('click', unlock);
+                document.removeEventListener('keydown', unlock);
+                document.removeEventListener('touchstart', unlock);
+            } catch (e) {}
+        }
+        document.addEventListener('click', unlock);
+        document.addEventListener('keydown', unlock);
+        document.addEventListener('touchstart', unlock);
+    })();
     var toggle = document.getElementById('toggleDisponivel');
     var label = document.getElementById('labelDisponivel');
 
@@ -147,18 +174,15 @@ $primeiroPedido = $pedidosVisiveis[0] ?? null;
             if (!container || !j.ok) return [];
             var pedidos = (j.pedidos || []);
             if (pedidos.length) {
-                // Recarrega a página se houver pedido novo diferente
                 var atual = container.querySelector('[data-pedido-id]');
                 var atualId = atual ? atual.getAttribute('data-pedido-id') : null;
                 if (String(pedidos[0].id) !== String(atualId)) {
-                    // [B-OFICINA-ALERTA-RELOAD] Dispara o alerta ANTES do reload
-                    // para o beep/toast saírem. Sem isso, o location.reload() mata
-                    // o JS antes do alerta rodar.
+                    // [B-OFICINA-ALERTA-INLINE] Alerta + re-render SEM reload.
+                    // O reload matava o AudioContext e o toast nunca saía.
                     if (window.__gfOficinaChecarAlerta) {
                         try { window.__gfOficinaChecarAlerta(pedidos); } catch (e) {}
                     }
-                    setTimeout(function() { location.reload(); }, 800);
-                    return pedidos;
+                    renderizarOferta(pedidos[0]);
                 }
             }
             return pedidos;
@@ -180,8 +204,47 @@ $primeiroPedido = $pedidosVisiveis[0] ?? null;
         });
     }
 
-    iniciarTimer();
-    // [B-OFICINA-ALERTA-01] Fallback de alerta (2026-10-07):
+    // [B-OFICINA-INLINE-RENDER] Re-renderiza o card sem reload,
+    // preservando AudioContext e o toast em andamento.
+    function renderizarOferta(p) {
+        var container = document.getElementById('ofertaAtivaContainer');
+        if (!container || !p) return;
+        var pedidoId = p.id;
+        var tipo = p.tipo_problema || 'Socorro';
+        var dist = Number(p.distancia_km || 0).toFixed(1).replace('.', ',');
+        var valor = Number(p.custo_estimado || 0).toFixed(2).replace('.', ',');
+        var cat = p.categoria || '—';
+        var expira = p.expira_em || '';
+        container.innerHTML = ''
+            + '<div class="tow-offer" data-pedido-id="' + pedidoId + '">'
+            +   '<div class="tow-offer-head d-flex justify-content-between align-items-start">'
+            +     '<div>'
+            +       '<span class="tow-offer-eyebrow"><i class="fas fa-bolt me-1"></i>Nova solicita\u00e7\u00e3o</span>'
+            +       '<h4 class="tow-offer-title">Pedido #' + pedidoId + '</h4>'
+            +       '<p class="tow-offer-subtitle mb-0">' + tipo + '</p>'
+            +     '</div>'
+            +     (expira ? '<span class="tow-offer-timer" data-expira="' + expira + '">--:--</span>' : '')
+            +   '</div>'
+            +   '<div class="tow-offer-metrics">'
+            +     '<div class="tow-offer-metric"><span>Dist\u00e2ncia</span><strong>' + dist + ' km</strong></div>'
+            +     '<div class="tow-offer-metric"><span>Valor estimado</span><strong>R$ ' + valor + '</strong></div>'
+            +     '<div class="tow-offer-metric"><span>Categoria</span><strong>' + cat + '</strong></div>'
+            +   '</div>'
+            +   '<div class="tow-offer-actions">'
+            +     '<form method="post" action="' + BP + '/oficina/recusar/' + pedidoId + '" class="flex-grow-1 m-0">'
+            +       '<input type="hidden" name="csrf_token" value="' + CSRF + '">'
+            +       '<button type="submit" class="btn btn-outline-secondary w-100"><i class="fas fa-xmark me-1"></i>Recusar</button>'
+            +     '</form>'
+            +     '<form method="post" action="' + BP + '/oficina/pedido/' + pedidoId + '/aceitar" class="flex-grow-1 m-0">'
+            +       '<input type="hidden" name="csrf_token" value="' + CSRF + '">'
+            +       '<button type="submit" class="btn btn-success w-100"><i class="fas fa-check me-1"></i>Aceitar</button>'
+            +     '</form>'
+            +   '</div>'
+            + '</div>';
+        iniciarTimer();
+    }
+
+    iniciarTimer();    // [B-OFICINA-ALERTA-01] Fallback de alerta (2026-10-07):
     (function () {
         'use strict';
         var SS_KEY = 'oficina_pedidos_vistos_v1';
@@ -240,15 +303,52 @@ $primeiroPedido = $pedidosVisiveis[0] ?? null;
             }, 8000);
         }
 
+        // [B-OFICINA-TOAST-CLICK] Toast clicavel que rola ate o card
+        // (clone do gfToastNovos do guincho, adaptado).
+        function mostrarToastNovoPedido(qtd, pedido) {
+            var id = 'oficina-toast-novo-pedido';
+            var old = document.getElementById(id);
+            if (old) old.remove();
+            var box = document.createElement('div');
+            box.id = id;
+            box.style.cssText = 'position:fixed;top:16px;left:50%;transform:translateX(-50%);'
+                + 'background:#2fb34a;color:#fff;padding:12px 20px;border-radius:10px;'
+                + 'box-shadow:0 8px 24px rgba(0,0,0,.35);z-index:2147483647;'
+                + 'font:600 14px/1.3 system-ui,sans-serif;cursor:pointer;max-width:92vw';
+            var titulo = qtd === 1 ? 'Novo pedido dispon\u00edvel!' : qtd + ' novos pedidos dispon\u00edveis!';
+            var sub = pedido ? [pedido.marca, pedido.modelo].filter(Boolean).join(' ') : '';
+            var rodape = 'Toque para ir ao pedido';
+            box.innerHTML = '<div>' + titulo + '</div>'
+                + (sub ? '<div style="font-weight:400;font-size:12px;margin-top:3px;opacity:.9">' + sub + '</div>' : '')
+                + '<div style="font-weight:400;font-size:11px;margin-top:6px;opacity:.85">' + rodape + '</div>';
+            box.addEventListener('click', function () {
+                var el = document.querySelector('[data-pedido-id]');
+                if (el && el.scrollIntoView) {
+                    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+                box.remove();
+            });
+            document.body.appendChild(box);
+            setTimeout(function () { if (box.parentNode) box.parentNode.remove(); }, 20000);
+        }
+
         window.__gfOficinaChecarAlerta = function (pedidos) {
             if (!Array.isArray(pedidos)) return;
             var totalNovos = 0;
+            var primeiroNovo = null;
             pedidos.forEach(function (p) {
                 var id = String(p.id || p.pedido_id || '');
-                if (id && !vistos[id]) { vistos[id] = true; totalNovos++; }
+                if (id && !vistos[id]) {
+                    vistos[id] = true;
+                    totalNovos++;
+                    if (!primeiroNovo) primeiroNovo = p;
+                }
             });
             try { sessionStorage.setItem(SS_KEY, JSON.stringify(vistos)); } catch (e) {}
-            if (totalNovos > 0) { tocarAlerta(); mostrarToast(totalNovos + ' novo(s) pedido(s) na sua fila'); }
+            if (totalNovos > 0) {
+                tocarAlerta();
+                mostrarToastNovoPedido(totalNovos, primeiroNovo);
+            }
         };
     })();
 

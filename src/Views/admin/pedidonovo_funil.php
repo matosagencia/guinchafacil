@@ -66,6 +66,13 @@ include __DIR__ . '/../layouts/header.php';
 <script<?= function_exists('csp_script_nonce_attr') ? csp_script_nonce_attr() : '' ?> src="<?= $e($bp) ?>/public/assets/vendor/leaflet/leaflet.js"></script>
 <script<?= function_exists('csp_script_nonce_attr') ? csp_script_nonce_attr() : '' ?>>window.__gfBasePath = <?= json_encode($bp) ?>;</script>
 <script<?= function_exists('csp_script_nonce_attr') ? csp_script_nonce_attr() : '' ?> src="<?= $e($bp) ?>/public/assets/js/components/address-picker.js?v=20260929-11"></script>
+<script<?= function_exists('csp_script_nonce_attr') ? csp_script_nonce_attr() : '' ?>>
+window.__gfFlowOptions = window.__gfFlowOptions || {};
+<?php if (!empty($adminCtx['veiculo_id']) && !empty($adminCtx['veiculo_categoria'])): ?>
+window.__gfFlowOptions.skipVeiculo = true;
+window.__gfFlowOptions.veiculoCategoria = <?= json_encode($adminCtx['veiculo_categoria']) ?>;
+<?php endif; ?>
+</script>
 <script<?= function_exists('csp_script_nonce_attr') ? csp_script_nonce_attr() : '' ?> src="<?= $e($bp) ?>/public/assets/js/public-pre-cotacao-flow.js?v=20260929-11"></script>
 
 <script<?= function_exists('csp_script_nonce_attr') ? csp_script_nonce_attr() : '' ?>>
