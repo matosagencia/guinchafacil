@@ -34,3 +34,6 @@ tools/fix-*.php
 tools/patch-*.patch
 tools/fix-*.php
 tools/patch-*.patch
+backup-*.sql
+*.patch
+teste-financeiro-*.ps1
