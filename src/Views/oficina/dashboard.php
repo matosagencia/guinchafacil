@@ -137,23 +137,26 @@ $primeiroPedido = $pedidosVisiveis[0] ?? null;
     }
 
     async function checarPedidos() {
-        if (!ONLINE) return;
+        if (!ONLINE) return [];
         try {
             var r = await fetch(BP + '/oficina/pedidos?_=' + Date.now(), { headers: { 'Accept':'application/json' }});
             // pedidos-disponiveis é JSON; /oficina/pedidos é HTML.
             var r2 = await fetch(BP + '/oficina/pedidos-disponiveis?_=' + Date.now(), { headers: { 'Accept':'application/json' }});
             var j = await r2.json();
             var container = document.getElementById('ofertaAtivaContainer');
-            if (!container || !j.ok) return;
-            if (j.pedidos && j.pedidos.length) {
+            if (!container || !j.ok) return [];
+            var pedidos = (j.pedidos || []);
+            if (pedidos.length) {
                 // Recarrega a página se houver pedido novo diferente
                 var atual = container.querySelector('[data-pedido-id]');
                 var atualId = atual ? atual.getAttribute('data-pedido-id') : null;
-                if (String(j.pedidos[0].id) !== String(atualId)) {
+                if (String(pedidos[0].id) !== String(atualId)) {
                     location.reload();
+                    return pedidos;
                 }
             }
-        } catch (e) { /* silencioso */ }
+            return pedidos;
+        } catch (e) { return []; }
     }
 
     if (toggle) {
