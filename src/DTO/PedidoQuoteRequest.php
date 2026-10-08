@@ -26,7 +26,8 @@ final class PedidoQuoteRequest
     {
         $this->clienteId = isset($data['cliente_id']) ? (int)$data['cliente_id'] : (isset($data['clienteId']) ? (int)$data['clienteId'] : null);
         $this->veiculoId = isset($data['veiculo_id']) ? (int)$data['veiculo_id'] : (isset($data['veiculoId']) ? (int)$data['veiculoId'] : null);
-        $this->tipoProblema = trim((string)($data['tipo_problema'] ?? $data['tipoProblema'] ?? 'outro'));
+        $tipoProblema = trim((string)($data['tipo_problema'] ?? $data['tipoProblema'] ?? 'outro'));
+        $this->tipoProblema = $tipoProblema !== '' ? $tipoProblema : 'outro';
         $this->localResgateLat = self::floatOrNull($data['local_resgate_lat'] ?? $data['localResgateLat'] ?? $data['lat_origem'] ?? null);
         $this->localResgateLng = self::floatOrNull($data['local_resgate_lng'] ?? $data['localResgateLng'] ?? $data['lng_origem'] ?? null);
         $this->enderecoOrigem = trim((string)($data['endereco_origem'] ?? $data['enderecoOrigem'] ?? ''));

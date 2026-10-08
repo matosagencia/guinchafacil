@@ -38,7 +38,11 @@ class Pedido {
     public static function criar(array $dados): int|false
     {
         try {
-            $pdo = getPDO();
+            $pdo = getPDO();
+            $tipoProblema = trim((string)($dados['tipo_problema'] ?? ''));
+            if ($tipoProblema === '') {
+                $tipoProblema = 'outro';
+            }
             // DATE_ADD/INTERVAL é sintaxe MySQL; sob o SQLite usado pelos testes
             // de integração (tests/bootstrap.php) isso quebrava silenciosamente
             // (capturado pelo catch abaixo como "Falha ao criar pedido no banco").
@@ -66,7 +70,7 @@ class Pedido {
             $stmt->execute([
                 ':cliente_id'         => (int)$dados['cliente_id'],
                 ':veiculo_id'         => (int)$dados['veiculo_id'],
-                ':tipo_problema'      => $dados['tipo_problema'],
+                ':tipo_problema'      => $tipoProblema,
                 ':descricao_problema' => trim($dados['descricao_problema'] ?? ''),
                 ':lat_origem'         => (float)$dados['lat_origem'],
                 ':lng_origem'         => (float)$dados['lng_origem'],
@@ -95,6 +99,10 @@ class Pedido {
     {
 
         $pdo = getPDO();
+        $tipoProblema = trim((string)($dados['tipo_problema'] ?? ''));
+        if ($tipoProblema === '') {
+            $tipoProblema = 'outro';
+        }
 
         $driver = (string)$pdo->getAttribute(PDO::ATTR_DRIVER_NAME);
 
@@ -152,7 +160,7 @@ class Pedido {
 
             ':cliente_id' => $dados['cliente_id'],
             ':veiculo_id' => $dados['veiculo_id'],
-            ':tipo_problema' => $dados['tipo_problema'],
+            ':tipo_problema' => $tipoProblema,
             ':descricao_problema' => $dados['descricao_problema'],
             ':lat_origem' => $dados['lat_origem'],
             ':lng_origem' => $dados['lng_origem'],
@@ -309,6 +317,10 @@ class Pedido {
 
         try {
             $pdo = getPDO();
+            $tipoProblema = trim((string)($dados['tipo_problema'] ?? ''));
+            if ($tipoProblema === '') {
+                $tipoProblema = 'outro';
+            }
             $agora = (string)$pdo->getAttribute(PDO::ATTR_DRIVER_NAME) === 'sqlite'
                 ? "datetime('now')"
                 : 'NOW()';

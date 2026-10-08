@@ -180,3 +180,98 @@ null # quando destino != online
 - Chama o metodo de A e trata os 4 retornos.
 - Redireciona para `/admin/pedido/{id}?criado=1` com flash contextual.
 - Interface da Etapa 1 nao permite escolher provedor desabilitado.
+
+
+## Contrato de Disponibilidade de Guincho (B -> A)
+
+**Status:** implementado pela Faixa A em 2026-10-06.  
+**Dono:** Faixa A (dispatch/cobertura). **Consumidores:** Faixa B (AdminController) e Faixa C (testes).
+
+### Metodo publico
+
+```php
+GuinchoDisponibilidade::existeNoRaio(
+    float $lat,
+    float $lng,
+    ?string $categoria = null,
+    ?float $raioKm = null
+): bool
+```
+
+### Semantica
+
+Retorna `true` somente quando existe pelo menos um prestador apto a receber um atendimento de **reboque/TOWING** nas coordenadas informadas.
+
+O gate pre-pedido exige:
+
+1. `aprovado = 1`;
+2. `disponivel = 1`;
+3. `reboque_aprovado = 1`;
+4. `lat_atual/lng_atual` validos;
+5. nenhum pedido ativo concorrente do mesmo guincho em `a_caminho|no_local|em_reboque`;
+6. distancia dentro de `MIN(raio_cobertura_km, raio_maximo_km global, raioKm opcional)`.
+
+O metodo e **read-only**: nao cria pedido, nao altera estado e nao grava evento/log de pedido. Em erro de banco/configuracao, retorna `false` (fail closed).
+
+### Limites do contrato pre-pedido
+
+- `expiracao_aceite` pertence ao pedido e so existe depois da criacao; portanto nao e aplicavel a esta consulta pre-pedido.
+- `categoria` esta reservada para compatibilidade veicular pre-pedido. O motor atual de compatibilidade usa snapshot ligado a `pedido_id`; a Faixa A nao inventa um gate diferente antes de o pedido existir.
+
+### Integracao de pre-cotacao
+
+`PreCotacaoOpcoesService::montar()`, quando `modo=reboque`, consulta **somente** `GuinchoDisponibilidade::existeNoRaio()` antes de calcular cotacao. Nao consulta oficinas neste modo.
+
+Sem guincho apto, a resposta e:
+
+```json
+{
+  "modo": "reboque",
+  "disponivel": false,
+  "fallback_tipo": "suporte",
+  "mensagem": "Nenhum guincho disponível na sua região agora."
+}
+```
+
+Com guincho apto, retorna `disponivel:true` e `valor_reboque`.
+
+A defesa da Faixa B antes de `PedidoCoreService::criar()` permanece obrigatoria e nao deve ser removida.
+
+
+### Semantica de fallback em orientacao/local (2026-10-07)
+
+Quando nao existir oficina/especialista apto para o servico solicitado:
+
+- se `GuinchoDisponibilidade::existeNoRaio(...)` retornar `true`, a API deve retornar `fallback_tipo = "guincho"`;
+- se retornar `false`, a API deve retornar `fallback_tipo = "suporte"`.
+
+Essa regra vale para `modo=orientacao` e `modo=local`.
+
+O front-end `public-pre-cotacao-flow.js` ja interpreta `fallback_tipo="guincho"` exibindo o botao **Quero rebocar**. A Faixa A deve fornecer apenas a semantica correta no payload.
+
+
+## Contrato de Persistencia de tipo_problema (B -> A)
+
+**Status:** implementado pela Faixa A em 2026-10-07.  
+**Dono:** Faixa A (`PedidoCoreService` / `Pedido`). **Consumidores:** Faixa B (AdminController) e Faixa C (testes).
+
+### Regra
+
+Quando a criacao receber `tipo_problema` nao vazio, o valor deve ser persistido integralmente em `pedidos.tipo_problema`.
+
+Exemplos:
+
+- fluxo direto de reboque: `tipo_problema = "reboque"`;
+- fluxo por servico: `tipo_problema = <slug do servico>`.
+
+A coluna `pedidos.tipo_problema` e `VARCHAR(80)`, e nao ENUM, porque o catalogo de servicos e extensivel. Isso impede que MySQL/MariaDB em modo permissivo converta silenciosamente slugs novos para string vazia.
+
+Como defesa adicional:
+
+- `PedidoQuoteRequest` normaliza valor vazio para `outro`;
+- `Pedido::criar()` e `Pedido::criarCompleto()` nunca gravam string vazia;
+- valores historicos vazios nao sao inferidos/backfillados automaticamente.
+
+### Criterio
+
+`tipo_problema="reboque"` deve ser lido como `reboque` apos o INSERT. Nenhum pedido novo criado pelos fluxos atuais deve persistir `tipo_problema = ''`.
