@@ -599,6 +599,9 @@ $rotas = [
         '/pagamento/complementar/mercadopago/pagar' => ['PagamentoController', 'complementarMercadoPago', 'cliente'],
 
         '/webhook/mercadopago'   => ['WebhookController', 'mercadoPago', null],
+        // Baixa faturas semanais de parceiros após PIX confirmado pelo Mercado Pago.
+        // A assinatura HMAC e a idempotência são validadas no controller.
+        '/webhook/mercadopago/pix' => ['FaturaWebhookController', 'mercadoPagoPix', null],
         '/webhook/pagseguro'     => ['WebhookController', 'pagSeguro', null],
 
         // Modo de debug global: espelho de erros JS pro log do servidor
