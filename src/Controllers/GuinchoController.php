@@ -183,8 +183,10 @@ class GuinchoController extends BaseController
         $raio = CoberturaService::raioEfetivoGuincho($guincho, (float)($cfg['raio_maximo_km'] ?? 50));
 
         $aguardando = Pedido::listarAguardandoGuincho();
-        $ofertas = [];
-
+        $ofertas = [];
+
+        $ofertasAbaixoDoScore = [];
+
         foreach ($aguardando as $pedido) {
             // Etapa 4 (matching por capacidade): pedidos de REBOQUE continuam
             // visíveis a qualquer guincho aprovado, exatamente como sempre
@@ -231,7 +233,8 @@ class GuinchoController extends BaseController
             if (!$semLocalizacao && $distancia > $raio) continue;
 
             $score = $semLocalizacao ? 1.0 : RankingService::calcularScore($distancia, (float)($guincho['reputacao'] ?? 0));
-            if (!$semLocalizacao && isset($pedido['score_minimo_atual']) && $score < (float)$pedido['score_minimo_atual']) continue;
+            $scoreMinimoAtual = (float)($pedido['score_minimo_atual'] ?? 0.0);
+            $abaixoDoScore = !$semLocalizacao && $scoreMinimoAtual > 0.0 && $score < $scoreMinimoAtual;
 
             $enderecoOrigem = (string)($pedido['endereco_origem'] ?? '');
             $partesEndereco = array_map('trim', explode(',', $enderecoOrigem));
@@ -245,7 +248,7 @@ class GuinchoController extends BaseController
             // ETA estimado: velocidade média urbana de ~28km/h até o cliente.
             $etaMin = $semLocalizacao ? null : max(1, (int)ceil(($distancia / 28) * 60));
 
-            $ofertas[] = [
+            $ofertaItem = [
                 'id'                 => (int)$pedido['id'],
                 'tipo_problema'      => (string)($pedido['tipo_problema'] ?? ''),
                 'marca'              => (string)($pedido['marca'] ?? ''),
@@ -255,17 +258,24 @@ class GuinchoController extends BaseController
                 'bairro'             => $bairro !== '' ? $bairro : $enderecoOrigem,
                 'distancia_km'       => round($distancia, 1),
                 'distancia_servico_km' => (float)($pedido['distancia_km'] ?? 0),
-                'custo_estimado'     => (float)($pedido['custo_estimado'] ?? 0),
+                'custo_estimado'     => (float)($pedido['custo_estimado'] ?? 0),
+                'forma_pagamento_escolhida' => (string)($pedido['forma_pagamento_escolhida'] ?? ''),
+                'provedor_pagamento_escolhido' => (string)($pedido['provedor_pagamento_escolhido'] ?? ''),
                 'eta_min'            => $etaMin,
                 'score'              => round($score, 4),
                 'segundos_desde_criacao' => $segundosDesde,
                 'expiracao_aceite'   => (string)($pedido['expiracao_aceite'] ?? ''),
                 'compat_status'      => $compatStatus,
-                'compat_warnings'    => $compatWarnings,
-            ];
+                'compat_warnings'    => $compatWarnings,
+            ];
+            if ($abaixoDoScore) { $ofertasAbaixoDoScore[] = $ofertaItem; } else { $ofertas[] = $ofertaItem; }
         }
 
-        usort($ofertas, fn($a, $b) => $b['score'] <=> $a['score']);
+        if (empty($ofertas) && !empty($ofertasAbaixoDoScore)) {
+            error_log(sprintf('[GuinchoController::montarOfertasDisponiveis] FALLBACK SCORE: %d pedido(s) abaixo do score minimo (guincho=%d)', count($ofertasAbaixoDoScore), (int)$guincho['id']));
+            $ofertas = $ofertasAbaixoDoScore;
+        }
+        usort($ofertas, fn($a, $b) => $b['score'] <=> $a['score']);
         return array_slice($ofertas, 0, $limite);
     }
 

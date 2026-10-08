@@ -332,6 +332,7 @@ class Pedido {
                 . "JOIN usuarios c ON c.id = p.cliente_id\n"
                 . "JOIN veiculos v ON v.id = p.veiculo_id\n"
                 . "WHERE p.status IN ('aguardando_guincho', 'aguardando_oficina')\n"
+                . "  AND p.attendance_mode IN ('ON_SITE', 'HYBRID')\n"
                 . "  AND p.expiracao_aceite > {$agora}\n"
                 . "  AND p.oficina_id IS NULL\n"
                 . "  AND p.lat_origem IS NOT NULL\n"
