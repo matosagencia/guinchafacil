@@ -391,4 +391,4 @@ CONTRATO_PEDIDO:
     - Com saldo < 0: fatura tem pix_qrcode + pix_copia_cola.
     - Webhook com evento repetido retorna 200 e nao reprocessa.
     - Fatura com saldo > 0 e paga em D+7: status='paga'.
-    - Fatura nao paga em D+7 bloqueia parceiro (bloquearPorVencimento
+    - Fatura nao paga em D+7 bloqueia parceiro (bloquearPorVencimento).
