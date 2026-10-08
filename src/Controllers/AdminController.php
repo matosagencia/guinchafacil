@@ -395,6 +395,8 @@ class AdminController extends BaseController
         if (!AuthService::validarCsrfToken($_POST['csrf_token'] ?? '')) {
             http_response_code(403); exit;
         }
+
+
         require_once __DIR__ . '/../Models/Ocorrencia.php';
 
         $pedidoId = (int)($_POST['pedido_id'] ?? 0);
@@ -1617,6 +1619,27 @@ $lngDestino = ($_POST['lng_destino'] ?? '') !== '' ? (float)$_POST['lng_destino'
             ];
             $this->redirect('/admin/pedido/novo/funil');
             return;
+        }
+
+        // [B-STID-01] Fallback quando o POST nao trouxe service_type_id
+        // (o JS public-pre-cotacao-flow.js ainda nao preenche o hidden).
+        // Sem isso, o PedidoCoreService assume TOWING e exige destino.
+        if ($serviceTypeId === null) {
+            $tipoParaBusca = trim((string)($_POST['tipo_problema'] ?? ''));
+            if ($tipoParaBusca !== '' && $tipoParaBusca !== 'outro') {
+                try {
+                    $pdoSvc = getPDO();
+                    $stmtSvc = $pdoSvc->prepare('SELECT id FROM service_types WHERE active = 1 AND (code = ? OR slug = ? OR LOWER(name) = LOWER(?)) LIMIT 1');
+                    $stmtSvc->execute([$tipoParaBusca, $tipoParaBusca, $tipoParaBusca]);
+                    $svcFallback = (int)$stmtSvc->fetchColumn();
+                    if ($svcFallback > 0) {
+                        $serviceTypeId = $svcFallback;
+                        error_log('[B-STID-01] service_type_id resolvido por fallback: ' . $svcFallback . ' (tipo_problema=' . $tipoParaBusca . ')');
+                    }
+                } catch (Throwable $eSvc) {
+                    error_log('[B-STID-01] falha no fallback: ' . $eSvc->getMessage());
+                }
+            }
         }
         $actorId = (int)($_SESSION['usuario_id'] ?? 0);
 
