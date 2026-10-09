@@ -289,10 +289,12 @@ class OficinaController extends BaseController
     }
 
     // --- FINANCEIRO ---
+    // --- FINANCEIRO ---
     public function financeiro(): void
     {
         $oficina = $this->getOficina();
         $oficinaId = (int)$oficina['id'];
+        $oficinaCompleta = $oficina;
 
         $mes = (int)($_GET['mes'] ?? date('m'));
         $ano = (int)($_GET['ano'] ?? date('Y'));
@@ -300,22 +302,79 @@ class OficinaController extends BaseController
         $fim    = date('Y-m-t', strtotime($inicio));
 
         $pdo = getPDO();
+
         $stmt = $pdo->prepare(
-            "SELECT * FROM oficina_repasses
-             WHERE oficina_id = ? AND criado_em BETWEEN ? AND ?
-             ORDER BY criado_em DESC"
+            "SELECT
+                r.id,
+                r.pedido_id,
+                r.valor_bruto,
+                r.taxa_plataforma,
+                r.valor_liquido,
+                r.status,
+                r.pix_enviado_em,
+                r.criado_em,
+                p.tipo_problema,
+                p.endereco_origem,
+                p.endereco_destino,
+                p.status       AS pedido_status,
+                p.criado_em    AS pedido_em,
+                p.motivo_cancelamento,
+                p.taxa_cancelamento,
+                u.nome         AS cliente_nome
+             FROM oficina_repasses r
+             LEFT JOIN pedidos p ON p.id = r.pedido_id
+             LEFT JOIN usuarios u ON u.id = p.cliente_id
+             WHERE r.oficina_id = ? AND r.criado_em BETWEEN ? AND ?
+             ORDER BY r.criado_em DESC"
         );
         $stmt->execute([$oficinaId, $inicio . ' 00:00:00', $fim . ' 23:59:59']);
-        $repasses = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+        $pagamentos = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
 
-        $totais = ['bruto'=>0.0,'taxa'=>0.0,'liquido'=>0.0,'pago'=>0.0,'a_receber'=>0.0];
-        foreach ($repasses as $r) {
-            $totais['bruto']   += (float)$r['valor_bruto'];
-            $totais['taxa']    += (float)$r['taxa_plataforma'];
-            $totais['liquido'] += (float)$r['valor_liquido'];
-            if ($r['status'] === 'pago')         $totais['pago']      += (float)$r['valor_liquido'];
-            elseif ($r['status'] === 'pendente') $totais['a_receber'] += (float)$r['valor_liquido'];
+        $totais = [
+            'valor_bruto'                  => 0.0,
+            'taxa_plataforma'              => 0.0,
+            'valor_liquido'                => 0.0,
+            'valor_pago_oficina'           => 0.0,
+            'valor_pendente_oficina'       => 0.0,
+            'valor_estornado'              => 0.0,
+            'taxa_retida_cancelamento'     => 0.0,
+            'concluidos'                   => 0,
+            'cancelados'                   => 0,
+        ];
+
+        foreach ($pagamentos as $r) {
+            $bruto   = (float)($r['valor_bruto'] ?? 0);
+            $taxa    = (float)($r['taxa_plataforma'] ?? 0);
+            $liquido = (float)($r['valor_liquido'] ?? 0);
+            $status  = (string)($r['status'] ?? '');
+            $pedidoStatus = (string)($r['pedido_status'] ?? '');
+
+            $totais['valor_bruto']     += $bruto;
+            $totais['taxa_plataforma'] += $taxa;
+            $totais['valor_liquido']   += $liquido;
+
+            if ($status === 'pago') {
+                $totais['valor_pago_oficina'] += $liquido;
+            } elseif ($status === 'pendente') {
+                $totais['valor_pendente_oficina'] += $liquido;
+            } elseif ($status === 'estornado') {
+                $totais['valor_estornado'] += $liquido;
+            }
+
+            if ($pedidoStatus === 'concluido') {
+                $totais['concluidos']++;
+            } elseif ($pedidoStatus === 'cancelado') {
+                $totais['cancelados']++;
+                $totais['taxa_retida_cancelamento'] += (float)($r['taxa_cancelamento'] ?? 0);
+            }
         }
+
+        require_once __DIR__ . '/../Models/Configuracao.php';
+        $cfg = Configuracao::getAll();
+        $systemMode = (string)($cfg['system_mode'] ?? 'production');
+        $comissaoPercent = (float)($cfg['comissao_plataforma'] ?? 0.15) * 100;
+
+        $csrfToken = AuthService::gerarCsrfToken();
 
         require __DIR__ . '/../Views/oficina/financeiro.php';
     }
@@ -605,38 +664,6 @@ class OficinaController extends BaseController
 
     
 
-    /** Financeiro com filtro + tabela. */
-    public function financeiroPage(): void
-    {
-        $oficina = $this->getOficina();
-        $oficinaId = (int)$oficina['id'];
-
-        $mes = (int)($_GET['mes'] ?? date('m'));
-        $ano = (int)($_GET['ano'] ?? date('Y'));
-        $inicio = sprintf('%04d-%02d-01', $ano, $mes);
-        $fim    = date('Y-m-t', strtotime($inicio));
-
-        $pdo = getPDO();
-        $stmt = $pdo->prepare(
-            "SELECT * FROM oficina_repasses
-             WHERE oficina_id = ? AND criado_em BETWEEN ? AND ?
-             ORDER BY criado_em DESC"
-        );
-        $stmt->execute([$oficinaId, $inicio . ' 00:00:00', $fim . ' 23:59:59']);
-        $repasses = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
-
-        $totais = ['bruto'=>0.0,'taxa'=>0.0,'liquido'=>0.0,'pago'=>0.0,'a_receber'=>0.0];
-        foreach ($repasses as $r) {
-            $totais['bruto']   += (float)$r['valor_bruto'];
-            $totais['taxa']    += (float)$r['taxa_plataforma'];
-            $totais['liquido'] += (float)$r['valor_liquido'];
-            if ($r['status'] === 'pago')         $totais['pago']      += (float)$r['valor_liquido'];
-            elseif ($r['status'] === 'pendente') $totais['a_receber'] += (float)$r['valor_liquido'];
-        }
-
-        $csrfToken = AuthService::gerarCsrfToken();
-        require __DIR__ . '/../Views/oficina/financeiro.php';
-    }
 
     /** Recusa um pedido (adiciona a uma lista de skip por sessão). */
     public function recusar(int $id): void

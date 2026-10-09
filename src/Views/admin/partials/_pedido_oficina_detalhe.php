@@ -67,6 +67,40 @@ $badgeRecomendacao = $recomendacao === 'assistencia'
 
             <dt class="col-sm-4">Custo reboque</dt>
             <dd class="col-sm-8"><?= htmlspecialchars($fmtMoney($custoReboque), ENT_QUOTES, 'UTF-8') ?></dd>
+
+        <?php
+        $comissaoValor = $pedido['comissao_valor'] ?? null;
+        $comissaoTipo  = $pedido['comissao_tipo']  ?? null;
+        $valorLiquido  = $pedido['valor_liquido_parceiro'] ?? null;
+        $faturaId      = $pedido['fatura_id'] ?? null;
+        ?>
+
+        <?php if ($comissaoValor !== null): ?>
+        <hr class="my-3">
+        <h6 class="text-muted mb-2">ComissÃ£o da plataforma</h6>
+        <dl class="row mb-0">
+            <dt class="col-sm-4">ComissÃ£o</dt>
+            <dd class="col-sm-8">
+                <?= htmlspecialchars($fmtMoney($comissaoValor), ENT_QUOTES, 'UTF-8') ?>
+                <?php if ($comissaoTipo !== null): ?>
+                    <span class="badge bg-<?= $comissaoTipo === 'faturada' ? 'warning text-dark' : 'info text-dark' ?>">
+                        <?= htmlspecialchars($comissaoTipo, ENT_QUOTES, 'UTF-8') ?>
+                    </span>
+                <?php endif; ?>
+            </dd>
+
+            <dt class="col-sm-4">LÃ­quido do parceiro</dt>
+            <dd class="col-sm-8"><?= htmlspecialchars($fmtMoney($valorLiquido), ENT_QUOTES, 'UTF-8') ?></dd>
+
+            <dt class="col-sm-4">Fatura</dt>
+            <dd class="col-sm-8">
+                <?php if (!empty($faturaId)): ?>
+                    <a href="<?= htmlspecialchars($bp, ENT_QUOTES, 'UTF-8') ?>/admin/fatura/<?= (int)$faturaId ?>">#<?= (int)$faturaId ?></a>
+                <?php else: ?>
+                    <span class="text-muted">Ainda nÃ£o faturada</span>
+                <?php endif; ?>
+            </dd>
         </dl>
+        <?php endif; ?>
     </div>
 </div>

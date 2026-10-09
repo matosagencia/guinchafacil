@@ -375,3 +375,63 @@ decisao_atendimento **nao pode sobrescrever** o catalogo. Divergencia -> erro ex
 - TOWING exige valor e destino; ON_SITE nao exige destino
 - Divergencia decisao x catalogo -> erro explicito
 - doc/CONTRATOS.md secao 2 sem "nao verificado"
+
+## Contrato de Bloqueio Financeiro (A -> B)
+
+  o_que_preciso:
+    1. Adicionar gate no matching: se o parceiro tem fatura com
+       status='bloqueada' e vencimento_em < NOW(), não ofertar
+       novos pedidos para ele.
+    2. Adicionar gate no aceite: se o parceiro está bloqueado,
+       rejeitar o aceite.
+    3. Documentar como o bloqueio é revertido (desbloquear()).
+  por_que:
+    Hoje faturas_parceiro.status = 'bloqueada' não tem efeito
+    operacional — o parceiro continua recebendo pedidos.
+  criterio_de_aceite:
+    - Guincho com fatura bloqueada não aparece em
+      /admin/pedidos-disponiveis nem no dashboard dele.
+    - Aceite é rejeitado com erro explícito.
+    
+**Status:** aceito por A em 2026-10-08. Implementacao de A pendente.
+
+**Regra:** parceiro com ao menos uma fatura vencida em
+`faturas_parceiro.status='bloqueada'` nao pode receber nem aceitar
+novas ofertas.
+
+**Chave do bloqueio:**
+
+| Campo | Valor |
+| --- | --- |
+| `parceiro_tipo` | `guincho` |
+| `parceiro_id` | `guincho_id` |
+| Condicao | `status = 'bloqueada' AND vencimento_em < NOW()` |
+
+**Metodo canonico (Faixa A):**
+```php
+BloqueioFinanceiroService::guinchoEstaBloqueado(int $guinchoId): bool
+```
+**Uso obrigatorio:**
+1. **Matching:** excluir apenas aquele guincho da lista de candidatos/ofertas.
+2. **Aceite:** consultar novamente antes de gravar o aceite, para evitar
+   corrida entre a montagem da oferta e o clique.
+3. **Auditoria/log:** registrar `FIN-BLOCK-MATCH` no filtro e
+   `FIN-BLOCK-ACCEPT` no aceite negado.
+**Resposta do aceite negado ao guincho:**
+> Nao e possivel aceitar novos pedidos enquanto houver fatura financeira
+> vencida pendente de regularizacao.
+**Nunca expor ao cliente** dados financeiros, valores ou IDs da fatura.
+**Reversao:**
+| Situacao | Acao canonica |
+| --- | --- |
+| Pagamento confirmado | `FaturaService::marcarPaga()` muda a fatura para paga; o gate deixa de bloquear |
+| Liberacao administrativa excepcional | `FaturaService::desbloquear($faturaId)` muda `bloqueada` -> `aberta` |
+| Fatura segue vencida apos desbloqueio excepcional | o cron `bloquearPorVencimento()` a bloqueia novamente |
+`desbloquear()` **nao equivale a pagamento**; e somente uma liberacao
+manual temporaria e deve ser auditada com administrador, motivo e data.
+**Criterio de aceite:**
+- Guincho bloqueado nao recebe nova oferta no dashboard.
+- Nao aparece como candidato no matching.
+- Tentativa de aceite e rejeitada no servidor com erro explicito.
+- Outro guincho elegivel continua podendo receber e aceitar o mesmo pedido.
+

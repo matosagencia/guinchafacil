@@ -44,10 +44,6 @@ src/Views/admin/partials/_pedido_oficina_detalhe.php renderiza triagem com
 htmlspecialchars(()). doc/CONTRATOS.md secao 2 marca o tipo de
 triagem como "nao verificado". Se for array/JSON, o admin ve "Array" ou JSON cru.
 
-**Hipoteses:**
-- H1: string humana -> partial OK.
-- H2: array/JSON -> partial imprime lixo.
-
 **CONTRATO_PEDIDO emitido (aguardando faixa A):**
     CONTRATO_PEDIDO:
       de: B
@@ -134,18 +130,13 @@ fix-B-11 v2 (toast+beep) funcionou.
    causa do alerta nao tocar. Mas e dado sujo.
    -> investigacao paralela Faixa B, nao bloqueia B-005.
 
-**Observacao (nao bloqueia):**
-404 em public/assets/vendor/leaflet-routing-machine/routing-icon.png
-referenciado por leaflet-routing-machine.css. Icone de manobra fica
-vazio. Dono decide: adicionar ao bundle ou incluir na fila D10.
-
 ---
 ## BLOCKER B-008 - Fallback [B-STID-01] nao resolve eletrica
 
 **Data:** 2026-10-08
 **Faixa:** B (paliativo por A)
 **Severidade:** alta (bloqueava criacao de pedidos de assistencia via funil admin)
-**Status:** **RESOLVIDO PALIATIVAMENTE em 2026-10-08** - aguardando confirmacao de teste funcional
+**Status:** **RESOLVIDO em 2026-10-08** - paliativo validado em teste funcional.
 
 **Sintoma:**
 Pedido com tipo_problema = "eletrica" no funil admin falhava com
@@ -166,27 +157,27 @@ Tres problemas:
 Resultado: pneu batia (por acaso), eletrica nao. serviceTypeId ficava
 NULL, PedidoCoreService assumia TOWING, exigia destino -> erro.
 
-**Paliativo aplicado:**
+**Paliativo aplicado (validado):**
 1. fix-B-stid-v5c.ps1 - substituiu o bloco [B-STID-01] antigo por chamada
    ao \App\Services\Catalog\ServiceTypeResolver::porSlug() (Faixa A).
-   Backup: AdminController.php.bak-fix-B-stid-v5c-20261008-153228.
-2. _precotacao_funil_admin.php (Solucao B) - o script proprio agora
-   sincroniza tipo_problema, categoria, valor_cotado e
-   decisao_atendimento via evento gf:flow-stage.
+2. fix-B-stid-v6c.ps1 - AdminController consulta service_types.attendance_mode
+   via ServiceType::isTowing() e passa modalidade_socorro explicito no
+   PedidoCreateRequest. Fecha o gap entre catalogo e ModalidadeResolver.
+3. _precotacao_funil_admin.php (Solucao B) - o script proprio sincroniza
+   tipo_problema, categoria, valor_cotado e decisao_atendimento via
+   evento gf:flow-stage.
+4. fix-B-funil-skip-veiculo.ps1 - funil admin pula o Passo 2 (veiculo)
+   quando ja veio do Passo 1 (pedidoNovoV2), via window.__gfFlowOptions.
 
-**Evidencia (log do console):**
-    [admin-funil] hidden sincronizados: {
-      tipo_problema: 'eletrica',
-      categoria: 'popular',
-      valor_cotado: 96.8,
-      decisao_atendimento: 'assistencia'
-    }
-
-**Pendencia para fechar:**
-Confirmar no php_errors.log a linha:
+**Evidencia (log do PHP):**
     [B-STID-01] service_type_id resolvido via ServiceTypeResolver: 8 (tipo_problema=eletrica)
-E testar /admin/pedido/novo/funil com eletrica: pedido criado como
-ON_SITE, service_type_id = 8, lat_destino = NULL, sem B-GUARD-02/03.
+    [B-STID-02] service_type_id=8 attendance_mode=ON_SITE -> modalidade_socorro=SOCORRO_LOCAL
+
+**Evidencia (banco):**
+    pedidos.service_type_id = 8, attendance_mode = ON_SITE, lat_destino = NULL
+
+**Evidencia (console):**
+    [admin-funil] hidden sincronizados: {tipo_problema: 'eletrica', ...}
 
 **Limite do paliativo:**
 O ServiceTypeResolver tem mapa hardcoded de 5 slugs (pneu, eletrica,
@@ -197,7 +188,51 @@ bateria, mecanica, chaveiro). Servico novo cadastrado no Backoffice
 **Sucessor:** B-009 (catalogo dinamico com service_type_id vindo de select
 real, attendance_mode do catalogo, public_slug administravel).
 
+---
+## BLOCKER B-010 - Bloqueio financeiro nao tem efeito operacional
+
+**Data:** 2026-10-08
+**Faixa:** B (CONTRATO_PEDIDO para A)
+**Severidade:** media (a fatura bloqueada nao impede o guincho de receber/aceitar pedidos)
+**Status:** **Ativo** - CONTRATO_PEDIDO emitido para Faixa A
+
+**Sintoma:**
+A tabela `faturas_parceiro.status = 'bloqueada'` (via `FaturaService::bloquearPorVencimento()`)
+nao tem efeito operacional. O guincho com fatura vencida continua:
+- Recebendo ofertas em `/guincho/dashboard`
+- Aparecendo como candidato no matching (`GuinchoController::montarOfertasDisponiveis`)
+- Podendo aceitar pedidos (`PedidoTransitionService::acceptByGuincho`)
+
+**Causa raiz:**
+O gate de bloqueio nao foi implementado. Existe apenas o estado
+`'bloqueada'` na tabela, sem consumo pelo matching/aceite.
+
+**CONTRATO_PEDIDO emitido (aceito por A em 2026-10-08):**
+    CONTRATO_PEDIDO:
+      de: B
+      para: A
+      o_que_preciso: BloqueioFinanceiroService::guinchoEstaBloqueado(int $guinchoId): bool
+                     com gate no matching e no aceite.
+      por_que: faturas_parceiro.status='bloqueada' nao tem efeito operacional.
+      criterio_de_aceite:
+        - guincho bloqueado nao aparece no dashboard nem no matching
+        - aceite rejeitado com mensagem explicita
+        - logs FIN-BLOCK-MATCH e FIN-BLOCK-ACCEPT
+        - outro guincho elegivel continua recebendo o mesmo pedido
+
+**Resposta de A (2026-10-08):**
+- `BloqueioFinanceiroService::guinchoEstaBloqueado(int $guinchoId): bool`
+- Condicao: `status = 'bloqueada' AND vencimento_em < NOW()` em `faturas_parceiro`
+- Uso: 1) matching (excluir o guincho), 2) aceite (re-checar para evitar race),
+  3) auditoria/log (`FIN-BLOCK-MATCH`, `FIN-BLOCK-ACCEPT`).
+- Mensagem ao guincho: "Nao e possivel aceitar novos pedidos enquanto houver
+  fatura financeira vencida pendente de regularizacao."
+- Reversao: `marcarPaga()` (fatura vira 'paga') ou `desbloquear()` (manual,
+  auditado com admin+motivo+data; o cron re-bloqueia se continuar vencida).
+
+**Ação B (bloqueada):**
+B nao implementa o gate — apenas exibe o badge "bloqueado" em
+`/admin/faturas` e `/admin/pedido/{id}` (feito em 2026-10-08).
+
 **Referencia cruzada:**
-- CONTRATO_RESPOSTA CONSOLIDADO - A -> B (2026-10-08) em doc/CONTRATOS.md.
-- fix-B-stid-v5c.ps1 em tools/.
-- _precotacao_funil_admin.php (Solucao B) em src/Views/admin/partials/.
+- `CONTRATO_RESPOSTA` (A → B) em `doc/CONTRATOS.md`.

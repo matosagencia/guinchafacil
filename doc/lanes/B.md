@@ -94,8 +94,10 @@ A faixa B **não escreve** os testes da própria faixa (R5).
 | Arquivos sem faixa | Decisão D10 pendente |
 | **B-GUARD-01** ativação | Aguardando merge do PR #1 da Faixa A. Depois do merge, substituir o bloco comentado em `AdminController.php:1545` pela chamada real `GuinchoDisponibilidade::existeNoRaio($latOrigem, $lngOrigem)`. |
 | **Permission denied em `src/Models/Pedido.php`** | Ativo — ver `doc/BLOCKERS.md` B-006. Afeta cron `cron_cancelar_pedidos_expirados.php`, não o fluxo interativo. |
-| **B-008** — Fallback `[B-STID-01]` não resolve `eletrica` | **RESOLVIDO PALIATIVAMENTE em 2026-10-08** — `ServiceTypeResolver` (A) + Solução B no funil admin. Aguardando confirmação de teste funcional (log `[B-STID-01] service_type_id resolvido: 8`). Ver `doc/BLOCKERS.md`. |
+| **B-008** — Fallback `[B-STID-01]` não resolve `eletrica` | **RESOLVIDO em 2026-10-08** — `ServiceTypeResolver` (A) + `ServiceType::isTowing()` + Solução B no funil admin + skip-veiculo. Validado em runtime. Ver `doc/BLOCKERS.md`. |
 | **B-009** — Catálogo dinâmico no funil | **Agendado** para próxima sessão. Ver `doc/CONTRATOS.md` §Catálogo Dinâmico. Escopo: 3 views reescritas (A: público; B: cliente e admin), 1 JS sem STATE, `PedidoCoreService` deriva modalidade do catálogo, `public_slug` administrável, `attendance_mode` administrável, E2E para os 3 funis. |
+| **B-010** — Bloqueio financeiro operacional | **Ativo** — `CONTRATO_PEDIDO` emitido e aceito por A. A implementa `BloqueioFinanceiroService::guinchoEstaBloqueado()`. B só exibe badge. |
+| **Faturas dos parceiros (B)** | **ENTREGUE em 2026-10-08** — 4 rotas, 2 views, 4 métodos no `AdminController`. Menu em `admin_nav_operacional.php` seção Financeiro. Card comissão no `_pedido_oficina_detalhe.php`. |
 
 Ao terminar uma entrega: atualizar este arquivo (estado, contratos, pendências) e parar.
 
@@ -140,5 +142,12 @@ Ao terminar uma entrega: atualizar este arquivo (estado, contratos, pendências)
 | 2026-10-08 (sessão 3) | B-008 reescrito como "bloqueado por A" + pacote de A documentado | `doc/BLOCKERS.md` atualizado com causa raiz, API de conexão (`getPDO()`), e os 5 itens que A precisa entregar. `CONTRATO_RESPOSTA` e `CONTRATO_PEDIDO` emitidos em `doc/CONTRATOS.md`. |
 | 2026-10-08 (sessão 4) | fix-B-stid-v5c aplicado em `AdminController.php` | OK — `php -l` limpo. Linha 59: `require_once` do resolver; linha 1634: `\App\Services\Catalog\ServiceTypeResolver::porSlug()`. Backup: `AdminController.php.bak-fix-B-stid-v5c-20261008-153228`. |
 | 2026-10-08 (sessão 4) | Solução B no `_precotacao_funil_admin.php` | OK — `<script>` próprio agora sincroniza `tipo_problema`, `categoria`, `valor_cotado`, `decisao_atendimento` via `gf:flow-stage`. Log do console: `[admin-funil] hidden sincronizados: {tipo_problema: 'eletrica', ...}`. |
-| 2026-10-08 (sessão 4) | B-008 fechado paliativamente | **RESOLVIDO PALIATIVAMENTE** — `ServiceTypeResolver` resolve `eletrica → 8`; funil admin sincroniza hidden via `gf:flow-stage`. Aguardando confirmação de teste funcional (log `[B-STID-01] service_type_id resolvido: 8`). |
+| 2026-10-08 (sessão 4) | B-008 paliativo inicial | Aplicado `fix-B-stid-v5c` + Solução B. **Fechado de vez na sessão 5** (ver abaixo). |
 | 2026-10-08 (sessão 4) | B-009 agendado — catálogo dinâmico no funil | Próxima sessão. Contrato em `doc/CONTRATOS.md` §Catálogo Dinâmico. Escopo: 3 views reescritas (A: público; B: cliente e admin), 1 JS sem STATE, `PedidoCoreService` deriva modalidade do catálogo, `public_slug` administrável, `attendance_mode` administrável, E2E para os 3 funis. |
+| 2026-10-08 (sessão 5) | fix-B-stid-v6c + Solução B + skip-veiculo | OK — `B-STID-02` consulta `service_types.attendance_mode` via `ServiceType::isTowing()`; `_precotacao_funil_admin.php` sincroniza hidden via `gf:flow-stage`; `pedidonovo_funil.php` pula Passo 2. B-008 fechado com evidência (log + banco + console). |
+| 2026-10-08 (sessão 5) | Tela `/admin/faturas` + `/admin/fatura/{id}` | OK — 4 métodos no `AdminController` (`faturas`, `faturaDetalhe`, `faturaMarcarPaga`, `faturaDesbloquear`), 2 views, 4 rotas no `index.php`. |
+| 2026-10-08 (sessão 5) | Item "Faturas dos parceiros" na sidebar admin | OK — `admin_nav_operacional.php` seção Financeiro. |
+| 2026-10-08 (sessão 5) | Card "Comissão" no `_pedido_oficina_detalhe.php` | OK — exibe `comissao_valor`, `comissao_tipo`, `valor_liquido_parceiro`, `fatura_id` (só se comissão preenchida). |
+| 2026-10-08 (sessão 5) | `OficinaController::financeiro()` refatorado (layout guincho) | OK — JOIN `oficina_repasses` × `pedidos` × `usuarios`; 8 stat cards + tabela de 9 colunas; reusa `tow-financeiro.css`. `financeiroPage()` duplicado removido. |
+| 2026-10-08 (sessão 5) | `CONTRATO_PEDIDO` B→A (bloqueio financeiro) aceito por A | OK — `BloqueioFinanceiroService::guinchoEstaBloqueado()` a implementar. B-010 aberto. |
+| 2026-10-08 (sessão 5) | `FaturaService` + `FaturaWebhookController` descomprimidos + UTF-8 | OK — débito técnico resolvido por A. |

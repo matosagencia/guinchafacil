@@ -45,6 +45,7 @@ function opsNavActive(string $uri, string $match): string { return strpos($uri, 
         <div class="ops-nav-section__links">
             <a href="<?php echo htmlspecialchars($bp); ?>/admin/financeiro" class="ops-nav-link <?php echo (strpos($cur, 'financeiro') !== false || strpos($cur, '/carteira') !== false || strpos($cur, '/saques') !== false) ? 'is-active' : ''; ?>"><span class="ops-nav-link__icon"><i class="fas fa-chart-line"></i></span><span class="ops-nav-link__label">Financeiro</span></a>
             <a href="<?php echo htmlspecialchars($bp); ?>/admin/financeiro/visao-unificada" class="ops-nav-link <?php echo opsNavActive($cur, 'financeiro/visao-unificada'); ?>"><span class="ops-nav-link__icon"><i class="fas fa-chart-pie"></i></span><span class="ops-nav-link__label">Receita e margem</span></a>
+            <a href="<?php echo htmlspecialchars($bp); ?>/admin/faturas" class="ops-nav-link <?php echo opsNavActive($cur, '/admin/faturas'); ?>"><span class="ops-nav-link__icon"><i class="fas fa-file-invoice-dollar"></i></span><span class="ops-nav-link__label">Faturas dos parceiros</span></a>
         </div>
     </div>
 
