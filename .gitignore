@@ -40,3 +40,8 @@ teste-financeiro-*.ps1
 backup-*.sql
 *.patch
 teste-financeiro-*.ps1
+
+# D14 - artefatos de teste (2026-10-08)
+playwright-report/
+playwright-report-*.zip
+test-results/
