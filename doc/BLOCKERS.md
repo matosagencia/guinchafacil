@@ -236,3 +236,52 @@ B nao implementa o gate — apenas exibe o badge "bloqueado" em
 
 **Referencia cruzada:**
 - `CONTRATO_RESPOSTA` (A → B) em `doc/CONTRATOS.md`.
+
+---
+## DEBITO TECNICO - Mojibake no AdminController.php
+
+**Data:** 2026-10-08
+**Faixa:** B
+**Severidade:** baixa (cosmetico â€” comentarios ilegiveis; codigo funciona)
+**Status:** **Registrado** - nao corrigir agora (risco alto vs beneficio baixo)
+
+**Descricao:**
+`src/Controllers/AdminController.php` tem mojibake (`AÆ’AE'A...`) em
+comentarios e strings literais â€” residuo de sessoes anteriores. O
+`php -l` passa; o site funciona. Nao e bug funcional.
+
+**Impacto:**
+
+- Leitura humana dos comentarios prejudicada.
+- `Select-String` nao acha palavras com acento (ex.: `eletrica`).
+
+**Acao futura (quando houver janela de manutencao):**
+
+1. `git stash` tudo (garante estado limpo).
+2. Restaurar `AdminController.php` do commit `8fdc9ff`.
+3. Corrigir o mojibake usando **bytes** (nao `Get-Content -Raw`):
+
+       $bytes = [System.IO.File]::ReadAllBytes($path)
+       $texto = [System.Text.Encoding]::UTF8.GetString($bytes)
+       # ... edita ...
+       [System.IO.File]::WriteAllBytes($path,
+           [System.Text.Encoding]::UTF8.GetBytes($texto))
+
+4. Reaplicar os patches da sessao 5:
+   - `fix-B-stid-v6c.ps1`
+   - `fix-B-admin-faturas-controller.ps1`
+   - `fix-B-admin-faturas-menu-e-comissao.ps1`
+5. Commit + push.
+
+**Por que nao corrigir agora:**
+
+- O arquivo tem 4.400+ linhas â€” refatoracao de altissimo risco.
+- Cada edicao com `Get-Content` + `WriteAllText` PIORA o encoding
+  (aconteceu 3 vezes nas sessoes 3, 4 e 5).
+- O `php -l` passa; o site funciona.
+- R6 do protocolo: diff minimo, sem limpezas fora da tarefa.
+
+**Referencia cruzada:**
+
+- Commit `cdffcfd` (sessao 5) no `origin/main`.
+- Mesmo problema pode afetar `index.php` (verificar em sessao dedicada).
