@@ -151,7 +151,7 @@ Conferidos no zip enviado (protocolo v2, seção 8):
 
 | Risco | Situação |
 | --- | --- |
-| `.cpanel.yml` copia tudo (inclui `tests`, `qa`, `.bak`), não remove arquivos deletados, apaga `*.txt` da raiz e executa `rm -f .env` em `public_html`. | Se o deploy por cPanel Git rodar, o `.env` de produção pode ser apagado. Validar onde o `.env` de produção vive antes do próximo deploy (tarefa C0). |
+| .cpanel.yml copia tudo (inclui `tests`, `qa`, `.bak`), não remove arquivos deletados, e executa proteção ao `.env` de produção (faz backup antes, restaura depois do deploy). | O deploy via cPanel Git é seguro para o `.env`. |
 | Segredos expostos em texto puro em conversas anteriores (chaves do Mercado Pago, tokens, senha de contas de teste em produção). | Rotacionar no painel do Mercado Pago; desativar contas `cliente1..3@teste.local` em produção. |
 | `.env` real, `node_modules` (~96 MB) e `.git` foram enviados a IAs. | Enviar apenas `git archive` ou zip filtrado. |
 | Arquivos soltos na raiz: `_auditoria_export.txt`, `deepKS.txt`, `result.json`, `gemini.js`, `index.php.bak-stage3-*`. | Mover para `_archive/` com autorização do dono (R6). |

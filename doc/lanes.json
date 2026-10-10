@@ -32,7 +32,14 @@
     "src/Views/admin/pedidodetalhe.php",
     "src/Views/admin/partials/_pedido_oficina_detalhe.php",
     "docs/lanes/B.md",
-    "docs/BLOCKERS.md"
+    "docs/BLOCKERS.md",
+    "src/Models/Configuracao.php",
+    "src/Services/Address/*",
+    "src/Services/PreCotacao/PreCotacaoOpcoesService.php",
+    "src/Services/CoberturaService.php",
+ "src/Views/public/parceiros/index.php",
+  "src/Views/public/parceiros/guinchos.php",
+  "src/Views/public/parceiros/oficinas.php"
   ],
   "C": [
     "tests/*",
@@ -56,12 +63,7 @@
     "docs/ARQUITETURA.md",
     "docs/lanes.json"
   ],
-  "_sem_faixa_definida": [
-    "src/Models/Configuracao.php",
-    "src/Services/Address/*",
-    "src/Services/PreCotacao/PreCotacaoOpcoesService.php",
-    "src/Services/CoberturaService.php"
-  ],
+  "_sem_faixa_definida": [],
   "_notas": [
     "Chaves A, B e C sao lidas por tools/lane_guard.ps1 (comparacao -like com caminhos no formato do git, barra normal).",
     "Chaves iniciadas por _ sao documentacao: o lane_guard nao as usa como faixa.",

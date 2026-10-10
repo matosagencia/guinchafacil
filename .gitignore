@@ -45,3 +45,17 @@ teste-financeiro-*.ps1
 playwright-report/
 playwright-report-*.zip
 test-results/
+
+# Artefatos locais / debug (nao vao para o repo)
+_backups/
+_ddl-*.sql
+tabelas-dev.txt
+*.bak-session-*
+*.bak-cta-cores-*
+*.bak-rotas-oficina-*
+*.bak-split-*
+*.bak-hero-*
+*.bak-oficina-*
+*.bak-antes-do-*
+*.bak-calculadora-*
+*.bak-mojibake-*

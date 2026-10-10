@@ -81,17 +81,30 @@
 
 ## D9 — Fronteira `CheckoutController` (A) × `/checkout/cliente` (B)
 
-**Status:** Pendente
+**Status:** **Aceita em 2026-10-08** (opção a)
 
-- `CheckoutController` é da faixa A, mas o método `cliente` atende a rota e a view da faixa B.
-- Opções: (a) A mantém o método e B só pede mudanças via `CONTRATO_PEDIDO`; (b) mover `cliente` para um controller da faixa B, via `ROTA_PEDIDA`. Decidir e registrar aqui.
+
+- B **não edita** `CheckoutController.php` diretamente.
+- Se B precisar de mudança no método `cliente()`, emite `CONTRATO_PEDIDO` para A, que executa e responde.
+- **Justificativa:** manter uma única fonte de verdade; o ciclo `CONTRATO_PEDIDO` já funciona bem no projeto.
+
 
 ## D10 — Arquivos sem faixa
 
-**Status:** Pendente
+**Status:** **Aceita em 2026-10-08** — os 4 arquivos passam a ser da **Faixa B**
 
-- Sem dono em `lanes.json`: `Configuracao.php`, `Services/Address/*`, `Services/PreCotacao/PreCotacaoOpcoesService.php`, `Services/CoberturaService.php`.
-- Decidir a faixa de cada um e atualizar `lanes.json`.
+- `src/Models/Configuracao.php` → **B**
+- `src/Services/Address/*` → **B**
+- `src/Services/PreCotacao/PreCotacaoOpcoesService.php` → **B**
+- `src/Services/CoberturaService.php` → **B**
+- **Ações decorrentes:** `doc/lanes.json` atualizado (`_sem_faixa_definida` vazia; 4 caminhos na chave `B`). A Faixa A emite `CONTRATO_PEDIDO` para B se precisar mexer.
+
+**Ações decorrentes:**
+
+- `doc/lanes.json` atualizado (chave `B` inclui os 4 caminhos; `_sem_faixa_definida` ficou vazia).
+- A Faixa B passa a ser responsável por mudanças nesses arquivos.
+- Se a Faixa A precisar mexer em algum deles, emite `CONTRATO_PEDIDO` para B.
+
 - **2026-10-03**  atualização com autorização do dono:
   - `src/Views/components/admin_nav_operacional.php`  **Faixa B**. Aplicado patch de menu (`/admin/pedido/novo`  `/admin/pedido/novo/v2`) nesta data.
   - `src/Views/layouts/header.php`  **compartilhado**. Ainda pendente: dropdown mobile do admin com o mesmo link antigo. Só o dono edita.
@@ -110,8 +123,17 @@
 | Data | Mudança |
 | --- | --- |
 | 2026-09-30 | Criação do arquivo com D0–D11 a partir do protocolo multi-agente v2 |
+| 2026-10-08 | D9 Aceita (opção a); D10 Aceita (4 arquivos → B); D14 Aceita (rm --cached) |
 
 ## D14 — Artefatos de teste no git
-Status: Pendente
-- playwright-report/ e um .zip de 20 MB estão versionados.
+
+**Status:** **Aceita em 2026-10-08**
+
+- `playwright-report/` e `*.zip` **não** devem ser versionados.
+- Ação: `git rm --cached` + `.gitignore` (commit `e6bdcae`).
+- **Sem reescrever história** (decisão explícita).
+- Artefatos já no histórico permanecem; novos não entram.
 - Proposta: .gitignore + git rm --cached. Sem reescrever história.
+- **Ação:** commit `e6bdcae` removeu `playwright-report/` do rastreamento; `.gitignore` atualizado.
+- **Sem reescrever história** (decisão explícita).
+| 2026-10-08 | D9 Aceita (opção a); D10 Aceita (4 arquivos → B); D14 Aceita (rm --cached) |

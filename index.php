@@ -2,21 +2,21 @@
 
 // File: guinchafacil/index.php
 
-// Router (front-controller) â€” roda em public_html (raiz) ou em subpasta automaticamente.
+// Router (front-controller) — roda em public_html (raiz) ou em subpasta automaticamente.
 
 declare(strict_types=1);
 
 require_once __DIR__ . '/config.php';
 
-// Â§OUTPUT-BUFFER-01: qualquer warning/notice do PHP (ex.: fsockopen do
-// PHPMailer falhando em DNS/SMTP durante o envio de notificaÃ§Ã£o â€” visto em
-// produÃ§Ã£o contaminando a resposta JSON do checkout transparente com
-// "Resposta nÃ£o-JSON (HTTP 200)") Ã© impresso direto no corpo da resposta se
+// §OUTPUT-BUFFER-01: qualquer warning/notice do PHP (ex.: fsockopen do
+// PHPMailer falhando em DNS/SMTP durante o envio de notificação — visto em
+// produção contaminando a resposta JSON do checkout transparente com
+// "Resposta não-JSON (HTTP 200)") é impresso direto no corpo da resposta se
 // display_errors estiver ligado, ANTES do json_encode() do controller.
-// Bufferizar a saÃ­da inteira e deixar os endpoints JSON (responderJson() no
+// Bufferizar a saída inteira e deixar os endpoints JSON (responderJson() no
 // PagamentoController, por exemplo) descartarem esse lixo com ob_clean()
 // antes de emitir o corpo real garante que a resposta HTTP nunca fica
-// corrompida por efeitos colaterais de cÃ³digo que nÃ£o deveriam gerar saÃ­da.
+// corrompida por efeitos colaterais de código que não deveriam gerar saída.
 ob_start();
 
 $requestId = preg_replace('/[^a-zA-Z0-9_\-]/', '', (string)($_SERVER['HTTP_X_REQUEST_ID'] ?? ''));
@@ -40,44 +40,44 @@ if (!function_exists('csp_script_nonce_attr')) {
     }
 }
 
-// Â§PAY-CSP-01: form-action sÃ³ com 'self' bloqueava o prÃ³prio checkout â€”
+// §PAY-CSP-01: form-action só com 'self' bloqueava o próprio checkout —
 // PagamentoController::iniciarMercadoPago()/iniciarPagSeguro() terminam com um
-// redirect 302 do POST do formulÃ¡rio direto pro checkout do gateway (domÃ­nio
-// externo), e o Chrome aplica form-action tambÃ©m no destino final do redirect
-// de um form, nÃ£o sÃ³ na origem. Sem os domÃ­nios dos gateways aqui, NENHUM
-// pagamento real (produÃ§Ã£o ou sandbox) chegava a abrir o checkout â€” achado
+// redirect 302 do POST do formulário direto pro checkout do gateway (domínio
+// externo), e o Chrome aplica form-action também no destino final do redirect
+// de um form, não só na origem. Sem os domínios dos gateways aqui, NENHUM
+// pagamento real (produção ou sandbox) chegava a abrir o checkout — achado
 // testando o sandbox MercadoPago (erro no console: "violates ... form-action
-// 'self'"). Inclui os domÃ­nios de checkout do MercadoPago (produÃ§Ã£o e
-// sandbox) e do PagSeguro (produÃ§Ã£o e sandbox). Mantido mesmo apÃ³s o
+// 'self'"). Inclui os domínios de checkout do MercadoPago (produção e
+// sandbox) e do PagSeguro (produção e sandbox). Mantido mesmo após o
 // checkout transparente porque o fluxo antigo (iniciarMercadoPago/
-// iniciarPagSeguro) continua no cÃ³digo como fallback.
+// iniciarPagSeguro) continua no código como fallback.
 //
-// Â§PAY-CSP-02 (checkout transparente): Payment Brick do MercadoPago carrega
+// §PAY-CSP-02 (checkout transparente): Payment Brick do MercadoPago carrega
 // o SDK de sdk.mercadopago.com, usa iframes de secure-fields pra tokenizar
-// cartÃ£o sem o nÃºmero passar pelo nosso JS (mercadolibre.com/mercadopago.com),
+// cartão sem o número passar pelo nosso JS (mercadolibre.com/mercadopago.com),
 // e busca assets em http2.mlstatic.com. PagSeguroDirectPayment.js vem de
 // stc(.sandbox).pagseguro.uol.com.br. Sem essas origens em script-src/
-// frame-src/connect-src, o Brick nÃ£o carrega e a tokenizaÃ§Ã£o de cartÃ£o do
+// frame-src/connect-src, o Brick não carrega e a tokenização de cartão do
 // PagSeguro falha silenciosamente.
-// Â§PAY-CSP-03: o Brick injeta seus prÃ³prios <script>/<iframe> filhos em
+// §PAY-CSP-03: o Brick injeta seus próprios <script>/<iframe> filhos em
 // runtime (device fingerprint /tracks, secure-fields) sem usar o nosso
-// nonce â€” impossÃ­vel prever hash/nonce desses scripts com antecedÃªncia.
-// A soluÃ§Ã£o documentada pra SDKs de terceiros assim Ã© 'strict-dynamic':
-// com ele, um script jÃ¡ confiÃ¡vel (o sdk.mercadopago.com carregado com
+// nonce — impossível prever hash/nonce desses scripts com antecedência.
+// A solução documentada pra SDKs de terceiros assim é 'strict-dynamic':
+// com ele, um script já confiável (o sdk.mercadopago.com carregado com
 // nosso nonce) pode inserir outros scripts em runtime e o browser confia
 // neles automaticamente, sem precisar listar cada host. Browsers que
 // suportam strict-dynamic ignoram a allowlist de hosts em script-src (por
 // isso o https://unpkg.com/https://cdn.jsdelivr.net continuam como
-// fallback pra navegadores mais antigos que nÃ£o suportam strict-dynamic).
-// connect-src tambÃ©m precisou de api.mercadolibre.com (telemetria do
-// Brick) e http2.mlstatic.com (assets/i18n) alÃ©m dos domÃ­nios de API.
-// Â§PAY-CSP-04: o Brick carrega o mÃ³dulo antifraude "device fingerprint"
-// (armor) do prÃ³prio Mercado Livre â€” mercadolibre.com/mercadolivre.com,
-// nÃ£o sÃ³ mercadopago.com/mlstatic.com. Ele faz XHR (connect-src), carrega
-// imagens de tracking (img-src) e abre um iframe de sessÃ£o (frame-src)
-// nesses domÃ­nios. Sem eles o Brick renderiza os mÃ©todos de pagamento mas
-// trava ao selecionar "CartÃ£o de crÃ©dito" (Ã© esse mÃ³dulo que monta os
-// campos de nÃºmero/validade/CVV).
+// fallback pra navegadores mais antigos que não suportam strict-dynamic).
+// connect-src também precisou de api.mercadolibre.com (telemetria do
+// Brick) e http2.mlstatic.com (assets/i18n) além dos domínios de API.
+// §PAY-CSP-04: o Brick carrega o módulo antifraude "device fingerprint"
+// (armor) do próprio Mercado Livre — mercadolibre.com/mercadolivre.com,
+// não só mercadopago.com/mlstatic.com. Ele faz XHR (connect-src), carrega
+// imagens de tracking (img-src) e abre um iframe de sessão (frame-src)
+// nesses domínios. Sem eles o Brick renderiza os métodos de pagamento mas
+// trava ao selecionar "Cartão de crédito" (é esse módulo que monta os
+// campos de número/validade/CVV).
 $cspPolicy = "default-src 'self' data: blob:; base-uri 'self'; object-src 'none'; form-action 'self' https://www.mercadopago.com.br https://www.mercadopago.com https://sandbox.mercadopago.com.br https://sandbox.mercadopago.com https://pagseguro.uol.com.br https://sandbox.pagseguro.uol.com.br; frame-ancestors 'self'; frame-src 'self' https://www.mercadopago.com.br https://www.mercadopago.com https://sandbox.mercadopago.com.br https://sandbox.mercadopago.com https://http2.mlstatic.com https://www.mercadolibre.com https://www.mercadolivre.com https://api-static.mercadopago.com https://secure-fields.mercadopago.com; script-src 'self' 'nonce-" . CSP_SCRIPT_NONCE . "' 'strict-dynamic' https://unpkg.com https://cdn.jsdelivr.net https://sdk.mercadopago.com https://http2.mlstatic.com https://api-static.mercadopago.com https://secure-fields.mercadopago.com https://stc.pagseguro.uol.com.br https://stc.sandbox.pagseguro.uol.com.br https://www.googletagmanager.com https://connect.facebook.net; script-src-attr 'none'; style-src 'self' 'unsafe-inline' https://unpkg.com; font-src 'self' data:; img-src 'self' data: blob: https://tile.openstreetmap.org https://*.tile.openstreetmap.org https://http2.mlstatic.com https://www.mercadolibre.com https://www.mercadolivre.com https://www.mercadopago.com https://www.mercadopago.com.br https://sandbox.mercadopago.com https://sandbox.mercadopago.com.br https://api-static.mercadopago.com https://secure-fields.mercadopago.com https://www.facebook.com https://www.googletagmanager.com https://www.google.com https://www.google.com.br; connect-src 'self' https://viacep.com.br https://nominatim.openstreetmap.org https://router.project-osrm.org https://api.mercadopago.com https://sdk.mercadopago.com https://events.mercadopago.com https://api.mercadolibre.com https://www.mercadolibre.com https://www.mercadolivre.com https://api-static.mercadopago.com https://secure-fields.mercadopago.com https://http2.mlstatic.com https://ws.pagseguro.uol.com.br https://ws.sandbox.pagseguro.uol.com.br https://stc.pagseguro.uol.com.br https://stc.sandbox.pagseguro.uol.com.br https://www.google-analytics.com https://region1.google-analytics.com https://www.facebook.com https://www.google.com https://analytics.google.com https://ad.doubleclick.net;";
 if (!headers_sent()) {
     header('Content-Security-Policy: ' . $cspPolicy);
@@ -90,9 +90,9 @@ require_once __DIR__ . '/src/Services/AuthService.php';
 require_once __DIR__ . '/src/Services/Logger.php';
 require_once __DIR__ . '/src/Controllers/BaseController.php';
 
-// â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”
-// Error handling: registra fatal e exceptions com contexto (pra parar de â€œ500 fantasmaâ€)
-// â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”
+// ————————————————————————————————————————————————————————————————————————————————
+// Error handling: registra fatal e exceptions com contexto (pra parar de “500 fantasma”)
+// ————————————————————————————————————————————————————————————————————————————————
 // [A-RESOLVER-BOOT-01] Liga o slug publico ao catalogo real de service_types.
 // O callback e lazy: getPDO() so abre conexao se porSlug() for chamado.
 require_once __DIR__ . '/src/Services/Catalog/ServiceTypeResolver.php';
@@ -176,7 +176,7 @@ register_shutdown_function(function (): void {
     }
 });
 
-// â€”â€” SessÃ£o segura â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”
+// —— Sessão segura ——————————————————————————————————————————————————————————————
 ini_set('session.cookie_httponly', '1');
 ini_set('session.use_strict_mode', '1');
 if (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') {
@@ -186,7 +186,7 @@ session_start();
 require_once __DIR__ . '/src/Services/MarketingAttributionService.php';
 MarketingAttributionService::capture();
 
-// Regenera ID da sessÃ£o a cada 5 minutos
+// Regenera ID da sessão a cada 5 minutos
 if (!isset($_SESSION['last_regen'])) {
     session_regenerate_id(true);
     $_SESSION['last_regen'] = time();
@@ -195,7 +195,7 @@ if (!isset($_SESSION['last_regen'])) {
     $_SESSION['last_regen'] = time();
 }
 
-// â€”â€” Autoloader simples (sem namespace) â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”
+// —— Autoloader simples (sem namespace) ————————————————————————————————————————
 spl_autoload_register(function ($classe): void {
     $classe = (string)$classe;
     $paths = [
@@ -207,11 +207,11 @@ spl_autoload_register(function ($classe): void {
         if (is_file($p)) { require_once $p; return; }
     }
 
-    // Fallback recursivo: domÃ­nios organizados em subpastas (Models/Catalog,
+    // Fallback recursivo: domínios organizados em subpastas (Models/Catalog,
     // Models/Dispatch, Models/Vehicle, Services/Dispatch, Services/Pedido,
-    // Financial etc.) nÃ£o sÃ£o achados pelos caminhos planos acima. Varre src/
-    // uma Ãºnica vez, monta um mapa {ClasseSemExtensao => caminho} e cacheia.
-    // Nomes de classe sÃ£o Ãºnicos no projeto, entÃ£o nÃ£o hÃ¡ ambiguidade.
+    // Financial etc.) não são achados pelos caminhos planos acima. Varre src/
+    // uma única vez, monta um mapa {ClasseSemExtensao => caminho} e cacheia.
+    // Nomes de classe são únicos no projeto, então não há ambiguidade.
     static $mapa = null;
     if ($mapa === null) {
         $mapa = [];
@@ -236,7 +236,7 @@ spl_autoload_register(function ($classe): void {
 });
 
 // BasePath: detectado automaticamente.
-// Em public_html (raiz) serÃ¡ '' â€” nenhuma configuraÃ§Ã£o necessÃ¡ria.
+// Em public_html (raiz) será '' — nenhuma configuração necessária.
 // Para subpasta, force: define('FORCE_BASEPATH','/minha-subpasta') em config.php
 $basePath = '';
 if (defined('FORCE_BASEPATH') && trim((string)FORCE_BASEPATH) !== '') {
@@ -255,11 +255,11 @@ if (isset($_GET['__route_debug'])) {
     exit;
 }
 
-// â€”â€” URL atual normalizada â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”
+// —— URL atual normalizada ——————————————————————————————————————————————————————
 $uri = $_SERVER['REQUEST_URI'] ?? '/';
 $uri = strtok($uri, '?') ?: '/';
 
-// Remove basePath do comeÃ§o da URL (rodando em subpasta)
+// Remove basePath do começo da URL (rodando em subpasta)
 if ($basePath !== '' && strpos($uri, $basePath) === 0) {
     $uri = substr($uri, strlen($basePath));
     if ($uri === '') $uri = '/';
@@ -273,10 +273,11 @@ $uri = rtrim($uri, '/') ?: '/';
 
 $metodo = $_SERVER['REQUEST_METHOD'] ?? 'GET';
 
-// â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”
-// Rotas (sem gambiarra de espaÃ§amento: mÃ©todo e path separados)
+// ————————————————————————————————————————————————————————————————————————————————
+// Rotas (sem gambiarra de espaçamento: método e path separados)
 // Formato: $rotas[METODO][PATH] = [Controller, action, perfil]
-// â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”
+//          (4º elemento opcional: array de argumentos extras passados ao action)
+// ————————————————————————————————————————————————————————————————————————————————
 $rotas = [
 
     'GET' => [
@@ -298,6 +299,9 @@ $rotas = [
         '/oficina/perfil'                => ['OficinaController', 'perfilForm',          'oficina'],
 
         '/'                 => ['AuthController', 'landing', null],
+        '/parceiros'          => ['SeoPartnerController', 'index',    null],
+        '/parceiros/guinchos' => ['SeoPartnerController', 'guinchos', null],
+        '/parceiros/oficinas' => ['SeoPartnerController', 'oficinas', null],
         '/parceiros/interesse' => ['AuthController', 'parceirosInteresse', null],
         '/sitemap.xml'      => ['AuthController', 'sitemap', null],
         '/login'            => ['AuthController', 'loginForm', null],
@@ -313,9 +317,22 @@ $rotas = [
         '/auth/magic'          => ['AuthController', 'magicEnviado', null],
         '/senha/esqueceu'         => ['AuthController', 'esqueceuSenhaForm', null],
 
-        '/registro/cliente' => ['AuthController', 'registroClienteForm', null],
-        '/registro/guincho' => ['AuthController', 'registroGuinchoForm', null],
+        // —— Signup simplificado (3 campos) + perfil interno ——
+        // O 4º elemento (args) é passado como argumento extra para o controller.
+        // AuthController::registroSimplesForm(string $tipo) usa esse valor
+        // ('cliente'|'guincho'|'oficina') para escolher a view/validação.
+        '/registro/simples/cliente' => ['AuthController', 'registroSimplesForm', null, ['cliente']],
+        '/registro/simples/guincho' => ['AuthController', 'registroSimplesForm', null, ['guincho']],
+        '/registro/simples/oficina' => ['AuthController', 'registroSimplesForm', null, ['oficina']],
+        '/perfil/completar'         => ['AuthController', 'perfilCompletarForm',   null],
+
+        // Rotas antigas mantidas para retrocompatibilidade (SEO, links em e-mails
+        // já enviados, cache). Os controllers delegam para o signup simples.
+        '/registro/cliente'      => ['AuthController', 'registroClienteForm', null],
+        '/registro/guincho'      => ['AuthController', 'registroGuinchoForm', null],
         '/registro/especialista' => ['AuthController', 'registroEspecialistaForm', null],
+        '/registro/oficina'      => ['AuthController', 'registroOficinaForm', null],
+        '/registro/oficinas'     => ['AuthController', 'registroOficinaForm', null],
 
         '/cliente/dashboard'    => ['ClienteController', 'dashboard', 'cliente'],
         '/cliente/incidente/orcamento/aprovar/{id}' => ['IncidenteController', 'aprovarOrcamento', 'cliente'],
@@ -450,8 +467,8 @@ $rotas = [
         '/admin/cidades'             => ['AdminController', 'cidades', 'admin'],
         '/admin/cidade/excluir'      => ['AdminController', 'cidadeExcluir', 'admin'],
 
-        // ROADMAP socorro automotivo â€” Etapa 1: catÃ¡logo estruturado (service_types),
-        // distinto de /admin/servicos (atalhos rÃ¡pidos do painel do cliente).
+        // ROADMAP socorro automotivo — Etapa 1: catálogo estruturado (service_types),
+        // distinto de /admin/servicos (atalhos rápidos do painel do cliente).
         '/admin/catalogo-servicos/tipos'        => ['AdminServiceCatalogController', 'tipos', 'admin'],
         '/admin/catalogo-servicos/tipo/novo'    => ['AdminServiceCatalogController', 'tipoForm', 'admin'],
         '/admin/catalogo-servicos/capacidades'  => ['AdminServiceCatalogController', 'capacidades', 'admin'],
@@ -463,16 +480,16 @@ $rotas = [
         '/admin/catalogo-veiculos/modelo/novo'  => ['AdminVehicleCatalogController', 'modeloForm', 'admin'],
         '/admin/catalogo-veiculos/versao/novo'  => ['AdminVehicleCatalogController', 'versaoForm', 'admin'],
 
-        // Â§CATALOGO-VISUAL-01: pÃºblicas de propÃ³sito (sem perfil) â€” o
-        // cadastro de caminhÃ£o do guincheiro acontece ANTES do login
-        // existir (registro pÃºblico), e reaproveita o MESMO catÃ¡logo do
-        // cliente. SÃ³ leitura, sem dado sensÃ­vel.
+        // §CATALOGO-VISUAL-01: públicas de propósito (sem perfil) — o
+        // cadastro de caminhão do guincheiro acontece ANTES do login
+        // existir (registro público), e reaproveita o MESMO catálogo do
+        // cliente. Só leitura, sem dado sensível.
         '/veiculo-catalogo/marcas'  => ['VehicleCatalogController', 'marcas', null],
         '/veiculo-catalogo/modelos' => ['VehicleCatalogController', 'modelos', null],
 
-        // ROADMAP socorro automotivo â€” Etapa 13: precificaÃ§Ã£o por zona/cidade
-        // (pricing_zones/service_price_rules) â€” schema existia desde
-        // migration_pricing_zones_v1.sql, mas sem tela admin nenhuma atÃ©
+        // ROADMAP socorro automotivo — Etapa 13: precificação por zona/cidade
+        // (pricing_zones/service_price_rules) — schema existia desde
+        // migration_pricing_zones_v1.sql, mas sem tela admin nenhuma até
         // 26/07/2026.
         '/admin/precificacao/zonas' => ['AdminPricingZoneController', 'zonas', 'admin'],
         '/admin/demanda-territorial' => ['AdminPricingZoneController', 'demandaTerritorial', 'admin'],
@@ -484,23 +501,26 @@ $rotas = [
 
         '/checkout/cliente' => ['CheckoutController', 'formCliente', null],
 
-
         '/checkout/veiculo' => ['CheckoutController', 'formVeiculo', 'cliente'],
-
 
         '/checkout/pagar'   => ['CheckoutController', 'pagar', 'cliente'],
 
-
-        '/pagamento/sucesso'  => ['PagamentoController', 'sucesso', 'cliente'],
-        '/pagamento/falha'    => ['PagamentoController', 'falha', 'cliente'],
-        '/pagamento/pendente' => ['PagamentoController', 'pendente', 'cliente'],
+        // Telas de retorno do gateway: precisam aceitar QUALQUER sessão
+        // autenticada (cliente, guincho, oficina) — o gateway redireciona o
+        // browser de volta independente de quem iniciou o pagamento.
+        '/pagamento/sucesso'  => ['PagamentoController', 'sucesso', null],
+        '/pagamento/falha'    => ['PagamentoController', 'falha', null],
+        '/pagamento/pendente' => ['PagamentoController', 'pendente', null],
     ],
 
     'POST' => [
-    
-    '/oficina/pedido/{id}/cancelar' => ['OficinaController', 'cancelarAtendimento', 'oficina'],
+
+        // O endpoint público é compartilhado pelas páginas de parceiros.
+        '/parceiros/interesse' => ['AuthController', 'parceirosInteresse', null],
+
+        '/oficina/pedido/{id}/cancelar' => ['OficinaController', 'cancelarAtendimento', 'oficina'],
         '/admin/pedido/novo/contexto' => ['AdminController', 'pedidoNovoContexto', 'admin'],
-                '/admin/pedido/novo/api/cliente' => ['AdminController', 'pedidoNovoApiClienteCriar', 'admin'],
+        '/admin/pedido/novo/api/cliente' => ['AdminController', 'pedidoNovoApiClienteCriar', 'admin'],
         '/admin/pedido/novo/api/veiculo' => ['AdminController', 'pedidoNovoApiVeiculoCriar', 'admin'],
         // === ROUTES OFICINA POST ===
         '/oficina/perfil/salvar'          => ['OficinaController', 'perfilSalvar',        'oficina'],
@@ -525,10 +545,18 @@ $rotas = [
         '/auth/magic/solicitar' => ['AuthController', 'magicSolicitar', null],
         '/push/subscribe'         => ['PushSubscriptionController', 'subscribe', null],
         '/push/unsubscribe'       => ['PushSubscriptionController', 'unsubscribe', null],
-        '/registro/cliente'       => ['AuthController', 'registroCliente', null],
-        '/registro/guincho'       => ['AuthController', 'registroGuincho', null],
-        
-        
+
+        // —— Signup simplificado (3 campos) + perfil interno ——
+        '/registro/simples/cliente' => ['AuthController', 'registroSimples',     null, ['cliente']],
+        '/registro/simples/guincho' => ['AuthController', 'registroSimples',     null, ['guincho']],
+        '/registro/simples/oficina' => ['AuthController', 'registroSimples',     null, ['oficina']],
+        '/perfil/completar'         => ['AuthController', 'perfilCompletarSave', null],
+
+        // ── Criar conta simplificada (3 campos) ──
+        '/registro/cliente'       => ['AuthController', 'registroClienteSimplesSave', null],
+        '/registro/guincho'       => ['AuthController', 'registroGuinchoSimplesSave', null],
+        '/registro/oficina'       => ['AuthController', 'registroOficinaSave',        null],
+
         '/registro/especialista'  => ['AuthController', 'registroEspecialista', null],
         '/especialista/atendimento/aceitar/' => ['EspecialistaController', 'aceitar', 'especialista'],
         '/especialista/atendimento/status/' => ['EspecialistaController', 'transicionar', 'especialista'],
@@ -623,39 +651,37 @@ $rotas = [
 
         '/checkout/cliente' => ['CheckoutController', 'salvarCliente', null],
 
-
         '/checkout/veiculo' => ['CheckoutController', 'salvarVeiculo', 'cliente'],
-
 
         '/pagamento/mercadopago' => ['PagamentoController', 'iniciarMercadoPago', 'cliente'],
         '/pagamento/pagseguro'   => ['PagamentoController', 'iniciarPagSeguro', 'cliente'],
 
-        // Checkout transparente (Â§CTP-01): cliente nunca sai de /pagamento/checkout/{id}.
+        // Checkout transparente (§CTP-01): cliente nunca sai de /pagamento/checkout/{id}.
         '/pagamento/mercadopago/pagar' => ['PagamentoController', 'mercadoPagoTransparente', 'cliente'],
         '/pagamento/pagseguro/pagar'   => ['PagamentoController', 'pagSeguroTransparente', 'cliente'],
         '/pagamento/complementar/mercadopago/pagar' => ['PagamentoController', 'complementarMercadoPago', 'cliente'],
 
         '/webhook/mercadopago'   => ['WebhookController', 'mercadoPago', null],
-        // Baixa faturas semanais de parceiros apÃ³s PIX confirmado pelo Mercado Pago.
-        // A assinatura HMAC e a idempotÃªncia sÃ£o validadas no controller.
+        // Baixa faturas semanais de parceiros após PIX confirmado pelo Mercado Pago.
+        // A assinatura HMAC e a idempotência são validadas no controller.
         '/webhook/mercadopago/pix' => ['FaturaWebhookController', 'mercadoPagoPix', null],
         '/webhook/pagseguro'     => ['WebhookController', 'pagSeguro', null],
 
         // Modo de debug global: espelho de erros JS pro log do servidor
         // (ver DebugController::jslog(), public/assets/js/debug.js). Rota
-        // pÃºblica pois roda em qualquer tela autenticada ou nÃ£o; noop quando
-        // debug_mode_ativo estÃ¡ desligado.
+        // pública pois roda em qualquer tela autenticada ou não; noop quando
+        // debug_mode_ativo está desligado.
         '/debug/jslog'           => ['DebugController', 'jslog', null],
 
-        // FuncionÃ¡rio sÃ³ CRIA demandas (nunca executa nada sensÃ­vel
-        // diretamente) â€” gerente Ã© quem decide, em DemandaService::decidir().
+        // Funcionário só CRIA demandas (nunca executa nada sensível
+        // diretamente) — gerente é quem decide, em DemandaService::decidir().
         '/funcionario/demanda/criar' => ['FuncionarioController', 'demandaCriar', 'funcionario'],
         '/gerente/demanda/decidir'   => ['GerenteController', 'demandaDecidir', 'gerente'],
     ],
 
 ];
 
-// Rotas dinÃ¢micas (prefixo + id numÃ©rico no final)
+// Rotas dinâmicas (prefixo + id numérico no final)
 // Formato: [metodo, prefixo, Controller, action, perfil]
 $rotasDinamicas = [
 
@@ -772,11 +798,14 @@ $rotasDinamicas = [
 
 ];
 
-// â€”â€” Resolve rota â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”
-$controller = null; $action = null; $perfil = null; $id = null;
+// —— Resolve rota ————————————————————————————————————————————————————————————————
+$controller = null; $action = null; $perfil = null; $id = null; $args = [];
 
 if (isset($rotas[$metodo][$uri])) {
-    [$controller, $action, $perfil] = $rotas[$metodo][$uri];
+    [$controller, $action, $perfil] = $rotas[$metodo][$uri] + [null, null, null];
+    // 4º elemento opcional = argumentos extras (ex.: tipo de signup)
+    $args = $rotas[$metodo][$uri][3] ?? [];
+    if (!is_array($args)) { $args = [$args]; }
 } else {
     // Match por template: {id} -> digitos, {nome} -> [\w.-]+
     // Resolve rotas dinamicas registradas em $rotas[METODO].
@@ -792,7 +821,9 @@ if (isset($rotas[$metodo][$uri])) {
             $regex
         );
         if (preg_match('~^' . $regex . '$~', $uri, $m)) {
-            [$controller, $action, $perfil] = $target;
+            [$controller, $action, $perfil] = $target + [null, null, null];
+            $args = $target[3] ?? [];
+            if (!is_array($args)) { $args = [$args]; }
             if (isset($m['id']) && $m['id'] !== '') {
                 $id = (int)$m['id'];
             } elseif (isset($m['nome']) && $m['nome'] !== '') {
@@ -803,8 +834,8 @@ if (isset($rotas[$metodo][$uri])) {
             break;
         }
     }
-    // PÃ¡gina local SEO: somente o slug de cidade Ã© dinÃ¢mico; dashboards tÃªm
-    // rotas explÃ­citas e continuam sendo resolvidos antes desta regra.
+    // Página local SEO: somente o slug de cidade é dinâmico; dashboards têm
+    // rotas explícitas e continuam sendo resolvidos antes desta regra.
     if ($controller === null && in_array($metodo, ['GET', 'POST'], true)
         && preg_match('~^/parceiros/oficinas-([a-z0-9]+(?:-[a-z0-9]+)*)$~', $uri, $m)) {
         $controller = 'SeoPartnerController';
@@ -822,7 +853,7 @@ if (isset($rotas[$metodo][$uri])) {
     }
 
     // API operacional de pedidos: possui sub-recursos depois do ID, por isso
-    // precisa ser resolvida antes das rotas dinÃ¢micas numÃ©ricas legadas.
+    // precisa ser resolvida antes das rotas dinâmicas numéricas legadas.
     if ($controller === null && $metodo === 'GET'
         && preg_match('~^/api/routing/osrm/route/v1/driving/(.+)$~', $uri, $m)) {
         $controller = 'RoutingApiController';
@@ -848,9 +879,9 @@ if (isset($rotas[$metodo][$uri])) {
         $perfil = 'admin';
     }
 
-    // Compatibilidade com links antigos do catÃ¡logo: /modelo/{id}/versoes.
-    // A rota canÃ´nica agora Ã© /modelo/{id}; redirecionar evita 404 em cache,
-    // favoritos e pÃ¡ginas antigas ainda abertas.
+    // Compatibilidade com links antigos do catálogo: /modelo/{id}/versoes.
+    // A rota canônica agora é /modelo/{id}; redirecionar evita 404 em cache,
+    // favoritos e páginas antigas ainda abertas.
     if ($controller === null && $metodo === 'GET'
         && preg_match('~^/admin/catalogo-veiculos/modelo/(\d+)/versoes$~', $uri, $m)) {
         $controller = 'AdminVehicleCatalogController';
@@ -868,7 +899,7 @@ if (isset($rotas[$metodo][$uri])) {
         $param = substr($uri, strlen($prefixo));
         if ($param === '') continue;
 
-        // Rotas de token (ex: /senha/redefinir/{hex64}) aceitam hex alfanumÃ©rico
+        // Rotas de token (ex: /senha/redefinir/{hex64}) aceitam hex alfanumérico
         $ehNumerico = ctype_digit($param);
         $ehToken    = ctype_xdigit($param) && strlen($param) >= 32;
 
@@ -890,7 +921,7 @@ if (!$controller) {
         'system' => 'ROUTER',
         'phase' => 'route_lookup',
         'code' => 'RTR-001',
-        'message' => 'Rota nÃ£o encontrada.',
+        'message' => 'Rota não encontrada.',
         'context' => [
             'metodo' => $metodo,
             'uri' => $uri,
@@ -900,32 +931,37 @@ if (!$controller) {
     ]);
 
     http_response_code(404);
-    echo '<h1>404 â€” PÃ¡gina nÃ£o encontrada</h1>';
+    echo '<h1>404 — Página não encontrada</h1>';
     exit;
 }
 
-// â€”â€” Rate limiting (rotas sensÃ­veis) â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”
-$rotasSensiveis = ['/login', '/registro/cliente', '/registro/guincho', '/registro/especialista'];
+// —— Rate limiting (rotas sensíveis) ————————————————————————————————————————————
+$rotasSensiveis = [
+    '/login',
+    '/registro/cliente', '/registro/guincho', '/registro/especialista',
+    '/registro/simples/cliente', '/registro/simples/guincho', '/registro/simples/oficina',
+    '/perfil/completar',
+];
 if (in_array($uri, $rotasSensiveis, true) && $metodo === 'POST') {
     $ip = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? ($_SERVER['REMOTE_ADDR'] ?? '0.0.0.0');
     $rotaRateLimit = ltrim($uri, '/');
     if (!AuthService::verificarRateLimit($ip, $rotaRateLimit)) {
         http_response_code(429);
-        echo '<h1>429 â€” Muitas tentativas. Aguarde alguns minutos.</h1>';
+        echo '<h1>429 — Muitas tentativas. Aguarde alguns minutos.</h1>';
         exit;
     }
 }
 
-// â€”â€” AutenticaÃ§Ã£o â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”
+// —— Autenticação ————————————————————————————————————————————————————————————————
 if ($perfil !== null) {
-    // O router tambÃ©m precisa usar AuthService: assim AJAX recebe 401 JSON em vez
+    // O router também precisa usar AuthService: assim AJAX recebe 401 JSON em vez
     // de seguir um redirect e tentar interpretar a tela HTML de login como JSON.
     $isPassivePolling = preg_match('~/(status|pedidos-disponiveis|pedidos|chat)(/|$)~', $uri) === 1
         && $metodo === 'GET';
     AuthService::requireAuth($perfil, !$isPassivePolling);
 }
 
-// â€”â€” Executa controller â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”
+// —— Executa controller ——————————————————————————————————————————————————————————
 $controllerFile = __DIR__ . '/src/Controllers/' . $controller . '.php';
 if (!is_file($controllerFile) && $controller === 'OrdersApiController') {
     $controllerFile = __DIR__ . '/src/Api/Admin/OrdersApiController.php';
@@ -935,13 +971,13 @@ if (is_file($controllerFile)) {
 }
 
 if (!class_exists($controller)) {
-    throw new RuntimeException("Controller '$controller' nÃ£o encontrado. (file=" . basename($controllerFile) . ")");
+    throw new RuntimeException("Controller '$controller' não encontrado. (file=" . basename($controllerFile) . ")");
 }
 
 $instancia = new $controller();
 
 if (!method_exists($instancia, $action)) {
-    throw new RuntimeException("MÃ©todo '$action' nÃ£o existe em '$controller'.");
+    throw new RuntimeException("Método '$action' não existe em '$controller'.");
 }
 
 Logger::event([
@@ -956,7 +992,20 @@ Logger::event([
 ]);
 
 try {
-    $id !== null ? $instancia->$action($id) : $instancia->$action();
+    // Ordem dos argumentos: se houver $id, ele vem primeiro; depois $args extras.
+    $callArgs = [];
+    if ($id !== null) {
+        $callArgs[] = $id;
+    }
+    foreach ($args as $extra) {
+        $callArgs[] = $extra;
+    }
+
+    if ($callArgs === []) {
+        $instancia->$action();
+    } else {
+        $instancia->$action(...$callArgs);
+    }
 } catch (Throwable $e) {
     Logger::exception($controller, $action, 'CONTROLLER', $e, ['method' => $metodo, 'uri' => $uri, 'id' => $id, 'code' => 'RTR-002']);
     throw $e;

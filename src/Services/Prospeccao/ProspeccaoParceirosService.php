@@ -177,11 +177,16 @@ final class ProspeccaoParceirosService
             $this->pdo->prepare("UPDATE prospeccao_leads SET status = 'cadastrado' WHERE id = ?")
                 ->execute([$leadId]);
 
-            $this->quotaService->registrarCadastroConfirmado((int)$lead['regiao_id'], false);
+            // regiao_id pode ser NULL (leads das landings publicas de
+            // /parceiros/guinchos e /parceiros/oficinas), entao so
+            // registra cota se a regiao existir.
+            if (!empty($lead['regiao_id'])) {
+                $this->quotaService->registrarCadastroConfirmado((int)$lead['regiao_id'], false);
+            }
 
             $this->registrarAtividade('operacao', 'lead_cadastrado', [
                 'lead_id' => $leadId,
-                'regiao_id' => (int)$lead['regiao_id'],
+                'regiao_id' => !empty($lead['regiao_id']) ? (int)$lead['regiao_id'] : null,
                 'titulo' => 'Cadastro confirmado',
                 'detalhes' => [
                     'status_anterior' => (string)($lead['status'] ?? ''),
@@ -197,54 +202,109 @@ final class ProspeccaoParceirosService
         }
     }
 
+    /**
+     * Registra um lead vindo das páginas públicas de parceiros
+     * (/parceiros/guinchos e /parceiros/oficinas).
+     *
+     * Barreira de entrada SIMPLES: nome + telefone. O resto
+     * (cidade, UF, documentos, PIX) é enriquecido depois, no
+     * fluxo autenticado do parceiro.
+     *
+     * Aceita:
+     *   - nome_negocio   (obrigatório, 2-180 chars)
+     *   - telefone       (obrigatório, 10-30 chars)
+     *   - tipo_parceiro  ('guincho' | 'oficina') — default 'oficina'
+     *   - cidade         (opcional) — se vier, tenta achar região
+     *   - uf             (opcional) — idem
+     *   - cnpj           (opcional)
+     *
+     * Retorna o id do lead criado.
+     */
     public function registrarLeadEntrante(array $dados): int
     {
         $nome = trim((string)($dados['nome_negocio'] ?? ''));
-        $cidade = trim((string)($dados['cidade'] ?? ''));
-        $uf = strtoupper(trim((string)($dados['uf'] ?? '')));
         $telefone = trim((string)($dados['telefone'] ?? ''));
         $telefoneNormalizado = preg_replace('/\D/', '', $telefone);
 
-        if ($nome === '' || $cidade === '' || !preg_match('/^[A-Z]{2}$/', $uf) || strlen((string)$telefoneNormalizado) < 10) {
-            throw new InvalidArgumentException('Informe oficina, cidade, UF e WhatsApp válidos.');
+        $tipo = (string)($dados['tipo_parceiro'] ?? 'oficina');
+        if ($tipo !== 'guincho' && $tipo !== 'oficina') {
+            $tipo = 'oficina';
+        }
+        $categoria = $tipo === 'guincho' ? 'guincho_parceiro_inbound' : 'oficina_parceira_inbound';
+
+        // Validação mínima (barreira de entrada simples)
+        if ($nome === '' || mb_strlen($nome) < 2 || strlen((string)$telefoneNormalizado) < 10) {
+            throw new InvalidArgumentException('Informe nome do negocio e telefone validos.');
         }
 
-        $regiao = $this->quotaService->buscarAtivaPorCidadeUf($cidade, $uf);
-        if (!$regiao) {
-            throw new RuntimeException('Ainda não há uma região de prospecção ativa para esta cidade.');
+        // Cidade/UF são opcionais. Se vierem, tenta achar região ativa.
+        $cidade = trim((string)($dados['cidade'] ?? ''));
+        $uf = strtoupper(trim((string)($dados['uf'] ?? '')));
+
+        $regiaoId = null;
+        if ($cidade !== '' && preg_match('/^[A-Z]{2}$/', $uf)) {
+            $regiao = $this->quotaService->buscarAtivaPorCidadeUf($cidade, $uf);
+            if ($regiao) {
+                $regiaoId = (int)$regiao['id'];
+            }
         }
 
         $this->pdo->beginTransaction();
         try {
             $stmt = $this->pdo->prepare(
-                "INSERT IGNORE INTO prospeccao_leads
-                    (regiao_id, nome_negocio, categoria, telefone, telefone_normalizado, endereco, website, fonte, score_go, status)
+                "INSERT INTO prospeccao_leads
+                    (regiao_id, nome_negocio, categoria, telefone, telefone_normalizado,
+                     endereco, website, fonte, score_go, status)
                  VALUES
-                    (:regiao_id, :nome_negocio, 'oficina_parceira_inbound', :telefone, :telefone_normalizado, :endereco, :website, 'landing_b2b', :score_go, 'novo')"
+                    (:regiao_id, :nome_negocio, :categoria, :telefone, :telefone_normalizado,
+                     :endereco, :website, 'landing_b2b', :score_go, 'novo')"
             );
+            $endereco = $cidade !== '' && $uf !== '' ? ($cidade . ' - ' . $uf) : null;
             $stmt->execute([
-                'regiao_id' => (int)$regiao['id'],
-                'nome_negocio' => substr($nome, 0, 180),
-                'telefone' => substr($telefone, 0, 30),
+                'regiao_id' => $regiaoId,
+                'nome_negocio' => mb_substr($nome, 0, 180),
+                'categoria' => $categoria,
+                'telefone' => mb_substr($telefone, 0, 30),
                 'telefone_normalizado' => substr((string)$telefoneNormalizado, 0, 20),
-                'endereco' => substr($cidade . ' - ' . $uf, 0, 255),
+                'endereco' => $endereco !== null ? substr($endereco, 0, 255) : null,
                 'website' => null,
                 'score_go' => 100.0,
             ]);
 
             $leadId = (int)$this->pdo->lastInsertId();
             if ($leadId === 0) {
-                $find = $this->pdo->prepare('SELECT id FROM prospeccao_leads WHERE regiao_id = ? AND telefone_normalizado = ? LIMIT 1');
-                $find->execute([(int)$regiao['id'], substr((string)$telefoneNormalizado, 0, 20)]);
+                // Se por algum motivo o INSERT nao retornar id, tenta achar
+                // o lead por (regiao_id + telefone) ou (categoria + telefone).
+                if ($regiaoId !== null) {
+                    $find = $this->pdo->prepare(
+                        'SELECT id FROM prospeccao_leads
+                         WHERE regiao_id = ? AND telefone_normalizado = ? LIMIT 1'
+                    );
+                    $find->execute([$regiaoId, substr((string)$telefoneNormalizado, 0, 20)]);
+                } else {
+                    $find = $this->pdo->prepare(
+                        'SELECT id FROM prospeccao_leads
+                         WHERE categoria = ? AND telefone_normalizado = ? LIMIT 1'
+                    );
+                    $find->execute([$categoria, substr((string)$telefoneNormalizado, 0, 20)]);
+                }
                 $leadId = (int)$find->fetchColumn();
             }
-            if ($leadId <= 0) throw new RuntimeException('Não foi possível registrar o interesse da oficina.');
+            if ($leadId <= 0) {
+                throw new RuntimeException('Nao foi possivel registrar o interesse do parceiro.');
+            }
 
             $this->registrarAtividade('contato_obtido', 'lead_landing_b2b', [
                 'lead_id' => $leadId,
-                'regiao_id' => (int)$regiao['id'],
-                'titulo' => 'Interesse recebido pela landing B2B',
-                'detalhes' => ['cidade' => $cidade, 'uf' => $uf, 'cnpj_informado' => trim((string)($dados['cnpj'] ?? '')) !== ''],
+                'regiao_id' => $regiaoId,
+                'titulo' => 'Interesse recebido pela landing de parceiros',
+                'detalhes' => [
+                    'tipo_parceiro' => $tipo,
+                    'categoria' => $categoria,
+                    'cidade' => $cidade !== '' ? $cidade : null,
+                    'uf' => $uf !== '' ? $uf : null,
+                    'cnpj_informado' => trim((string)($dados['cnpj'] ?? '')) !== '',
+                ],
             ]);
             $this->pdo->commit();
             return $leadId;

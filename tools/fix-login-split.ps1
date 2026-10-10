@@ -1,12 +1,33 @@
+# tools/fix-login-split.ps1
+# Reescreve src/Views/auth/login.php com layout split no tema cliente (branco/verde).
+# ASCII-only. Faixa B.
+
+param([string]$Repositorio = 'C:\xampp\htdocs\guinchafacil')
+$ErrorActionPreference = 'Stop'
+
+$dir = Join-Path $Repositorio 'src\Views\auth'
+if (-not (Test-Path -LiteralPath $dir)) { Write-Host "[ERRO] $dir"; exit 1 }
+
+$arquivo = Join-Path $dir 'login.php'
+$utf8NoBom = New-Object System.Text.UTF8Encoding($false)
+
+if (Test-Path -LiteralPath $arquivo) {
+    $stamp = Get-Date -Format 'yyyyMMdd-HHmmss'
+    $bak = "$arquivo.bak-split-$stamp"
+    Copy-Item -LiteralPath $arquivo -Destination $bak -Force
+    Write-Host "[BACKUP] $bak" -ForegroundColor Green
+}
+
+$raw = @'
 <?php
 $bp = defined('BASE_PATH') ? BASE_PATH : '';
 $retorno = $retorno ?? '/';
 $vantagens = [
     ['fa-clock','Socorro 24h','Atendimento a qualquer hora, todos os dias.'],
-    ['fa-tag','Preço antes do aceite','Vocé vé o valor antes de confirmar o pedido.'],
-    ['fa-map-location-dot','Rastreio em tempo real','Acompanhe seu guincho até a chegada.'],
-    ['fa-shield-halved','Profissionais verificados','Todos passam por análise e avaliação.'],
-    ['fa-wallet','Sem mensalidade','Vocé paga só o serviço que pedir.'],
+    ['fa-tag','Pre{{C_CED}}o antes do aceite','Voc{{E_ACUTE}} v{{E_ACUTE}} o valor antes de confirmar o pedido.'],
+    ['fa-map-location-dot','Rastreio em tempo real','Acompanhe seu guincho at{{E_ACUTE}} a chegada.'],
+    ['fa-shield-halved','Profissionais verificados','Todos passam por an{{A_ACUTE}}lise e avalia{{C_CED}}{{A_TILDE}}o.'],
+    ['fa-wallet','Sem mensalidade','Voc{{E_ACUTE}} paga s{{O_ACUTE}} o servi{{C_CED}}o que pedir.'],
 ];
 ?>
 <!doctype html><html lang="pt-BR"><head>
@@ -15,7 +36,7 @@ $vantagens = [
 <link href="<?php echo htmlspecialchars($bp); ?>/public/assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
 <link href="<?php echo htmlspecialchars($bp); ?>/public/assets/vendor/fontawesome/css/all.min.css" rel="stylesheet">
 <link rel="icon" type="image/png" href="<?php echo htmlspecialchars($bp); ?>/public/assets/img/favicon-32.png">
-<title>Entrar | GuinchaFácil</title>
+<title>Entrar | GuinchaF{{A_ACUTE}}cil</title>
 <meta name="robots" content="noindex,follow">
 <style>
 :root{--acc:#1f8a36;--acc2:#2fb34a;--hero-bg:linear-gradient(145deg,#ffffff 0%,#d5f5dd 45%,#4ccf6a 100%);--hero-fg:#0f3d1a;--hero-muted:rgba(15,61,26,.72);--badge-bg:rgba(47,179,74,.15);--badge-bd:rgba(47,179,74,.35);--badge-fg:#0f5c25;--form-bg:#f4f8f5;--card-bg:#ffffff;--text-main:#14201a;--text-muted:#5f6f66;--input-bd:#d9e2dc;--input-bg:#ffffff;--input-fg:#14201a}
@@ -73,12 +94,12 @@ body{margin:0;min-height:100vh;font-family:system-ui,-apple-system,"Segoe UI",Ro
   <section class="reg-hero" aria-label="Vantagens">
     <div class="hero-content">
       <div class="hero-logo">
-        <img src="<?php echo htmlspecialchars($bp); ?>/public/assets/img/logo-48.png" alt="GuinchaFácil">
-        <div class="brand">Guincha<span>Fácil</span></div>
+        <img src="<?php echo htmlspecialchars($bp); ?>/public/assets/img/logo-48.png" alt="GuinchaF{{A_ACUTE}}cil">
+        <div class="brand">Guincha<span>F{{A_ACUTE}}cil</span></div>
       </div>
       <div class="hero-badge"><i class="fas fa-bolt"></i> Bem-vindo de volta</div>
       <h1 class="hero-title">Entre para continuar<br><span>seu atendimento.</span></h1>
-      <p class="hero-lead">Sua conta GuinchaFácil é gratuita e leva 30 segundos para criar. Continue de onde parou.</p>
+      <p class="hero-lead">Sua conta GuinchaF{{A_ACUTE}}cil {{E_ACUTE}} gratuita e leva 30 segundos para criar. Continue de onde parou.</p>
       <ul class="hero-vantagens">
         <?php foreach ($vantagens as $v): ?>
         <li>
@@ -95,7 +116,7 @@ body{margin:0;min-height:100vh;font-family:system-ui,-apple-system,"Segoe UI",Ro
 
   <section class="reg-form-side">
     <nav class="reg-form-nav">
-      <a class="logo-sm" href="<?php echo htmlspecialchars($bp); ?>/">Guincha<span>Fácil</span></a>
+      <a class="logo-sm" href="<?php echo htmlspecialchars($bp); ?>/">Guincha<span>F{{A_ACUTE}}cil</span></a>
       <a class="btn-create" href="<?php echo htmlspecialchars($bp); ?>/registro/cliente"><i class="fas fa-user-plus"></i> Criar conta</a>
     </nav>
     <div class="reg-form-body">
@@ -128,8 +149,8 @@ body{margin:0;min-height:100vh;font-family:system-ui,-apple-system,"Segoe UI",Ro
       </a>
 
       <p class="reg-foot">
-        Ainda não tem conta?
-        <a href="<?php echo htmlspecialchars($bp); ?>/registro/cliente">Criar conta grátis</a>
+        Ainda n{{A_TILDE}}o tem conta?
+        <a href="<?php echo htmlspecialchars($bp); ?>/registro/cliente">Criar conta gr{{A_ACUTE}}tis</a>
         &nbsp;&middot;&nbsp;
         <a href="<?php echo htmlspecialchars($bp); ?>/parceiros">Sou parceiro</a>
       </p>
@@ -149,3 +170,33 @@ body{margin:0;min-height:100vh;font-family:system-ui,-apple-system,"Segoe UI",Ro
 })();
 </script>
 </body></html>
+'@
+
+$acc = @{
+    '{{A_ACUTE}}' = [string][char]0x00E1
+    '{{A_TILDE}}' = [string][char]0x00E3
+    '{{C_CED}}'   = [string][char]0x00E7
+    '{{E_ACUTE}}' = [string][char]0x00E9
+    '{{I_ACUTE}}' = [string][char]0x00ED
+    '{{O_ACUTE}}' = [string][char]0x00F3
+    '{{U_ACUTE}}' = [string][char]0x00FA
+}
+foreach ($k in $acc.Keys) { $raw = $raw.Replace($k, $acc[$k]) }
+
+if ($raw -match '\{\{[A-Z_]+\}\}') {
+    Write-Host "[ERRO] placeholder nao substituido." -ForegroundColor Red
+    exit 1
+}
+
+[System.IO.File]::WriteAllText($arquivo, $raw, $utf8NoBom)
+Write-Host "[WRITE] $arquivo" -ForegroundColor Green
+
+& 'C:\xampp\php\php.exe' -l $arquivo
+if ($LASTEXITCODE -ne 0) {
+    Write-Host "[ERRO] php -l falhou. Restaurando backup." -ForegroundColor Red
+    if ($bak) { Copy-Item -LiteralPath $bak -Destination $arquivo -Force }
+    exit 1
+}
+Write-Host ""
+Write-Host "[DONE] login.php reescrito no tema cliente (split branco/verde)." -ForegroundColor Green
+if ($bak) { Write-Host "Backup: $bak" -ForegroundColor Yellow; Write-Host "Reverter: Copy-Item '$bak' '$arquivo' -Force" }

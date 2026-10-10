@@ -108,9 +108,65 @@ class AuthController extends BaseController
         require __DIR__ . '/../Views/public/cidades.php';
     }
 
+    /**
+     * POST /parceiros/interesse
+     * Recebe o formulario das paginas publicas de parceiros
+     * (/parceiros/guinchos e /parceiros/oficinas).
+     *
+     * Barreira de entrada simples: nome + telefone + tipo_parceiro.
+     * Persiste em prospeccao_leads (regiao_id pode ser NULL).
+     */
     public function parceirosInteresse(): void
     {
-        $this->redirect('/#parceiros');
+        // 1. Tipo (define o redirect de volta)
+        $tipo = (string)($_POST['tipo_parceiro'] ?? '');
+        if ($tipo !== 'guincho' && $tipo !== 'oficina') {
+            $tipo = 'oficina';
+        }
+        $redirectBase = '/parceiros/' . ($tipo === 'guincho' ? 'guinchos' : 'oficinas');
+
+        // 2. CSRF
+        if (!$this->validateCSRFToken((string)($_POST['csrf_token'] ?? ''))) {
+            $this->redirect($redirectBase . '?erro=sessao');
+            return;
+        }
+
+        // 3. Rate limit (por IP + tipo)
+        $ip = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? ($_SERVER['REMOTE_ADDR'] ?? '0.0.0.0');
+        if (!AuthService::verificarRateLimit((string)$ip, 'parceiros_' . $tipo)) {
+            $this->redirect($redirectBase . '?erro=limite');
+            return;
+        }
+
+        // 4. Persiste via service
+        try {
+            require_once __DIR__ . '/../Services/Prospeccao/SerpApiMapsClient.php';
+            require_once __DIR__ . '/../Services/Prospeccao/RegiaoQuotaService.php';
+            require_once __DIR__ . '/../Services/Prospeccao/MensagemPersuasaoService.php';
+            require_once __DIR__ . '/../Services/Prospeccao/ProspeccaoParceirosService.php';
+
+            $pdo = getPDO();
+            $service = new ProspeccaoParceirosService(
+                $pdo,
+                new SerpApiMapsClient((string)env('SERPAPI_KEY', '')),
+                new RegiaoQuotaService($pdo),
+                new MensagemPersuasaoService($redirectBase)
+            );
+
+            $service->registrarLeadEntrante([
+                'nome_negocio'  => $_POST['nome_oficina'] ?? '',
+                'telefone'      => $_POST['telefone'] ?? '',
+                'cnpj'          => $_POST['cnpj'] ?? '',
+                'tipo_parceiro' => $tipo,
+                'cidade'        => $_POST['cidade'] ?? '',
+                'uf'            => $_POST['uf'] ?? '',
+            ]);
+
+            $this->redirect($redirectBase . '?enviado=1');
+        } catch (Throwable $e) {
+            error_log('[parceiros_interesse] ' . $e->getMessage());
+            $this->redirect($redirectBase . '?erro=invalid');
+        }
     }
 
     /** Página SEO local gerada a partir de cidade + zonas ativas. */
@@ -727,14 +783,14 @@ class AuthController extends BaseController
         $allowed = ['CLIENTE', 'GUINCHO', 'OFICINA', 'PRESTADOR_MOVEL'];
         if (!$user || !in_array($role, $allowed, true)) {
             $this->setFlashMessage('Escolha uma opção válida para continuar.', 'error');
-            $this->redirect('/auth/google/profile');
+            $this->redirect('/perfil/completar');
             return;
         }
         $telefone = preg_replace('/\D+/', '', (string)($_POST['telefone'] ?? ''));
         $cpf = preg_replace('/\D+/', '', (string)($_POST['cpf'] ?? ''));
         if (strlen($telefone) < 10 || strlen($cpf) !== 11) {
             $this->setFlashMessage('Informe um telefone e CPF válidos para concluir o perfil.', 'error');
-            $this->redirect('/auth/google/profile');
+            $this->redirect('/perfil/completar');
             return;
         }
         try {
@@ -754,12 +810,12 @@ class AuthController extends BaseController
                 return;
             }
             $this->setFlashMessage('Solicitação recebida. Nossa equipe vai revisar seu cadastro antes de liberar o painel profissional.', 'success');
-            $this->redirect('/auth/google/profile');
+            $this->redirect('/perfil/completar');
         } catch (Throwable $e) {
             if (isset($pdo) && $pdo instanceof PDO && $pdo->inTransaction()) $pdo->rollBack();
             error_log('[GoogleProfile] ' . $e->getMessage());
             $this->setFlashMessage($e instanceof DomainException ? $e->getMessage() : 'Não foi possível salvar seu perfil agora.', 'error');
-            $this->redirect('/auth/google/profile');
+            $this->redirect('/perfil/completar');
         }
     }
 
@@ -1099,7 +1155,7 @@ class AuthController extends BaseController
 
 
 
-        require __DIR__ . '/../Views/auth/registrocliente.php';
+        $tipo = 'cliente'; require __DIR__ . '/../Views/auth/registro_simples.php';
 
 
 
@@ -1555,7 +1611,7 @@ class AuthController extends BaseController
 
 
 
-        require __DIR__ . '/../Views/auth/registroguincho.php';
+        $tipo = 'guincho'; require __DIR__ . '/../Views/auth/registro_simples.php';
 
 
 
@@ -2113,6 +2169,199 @@ class AuthController extends BaseController
 
 
 
+    // --- WRAPPERS: URL limpa /registro/{tipo} --------------------------
+
+    public function registroClienteSimplesForm(): void { $this->registroSimplesForm('cliente'); }
+    public function registroClienteSimplesSave(): void { $this->registroSimples('cliente'); }
+
+    public function registroGuinchoSimplesForm(): void { $this->registroSimplesForm('guincho'); }
+    public function registroGuinchoSimplesSave(): void { $this->registroSimples('guincho'); }
+
+    public function registroOficinaForm(): void { $this->registroSimplesForm('oficina'); }
+    public function registroOficinaSave(): void { $this->registroSimples('oficina'); }
+    // --- SIGNUP SIMPLIFICADO (3 campos) + PERFIL INTERNO ---------------
+
+    public function registroSimplesForm(string $tipo): void
+    {
+        if ($this->isAuthenticated()) { $this->redirectByProfile(); return; }
+        if (!in_array($tipo, ['cliente','guincho','oficina'], true)) {
+            $this->setFlashMessage('Tipo de cadastro invalido.', 'error');
+            $this->redirect('/registro/cliente');
+            return;
+        }
+        $csrf_token = $this->generateCSRFToken();
+        $flash = $this->pullFlash();
+        $retorno = AuthService::sanitizeReturnPath((string)($_GET['retorno'] ?? '/'));
+        require __DIR__ . '/../Views/auth/registro_simples.php';
+    }
+
+    public function registroSimples(string $tipo): void
+    {
+        $tipo = in_array($tipo, ['cliente','guincho','oficina'], true) ? $tipo : 'cliente';
+        if (!$this->validateCSRFToken($_POST['csrf_token'] ?? '')) {
+            $this->setFlashMessage('Sessao expirada. Tente novamente.', 'error');
+            $this->redirect('/registro/simples/' . $tipo);
+            return;
+        }
+        $nome = trim((string)($_POST['nome'] ?? ''));
+        $email = strtolower(trim((string)($_POST['email'] ?? '')));
+        $telefone = preg_replace('/\D/', '', (string)($_POST['telefone'] ?? ''));
+
+        $erros = [];
+        if (mb_strlen($nome) < 3) $erros[] = 'Informe seu nome completo.';
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) $erros[] = 'E-mail invalido.';
+        if (!$this->validarTelefoneBr($telefone)) $erros[] = 'WhatsApp invalido (DDD + numero).';
+        if ($erros) {
+            $this->setFlashMessage(implode(' ', $erros), 'error');
+            $this->redirect('/registro/simples/' . $tipo);
+            return;
+        }
+
+        try {
+            $pdo = getPDO();
+            $pdo->beginTransaction();
+
+            $dup = $pdo->prepare('SELECT id FROM usuarios WHERE email = ? FOR UPDATE');
+            $dup->execute([$email]);
+            if ($dup->fetch()) {
+                $pdo->rollBack();
+                $this->setFlashMessage('Este e-mail ja tem conta. Faca login.', 'error');
+                $this->redirect('/login?retorno=' . rawurlencode('/perfil/completar'));
+                return;
+            }
+
+            $senhaPlaceholder = password_hash(bin2hex(random_bytes(24)), PASSWORD_BCRYPT);
+            $stmt = $pdo->prepare("INSERT INTO usuarios (nome, email, senha_hash, telefone, tipo, perfil_status, ativo, criado_em) VALUES (?, ?, ?, ?, ?, 'PENDENTE', 1, NOW())");
+            $stmt->execute([$nome, $email, $senhaPlaceholder, $telefone, $tipo]);
+            $userId = (int)$pdo->lastInsertId();
+
+            $pdo->commit();
+
+            $user = ['id' => $userId, 'nome' => $nome, 'email' => $email, 'tipo' => $tipo, 'ativo' => true];
+            AuthService::initializeAuthenticatedSession($user);
+            $this->setFlashMessage('Conta criada. Complete seus dados para liberar o painel.', 'success');
+            $this->redirect('/perfil/completar');
+            return;
+        } catch (Throwable $e) {
+            if (isset($pdo) && $pdo instanceof PDO && $pdo->inTransaction()) $pdo->rollBack();
+            error_log('[registroSimples] ' . $e->getMessage());
+            $this->setFlashMessage('Nao foi possivel criar a conta agora.', 'error');
+            $this->redirect('/registro/simples/' . $tipo);
+        }
+    }
+
+    public function perfilCompletarForm(): void
+    {
+        if (!$this->isAuthenticated()) { $this->redirect('/login?retorno=' . rawurlencode('/perfil/completar')); return; }
+        $user = AuthService::getCurrentUser();
+        if (!$user) { $this->redirect('/login'); return; }
+
+        $pdo = getPDO();
+        $stmt = $pdo->prepare('SELECT id, nome, email, telefone, cpf, tipo, perfil_status FROM usuarios WHERE id = ? LIMIT 1');
+        $stmt->execute([(int)$user['id']]);
+        $u = $stmt->fetch(PDO::FETCH_ASSOC) ?: [];
+        if (($u['perfil_status'] ?? '') === 'COMPLETO') { $this->redirectByProfile((string)$u['tipo']); return; }
+
+        $tipo = in_array((string)($u['tipo'] ?? 'cliente'), ['cliente','guincho','oficina','especialista'], true) ? (string)$u['tipo'] : 'cliente';
+        $salvo = [
+            'nome' => $u['nome'] ?? '',
+            'telefone' => $u['telefone'] ?? '',
+            'cpf' => $u['cpf'] ?? '',
+            'estado' => '',
+        ];
+        $pendenteAprovacao = (($u['perfil_status'] ?? '') === 'PENDENTE_APROVACAO');
+        $csrf_token = $this->generateCSRFToken();
+        $flash = $this->pullFlash();
+        require __DIR__ . '/../Views/auth/perfil_completar.php';
+    }
+
+    public function perfilCompletarSave(): void
+    {
+        if (!$this->isAuthenticated() || !$this->validateCSRFToken($_POST['csrf_token'] ?? '')) {
+            $this->setFlashMessage('Sessao expirada. Entre novamente.', 'error');
+            $this->redirect('/login?retorno=' . rawurlencode('/perfil/completar'));
+            return;
+        }
+        $user = AuthService::getCurrentUser();
+        if (!$user) { $this->redirect('/login'); return; }
+
+        $nome = trim((string)($_POST['nome'] ?? ''));
+        $cpf = preg_replace('/\D/', '', (string)($_POST['cpf'] ?? ''));
+        $telefone = preg_replace('/\D/', '', (string)($_POST['telefone'] ?? ''));
+        $senha = (string)($_POST['senha'] ?? '');
+        $conf = (string)($_POST['confirmar_senha'] ?? '');
+        $cep = preg_replace('/\D/', '', (string)($_POST['cep'] ?? ''));
+        $logradouro = trim((string)($_POST['logradouro'] ?? ''));
+        $numero = trim((string)($_POST['numero'] ?? ''));
+        $bairro = trim((string)($_POST['bairro'] ?? ''));
+        $cidade = trim((string)($_POST['cidade'] ?? ''));
+        $estado = strtoupper(trim((string)($_POST['estado'] ?? '')));
+
+        $erros = [];
+        if (mb_strlen($nome) < 3) $erros[] = 'Nome invalido.';
+        if (!$this->validarCPF($cpf)) $erros[] = 'CPF invalido.';
+        if (!$this->validarTelefoneBr($telefone)) $erros[] = 'Telefone invalido.';
+        if (strlen($senha) < 8) $erros[] = 'Senha deve ter 8+ caracteres.';
+        if ($senha !== $conf) $erros[] = 'Senhas nao conferem.';
+        if (strlen($cep) !== 8) $erros[] = 'CEP invalido.';
+        if ($logradouro === '' || $numero === '' || $bairro === '' || $cidade === '') $erros[] = 'Endereco incompleto.';
+        if (!preg_match('/^[A-Z]{2}$/', $estado)) $erros[] = 'UF invalida.';
+
+        if ($erros) {
+            $this->setFlashMessage(implode(' ', $erros), 'error');
+            $this->redirect('/perfil/completar');
+            return;
+        }
+
+        try {
+            $pdo = getPDO();
+            $pdo->beginTransaction();
+
+            $dup = $pdo->prepare('SELECT id FROM usuarios WHERE cpf = ? AND id <> ? LIMIT 1 FOR UPDATE');
+            $dup->execute([$cpf, (int)$user['id']]);
+            if ($dup->fetch()) {
+                $pdo->rollBack();
+                $this->setFlashMessage('Este CPF ja esta em outra conta.', 'error');
+                $this->redirect('/perfil/completar');
+                return;
+            }
+
+            $tipoAtual = (string)($_SESSION['user']['tipo'] ?? 'cliente');
+            $novoStatus = ($tipoAtual === 'cliente') ? 'COMPLETO' : 'PENDENTE_APROVACAO';
+
+            $pdo->prepare('UPDATE usuarios SET nome = ?, cpf = ?, telefone = ?, senha_hash = ?, perfil_status = ?, atualizado_em = NOW() WHERE id = ?')
+                ->execute([$nome, $cpf, $telefone, password_hash($senha, PASSWORD_BCRYPT), $novoStatus, (int)$user['id']]);
+
+            $temEnd = $pdo->prepare('SELECT id FROM enderecos WHERE usuario_id = ? LIMIT 1');
+            $temEnd->execute([(int)$user['id']]);
+            if ($temEnd->fetch()) {
+                $pdo->prepare('UPDATE enderecos SET cep = ?, logradouro = ?, numero = ?, bairro = ?, cidade = ?, estado = ? WHERE usuario_id = ?')
+                    ->execute([$cep, $logradouro, $numero, $bairro, $cidade, $estado, (int)$user['id']]);
+            } else {
+                $pdo->prepare('INSERT INTO enderecos (usuario_id, cep, logradouro, numero, complemento, bairro, cidade, estado, principal) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1)')
+                    ->execute([(int)$user['id'], $cep, $logradouro, $numero, trim((string)($_POST['complemento'] ?? '')) ?: null, $bairro, $cidade, $estado]);
+            }
+
+            $_SESSION['user']['nome'] = $nome;
+            $_SESSION['user']['perfil_status'] = $novoStatus;
+
+            $pdo->commit();
+
+            if ($novoStatus === 'COMPLETO') {
+                $this->setFlashMessage('Perfil completo. Bem-vindo!', 'success');
+                $this->redirectByProfile($tipoAtual);
+            } else {
+                $this->setFlashMessage('Dados recebidos. Sua documentacao sera analisada pela equipe.', 'success');
+                $this->redirect('/perfil/completar');
+            }
+            return;
+        } catch (Throwable $e) {
+            if (isset($pdo) && $pdo instanceof PDO && $pdo->inTransaction()) $pdo->rollBack();
+            error_log('[perfilCompletarSave] ' . $e->getMessage());
+            $this->setFlashMessage('Nao foi possivel salvar. Tente novamente.', 'error');
+            $this->redirect('/perfil/completar');
+        }
+    }
     // ─── ESQUECEU SENHA ──────────────────────────────────────────
 
 
@@ -4567,7 +4816,7 @@ class AuthController extends BaseController
                 $pending = getPDO()->prepare('SELECT perfil_status FROM usuarios WHERE id = ? LIMIT 1');
                 $pending->execute([(int)$_SESSION['user']['id']]);
                 if ((string)$pending->fetchColumn() !== 'COMPLETO') {
-                    $this->redirect('/auth/google/profile');
+                    $this->redirect('/perfil/completar');
                     return;
                 }
             } catch (Throwable $e) {

@@ -25,6 +25,33 @@
 
 O agente emite o bloco e **para essa parte da tarefa**. O dono decide e atualiza este arquivo.
 
+CONTRATO_PEDIDO:
+  de: B
+  para: A
+  o_que_preciso:
+    1. Registrar 3 rotas no index.php:
+       - GET /parceiros              -> ParceirosController::index (hub)
+       - GET /parceiros/guinchos     -> ParceirosController::guinchos
+       - GET /parceiros/oficinas     -> ParceirosController::oficinas
+       (a rota da oficina ja existe como view; falta a rota)
+
+    2. Criar/revisar 3 views:
+       - src/Views/public/parceiros/index.php     (NOVO)
+       - src/Views/public/parceiros/guinchos.php  (NOVO)
+       - src/Views/public/parceiros-oficinas.php  (REVISAR: garantir hero, beneficios, FAQ, JSON-LD)
+
+    3. Substituir o link ancora:
+       - landing.php:72      href="#parceiros" -> /parceiros
+       - cidades.php:11      href="/#parceiros" -> /parceiros
+       - pre-cotacao.php:168 href="/#parceiros" -> /parceiros
+
+    4. SEO tecnico em cada view:
+       - Title unico
+       - Meta description persuasiva
+       - H1 unico
+       - JSON-LD: LocalBusiness + Service + FAQPage
+  ...
+
 ## 2. Contrato Pedido v1
 
 **Status:** rascunho. A faixa A (ChatGPT) publica a versao final (missao A2) e o dono aprova.

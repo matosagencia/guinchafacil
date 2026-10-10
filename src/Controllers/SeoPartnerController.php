@@ -12,6 +12,31 @@ require_once __DIR__ . '/../Services/Prospeccao/ProspeccaoParceirosService.php';
 
 final class SeoPartnerController extends BaseController
 {
+    /** Hub público do programa de parceiros. Não depende de cidade. */
+    public function index(): void
+    {
+        $csrf_token = $this->generateCSRFToken();
+        require __DIR__ . '/../Views/public/parceiros/index.php';
+    }
+
+    /** Página de captação de empresas de guincho. Não depende de cidade. */
+    public function guinchos(): void
+    {
+        $csrf_token = $this->generateCSRFToken();
+        $enviado = (($_GET['enviado'] ?? '') === '1');
+        $erro = (string)($_GET['erro'] ?? '');
+        require __DIR__ . '/../Views/public/parceiros/guinchos.php';
+    }
+
+    /** Página genérica de captação de oficinas. Não depende de cidade. */
+    public function oficinas(): void
+    {
+        $csrf_token = $this->generateCSRFToken();
+        $enviado = (($_GET['enviado'] ?? '') === '1');
+        $erro = (string)($_GET['erro'] ?? '');
+        require __DIR__ . '/../Views/public/parceiros/oficinas.php';
+    }
+
     public function landing(string $slug): void
     {
         $cidade = Cidade::buscarPorSlug(strtolower(trim($slug)));

@@ -285,3 +285,33 @@ comentarios e strings literais â€” residuo de sessoes anteriores. O
 
 - Commit `cdffcfd` (sessao 5) no `origin/main`.
 - Mesmo problema pode afetar `index.php` (verificar em sessao dedicada).
+
+---
+## DÉBITO TÉCNICO — Tabelas de oficina não versionadas
+**Data:** 2026-10-08
+**Faixa:** B (com dependência de schema)
+**Severidade:** alta (bloqueou /admin/faturas e painel da oficina em prod)
+**Status:** **RESOLVIDO em 2026-10-08**
+**Sintoma:**
+5 tabelas existiam em dev mas não em prod:
+- `oficinas`
+- `oficina_servicos`
+- `oficina_orcamentos`
+- `oficina_repasses`
+- `oficina_evidencias`
+Resultado: `/admin/faturas` e todo o painel da oficina quebravam
+em prod com `SQLSTATE[42S02] Table 'oficinas' doesn't exist`.
+**Causa raiz:**
+As tabelas nunca foram versionadas no `migrate.php` nem em
+nenhum `.sql` de `install/`. Existiam em dev por caminho
+desconhecido (script manual, migration apagada, etc).
+**Solução:**
+Commit `9a3c3ab` adiciona 5 `createTable()` no `install/migrate.php`,
+replicando o DDL exato do banco de dev. Rodado em prod via
+`php install/migrate.php` (Terminal cPanel).
+**Evidência:**
+[NOVO] Tabela oficinas criada
+[NOVO] Tabela oficina_servicos criada
+[NOVO] Tabela oficina_orcamentos criada
+[NOVO] Tabela oficina_repasses criada
+[NOVO] Tabela oficina_evidencias criada
