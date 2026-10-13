@@ -1,61 +1,21 @@
-.backup-admin-payment-destination/
-fix-B-*.ps1
-fix-A-*.ps1
-fix-C-*.ps1
-commit-a-*.ps1
-playwright-report/
-test-results/
-.deploy-state/
-.env
-.env.*
-!.env.example
+# Testes — estado volátil
+tests/last_run.json
+tests/*.tmp
+tests/trz*.tmp
+
+# Backups gerados por scripts
 *.bak-*
-*.bak_*
+*.bak-a1-*
+*.bak-v3-*
+*.bak-fix463-*
 
-# --- _archive / .bak* ---
-_archive/
-*.bak*
-index.php.bak-*
-.patch-backup-*/
-.backup-*/
-patch-a-*.ps1
-.fix-B-*.ps1
+# Dumps de produção — LGPD
+database/*.sql
 
-# --- storage/ (runtime, nao versionado) ---
-storage/*.log
-storage/*.txt
+# Dirs temporários de onda
+_onda*/
+_reverse-geocoding-*/
 
-chaves.dev.txt
-*.pre-rollback-*
-logs/
-tools/fix-*.php
-tools/patch-*.patch
-tools/fix-*.php
-tools/patch-*.patch
-tools/fix-*.php
-tools/patch-*.patch
-backup-*.sql
-*.patch
-teste-financeiro-*.ps1
-backup-*.sql
-*.patch
-teste-financeiro-*.ps1
-
-# D14 - artefatos de teste (2026-10-08)
-playwright-report/
-playwright-report-*.zip
-test-results/
-
-# Artefatos locais / debug (nao vao para o repo)
-_backups/
-_ddl-*.sql
-tabelas-dev.txt
-*.bak-session-*
-*.bak-cta-cores-*
-*.bak-rotas-oficina-*
-*.bak-split-*
-*.bak-hero-*
-*.bak-oficina-*
-*.bak-antes-do-*
-*.bak-calculadora-*
-*.bak-mojibake-*
+# Rascunhos
+leiaisso.txt
+tssmoke_*.php
