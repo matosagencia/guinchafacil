@@ -6,6 +6,7 @@ require_once __DIR__ . '/../Models/Configuracao.php';
 require_once __DIR__ . '/../Models/Pedido.php';
 require_once __DIR__ . '/GeoService.php';
 require_once __DIR__ . '/Logger.php';
+require_once __DIR__ . '/TarifaService.php';
 
 final class DecisaoAtendimentoService
 {
@@ -34,7 +35,7 @@ final class DecisaoAtendimentoService
 
         if (!$this->comparativoHabilitado()) {
             return $this->somenteReboque($pedidoId, $tipo, (float)($opcoes['distancia_km'] ?? 5.0),
-                'O comparativo de assistencia esta desabilitado. Seguimos com reboque.');
+                'O comparativo de assistencia esta desabilitado. Seguimos com reboque.', $categoria);
         }
 
         $oficinas = $this->oficinasNoRaio($lat, $lng, $tipo);
@@ -59,20 +60,20 @@ final class DecisaoAtendimentoService
         if (count($oficinas) === 0) {
             $distanciaFallback = max(5.0, (float)($opcoes['distancia_km'] ?? 5.0));
             $result = $this->somenteReboque($pedidoId, $tipo, $distanciaFallback,
-                'Sem assistencia na sua regiao agora. Podemos levar seu veiculo ate a oficina que voce escolher.');
+                'Sem assistencia na sua regiao agora. Podemos levar seu veiculo ate a oficina que voce escolher.', $categoria);
             $result['sem_oficina'] = true;
             return $result;
         }
 
         if ($tipo === 'colisao' && !$veiculoPodeMover) {
             return $this->somenteReboque($pedidoId, $tipo, (float)$oficinas[0]['distancia_km'],
-                'O veiculo nao pode se mover com seguranca. Reboque e obrigatorio.', $oficinas[0]);
+                'O veiculo nao pode se mover com seguranca. Reboque e obrigatorio.', $categoria, $oficinas[0]);
         }
 
         $oficinaMaisProxima = $oficinas[0];
         $distanciaOficina = (float)$oficinaMaisProxima['distancia_km'];
         $custoAssistencia = $this->calcularAssistencia($oficinaMaisProxima);
-        $custoReboque     = $this->calcularReboque($distanciaOficina);
+        $custoReboque     = $this->calcularReboque($distanciaOficina, $categoria);
         $recomendacao     = $custoReboque > $custoAssistencia ? 'assistencia' : 'reboque';
         $justificativa    = $recomendacao === 'assistencia'
             ? 'A assistencia no local sai mais barata que o reboque. Se o profissional nao conseguir resolver, voce pode converter para reboque com '
@@ -110,10 +111,10 @@ final class DecisaoAtendimentoService
         return $payload;
     }
 
-    private function somenteReboque(int $pedidoId, string $tipo, float $distancia, string $motivo, ?array $oficina = null): array
+    private function somenteReboque(int $pedidoId, string $tipo, float $distancia, string $motivo, string $categoria, ?array $oficina = null): array
     {
         if ($distancia <= 0.5) $distancia = 5.0; // nunca zerar
-        $custoReboque = $this->calcularReboque($distancia);
+        $custoReboque = $this->calcularReboque($distancia, $categoria);
         $payload = [
             'opcoes_disponiveis' => ['reboque'],
             'opcao_assistencia' => ['disponivel' => false],
@@ -180,7 +181,16 @@ final class DecisaoAtendimentoService
             ? (float)($reboque['custo_total_bruto'] ?? $reboque['custo_total'] ?? 0.0)
             : null;
 
-        if (!Pedido::registrarSnapshotCustos($pedidoId, $custoAssistencia, $custoReboque)) {
+        $oficina = $decisao['oficina_mais_proxima'] ?? [];
+        if (!Pedido::registrarSnapshotDecisao(
+            $pedidoId,
+            is_array($oficina) ? (int)($oficina['provider_id'] ?? 0) : null,
+            is_array($oficina) ? (string)($oficina['nome'] ?? '') : null,
+            (string)($decisao['acao'] ?? $decisao['recomendacao'] ?? ''),
+            $custoAssistencia,
+            $custoReboque,
+            isset($decisao['recomendacao']) ? (string)$decisao['recomendacao'] : null
+        )) {
             Logger::log(Logger::LEVEL_INFO, __CLASS__, __FUNCTION__, 'financial_snapshot',
                 'Snapshot bruto nao gravado. Confirme a migration contract_pedido_financial_snapshot_v1.', [
                     'pedido_id' => $pedidoId,
@@ -199,12 +209,9 @@ final class DecisaoAtendimentoService
         return round($base * (1 + $comissao), 2);
     }
 
-    private function calcularReboque(float $distanciaKm): float
+    private function calcularReboque(float $distanciaKm, string $categoria): float
     {
-        if ($distanciaKm <= 0) $distanciaKm = 5.0; // fallback minimo
-        $base        = (float)Configuracao::get('taxa_fixa', '150.00');
-        $tarifaPorKm = (float)Configuracao::get('tarifa_por_km', '3.50');
-        return round($base + ($tarifaPorKm * $distanciaKm), 2);
+        return TarifaService::calcular(max(5.0, $distanciaKm), $categoria);
     }
 
     public function descontoPercentual(): float

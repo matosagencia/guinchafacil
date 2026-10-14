@@ -1,190 +1,104 @@
 <?php
 declare(strict_types=1);
 
-final class PreCotacaoApiController
+require_once __DIR__ . '/BaseController.php';
+require_once __DIR__ . '/../Services/TriageSessionService.php';
+require_once __DIR__ . '/../Services/GeocodingService.php';
+
+final class PreCotacaoApiController extends BaseController
 {
-    private function json(array $payload, int $status = 200): void
+    public function form(): void
     {
-        if (!headers_sent()) {
-            http_response_code($status);
-            header('Content-Type: application/json; charset=UTF-8');
-            header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
-        }
-        echo json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-        exit;
+        require __DIR__ . '/../Views/public/pre-cotacao.php';
     }
 
-    private function ok($data): void
+    public function finalizar(): void
     {
-        $this->json(['ok' => true, 'data' => $data, 'error' => null]);
-    }
-
-    private function fail(string $msg, int $status = 400): void
-    {
-        $this->json(['ok' => false, 'data' => null, 'error' => $msg], $status);
-    }
-
-    public function sugestoes(): void
-    {
+        header('Content-Type: application/json; charset=UTF-8');
+        header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
         try {
-            $q = trim((string)($_GET['q'] ?? ''));
-            $biasLat = isset($_GET['bias_lat']) ? (float)$_GET['bias_lat'] : null;
-            $biasLng = isset($_GET['bias_lng']) ? (float)$_GET['bias_lng'] : null;
-            $limit = min(10, max(1, (int)($_GET['limit'] ?? 8)));
-
-            if (mb_strlen($q, 'UTF-8') < 3) {
-                $this->ok(['items' => []]);
-                return;
-            }
-
-            require_once __DIR__ . '/../Services/Address/AddressAutocompleteService.php';
-            $svc = new AddressAutocompleteService();
-            $items = $svc->suggest($q, $biasLat, $biasLng, $limit);
-            $this->ok(['items' => $items]);
+            $json = json_decode((string)file_get_contents('php://input'), true);
+            $entrada = is_array($json) ? $json : $_POST;
+            $cotacao = is_array($entrada['cotacao'] ?? null) ? $entrada['cotacao'] : $entrada;
+            $triagem = TriageSessionService::finalizar($cotacao);
+            $checkoutUrl = (defined('BASE_PATH') ? BASE_PATH : '') . '/checkout/veiculo?triage_session_id=' . rawurlencode($triagem['id']);
+            $nextUrl = AuthService::isLoggedIn()
+                ? $checkoutUrl
+                : (defined('BASE_PATH') ? BASE_PATH : '') . '/registro/cliente?retorno=' . rawurlencode($checkoutUrl);
+            echo json_encode([
+                'ok' => true,
+                'triage_session_id' => $triagem['id'],
+                'checkout_url' => $checkoutUrl,
+                'next_url' => $nextUrl,
+            ], JSON_UNESCAPED_UNICODE);
+        } catch (InvalidArgumentException $e) {
+            Logger::log(Logger::LEVEL_WARN, 'PreCotacaoApiController', 'finalizar', 'triage', '[TRIAGE-VALIDATION-FAIL] ' . $e->getMessage());
+            http_response_code(422);
+            echo json_encode(['ok' => false, 'erro' => $e->getMessage()], JSON_UNESCAPED_UNICODE);
         } catch (Throwable $e) {
-            error_log('[PreCotacaoApi::sugestoes] ' . $e->getMessage());
-            $this->fail('Falha ao buscar sugestoes.', 500);
+            Logger::exception('PreCotacaoApiController', 'finalizar', 'triage', $e, ['phase' => 'TRIAGE-SAVE-FAIL']);
+            http_response_code(500);
+            echo json_encode(['ok' => false, 'erro' => 'Não foi possível finalizar a cotação.'], JSON_UNESCAPED_UNICODE);
         }
     }
 
-    public function reverso(): void
+    public function endereco(): void
     {
+        header('Content-Type: application/json; charset=UTF-8');
+        header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+
+        $json = json_decode((string) file_get_contents('php://input'), true);
+        $entrada = is_array($json) ? $json : $_POST;
+        $lat = self::coordenadaValida($entrada['lat'] ?? null, -34.0, 5.0);
+        $lng = self::coordenadaValida($entrada['lng'] ?? null, -74.0, -28.0);
+
+        if ($lat === null || $lng === null) {
+            Logger::log(Logger::LEVEL_WARN, 'PreCotacaoApiController', 'endereco', 'geocoding', '[REVERSE-GEOCODING-VALIDATION-FAIL] Coordenadas invalidas.');
+            http_response_code(422);
+            echo json_encode(['ok' => false, 'erro' => 'Coordenadas inválidas'], JSON_UNESCAPED_UNICODE);
+            return;
+        }
+
         try {
-            $lat = isset($_GET['lat']) ? (float)$_GET['lat'] : 0.0;
-            $lng = isset($_GET['lng']) ? (float)$_GET['lng'] : 0.0;
-            if ($lat === 0.0 || $lng === 0.0) {
-                $this->fail('Informe lat e lng.');
+            $endereco = (new GeocodingService())->reverseGeocode($lat, $lng);
+            $label = trim((string) ($endereco['street'] ?? ''));
+
+            if ($label === '') {
+                Logger::log(Logger::LEVEL_WARN, 'PreCotacaoApiController', 'endereco', 'geocoding', '[REVERSE-GEOCODING-EMPTY] Nenhum endereco encontrado. lat=' . $lat . ' lng=' . $lng);
+                http_response_code(500);
+                echo json_encode(['ok' => false, 'erro' => 'Falha no reverse geocoding'], JSON_UNESCAPED_UNICODE);
                 return;
             }
-            if ($lat < -34 || $lat > 5 || $lng < -74 || $lng > -28) {
-                $this->fail('Coordenada fora do Brasil.');
-                return;
-            }
-            require_once __DIR__ . '/../Services/Address/AddressAutocompleteService.php';
-            $svc = new AddressAutocompleteService();
-            $item = $svc->reverse($lat, $lng);
-            $this->ok(['item' => $item]);
+
+            echo json_encode([
+                'ok' => true,
+                'label' => $label,
+                'numero' => $endereco['numero'] ?? null,
+                'cidade' => $endereco['cidade'] ?? null,
+                'uf' => $endereco['uf'] ?? null,
+            ], JSON_UNESCAPED_UNICODE);
         } catch (Throwable $e) {
-            error_log('[PreCotacaoApi::reverso] ' . $e->getMessage());
-            $this->fail('Falha ao reverter coordenada.', 500);
-        }
-    }
-
-    public function cobertura(): void
-    {
-        try {
-            $lat = isset($_GET['lat']) ? (float)$_GET['lat'] : 0.0;
-            $lng = isset($_GET['lng']) ? (float)$_GET['lng'] : 0.0;
-            if ($lat === 0.0 || $lng === 0.0) {
-                $this->fail('Informe lat e lng.');
-                return;
-            }
-
-            $qtdOficinas = 0;
-            try {
-                require_once __DIR__ . '/../Services/DecisaoAtendimentoService.php';
-                if (class_exists('DecisaoAtendimentoService')) {
-                    $svc = new DecisaoAtendimentoService();
-                    if (method_exists($svc, 'oficinasProximasPublico')) {
-                        $qtdOficinas = count($svc->oficinasProximasPublico($lat, $lng, ''));
-                    }
-                }
-            } catch (Throwable $e) {
-                error_log('[PreCotacaoApi::cobertura::oficinas] ' . $e->getMessage());
-            }
-
-            $qtdGuinchos = 0;
-            try {
-                $stmt = getPDO()->query("
-                    SELECT COUNT(*) FROM guinchos
-                     WHERE aprovado = 1 AND disponivel = 1
-                       AND lat_atual IS NOT NULL AND lng_atual IS NOT NULL
-                ");
-                $qtdGuinchos = (int)$stmt->fetchColumn();
-            } catch (Throwable $e) {
-                error_log('[PreCotacaoApi::cobertura::guincho] ' . $e->getMessage());
-            }
-
-            $this->ok([
-                'qtd_oficinas' => $qtdOficinas,
-                'tem_guincho' => $qtdGuinchos > 0,
-                'qtd_guinchos' => $qtdGuinchos,
+            Logger::exception('PreCotacaoApiController', 'endereco', 'geocoding', $e, [
+                'phase' => 'REVERSE-GEOCODING-FAIL',
+                'lat' => $lat,
+                'lng' => $lng,
             ]);
-        } catch (Throwable $e) {
-            error_log('[PreCotacaoApi::cobertura] ' . $e->getMessage());
-            $this->fail('Falha ao verificar cobertura.', 500);
+            http_response_code(500);
+            echo json_encode(['ok' => false, 'erro' => 'Falha no reverse geocoding'], JSON_UNESCAPED_UNICODE);
         }
     }
 
-    public function triagemServicos(): void
+    private static function coordenadaValida($valor, float $minimo, float $maximo): ?float
     {
-        try {
-            require_once __DIR__ . '/../Models/TriagemServico.php';
-            $servicos = TriagemServico::listarAtivos();
-            $this->ok(['servicos' => $servicos]);
-        } catch (Throwable $e) {
-            error_log('[PreCotacaoApi::triagemServicos] ' . $e->getMessage());
-            $this->fail('Falha ao listar servicos.', 500);
+        if (!is_numeric($valor)) {
+            return null;
         }
-    }
 
-    public function opcoes(): void
-    {
-        try {
-            $modo = (string)($_GET['modo'] ?? 'orientacao');
-            $servico = (string)($_GET['servico'] ?? '');
-            $lat = isset($_GET['lat']) ? (float)$_GET['lat'] : 0.0;
-            $lng = isset($_GET['lng']) ? (float)$_GET['lng'] : 0.0;
-            $latDest = isset($_GET['lat_destino']) ? (float)$_GET['lat_destino'] : null;
-            $lngDest = isset($_GET['lng_destino']) ? (float)$_GET['lng_destino'] : null;
-            if ($lat === 0.0 || $lng === 0.0) {
-                $this->fail('Informe lat e lng.');
-                return;
-            }
-            require_once __DIR__ . '/../Services/PreCotacao/PreCotacaoOpcoesService.php';
-            $dados = PreCotacaoOpcoesService::montar($modo, $servico, $lat, $lng, $latDest, $lngDest);
-            $this->ok($dados);
-        } catch (Throwable $e) {
-            error_log('[PreCotacaoApi::opcoes] ' . $e->getMessage());
-            $this->fail('Falha ao montar opcoes.', 500);
+        $coordenada = (float) $valor;
+        if (!is_finite($coordenada) || $coordenada < $minimo || $coordenada > $maximo) {
+            return null;
         }
-    }
 
-    public function whatsapp(): void
-    {
-        try {
-            if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') {
-                $this->fail('Metodo nao permitido.', 405);
-                return;
-            }
-
-            $token = (string)($_POST['csrf_token'] ?? '');
-            $sessToken = (string)($_SESSION['_csrf_token'] ?? '');
-            if ($token === '' || $sessToken === '' || !hash_equals($sessToken, $token)) {
-                $this->fail('Sessao expirada.', 419);
-                return;
-            }
-
-            $ctx = [
-                'modo' => (string)($_POST['modo'] ?? ''),
-                'servico' => (string)($_POST['servico'] ?? ''),
-                'veiculo' => (string)($_POST['veiculo'] ?? ''),
-                'origem_texto' => (string)($_POST['origem_texto'] ?? ''),
-                'origem_lat' => (string)($_POST['origem_lat'] ?? ''),
-                'origem_lng' => (string)($_POST['origem_lng'] ?? ''),
-                'destino_texto' => (string)($_POST['destino_texto'] ?? ''),
-            ];
-
-            require_once __DIR__ . '/../Services/PreCotacao/WhatsAppCotacaoService.php';
-            $link = WhatsAppCotacaoService::gerarLink($ctx);
-            if ($link === '') {
-                $this->fail('Numero de WhatsApp nao configurado.', 503);
-                return;
-            }
-            $this->ok(['link' => $link]);
-        } catch (Throwable $e) {
-            error_log('[PreCotacaoApi::whatsapp] ' . $e->getMessage());
-            $this->fail('Falha ao gerar link.', 500);
-        }
+        return $coordenada;
     }
 }

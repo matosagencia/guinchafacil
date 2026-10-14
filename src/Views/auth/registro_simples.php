@@ -6,12 +6,12 @@ $cfg = [
     'cliente' => [
         'eyebrow'     => 'Para quem precisa de socorro',
         'title'       => 'Sua conta em 30 segundos',
-        'subtitle'    => 'Sem formulário longo. Só o básico pra vocé pedir socorro quando precisar.',
-        'acc'         => '#2fb34a',
-        'acc2'        => '#1f8a36',
+        'subtitle'    => 'Sem formulário longo. Só o básico pra você pedir socorro quando precisar.',
+        'acc'         => 'var(--gf-verde)',
+        'acc2'        => 'var(--gf-verde-dark)',
         'acc_ring'    => 'rgba(47,179,74,.22)',
         'acc_shadow'  => 'rgba(47,179,74,.30)',
-        'hero_bg'     => 'linear-gradient(135deg,#ffffff 0%,#e6f5ea 60%,#2fb34a 100%)',
+        'hero_bg'     => 'linear-gradient(135deg,#ffffff 0%,#e6f5ea 60%,var(--gf-verde) 100%)',
         'hero_text'   => '#0a3d1a',
         'hero_muted'  => '#3d5a42',
         'back_href'   => '/',
@@ -20,27 +20,27 @@ $cfg = [
             ['Preço antes de pedir', 'Veja o valor estimado antes de confirmar o atendimento.'],
             ['Atendimento 24 horas', 'Guinchos disponíveis a qualquer hora, todos os dias.'],
             ['Rastreio em tempo real', 'Acompanhe o guincho no mapa até chegar.'],
-            ['Pagamento flexível', 'PIX, cartão ou dinheiro na chegada. Vocé escolhe.'],
+            ['Pagamento flexível', 'PIX, cartão ou dinheiro na chegada. Você escolhe.'],
             ['Sem burocracia', 'Nome, WhatsApp e e-mail. Pronto pra usar.'],
         ],
     ],
     'guincho' => [
         'eyebrow'     => 'Para empresas de guincho',
         'title'       => 'Receba chamados sem mensalidade',
-        'subtitle'    => 'Comece com 3 dados. Veículo, CNH e documentação vocé completa no painel.',
-        'acc'         => '#2fb34a',
-        'acc2'        => '#1f8a36',
+        'subtitle'    => 'Comece com 3 dados. Veículo, CNH e documentação você completa no painel.',
+        'acc'         => 'var(--gf-verde)',
+        'acc2'        => 'var(--gf-verde-dark)',
         'acc_ring'    => 'rgba(47,179,74,.22)',
         'acc_shadow'  => 'rgba(47,179,74,.30)',
-        'hero_bg'     => 'linear-gradient(135deg,#000000 0%,#0a3d1a 50%,#2fb34a 100%)',
+        'hero_bg'     => 'linear-gradient(135deg,#000000 0%,#0a3d1a 50%,var(--gf-verde) 100%)',
         'hero_text'   => '#ffffff',
         'hero_muted'  => 'rgba(255,255,255,.78)',
         'back_href'   => '/parceiros/guinchos',
         'back_txt'    => 'Programa de parceiros',
         'adv' => [
             ['Zero mensalidade', 'Sem taxa de adesão e sem mensalidade para entrar.'],
-            ['Chamados compatíveis', 'Vocé recebe pedidos da sua região e capacidade.'],
-            ['Vocé decide quando', 'Ligue e desligue sua disponibilidade no painel.'],
+            ['Chamados compatíveis', 'Você recebe pedidos da sua região e capacidade.'],
+            ['Você decide quando', 'Ligue e desligue sua disponibilidade no painel.'],
             ['Repasse em D+7', 'PIX na sua chave após a conclusão do atendimento.'],
             ['Sem exclusividade', 'Sua carteira e seus clientes continuam sendo seus.'],
         ],
@@ -48,7 +48,7 @@ $cfg = [
     'oficina' => [
         'eyebrow'     => 'Para oficinas parceiras',
         'title'       => 'Encha sua agenda com clientes',
-        'subtitle'    => 'Cadastro rápido pra vocé começar. CNPJ e endereço vocé completa depois, no painel.',
+        'subtitle'    => 'Cadastro rápido pra você começar. CNPJ e endereço você completa depois, no painel.',
         'acc'         => '#f0a83b',
         'acc2'        => '#b9670c',
         'acc_ring'    => 'rgba(240,168,59,.24)',
@@ -61,7 +61,7 @@ $cfg = [
         'adv' => [
             ['Clientes qualificados', 'Demandas da sua região e especialidade técnica.'],
             ['Sem taxa de adesão', 'Entrada gratuita, sem mensalidade fixa.'],
-            ['Orçamento pelo painel', 'Vocé envia o orçamento e o cliente aprova.'],
+            ['Orçamento pelo painel', 'Você envia o orçamento e o cliente aprova.'],
             ['Repasse via PIX', 'Em D+7 após a conclusão do serviço.'],
             ['Sua agenda, seu ritmo', 'Aceite chamados só quando puder atender.'],
         ],
@@ -74,7 +74,8 @@ $styleVars = '--acc:' . $c['acc'] . ';--acc2:' . $c['acc2'] . ';--acc-ring:' . $
 <!doctype html><html lang="pt-BR"><head>
 <?php require __DIR__ . '/../components/marketing_tracking.php'; ?>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<link href="<?php echo htmlspecialchars($bp); ?>/public/assets/vendor/fontawesome/css/all.min.css" rel="stylesheet">
+<link href="<?php echo htmlspecialchars($bp); ?>/public/assets/css/tokens.css" rel="stylesheet"><link href="<?php echo htmlspecialchars($bp); ?>/public/assets/vendor/fontawesome/css/all.min.css" rel="stylesheet">
+<link href="<?php echo htmlspecialchars($bp); ?>/public/assets/css/auth-registro-enhancements.css" rel="stylesheet">
 <link rel="icon" type="image/png" href="<?php echo htmlspecialchars($bp); ?>/public/assets/img/favicon-32.png">
 <title><?php echo htmlspecialchars($c['title']); ?> | GuinchaFácil</title>
 <meta name="robots" content="noindex,follow">
@@ -202,7 +203,7 @@ body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:#0f2
         Continuar com Google
       </a>
 
-      <p class="rs-foot">Ao continuar, vocé concorda com os <a href="<?php echo htmlspecialchars($bp); ?>/termos-servico.php" target="_blank" rel="noopener">Termos</a> e a <a href="<?php echo htmlspecialchars($bp); ?>/politica-privacidade.php" target="_blank" rel="noopener">PolÃ­tica de Privacidade</a>.</p>
+      <p class="rs-foot">Ao continuar, você concorda com os <a href="<?php echo htmlspecialchars($bp); ?>/termos-servico.php" target="_blank" rel="noopener">Termos</a> e a <a href="<?php echo htmlspecialchars($bp); ?>/politica-privacidade.php" target="_blank" rel="noopener">Política de Privacidade</a>.</p>
 
       <p class="rs-login">Já tem conta? <a href="<?php echo htmlspecialchars($bp); ?>/login<?php echo !empty($retorno) && $retorno !== '/' ? '?retorno=' . rawurlencode((string)$retorno) : ''; ?>">Entrar</a></p>
     </div>

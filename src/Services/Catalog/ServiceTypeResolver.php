@@ -46,6 +46,8 @@ final class ServiceTypeResolver
             'pneu' => 'TIRE_CHANGE',
             'eletrica' => 'ELECTRICAL_DIAGNOSIS',
             'bateria' => 'JUMP_START',
+            'combustivel' => 'FUEL_DELIVERY',
+            'pane_seca' => 'FUEL_DELIVERY',
             'mecanica' => 'MECHANICAL_ASSISTANCE',
             'chaveiro' => 'AUTOMOTIVE_LOCKSMITH',
         ];

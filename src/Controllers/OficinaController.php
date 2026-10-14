@@ -130,6 +130,15 @@ class OficinaController extends BaseController
             );
             $stmt->execute([(int)$oficina['id'], $id]);
 
+            $afetadosOf = $stmt->rowCount();
+            if ($afetadosOf > 0) {
+                require_once __DIR__ . '/../Services/PedidoEventoService.php';
+                PedidoEventoService::registrar(
+                    $pdo, $id, 'oficina_aceitou_pedido',
+                    null, 'oficina_aceitou', 'oficina',
+                    (int)$oficina['id'], null
+                );
+            }
             if ($stmt->rowCount() === 0) {
                 $this->setFlashMessage('Este pedido ja foi aceito por outra oficina.', 'error');
                 $this->redirect('/oficina/dashboard');
@@ -222,8 +231,18 @@ class OficinaController extends BaseController
         }
 
         try {
+            $pdoOfSt = getPDO();
+            $stOfSt = $pdoOfSt->prepare("SELECT status FROM pedidos WHERE id = ?");
+            $stOfSt->execute([$id]);
+            $statusAntesOf = (string)($stOfSt->fetchColumn() ?: '');
             getPDO()->prepare("UPDATE pedidos SET status = ? WHERE id = ?")
                 ->execute([$novo, $id]);
+                require_once __DIR__ . '/../Services/PedidoEventoService.php';
+                PedidoEventoService::registrar(
+                    $pdoOfSt, $id, 'oficina_atualizou_status',
+                    $statusAntesOf, (string)$novo, 'oficina',
+                    (int)($_SESSION['oficina_id'] ?? 0), null
+                );
             $this->setFlashMessage('Status atualizado.', 'success');
         } catch (Throwable $e) {
             error_log('[OficinaController][atualizarStatus] ' . $e->getMessage());
@@ -653,6 +672,12 @@ class OficinaController extends BaseController
 
             $pdo->prepare("UPDATE pedidos SET status = 'orcamento_enviado' WHERE id = ?")
                 ->execute([$pedidoId]);
+                require_once __DIR__ . '/../Services/PedidoEventoService.php';
+                PedidoEventoService::registrar(
+                    $pdo, $pedidoId, 'orcamento_enviado',
+                    null, 'orcamento_enviado', 'oficina',
+                    (int)($oficina['id'] ?? 0), null
+                );
 
             $this->setFlashMessage('Orcamento enviado. Aguardando resposta.', 'success');
         } catch (Throwable $e) {

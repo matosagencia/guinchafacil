@@ -1,6 +1,9 @@
 <?php
 
+declare(strict_types=1);
+
 require_once __DIR__ . '/GeoService.php';
+require_once __DIR__ . '/DecisaoAtendimentoService.php';
 
 class PricingService {
     private $config = [];
@@ -60,57 +63,42 @@ class PricingService {
      * @param float $distanciaDestino Distância total até o destino final em KM (para calcular km extra)
      */
     public function gerarOpcoesCotacao($latCliente, $lngCliente, $tipoProblema, $distanciaDestino = 0) {
-        $oficinas = $this->buscarOficinasProximas($latCliente, $lngCliente);
+        $decisao = (new DecisaoAtendimentoService())->avaliar(
+            0,
+            (string)$tipoProblema,
+            (float)$latCliente,
+            (float)$lngCliente,
+            ['distancia_km' => (float)$distanciaDestino]
+        );
+        $oficina = $decisao['oficina_mais_proxima'] ?? null;
+        $assistencia = $decisao['opcao_assistencia'] ?? [];
+        $reboque = $decisao['opcao_reboque'] ?? [];
+        $opcoes = [
+            'guincho' => [
+                'titulo' => 'Rebocar',
+                'descricao' => (string)($reboque['mensagem'] ?? 'Vamos levar seu veículo até a oficina.'),
+                'valor_total' => (float)($reboque['custo_total'] ?? 0.0),
+                'taxa_saida' => 0.0,
+            ],
+        ];
 
-        // Valores globais definidos pelo Admin
-        $taxaSaidaPadrao = (float)$this->config['taxa_saida_assistencia_padrao'];
-        $valorBaseGuincho = (float)$this->config['valor_base_guincho_padrao'];
-        $valorKmExtra = (float)$this->config['valor_km_extra_guincho'];
-        
-        // Cálculo do valor total do guincho (Base + KM Extra)
-        $valorTotalGuincho = $valorBaseGuincho + ($distanciaDestino * $valorKmExtra);
-
-        // CENÁRIO SEM OFICINA (Vai direto pro guincho)
-        if (empty($oficinas)) {
-            return [
-                'mostrar_comparativo' => false,
-                'opcoes' => [
-                    'guincho' => [
-                        'titulo' => 'Rebocar',
-                        'descricao' => 'Não encontramos mecânicos próximos. Vamos levar seu veículo direto para a oficina.',
-                        'valor_base' => $valorBaseGuincho,
-                        'valor_km_extra' => $valorKmExtra,
-                        'valor_total' => $valorTotalGuincho,
-                        'taxa_saida' => 0.00
-                    ]
-                ]
-            ];
-        }
-
-        // CENÁRIO COM OFICINA (Mostra comparativo)
-        $oficinaMaisProxima = $oficinas[0];
-
-        return [
-            'mostrar_comparativo' => true,
-            'oficinas_encontradas' => $oficinas,
-            'opcoes' => [
+        if (!empty($assistencia['disponivel'])) {
+            $opcoes = [
                 'assistencia_local' => [
                     'titulo' => 'Assistência 24h',
-                    'descricao' => 'Um mecânico vai até você. Se não consertar no local, abatemos do reparo.',
-                    'valor_taxa' => $taxaSaidaPadrao, // Vem do Admin
-                    'prestador_id' => $oficinaMaisProxima['id'],
-                    'nome_prestador' => $oficinaMaisProxima['nome'],
-                    'distancia_km' => $oficinaMaisProxima['distancia_km']
+                    'descricao' => (string)($assistencia['mensagem'] ?? ''),
+                    'valor_taxa' => (float)($assistencia['custo_saida'] ?? 0.0),
+                    'prestador_id' => (int)($oficina['provider_id'] ?? 0),
+                    'nome_prestador' => (string)($oficina['nome'] ?? ''),
+                    'distancia_km' => (float)($oficina['distancia_km'] ?? 0.0),
                 ],
-                'guincho' => [
-                    'titulo' => 'Rebocar',
-                    'descricao' => 'Levamos seu carro para a oficina ' . $oficinaMaisProxima['nome'],
-                    'valor_base' => $valorBaseGuincho,
-                    'valor_km_extra' => $valorKmExtra,
-                    'valor_total' => $valorTotalGuincho,
-                    'taxa_saida' => 0.00
-                ]
-            ]
+            ] + $opcoes;
+        }
+
+        return [
+            'mostrar_comparativo' => count($decisao['opcoes_disponiveis'] ?? []) > 1,
+            'oficinas_encontradas' => $decisao['oficinas_encontradas'] ?? [],
+            'opcoes' => $opcoes,
         ];
     }
 

@@ -33,7 +33,7 @@ class Pedido {
             return false;
         }
     }
-
+    /**     * CONTRATO-PEDIDO-v1: grava o snapshot da decisão sem sobrescrever uma     * decisão já apresentada ao cliente.     */    public static function registrarSnapshotDecisao(        int $pedidoId,        ?int $oficinaId,        ?string $oficinaNome,        ?string $triagem,        ?float $custoAssistencia,        ?float $custoReboque,        ?string $recomendacao    ): bool {        if ($pedidoId <= 0) {            return false;        }        try {            $stmt = getPDO()->prepare(                'UPDATE pedidos SET '                . 'oficina_id = COALESCE(oficina_id, :oficina_id), '                . 'oficina_nome = COALESCE(oficina_nome, :oficina_nome), '                . 'triagem = COALESCE(triagem, :triagem), '                . 'custo_assistencia = COALESCE(custo_assistencia, :custo_assistencia), '                . 'custo_reboque = COALESCE(custo_reboque, :custo_reboque), '                . 'recomendacao = COALESCE(recomendacao, :recomendacao) '                . 'WHERE id = :id'            );            return $stmt->execute([                ':oficina_id' => $oficinaId && $oficinaId > 0 ? $oficinaId : null,                ':oficina_nome' => $oficinaNome !== '' ? $oficinaNome : null,                ':triagem' => $triagem !== '' ? $triagem : null,                ':custo_assistencia' => $custoAssistencia === null ? null : round(max(0.0, $custoAssistencia), 2),                ':custo_reboque' => $custoReboque === null ? null : round(max(0.0, $custoReboque), 2),                ':recomendacao' => in_array($recomendacao, ['assistencia', 'reboque'], true) ? $recomendacao : null,                ':id' => $pedidoId,            ]);        } catch (Throwable $e) {            error_log('[Pedido::registrarSnapshotDecisao][pedido_id=' . $pedidoId . '] ' . $e->getMessage());            return false;        }    }
     /** Cria pedido (cliente) */
     public static function criar(array $dados): int|false
     {
@@ -113,7 +113,7 @@ class Pedido {
             : 'DATE_ADD(NOW(), INTERVAL 30 MINUTE)';
 
         $criadoEmExpr = $driver === 'sqlite' ? "datetime('now')" : 'NOW()';
-
+        $triageSessionId = trim((string)($dados['triage_session_id'] ?? ''));        if ($triageSessionId !== '') {            $existente = $pdo->prepare('SELECT id FROM pedidos WHERE triage_session_id = :triage_session_id LIMIT 1');            $existente->execute([':triage_session_id' => $triageSessionId]);            $pedidoExistente = $existente->fetchColumn();            if ($pedidoExistente !== false) {                return (int)$pedidoExistente;            }        }
         $stmt = $pdo->prepare(
 
             "INSERT INTO pedidos (
@@ -132,8 +132,7 @@ class Pedido {
 
                 referrer_url, landing_page, cidade_id, pricing_zone_id,
 
-                modalidade_socorro, local_resgate_lat, local_resgate_lng
-
+                modalidade_socorro, local_resgate_lat, local_resgate_lng,                triage_session_id, oficina_id, oficina_nome, triagem,                custo_assistencia, custo_reboque, recomendacao, origem_funil
              ) VALUES (
 
                 :cliente_id, :veiculo_id, :tipo_problema, :descricao_problema,
@@ -150,8 +149,7 @@ class Pedido {
 
                 :referrer_url, :landing_page, :cidade_id, :pricing_zone_id,
 
-                :modalidade_socorro, :local_resgate_lat, :local_resgate_lng
-
+                :modalidade_socorro, :local_resgate_lat, :local_resgate_lng,                :triage_session_id, :oficina_id, :oficina_nome, :triagem,                :custo_assistencia, :custo_reboque, :recomendacao, :origem_funil
              )"
 
         );
@@ -190,7 +188,7 @@ class Pedido {
             ':modalidade_socorro' => $dados['modalidade_socorro'],
             ':local_resgate_lat' => $dados['local_resgate_lat'],
             ':local_resgate_lng' => $dados['local_resgate_lng'],
-
+            ':triage_session_id' => $triageSessionId !== '' ? $triageSessionId : null,            ':oficina_id' => !empty($dados['oficina_id']) ? (int)$dados['oficina_id'] : null,            ':oficina_nome' => !empty($dados['oficina_nome']) ? (string)$dados['oficina_nome'] : null,            ':triagem' => !empty($dados['triagem']) ? (string)$dados['triagem'] : null,            ':custo_assistencia' => isset($dados['custo_assistencia']) ? round(max(0.0, (float)$dados['custo_assistencia']), 2) : null,            ':custo_reboque' => isset($dados['custo_reboque']) ? round(max(0.0, (float)$dados['custo_reboque']), 2) : null,            ':recomendacao' => in_array(($dados['recomendacao'] ?? null), ['assistencia', 'reboque'], true) ? $dados['recomendacao'] : null,            ':origem_funil' => in_array(($dados['origem_funil'] ?? null), ['oficina', 'especialista'], true) ? $dados['origem_funil'] : null,
         ]);
 
         return (int)$pdo->lastInsertId();

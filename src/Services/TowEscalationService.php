@@ -18,8 +18,19 @@ final class TowEscalationService
             if (!$inc) throw new DomainException('Incidente não encontrado.');
             if ($inc['status'] !== 'necessita_reboque') throw new DomainException('Este incidente não pode ser escalonado agora.');
             $pdo->prepare("UPDATE incidentes SET status='procurando_guincho', resolucao_tipo='reboque' WHERE id=?")->execute([$incidenteId]);
+            $stPedEsc = $pdo->prepare("SELECT id, status FROM pedidos WHERE incidente_id=? LIMIT 1");
+            $stPedEsc->execute([$incidenteId]);
+            $pedEsc = $stPedEsc->fetch(PDO::FETCH_ASSOC);
             $pdo->prepare("UPDATE pedidos SET status='aguardando_guincho', attendance_mode='TOWING', guincho_id=NULL WHERE incidente_id=?")->execute([$incidenteId]);
             // O deslocamento/diagnóstico do especialista é devido mesmo sem resolução local.
+            if ($pedEsc) {
+                require_once __DIR__ . '/PedidoEventoService.php';
+                PedidoEventoService::registrar(
+                    $pdo, (int)$pedEsc['id'], 'pedido_escalado_para_reboque',
+                    (string)($pedEsc['status'] ?? ''), 'aguardando_guincho',
+                    'system', 0, 'incidente ' . $incidenteId . ' necessita_reboque'
+                );
+            }
             $pdo->prepare("UPDATE financeiro_lancamentos SET status='confirmado' WHERE incidente_id=? AND tipo='repasse_especialista' AND referencia_tipo='atendimento_especialista' AND status IN ('pendente','processando')")->execute([$incidenteId]);
             $pdo->commit();
             Logger::log(Logger::LEVEL_INFO, __CLASS__, __FUNCTION__, 'especialista_fallback', 'Fallback para guincho concluído.', ['incidente_id'=>$incidenteId]); return true;

@@ -1,0 +1,65 @@
+.gf-footer-payments {
+  border-top: 1px solid var(--gf-borda-dark, #262626);
+  margin-top: 32px;
+  padding-top: 24px;
+  text-align: center;
+}
+
+.gf-footer-payments__title {
+  color: #9ca3af;
+  font-size: .8rem;
+  font-weight: 700;
+  letter-spacing: .05em;
+  margin: 0 0 12px;
+  text-transform: uppercase;
+}
+
+.gf-footer-payments__brands {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+}
+
+.gf-payment-brand {
+  align-items: center;
+  border: 1px solid #374151;
+  border-radius: 6px;
+  display: inline-flex;
+  font-size: .72rem;
+  font-weight: 800;
+  gap: 5px;
+  min-height: 31px;
+  padding: 5px 10px;
+}
+
+.gf-payment-brand svg { display: block; height: 17px; width: auto; }
+.gf-payment-brand--pix { background: #fff; color: #008a7b; }
+.gf-payment-brand--visa { background: #1a1f71; border-color: #1a1f71; color: #fff; }
+.gf-payment-brand--mastercard { background: #fff; color: #111827; }
+.gf-payment-brand--elo { background: #000; color: #fff; }
+.gf-payment-brand--hipercard { background: #b3131b; border-color: #b3131b; color: #fff; }
+.gf-payment-brand--amex { background: #0077a6; border-color: #0077a6; color: #fff; }
+
+.gf-footer-payments__security {
+  align-items: center;
+  color: #9ca3af;
+  display: flex;
+  font-size: .75rem;
+  gap: 6px;
+  justify-content: center;
+  margin: 14px 0 0;
+}
+
+.gf-footer-payments__security svg { flex: 0 0 auto; height: 15px; width: 15px; }
+
+.gf-payment-card {
+  background: var(--gf-preto, #0A0A0A);
+  border: 1px solid var(--gf-borda-dark, #262626);
+  color: #fff;
+}
+
+.gf-payment-card .card-header { border-color: var(--gf-borda-dark, #262626); }
+.gf-payment-card .text-muted { color: #b6bec9 !important; }
+.gf-payment-card .gf-footer-payments { margin: 0 0 20px; }

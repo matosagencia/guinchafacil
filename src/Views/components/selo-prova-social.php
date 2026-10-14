@@ -1,0 +1,5 @@
+<section class="gf-selo-prova-social" aria-label="Indicadores de confianca">
+    <div class="gf-selo-prova-social__item"><span aria-hidden="true">&#9733;</span><strong>4,8/5</strong><span>avaliacoes verificadas</span></div>
+    <div class="gf-selo-prova-social__item"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="2"></circle><path d="M12 7v5l3 2" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="2"></path></svg><strong>12 a 20 min</strong><span>tempo medio estimado</span></div>
+    <div class="gf-selo-prova-social__item"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="5" y="10" width="14" height="10" rx="2" fill="none" stroke="currentColor" stroke-width="2"></rect><path d="M8 10V7a4 4 0 0 1 8 0v3" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="2"></path></svg><strong>Preco Fechado</strong><span>cotacao antes da conta</span></div>
+</section>

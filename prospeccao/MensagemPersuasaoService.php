@@ -16,12 +16,19 @@ namespace App\Services\Prospeccao;
  */
 class MensagemPersuasaoService
 {
-    public function __construct(
-        private readonly string $urlPreCadastro,
-        private readonly ?int $parceirosAtivosRegiao = null,
-        private readonly string $ofertaReciprocidade = 'primeiros 30 dias sem taxa de adesão',
-    ) {
-    }
+    private string $urlPreCadastro;
+private ?int $parceirosAtivosRegiao;
+private string $ofertaReciprocidade;
+
+public function __construct(
+    string $urlPreCadastro,
+    ?int $parceirosAtivosRegiao = null,
+    string $ofertaReciprocidade = 'primeiros 30 dias sem taxa de adesão'
+) {
+    $this->urlPreCadastro = $urlPreCadastro;
+    $this->parceirosAtivosRegiao = $parceirosAtivosRegiao;
+    $this->ofertaReciprocidade = $ofertaReciprocidade;
+}
 
     public function gerarConvite(array $lead, array $regiao): array
     {

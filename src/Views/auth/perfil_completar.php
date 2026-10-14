@@ -6,8 +6,8 @@ $isGuincho    = $tipo === 'guincho';
 $isOficina    = $tipo === 'oficina';
 $isEspecialista = $tipo === 'especialista';
 
-$accent   = $isOficina ? '#f0a83b' : ($isCliente ? '#2fb34a' : '#2fb34a');
-$accent2  = $isOficina ? '#b9670c' : ($isCliente ? '#1f8a36' : '#1f8a36');
+$accent   = $isOficina ? '#f0a83b' : ($isCliente ? 'var(--gf-verde)' : 'var(--gf-verde)');
+$accent2  = $isOficina ? '#b9670c' : ($isCliente ? 'var(--gf-verde-dark)' : 'var(--gf-verde-dark)');
 
 $labelTipo = [
     'cliente'      => 'Cliente',
@@ -23,7 +23,7 @@ $val = function(string $k, string $default = '') use ($salvo): string {
 ?>
 <!doctype html><html lang="pt-BR"><head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<link href="<?php echo htmlspecialchars($bp); ?>/public/assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+<link href="<?php echo htmlspecialchars($bp); ?>/public/assets/css/tokens.css" rel="stylesheet"><link href="<?php echo htmlspecialchars($bp); ?>/public/assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
 <link href="<?php echo htmlspecialchars($bp); ?>/public/assets/vendor/fontawesome/css/all.min.css" rel="stylesheet">
 <title>Completar perfil | GuinchaFácil</title>
 <meta name="robots" content="noindex,follow">
@@ -68,7 +68,7 @@ body{margin:0;min-height:100vh;background:#f4f8f5;color:#14201a;font-family:syst
     <p class="pc-sub">Esses dados são obrigatórios para liberar o painel e processar pagamentos. Nada é compartilhado publicamente.</p>
 
     <?php if (!empty($flash)): ?><div class="pc-alert <?php echo (($flash['type'] ?? '') === 'success') ? 'ok' : ''; ?>"><?php echo htmlspecialchars((string)($flash['message'] ?? '')); ?></div><?php endif; ?>
-    <?php if (!empty($pendenteAprovacao)): ?><div class="pc-warn"><i class="fas fa-clock"></i> Sua documentação está em análise. Vocé será notificado quando for aprovado.</div><?php endif; ?>
+    <?php if (!empty($pendenteAprovacao)): ?><div class="pc-warn"><i class="fas fa-clock"></i> Sua documentação está em análise. Você será notificado quando for aprovado.</div><?php endif; ?>
 
     <form method="POST" action="<?php echo htmlspecialchars($bp); ?>/perfil/completar" enctype="multipart/form-data" novalidate>
       <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars((string)($csrf_token ?? '')); ?>">

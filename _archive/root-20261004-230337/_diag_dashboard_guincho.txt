@@ -1,0 +1,291 @@
+===== TOP 60 LINHAS dashboard.php =====
+<?php
+
+$bp = defined('BASE_PATH') ? BASE_PATH : '';
+include __DIR__ . '/../layouts/header.php';
+$operadorNome = trim((string)($_SESSION['user']['nome'] ?? 'Operador'));
+require_once __DIR__ . '/../../Services/PushVapidService.php';
+$pushPublicKey = PushVapidService::publicKey();
+?>
+<script<?= function_exists('csp_script_nonce_attr') ? csp_script_nonce_attr() : '' ?>>
+window.GFPushConfig = <?= json_encode([
+    'publicKey' => $pushPublicKey,
+    'subscribeUrl' => $bp . '/push/subscribe',
+    'unsubscribeUrl' => $bp . '/push/unsubscribe',
+    'csrfToken' => $csrfToken ?? '',
+    'role' => 'guincho',
+], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?>;
+</script>
+<?php
+
+/** Formata segundos decorridos como "Agora" / "X min" / "Xh" para a fila de ofertas. */
+function tow_relative_time(?int $segundos): string
+
+{
+
+    if ($segundos === null) return '-';
+
+    if ($segundos < 60) return 'Agora';
+
+    $min = (int)floor($segundos / 60);
+
+    if ($min < 60) return $min . ' min';
+
+    return (int)floor($min / 60) . 'h';
+
+}
+
+
+
+/** Formata segundos decorridos desde o último ponto POR para o painel Proof-of-Road. */
+
+function tow_format_elapsed(?int $segundos): string
+
+{
+
+    if ($segundos === null) return '-';
+
+    if ($segundos < 60) return $segundos . ' s';
+
+    $min = (int)floor($segundos / 60);
+
+    if ($min < 60) return $min . ' min';
+
+    return (int)floor($min / 60) . 'h';
+
+}
+
+
+
+/** Saudação real baseada no horário do servidor (não é texto fixo). */
+
+
+===== BOTTOM 100 LINHAS dashboard.php =====
+(total: 1823 linhas)
+            fd.append('disponivel', desejado ? '1' : '0');
+
+
+
+            const data = await window.apiFetch(BP + '/guincho/disponibilidade', {
+
+                method: 'POST',
+
+                body: fd
+
+            });
+
+
+
+            if (data.ok) {
+
+                label.textContent = data.disponivel ? 'Online' : 'Offline';
+
+                toggle.checked = !!data.disponivel;
+
+                if (data.disponivel) {
+
+                    checarPedidos();
+
+                    iniciarPedidosSse();
+
+                } else {
+
+                    encerrarPedidosSse();
+
+                    renderPedidosOffline();
+
+                }
+
+            } else {
+
+                toggle.checked = !desejado;
+
+                label.textContent = !desejado ? 'Online' : 'Offline';
+
+                mostrarToast(data.erro || 'Tente novamente.', 'danger');
+
+                if (data.precisa_confirmar_localizacao) abrirModalConfirmarLocalizacao();
+
+            }
+
+        } catch (e) {
+
+            toggle.checked = !desejado;
+
+            label.textContent = !desejado ? 'Online' : 'Offline';
+
+        } finally {
+
+            toggle.disabled = false;
+
+        }
+
+    });
+
+});
+
+
+
+function mostrarToast(msg, tipo = 'danger') {
+
+    const container = document.getElementById('toastContainer') || (() => {
+
+        const el = document.createElement('div');
+
+        el.id = 'toastContainer';
+
+        el.style.cssText = 'position:fixed;top:70px;right:16px;z-index:9999;display:flex;flex-direction:column;gap:8px';
+
+        document.body.appendChild(el);
+
+        return el;
+
+    })();
+
+    const toast = document.createElement('div');
+
+    toast.className = `alert alert-${tipo} alert-dismissible shadow mb-0`;
+
+    toast.style.cssText = 'min-width:260px;max-width:380px;animation:fadeIn .2s';
+
+    toast.innerHTML = `<i class="fas fa-exclamation-circle me-2"></i>${msg}
+
+        <button type="button" class="btn-close" data-dismiss-parent=".alert"></button>`;
+
+    container.appendChild(toast);
+
+    setTimeout(() => toast.remove(), 5000);
+
+}
+
+</script>
+
+
+
+
+===== GREP: SSE / EventSource / polling / pedidos-disponiveis =====
+L77: <link rel="stylesheet" href="<?php echo $bp; ?>/public/assets/css/components/communications.css">
+L79: <link rel="stylesheet" href="<?php echo $bp; ?>/public/assets/css/components/dashboard.css">
+L85: só falta o CSS desta página, que resolve o descompasso de classes
+L89: <link rel="stylesheet" href="<?php echo $bp; ?>/public/assets/css/pages/tow-dashboard.css">
+L328: <strong id="guinchoAtivoKm"><?php echo isset($pedidoAtivo['distancia_km']) ? number_format((float)$pedidoAtivo['distancia_km'], 1, ',', '.') . ' km' : '-'; ?></strong>
+L786: <link rel="stylesheet" href="<?php echo $bp; ?>/public/assets/vendor/leaflet/leaflet.css">
+L788: <script<?php echo csp_script_nonce_attr(); ?> src="<?php echo $bp; ?>/public/assets/js/core/offline-queue.js"></script>
+L790: <script<?php echo csp_script_nonce_attr(); ?> src="<?php echo $bp; ?>/public/assets/vendor/leaflet/leaflet.js"></script>
+L792: <script<?php echo csp_script_nonce_attr(); ?> src="<?php echo $bp; ?>/public/assets/js/atendimento-status.js"></script>
+L794: <script<?php echo csp_script_nonce_attr(); ?> src="<?php echo $bp; ?>/public/assets/js/communications.js"></script>
+L872: * padrão quebrado por path de asset). Só envia pro servidor a posição REAL
+L1018: // (ver iniciarMapaConfirmarLocalizacao) — Bootstrap dispara esse evento
+L1020: // exatamente nesse momento, então plugamos a inicialização nele em vez
+L1066: const data = await window.apiFetch(BP + '/guincho/localizacao', { method: 'POST', body: fd });
+L1228: const filaPolling = setInterval(atualizarPontosEmFila, 5000);
+L1230: if (window.SessionManager) window.SessionManager.registerPolling(filaPolling);
+L1320: * public/assets/js/core/offline-queue.js), não um dado do servidor —
+L1344: const atualizarStatus = () => fetch(statusUrl, { headers: { 'Accept': 'application/json' } })
+L1400: const porPolling = setInterval(atualizarStatus, 15000);
+L1402: if (window.SessionManager) window.SessionManager.registerPolling(porPolling);
+L1422: let pedidosPolling = null;
+L1424: let pedidosSse = null;
+L1426: let pedidosSseRetry = null;
+L1580: function encerrarPedidosSse() {
+L1582: if (pedidosSseRetry) {
+L1584: clearTimeout(pedidosSseRetry);
+L1586: pedidosSseRetry = null;
+L1590: if (pedidosSse) {
+L1592: pedidosSse.close();
+L1594: pedidosSse = null;
+L1602: function reagendarPedidosSse() {
+L1606: if (pedidosSseRetry) clearTimeout(pedidosSseRetry);
+L1608: pedidosSseRetry = setTimeout(iniciarPedidosSse, 4000);
+L1620: const data = await window.apiFetch(BP + '/guincho/pedidos-disponiveis?_=' + Date.now());
+L1638: function iniciarPedidosSse() {
+L1640: if (!window.EventSource || !toggle.checked) return;
+L1644: encerrarPedidosSse();
+L1646: pedidosSse = new EventSource(BP + '/sse/pedidos');
+L1650: // O evento SSE só avisa que "algo mudou" — a fila completa (ordenada
+L1658: pedidosSse.addEventListener('novo_pedido', () => checarPedidos());
+L1662: pedidosSse.addEventListener('session_expired', () => {
+L1664: encerrarPedidosSse();
+L1672: pedidosSse.addEventListener('stream_close', () => {
+L1674: encerrarPedidosSse();
+L1682: pedidosSse.onerror = () => {
+L1684: encerrarPedidosSse();
+L1686: reagendarPedidosSse();
+L1696: iniciarPedidosSse();
+L1698: pedidosPolling = setInterval(checarPedidos, 45000);
+L1700: if (window.SessionManager) window.SessionManager.registerPolling(pedidosPolling);
+L1702: document.addEventListener('guincha:session-expired', encerrarPedidosSse);
+L1704: window.addEventListener('beforeunload', encerrarPedidosSse);
+L1728: const data = await window.apiFetch(BP + '/guincho/disponibilidade', {
+L1748: iniciarPedidosSse();
+L1752: encerrarPedidosSse();
+
+===== ARQUIVOS RELACIONADOS (existem?) =====
+  [1] src\Views\guincho\dashboard.php
+  [1] src\Controllers\SseController.php
+  [0] public\assets\js\guincho-dashboard.js
+  [0] public\assets\js\pages\guincho-dashboard.js
+  [0] public\assets\js\guincho-pedidos.js
+
+===== SSE_JS_INLINE (se houver) =====
+Encontrado EventSource. Preview das 40 linhas ao redor do primeiro match:
+
+                renderFila(data.pedidos);
+
+            }
+
+        } catch (e) { console.error('Falha ao checar pedidos', e); }
+
+    }
+
+
+
+    function iniciarPedidosSse() {
+
+        if (!window.EventSource || !toggle.checked) return;
+
+
+
+        encerrarPedidosSse();
+
+        pedidosSse = new EventSource(BP + '/sse/pedidos');
+
+
+
+        // O evento SSE só avisa que "algo mudou" — a fila completa (ordenada
+
+        // por compatibilidade) é sempre buscada de novo via checarPedidos(),
+
+        // para manter o card de oferta e a fila com os mesmos campos
+
+        // enriquecidos (bairro, ETA, distância de serviço etc.).
+
+        pedidosSse.addEventListener('novo_pedido', () => checarPedidos());
+
+
+
+        pedidosSse.addEventListener('session_expired', () => {
+
+            encerrarPedidosSse();
+
+            if (window.SessionManager) window.SessionManager.handleUnauthorized();
+
+        });
+
+
+
+        pedidosSse.addEventListener('stream_close', () => {
+
+            encerrarPedidosSse();
+
+            checarPedidos();
+
+        });
+
+
+
+        pedidosSse.onerror = () => {
+
+            encerrarPedidosSse();
+
+            reagendarPedidosSse();

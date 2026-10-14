@@ -1,0 +1,863 @@
+From db6e988e55941bdde6354694614a5070759d0166 Mon Sep 17 00:00:00 2001
+From: Codex <codex@openai.com>
+Date: Thu, 8 Oct 2026 10:29:54 -0300
+Subject: [PATCH 1/2] feat(financeiro): comissao e fatura semanal de parceiros
+
+---
+ cron/aplicar_bloqueios_vencidos.php           |   4 +
+ cron/fechar_ciclos_semanais.php               |   5 +
+ doc/lanes/A.md                                |  24 +-
+ install/migration_comissao_v1.sql             |  78 ++++
+ src/Controllers/FaturaWebhookController.php   |  25 ++
+ src/Services/ComissaoService.php              |  54 +++
+ src/Services/FaturaService.php                |  38 ++
+ .../Pedido/PedidoTransitionService.php        | 352 +++++++++---------
+ src/Services/PixFaturaService.php             |  19 +
+ src/Services/PixService.php                   |   6 +
+ 10 files changed, 428 insertions(+), 177 deletions(-)
+ create mode 100644 cron/aplicar_bloqueios_vencidos.php
+ create mode 100644 cron/fechar_ciclos_semanais.php
+ create mode 100644 install/migration_comissao_v1.sql
+ create mode 100644 src/Controllers/FaturaWebhookController.php
+ create mode 100644 src/Services/ComissaoService.php
+ create mode 100644 src/Services/FaturaService.php
+ create mode 100644 src/Services/PixFaturaService.php
+
+diff --git a/cron/aplicar_bloqueios_vencidos.php b/cron/aplicar_bloqueios_vencidos.php
+new file mode 100644
+index 0000000..0153c3e
+--- /dev/null
++++ b/cron/aplicar_bloqueios_vencidos.php
+@@ -0,0 +1,4 @@
++<?php
++declare(strict_types=1);
++require_once __DIR__ . '/../config.php'; require_once __DIR__ . '/../src/Services/FaturaService.php';
++try{$qtd=FaturaService::bloquearPorVencimento();error_log('[Cron][aplicar_bloqueios_vencidos][OK] bloqueadas='.$qtd);exit(0);}catch(Throwable $e){error_log('[Cron][aplicar_bloqueios_vencidos][ERRO] fase=bloquear erro='.$e->getMessage());exit(1);}
+diff --git a/cron/fechar_ciclos_semanais.php b/cron/fechar_ciclos_semanais.php
+new file mode 100644
+index 0000000..25ec066
+--- /dev/null
++++ b/cron/fechar_ciclos_semanais.php
+@@ -0,0 +1,5 @@
++<?php
++declare(strict_types=1);
++require_once __DIR__ . '/../config.php'; require_once __DIR__ . '/../src/Services/FaturaService.php';
++try { $inicio=(new DateTimeImmutable('last sunday'))->setTime(0,0); $qtd=FaturaService::fecharCiclo($inicio); error_log('[Cron][fechar_ciclos_semanais][OK] ciclo='.$inicio->format('Y-m-d').' faturas='.$qtd); exit(0); }
++catch(Throwable $e){error_log('[Cron][fechar_ciclos_semanais][ERRO] fase=fechar_ciclo erro='.$e->getMessage());exit(1);}
+diff --git a/doc/lanes/A.md b/doc/lanes/A.md
+index c441522..2b6ac78 100644
+--- a/doc/lanes/A.md
++++ b/doc/lanes/A.md
+@@ -73,4 +73,26 @@ ESTADO_FAIXA_A:
+         - install/rollback_admin_payment_destination_v1.sql
+     pendencias:
+       - "Aplicar a migration no banco antes da integracao da faixa B."
+-      - "B consome somente o retorno do metodo; A nao altera AdminController, views, CSS ou rotas."
+\ No newline at end of file
++      - "B consome somente o retorno do metodo; A nao altera AdminController, views, CSS ou rotas."
++
++  financeiro_parceiros_v1:
++    status: entregue_para_validacao
++    data: 2026-10-08
++    preambulo_6_0: "Aplicado: congelar valores financeiros na transição canônica; operações repetidas não podem recalcular ou duplicar lançamento."
++    implementacao:
++      migration: install/migration_comissao_v1.sql
++      comissao: ComissaoService::calcular e ::persistirParaPedido
++      ponto_canonico: "PedidoTransitionService::transition(targetStatus=concluido)."
++      fatura: "FaturaService::fecharCiclo, ::marcarPaga, ::bloquearPorVencimento e ::desbloquear"
++      pix: PixFaturaService::gerar
++      webhook: FaturaWebhookController::mercadoPagoPix
++      crons:
++        - "domingo 00:01: php cron/fechar_ciclos_semanais.php"
++        - "sábado 00:01: php cron/aplicar_bloqueios_vencidos.php"
++    rota_pedida_ao_dono: |
++      ROTA_PEDIDA:
++        faixa: A
++        metodo: POST
++        caminho: /webhook/mercadopago/pix
++        controller: FaturaWebhookController::mercadoPagoPix
++        motivo: baixa idempotente de fatura PIX após HMAC Mercado Pago
+diff --git a/install/migration_comissao_v1.sql b/install/migration_comissao_v1.sql
+new file mode 100644
+index 0000000..bff9f09
+--- /dev/null
++++ b/install/migration_comissao_v1.sql
+@@ -0,0 +1,78 @@
++-- Comissão e fatura de parceiros v1. Idempotente para MySQL/MariaDB.
++SET @schema := DATABASE();
++
++CREATE TABLE IF NOT EXISTS comissoes_cidade (
++  id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
++  cidade_id BIGINT UNSIGNED NOT NULL,
++  percentual DECIMAL(5,4) NOT NULL DEFAULT 0.0000,
++  ativo TINYINT(1) NOT NULL DEFAULT 1,
++  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
++  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
++  PRIMARY KEY (id), UNIQUE KEY uk_comissoes_cidade_cidade (cidade_id)
++) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
++
++CREATE TABLE IF NOT EXISTS faturas_parceiro (
++  id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
++  parceiro_tipo ENUM('guincho','oficina','especialista') NOT NULL,
++  parceiro_id BIGINT UNSIGNED NOT NULL,
++  ciclo_inicio DATETIME NOT NULL,
++  ciclo_fim DATETIME NOT NULL,
++  total_faturado DECIMAL(12,2) NOT NULL DEFAULT 0.00,
++  total_repasse DECIMAL(12,2) NOT NULL DEFAULT 0.00,
++  saldo DECIMAL(12,2) NOT NULL DEFAULT 0.00,
++  status ENUM('aberta','paga','vencida','bloqueada','cancelada') NOT NULL DEFAULT 'aberta',
++  pix_qrcode MEDIUMTEXT NULL,
++  pix_copia_cola TEXT NULL,
++  pix_transacao_id VARCHAR(120) NULL,
++  vencimento_em DATETIME NOT NULL,
++  paga_em DATETIME NULL,
++  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
++  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
++  PRIMARY KEY (id),
++  UNIQUE KEY uk_fatura_parceiro_ciclo (parceiro_tipo, parceiro_id, ciclo_inicio),
++  KEY idx_fatura_status_vencimento (status, vencimento_em),
++  KEY idx_fatura_pix_transacao (pix_transacao_id)
++) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
++
++CREATE TABLE IF NOT EXISTS faturas_itens (
++  id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
++  fatura_id BIGINT UNSIGNED NOT NULL,
++  pedido_id BIGINT UNSIGNED NOT NULL,
++  comissao_tipo ENUM('faturada','descontada') NOT NULL,
++  valor_total DECIMAL(12,2) NOT NULL,
++  comissao_valor DECIMAL(12,2) NOT NULL,
++  valor_liquido_parceiro DECIMAL(12,2) NOT NULL,
++  saldo_item DECIMAL(12,2) NOT NULL,
++  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
++  PRIMARY KEY (id),
++  UNIQUE KEY uk_fatura_item_pedido (pedido_id),
++  KEY idx_fatura_itens_fatura (fatura_id),
++  CONSTRAINT fk_faturas_itens_fatura FOREIGN KEY (fatura_id) REFERENCES faturas_parceiro(id) ON DELETE CASCADE
++) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
++
++CREATE TABLE IF NOT EXISTS faturas_pagamentos (
++  id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
++  fatura_id BIGINT UNSIGNED NOT NULL,
++  transacao_id VARCHAR(120) NOT NULL,
++  metodo VARCHAR(32) NOT NULL,
++  valor DECIMAL(12,2) NOT NULL DEFAULT 0.00,
++  payload MEDIUMTEXT NULL,
++  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
++  PRIMARY KEY (id),
++  UNIQUE KEY uk_fatura_pagamento_transacao (transacao_id),
++  KEY idx_fatura_pagamentos_fatura (fatura_id),
++  CONSTRAINT fk_faturas_pagamentos_fatura FOREIGN KEY (fatura_id) REFERENCES faturas_parceiro(id) ON DELETE CASCADE
++) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
++
++SET @sql := IF((SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA=@schema AND TABLE_NAME='pedidos' AND COLUMN_NAME='comissao_valor')=0,
++  'ALTER TABLE pedidos ADD COLUMN comissao_valor DECIMAL(10,2) NULL', 'SELECT 1'); PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
++SET @sql := IF((SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA=@schema AND TABLE_NAME='pedidos' AND COLUMN_NAME='comissao_tipo')=0,
++  "ALTER TABLE pedidos ADD COLUMN comissao_tipo ENUM('faturada','descontada') NULL", 'SELECT 1'); PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
++SET @sql := IF((SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA=@schema AND TABLE_NAME='pedidos' AND COLUMN_NAME='valor_liquido_parceiro')=0,
++  'ALTER TABLE pedidos ADD COLUMN valor_liquido_parceiro DECIMAL(10,2) NULL', 'SELECT 1'); PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
++SET @sql := IF((SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA=@schema AND TABLE_NAME='pedidos' AND COLUMN_NAME='fatura_id')=0,
++  'ALTER TABLE pedidos ADD COLUMN fatura_id BIGINT UNSIGNED NULL', 'SELECT 1'); PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
++SET @sql := IF((SELECT COUNT(*) FROM INFORMATION_SCHEMA.STATISTICS WHERE TABLE_SCHEMA=@schema AND TABLE_NAME='pedidos' AND INDEX_NAME='idx_pedidos_fatura')=0,
++  'CREATE INDEX idx_pedidos_fatura ON pedidos(fatura_id)', 'SELECT 1'); PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
++SET @sql := IF((SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS WHERE TABLE_SCHEMA=@schema AND TABLE_NAME='pedidos' AND CONSTRAINT_NAME='fk_pedidos_fatura')=0,
++  'ALTER TABLE pedidos ADD CONSTRAINT fk_pedidos_fatura FOREIGN KEY (fatura_id) REFERENCES faturas_parceiro(id) ON DELETE SET NULL', 'SELECT 1'); PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+diff --git a/src/Controllers/FaturaWebhookController.php b/src/Controllers/FaturaWebhookController.php
+new file mode 100644
+index 0000000..e3fe031
+--- /dev/null
++++ b/src/Controllers/FaturaWebhookController.php
+@@ -0,0 +1,25 @@
++<?php
++declare(strict_types=1);
++
++require_once __DIR__ . '/../../config.php';
++require_once __DIR__ . '/../Services/FaturaService.php';
++require_once __DIR__ . '/../Services/Logger.php';
++
++/** Endpoint A: POST /webhook/mercadopago/pix (registro pelo dono em index.php). */
++final class FaturaWebhookController
++{
++    public function mercadoPagoPix(): void
++    {
++        $body=(string)file_get_contents('php://input'); $data=json_decode($body,true);
++        if(!is_array($data)){http_response_code(400);echo 'invalid payload';return;}
++        $x=(string)($_SERVER['HTTP_X_SIGNATURE']??'');$rid=(string)($_SERVER['HTTP_X_REQUEST_ID']??'');$id=(string)($_GET['data.id']??$data['data']['id']??$data['id']??'');$ts='';$sig='';
++        foreach(explode(',',$x) as $part){[$k,$v]=array_pad(explode('=',trim($part),2),2,'');if($k==='ts')$ts=$v;if($k==='v1')$sig=$v;}
++        $expected=hash_hmac('sha256',"id:{$id};request-id:{$rid};ts:{$ts};",(string)MP_WEBHOOK_SECRET);
++        if($sig===''||!hash_equals($expected,$sig)){Logger::log(Logger::LEVEL_WARN,__CLASS__,__FUNCTION__,'pix_fatura','FATURA-WH-001: assinatura inválida.',['transacao'=>$id]);http_response_code(401);return;}
++        $tx=(string)($data['transaction_id']??$data['id']??$id);$copia=(string)($data['pix_copia_cola']??'');
++        $pdo=getPDO();$q=$pdo->prepare('SELECT id FROM faturas_parceiro WHERE pix_transacao_id=? OR (?<>\'\' AND pix_copia_cola=?) LIMIT 1');$q->execute([$tx,$copia,$copia]);$faturaId=(int)$q->fetchColumn();
++        if($faturaId<1){Logger::log(Logger::LEVEL_WARN,__CLASS__,__FUNCTION__,'pix_fatura','FATURA-WH-002: fatura não localizada.',['transacao'=>$tx]);http_response_code(200);echo 'ignored';return;}
++        $ok=FaturaService::marcarPaga($faturaId,$tx,'mercadopago_pix');
++        Logger::log($ok?Logger::LEVEL_INFO:Logger::LEVEL_ERROR,__CLASS__,__FUNCTION__,'pix_fatura',$ok?'FATURA-WH-OK: pagamento processado.':'FATURA-WH-003: falha ao baixar fatura.',['fatura_id'=>$faturaId,'transacao'=>$tx]);http_response_code($ok?200:500);echo $ok?'OK':'error';
++    }
++}
+diff --git a/src/Services/ComissaoService.php b/src/Services/ComissaoService.php
+new file mode 100644
+index 0000000..328cb0a
+--- /dev/null
++++ b/src/Services/ComissaoService.php
+@@ -0,0 +1,54 @@
++<?php
++declare(strict_types=1);
++
++require_once __DIR__ . '/../Models/Configuracao.php';
++
++final class ComissaoService
++{
++    public static function schemaDisponivel(PDO $pdo): bool
++    {
++        try {
++            if ($pdo->getAttribute(PDO::ATTR_DRIVER_NAME) === 'sqlite') {
++                $cols = $pdo->query('PRAGMA table_info(pedidos)')->fetchAll(PDO::FETCH_ASSOC);
++                return count(array_intersect(['comissao_valor', 'comissao_tipo', 'valor_liquido_parceiro'], array_column($cols, 'name'))) === 3;
++            }
++            return (int) $pdo->query("SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='pedidos' AND COLUMN_NAME IN ('comissao_valor','comissao_tipo','valor_liquido_parceiro')")->fetchColumn() === 3;
++        } catch (Throwable) { return false; }
++    }
++    public static function calcular(int $pedidoId, string $formaPagamento, float $valorTotal, ?int $cidadeId = null): array
++    {
++        $base = self::normalizarPercentual((float) Configuracao::get('comissao_plataforma', '0'));
++        $extra = 0.0;
++        if ($cidadeId !== null && $cidadeId > 0) {
++            $stmt = getPDO()->prepare('SELECT percentual FROM comissoes_cidade WHERE cidade_id=? AND ativo=1 LIMIT 1');
++            $stmt->execute([$cidadeId]);
++            $extra = self::normalizarPercentual((float) ($stmt->fetchColumn() ?: 0));
++        }
++        $total = round(max(0.0, $valorTotal), 2);
++        $percentual = round($base + $extra, 4);
++        $valor = round($total * $percentual, 2);
++        $tipo = strtolower(trim($formaPagamento)) === 'pago_na_chegada' ? 'faturada' : 'descontada';
++        return ['percentual' => $percentual, 'valor' => $valor, 'tipo' => $tipo,
++            'valor_liquido_parceiro' => $tipo === 'faturada' ? $total : round($total - $valor, 2)];
++    }
++
++    public static function persistirParaPedido(PDO $pdo, array $pedido): array
++    {
++        $id = (int) ($pedido['id'] ?? 0);
++        if ($id < 1) throw new InvalidArgumentException('COMISSAO-001: pedido inválido.');
++        $forma = (string) ($pedido['forma_pagamento_escolhida'] ?? '');
++        $total = (float) ($pedido['custo_final'] ?? $pedido['custo_estimado'] ?? 0);
++        $calc = self::calcular($id, $forma, $total, isset($pedido['cidade_id']) ? (int)$pedido['cidade_id'] : null);
++        $stmt = $pdo->prepare('UPDATE pedidos SET comissao_valor=?, comissao_tipo=?, valor_liquido_parceiro=? WHERE id=? AND comissao_valor IS NULL');
++        $stmt->execute([$calc['valor'], $calc['tipo'], $calc['valor_liquido_parceiro'], $id]);
++        if ($stmt->rowCount() === 0) {
++            $q = $pdo->prepare('SELECT comissao_valor, comissao_tipo, valor_liquido_parceiro FROM pedidos WHERE id=?'); $q->execute([$id]);
++            $atual = $q->fetch(PDO::FETCH_ASSOC) ?: [];
++            $calc['valor'] = (float)($atual['comissao_valor'] ?? $calc['valor']);
++            $calc['tipo'] = (string)($atual['comissao_tipo'] ?? $calc['tipo']);
++            $calc['valor_liquido_parceiro'] = (float)($atual['valor_liquido_parceiro'] ?? $calc['valor_liquido_parceiro']);
++        }
++        return $calc;
++    }
++    private static function normalizarPercentual(float $valor): float { return max(0.0, $valor > 1 ? $valor / 100 : $valor); }
++}
+diff --git a/src/Services/FaturaService.php b/src/Services/FaturaService.php
+new file mode 100644
+index 0000000..ccf9734
+--- /dev/null
++++ b/src/Services/FaturaService.php
+@@ -0,0 +1,38 @@
++<?php
++declare(strict_types=1);
++
++require_once __DIR__ . '/../Models/Configuracao.php';
++require_once __DIR__ . '/PixService.php';
++require_once __DIR__ . '/PixFaturaService.php';
++require_once __DIR__ . '/Logger.php';
++
++final class FaturaService
++{
++    public static function fecharCiclo(DateTimeImmutable $cicloInicio): int
++    {
++        $inicio = $cicloInicio->setTime(0, 0); $fim = $inicio->modify('+7 days'); $pdo = getPDO();
++        $q = $pdo->prepare("SELECT guincho_id parceiro_id, SUM(CASE WHEN comissao_tipo='faturada' THEN comissao_valor ELSE 0 END) total_faturado, SUM(CASE WHEN comissao_tipo='descontada' THEN valor_liquido_parceiro ELSE 0 END) total_repasse FROM pedidos WHERE status='concluido' AND guincho_id IS NOT NULL AND comissao_valor IS NOT NULL AND fatura_id IS NULL AND atualizado_em >= ? AND atualizado_em < ? GROUP BY guincho_id");
++        $q->execute([$inicio->format('Y-m-d H:i:s'), $fim->format('Y-m-d H:i:s')]); $criados = 0;
++        foreach ($q->fetchAll(PDO::FETCH_ASSOC) as $grupo) {
++            $pdo->beginTransaction();
++            try {
++                $saldo = round((float)$grupo['total_repasse'] - (float)$grupo['total_faturado'], 2);
++                $insert = $pdo->prepare("INSERT INTO faturas_parceiro (parceiro_tipo,parceiro_id,ciclo_inicio,ciclo_fim,total_faturado,total_repasse,saldo,vencimento_em) VALUES ('guincho',?,?,?,?,?,?,?)");
++                $insert->execute([(int)$grupo['parceiro_id'],$inicio->format('Y-m-d H:i:s'),$fim->modify('-1 second')->format('Y-m-d H:i:s'),$grupo['total_faturado'],$grupo['total_repasse'],$saldo,$fim->modify('+7 days')->format('Y-m-d H:i:s')]);
++                $faturaId=(int)$pdo->lastInsertId();
++                $itens=$pdo->prepare("SELECT id,custo_final,custo_estimado,comissao_tipo,comissao_valor,valor_liquido_parceiro FROM pedidos WHERE status='concluido' AND guincho_id=? AND comissao_valor IS NOT NULL AND fatura_id IS NULL AND atualizado_em >= ? AND atualizado_em < ?");
++                $itens->execute([(int)$grupo['parceiro_id'],$inicio->format('Y-m-d H:i:s'),$fim->format('Y-m-d H:i:s')]);
++                $add=$pdo->prepare('INSERT INTO faturas_itens (fatura_id,pedido_id,comissao_tipo,valor_total,comissao_valor,valor_liquido_parceiro,saldo_item) VALUES (?,?,?,?,?,?,?)'); $link=$pdo->prepare('UPDATE pedidos SET fatura_id=? WHERE id=? AND fatura_id IS NULL');
++                foreach($itens->fetchAll(PDO::FETCH_ASSOC) as $i){$itemSaldo=$i['comissao_tipo']==='faturada'?-(float)$i['comissao_valor']:(float)$i['valor_liquido_parceiro'];$add->execute([$faturaId,$i['id'],$i['comissao_tipo'],(float)($i['custo_final']??$i['custo_estimado']),$i['comissao_valor'],$i['valor_liquido_parceiro'],$itemSaldo]);$link->execute([$faturaId,$i['id']]);}
++                $pdo->commit(); $criados++;
++                $pix=PixService::gerar($faturaId,abs($saldo),$saldo>0?'plataforma_paga_parceiro':'parceiro_paga_plataforma');
++                if($pix['ok']??false){$pdo->prepare('UPDATE faturas_parceiro SET pix_qrcode=?,pix_copia_cola=?,pix_transacao_id=? WHERE id=? AND pix_qrcode IS NULL')->execute([$pix['qrcode'],$pix['copia_cola'],$pix['transacao_id'],$faturaId]);}else{Logger::log(Logger::LEVEL_ERROR,__CLASS__,__FUNCTION__,'pix_fatura','FATURA-PIX-001: falha ao gerar PIX.',['fatura_id'=>$faturaId,'erro'=>$pix['erro']??'']);}
++            } catch(Throwable $e){if($pdo->inTransaction())$pdo->rollBack();Logger::exception(__CLASS__,__FUNCTION__,'fechar_ciclo',$e,['parceiro_id'=>$grupo['parceiro_id']]);throw $e;}
++        } return $criados;
++    }
++    public static function marcarPaga(int $faturaId,string $transacaoId,string $metodo): bool
++    { if($faturaId<1||trim($transacaoId)==='')return false;$pdo=getPDO();try{$pdo->beginTransaction();$q=$pdo->prepare('SELECT saldo FROM faturas_parceiro WHERE id=?'.self::lock($pdo));$q->execute([$faturaId]);$f=$q->fetch(PDO::FETCH_ASSOC);if(!$f){$pdo->rollBack();return false;}$seen=$pdo->prepare('SELECT id FROM faturas_pagamentos WHERE transacao_id=?');$seen->execute([$transacaoId]);if($seen->fetchColumn()){$pdo->rollBack();return true;}$pdo->prepare('INSERT INTO faturas_pagamentos (fatura_id,transacao_id,metodo,valor) VALUES (?,?,?,?)')->execute([$faturaId,$transacaoId,$metodo,abs((float)$f['saldo'])]);$pdo->prepare("UPDATE faturas_parceiro SET status='paga',paga_em=NOW(),pix_transacao_id=? WHERE id=? AND status<>'paga'")->execute([$transacaoId,$faturaId]);$pdo->commit();return true;}catch(Throwable $e){if($pdo->inTransaction())$pdo->rollBack();Logger::exception(__CLASS__,__FUNCTION__,'marcar_paga',$e,['fatura_id'=>$faturaId]);return false;} }
++    public static function bloquearPorVencimento(): int {$s=getPDO()->prepare("UPDATE faturas_parceiro SET status='bloqueada' WHERE status='aberta' AND vencimento_em<NOW()");$s->execute();return $s->rowCount();}
++    public static function desbloquear(int $faturaId): bool {$s=getPDO()->prepare("UPDATE faturas_parceiro SET status='aberta' WHERE id=? AND status='bloqueada'");$s->execute([$faturaId]);return $s->rowCount()===1;}
++    private static function lock(PDO $pdo):string{return $pdo->getAttribute(PDO::ATTR_DRIVER_NAME)==='sqlite'?'':' FOR UPDATE';}
++}
+diff --git a/src/Services/Pedido/PedidoTransitionService.php b/src/Services/Pedido/PedidoTransitionService.php
+index 5f85cc1..a54b247 100644
+--- a/src/Services/Pedido/PedidoTransitionService.php
++++ b/src/Services/Pedido/PedidoTransitionService.php
+@@ -19,19 +19,19 @@ require_once __DIR__ . '/../Evidence/EvidenceService.php';
+ require_once __DIR__ . '/../DebugMode.php';
+ require_once __DIR__ . '/../GeoService.php';
+ require_once __DIR__ . '/../../Models/Catalog/ProviderCapability.php';
+-require_once __DIR__ . '/../Dispatch/ProviderVehicleCompatibilityService.php';
+-require_once __DIR__ . '/../IncidenteService.php';
+-require_once __DIR__ . '/../EspecialistaDispatchService.php';
+-require_once __DIR__ . '/../EspecialistaPricingService.php';
+-require_once __DIR__ . '/../IncidenteFinanceiroService.php';
+-
++require_once __DIR__ . '/../Dispatch/ProviderVehicleCompatibilityService.php';
++require_once __DIR__ . '/../IncidenteService.php';
++require_once __DIR__ . '/../EspecialistaDispatchService.php';
++require_once __DIR__ . '/../EspecialistaPricingService.php';
++require_once __DIR__ . '/../IncidenteFinanceiroService.php';
++require_once __DIR__ . '/../ComissaoService.php';
+ final class PedidoTransitionService
+ {
+-    public static function approvePayment(int $pedidoId, string $idExterno, string $payload = '', int $actorId = 0): PedidoTransitionResult
+-    {
+-        $pdo = getPDO();
+-        $incidenteCriado = 0;
+-        $codigoServicoEspecialista = '';
++    public static function approvePayment(int $pedidoId, string $idExterno, string $payload = '', int $actorId = 0): PedidoTransitionResult
++    {
++        $pdo = getPDO();
++        $incidenteCriado = 0;
++        $codigoServicoEspecialista = '';
+         try {
+             $pdo->beginTransaction();
+             $stmt = $pdo->prepare("SELECT * FROM pedidos WHERE id = ?" . self::lockClause($pdo));
+@@ -96,20 +96,20 @@ final class PedidoTransitionService
+ 
+             Pagamento::aprovar((int)$pag['id'], $idExterno, $payload);
+             Pagamento::atualizarSplit((int)$pag['id'], $valorGuincho, $valorPlataforma);
+-            PayoutLedgerService::registrarSplitAprovado($pdo, (int)$pag['id'], $pedidoId, $valorGuincho, $valorPlataforma, $idExterno, $valorReservaGateway);
+-
+-            if ((string)($pedido['attendance_mode'] ?? '') === 'ON_SITE' && empty($pedido['incidente_id'])) {
+-                $svc = (int)($pedido['service_type_id'] ?? 0);
+-                $st = $svc > 0 ? $pdo->prepare('SELECT code FROM service_types WHERE id=? LIMIT 1') : null;
+-                if ($st) { $st->execute([$svc]); $codigoServicoEspecialista = (string)($st->fetchColumn() ?: ''); }
+-                $incidenteCriado = Incidente::criar([
+-                    'cliente_id' => (int)$pedido['cliente_id'], 'veiculo_id' => (int)$pedido['veiculo_id'],
+-                    'tipo_problema' => (string)$pedido['tipo_problema'], 'descricao_problema' => (string)$pedido['descricao_problema'],
+-                    'lat_origem' => (float)$pedido['lat_origem'], 'lng_origem' => (float)$pedido['lng_origem'],
+-                    'endereco_origem' => (string)$pedido['endereco_origem'], 'status' => 'procurando_especialista'
+-                ], $pdo);
+-                $pdo->prepare('UPDATE pedidos SET incidente_id=? WHERE id=?')->execute([$incidenteCriado, $pedidoId]);
+-            }
++            PayoutLedgerService::registrarSplitAprovado($pdo, (int)$pag['id'], $pedidoId, $valorGuincho, $valorPlataforma, $idExterno, $valorReservaGateway);
++
++            if ((string)($pedido['attendance_mode'] ?? '') === 'ON_SITE' && empty($pedido['incidente_id'])) {
++                $svc = (int)($pedido['service_type_id'] ?? 0);
++                $st = $svc > 0 ? $pdo->prepare('SELECT code FROM service_types WHERE id=? LIMIT 1') : null;
++                if ($st) { $st->execute([$svc]); $codigoServicoEspecialista = (string)($st->fetchColumn() ?: ''); }
++                $incidenteCriado = Incidente::criar([
++                    'cliente_id' => (int)$pedido['cliente_id'], 'veiculo_id' => (int)$pedido['veiculo_id'],
++                    'tipo_problema' => (string)$pedido['tipo_problema'], 'descricao_problema' => (string)$pedido['descricao_problema'],
++                    'lat_origem' => (float)$pedido['lat_origem'], 'lng_origem' => (float)$pedido['lng_origem'],
++                    'endereco_origem' => (string)$pedido['endereco_origem'], 'status' => 'procurando_especialista'
++                ], $pdo);
++                $pdo->prepare('UPDATE pedidos SET incidente_id=? WHERE id=?')->execute([$incidenteCriado, $pedidoId]);
++            }
+ 
+             $expMin = (int)($cfg['tempo_expiracao_min'] ?? 5);
+             $raioInicial = (int)($cfg['raio_inicial_km'] ?? 10);
+@@ -151,18 +151,18 @@ final class PedidoTransitionService
+                 // pela capacidade do serviço original) e entra na fila com
+                 // prazo/raio novos.
+                 $pdo->prepare("
+-                    UPDATE pedidos
+-                       SET status = ?,
+-                           attendance_mode = 'TOWING',
+-                           guincho_id = NULL,
+-                           expiracao_aceite = " . self::dateAddMinutesExpression($expMin) . ",
+-                           raio_atual_km = ?
+-                     WHERE id = ?
+-                ")->execute([
+-                    $statusNovo,
+-                    $raioInicial,
+-                    $pedidoId,
+-                ]);
++                    UPDATE pedidos
++                       SET status = ?,
++                           attendance_mode = 'TOWING',
++                           guincho_id = NULL,
++                           expiracao_aceite = " . self::dateAddMinutesExpression($expMin) . ",
++                           raio_atual_km = ?
++                     WHERE id = ?
++                ")->execute([
++                    $statusNovo,
++                    $raioInicial,
++                    $pedidoId,
++                ]);
+                 if ($guinchoHibridoId > 0) {
+                     $pdo->prepare('UPDATE guinchos SET disponivel = 1 WHERE id = ?')->execute([$guinchoHibridoId]);
+                 }
+@@ -172,38 +172,38 @@ final class PedidoTransitionService
+                 // ConversionService) permanecem intactos.
+                 $pdo->prepare('UPDATE pedidos SET status = ? WHERE id = ?')->execute([$statusNovo, $pedidoId]);
+             } else {
+-                $pdo->prepare("
+-                    UPDATE pedidos
+-                       SET status = 'aguardando_guincho',
+-                           expiracao_aceite = " . self::dateAddMinutesExpression($expMin) . ",
+-                           raio_atual_km = ?
+-                     WHERE id = ?
+-                ")->execute([
+-                    $raioInicial,
+-                    $pedidoId,
+-                ]);
+-            }
+-
+-            $pdo->commit();
+-
+-            if ($incidenteCriado > 0 && $codigoServicoEspecialista !== '') {
+-                try {
+-                    // O repasse é sempre recalculado sobre o valor efetivamente
+-                    // pago pelo cliente (incluindo distância e adicional noturno).
+-                    $repasseEspecialista = round((float)$total * 0.75, 2);
+-                    $taxaEspecialista = round((float)$total - $repasseEspecialista, 2);
+-                    IncidenteFinanceiroService::registrar($incidenteCriado, 'cobranca_cliente', 'pagamento', (int)$pag['id'], $total);
+-                    IncidenteFinanceiroService::registrar($incidenteCriado, 'taxa_plataforma', 'pagamento', (int)$pag['id'], $taxaEspecialista);
+-                    $atendimentoId = EspecialistaDispatchService::disparar($incidenteCriado, $codigoServicoEspecialista, $repasseEspecialista, $total, $taxaEspecialista);
+-                    if ($atendimentoId) {
+-                        IncidenteFinanceiroService::registrar($incidenteCriado, 'repasse_especialista', 'atendimento_especialista', $atendimentoId, $repasseEspecialista, 'pendente');
+-                    } else {
+-                        error_log('[EspecialistaDispatch] falha pós-pagamento: retorno nulo; pedido_id=' . $pedidoId . ' incidente_id=' . $incidenteCriado . ' service_code=' . $codigoServicoEspecialista);
+-                    }
+-                } catch (Throwable $dispatchError) {
+-                    error_log('[EspecialistaDispatch] falha pós-pagamento: exceção; pedido_id=' . $pedidoId . ' incidente_id=' . $incidenteCriado . ' service_code=' . $codigoServicoEspecialista . ' erro=' . $dispatchError->getMessage());
+-                }
+-            }
++                $pdo->prepare("
++                    UPDATE pedidos
++                       SET status = 'aguardando_guincho',
++                           expiracao_aceite = " . self::dateAddMinutesExpression($expMin) . ",
++                           raio_atual_km = ?
++                     WHERE id = ?
++                ")->execute([
++                    $raioInicial,
++                    $pedidoId,
++                ]);
++            }
++
++            $pdo->commit();
++
++            if ($incidenteCriado > 0 && $codigoServicoEspecialista !== '') {
++                try {
++                    // O repasse é sempre recalculado sobre o valor efetivamente
++                    // pago pelo cliente (incluindo distância e adicional noturno).
++                    $repasseEspecialista = round((float)$total * 0.75, 2);
++                    $taxaEspecialista = round((float)$total - $repasseEspecialista, 2);
++                    IncidenteFinanceiroService::registrar($incidenteCriado, 'cobranca_cliente', 'pagamento', (int)$pag['id'], $total);
++                    IncidenteFinanceiroService::registrar($incidenteCriado, 'taxa_plataforma', 'pagamento', (int)$pag['id'], $taxaEspecialista);
++                    $atendimentoId = EspecialistaDispatchService::disparar($incidenteCriado, $codigoServicoEspecialista, $repasseEspecialista, $total, $taxaEspecialista);
++                    if ($atendimentoId) {
++                        IncidenteFinanceiroService::registrar($incidenteCriado, 'repasse_especialista', 'atendimento_especialista', $atendimentoId, $repasseEspecialista, 'pendente');
++                    } else {
++                        error_log('[EspecialistaDispatch] falha pós-pagamento: retorno nulo; pedido_id=' . $pedidoId . ' incidente_id=' . $incidenteCriado . ' service_code=' . $codigoServicoEspecialista);
++                    }
++                } catch (Throwable $dispatchError) {
++                    error_log('[EspecialistaDispatch] falha pós-pagamento: exceção; pedido_id=' . $pedidoId . ' incidente_id=' . $incidenteCriado . ' service_code=' . $codigoServicoEspecialista . ' erro=' . $dispatchError->getMessage());
++                }
++            }
+ 
+             AuditTrailService::evento('pagamento_aprovado_pedido', __CLASS__, __FUNCTION__, [
+                 'pedido_id' => $pedidoId,
+@@ -304,10 +304,10 @@ final class PedidoTransitionService
+                 && !empty($pedido['guincho_id']);
+ 
+             $params = [$request->targetStatus];
+-            $sql = "UPDATE pedidos SET status = ?";
+-
+-            if ($request->targetStatus === 'recusado_solicitando_reboque') {
+-                $sql .= ", attendance_mode = 'TOWING'";
++            $sql = "UPDATE pedidos SET status = ?";
++
++            if ($request->targetStatus === 'recusado_solicitando_reboque') {
++                $sql .= ", attendance_mode = 'TOWING'";
+             }
+             if ($request->targetStatus === 'em_reboque' && !empty($request->context['foto_plataforma'])) {
+                 $sql .= ", foto_plataforma = ?";
+@@ -317,7 +317,7 @@ final class PedidoTransitionService
+                 $sql .= ", foto_destino = ?";
+                 $params[] = (string)$request->context['foto_destino'];
+             }
+-            if ($liberarGuinchoAnterior) {
++            if ($request->targetStatus === 'concluido' && ComissaoService::schemaDisponivel($pdo)) {                $comissao = ComissaoService::persistirParaPedido($pdo, $pedido);                Logger::log(Logger::LEVEL_INFO, __CLASS__, __FUNCTION__, 'comissao', 'COMISSAO-OK: comissão persistida na conclusão.', [                    'pedido_id' => $request->pedidoId, 'tipo' => $comissao['tipo'], 'valor' => $comissao['valor'],                ]);            }            if ($liberarGuinchoAnterior) {
+                 // attendance_mode -> TOWING é intencional aqui, não só cosmético:
+                 // a partir deste ponto o pedido É literalmente um reboque (a fase
+                 // de socorro local já terminou). Sem isso, o filtro de capacidade
+@@ -330,7 +330,7 @@ final class PedidoTransitionService
+                 // dali em diante (a_caminho/no_local/em_reboque/concluido) o
+                 // TowingFlowDefinition assume, e são exatamente os mesmos passos
+                 // do reboque comum.
+-                $sql .= ", guincho_id = NULL, expiracao_aceite = " . self::dateAddMinutesExpression(30) . ", attendance_mode = 'TOWING'";
++                $sql .= ", guincho_id = NULL, expiracao_aceite = " . self::dateAddMinutesExpression(30) . ", attendance_mode = 'TOWING'";
+             }
+             $sql .= " WHERE id = ?";
+             $params[] = $request->pedidoId;
+@@ -355,16 +355,16 @@ final class PedidoTransitionService
+                 'status_novo' => $request->targetStatus,
+             ]);
+ 
+-            // Monetização de oficinas: o pedido já foi commitado acima. Falhas
+-            // na indicação nunca podem reverter/bloquear a conclusão do reboque.
+-            if ($request->targetStatus === 'concluido') {
+-                try {
+-                    require_once __DIR__ . '/../IndicacaoOficinaService.php';
+-                    IndicacaoOficinaService::processarEntrega((int)$request->pedidoId);
+-                } catch (Throwable $indicacaoError) {
+-                    Logger::exception(__CLASS__, __FUNCTION__, 'indicacao_oficina_pos_commit', $indicacaoError, ['pedido_id' => $request->pedidoId]);
+-                }
+-            }
++            // Monetização de oficinas: o pedido já foi commitado acima. Falhas
++            // na indicação nunca podem reverter/bloquear a conclusão do reboque.
++            if ($request->targetStatus === 'concluido') {
++                try {
++                    require_once __DIR__ . '/../IndicacaoOficinaService.php';
++                    IndicacaoOficinaService::processarEntrega((int)$request->pedidoId);
++                } catch (Throwable $indicacaoError) {
++                    Logger::exception(__CLASS__, __FUNCTION__, 'indicacao_oficina_pos_commit', $indicacaoError, ['pedido_id' => $request->pedidoId]);
++                }
++            }
+             return PedidoTransitionResult::success(Pedido::buscarPorId($request->pedidoId) ?? $pedido, [
+                 'status_anterior' => $pedido['status'],
+                 'status_novo' => $request->targetStatus,
+@@ -1270,94 +1270,94 @@ final class PedidoTransitionService
+         return ProviderCapability::possuiCapacidadeReboqueAprovada($guinchoId);
+     }
+ 
+-    private static function lockClause(PDO $pdo): string
+-    {
+-        return $pdo->getAttribute(PDO::ATTR_DRIVER_NAME) === 'sqlite' ? '' : ' FOR UPDATE';
+-    }
+-
+-    private static function dateAddMinutesExpression(int $minutes): string
+-    {
+-        $minutes = max(1, $minutes);
+-        $pdo = getPDO();
+-        if ($pdo->getAttribute(PDO::ATTR_DRIVER_NAME) === 'sqlite') {
+-            return "datetime('now', '+" . $minutes . " minutes')";
+-        }
+-
+-        return "DATE_ADD(NOW(), INTERVAL " . $minutes . " MINUTE)";
+-    }
+-    public static function requeueByOficina(int $pedidoId, int $oficinaId, int $actorId, string $justificativa, int $expMin, float $penalidadeReputacao = 0.0): PedidoTransitionResult
+-    {
+-        $pdo = getPDO();
+-        try {
+-            $pdo->beginTransaction();
+-            $stmtPedido = $pdo->prepare("SELECT * FROM pedidos WHERE id = ?" . self::lockClause($pdo));
+-            $stmtPedido->execute([$pedidoId]);
+-            $pedido = $stmtPedido->fetch(PDO::FETCH_ASSOC);
+-
+-            if (!$pedido) {
+-                $pdo->rollBack();
+-                return PedidoTransitionResult::failure('Pedido nao encontrado.');
+-            }
+-            if ((int)($pedido['oficina_id'] ?? 0) !== $oficinaId) {
+-                $pdo->rollBack();
+-                return PedidoTransitionResult::failure('Pedido nao pertence a esta oficina.');
+-            }
+-            if (!in_array((string)$pedido['status'], ['oficina_aceitou', 'oficina_a_caminho'], true)) {
+-                $pdo->rollBack();
+-                return PedidoTransitionResult::failure('So e possivel cancelar antes de chegar ao local.');
+-            }
+-
+-            $attendanceMode = (string)($pedido['attendance_mode'] ?? 'TOWING');
+-            $statusFila = 'aguardando_guincho';
+-            if ($attendanceMode === 'ON_SITE' || $attendanceMode === 'HYBRID') {
+-                $statusFila = 'aguardando_oficina';
+-            }
+-
+-            $pdo->prepare("
+-                UPDATE pedidos
+-                   SET status = ?, oficina_id = NULL, motivo_cancelamento = ?, expiracao_aceite = ?
+-                 WHERE id = ?
+-            ")->execute([
+-                $statusFila,
+-                mb_substr('[oficina] ' . $justificativa, 0, 255),
+-                date('Y-m-d H:i:s', strtotime("+{$expMin} minutes")),
+-                $pedidoId,
+-            ]);
+-
+-            if ($penalidadeReputacao > 0) {
+-                try {
+-                    $pdo->prepare("
+-                        UPDATE oficinas
+-                           SET total_cancelamentos = total_cancelamentos + 1,
+-                               reputacao = GREATEST(0, reputacao - ?)
+-                         WHERE id = ?
+-                    ")->execute([$penalidadeReputacao, $oficinaId]);
+-                } catch (Throwable $eRep) {
+-                    Logger::exception(__CLASS__, __FUNCTION__, 'requeue_oficina_reputacao', $eRep, [
+-                        'pedido_id' => $pedidoId, 'oficina_id' => $oficinaId,
+-                    ]);
+-                }
+-            }
+-
+-            self::registrarCancelamentoAuditado($pdo, $pedidoId, 'oficina', $actorId, $justificativa, (string)$pedido['status'], $penalidadeReputacao);
+-            $pdo->commit();
+-
+-            AuditTrailService::evento('pedido_reenfileirado_oficina', __CLASS__, __FUNCTION__, [
+-                'pedido_id' => $pedidoId, 'actor_type' => 'oficina', 'actor_id' => $actorId,
+-                'oficina_id' => $oficinaId, 'event_code' => 'ORD-REQ-OFI-001',
+-                'status_anterior' => $pedido['status'], 'status_novo' => $statusFila,
+-            ]);
+-
+-            return PedidoTransitionResult::success(Pedido::buscarPorId($pedidoId) ?? $pedido, [
+-                'status_anterior' => $pedido['status'], 'status_novo' => $statusFila,
+-            ]);
+-        } catch (Throwable $e) {
+-            if ($pdo->inTransaction()) { $pdo->rollBack(); }
+-            Logger::exception(__CLASS__, __FUNCTION__, 'requeue_oficina', $e, [
+-                'pedido_id' => $pedidoId, 'oficina_id' => $oficinaId, 'actor_id' => $actorId,
+-            ]);
+-            return PedidoTransitionResult::failure('Erro interno ao devolver o pedido para a fila.');
+-        }
+-    }
+-}
+-
++    private static function lockClause(PDO $pdo): string
++    {
++        return $pdo->getAttribute(PDO::ATTR_DRIVER_NAME) === 'sqlite' ? '' : ' FOR UPDATE';
++    }
++
++    private static function dateAddMinutesExpression(int $minutes): string
++    {
++        $minutes = max(1, $minutes);
++        $pdo = getPDO();
++        if ($pdo->getAttribute(PDO::ATTR_DRIVER_NAME) === 'sqlite') {
++            return "datetime('now', '+" . $minutes . " minutes')";
++        }
++
++        return "DATE_ADD(NOW(), INTERVAL " . $minutes . " MINUTE)";
++    }
++    public static function requeueByOficina(int $pedidoId, int $oficinaId, int $actorId, string $justificativa, int $expMin, float $penalidadeReputacao = 0.0): PedidoTransitionResult
++    {
++        $pdo = getPDO();
++        try {
++            $pdo->beginTransaction();
++            $stmtPedido = $pdo->prepare("SELECT * FROM pedidos WHERE id = ?" . self::lockClause($pdo));
++            $stmtPedido->execute([$pedidoId]);
++            $pedido = $stmtPedido->fetch(PDO::FETCH_ASSOC);
++
++            if (!$pedido) {
++                $pdo->rollBack();
++                return PedidoTransitionResult::failure('Pedido nao encontrado.');
++            }
++            if ((int)($pedido['oficina_id'] ?? 0) !== $oficinaId) {
++                $pdo->rollBack();
++                return PedidoTransitionResult::failure('Pedido nao pertence a esta oficina.');
++            }
++            if (!in_array((string)$pedido['status'], ['oficina_aceitou', 'oficina_a_caminho'], true)) {
++                $pdo->rollBack();
++                return PedidoTransitionResult::failure('So e possivel cancelar antes de chegar ao local.');
++            }
++
++            $attendanceMode = (string)($pedido['attendance_mode'] ?? 'TOWING');
++            $statusFila = 'aguardando_guincho';
++            if ($attendanceMode === 'ON_SITE' || $attendanceMode === 'HYBRID') {
++                $statusFila = 'aguardando_oficina';
++            }
++
++            $pdo->prepare("
++                UPDATE pedidos
++                   SET status = ?, oficina_id = NULL, motivo_cancelamento = ?, expiracao_aceite = ?
++                 WHERE id = ?
++            ")->execute([
++                $statusFila,
++                mb_substr('[oficina] ' . $justificativa, 0, 255),
++                date('Y-m-d H:i:s', strtotime("+{$expMin} minutes")),
++                $pedidoId,
++            ]);
++
++            if ($penalidadeReputacao > 0) {
++                try {
++                    $pdo->prepare("
++                        UPDATE oficinas
++                           SET total_cancelamentos = total_cancelamentos + 1,
++                               reputacao = GREATEST(0, reputacao - ?)
++                         WHERE id = ?
++                    ")->execute([$penalidadeReputacao, $oficinaId]);
++                } catch (Throwable $eRep) {
++                    Logger::exception(__CLASS__, __FUNCTION__, 'requeue_oficina_reputacao', $eRep, [
++                        'pedido_id' => $pedidoId, 'oficina_id' => $oficinaId,
++                    ]);
++                }
++            }
++
++            self::registrarCancelamentoAuditado($pdo, $pedidoId, 'oficina', $actorId, $justificativa, (string)$pedido['status'], $penalidadeReputacao);
++            $pdo->commit();
++
++            AuditTrailService::evento('pedido_reenfileirado_oficina', __CLASS__, __FUNCTION__, [
++                'pedido_id' => $pedidoId, 'actor_type' => 'oficina', 'actor_id' => $actorId,
++                'oficina_id' => $oficinaId, 'event_code' => 'ORD-REQ-OFI-001',
++                'status_anterior' => $pedido['status'], 'status_novo' => $statusFila,
++            ]);
++
++            return PedidoTransitionResult::success(Pedido::buscarPorId($pedidoId) ?? $pedido, [
++                'status_anterior' => $pedido['status'], 'status_novo' => $statusFila,
++            ]);
++        } catch (Throwable $e) {
++            if ($pdo->inTransaction()) { $pdo->rollBack(); }
++            Logger::exception(__CLASS__, __FUNCTION__, 'requeue_oficina', $e, [
++                'pedido_id' => $pedidoId, 'oficina_id' => $oficinaId, 'actor_id' => $actorId,
++            ]);
++            return PedidoTransitionResult::failure('Erro interno ao devolver o pedido para a fila.');
++        }
++    }
++}
++
+diff --git a/src/Services/PixFaturaService.php b/src/Services/PixFaturaService.php
+new file mode 100644
+index 0000000..190ddf8
+--- /dev/null
++++ b/src/Services/PixFaturaService.php
+@@ -0,0 +1,19 @@
++<?php
++declare(strict_types=1);
++
++require_once __DIR__ . '/../Models/Configuracao.php';
++
++/** Gera cobrança PIX de fatura; não reutiliza o repasse de pedido. */
++final class PixFaturaService
++{
++    public static function gerar(int $faturaId, float $valor, string $direcao): array
++    {
++        $email = (string) Configuracao::get('pix_fatura_payer_email', defined('ADMIN_EMAIL') ? ADMIN_EMAIL : '');
++        if ($faturaId < 1 || $valor <= 0 || $email === '') return ['ok'=>false,'erro'=>'PIX-FATURA-001: configuração ou valor inválido.'];
++        $payload = json_encode(['transaction_amount'=>round($valor,2),'payment_method_id'=>'pix','description'=>"Fatura parceiro #{$faturaId} ({$direcao})",'external_reference'=>"fatura:{$faturaId}",'payer'=>['email'=>$email]]);
++        $ch=curl_init('https://api.mercadopago.com/v1/payments'); curl_setopt_array($ch,[CURLOPT_RETURNTRANSFER=>true,CURLOPT_POST=>true,CURLOPT_POSTFIELDS=>$payload,CURLOPT_HTTPHEADER=>['Authorization: Bearer '.MP_ACCESS_TOKEN,'Content-Type: application/json','X-Idempotency-Key: pix-fatura-'.$faturaId],CURLOPT_TIMEOUT=>30]);
++        $body=(string)curl_exec($ch);$code=(int)curl_getinfo($ch,CURLINFO_HTTP_CODE);$err=curl_error($ch);curl_close($ch);$data=json_decode($body,true);$tx=$data['point_of_interaction']['transaction_data']??[];
++        if($code>=200&&$code<300&&!empty($data['id'])&&!empty($tx['qr_code']))return ['ok'=>true,'qrcode'=>$tx['qr_code_base64']??$tx['qr_code'],'copia_cola'=>$tx['qr_code'],'transacao_id'=>'mp_'.$data['id']];
++        return ['ok'=>false,'erro'=>(string)($data['message']??$err??'PIX-FATURA-002: resposta inválida.')];
++    }
++}
+diff --git a/src/Services/PixService.php b/src/Services/PixService.php
+index 7586560..1bd82fa 100644
+--- a/src/Services/PixService.php
++++ b/src/Services/PixService.php
+@@ -10,6 +10,12 @@ class PixService
+ {
+     private const MP_PAYMENTS_URL = 'https://api.mercadopago.com/v1/payments';
+ 
++    /** Compatibilidade do contrato de faturas: cobrança PIX idempotente por fatura. */
++    public static function gerar(int $faturaId, float $valor, string $direcao): array
++    {
++        return PixFaturaService::gerar($faturaId, $valor, $direcao);
++    }
++
+     /**
+      * Mapeia o tipo de chave Pix armazenado no banco para o valor esperado pela API do MercadoPago.
+      * DB: cpf | email | telefone | aleatoria
+-- 
+2.51.1
+
+
+From d6139c8f1d79ec2074ea4a5ba6087655121fdc8e Mon Sep 17 00:00:00 2001
+From: Codex <codex@openai.com>
+Date: Thu, 8 Oct 2026 10:33:24 -0300
+Subject: [PATCH 2/2] chore(financeiro): rollback seguro da migration
+
+---
+ doc/lanes/A.md                   |  1 +
+ install/rollback_comissao_v1.sql | 69 ++++++++++++++++++++++++++++++++
+ 2 files changed, 70 insertions(+)
+ create mode 100644 install/rollback_comissao_v1.sql
+
+diff --git a/doc/lanes/A.md b/doc/lanes/A.md
+index 2b6ac78..636f3dd 100644
+--- a/doc/lanes/A.md
++++ b/doc/lanes/A.md
+@@ -81,6 +81,7 @@ ESTADO_FAIXA_A:
+     preambulo_6_0: "Aplicado: congelar valores financeiros na transição canônica; operações repetidas não podem recalcular ou duplicar lançamento."
+     implementacao:
+       migration: install/migration_comissao_v1.sql
++      rollback: "install/rollback_comissao_v1.sql (idempotente; só remove estrutura se não houver dados)"
+       comissao: ComissaoService::calcular e ::persistirParaPedido
+       ponto_canonico: "PedidoTransitionService::transition(targetStatus=concluido)."
+       fatura: "FaturaService::fecharCiclo, ::marcarPaga, ::bloquearPorVencimento e ::desbloquear"
+diff --git a/install/rollback_comissao_v1.sql b/install/rollback_comissao_v1.sql
+new file mode 100644
+index 0000000..e1beb33
+--- /dev/null
++++ b/install/rollback_comissao_v1.sql
+@@ -0,0 +1,69 @@
++-- Rollback da comissão e fatura de parceiros v1 (MySQL/MariaDB).
++-- Idempotente e conservador: só remove a estrutura se as quatro tabelas
++-- introduzidas pela migration estiverem vazias. Em caso contrário, não altera
++-- nada e devolve mensagens SKIPPED para evitar perda de dados.
++SET @schema := DATABASE();
++
++SET @sql := IF(
++  (SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA=@schema AND TABLE_NAME='comissoes_cidade') > 0,
++  'SELECT COUNT(*) INTO @comissoes_cidade_rows FROM comissoes_cidade',
++  'SELECT 0 INTO @comissoes_cidade_rows'
++); PREPARE rollback_stmt FROM @sql; EXECUTE rollback_stmt; DEALLOCATE PREPARE rollback_stmt;
++SET @sql := IF(
++  (SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA=@schema AND TABLE_NAME='faturas_parceiro') > 0,
++  'SELECT COUNT(*) INTO @faturas_parceiro_rows FROM faturas_parceiro',
++  'SELECT 0 INTO @faturas_parceiro_rows'
++); PREPARE rollback_stmt FROM @sql; EXECUTE rollback_stmt; DEALLOCATE PREPARE rollback_stmt;
++SET @sql := IF(
++  (SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA=@schema AND TABLE_NAME='faturas_itens') > 0,
++  'SELECT COUNT(*) INTO @faturas_itens_rows FROM faturas_itens',
++  'SELECT 0 INTO @faturas_itens_rows'
++); PREPARE rollback_stmt FROM @sql; EXECUTE rollback_stmt; DEALLOCATE PREPARE rollback_stmt;
++SET @sql := IF(
++  (SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA=@schema AND TABLE_NAME='faturas_pagamentos') > 0,
++  'SELECT COUNT(*) INTO @faturas_pagamentos_rows FROM faturas_pagamentos',
++  'SELECT 0 INTO @faturas_pagamentos_rows'
++); PREPARE rollback_stmt FROM @sql; EXECUTE rollback_stmt; DEALLOCATE PREPARE rollback_stmt;
++
++SET @rollback_safe := IF(
++  @comissoes_cidade_rows = 0
++  AND @faturas_parceiro_rows = 0
++  AND @faturas_itens_rows = 0
++  AND @faturas_pagamentos_rows = 0,
++  1, 0
++);
++SELECT IF(@rollback_safe = 1,
++  'ROLLBACK-COMISSAO-V1: estrutura vazia; remoção autorizada.',
++  'ROLLBACK-COMISSAO-V1: SKIPPED; existem dados de comissão/fatura. Restaure o backup para reverter.'
++) AS resultado;
++
++SET @sql := IF(@rollback_safe = 1 AND (SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS WHERE TABLE_SCHEMA=@schema AND TABLE_NAME='pedidos' AND CONSTRAINT_NAME='fk_pedidos_fatura') > 0,
++  'ALTER TABLE pedidos DROP FOREIGN KEY fk_pedidos_fatura',
++  'SELECT ''ROLLBACK-COMISSAO-V1: FK pedidos ignorada'' AS resultado'
++); PREPARE rollback_stmt FROM @sql; EXECUTE rollback_stmt; DEALLOCATE PREPARE rollback_stmt;
++SET @sql := IF(@rollback_safe = 1 AND (SELECT COUNT(*) FROM INFORMATION_SCHEMA.STATISTICS WHERE TABLE_SCHEMA=@schema AND TABLE_NAME='pedidos' AND INDEX_NAME='idx_pedidos_fatura') > 0,
++  'DROP INDEX idx_pedidos_fatura ON pedidos',
++  'SELECT ''ROLLBACK-COMISSAO-V1: índice pedidos ignorado'' AS resultado'
++); PREPARE rollback_stmt FROM @sql; EXECUTE rollback_stmt; DEALLOCATE PREPARE rollback_stmt;
++
++SET @sql := IF(@rollback_safe = 1 AND (SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA=@schema AND TABLE_NAME='pedidos' AND COLUMN_NAME='fatura_id') > 0,
++  'ALTER TABLE pedidos DROP COLUMN fatura_id',
++  'SELECT ''ROLLBACK-COMISSAO-V1: coluna fatura_id ignorada'' AS resultado'
++); PREPARE rollback_stmt FROM @sql; EXECUTE rollback_stmt; DEALLOCATE PREPARE rollback_stmt;
++SET @sql := IF(@rollback_safe = 1 AND (SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA=@schema AND TABLE_NAME='pedidos' AND COLUMN_NAME='valor_liquido_parceiro') > 0,
++  'ALTER TABLE pedidos DROP COLUMN valor_liquido_parceiro',
++  'SELECT ''ROLLBACK-COMISSAO-V1: coluna valor_liquido_parceiro ignorada'' AS resultado'
++); PREPARE rollback_stmt FROM @sql; EXECUTE rollback_stmt; DEALLOCATE PREPARE rollback_stmt;
++SET @sql := IF(@rollback_safe = 1 AND (SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA=@schema AND TABLE_NAME='pedidos' AND COLUMN_NAME='comissao_tipo') > 0,
++  'ALTER TABLE pedidos DROP COLUMN comissao_tipo',
++  'SELECT ''ROLLBACK-COMISSAO-V1: coluna comissao_tipo ignorada'' AS resultado'
++); PREPARE rollback_stmt FROM @sql; EXECUTE rollback_stmt; DEALLOCATE PREPARE rollback_stmt;
++SET @sql := IF(@rollback_safe = 1 AND (SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA=@schema AND TABLE_NAME='pedidos' AND COLUMN_NAME='comissao_valor') > 0,
++  'ALTER TABLE pedidos DROP COLUMN comissao_valor',
++  'SELECT ''ROLLBACK-COMISSAO-V1: coluna comissao_valor ignorada'' AS resultado'
++); PREPARE rollback_stmt FROM @sql; EXECUTE rollback_stmt; DEALLOCATE PREPARE rollback_stmt;
++
++SET @sql := IF(@rollback_safe = 1, 'DROP TABLE IF EXISTS faturas_pagamentos', 'SELECT ''ROLLBACK-COMISSAO-V1: faturas_pagamentos preservada'' AS resultado'); PREPARE rollback_stmt FROM @sql; EXECUTE rollback_stmt; DEALLOCATE PREPARE rollback_stmt;
++SET @sql := IF(@rollback_safe = 1, 'DROP TABLE IF EXISTS faturas_itens', 'SELECT ''ROLLBACK-COMISSAO-V1: faturas_itens preservada'' AS resultado'); PREPARE rollback_stmt FROM @sql; EXECUTE rollback_stmt; DEALLOCATE PREPARE rollback_stmt;
++SET @sql := IF(@rollback_safe = 1, 'DROP TABLE IF EXISTS faturas_parceiro', 'SELECT ''ROLLBACK-COMISSAO-V1: faturas_parceiro preservada'' AS resultado'); PREPARE rollback_stmt FROM @sql; EXECUTE rollback_stmt; DEALLOCATE PREPARE rollback_stmt;
++SET @sql := IF(@rollback_safe = 1, 'DROP TABLE IF EXISTS comissoes_cidade', 'SELECT ''ROLLBACK-COMISSAO-V1: comissoes_cidade preservada'' AS resultado'); PREPARE rollback_stmt FROM @sql; EXECUTE rollback_stmt; DEALLOCATE PREPARE rollback_stmt;
+-- 
+2.51.1
+

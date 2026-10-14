@@ -1,30 +1,21 @@
-# Refatoração — FaturaWebhookController e FaturaService
+# Entrega A — documento e continuidade de triagem
 
-Arquivos refatorados somente para legibilidade e UTF-8, sem mudança
-intencional nas regras de assinatura, idempotência, consulta de fatura ou
-respostas HTTP.
+Copie os arquivos mantendo os caminhos. O `index.php` do pacote contém as quatro rotas acrescentadas; aplique apenas os blocos dessas rotas se o arquivo local tiver alterações de outras faixas.
 
-## Instalação
+## Migration CPF/CNPJ
 
-Faça backup dos dois arquivos atuais e substitua:
-
-- `FaturaWebhookController.php` em `src/Controllers/`
-- `FaturaService.php` em `src/Services/`
-
-## Validação no XAMPP
+Execute duas vezes no XAMPP para homologar o contrato:
 
 ```powershell
-.\validar-fatura-webhook.ps1 -Repositorio 'C:\xampp\htdocs\guinchafacil'
+C:\xampp\php\php.exe tools\test_documento_cnpj_migration.php
 ```
 
-Resultado esperado:
+O resultado esperado contém `RUN-1][OK`, `RUN-2][OK` e `ASSERT][OK`. A coluna `usuarios.cpf` será `VARCHAR(18)` e continuará sendo a coluna canônica de documento.
 
-```text
-[PASS][FaturaWebhook][syntax] ...FaturaWebhookController.php
-[PASS][FaturaWebhook][syntax] ...FaturaService.php
-[DONE][FaturaWebhook] Sintaxe PHP validada.
-```
+## Fluxo de triagem
 
-Não foi fornecido teste automatizado do webhook. Antes de produção, execute o
-cenário já existente de assinatura inválida, fatura não localizada, pagamento
-válido e repetição da mesma transação.
+1. `POST /api/pre-cotacao/finalizar` grava a chave `triage_session_id` e o payload privado da cotação.
+2. O cadastro preserva a sessão e entrega o cliente em `/checkout/veiculo?triage_session_id=<id>`.
+3. O checkout restaura a cotação, valida o veículo do cliente e cria o pedido uma única vez antes de encaminhar ao pagamento.
+
+Os logs de cada fase estão documentados em `doc/CONTRATOS.md`.

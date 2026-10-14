@@ -19,6 +19,7 @@ $idsPorCode = [
     'TIRE_CHANGE' => 11,
     'ELECTRICAL_DIAGNOSIS' => 12,
     'JUMP_START' => 13,
+    'FUEL_DELIVERY' => 16,
     'MECHANICAL_ASSISTANCE' => 14,
     'AUTOMOTIVE_LOCKSMITH' => 15,
 ];
@@ -31,6 +32,8 @@ $casos = [
     'pneu' => ['TIRE_CHANGE', 11],
     'eletrica' => ['ELECTRICAL_DIAGNOSIS', 12],
     'bateria' => ['JUMP_START', 13],
+    'combustivel' => ['FUEL_DELIVERY', 16],
+    'pane_seca' => ['FUEL_DELIVERY', 16],
     'mecanica' => ['MECHANICAL_ASSISTANCE', 14],
     'chaveiro' => ['AUTOMOTIVE_LOCKSMITH', 15],
 ];
@@ -43,4 +46,4 @@ foreach ($casos as $slug => [$codeEsperado, $idEsperado]) {
 verificar(ServiceTypeResolver::codePorSlug('desconhecido') === null, 'mapa:desconhecido');
 verificar(ServiceTypeResolver::porSlug('desconhecido') === null, 'lookup:desconhecido-fail-closed');
 
-echo "[DONE][ServiceTypeResolver] 12 verificacoes concluidas\n";
+echo "[DONE][ServiceTypeResolver] 16 verificacoes concluidas\n";

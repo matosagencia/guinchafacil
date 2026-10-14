@@ -962,11 +962,21 @@ class ClienteController extends BaseController
             $sets[] = $column . ' = ?';
             $params[] = $value;
         }
+        $reabriuFila = false;
         if ($pService->podeIniciarAtendimento()) {
             $sets[] = "status = 'aguardando_guincho'";
+            $reabriuFila = true;
         }
         $params[] = $pedidoId;
         $pdo->prepare('UPDATE pedidos SET ' . implode(', ', $sets) . ' WHERE id = ?')->execute($params);
+        if ($reabriuFila) {
+            require_once __DIR__ . '/../Services/PedidoEventoService.php';
+            PedidoEventoService::registrar(
+                $pdo, $pedidoId, 'pedido_reaberto_fila',
+                null, 'aguardando_guincho', 'cliente', (int)$uid,
+                'podeIniciarAtendimento'
+            );
+        }
 
         if ($resgateDiretoConfirmado && $oficinaParceiraProviderId > 0 && IndicacaoOficinaService::ativo()) {
             try {
@@ -1650,6 +1660,12 @@ class ClienteController extends BaseController
                 }
                 $pdo->prepare("UPDATE pedidos SET status = 'orcamento_aprovado' WHERE id = ?")
                     ->execute([$pedidoId]);
+                    require_once __DIR__ . '/../Services/PedidoEventoService.php';
+                    PedidoEventoService::registrar(
+                        $pdo, $pedidoId, 'orcamento_aprovado',
+                        null, 'orcamento_aprovado', 'cliente', (int)($uid ?? 0),
+                        'aprovacao via /cliente/orcamento/decidir'
+                    );
 
                 echo json_encode([
                     'ok' => true,
@@ -1669,6 +1685,12 @@ class ClienteController extends BaseController
             // e precisa confirmar (endpoint /cliente/pedido/{id}/converter-reboque-com-desconto).
             $pdo->prepare("UPDATE pedidos SET status = 'conversao_reboque_pendente' WHERE id = ?")
                 ->execute([$pedidoId]);
+                require_once __DIR__ . '/../Services/PedidoEventoService.php';
+                PedidoEventoService::registrar(
+                    $pdo, $pedidoId, 'conversao_reboque_pendente',
+                    null, 'conversao_reboque_pendente', 'cliente', (int)($uid ?? 0),
+                    'aguardando confirmacao do cliente'
+                );
 
             // Calcula o valor do guincho com desconto pra já mostrar na tela
             require_once __DIR__ . '/../Services/PricingService.php';

@@ -77,9 +77,9 @@ $badgeRecomendacao = $recomendacao === 'assistencia'
 
         <?php if ($comissaoValor !== null): ?>
         <hr class="my-3">
-        <h6 class="text-muted mb-2">ComissÃ£o da plataforma</h6>
+        <h6 class="text-muted mb-2">Comissão da plataforma</h6>
         <dl class="row mb-0">
-            <dt class="col-sm-4">ComissÃ£o</dt>
+            <dt class="col-sm-4">Comissão</dt>
             <dd class="col-sm-8">
                 <?= htmlspecialchars($fmtMoney($comissaoValor), ENT_QUOTES, 'UTF-8') ?>
                 <?php if ($comissaoTipo !== null): ?>
@@ -89,7 +89,7 @@ $badgeRecomendacao = $recomendacao === 'assistencia'
                 <?php endif; ?>
             </dd>
 
-            <dt class="col-sm-4">LÃ­quido do parceiro</dt>
+            <dt class="col-sm-4">Líquido do parceiro</dt>
             <dd class="col-sm-8"><?= htmlspecialchars($fmtMoney($valorLiquido), ENT_QUOTES, 'UTF-8') ?></dd>
 
             <dt class="col-sm-4">Fatura</dt>
@@ -97,7 +97,7 @@ $badgeRecomendacao = $recomendacao === 'assistencia'
                 <?php if (!empty($faturaId)): ?>
                     <a href="<?= htmlspecialchars($bp, ENT_QUOTES, 'UTF-8') ?>/admin/fatura/<?= (int)$faturaId ?>">#<?= (int)$faturaId ?></a>
                 <?php else: ?>
-                    <span class="text-muted">Ainda nÃ£o faturada</span>
+                    <span class="text-muted">Ainda não faturada</span>
                 <?php endif; ?>
             </dd>
         </dl>

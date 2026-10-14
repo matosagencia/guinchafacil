@@ -8,13 +8,22 @@ use PDO;
 
 class ProspeccaoParceirosService
 {
-    public function __construct(
-        private readonly PDO $pdo,
-        private readonly SerpApiMapsClient $serpApi,
-        private readonly RegiaoQuotaService $quotaService,
-        private readonly MensagemPersuasaoService $mensagemService,
-    ) {
-    }
+    private PDO $pdo;
+private SerpApiMapsClient $serpApi;
+private RegiaoQuotaService $quotaService;
+private MensagemPersuasaoService $mensagemService;
+
+public function __construct(
+    PDO $pdo,
+    SerpApiMapsClient $serpApi,
+    RegiaoQuotaService $quotaService,
+    MensagemPersuasaoService $mensagemService
+) {
+    $this->pdo = $pdo;
+    $this->serpApi = $serpApi;
+    $this->quotaService = $quotaService;
+    $this->mensagemService = $mensagemService;
+}
 
     /**
      * Busca leads novos para uma região em todas as categorias

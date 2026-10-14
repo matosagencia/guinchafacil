@@ -1,0 +1,19 @@
+{
+    "files":  [
+                  {
+                      "existed":  true,
+                      "path":  "C:\\xampp\\htdocs\\guinchafacil\\src\\Models\\Pagamento.php",
+                      "backup":  "C:\\xampp\\htdocs\\guinchafacil\\.backup-admin-payment-destination\\Pagamento.php.bak"
+                  },
+                  {
+                      "existed":  false,
+                      "path":  "C:\\xampp\\htdocs\\guinchafacil\\install\\migration_admin_payment_destination_v1.sql",
+                      "backup":  "C:\\xampp\\htdocs\\guinchafacil\\.backup-admin-payment-destination\\migration_admin_payment_destination_v1.sql.bak"
+                  },
+                  {
+                      "existed":  false,
+                      "path":  "C:\\xampp\\htdocs\\guinchafacil\\install\\rollback_admin_payment_destination_v1.sql",
+                      "backup":  "C:\\xampp\\htdocs\\guinchafacil\\.backup-admin-payment-destination\\rollback_admin_payment_destination_v1.sql.bak"
+                  }
+              ]
+}

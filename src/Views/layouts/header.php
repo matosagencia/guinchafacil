@@ -47,11 +47,11 @@ $debugModeAtivo = DebugMode::jsFlag();
 
     <!-- Pacote L2.1: fundação do design system modular (tokens/base/shell/tema).
          Aditivo a style.css acima (nomes de variável diferentes, não conflita);
-         componentes/páginas novos dos pacotes L2.2+ passam a consumir isto. -->
-    <link href="<?php echo htmlspecialchars($bp); ?>/public/assets/css/tokens.css" rel="stylesheet">
+         componentes/páginas novos dos pacotes L2.2+ passam a consumir isto. --><link rel="stylesheet" href="<?php echo htmlspecialchars($bp ?? (defined('BASE_PATH') ? BASE_PATH : '')); ?>/public/assets/css/tokens.css">
+
     <link href="<?php echo htmlspecialchars($bp); ?>/public/assets/css/base.css" rel="stylesheet">
     <link href="<?php echo htmlspecialchars($bp); ?>/public/assets/css/shell.css?v=20260802-2" rel="stylesheet">
-    <link href="<?php echo htmlspecialchars($bp); ?>/public/assets/css/components/page-head.css" rel="stylesheet">
+       <!-- Onda 5.1: Manrope + gf-layout.css -->    <link rel="preconnect" href="https://fonts.googleapis.com">    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">    <link rel="stylesheet" href="<?php echo htmlspecialchars($bp ?? (defined('BASE_PATH') ? BASE_PATH : '')); ?>/public/assets/css/gf-layout.css">
     <?php if ($temaArquivo): ?>
     <link href="<?php echo htmlspecialchars($bp); ?>/public/assets/css/themes/<?php echo htmlspecialchars($temaArquivo); ?>.css" rel="stylesheet">
     <?php endif; ?>

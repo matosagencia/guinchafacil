@@ -2,9 +2,8 @@
 
 require_once __DIR__ . '/../Services/NotificacaoService.php';
 require_once __DIR__ . '/../Services/EnderecoFormatter.php';
+require_once __DIR__ . '/../Models/Pricing/PricingZone.php';
 // File: guinchafacil/src/Controllers/AuthController.php
-
-
 // Refatorado com transações seguras e validações aprimoradas
 
 
@@ -1032,8 +1031,9 @@ class AuthController extends BaseController
             // sanitizeReturnPath() pode rebaixar /checkout/veiculo para / e
             // redirectByProfile() levaria o cliente direto pra /cliente/dashboard,
             // pulando a etapa de veiculo.
-            if (!empty($_SESSION['pre_cotacao']) && (int)($_SESSION['pre_cotacao']['expira_em'] ?? 0) > time()) {
-                $this->redirect('/checkout/veiculo');
+            $checkoutComTriagem = $this->checkoutPathFromActiveTriage();
+            if ($checkoutComTriagem !== null) {
+                $this->redirect($checkoutComTriagem);
                 return;
             }
 
@@ -1334,8 +1334,9 @@ class AuthController extends BaseController
             $this->setFlashMessage('Cadastro realizado! Faca login para continuar.', 'success');
 
             // Se veio de uma cotacao ativa, volta pro checkout em vez do login generico.
-            if (!empty($_SESSION['pre_cotacao']) && (int)($_SESSION['pre_cotacao']['expira_em'] ?? 0) > time()) {
-                $this->redirect('/login?retorno=' . rawurlencode('/checkout/veiculo'));
+            $checkoutComTriagem = $this->checkoutPathFromActiveTriage();
+            if ($checkoutComTriagem !== null) {
+                $this->redirect('/login?retorno=' . rawurlencode($checkoutComTriagem));
                 return;
             }
 
@@ -2240,6 +2241,11 @@ class AuthController extends BaseController
             $user = ['id' => $userId, 'nome' => $nome, 'email' => $email, 'tipo' => $tipo, 'ativo' => true];
             AuthService::initializeAuthenticatedSession($user);
             $this->setFlashMessage('Conta criada. Complete seus dados para liberar o painel.', 'success');
+            $checkoutComTriagem = $tipo === 'cliente' ? $this->checkoutPathFromActiveTriage() : null;
+            if ($checkoutComTriagem !== null) {
+                $this->redirect($checkoutComTriagem);
+                return;
+            }
             $this->redirect('/perfil/completar');
             return;
         } catch (Throwable $e) {
@@ -2299,7 +2305,7 @@ class AuthController extends BaseController
 
         $erros = [];
         if (mb_strlen($nome) < 3) $erros[] = 'Nome invalido.';
-        if (!$this->validarCPF($cpf)) $erros[] = 'CPF invalido.';
+        if (!$this->validarDocumentoBr($cpf)) $erros[] = 'CPF ou CNPJ invalido.';
         if (!$this->validarTelefoneBr($telefone)) $erros[] = 'Telefone invalido.';
         if (strlen($senha) < 8) $erros[] = 'Senha deve ter 8+ caracteres.';
         if ($senha !== $conf) $erros[] = 'Senhas nao conferem.';
@@ -2349,6 +2355,11 @@ class AuthController extends BaseController
 
             if ($novoStatus === 'COMPLETO') {
                 $this->setFlashMessage('Perfil completo. Bem-vindo!', 'success');
+                $checkoutComTriagem = $tipoAtual === 'cliente' ? $this->checkoutPathFromActiveTriage() : null;
+                if ($checkoutComTriagem !== null) {
+                    $this->redirect($checkoutComTriagem);
+                    return;
+                }
                 $this->redirectByProfile($tipoAtual);
             } else {
                 $this->setFlashMessage('Dados recebidos. Sua documentacao sera analisada pela equipe.', 'success');
@@ -3660,7 +3671,7 @@ class AuthController extends BaseController
 
 
 
-        $tiposPermitidos = ['cpf', 'email', 'telefone', 'aleatoria'];
+        $tiposPermitidos = ['cpf', 'cnpj', 'email', 'telefone', 'aleatoria'];
 
 
 
@@ -3748,11 +3759,11 @@ class AuthController extends BaseController
 
 
 
-        if (!$this->validarCPF($dados['cpf'])) {
+        if (!$this->validarDocumentoBr($dados['cpf'])) {
 
 
 
-            $erros[] = 'CPF inválido.';
+            $erros[] = 'CPF ou CNPJ inválido.';
 
 
 
@@ -4236,6 +4247,10 @@ class AuthController extends BaseController
 
 
 
+            'cnpj' => $this->validarCNPJ(preg_replace('/\D/', '', $chave)),
+
+
+
             'email' => filter_var($chave, FILTER_VALIDATE_EMAIL) !== false,
 
 
@@ -4372,6 +4387,36 @@ class AuthController extends BaseController
 
 
 
+    }
+
+    /** Aceita CPF ou CNPJ, sempre após normalização para dígitos. */
+    private function validarDocumentoBr(string $documento): bool
+    {
+        $digitos = preg_replace('/\D/', '', $documento);
+        return strlen($digitos) === 11
+            ? $this->validarCPF($digitos)
+            : (strlen($digitos) === 14 && $this->validarCNPJ($digitos));
+    }
+
+    private function validarCNPJ(string $cnpj): bool
+    {
+        $cnpj = preg_replace('/\D/', '', $cnpj);
+        if (strlen($cnpj) !== 14 || preg_match('/^(\d)\1{13}$/', $cnpj)) {
+            return false;
+        }
+
+        $pesos = [6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2];
+        for ($posicao = 12; $posicao <= 13; $posicao++) {
+            $soma = 0;
+            for ($i = 0; $i < $posicao; $i++) {
+                $soma += (int)$cnpj[$i] * $pesos[$i + (13 - $posicao)];
+            }
+            $digito = ($soma % 11) < 2 ? 0 : 11 - ($soma % 11);
+            if ($digito !== (int)$cnpj[$posicao]) {
+                return false;
+            }
+        }
+        return true;
     }
 
 
@@ -4801,6 +4846,36 @@ class AuthController extends BaseController
     
 
 
+
+    /**
+     * Retorna o checkout obrigatório para uma cotação ainda ativa.
+     *
+     * O ID vem exclusivamente da sessão (nunca de GET/POST), evitando open
+     * redirect e impedindo que o cadastro perca o contexto da triagem.
+     */
+    private function checkoutPathFromActiveTriage(): ?string
+    {
+        $cotacao = $_SESSION['pre_cotacao'] ?? null;
+        if (is_array($cotacao) && isset($cotacao['expira_em']) && (int)$cotacao['expira_em'] <= time()) {
+            return null;
+        }
+
+        $triageSessionId = trim((string)(
+            $_SESSION['triage_session_id']
+            ?? (is_array($cotacao) ? ($cotacao['triage_session_id'] ?? '') : '')
+        ));
+
+        if ($triageSessionId === '') {
+            return is_array($cotacao) ? '/checkout/veiculo' : null;
+        }
+
+        if (!preg_match('/^[A-Za-z0-9_-]{8,128}$/', $triageSessionId)) {
+            error_log('[AuthController::checkoutPathFromActiveTriage][TRIAGE-ID-INVALID] ID de triagem descartado.');
+            return null;
+        }
+
+        return '/checkout/veiculo?triage_session_id=' . rawurlencode($triageSessionId);
+    }
 
     private function redirectByProfile(?string $tipo = null): void
 

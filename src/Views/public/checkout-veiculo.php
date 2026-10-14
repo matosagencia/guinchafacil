@@ -19,12 +19,14 @@ $coresVeiculo = [
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Seu veiculo | GuinchaFacil</title>
+    <link href="<?= $esc($bp) ?>/public/assets/css/tokens.css" rel="stylesheet">
+    <link href="<?= $esc($bp) ?>/public/assets/css/components/gf-footer-payments.css" rel="stylesheet">
     <link href="<?= $esc($bp) ?>/public/assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        :root { --gf-green:#2fb34a; --gf-green-dark:#1f8a36; --gf-bg:#0a1a0d; --gf-ink:#10233f; }
+        :root { --gf-green:#2fb34a; --gf-green-dark:#1f8a36; --gf-bg:#0A0A0A; --gf-ink:#111827; }
         * { box-sizing:border-box; }
         body { min-height:100vh; margin:0; background:var(--gf-bg); color:#fff; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; }
-        .topbar { display:flex; align-items:center; justify-content:space-between; padding:16px 24px; border-bottom:1px solid rgba(47,179,74,.15); }
+        .topbar { display:flex; align-items:center; justify-content:space-between; padding:16px 24px; border-bottom:1px solid rgba(47,179,74,.2); background:#0A0A0A; }
         .topbar .brand { display:flex; align-items:center; gap:10px; color:#fff; text-decoration:none; font-weight:700; }
         .topbar .brand img { width:42px; height:42px; border-radius:10px; }
         .topbar .brand span { color:var(--gf-green); }
@@ -35,7 +37,11 @@ $coresVeiculo = [
         .hero .eyebrow { color:var(--gf-green); font-size:.75rem; letter-spacing:.15em; font-weight:800; text-transform:uppercase; }
         .hero h1 { font-size:clamp(1.6rem,4vw,2rem); font-weight:800; letter-spacing:-.02em; margin:8px 0 6px; color:#fff; }
         .hero p { color:rgba(255,255,255,.55); font-size:.95rem; margin:0; }
-        .card-panel { background:#fff; color:var(--gf-ink); border-radius:18px; padding:28px; box-shadow:0 20px 60px rgba(0,0,0,.4); }
+        .card-panel { background:#fff; color:var(--gf-ink); border:1px solid rgba(47,179,74,.22); border-radius:20px; padding:30px; box-shadow:0 24px 70px rgba(0,0,0,.48); }
+        .gf-checkout-seguro { background:var(--gf-preto); border:1px solid var(--gf-borda-dark); border-radius:16px; margin:0 0 18px; padding:20px; }
+        .gf-checkout-seguro h2 { color:var(--gf-branco); font-size:1rem; margin:0 0 4px; }
+        .gf-checkout-seguro p { color:#d1d5db; font-size:.86rem; margin:0; }
+        .gf-checkout-seguro .gf-footer-payments { margin-top:16px; }
         .resumo { display:flex; justify-content:space-between; align-items:center; padding:12px 0 16px; border-bottom:1px dashed #e3eaf4; margin-bottom:22px; color:#334155; font-size:.9rem; }
         .resumo strong { color:var(--gf-green-dark); font-size:1.25rem; }
         label { font-weight:600; font-size:.88rem; color:#334155; margin-bottom:6px; display:block; }
@@ -45,7 +51,7 @@ $coresVeiculo = [
         .tipo-grid input { position:absolute; opacity:0; }
         .tipo-grid label { display:block; text-align:center; padding:12px 8px; border:1.5px solid #dce4ef; border-radius:10px; cursor:pointer; background:#fff; font-size:.85rem; transition:.15s; margin:0; color:#334155; }
         .tipo-grid input:checked + label { border-color:var(--gf-green); background:#f0fdf4; box-shadow:0 0 0 3px rgba(47,179,74,.15); color:var(--gf-green-dark); font-weight:700; }
-        .btn-primary { background:linear-gradient(135deg,var(--gf-green),var(--gf-green-dark)); border:0; border-radius:10px; padding:.9rem 1.4rem; font-weight:700; width:100%; font-size:1rem; color:#fff; box-shadow:0 6px 20px rgba(47,179,74,.35); transition:.15s; }
+        .btn-primary { background:linear-gradient(135deg,var(--gf-green),var(--gf-green-dark)); border:0; border-radius:12px; padding:1rem 1.4rem; font-weight:800; width:100%; font-size:1rem; color:#0A0A0A; box-shadow:0 8px 24px rgba(47,179,74,.32); transition:.15s; }
         .btn-primary:hover { transform:translateY(-1px); box-shadow:0 8px 26px rgba(47,179,74,.45); }
         .btn-primary:disabled { opacity:.6; cursor:not-allowed; transform:none; }
         .veiculo-opcao { border:1.5px solid #dce4ef; border-radius:12px; padding:14px 16px; margin-bottom:10px; cursor:pointer; background:#fff; display:flex; align-items:center; gap:10px; color:#334155; font-size:.9rem; transition:.15s; font-weight:500; }
@@ -75,6 +81,12 @@ $coresVeiculo = [
     <?php if (!empty($flash)): ?>
         <div class="alerta"><?= $esc($flash['message']) ?></div>
     <?php endif; ?>
+
+    <section class="gf-checkout-seguro" aria-label="Pagamento seguro">
+        <h2>Pagamento seguro</h2>
+        <p>Escolha o veiculo e siga para o pagamento protegido.</p>
+        <?php require __DIR__ . '/../components/gf-footer-payments.php'; ?>
+    </section>
 
     <form class="card-panel" method="post" action="<?= $esc($bp) ?>/checkout/veiculo">
         <input type="hidden" name="csrf_token" value="<?= $esc($csrf_token ?? '') ?>">

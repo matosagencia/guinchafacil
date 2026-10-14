@@ -13,9 +13,12 @@ class SerpApiMapsClient
 {
     private const ENDPOINT = 'https://serpapi.com/search.json';
 
-    public function __construct(private readonly string $apiKey)
-    {
-    }
+    private string $apiKey;
+
+public function __construct(string $apiKey)
+{
+    $this->apiKey = $apiKey;
+}
 
     /**
      * Busca locais no Google Maps para uma categoria, ao redor de

@@ -49,7 +49,16 @@ class PedidoService
             $dados['status'] = $this->statusInicialPedido();
         }
 
-        return (int)$this->pedidoModel->criar($dados);
+        $id = (int)$this->pedidoModel->criar($dados);
+        if ($id > 0) {
+            require_once __DIR__ . '/PedidoEventoService.php';
+            PedidoEventoService::registrar(
+                getPDO(), $id, 'pedido_criado',
+                null, (string)($dados['status'] ?? ''),
+                'cliente', (int)($dados['cliente_id'] ?? 0)
+            );
+        }
+        return $id;
     }
 
     public function getByIdAndCliente(int $pedidoId, int $clienteId)
