@@ -22,3 +22,8 @@ tssmoke_*.php
 .env
 .env.*
 !.env.example
+
+# Logs de runtime (não versionar)
+logs/*.jsonl
+logs/*.log
+storage/audit/

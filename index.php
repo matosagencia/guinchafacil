@@ -215,7 +215,7 @@ $rotas = [
         '/checkout/pagar'            => ['CheckoutController', 'pagar', 'cliente'],
         '/senha/esqueceu'         => ['AuthController', 'esqueceuSenha',     null],
         '/senha/redefinir'        => ['AuthController', 'redefinirSenha',    null],
-
+'/webhook/mercadopago/pix' => ['FaturaWebhookController', 'mercadoPagoPix', null],
 
         '/cliente/veiculo/salvar'  => ['ClienteController', 'veiculoSalvar', 'cliente'],
         '/cliente/veiculo/deletar' => ['ClienteController', 'veiculoDeletar', 'cliente'],
