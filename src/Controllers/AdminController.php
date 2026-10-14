@@ -1559,8 +1559,14 @@ $lngDestino = ($_POST['lng_destino'] ?? '') !== '' ? (float)$_POST['lng_destino'
             null,
             null
         )) {
+                        error_log(sprintf(
+                '[AdminController::pedidoCriar][B-GUARD-01] Rejeitado: sem guincho apto no raio. cliente_id=%d lat=%.4f lng=%.4f',
+                $clienteId,
+                $latOrigem,
+                $lngOrigem
+            ));
             $_SESSION['_flash'][] = [
-                'message' => 'Nenhum guincho disponÃ­vel no raio de atendimento agora. '
+                'message' => 'Nenhum guincho disponível no raio de atendimento agora. '
                            . 'Aguarde alguns minutos ou tente outro destino.',
                 'type' => 'error',
             ];
