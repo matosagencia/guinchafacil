@@ -19,3 +19,6 @@ _reverse-geocoding-*/
 # Rascunhos
 leiaisso.txt
 tssmoke_*.php
+.env
+.env.*
+!.env.example
