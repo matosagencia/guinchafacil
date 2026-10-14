@@ -1,464 +1,399 @@
-# CONTRATOS - GuinchaFacil
+# Contratos de integração
 
-> Toda mudanca de entrada/saida **entre faixas** e registrada aqui **antes** do codigo (R2). So o dono edita este arquivo; agentes propoem via CONTRATO_PEDIDO:.
-> Tipos e nomes de coluna marcados **nao verificado** devem ser confirmados pela faixa dona com o trecho real do codigo antes de virar contrato fechado.
-
-## 1. Como pedir mudanca
-
-### ROTA_PEDIDA (rota nova ou alterada em index.php)
-
-    ROTA_PEDIDA:
-      faixa: <A|B|C>
-      metodo: <GET|POST>
-      caminho: </exemplo/{id}>
-      controller: <Classe::metodo>
-      motivo: <uma linha>
-
-### CONTRATO_PEDIDO (mudanca em arquivo/contrato de outra faixa)
-
-    CONTRATO_PEDIDO:
-      de: <faixa solicitante>
-      para: <faixa dona>
-      o_que_preciso: <campo, metodo ou comportamento>
-      por_que: <uma linha>
-      criterio_de_aceite: <como saber que ficou pronto>
-
-O agente emite o bloco e **para essa parte da tarefa**. O dono decide e atualiza este arquivo.
-
-CONTRATO_PEDIDO:
-  de: B
-  para: A
-  o_que_preciso:
-    1. Registrar 3 rotas no index.php:
-       - GET /parceiros              -> ParceirosController::index (hub)
-       - GET /parceiros/guinchos     -> ParceirosController::guinchos
-       - GET /parceiros/oficinas     -> ParceirosController::oficinas
-       (a rota da oficina ja existe como view; falta a rota)
-
-    2. Criar/revisar 3 views:
-       - src/Views/public/parceiros/index.php     (NOVO)
-       - src/Views/public/parceiros/guinchos.php  (NOVO)
-       - src/Views/public/parceiros-oficinas.php  (REVISAR: garantir hero, beneficios, FAQ, JSON-LD)
-
-    3. Substituir o link ancora:
-       - landing.php:72      href="#parceiros" -> /parceiros
-       - cidades.php:11      href="/#parceiros" -> /parceiros
-       - pre-cotacao.php:168 href="/#parceiros" -> /parceiros
-
-    4. SEO tecnico em cada view:
-       - Title unico
-       - Meta description persuasiva
-       - H1 unico
-       - JSON-LD: LocalBusiness + Service + FAQPage
-  ...
-
-## 2. Contrato Pedido v1
-
-**Status:** rascunho. A faixa A (ChatGPT) publica a versao final (missao A2) e o dono aprova.
-**Dono da escrita:** faixa A (Pedido / PedidoCoreService). **Consumidores:** faixa B (admin, painel oficina) e faixa C (testes).
-
-| Campo | Significado | Tipo | Observacao |
-| --- | --- | --- | --- |
-| oficina_id | Oficina escolhida pelo motor de decisao | nao verificado | Nulo quando origem_funil = especialista |
-| oficina_nome | Nome da oficina, para exibicao | nao verificado | Exibido em admin/pedidodetalhe |
-| triagem | Resultado da triagem do atendimento | nao verificado | Exibido em admin/pedidodetalhe |
-| custo_assistencia | Custo estimado da assistencia | nao verificado | Exibido em admin/pedidodetalhe |
-| custo_reboque | Custo estimado do reboque | nao verificado | Exibido em admin/pedidodetalhe |
-| recomendacao | Recomendacao do motor | nao verificado | Exibido em admin/pedidodetalhe |
-| origem_funil | Origem do pedido | enum | Valores: oficina ou especialista |
-
-Regras do contrato:
-
-1. A faixa B **consome apenas** estes campos. Nao consulta tabelas diretamente.
-2. Campo que a faixa B precise e nao esteja aqui -> CONTRATO_PEDIDO para a faixa A.
-3. Pedido com origem_funil = oficina deve expor **todos** os campos acima (criterio de aceite da faixa A, testado pela faixa C).
-4. Mudanca de nome, tipo ou significado gera **Contrato Pedido v2**, sem alterar a v1 retroativamente.
-
-## 3. Contrato de idempotencia (Pagamento e Webhook)
-
-**Dono:** faixa A. **Testa:** faixa C (cenarios idempotencia-pagamento e idempotencia-webhook).
-
-| Ponto | Contrato |
-| --- | --- |
-| Criacao de pagamento | Header X-Idempotency-Key = "ped{id}-t{tentativa}" no MercadoPagoProvider. Mesmo POST repetido -> 1 cobranca. |
-| Webhook: autenticidade | Assinatura HMAC validada antes de qualquer processamento. |
-| Webhook: repeticao | Indice unico (provedor, event_id) em logs_webhook. Evento repetido -> resposta **200** sem reprocessar. |
-| Pedido | Um pedido por triage_session_id. Duplo clique nao duplica. |
-
-## 4. Contrato de evento de front-end (A -> C)
-
-| Evento | Disparado em | Por quem | Usado por |
-| --- | --- | --- | --- |
-| gf:address-confirmed | document | public-pre-cotacao-flow.js (faixa A) | Playwright fluxo-1a (faixa C) |
-| gf:flow-stage | document | public-pre-cotacao-flow.js (faixa A) | Funis admin/cliente (faixa B) |
-
-O payload do evento e **nao verificado**. A faixa A documenta aqui antes de a faixa C depender dele.
-
-## 5. Contrato do console de testes (C <-> todas)
-
-- Cenarios em tests/scenarios/*.json; cada passo tem key, node e probe.
-- Tabelas test_runs e test_run_steps (colunas: run_id, step_key, node, status, started_at, duration_ms, detail).
-- status in pending | running | ok | fail.
-- Eventos: GET /admin/testes/run/{id}/events?after=N (polling de 1 s).
-- Ingestao do Playwright: POST /admin/testes/ingest com token.
-- Guardas: so admin, CSRF, bloqueia se MP_ENV != sandbox, so dados E2E_, nunca exibe segredos.
-- Nota: o protocolo v2 manda **estender** /admin/qa/run/* e /admin/simulador em vez de criar um segundo sistema. Rotas finais dependem da decisao D4.
-
-## 6. Contrato de verificacao de rotas (R7)
-
-Toda checagem de rota usa **GET**:
-
-    curl -s -o /dev/null -w "%{http_code}" https://guinchafacil.com.br/login
-
-Nao usar curl -sI (envia HEAD; o router so trata GET/POST).
-
-## 7. Historico
-
-| Versao | Data | Mudanca |
-| --- | --- | --- |
-| Pedido v1 (rascunho) | 2026-09-30 | Campos extraidos do protocolo; tipos pendentes de verificacao pela faixa A |
-| Resolucao service_type_id (A->B) | 2026-10-08 | ServiceTypeResolver::porSlug() - mapa slug->code, fail closed |
-| Catalogo Dinamico (A->B) - visao B-009 | 2026-10-08 | Aceito por B; implementacao paliativa vigente, arquitetura definitiva agendada |
+> **Versão 2.0 — 12/10/2026.** Fusão consolidada. Schema verificado contra o dump de `guinchafacil_dev` (120 tabelas).
+> **Contrato canônico.** Versões anteriores devem ser arquivadas.
 
 ---
 
-## Contrato Financeiro Admin (destino de pagamento)
+## §1. Triagem → registro → checkout
 
-**Status:** proposto por B em 2026-10-03; aguarda A implementar.
-**Dono da escrita:** A (Pagamento / Payment). **Consumidores:** B (AdminController + views do funil).
+| Item | Contrato |
+|---|---|
+| Chave principal | `triage_session_id` |
+| Formato | 32 hex minúsculos, `bin2hex(random_bytes(16))`, `^[a-f0-9]{32}$` |
+| Payload privado | `$_SESSION['triage_sessions'][triage_session_id]` |
+| Validade | 30 minutos após finalização |
+| Escrita | `PreCotacaoApiController::finalizar()` via `TriageSessionService::finalizar()` |
+| Leitura | `CheckoutController::veiculo()` e `pagar()` via `TriageSessionService::reconstruir()` |
 
-### Entrada
+**Sequência obrigatória:**
+1. `POST /api/pre-cotacao/finalizar` (ou `/pre-cotacao/finalizar`) com origem, destino, distância, custo e tipo.
+2. Controlador grava `$_SESSION['triage_session_id']` e payload sob o mesmo ID; retorna ID + URL `/checkout/veiculo?triage_session_id=<id>`.
+3. Registro e login preservam a sessão e redirecionam para essa URL. ID nunca é recriado pelo cliente.
+4. `/checkout/pagar` cria pedido **uma única vez**; `pedido_id` fica vinculado ao payload.
 
-    destino_pagamento:
-      pago_agora        # baixa manual auditavel
-      pago_na_chegada   # permanece pendente, sem checkout
-      online            # cria cobranca pendente + link do provedor
-      sem_cobranca      # isencao auditavel, sem checkout
-
-    provedor_online:
-      mercadopago
-      pagseguro
-      null              # quando destino != online
-
-### Regras
-
-1. online so pode aceitar provedor efetivamente habilitado na configuracao.
-2. A interface **nao pode mostrar** provedor desabilitado.
-3. pago_agora registra baixa manual auditavel.
-4. pago_na_chegada permanece pendente, sem criar checkout.
-5. online cria cobranca pendente e link do provedor escolhido.
-6. sem_cobranca registra isencao auditavel, sem checkout.
-7. Todas as transicoes devem gerar evento e ser idempotentes.
-8. Ao concluir com sucesso, B redireciona para /admin/pedido/{id}?criado=1 (com flash contendo link MP ou mensagem de isencao) - decisao do dono em 2026-10-03, contraria o /admin/pedidos original proposto por B.
-
-### Saida esperada de A
-
-- Operacao unica para aplicar o destino financeiro ao pedido recem-criado.
-- Retorno do link de checkout apenas para destino online.
-- Eventos/snapshot financeiro coerentes.
-- Erro explicito se o provedor escolhido estiver desabilitado.
-- Fonte de verdade que lista os provedores habilitados (endpoint ou metodo estatico - A decide o nome).
-
-### Nao verificado
-
-- Nome exato do metodo de A.
-- Formato exato do retorno (array com chaves).
-
-### Confirmado pelo dono em 2026-10-03
-
-- **Provedores habilitados:** apenas UM por vez - o valor da config PAYMENT_GATEWAY_ACTIVE. Nao coexistem mercadopago + pagseguro. A interface deve mostrar exatamente esse (ou os permitidos pela mesma fonte que PaymentProviderFactory::gatewayAtivoRaw() le), nunca os dois.
-- **Redirect final:** /admin/pedido/{id}?criado=1 (com flash contextual exibindo link do provedor quando destino = online).
-
-### Criterio de aceite (B)
-
-- AdminController::pedidoCriar recebe destino_pagamento e provedor_online via POST.
-- Chama o metodo de A e trata os 4 retornos.
-- Redireciona para /admin/pedido/{id}?criado=1 com flash contextual.
-- Interface da Etapa 1 nao permite escolher provedor desabilitado.
+**Observabilidade:** `TRIAGE-SAVE`, `TRIAGE-RESTORE`, `TRIAGE-REJECT`, `TRIAGE-EXPIRED`, `TRIAGE-ORDER-LINK`, `CHECKOUT-TRIAGE-VEHICLE-FAIL`, `CHECKOUT-TRIAGE-ORDER-FAIL`.
 
 ---
 
-## Contrato de Disponibilidade de Guincho (B -> A)
+## §2. Documento de pessoa
 
-**Status:** implementado pela Faixa A em 2026-10-06.
-**Dono:** Faixa A (dispatch/cobertura). **Consumidores:** Faixa B (AdminController) e Faixa C (testes).
-
-### Metodo publico
-
-    GuinchoDisponibilidade::existeNoRaio(
-        float $lat,
-        float $lng,
-        ?string $categoria = null,
-        ?float $raioKm = null
-    ): bool
-
-### Semantica
-
-Retorna true somente quando existe pelo menos um prestador apto a receber um atendimento de **reboque/TOWING** nas coordenadas informadas.
-
-O gate pre-pedido exige:
-
-1. aprovado = 1;
-2. disponivel = 1;
-3. reboque_aprovado = 1;
-4. lat_atual/lng_atual validos;
-5. nenhum pedido ativo concorrente do mesmo guincho em a_caminho|no_local|em_reboque;
-6. distancia dentro de MIN(raio_cobertura_km, raio_maximo_km global, raioKm opcional).
-
-O metodo e **read-only**: nao cria pedido, nao altera estado e nao grava evento/log de pedido. Em erro de banco/configuracao, retorna false (fail closed).
-
-### Limites do contrato pre-pedido
-
-- expiracao_aceite pertence ao pedido e so existe depois da criacao; portanto nao e aplicavel a esta consulta pre-pedido.
-- categoria esta reservada para compatibilidade veicular pre-pedido. O motor atual de compatibilidade usa snapshot ligado a pedido_id; a Faixa A nao inventa um gate diferente antes de o pedido existir.
-
-### Integracao de pre-cotacao
-
-PreCotacaoOpcoesService::montar(), quando modo=reboque, consulta **somente** GuinchoDisponibilidade::existeNoRaio() antes de calcular cotacao. Nao consulta oficinas neste modo.
-
-Sem guincho apto, a resposta e:
-
-    {
-      "modo": "reboque",
-      "disponivel": false,
-      "fallback_tipo": "suporte",
-      "mensagem": "Nenhum guincho disponivel na sua regiao agora."
-    }
-
-Com guincho apto, retorna disponivel:true e valor_reboque.
-
-A defesa da Faixa B antes de PedidoCoreService::criar() permanece obrigatoria e nao deve ser removida.
-
-### Semantica de fallback em orientacao/local (2026-10-07)
-
-Quando nao existir oficina/especialista apto para o servico solicitado:
-
-- se GuinchoDisponibilidade::existeNoRaio(...) retornar true, a API deve retornar fallback_tipo = "guincho";
-- se retornar false, a API deve retornar fallback_tipo = "suporte".
-
-Essa regra vale para modo=orientacao e modo=local.
-
-O front-end public-pre-cotacao-flow.js ja interpreta fallback_tipo="guincho" exibindo o botao **Quero rebocar**. A Faixa A deve fornecer apenas a semantica correta no payload.
+`usuarios.cpf` = `VARCHAR(18) YES UNI NULL`. Gravação: **apenas dígitos** (sem máscara). Migration `install/migration_expand_usuario_documento.sql` — idempotente via `INFORMATION_SCHEMA`. Formatação de exibição via helper de view.
 
 ---
 
-## Contrato de Persistencia de tipo_problema (B -> A)
+## §3. Contrato Pedido v1 — **já implementado no banco**
 
-**Status:** implementado pela Faixa A em 2026-10-07.
-**Dono:** Faixa A (PedidoCoreService / Pedido). **Consumidores:** Faixa B (AdminController) e Faixa C (testes).
+| Campo do contrato | Coluna real | Tipo |
+|---|---|---|
+| `oficina_id` | `pedidos.oficina_id` | `INT(11) NULL` |
+| `oficina_nome` | `pedidos.oficina_nome` | `VARCHAR(255) NULL` |
+| `triagem` | `pedidos.triagem` | `VARCHAR(50) NULL` |
+| `custo_assistencia` | `pedidos.custo_assistencia` | `DECIMAL(10,2) NULL` |
+| `custo_reboque` | `pedidos.custo_reboque` | `DECIMAL(10,2) NULL` |
+| `recomendacao` | `pedidos.recomendacao` | `ENUM('assistencia','reboque') NULL` |
+| `origem_funil` | `pedidos.origem_funil` | `ENUM('oficina','especialista') NULL` |
+| `triage_session_id` | `pedidos.triage_session_id` | `CHAR(32) NULL` UNIQUE |
 
-### Regra
+**Exposição:** `Pedido::buscarPorId()` e `Pedido::listarPorStatus()` retornam `p.*`. `origem_funil` disponível sem JOIN adicional.
 
-Quando a criacao receber tipo_problema nao vazio, o valor deve ser persistido integralmente em pedidos.tipo_problema.
+**Idempotência:** `Pedido::criarCompleto()` devolve o ID existente se `triage_session_id` já houver.
 
-Exemplos:
-
-- fluxo direto de reboque: tipo_problema = "reboque";
-- fluxo por servico: tipo_problema = <slug do servico>.
-
-A coluna pedidos.tipo_problema e VARCHAR(80), e nao ENUM, porque o catalogo de servicos e extensivel. Isso impede que MySQL/MariaDB em modo permissivo converta silenciosamente slugs novos para string vazia.
-
-Como defesa adicional:
-
-- PedidoQuoteRequest normaliza valor vazio para outro;
-- Pedido::criar() e Pedido::criarCompleto() nunca gravam string vazia;
-- valores historicos vazios nao sao inferidos/backfillados automaticamente.
-
-### Criterio
-
-tipo_problema="reboque" deve ser lido como reboque apos o INSERT. Nenhum pedido novo criado pelos fluxos atuais deve persistir tipo_problema = ''.
+**Estado:** **B-002 e B-004 fechados no banco.** Nenhuma migration nova necessária.
 
 ---
 
-## Contrato de Resolucao de service_type_id (A -> B)
+## §4. Idempotência Mercado Pago v1
 
-**Status:** entregue por A em 2026-10-08 (resolver + testes unitarios).
-**Dono da escrita:** A (src/Services/Catalog/ServiceTypeResolver.php). **Consumidores:** B (AdminController::pedidoCriar).
-
-### Metodo entregue
-
-    App\Services\Catalog\ServiceTypeResolver::porSlug(string $slug): ?int
-
-### Semantica
-
-Traduz o slug publico do funil (pneu, eletrica, bateria, mecanica, chaveiro) para o id interno da tabela service_types. Mapa propositalmente fechado.
-
-| Slug | Code interno |
-| --- | --- |
-| pneu | TIRE_CHANGE |
-| eletrica | ELECTRICAL_DIAGNOSIS |
-| bateria | JUMP_START |
-| mecanica | MECHANICAL_ASSISTANCE |
-| chaveiro | AUTOMOTIVE_LOCKSMITH |
-
-**Fail closed:** retorna null para slug desconhecido, catalogo sem o code, banco indisponivel ou lookup nao registrado. **Nunca** assume TOWING como fallback.
-
-### API de lookup
-
-    App\Services\Catalog\ServiceTypeResolver::definirLookupPorCodigo(
-        callable(string): (int|null) $lookup
-    ): void
-
-Registrado **uma vez** no bootstrap.
-
-### Bootstrap
-
-| Item | Valor |
-| --- | --- |
-| Arquivo | index.php |
-| Quando | apos require_once de config.php e Database.php, antes do dispatcher |
-| Chamada | ServiceTypeResolver::definirLookupPorCodigo(callback) |
-| Callback | lazy - getPDO() chamado **dentro** do callback, nao no boot |
-| Query | SELECT id FROM service_types WHERE code = ? AND active = 1 LIMIT 1 |
-| Fail closed | true - erro de banco loga STR-LOOKUP-FAIL e retorna null |
-| API de conexao | \getPDO() - definida em src/Database.php:25, singleton lazy |
-
-### Criterio de aceite
-
-- tests/ServiceTypeResolverTest.php passa 12/12 (mapa + lookup injetado).
-- tests/ServiceTypeResolverDbTest.php prova eletrica -> id real em ambiente com banco.
-- porSlug('inexistente') retorna null.
-- CONTRATO_RESPOSTA tem campo bootstrap: preenchido.
-
-### Status de implementacao (2026-10-08)
-
-- [x] ServiceTypeResolver.php criado com mapa + definirLookupPorCodigo().
-- [x] tests/ServiceTypeResolverTest.php (12/12 PASS em PHP 8.0.30).
-- [x] Namespace App\Services\Catalog declarado no resolver.
-- [x] Bootstrap registrado no index.php.
-- [x] tests/ServiceTypeResolverDbTest.php (prova real de banco).
-- [x] CONTRATO_RESPOSTA com bootstrap: preenchido.
-
-**Limite (paliativo):** mapa hardcoded de 5 slugs. Servico novo cadastrado no Backoffice nao e coberto -> fail closed. Solucao definitiva: B-009.
+```
+X-Idempotency-Key: ped{pedido_id}-t{tentativa}
+```
+Tentativa inicia em `1`, mantida em reenvios, avança só após falha. Cobranças complementares preservam chave própria.
 
 ---
 
-## Contrato de Catalogo Dinamico (A -> B) - visao B-009
+## §5. Precificação
 
-**Status:** aceito por B em 2026-10-08. Implementacao paliativa vigente (ServiceTypeResolver); arquitetura definitiva agendada como **B-009**.
+**Fonte única:** `service_price_rules` (tabela versionada, com vigência e `version`).
 
-**Regra de ouro:** service_types e a unica fonte de verdade. Nenhum mapa de slug/code/ID pode permanecer gravado no core.
+**Referência de mercado:** Ache Guincho 2026 - linear, taxa de saída R$ 120-250 + R$ 5-8/km para carro de passeio.
 
-### Interface canonica dos 3 funis
+**Tabelas aposentadas:** `service_pricing_rules` (vazia, congelar) e as chaves `tarifa_*` em `configuracoes` (migrar e congelar).
 
-| Item | Regra |
-| --- | --- |
-| Formulario | um unico form method=post por funil |
-| Campos | input/select/radio reais |
-| Etapas | fieldset data-step (nao forms separados) |
-| JS | so apresentacao, validacao e chamadas de cotacao |
-| Estado de negocio em JS | **proibido** |
-| Hidden preenchido por JS | **proibido** |
+### §5.1 Fórmula base
 
-### Contrato do public-pre-cotacao-flow.js
+Preco_cliente = taxa_saida
+              + [(km_transporte x tarifa_km) x fator_veiculo x fator_periodo]
+              + deadhead_do_anel
+              + fator_terreno_fixo
+              + pedagio_repassado
 
-| Permitido | Proibido |
-| --- | --- |
-| navegar entre fieldset data-step | window.__gfFlow.STATE |
-| mostrar/ocultar etapas | estado de negocio paralelo ao form |
-| habilitar/desabilitar controles | escrever em hidden no submit |
-| validar etapa atual | resolver service_type_id |
-| chamar APIs de cotacao | inventar tipo_problema |
-| emitir gf:flow-stage | |
+### §5.2 Base de km - decisão obrigatória
 
-### Contrato do POST
+`service_price_rules.base_km_contagem` ENUM('transporte','percurso_completo','percurso_efetivo').
 
-| Campo | Tipo | Obrigatorio | Origem |
-| --- | --- | --- | --- |
-| service_type_id | integer | **sim** | select real do catalogo ativo |
-| descricao_problema | string ou null | nao | textarea real |
-| decisao_atendimento | string ou null | nao | intencao de cotacao (nao decide modalidade) |
-| tipo_problema | string ou null | nao | legado/descricao (nao e autoridade) |
+- `transporte`: apenas coleta -> destino. Deadhead absorvido na taxa de saída.
+- `percurso_completo`: deadhead + transporte + retorno.
+- `percurso_efetivo`: deadhead + transporte, sem retorno.
 
-### Regra de modalidade
+Sem esta coluna preenchida, a cotação não pode ser gerada. O erro de Campinas nasceu da ausência dela.
 
-A autoridade da modalidade e service_types.attendance_mode:
+### §5.3 Colunas novas em service_price_rules
 
-| Modalidade | B-GUARD-02 (valor cotado) | B-GUARD-03 (destino) |
-| --- | --- | --- |
-| TOWING | obrigatorio | obrigatorio |
-| ON_SITE | nao aplica | nao obrigatorio |
+| Coluna | Tipo | Função |
+|---|---|---|
+| `base_km_contagem` | ENUM | Qual km está sendo cobrado |
+| `fator_veiculo` | DECIMAL(4,2) | Moto, carro, SUV |
+| `fator_periodo_noturno` | DECIMAL(4,2) | 1,20-1,50 |
+| `fator_periodo_fds` | DECIMAL(4,2) | 1,20-1,50 |
+| `fator_periodo_feriado` | DECIMAL(4,2) | 1,20-1,50 |
+| `taxa_terreno_leve` | DECIMAL(10,2) | R$ 40-80 |
+| `taxa_terreno_acentuado` | DECIMAL(10,2) | R$ 80-150 |
+| `taxa_manobra_ladeira` | DECIMAL(10,2) | R$ 50-120 |
 
-decisao_atendimento **nao pode sobrescrever** o catalogo. Divergencia -> erro explicito.
+### §5.4 Fatores
 
-### Rota e redirect
+- `fator_veiculo`: multiplica `(km × tarifa)`.
+- `fator_periodo`: multiplica `(km × tarifa)`.
+- Terreno — taxas fixas, não multiplicam:
+  - leve (grade ≥ 6% por ≥ 1 km): R$ 40–80
+  - acentuado (grade ≥ 8%): R$ 80–150
+  - manobra em ladeira no hook-up: R$ 50–120
+- **Ganho de elevação total** — multiplicador sobre o bloco variável
+  `(km × tarifa × fator_veiculo × fator_periodo)`:
+  - 0–100 m: 1,00
+  - 100–300 m: 1,05
+  - 300–600 m: 1,10
+  - 600–1000 m: 1,18
+  - >1000 m: 1,25
+  Configurável em `configuracoes.ganho_elevacao_faixas` (metros) e
+  `configuracoes.ganho_elevacao_mult` (multiplicadores).
+- **Altitude absoluta não cobra.** Fica como dado operacional/informativo
+  no pedido. Distinto de ganho de elevação: estar a 750 m de altitude
+  numa rua plana não custa; subir 750 m contra a gravidade custa.
 
-| Item | Valor |
-| --- | --- |
-| Form admin | POST /admin/pedido/criar |
-| Controller | AdminController::pedidoCriar |
-| Rota /admin/pedido/novo | so Passo 1 (cliente + veiculo) |
-| Redirect em erro | /admin/pedido/novo/funil (status 303) |
-| Preservar no erro | flash + contexto de cliente/veiculo |
+### §5.5 Deadhead por anel
 
-### Criterio de aceite do B-009
+O deadhead é do anel, não do guincho individual. Ver §7.
 
-- 3 funis usam 1 form com campos reais
-- Nenhum hidden preenchido por JS
-- Etapas ocultas tambem desabilitadas
-- Mesmo JS nos 3 contextos, sem STATE
-- Select envia service_type_id do catalogo ativo
-- Criar tipo no Backoffice nao exige alterar PHP
-- TOWING exige valor e destino; ON_SITE nao exige destino
-- Divergencia decisao x catalogo -> erro explicito
-- doc/CONTRATOS.md secao 2 sem "nao verificado"
+### §5.6 Pedágio
 
-## Contrato de Bloqueio Financeiro (A -> B)
+Repassado integralmente, com comprovante. Guincho plataforma 2 eixos. Veículo em cima da plataforma não gera cobrança autônoma (Free Flow).
 
-  o_que_preciso:
-    1. Adicionar gate no matching: se o parceiro tem fatura com
-       status='bloqueada' e vencimento_em < NOW(), não ofertar
-       novos pedidos para ele.
-    2. Adicionar gate no aceite: se o parceiro está bloqueado,
-       rejeitar o aceite.
-    3. Documentar como o bloqueio é revertido (desbloquear()).
-  por_que:
-    Hoje faturas_parceiro.status = 'bloqueada' não tem efeito
-    operacional — o parceiro continua recebendo pedidos.
-  criterio_de_aceite:
-    - Guincho com fatura bloqueada não aparece em
-      /admin/pedidos-disponiveis nem no dashboard dele.
-    - Aceite é rejeitado com erro explícito.
-    
-**Status:** aceito por A em 2026-10-08. Implementacao de A pendente.
+### §5.7 Comissão
 
-**Regra:** parceiro com ao menos uma fatura vencida em
-`faturas_parceiro.status='bloqueada'` nao pode receber nem aceitar
-novas ofertas.
+Take rate: **8% flat sobre o valor BRUTO do pedido**.
 
-**Chave do bloqueio:**
+**Fonte única:** `configuracoes.comissao_plataforma` (decimal, ex.: `0.08`).
+**Leitura:** exclusivamente via `Configuracao::get('comissao_plataforma')`.
+Nenhum valor hardcoded em código.
 
-| Campo | Valor |
-| --- | --- |
-| `parceiro_tipo` | `guincho` |
-| `parceiro_id` | `guincho_id` |
-| Condicao | `status = 'bloqueada' AND vencimento_em < NOW()` |
+**Gateway — reserva dinâmica por método de pagamento:**
 
-**Metodo canonico (Faixa A):**
+O valor real do gateway depende do método escolhido pelo cliente. A reserva
+é feita em duas etapas:
+
+1. **Na cotação** (método ainda desconhecido): usar `reserva_gateway_credito`
+   (crédito à vista, pior caso comum). O cliente vê o preço final com a
+   reserva máxima.
+2. **No webhook de aprovação**: o método real é detectado pelo payload do
+   gateway. Se foi PIX (`reserva_gateway_pix`, 0,49%), a diferença entre
+   a reserva máxima e a real cai automaticamente no repasse do guincho.
+
+**Chaves de reserva (configuráveis):**
+- `reserva_gateway_pix` = 0,49%
+- `reserva_gateway_debito` = 1,99%
+- `reserva_gateway_credito` = 4,98% (default na cotação)
+- `reserva_gateway_boleto` = 1,99%
+- `reserva_gateway_percentual` = 4,98% (fallback legado)
+
+**Fórmula do split (§5.7):**
+
+```
+valor_plataforma = total × comissao_plataforma
+valor_gateway = total × reserva_gateway (dinâmica por método)
+valor_guincho = total − valor_plataforma − valor_gateway
+```
+
+Os três somam exatamente o total. Sem estouro.
+
+**Exibição ao guincho:**
+
+```
+Você receberá: R$ 794,85
+Retenção GuinchaFácil: R$ 113,55
+```
+
+Comissão + gateway consolidados em um único número. O detalhamento
+interno fica no `pedido_eventos` e no painel financeiro do backoffice.
+
+**Regras:**
+- `comissoes_cidade` desativada até haver densidade para diferenciação.
+- Tabela tiered por faixa de km (12/10/8/6) **não é oficial**. Descartada.
+- Teto por corrida: sem teto por enquanto.
+
+**Chaves aposentadas:**
+- `comissao_assistencia_percentual` — removida.
+- `service_price_rules.platform_fee_value` — override por serviço, opcional.
+
+### §5.8 Detalhamento obrigatório
+
+Toda cotação grava em `order_price_snapshots`:
+- `taxa_saida`, `km_transporte`, `tarifa_km`, `base_km_contagem`
+- `fator_veiculo`, `fator_periodo` aplicado
+- `deadhead_ref` e anel usado
+- `fator_terreno` aplicado
+- `pedagio`
+- `comissao` (8%)
+- `valor_total`
+
+### §5.9 Estorno parcial
+
+Quando um guincho de anel interno aceita após cotação em anel externo, estorno automático da diferença de deadhead.
+
+- Mercado Pago: `POST /v1/payments/{id}/refunds` com `{ "amount": <valor> }`
+- PagSeguro: `POST /charges/{id}/cancel` com `{ "amount": <valor> }`
+- Trilha em `pedido_eventos` tipo `estorno_diferenca_deadhead`
+- Retry com backoff se saldo insuficiente; alerta no admin
+
+---
+
+## §6. Motor de preço — fonte única
+
+**Schema verificado (dump 12/10/2026):**
+
+- **`service_price_rules`** (tabela canônica):
+  `pricing_zone_id`, `service_type_id`, `vehicle_category`, `base_customer_price`, `minimum_customer_price`, `maximum_customer_price`, `provider_base_amount`, `platform_fee_type`, `platform_fee_value`, `included_distance_km`, `extra_distance_price`, `included_minutes`, `extra_minute_price`, `night_multiplier`, `holiday_multiplier`, `effective_from`, `effective_until`, `active`, `version`.
+  `vehicle_category VARCHAR(30) DEFAULT NULL` **já existe**.
+  `platform_fee_type` + `platform_fee_value` **já existem**.
+
+- **`service_pricing_rules`** (0 linhas) — **congelada** (desenho antigo `base_fee`/`pickup_km_price`/`tow_km_price`).
+- **`provider_quote_rules`** (legado por provedor) — **congelado**.
+- **`order_price_snapshots`** — pronta. `UNIQUE order_id`. FK para `service_price_rules`.
+- **`comissoes_cidade`** — pronta, vazia. `UNIQUE cidade_id`.
+- **`configuracoes`** — chave/valor. Chaves `tarifa_*` a migrar.
+
+**Take rate (D-P2 — 12/10/2026):**
+- 0–30 km: 12%
+- 31–80 km: 10%
+- 81–150 km: 8%
+- >150 km: 6% ou R$ 60 (o maior)
+- Assistência local: R$ 25 fixos + 5%
+
+**Precedência:** `service_price_rules.platform_fee_value` > `comissoes_cidade.percentual` > `configuracoes.comissao_plataforma`.
+
+**Valores base (D-P1 — 12/10/2026):**
+- `taxa_engate` = R$ 200,00 · `tarifa_km` = R$ 5,80 · piso > 80 km = R$ 650,00
+- `night_multiplier` = 1,20 · `holiday_multiplier` = 1,30
+- Fórmula: `preço = engate + (km × tarifa) × fator_terreno + pedágio`
+
+Detalhes em `doc/PRECIFICACAO.md` v1.1.
+
+---
+
+## §7. Disponibilidade (B->A)
+
+**Interface antiga:** `GuinchoDisponibilidade::existeNoRaio()` - deprecada.
+
+**Interface nova:**
+
+GuinchoDisponibilidade::candidatosPorAnel(
+    float $lat, float $lng, int $service_type_id
+): array
+
+Retorno por anel: `candidatos[]`, `deadhead_ref`, `elegiveis`.
+
+### §7.1 Anéis
+
+Configuráveis no admin. Default: 2, 5, 10, 20, 35 km.
+
+### §7.2 Filtro duro
+
+`aprovado = 1 AND disponivel = 1 AND reboque_aprovado = 1
+AND NÃO bloqueado financeiramente (§9)
+AND dist_km <= raio_maximo`
+
+### §7.3 Deadhead de referência
+
+Sempre o **centro do anel**. Não é a média, não é o mais distante.
+
+### §7.4 Regra de escolha do anel
+
+Menor anel com **>= 3 elegíveis**. O `deadhead_ref` daquele anel é aplicado a todos os candidatos daquele anel, garantindo igualdade de preço.
+
+Se nenhum anel até 35 km tiver >= 3 elegíveis: fallback WhatsApp.
+
+### §7.5 Ordenação interna
+
+1. Menor distância real
+2. Maior reputação
+3. Aceites recentes
+4. Aleatório
+
+### §7.6 Estorno automático
+
+Se o cliente já pagou deadhead de anel externo e um guincho de anel interno aceita, estorno parcial automático (ver §5.9).
+
+### §7.7 Bloqueio financeiro (§9)
+
+Bloqueado não conta como elegível. Não recebe oferta. **Não recebe notificação até quitar.**
+
+---
+
+## §8. Catálogo Dinâmico (B-009)
+
+**Fonte:** tabelas `service_categories` → `service_types` → `service_price_rules`.
+
+**Estrutura:**
+- `service_categories`: `code`, `name`, `icon`, `active`, `sort_order`
+- `service_types`: `category_id`, `code`, `name`, `attendance_mode ENUM('TOWING','ON_SITE','HYBRID')`, `requires_destination`, `requires_diagnostic`, `requires_before_evidence`, `requires_after_evidence`, `active`, `is_system`, `is_removable`, `can_disable`
+- `service_price_rules`: preço por `pricing_zone_id` + `service_type_id` + `vehicle_category`
+
+**Regra de negócio:**
+1. O funil lista `service_types WHERE active = 1`, agrupado por `service_categories.sort_order`.
+2. Cliente escolhe um `service_type_id`.
+3. `attendance_mode` do serviço define o fluxo:
+   - `TOWING` → exige destino, calcula reboque
+   - `ON_SITE` → não exige destino, calcula assistência local, filtra oficinas
+   - `HYBRID` → oferece ambos
+4. `PedidoCoreService::criar()` deriva a modalidade do catálogo — **não do `tipo_problema` VARCHAR**.
+
+**Regra proibida:** o funil **não** deve usar `service_type_id` fixo por slug. Deve consultar o catálogo ativo.
+
+**Consumidores:** views públicas, admin, cliente (3 funis).
+
+---
+
+## §9. Bloqueio Financeiro Operacional (B-010)
+
+**Contrato aceito pela Faixa A.**
+
+**Interface:**
 ```php
 BloqueioFinanceiroService::guinchoEstaBloqueado(int $guinchoId): bool
 ```
-**Uso obrigatorio:**
-1. **Matching:** excluir apenas aquele guincho da lista de candidatos/ofertas.
-2. **Aceite:** consultar novamente antes de gravar o aceite, para evitar
-   corrida entre a montagem da oferta e o clique.
-3. **Auditoria/log:** registrar `FIN-BLOCK-MATCH` no filtro e
-   `FIN-BLOCK-ACCEPT` no aceite negado.
-**Resposta do aceite negado ao guincho:**
-> Nao e possivel aceitar novos pedidos enquanto houver fatura financeira
-> vencida pendente de regularizacao.
-**Nunca expor ao cliente** dados financeiros, valores ou IDs da fatura.
-**Reversao:**
-| Situacao | Acao canonica |
-| --- | --- |
-| Pagamento confirmado | `FaturaService::marcarPaga()` muda a fatura para paga; o gate deixa de bloquear |
-| Liberacao administrativa excepcional | `FaturaService::desbloquear($faturaId)` muda `bloqueada` -> `aberta` |
-| Fatura segue vencida apos desbloqueio excepcional | o cron `bloquearPorVencimento()` a bloqueia novamente |
-`desbloquear()` **nao equivale a pagamento**; e somente uma liberacao
-manual temporaria e deve ser auditada com administrador, motivo e data.
-**Criterio de aceite:**
-- Guincho bloqueado nao recebe nova oferta no dashboard.
-- Nao aparece como candidato no matching.
-- Tentativa de aceite e rejeitada no servidor com erro explicito.
-- Outro guincho elegivel continua podendo receber e aceitar o mesmo pedido.
 
+**Fonte:** tabela `faturas_parceiro`, colunas:
+- `parceiro_tipo ENUM('guincho','oficina','especialista')`
+- `parceiro_id BIGINT`
+- `status ENUM('aberta','paga','vencida','bloqueada','cancelada')`
+- `vencimento_em DATETIME`
+- `saldo DECIMAL(12,2)`
+
+**Regra:** retorna `true` se existe ao menos 1 fatura com `parceiro_tipo = 'guincho'`, `parceiro_id = :id` e `status IN ('vencida','bloqueada')`.
+
+**Uso:** o parceiro continua recebendo ofertas no painel, mas ao **aceitar** um pedido o sistema verifica antes e, se bloqueado, exibe modal de pagamento pendente.
+
+**Consumidor:** `OficinaController` e `GuinchoController` (Faixa B) exibem o badge; o bloqueio real é do motor (A).
+
+---
+
+## §10. Relevo v2 e Prioridade (D19/D20)
+
+**Interface `RelevoService` (Faixa A):**
+```php
+RelevoService::fatorPorOrigem(float $lat, float $lng): array
+// Retorno: ['fator_relevo' => float, 'inclinacao_graus' => ?float,
+//           'segmento_encontrado' => bool, 'origem_fator' => string,
+//           'via_segmento_id' => ?int]
+```
+
+**Migrations pendentes (A):** `install/migration_via_segmentos_v1.sql`, `install/migration_auditoria_prioridade_v1.sql`.
+
+**Fórmula e réguas:** ver `doc/PRECIFICACAO.md` v1.1 §5 e `doc/DECISOES.md` D19/D20.
+
+**Prioridade (D16/D20):** `prioridade_status` em `pedidos`. Estado inicial: `nao_solicitada` ou `pendente_confirmacao`. Transições registradas em `pedido_eventos` com ator, data, status anterior, novo e motivo.
+
+---
+
+## §11. Interface A↔B (`CONTRATO_PEDIDO` / `CONTRATO_RESPOSTA`)
+
+Formato dos blocos emitidos entre faixas.
+
+```
+CONTRATO_PEDIDO:
+  de: B
+  para: A
+  motivo: <por que B precisa>
+  contrato_esperado:
+    endpoint: <rota>
+    body: <JSON>
+    response_200: <JSON>
+    response_erro: <JSON>
+  impacto_se_nao_implementar: <consequência>
+  prioridade: <ALTA|MÉDIA|BAIXA>
+```
+
+```
+CONTRATO_RESPOSTA:
+  de: A
+  para: B
+  <nome_do_campo>:
+    existe: sim | não
+    tabela: <nome>
+    tipo: <tipo SQL>
+    definição: <DDL>            # se precisa criar
+    origem: <onde o motor gera>
+    exposição: <como B acessa>
+    legado: <o que fazer com dados antigos>
+```
+
+---
+
+## Registro de alterações
+
+| Data | Mudança |
+|---|---|
+| 2026-09-30 | Criação inicial (vA) |
+| 2026-10-08 | vB adiciona catálogo, bloqueio, financeiro, relevo, prioridade |
+| 2026-10-12 | **v2.0** — Fusão consolidada + schema verificado contra dump. §3, §7, §8, §9 fechados. |

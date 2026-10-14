@@ -24,6 +24,16 @@
 **Fora do escopo (emitir `ROTA_PEDIDA` ou `CONTRATO_PEDIDO` e parar):** `index.php`, `config.php`, `CheckoutController.php` (faixa A), qualquer arquivo de A ou C, e os arquivos sem faixa definida.
 
 ## 2. Estado atual (verificado em 2026-10-01)
+<!-- B-ONDA1-2026-10-10 -->
+> **Verificação 2026-10-10 (sessão Onda 1 MISSãO):** os 5 itens da MISSãO colada
+> estão **integralmente implementados**. Nenhum diff de cõdigo necessãrio.
+> Os 4 assets referenciados por `oficina/dashboard.php` existem no repositõrio
+> (`communications.css`, `communications.js`, `atendimento-status.js`
+> confirmados por anexo nesta sessão; `offline-queue.js` **não verificado**).
+> `MagicLinkService.php` existe, íntegro, 200+ linhas.
+> `_pedido_oficina_detalhe.php` existe, consome sõ Contrato Pedido v1, sem
+> `JOIN`/`SELECT` direto.
+
 
 > **Verificação 2026-10-01:** itens 1 (assets no `oficina/dashboard.php`), 2 (partial `_pedido_oficina_detalhe.php` já incluído em `pedidodetalhe.php:348`, consumindo os 7 campos do Contrato Pedido v1) e 3 (badge `origem_funil` em `admin/pedidos.php` via closure `$getOrigemFunilBadge`) **já estão implementados**. `php -l` limpo no partial. Item 1 **não alterar** (Opção A: só muda se o ChatGPT apontar falha no cenário `oficina-alertas`).
 
@@ -99,6 +109,25 @@ A faixa B **não escreve** os testes da própria faixa (R5).
 | **B-010** — Bloqueio financeiro operacional | **Ativo** — `CONTRATO_PEDIDO` emitido e aceito por A. A implementa `BloqueioFinanceiroService::guinchoEstaBloqueado()`. B só exibe badge. |
 | **Faturas dos parceiros (B)** | **ENTREGUE em 2026-10-08** — 4 rotas, 2 views, 4 métodos no `AdminController`. Menu em `admin_nav_operacional.php` seção Financeiro. Card comissão no `_pedido_oficina_detalhe.php`. |
 
+| **P-B-01** - `MagicLinkService` depende de `RateLimiter`, `Configuracao`, `AuthService::sanitizeReturnPath`, constantes SMTP/Brevo e envs WAPI. Nenhum foi verificado nesta sessão. Faixa C precisa testar `POST /login` com magic link e confirmar que `RateLimiter` carrega via autoload. | **Aberto - teste da Faixa C** |
+| **P-B-02** - `_pedido_oficina_detalhe.php` tinha encoding quebrado (UTF-8 duplo-encodado). **verificado em 2026-10-10**: arquivo no disco já está em UTF-8 correto; mojibake era artefato de transporte. | **RESOLVIDO 2026-10-10** |
+| **P-B-03** - `_pedido_oficina_detalhe.php` usa `$bp` sem guard. Hoje funciona porque `pedidodetalhe.php` define `$bp` antes do `require`. Se o partial for reusado em outro contexto, quebra. | **Informativo, sem ação** |
+
+<!-- B-PENDENCIAS-ONDA1-2026-10-11 -->
+| **P-B-04** - Views docrfás `src/Views/auth/registro_cliente.php` e `registro_guincho.php` existem mas NAO sao mais usadas pelo `AuthController` atual (fluxo ativo e `registro_simples.php` + `perfil_completar.php`). Editar essas views = trabalho morto. | **Aberto - decidir (arquivar/deletar/reativar)** |
+| **P-B-05** - Oficina nao tem formulario completo em uma pagina (assimetria com cliente/guincho). Hoje: `/registro/simples/oficina` (3 campos) + `/perfil/completar` (CNPJ + razao social). Funcional, mas inconsistente. | **Feature nova - nao Onda 1** |
+| **P-B-06** - `registro_simples.php` e `perfil_completar.php` tinham mojibake real (`você` em vez de `você`, `PolÃ­tica` em vez de `Polática`). **Corrigido em 2026-10-11** por `tools/fix-B-encoding-voces.ps1` (7 substituicoes, php -l limpo). | **RESOLVIDO 2026-10-11** |
+| **B-ONDA1-ENCERRADA** - Onda 1 da Faixa B: 6/6 itens (B1.1 a B1.6) fechados. B1.1/B1.3/B1.4/B1.6 no repo, B1.2/B1.5 em `auth-registro-enhancements.js`. Validado em 2026-10-11. | **ENCERRADA** |
+<!-- B-ONDA2-2026-10-11 -->
+| **ONDA-2-ENCERRADA-2026-10-11** - Onda 2 da Faixa B: tokens aplicados, cores convertidas, rodape de bandeiras, badges amigaveis. 6 arquivos alterados, php -l limpo em todos. | **ENCERRADA 2026-10-11** |
+| **B-Onda-2.1** - Import `tokens.css` em `registro_simples.php` e `perfil_completar.php` (1 ocorrência cada, sem duplicata). | **OK 2026-10-11** |
+| **B-Onda-2.2** - Cores hardcoded (`#2fb34a`, `#1f8a36`, `#0A0A0A`, `#111827`) convertidas para `var(--gf-*)` em `registro_simples.php`, `perfil_completar.php`, `pre-cotacao.php`. | **OK 2026-10-11** |
+| **B-Onda-2.3** - Rodape de bandeiras (`gf-footer-payments.php`) aplicado em `landing.php`, `cidade.php`, `cidades.php`. | **OK 2026-10-11** |
+| **B-Onda-2.4** - Badges amigaveis em `cidade.php`: `Pedra Viva` -> `<span class=badge-status-ativo>Atendimento Imediato (Guincho a postos)</span>`; `Pedra Morta` -> `<span class=badge-status-expansao>Sob Consulta / Agendamento</span>`; fallback `<span class=badge-status-mapeada>Area mapeada</span>`. CSS inline no `<head>`. Paragrafo `Pedras Vivas e Mortas` removido. | **OK 2026-10-11** |
+| **B-Onda-2.5** - Fix `Você` (V + e-agudo) -> `Você` (V + e-circ) em `registro_simples.php` e `perfil_completar.php`. | **OK 2026-10-11** |
+| **P-B-07** - `registro_simples.php` e `perfil_completar.php` usam `var(--gf-*)` com import prõprio de `tokens.css`. Independentes do `header.php`. | **Informativo** |
+| **P-B-08** - `cidade.php` tem CSS inline das badges (`.badge-status-*`). Se a Faixa A migrar para `public-landing.css`, ê mover. | **Informativo** |
+| **ONDA-3-EM-ANDAMENTO-2026-10-11** - Revestimento visual do `pre-cotacao.php` clássico (card + barra de prova social). Páginas de cidade/landing com cores hardcoded remanescentes convertidas para `var(--gf-*)`. | **Em andamento** |
 Ao terminar uma entrega: atualizar este arquivo (estado, contratos, pendências) e parar.
 
 ## 8. Histórico

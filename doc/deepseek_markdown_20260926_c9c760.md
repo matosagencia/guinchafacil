@@ -1,9 +1,10 @@
 # Motor de Decisão — Assistência no Local vs Reboque
 
-> **Versão:** 2.0
-> **Data:** 2026-09-26
+> **Versão:** 2.1 (revisada em 2026-10-10 para incorporar relevo: elevação + inclinação)
+> **Data original:** 2026-09-26
 > **Autor:** Matos Agência
 > **Escopo:** Pré-cotação pública + painel admin + testes
+> **Precedência:** em caso de conflito, `doc/CONTRATOS.md` e `doc/DECISOES.md` mandam sobre este guia.
 
 ---
 
@@ -30,17 +31,42 @@ Projeto PHP MVC (repo `matosagencia/guinchafacil`). Implementar o motor de decis
 
 **Princípio:** usar configs existentes sempre que possível. Não criar chaves duplicadas.
 
+**Relevo:** o preço considera **elevação** (desnível do trajeto, guincho e assistência) e **inclinação** da via (só guincho). Ver `CONTRATOS.md` → `relevo_v2` (proposto; **só implementar após aprovação do dono**, regra R2). Até lá vale o `relevo_v1`, que mede só inclinação na origem.
+
 ---
 
 ## 2. Fórmulas travadas
-ASSISTÊNCIA = custo_saida_profissional_padrao × (1 + comissao_assistencia_percentual)
-= 80,00 × 1,21
-= 96,80
 
-REBOQUE = taxa_fixa + (tarifa_por_km × distancia_ate_oficina_mais_proxima)
-= 150,00 + (3,50 × km)
+```text
+ASSISTÊNCIA_BASE = custo_saida_profissional_padrao × (1 + comissao_assistencia_percentual)
+                 = 80,00 × 1,21
+                 = 96,80
 
-text
+REBOQUE_BASE     = taxa_fixa + (tarifa_por_km × distancia_ate_oficina_mais_proxima)
+                 = 150,00 + (3,50 × km)
+```
+
+**Com relevo (`relevo_v2`, proposto):**
+
+```text
+reboque_com_relevo       = REBOQUE_BASE × fator_elevacao × fator_inclinacao
+assistencia_com_elevacao = ASSISTÊNCIA_BASE × fator_elevacao_assistencia
+reboque_convertido       = reboque_com_relevo × (1 - (desconto_saida_oficina_percentual / 100))
+```
+
+- `fator_elevacao`: desnível efetivo do trajeto, `subida_m + coef_descida × descida_m`. Guincho soma os **dois trechos** (guincho→cliente e cliente→destino). Vale para guincho e assistência.
+- `fator_inclinacao`: inclinação da via, régua de 1.00 a 1.30 em 5 faixas de graus. **Só guincho.**
+- Sem dado de relevo: fatores 1.00, sem erro e sem taxa fantasma.
+- Faixas da régua de elevação, composição exata e tetos: **a definir pelo dono**.
+- Comissão: segue a divisão atual, percentual sobre o **valor total**, incluindo adicionais.
+
+**Até o `relevo_v2` ser aprovado**, vale o `relevo_v1`:
+
+```text
+reboque_com_relevo = (taxa_fixa + (tarifa_por_km × distancia)) × fator_relevo
+```
+
+onde `fator_relevo` segue a régua de 1.00 a 1.30 sobre `abs(inclinacao_graus)` num raio de até 50 m da origem; sem segmento, fallback silencioso de 1.00.
 
 ### Chaves de configuração
 
@@ -51,19 +77,21 @@ text
 | `custo_saida_profissional_padrao` | **criar** | R$ 80,00 | Base da assistência |
 | `comissao_assistencia_percentual` | **criar** | 0.21 | Comissão sobre assistência |
 | `desconto_saida_oficina_percentual` | **já existe** | 0.21 | Fallback assistência → reboque |
+| `coef_descida` | **criar (relevo_v2)** | menor que 1; valor a definir | Peso da descida no desnível |
 
 ---
 
 ## 3. Árvore de decisão
+
+```text
 Sem oficinas no raio → SOMENTE REBOQUE
 
 Colisão + veículo NÃO pode mover → SOMENTE REBOQUE
 
 Todos os outros casos → COMPARATIVO
-Se reboque > assistência → recomendar ASSISTÊNCIA
-Senão → recomendar REBOQUE
-
-text
+  Se reboque > assistência → recomendar ASSISTÊNCIA
+  Senão → recomendar REBOQUE
+```
 
 **Pergunta "O veículo pode se mover com segurança?"** só aparece no funil quando `tipo_problema = colisao`. Nos demais casos, assume `true` silenciosamente.
 
@@ -93,30 +121,27 @@ UPDATE `configuracoes`
        `descricao` = 'Valor base do reboque (bandeirada). Somado a tarifa por km.'
  WHERE `chave` = 'taxa_fixa'
    AND CAST(`valor` AS DECIMAL(10,2)) < 100.00;
-4.2 SUBSTITUIR src/Services/DecisaoAtendimentoService.php
+```
+
+### 4.2 SUBSTITUIR `src/Services/DecisaoAtendimentoService.php`
+
 Manter:
 
-Constantes
-
-normalizarTipo()
-
-oficinasNoRaio()
-
-descontoPercentual()
-
-descontoPercentualFormatado()
-
-calcularValorComDesconto()
+- Constantes
+- `normalizarTipo()`
+- `oficinasNoRaio()`
+- `descontoPercentual()`
+- `descontoPercentualFormatado()`
+- `calcularValorComDesconto()`
 
 Remover:
 
-custoSaidaProfissional()
+- `custoSaidaProfissional()`
+- `require_once TarifaService.php`
 
-require_once TarifaService.php
+Substituir `avaliar()` e adicionar os métodos abaixo. **Atenção:** `calcularReboque()` e `calcularAssistencia()` agora recebem as coordenadas e consultam o `RelevoService` (Faixa A). Sem isso o fator de relevo não entra no preço.
 
-Substituir avaliar() e adicionar:
-
-php
+```php
 public function avaliar(int $pedidoId, string $tipoProblema, float $lat, float $lng, array $opcoes = []): array
 {
     $tipo = self::normalizarTipo($tipoProblema);
@@ -126,18 +151,18 @@ public function avaliar(int $pedidoId, string $tipoProblema, float $lat, float $
     $oficinas = $this->oficinasNoRaio($lat, $lng);
 
     if (count($oficinas) === 0) {
-        return $this->somenteReboque($pedidoId, $tipo, 5.0,
+        return $this->somenteReboque($pedidoId, $tipo, 5.0, $lat, $lng,
             'Nao encontramos oficinas no raio de atendimento. Reboque e a unica opcao.');
     }
 
     if ($tipo === 'colisao' && !$veiculoPodeMover) {
-        return $this->somenteReboque($pedidoId, $tipo, (float)$oficinas[0]['distancia_km'],
+        return $this->somenteReboque($pedidoId, $tipo, (float)$oficinas[0]['distancia_km'], $lat, $lng,
             'O veiculo nao pode se mover com seguranca. Reboque e obrigatorio.');
     }
 
     $distanciaOficina = (float)$oficinas[0]['distancia_km'];
-    $custoAssistencia = $this->calcularAssistencia();
-    $custoReboque     = $this->calcularReboque($distanciaOficina);
+    $custoAssistencia = $this->calcularAssistencia($lat, $lng);
+    $custoReboque     = $this->calcularReboque($distanciaOficina, $lat, $lng, $oficinas[0]);
     $recomendacao     = $custoReboque > $custoAssistencia ? 'assistencia' : 'reboque';
     $justificativa    = $recomendacao === 'assistencia'
         ? 'A assistencia no local sai mais barata que o reboque. Se o profissional nao conseguir resolver, voce pode converter para reboque com '
@@ -174,9 +199,9 @@ public function avaliar(int $pedidoId, string $tipoProblema, float $lat, float $
     return $payload;
 }
 
-private function somenteReboque(int $pedidoId, string $tipo, float $distancia, string $motivo): array
+private function somenteReboque(int $pedidoId, string $tipo, float $distancia, float $lat, float $lng, string $motivo): array
 {
-    $custoReboque = $this->calcularReboque($distancia);
+    $custoReboque = $this->calcularReboque($distancia, $lat, $lng, null);
 
     Logger::log(Logger::LEVEL_INFO, __CLASS__, __FUNCTION__, 'decisao_atendimento', 'Somente reboque.', [
         'pedido_id' => $pedidoId ?: null,
@@ -199,35 +224,57 @@ private function somenteReboque(int $pedidoId, string $tipo, float $distancia, s
     ];
 }
 
-private function calcularAssistencia(): float
+private function calcularAssistencia(float $lat, float $lng): float
 {
     $base     = (float)Configuracao::get('custo_saida_profissional_padrao', '80.00');
     $comissao = (float)Configuracao::get('comissao_assistencia_percentual', '0.21');
-    return round($base * (1 + $comissao), 2);
+    $valor    = $base * (1 + $comissao);
+
+    // relevo_v2: assistencia cobra so elevacao (sem inclinacao da via).
+    // Ate o relevo_v2 ser aprovado, o fator e 1.00.
+    $fatorElevacao = (new RelevoService())->fatorElevacaoAssistencia($lat, $lng);
+
+    return round($valor * $fatorElevacao, 2);
 }
 
-private function calcularReboque(float $distanciaKm): float
+private function calcularReboque(float $distanciaKm, float $lat, float $lng, ?array $oficinaDestino): float
 {
     $base        = (float)Configuracao::get('taxa_fixa', '150.00');
     $tarifaPorKm = (float)Configuracao::get('tarifa_por_km', '3.50');
-    return round($base + ($tarifaPorKm * $distanciaKm), 2);
+    $valor       = $base + ($tarifaPorKm * $distanciaKm);
+
+    // Fator de relevo (CONTRATOS.md: relevo_v1 hoje, relevo_v2 apos aprovacao).
+    // v1: fator de inclinacao na origem. v2: elevacao + inclinacao nos dois trechos.
+    $relevo = (new RelevoService())->fatorReboque($lat, $lng, $oficinaDestino);
+
+    return round($valor * (float)$relevo['fator_total'], 2);
 }
-4.3 AJUSTAR src/Controllers/PedidoController.php
-No método decisaoPreCotacao(), adicionar no início:
+```
 
-php
+> **Nota para a Faixa A:** `RelevoService` é da Faixa A (`doc/lanes.json`). As assinaturas `fatorElevacaoAssistencia()` e `fatorReboque()` acima são **propostas**; a assinatura final é definida no `relevo_v2`. No `relevo_v1`, `fatorReboque()` devolve o fator de inclinação da origem em `fator_total`. Cada chamada deve também fornecer os campos do snapshot do pedido (`CONTRATOS.md`).
+
+### 4.3 AJUSTAR `src/Controllers/PedidoController.php`
+
+No método `decisaoPreCotacao()`, adicionar no início:
+
+```php
 $veiculoPodeMover = filter_var($_POST['veiculo_pode_mover'] ?? '1', FILTER_VALIDATE_BOOLEAN);
-No array $opcoes:
+```
 
-php
+No array `$opcoes`:
+
+```php
 $opcoes = [
     'categoria' => (string)($_POST['categoria'] ?? 'popular'),
     'veiculo_pode_mover' => $veiculoPodeMover,
 ];
-4.4 ADICIONAR em src/Views/public/pre-cotacao.php
-Após o fieldset de tipo_problema (linha ~49):
+```
 
-html
+### 4.4 ADICIONAR em `src/Views/public/pre-cotacao.php`
+
+Após o fieldset de `tipo_problema` (linha ~49):
+
+```html
 <fieldset class="quote-step" id="fieldVeiculoPodeMover" data-show-when="colisao" hidden>
     <legend>O veículo pode se mover com segurança?</legend>
     <div class="choice-grid" data-choice-group="veiculo_pode_mover">
@@ -244,14 +291,21 @@ html
     </div>
     <input type="hidden" name="veiculo_pode_mover" id="veiculo_pode_mover" value="1">
 </fieldset>
+```
+
 Antes do botão de submit:
 
-html
+```html
 <div id="decisaoComparativo" class="decisao-comparativo" hidden></div>
-4.5 AJUSTAR public/assets/js/public-pre-cotacao-form.js
+```
+
+> **Atenção (B-009):** o contrato do funil proíbe *hidden preenchido por JS* e estado de negócio em JS. O `hidden veiculo_pode_mover` acima é herdado deste guia; a Faixa B deve trocá-lo por um `input type="radio"` real conforme o contrato de Catálogo Dinâmico.
+
+### 4.5 AJUSTAR `public/assets/js/public-pre-cotacao-form.js`
+
 Bloco de visibilidade condicional:
 
-js
+```js
 function atualizarVisibilidadeVeiculoPodeMover(tipoAtual) {
     var field = document.getElementById('fieldVeiculoPodeMover');
     if (!field) return;
@@ -268,14 +322,18 @@ document.querySelectorAll('[data-choice-group="tipo_problema"] .choice-card').fo
         atualizarVisibilidadeVeiculoPodeMover(btn.getAttribute('data-choice-value'));
     });
 });
-No FormData enviado para /api/pre-cotacao/decisao:
+```
 
-js
+No FormData enviado para `/api/pre-cotacao/decisao`:
+
+```js
 var h = document.getElementById('veiculo_pode_mover');
 fd.append('veiculo_pode_mover', h ? h.value : '1');
+```
+
 Na renderização dos cards:
 
-js
+```js
 var soReboque = payload.opcoes_disponiveis.length === 1
              && payload.opcoes_disponiveis[0] === 'reboque';
 
@@ -284,10 +342,13 @@ if (soReboque) {
 } else {
     // renderiza 2 cards, destacando payload.recomendacao
 }
-4.6 ADICIONAR em src/Views/admin/configuracoes.php
-Perto da linha ~261, junto do taxa_fixa:
+```
 
-html
+### 4.6 ADICIONAR em `src/Views/admin/configuracoes.php`
+
+Perto da linha ~261, junto do `taxa_fixa`:
+
+```html
 <div class="col-md-4">
     <label class="form-label">Saída do profissional de assistência (R$)</label>
     <input type="number" step="0.01" class="form-control" name="custo_saida_profissional_padrao"
@@ -299,23 +360,35 @@ html
            value="<?php echo htmlspecialchars($config['comissao_assistencia_percentual'] ?? '0.21'); ?>">
     <small class="text-muted">Ex: 0.21 = 21%</small>
 </div>
-Atualizar o label do campo taxa_fixa existente:
+```
 
-html
+Atualizar o label do campo `taxa_fixa` existente:
+
+```html
 <label class="form-label">Taxa Fixa / Bandeirada do Reboque (R$)</label>
-4.7 ADICIONAR em src/Controllers/AdminController.php
+```
+
+### 4.7 ADICIONAR em `src/Controllers/AdminController.php`
+
 Na whitelist (linha ~3483):
 
-php
+```php
 'tarifa_por_km', 'taxa_fixa',
 'custo_saida_profissional_padrao', 'comissao_assistencia_percentual',
+```
+
 No array de chaves salvas (linha ~3591):
 
-php
+```php
 "tarifa_por_km", "taxa_fixa", "comissao_plataforma",
 "custo_saida_profissional_padrao", "comissao_assistencia_percentual",
-4.8 ADICIONAR em tests/Integration/DecisaoAtendimentoTest.php
-php
+```
+
+### 4.8 ADICIONAR em `tests/Integration/DecisaoAtendimentoTest.php`
+
+> Pela regra R5, a Faixa C é quem cria e mantém testes. A Faixa A entrega a matriz e os stubs.
+
+```php
 public function testColisaoComVeiculoTravadoRetornaSomenteReboque(): void
 {
     $svc = new DecisaoAtendimentoService();
@@ -344,7 +417,8 @@ public function testReboqueUsaTaxaFixaComoBase(): void
     $svc = new DecisaoAtendimentoService();
     $reflex = new ReflectionMethod($svc, 'calcularReboque');
     $reflex->setAccessible(true);
-    $valor = $reflex->invoke($svc, 10.0);
+    // assinatura: (distanciaKm, lat, lng, oficinaDestino); ponto plano sem dado de relevo
+    $valor = $reflex->invoke($svc, 10.0, 0.0, 0.0, null);
     $this->assertGreaterThan(150.0, $valor);
 }
 
@@ -358,9 +432,24 @@ public function testAssistenciaRecomendadaQuandoReboqueMaisCaro(): void
         $this->markTestSkipped('Sem oficina no raio de teste.');
     }
 }
-5. Validação obrigatória
-5.1 Sintaxe
-powershell
+
+public function testSemDadoDeRelevoUsaFatorUm(): void
+{
+    $svc = new DecisaoAtendimentoService();
+    $reflex = new ReflectionMethod($svc, 'calcularReboque');
+    $reflex->setAccessible(true);
+    $semRelevo = $reflex->invoke($svc, 10.0, 0.0, 0.0, null);
+    $this->assertEquals(150.0 + 3.5 * 10.0, $semRelevo);
+}
+```
+
+---
+
+## 5. Validação obrigatória
+
+### 5.1 Sintaxe
+
+```powershell
 php install/migrate.php
 php -l src/Services/DecisaoAtendimentoService.php
 php -l src/Controllers/PedidoController.php
@@ -368,63 +457,62 @@ php -l src/Controllers/AdminController.php
 php -l src/Views/public/pre-cotacao.php
 php -l src/Views/admin/configuracoes.php
 node --check public/assets/js/public-pre-cotacao-form.js
-5.2 Testes
-powershell
+```
+
+### 5.2 Testes
+
+```powershell
 vendor\bin\phpunit tests/Integration/DecisaoAtendimentoTest.php
-5.3 Teste manual (localhost:8080/pre-cotacao)
-#	Cenário	Resultado esperado
-1	Bateria	2 cards, assistência destacada (R
-96
-,
-80
-v
-s
-R
-96,80vsR 150 + km)
-2	Colisão + "Sim"	2 cards com comparativo
-3	Colisão + "Não"	Só card reboque
-4	Endereço sem oficina no raio	Só card reboque
-5	Admin → Configurações	2 campos novos + taxa_fixa mostrando R$ 150
-6	Alterar custo_saida_profissional_padrao para 100	Próxima cotação mostra R$ 121,00
-7	Alterar comissao_assistencia_percentual para 0.30	Próxima cotação embute 30%
-6. Critérios de aceite
-□ Colisão + "Não pode mover" → nunca mostra card de assistência
-□ Sem oficina no raio → nunca mostra card de assistência
-□ taxa_fixa não é criada de novo — usa a existente
-□ Reboque = taxa_fixa + (tarifa_por_km × km)
-□ Assistência = custo_saida_profissional_padrao × (1 + comissao_assistencia_percentual)
-□ Alterar valores no admin reflete no próximo cálculo sem deploy
-□ Pergunta "veículo pode se mover?" só aparece em colisao
-□ Toda decisão continua em pedido_decisoes_socorro (não regride)
-□ Migration não sobrescreve taxa_fixa se já estiver ≥ R$ 100
-7. Ordem de execução
-✅ Migration install/migration_decisao_config_v2.sql
+```
 
-✅ Service: substituir avaliar(), adicionar somenteReboque(), calcularAssistencia(), calcularReboque(); remover custoSaidaProfissional() e o require do TarifaService
+### 5.3 Teste manual (localhost:8080/pre-cotacao)
 
-✅ PedidoController::decisaoPreCotacao() — ler veiculo_pode_mover
+| # | Cenário | Resultado esperado |
+|---|---|---|
+| 1 | Bateria | 2 cards, assistência destacada (R$ 96,80 vs R$ 150 + km) |
+| 2 | Colisão + "Sim" | 2 cards com comparativo |
+| 3 | Colisão + "Não" | Só card reboque |
+| 4 | Endereço sem oficina no raio | Só card reboque |
+| 5 | Admin → Configurações | 2 campos novos + `taxa_fixa` mostrando R$ 150 |
+| 6 | Alterar `custo_saida_profissional_padrao` para 100 | Próxima cotação mostra R$ 121,00 |
+| 7 | Alterar `comissao_assistencia_percentual` para 0.30 | Próxima cotação embute 30% |
+| 8 | Endereço em rua íngreme conhecida (ex.: Rua Leôncio de Albuquerque, Gamboa) | Reboque com fator de relevo > 1.00 (após `relevo_v1`/`v2`) |
+| 9 | Endereço sem segmento de via no raio de 50 m | Fator 1.00, sem erro |
 
-✅ View pre-cotacao.php — fieldset condicional + container do comparativo
+---
 
-✅ JS — visibilidade condicional + envio + renderização
+## 6. Critérios de aceite
 
-✅ Admin view — 2 inputs + atualizar label do taxa_fixa
+- [ ] Colisão + "Não pode mover" → nunca mostra card de assistência
+- [ ] Sem oficina no raio → nunca mostra card de assistência
+- [ ] `taxa_fixa` não é criada de novo — usa a existente
+- [ ] Reboque base = `taxa_fixa + (tarifa_por_km × km)`, multiplicado pelo fator de relevo vigente
+- [ ] Assistência base = `custo_saida_profissional_padrao × (1 + comissao_assistencia_percentual)`
+- [ ] Alterar valores no admin reflete no próximo cálculo sem deploy
+- [ ] Pergunta "veículo pode se mover?" só aparece em `colisao`
+- [ ] Toda decisão continua em `pedido_decisoes_socorro` (não regride)
+- [ ] Migration não sobrescreve `taxa_fixa` se já estiver ≥ R$ 100
+- [ ] Sem dado de relevo: fator 1.00 e nenhum erro
+- [ ] Snapshot de relevo gravado no pedido conforme `CONTRATOS.md`
 
-✅ AdminController — whitelist
+---
 
-✅ Testes — 5 casos
+## 7. Ordem de execução
 
-✅ Rodar validações locais (seção 5)
+1. Migration `install/migration_decisao_config_v2.sql`
+2. Service: substituir `avaliar()`, adicionar `somenteReboque()`, `calcularAssistencia()`, `calcularReboque()` (com `RelevoService`); remover `custoSaidaProfissional()` e o require do `TarifaService`
+3. `PedidoController::decisaoPreCotacao()` — ler `veiculo_pode_mover`
+4. View `pre-cotacao.php` — fieldset condicional + container do comparativo
+5. JS — visibilidade condicional + envio + renderização
+6. Admin view — 2 inputs + atualizar label do `taxa_fixa`
+7. `AdminController` — whitelist
+8. Testes — casos acima (Faixa C)
+9. Rodar validações locais (seção 5)
+10. Reportar outputs
 
-✅ Reportar outputs (php -l, phpunit, testes manuais)
+### Relatório final esperado
 
-Relatório final esperado
-Ao terminar, reportar:
-
-Output dos php -l (todos devem dizer "No syntax errors detected")
-
-Output do phpunit (todos os 5 testes devem passar)
-
-Descrição dos 7 testes manuais (tabela da seção 5.3)
-
-git status no XAMPP mostrando os arquivos alterados/criados
+- Output dos `php -l` (todos devem dizer "No syntax errors detected")
+- Output do phpunit (todos os testes devem passar)
+- Descrição dos testes manuais (tabela da seção 5.3)
+- `git status` no XAMPP mostrando os arquivos alterados/criados

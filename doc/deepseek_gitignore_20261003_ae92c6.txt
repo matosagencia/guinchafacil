@@ -1,0 +1,12 @@
+# Produção e backups — nunca no repo
+.well-known/
+.deploy-state/
+database/backups/
+database/seeds/
+bin/
+osrm.guinchafacil.com.br/
+index.php.backup-*
+_debug_route.php
+SESSION-CHECKPOINT-*.md
+*.bak-*
+*.bak_*
