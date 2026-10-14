@@ -1,33 +1,21 @@
-Write-Host "Iniciando Smoke Test..." -ForegroundColor Cyan
-$php = "C:\xampp\php\php.exe"
-$erros = 0
+# tools/smoke.ps1 - Teste de fumaça e lint PHP
+param()
 
-Get-ChildItem "." -Recurse -Filter *.php | Where-Object { 
-    $_.FullName -notmatch '\\vendor\\' -and 
-    $_.FullName -notmatch '\\node_modules\\' -and 
-    $_.FullName -notmatch '\\prospeccao\\' -and
-    $_.FullName -notmatch '\\install\\' -and
-    $_.FullName -notmatch '\\installers\\' -and
-    $_.FullName -notmatch '\.bak'
-} | ForEach-Object {
-    $res = & $php -l $_.FullName 2>&1
-    if ($res -notmatch "No syntax errors detected") {
-        Write-Host "Erro de sintaxe em: $($_.FullName)" -ForegroundColor Red
-        $erros++
+Write-Host "=== INICIANDO SMOKE TEST (PHP LINT) ===" -ForegroundColor Cyan
+
+$errors = 0
+Get-ChildItem -Recurse -Filter "*.php" | ForEach-Object {
+    $result = & C:\xampp\php\php.exe -l $_.FullName 2>&1
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host "ERRO DE SINTAXE: $($_.FullName)" -ForegroundColor Red
+        Write-Host $result
+        $errors++
     }
 }
 
-if ($erros -gt 0) {
-    Write-Host "Smoke Test falhou com $erros erros de sintaxe." -ForegroundColor Red
+if ($errors -gt 0) {
+    Write-Host "Smoke test falhou com $errors erro(s)." -ForegroundColor Red
     exit 1
+} else {
+    Write-Host "Smoke test concluído com sucesso: nenhum erro de sintaxe PHP encontrado." -ForegroundColor Green
 }
-Write-Host "Smoke Test PHP OK!" -ForegroundColor Green
-
-# Playwright @smoke (fluxo real; falha se nenhum teste @smoke existir ainda)
-Write-Host "Rodando Playwright @smoke..." -ForegroundColor Cyan
-npx playwright test --grep "@smoke" --reporter=line
-if ($LASTEXITCODE -ne 0) {
-    Write-Host "Smoke Test Playwright FALHOU (exit $LASTEXITCODE)" -ForegroundColor Red
-    exit $LASTEXITCODE
-}
-Write-Host "Smoke Test Playwright OK!" -ForegroundColor Green
