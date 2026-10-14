@@ -27,3 +27,15 @@ tssmoke_*.php
 logs/*.jsonl
 logs/*.log
 storage/audit/
+node_modules/
+_backups/
+*.sql
+chaves*.txt
+logs/
+storage/
+playwright-report/
+test-results/
+.backup-*/
+*.bak
+.tmp/
+vendor/
