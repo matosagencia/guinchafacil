@@ -1,0 +1,41 @@
+/* GF-F18F11: rebase de usuarios e guinchos; sem regras globais nas outras telas. */
+body.admin:has(#usuariosShell),body.admin:has(#guinchosShell){--theme-bg:#f4f6f8;--theme-surface:#fff;--theme-surface-2:#f8fafb;--theme-text:#182532;--theme-muted:#64748b;--theme-border:#dbe3ea;--theme-nav:#101417;--brand:#27ae4b;background:#f4f6f8!important;color:#182532!important}
+/* Topo escuro herdado substituido pela hierarquia clara Lovable. */
+body.admin:has(#usuariosShell) .ops-topbar,body.admin:has(#guinchosShell) .ops-topbar{background:#fff!important;border-bottom:1px solid #dbe3ea!important;padding:10px 20px!important;color:#1d2b36!important}
+body.admin:has(#usuariosShell) .ops-topbar__search,body.admin:has(#guinchosShell) .ops-topbar__search{background:#f5f7f9!important;border:1px solid #cbd5e1!important;border-radius:9px!important;box-shadow:none!important}
+body.admin:has(#usuariosShell) .ops-topbar input,body.admin:has(#guinchosShell) .ops-topbar input{color:#233142!important;background:transparent!important}
+body.admin:has(#usuariosShell) .ops-topbar__meta,body.admin:has(#guinchosShell) .ops-topbar__meta{color:#556576!important}
+body.admin:has(#usuariosShell) .ops-topbar a,body.admin:has(#guinchosShell) .ops-topbar a{color:#168441!important}
+/* Resumo: cards discretos e compactos */
+body.admin:has(#usuariosShell) .ops-summary,body.admin:has(#guinchosShell) .ops-summary{margin:12px 20px 14px!important;border:1px solid #dbe3ea!important;background:#dbe3ea!important;border-radius:10px!important;box-shadow:none!important}
+body.admin:has(#usuariosShell) .ops-metric,body.admin:has(#guinchosShell) .ops-metric{background:#fff!important;padding:12px 15px!important}
+body.admin:has(#usuariosShell) .ops-metric__label,body.admin:has(#guinchosShell) .ops-metric__label{color:#64748b!important}
+body.admin:has(#usuariosShell) .ops-metric__value,body.admin:has(#guinchosShell) .ops-metric__value{color:#182532!important}
+/* Shell: sidebar escura, fila e painel de trabalho claros */
+body.admin:has(#usuariosShell) .shell-ops,body.admin:has(#guinchosShell) .shell-ops{background:#f4f6f8!important;color:#182532!important;min-height:calc(100vh - 140px)!important}
+body.admin:has(#usuariosShell) .shell-ops-sidebar,body.admin:has(#guinchosShell) .shell-ops-sidebar{background:#101417!important;--theme-text:#eef5f0;--theme-muted:#a1b0a7;--theme-border:#28343a;--theme-surface:#101417;--theme-surface-2:#192025;color:#edf4ef!important}
+body.admin:has(#usuariosShell) .shell-ops-sidebar a,body.admin:has(#guinchosShell) .shell-ops-sidebar a{color:inherit}
+body.admin:has(#usuariosShell) .shell-ops-worklist,body.admin:has(#guinchosShell) .shell-ops-worklist{background:#fff!important;border-right:1px solid #dbe3ea!important;color:#182532!important}
+body.admin:has(#usuariosShell) .shell-ops-workspace,body.admin:has(#guinchosShell) .shell-ops-workspace{background:#f4f6f8!important;color:#182532!important;min-width:0}
+body.admin:has(#usuariosShell) .shell-ops-workspace .card,body.admin:has(#guinchosShell) .shell-ops-workspace .card{background:#fff!important;border:1px solid #dde5eb!important;color:#182532!important;border-radius:11px!important;box-shadow:none!important}
+body.admin:has(#usuariosShell) .shell-ops-workspace .card-header,body.admin:has(#guinchosShell) .shell-ops-workspace .card-header{background:#f8fafb!important;color:#182532!important;border-bottom:1px solid #e1e8ef!important;font-weight:650}
+body.admin:has(#usuariosShell) .shell-ops-workspace .card-body,body.admin:has(#guinchosShell) .shell-ops-workspace .card-body{background:#fff!important;color:#182532!important}
+body.admin:has(#usuariosShell) .shell-ops-workspace h1,body.admin:has(#guinchosShell) .shell-ops-workspace h1,body.admin:has(#usuariosShell) .shell-ops-workspace h2,body.admin:has(#guinchosShell) .shell-ops-workspace h2{color:#172532!important}
+body.admin:has(#usuariosShell) .shell-ops-workspace .table,body.admin:has(#guinchosShell) .shell-ops-workspace .table{--bs-table-bg:#fff;--bs-table-color:#233142;--bs-table-border-color:#e1e8ef;color:#233142!important}
+body.admin:has(#usuariosShell) .shell-ops-workspace .table thead th,body.admin:has(#guinchosShell) .shell-ops-workspace .table thead th{background:#f7f9fb!important;color:#536477!important}
+body.admin:has(#usuariosShell) .ops-worklist-item,body.admin:has(#guinchosShell) .ops-worklist-item{color:#1c2a38!important;border-bottom-color:#e3e9ef!important}
+body.admin:has(#usuariosShell) .ops-worklist-item[aria-selected=true],body.admin:has(#guinchosShell) .ops-worklist-item[aria-selected=true]{background:#eaf7ed!important}
+body.admin:has(#usuariosShell) .ops-worklist-item__top strong,body.admin:has(#guinchosShell) .ops-worklist-item__top strong{color:#182532!important}
+body.admin:has(#usuariosShell) .ops-worklist-item__content,body.admin:has(#guinchosShell) .ops-worklist-item__content{color:#324355!important}
+body.admin:has(#usuariosShell) .shell-ops-worklist input,body.admin:has(#guinchosShell) .shell-ops-worklist input{background:#f8fafb!important;color:#182532!important;border:1px solid #d5dfe8!important}
+body.admin:has(#usuariosShell) .ops-order-header,body.admin:has(#guinchosShell) .ops-order-header{padding-top:15px!important}
+body.admin:has(#usuariosShell) .ops-btn,body.admin:has(#guinchosShell) .ops-btn{background:#fff!important;color:#263647!important;border-color:#d4dfe8!important}
+body.admin:has(#usuariosShell) .ops-back-link,body.admin:has(#guinchosShell) .ops-back-link{color:#486477!important}
+/* Navegacao F18F1 — agora com contraste adequado na area de trabalho */
+body.admin:has(#usuariosShell) .gf18f1-nav,body.admin:has(#guinchosShell) .gf18f1-nav{background:#fff!important;border:1px solid #dbe3ea!important;border-radius:10px!important;margin:12px 18px!important;padding:12px 16px!important}
+body.admin:has(#usuariosShell) .gf18f1-nav__tabs,body.admin:has(#guinchosShell) .gf18f1-nav__tabs{background:#f2f5f3!important}
+body.admin:has(#usuariosShell) .gf18f1-nav__hint,body.admin:has(#guinchosShell) .gf18f1-nav__hint{display:none!important}
+/* Tema global tem varios elementos escuros via var CSS; restringimos a area clara. */
+body.admin:has(#usuariosShell) .shell-ops-workspace .text-muted,body.admin:has(#guinchosShell) .shell-ops-workspace .text-muted{color:#64748b!important}
+body.admin:has(#usuariosShell) .shell-ops-workspace .bg-dark,body.admin:has(#guinchosShell) .shell-ops-workspace .bg-dark{background:#fff!important;color:#1d2e3d!important}
+@media(max-width:900px){body.admin:has(#usuariosShell) .gf18f1-nav,body.admin:has(#guinchosShell) .gf18f1-nav{margin:8px!important}body.admin:has(#usuariosShell) .ops-summary,body.admin:has(#guinchosShell) .ops-summary{margin:8px!important}}

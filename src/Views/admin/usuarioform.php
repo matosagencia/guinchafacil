@@ -1,8 +1,25 @@
 <?php
-$bp = defined('BASE_PATH') ? BASE_PATH : '';
+$bp = defined('BASE_PATH') ? BASE_PATH : '';
+$gfF18f18Preset = (string)($_GET['tipo'] ?? 'cliente');
+if (!in_array($gfF18f18Preset, ['cliente', 'guincho', 'oficina'], true)) { $gfF18f18Preset = 'cliente'; }
 include __DIR__ . '/../layouts/header.php';
 ?>
-<link rel="stylesheet" href="<?php echo htmlspecialchars($bp); ?>/public/assets/css/pages/admin-usuarioform.css">
+
+<link rel="stylesheet" href="<?= htmlspecialchars($bp, ENT_QUOTES, 'UTF-8') ?>/public/assets/css/pages/gf-f18f19-shell-unificado.css?v=20261018-2">
+<script>document.body.classList.add("gf-f18f19");</script>
+<link rel="stylesheet" href="<?php echo htmlspecialchars($bp); ?>/public/assets/css/pages/admin-usuarioform.css">
+<link rel="stylesheet" href="<?php echo htmlspecialchars($bp, ENT_QUOTES, 'UTF-8'); ?>/public/assets/css/pages/gf-f18f18-sidebar-cadastros.css?v=20261018-1">
+<script>document.body.classList.add("gf-f18f18");</script>
+<!-- GF-F18F15-REPAIRED -->
+<link rel="stylesheet" href="<?php echo htmlspecialchars($bp, ENT_QUOTES, 'UTF-8'); ?>/public/assets/css/pages/gf-f18f14b-acabamento.css?v=20261018-f15">
+<!-- GF-F18F13-USERFORM -->
+<link rel="stylesheet" href="<?php echo htmlspecialchars($bp, ENT_QUOTES, 'UTF-8'); ?>/public/assets/css/pages/gf-f18f12-pessoas-estrutura.css?v=20261018-1">
+<link rel="stylesheet" href="<?php echo htmlspecialchars($bp, ENT_QUOTES, 'UTF-8'); ?>/public/assets/css/pages/gf-f18f13-topo.css?v=20261018-1">
+<!-- GF-F18F14-ASSET -->
+<link rel="stylesheet" href="<?php echo htmlspecialchars($bp, ENT_QUOTES, 'UTF-8'); ?>/public/assets/css/pages/gf-f18f14-acabamento.css?v=20261018-1">
+<!-- /GF-F18F14-ASSET -->
+<script>document.body.classList.add("gf-f18f12", "gf-f18f13-new-user");</script>
+<!-- /GF-F18F13-USERFORM -->
 <div class="main-wrapper shell admin-shell">
 <?php include __DIR__ . '/../layouts/sidebar_admin.php'; ?>
 <main class="main-content shell-main shell-content">
@@ -20,7 +37,7 @@ include __DIR__ . '/../layouts/header.php';
 
     <?php if (isset($_GET['erro'])): ?>
     <div class="alert alert-danger mb-3">
-        <?php $erros = ['1'=>'Dados inválidos. Verifique os campos.','email_duplicado'=>'E-mail ou CPF já cadastrado.'];
+        <?php $erros = ['1'=>'Dados inválidos. Verifique os campos.','email_duplicado'=>'E-mail ou CPF já cadastrado.','tipo_invalido'=>'Perfil não autorizado.','oficina_invalida'=>'Preencha os dados obrigatórios da oficina.','salvar'=>'Não foi possível salvar; nenhum cadastro parcial foi mantido.'];
         echo $erros[$_GET['erro']] ?? 'Erro desconhecido.'; ?>
     </div>
     <?php endif; ?>
@@ -38,14 +55,15 @@ include __DIR__ . '/../layouts/header.php';
                         'guincho'     => ['fa-truck','Guincheiro','Opera o reboque e aceita pedidos'],
                         'funcionario' => ['fa-headset','Funcionário','Atendimento financeiro/operacional — só cria demandas, nunca executa direto'],
                         'gerente'     => ['fa-user-tie','Gerente','Aprova ou rejeita as demandas criadas por funcionários'],
-                        'admin'       => ['fa-shield-halved','Administrador','Gerencia toda a plataforma (inclusive configuração técnica)'],
+                        'admin'       => ['fa-shield-halved','Administrador','Gerencia toda a plataforma (inclusive configuração técnica)'],
+                        'oficina'     => ['fa-screwdriver-wrench','Oficina','Estabelecimento parceiro de reparos e assistência'],
                     ] as $tipo => [$icon, $label, $desc]): ?>
                     <div class="col-md-4 col-lg-2">
                         <label class="d-flex gap-3 p-3 rounded border h-100 usuarioform-type-label"
                                id="label_<?php echo $tipo; ?>">
                             <input type="radio" name="tipo" value="<?php echo $tipo; ?>"
                                    data-user-type-radio="<?php echo $tipo; ?>"
-                                   <?php echo $tipo === 'cliente' ? 'checked' : ''; ?> class="usuarioform-type-radio">
+                                   <?php echo $tipo === $gfF18f18Preset ? 'checked' : ''; ?> class="usuarioform-type-radio">
                             <div>
                                 <i class="fas <?php echo $icon; ?> mb-1 usuarioform-type-icon--<?php echo $tipo; ?>"></i>
                                 <div class="usuarioform-type-title"><?php echo $label; ?></div>
@@ -169,6 +187,20 @@ include __DIR__ . '/../layouts/header.php';
             </div>
         </div>
 
+        <!-- GF-18F16: dados canônicos de oficinas (tabela oficinas). -->
+        <div id="camposOficina" style="display:none">
+            <div class="card mb-4" style="border-color:#f97316">
+                <div class="card-header"><i class="fas fa-screwdriver-wrench me-2" style="color:#f97316"></i>Dados da Oficina Parceira</div>
+                <div class="card-body"><div class="row g-3">
+                    <div class="col-md-6"><label class="form-label">Nome do estabelecimento *</label><input type="text" class="form-control" name="oficina_nome" id="oficinaNome" maxlength="255"></div>
+                    <div class="col-md-6"><label class="form-label">Modalidade *</label><select class="form-select" name="oficina_tipo" id="oficinaTipo"><option value="assistencia_local">Assistência local</option><option value="guincho">Reboque</option><option value="ambos">Ambos</option></select></div>
+                    <div class="col-md-9"><label class="form-label">Endereço completo *</label><input type="text" class="form-control" name="oficina_endereco" id="oficinaEndereco"></div>
+                    <div class="col-md-3"><label class="form-label">Raio de atendimento (km)</label><input type="number" class="form-control" name="oficina_raio_km" value="10" min="1" max="500"></div>
+                    <div class="col-12"><small class="text-muted">A oficina será criada offline, associada à conta responsável. Ativação de oferta depende dos demais critérios operacionais.</small></div>
+                </div></div>
+            </div>
+        </div>
+
         <button type="submit" class="btn btn-primary w-100 py-2 mb-4" id="btnSubmit">
             <i class="fas fa-user-plus me-2"></i><span id="btnLabel">Criar Cliente</span>
         </button>
@@ -179,20 +211,23 @@ include __DIR__ . '/../layouts/header.php';
 <script<?php echo csp_script_nonce_attr(); ?>>
 function mudarTipo(tipo) {
     // Highlight selecionado
-    ['cliente','guincho','funcionario','gerente','admin'].forEach(t => {
+    ['cliente','guincho','funcionario','gerente','admin','oficina'].forEach(t => {
         const lbl = document.getElementById('label_' + t);
         lbl.style.borderColor = t === tipo ? 'var(--primary)' : 'var(--theme-border)';
         lbl.style.background  = t === tipo ? 'rgba(47,179,74,.08)' : '';
     });
 
     // Mostrar campos de guincho
-    document.getElementById('camposGuincho').style.display = tipo === 'guincho' ? 'block' : 'none';
+    document.getElementById('camposGuincho').style.display = tipo === 'guincho' ? 'block' : 'none';
+    document.getElementById('camposOficina').style.display = tipo === 'oficina' ? 'block' : 'none';
+    document.getElementById('oficinaNome').required = tipo === 'oficina';
+    document.getElementById('oficinaEndereco').required = tipo === 'oficina';
 
     // Tornar placa required apenas para guincho
     document.getElementById('placaGuincho').required = tipo === 'guincho';
 
     // Atualizar botão
-    const labels = {cliente:'Criar Cliente', guincho:'Criar Guincheiro', funcionario:'Criar Funcionário', gerente:'Criar Gerente', admin:'Criar Administrador'};
+    const labels = {cliente:'Criar Cliente', guincho:'Criar Guincheiro', funcionario:'Criar Funcionário', gerente:'Criar Gerente', admin:'Criar Administrador', oficina:'Criar Oficina'};
     document.getElementById('btnLabel').textContent = labels[tipo] || 'Criar Usuário';
 }
 

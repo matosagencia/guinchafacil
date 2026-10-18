@@ -2,10 +2,19 @@
 $bp = defined('BASE_PATH') ? BASE_PATH : '';
 include __DIR__ . '/../layouts/header.php';
 ?>
+
+<link rel="stylesheet" href="<?= htmlspecialchars($bp, ENT_QUOTES, 'UTF-8') ?>/public/assets/css/pages/gf-f18f19-shell-unificado.css?v=20261018-2">
+<script>document.body.classList.add("gf-f18f19");</script>
+<link rel="stylesheet" href="<?= htmlspecialchars($bp, ENT_QUOTES, 'UTF-8') ?>/public/assets/css/pages/gf-f18f12-pessoas-estrutura.css?v=20261018-1">
+<script>document.body.classList.add("gf-f18f12");</script>
+<link rel="stylesheet" href="<?= htmlspecialchars($bp, ENT_QUOTES, 'UTF-8') ?>/public/assets/css/pages/gf-f18f110-qualidade.css?v=20261018-1">
+<script<?php echo csp_script_nonce_attr(); ?>>document.body.classList.add('gf-f18f110-quality');</script>
 <div class="main-wrapper shell admin-shell">
 <?php include __DIR__ . '/../layouts/sidebar_admin.php'; ?>
-<main class="main-content shell-main shell-content">
-<div class="ops-topbar">
+<main class="main-content shell-main shell-content">
+<?php $gfQualityTab = 'avaliacoes'; ?>
+<nav class="gf-quality-tabs" aria-label="Navegação de qualidade"><a href="<?= htmlspecialchars($bp, ENT_QUOTES, 'UTF-8') ?>/admin/avaliacoes" class="<?= $gfQualityTab === 'avaliacoes' ? 'is-active' : '' ?>">Avaliações</a><a href="<?= htmlspecialchars($bp, ENT_QUOTES, 'UTF-8') ?>/admin/proof-of-road" class="<?= $gfQualityTab === 'proof' ? 'is-active' : '' ?>">Proof-of-Road</a><a href="<?= htmlspecialchars($bp, ENT_QUOTES, 'UTF-8') ?>/admin/checklists-incompletos" class="<?= $gfQualityTab === 'checklists' ? 'is-active' : '' ?>">Checklists incompletos</a><a href="<?= htmlspecialchars($bp, ENT_QUOTES, 'UTF-8') ?>/admin/revisoes-manuais">RevisÃµes manuais</a></nav>
+<div class="ops-topbar gf-f18f19-topbar">
     <div class="ops-topbar__search"><i class="fas fa-magnifying-glass"></i><input type="search" id="avaliacoesBusca" placeholder="Buscar por cliente, guincheiro ou comentário" autocomplete="off" aria-label="Buscar avaliações"></div>
     <div class="ops-topbar__meta"><span class="ops-topbar__status"><span class="ops-topbar__status-dot"></span><?php echo (int)$resumo['total']; ?> avaliações</span></div>
 </div>

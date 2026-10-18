@@ -1,0 +1,20 @@
+/* GF-F18F14B: estilos escopados, carregados explicitamente nas quatro views */
+body.gf-f18f12 { --gf-f14-surface:#f4f6f9; --gf-f14-border:#d7e0eb; }
+body.gf-f18f12 .gf-f18f13-worklist-actions { display:flex !important; flex-wrap:wrap; align-items:center; gap:8px; margin-bottom:8px; }
+body.gf-f18f12 .gf-f18f13-worklist-actions a {display:inline-flex;align-items:center;justify-content:center;min-height:32px;padding:5px 10px;border:1px solid #cbd7e2;border-radius:7px;background:#fff;color:#157334 !important;font-size:12px;font-weight:650;text-decoration:none !important;white-space:nowrap;}
+body.gf-f18f12 .gf-f18f13-worklist-actions a:hover {background:#e9f6ec;}
+body.gf-f18f12 #usuariosShell .ops-worklist-header,body.gf-f18f12 #guinchosShell .ops-worklist-header {padding-top:13px !important;}
+/* Alinhar as duas telas de lista com o início do workspace, sem afetar o cabeçalho do navegador */
+body.gf-f18f12:has(#usuariosShell) .gf-f18f1-nav,body.gf-f18f12:has(#guinchosShell) .gf-f18f1-nav {margin-top:0 !important;}
+body.gf-f18f12:has(#usuariosShell) .gf-f18f12-pessoas-estrutura,body.gf-f18f12:has(#guinchosShell) .gf-f18f12-pessoas-estrutura {margin-top:0 !important;}
+/* Edição/criação: remover faixa vertical entre cabeçalho global e formulário */
+body.gf-f18f12:has(#formUsuario) .main-wrapper, body.gf-f18f12:has(.page-head) .main-wrapper {margin-top:0 !important;padding-top:0 !important;}
+body.gf-f18f12 .main-wrapper .main-content {padding-top:16px !important;}
+body.gf-f18f12 .main-wrapper .page-head {margin-top:0 !important;}
+/* Informação sistêmica: texto herdado escuro em cartão branco */
+body.gf-f18f12 .main-wrapper .card {color:#172434;}
+body.gf-f18f12 .main-wrapper .card .text-muted,body.gf-f18f12 .main-wrapper .card small,body.gf-f18f12 .main-wrapper .card td,body.gf-f18f12 .main-wrapper .card th,body.gf-f18f12 .main-wrapper .card .card-body {color:#26374a !important;}
+body.gf-f18f12 .main-wrapper .card .text-muted {color:#586b7e !important;}
+body.gf-f18f12 .main-wrapper .card .table {--bs-table-color:#26374a !important;--bs-table-bg:transparent !important;--bs-table-border-color:#d9e2eb !important;}
+body.gf-f18f12 .main-wrapper .card .table tr>* {color:#26374a !important;background:transparent !important;}
+@media(max-width:800px){body.gf-f18f12 .gf-f18f13-worklist-actions a{white-space:normal;}}

@@ -809,6 +809,7 @@ class AdminController extends BaseController
         $resumoUsuarios = [
             'clientes'  => Usuario::contarTotal(['tipo' => 'cliente']),
             'guinchos'  => Usuario::contarTotal(['tipo' => 'guincho']),
+            'oficinas' => Usuario::contarTotal(['tipo' => 'oficina']),
             'admins'    => Usuario::contarTotal(['tipo' => 'admin']),
             'suspensos' => Usuario::contarTotal(['ativo' => 0]),
         ];
@@ -829,6 +830,10 @@ class AdminController extends BaseController
         $extra = null;
         if ($usuario['tipo'] === 'guincho') {
             $extra = Guincho::buscarPorUsuario($usuario['id']);
+        } elseif ($usuario['tipo'] === 'oficina') {
+            $stmtOficina = getPDO()->prepare('SELECT * FROM oficinas WHERE usuario_id = ? ORDER BY id DESC LIMIT 1');
+            $stmtOficina->execute([(int)$usuario['id']]);
+            $extra = $stmtOficina->fetch(PDO::FETCH_ASSOC) ?: null;
         }
         $pedidos = [];
         try {
@@ -893,50 +898,78 @@ class AdminController extends BaseController
     {
         AuthService::requireAuth('admin');
         if (!AuthService::validarCsrfToken($_POST['csrf_token'] ?? '')) {
+            error_log('[GF-18F16][FAIL][AdminController::usuarioSalvar][CSRF]');
             http_response_code(403); exit;
         }
 
-        $nome  = trim($_POST['nome']  ?? '');
-        $email = trim($_POST['email'] ?? '');
-        $tipo  = in_array($_POST['tipo'] ?? '', ['admin','cliente','guincho','funcionario','gerente'])
-                    ? $_POST['tipo'] : 'cliente';
-        $tel   = preg_replace('/\D/', '', $_POST['telefone'] ?? '');
-        $cpf   = preg_replace('/\D/', '', $_POST['cpf'] ?? '');
-        $senha = $_POST['senha'] ?? '';
-
-        if (empty($nome) || !filter_var($email, FILTER_VALIDATE_EMAIL) || strlen($senha) < 8) {
-            $this->redirect('/admin/usuario/novo?erro=1');
+        $tipo = (string)($_POST['tipo'] ?? '');
+        $permitidos = ['admin', 'cliente', 'guincho', 'funcionario', 'gerente', 'oficina'];
+        if (!in_array($tipo, $permitidos, true)) {
+            error_log('[GF-18F16][REJECT][AdminController::usuarioSalvar][ROLE] perfil invalido');
+            $this->redirect('/admin/usuario/novo?erro=tipo_invalido'); return;
         }
-
-        // Verificar duplicatas
+        $nome = trim((string)($_POST['nome'] ?? ''));
+        $email = strtolower(trim((string)($_POST['email'] ?? '')));
+        $tel = preg_replace('/\D/', '', (string)($_POST['telefone'] ?? ''));
+        $cpf = preg_replace('/\D/', '', (string)($_POST['cpf'] ?? ''));
+        $senha = (string)($_POST['senha'] ?? '');
+        if ($nome === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)
+            || strlen($senha) < 8 || $senha !== (string)($_POST['confirmar_senha'] ?? '')) {
+            $this->redirect('/admin/usuario/novo?erro=1'); return;
+        }
+        $oficinaNome = trim((string)($_POST['oficina_nome'] ?? ''));
+        $oficinaEndereco = trim((string)($_POST['oficina_endereco'] ?? ''));
+        $oficinaTipo = (string)($_POST['oficina_tipo'] ?? 'assistencia_local');
+        $oficinaRaio = filter_var($_POST['oficina_raio_km'] ?? 10, FILTER_VALIDATE_INT);
+        if ($tipo === 'oficina' && ($oficinaNome === '' || $oficinaEndereco === ''
+            || !in_array($oficinaTipo, ['guincho','assistencia_local','ambos'], true)
+            || $oficinaRaio === false || $oficinaRaio < 1 || $oficinaRaio > 500)) {
+            error_log('[GF-18F16][REJECT][AdminController::usuarioSalvar][VALIDATE_WORKSHOP]');
+            $this->redirect('/admin/usuario/novo?erro=oficina_invalida'); return;
+        }
         $pdo = getPDO();
-        $existe = $pdo->prepare("SELECT id FROM usuarios WHERE email=? OR cpf=? LIMIT 1");
-        $existe->execute([$email, $cpf]);
-        if ($existe->fetch()) {
-            $this->redirect('/admin/usuario/novo?erro=email_duplicado');
+        try {
+            if (!$pdo->inTransaction()) $pdo->beginTransaction();
+            $existe = $pdo->prepare("SELECT id FROM usuarios WHERE email = ? OR (cpf = ? AND ? <> '') LIMIT 1");
+            $existe->execute([$email, $cpf, $cpf]);
+            if ($existe->fetchColumn()) {
+                $pdo->rollBack();
+                $this->redirect('/admin/usuario/novo?erro=email_duplicado'); return;
+            }
+            $hash = password_hash($senha, PASSWORD_BCRYPT);
+            if ($hash === false) throw new RuntimeException('password_hash falhou');
+            $stmt = $pdo->prepare('INSERT INTO usuarios (nome,email,senha_hash,telefone,cpf,tipo,ativo,criado_em) VALUES (?,?,?,?,?,?,1,NOW())');
+            $stmt->execute([$nome,$email,$hash,$tel,$cpf !== '' ? $cpf : null,$tipo]);
+            $usuarioId = (int)$pdo->lastInsertId();
+            if ($usuarioId <= 0) throw new RuntimeException('ID de usuario invalido');
+            if ($tipo === 'oficina') {
+                $stmt = $pdo->prepare('INSERT INTO oficinas (usuario_id,nome,telefone,endereco,raio_atendimento_km,tipo,ativo,disponivel) VALUES (?,?,?,?,?,?,1,0)');
+                $stmt->execute([$usuarioId,$oficinaNome,$tel,$oficinaEndereco,$oficinaRaio,$oficinaTipo]);
+                if ((int)$pdo->lastInsertId() <= 0) throw new RuntimeException('ID de oficina invalido');
+            } elseif ($tipo === 'guincho') {
+                $gDados = [
+                    'cnh_numero' => trim((string)($_POST['cnh_numero'] ?? '')),
+                    'cnh_validade' => $_POST['cnh_validade'] ?? date('Y-m-d', strtotime('+5 years')),
+                    'placa_guincho' => strtoupper(trim((string)($_POST['placa_guincho'] ?? 'AAA0000'))),
+                    'capacidade_ton' => (float)($_POST['capacidade_ton'] ?? 1),
+                    'raio_cobertura_km' => (int)($_POST['raio_cobertura_km'] ?? 20),
+                    'chave_pix' => trim((string)($_POST['chave_pix'] ?? '')),
+                    'chave_pix_tipo' => $_POST['chave_pix_tipo'] ?? 'cpf',
+                    'foto_veiculo' => $this->processarUpload('foto_veiculo'),
+                    'doc_cnh_frente' => $this->processarUpload('doc_cnh_frente'),
+                    'doc_cnh_verso' => $this->processarUpload('doc_cnh_verso'),
+                ];
+                $guinchoId = Guincho::criarDeRegistro($usuarioId, $gDados);
+                if (!$guinchoId) throw new RuntimeException('Criacao de guincho falhou');
+            }
+            $pdo->commit();
+            error_log('[GF-18F16][PASS][AdminController::usuarioSalvar][COMMIT] tipo=' . $tipo . ' usuario_id=' . $usuarioId);
+            $this->redirect('/admin/usuarios?criado=1&tipo=' . rawurlencode($tipo)); return;
+        } catch (Throwable $e) {
+            if ($pdo->inTransaction()) $pdo->rollBack();
+            error_log('[GF-18F16][FAIL][AdminController::usuarioSalvar][ROLLBACK] class=' . get_class($e) . ' code=' . $e->getCode());
+            $this->redirect('/admin/usuario/novo?erro=salvar'); return;
         }
-
-        $hash = password_hash($senha, PASSWORD_BCRYPT);
-        $stmt = $pdo->prepare("INSERT INTO usuarios (nome,email,senha_hash,telefone,cpf,tipo,ativo,criado_em)
-                                VALUES (?,?,?,?,?,?,1,NOW())");
-        $stmt->execute([$nome, $email, $hash, $tel, $cpf, $tipo]);
-        $usuarioId = (int)$pdo->lastInsertId();
-        if ($tipo === 'guincho') {
-            $gDados = [
-                'cnh_numero'        => trim($_POST['cnh_numero'] ?? ''),
-                'cnh_validade'      => $_POST['cnh_validade'] ?? date('Y-m-d', strtotime('+5 years')),
-                'placa_guincho'     => strtoupper(trim($_POST['placa_guincho'] ?? 'AAA0000')),
-                'capacidade_ton'    => (float)($_POST['capacidade_ton'] ?? 1),
-                'raio_cobertura_km' => (int)($_POST['raio_cobertura_km'] ?? 20),
-                'chave_pix'         => trim($_POST['chave_pix'] ?? ''),
-                'chave_pix_tipo'    => $_POST['chave_pix_tipo'] ?? 'cpf',
-                'foto_veiculo'      => $this->processarUpload('foto_veiculo'),
-                'doc_cnh_frente'    => $this->processarUpload('doc_cnh_frente'),
-                'doc_cnh_verso'     => $this->processarUpload('doc_cnh_verso'),
-            ];
-            Guincho::criarDeRegistro($usuarioId, $gDados);
-        }
-        $this->redirect('/admin/usuarios?criado=1');
     }
 
     public function usuarioAtivar(int $id = 0): void
@@ -1297,7 +1330,7 @@ class AdminController extends BaseController
             'no_local'             => ['label' => 'No local',             'css' => 'route'],
             'em_reboque'           => ['label' => 'Em atendimento',       'css' => 'service'],
             'teste_final'          => ['label' => 'Teste final',         'css' => 'service'],
-            'concluido'            => ['label' => html_entity_decode('Conclu&iacute;do', ENT_QUOTES, 'UTF-8'),           'css' => 'service'],
+            'concluido' => ['label' => html_entity_decode('Conclu&iacute;do', ENT_QUOTES, 'UTF-8'), 'css' => 'service'],
             'cancelado'            => ['label' => 'Cancelado',           'css' => 'audit'],
         ];
         $worklist = [];
@@ -1575,34 +1608,10 @@ $lngDestino = ($_POST['lng_destino'] ?? '') !== '' ? (float)$_POST['lng_destino'
         }
         // =============================================================
 
-        // [B-GUARD-02] Reboque sem cotacao valida -> rejeita
-        //
-        // O public-pre-cotacao-flow.js popula o hidden 'valor_cotado'
-        // SOMENTE quando a API /api/pre-cotacao/opcoes retorna
-        // disponivel=true E valor_reboque != null. Se a decisao foi
-        // 'reboque' mas o valor_cotado veio vazio, significa que o
-        // Comentário removido por corrupção de codificação.
-        // apto. Nao criamos o pedido.
-        // -------------------------------------------------------------
-        $decisaoPost     = strtolower(trim((string)($_POST['decisao_atendimento'] ?? '')));
-        $valorCotadoPost = trim((string)($_POST['valor_cotado'] ?? ''));
+        // B-011: nenhum preço do navegador governa a criação.
+        // A validação da regra e do preço ocorre em PedidoCoreService::criar().
+        $decisaoPost = strtolower(trim((string)($_POST['decisao_atendimento'] ?? '')));
 
-        if ($decisaoPost === 'reboque' && $valorCotadoPost === '') {
-            error_log(sprintf(
-                '[AdminController::pedidoCriar][B-GUARD-02] Rejeitado: decisao=reboque sem valor_cotado. cliente_id=%d veiculo_id=%d',
-                $clienteId,
-                $veiculoId
-            ));
-            $_SESSION['_flash'][] = [
-                'message' => 'Nao foi possivel criar o pedido: nenhum guincho disponivel no raio de atendimento agora. '
-                           . 'Aguarde alguns minutos ou tente outro destino.',
-                'type' => 'error',
-            ];
-            $this->redirect('/admin/pedido/novo/funil');
-            return;
-        }
-
-        // -------------------------------------------------------------
         // [B-GUARD-03] Reboque sem destino -> rejeita
         //
         // PedidoCoreService ja rejeita (0,0) no destino, mas aqui damos
@@ -1807,7 +1816,7 @@ $lngDestino = ($_POST['lng_destino'] ?? '') !== '' ? (float)$_POST['lng_destino'
                     'message' => 'Pedido #' . $pedidoId . ' criado, mas o pagamento falhou: ' . $erroMsg,
                     'type' => 'error',
                 ];
-                $this->redirect('/admin/pedidos');
+                $this->redirect('/admin/pedido/' . $pedidoId . '?criado=1');
                 return;
             }
 
@@ -1856,7 +1865,8 @@ $lngDestino = ($_POST['lng_destino'] ?? '') !== '' ? (float)$_POST['lng_destino'
                 'type' => 'success',
             ];
         }
-        $this->redirect('/admin/pedidos');    }
+        $this->redirect('/admin/pedido/' . $pedidoId . '?criado=1');
+    }
     
         public function pedidoCalcularCusto(): void
     {
@@ -2754,11 +2764,18 @@ $lngDestino = ($_POST['lng_destino'] ?? '') !== '' ? (float)$_POST['lng_destino'
         $extra = null;
         if ($usuario["tipo"] === "guincho") {
             $extra = Guincho::buscarPorUsuario($id);
+        } elseif ($usuario['tipo'] === 'oficina') {
+            $stmtOficina = getPDO()->prepare('SELECT * FROM oficinas WHERE usuario_id = ? ORDER BY id DESC LIMIT 1');
+            $stmtOficina->execute([$id]);
+            $extra = $stmtOficina->fetch(PDO::FETCH_ASSOC) ?: null;
         }
 
         // Ficha 360°: relações existentes reunidas sem duplicar cadastros.
         $veiculosAssociados = Veiculo::listarPorUsuario($id);
-        $oficinasAssociadas = Oficina::listarPorUsuario($id);
+        // Oficinas de parceiros (canônica), não oficinas_favoritas do cliente.
+        $stmtOficinasAssoc = getPDO()->prepare('SELECT * FROM oficinas WHERE usuario_id = ? ORDER BY id DESC');
+        $stmtOficinasAssoc->execute([$id]);
+        $oficinasAssociadas = $stmtOficinasAssoc->fetchAll(PDO::FETCH_ASSOC) ?: [];
         $pedidosClienteAssociados = $usuario['tipo'] === 'cliente'
             ? Pedido::listarPorCliente($id, 1, 50) : [];
         $pedidosPrestadorAssociados = [];
@@ -3396,7 +3413,7 @@ $lngDestino = ($_POST['lng_destino'] ?? '') !== '' ? (float)$_POST['lng_destino'
             'a_caminho' => 'A Caminho',
             'no_local' => 'No Local',
             'em_reboque' => 'Em Reboque',
-            'concluido'            => ['label' => html_entity_decode('Conclu&iacute;do', ENT_QUOTES, 'UTF-8'),           'css' => 'service'],
+            'concluido' => 'Concluído',
             'cancelado' => 'Cancelado',
             default => ucfirst(str_replace('_', ' ', $status)),
         };
@@ -4460,6 +4477,19 @@ $lngDestino = ($_POST['lng_destino'] ?? '') !== '' ? (float)$_POST['lng_destino'
         );
         $pagamentos->execute([$id]);
         $pagamentos = $pagamentos->fetchAll(PDO::FETCH_ASSOC) ?: [];
+
+        // C3-b: snapshots decompostos dos pedidos desta fatura
+        $snapshotsItens = [];
+        $pedidoIdsFatura = array_map(static fn(array $i): int => (int)($i['pedido_id'] ?? 0), $itens);
+        $pedidoIdsFatura = array_values(array_filter($pedidoIdsFatura));
+        if ($pedidoIdsFatura !== []) {
+            $ph = implode(',', array_fill(0, count($pedidoIdsFatura), '?'));
+            $stmtSnap = $pdo->prepare("SELECT order_id, calculation_context_json FROM order_price_snapshots WHERE order_id IN ($ph)");
+            $stmtSnap->execute($pedidoIdsFatura);
+            foreach ($stmtSnap->fetchAll(PDO::FETCH_ASSOC) as $row) {
+                $snapshotsItens[(int)$row['order_id']] = json_decode((string)$row['calculation_context_json'], true) ?: null;
+            }
+        }
 
         $csrfToken = AuthService::gerarCsrfToken();
         require __DIR__ . '/../Views/admin/fatura_detalhe.php';

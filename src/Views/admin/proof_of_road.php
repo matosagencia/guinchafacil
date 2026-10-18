@@ -3,9 +3,13 @@ $bp = defined('BASE_PATH') ? BASE_PATH : '';
 $qualityLabels = ['poor'=>'Ruim','degraded'=>'Degradada','good'=>'Boa','excellent'=>'Excelente','unknown'=>'Desconhecida'];
 include __DIR__ . '/../layouts/header.php';
 ?>
+<link rel="stylesheet" href="<?= htmlspecialchars($bp, ENT_QUOTES, 'UTF-8') ?>/public/assets/css/pages/gf-f18f110-qualidade.css?v=20261018-1">
+<script<?php echo csp_script_nonce_attr(); ?>>document.body.classList.add('gf-f18f110-quality');</script>
 <div class="main-wrapper shell admin-shell">
 <?php include __DIR__ . '/../layouts/sidebar_admin.php'; ?>
-<main class="main-content shell-main shell-content">
+<main class="main-content shell-main shell-content">
+<?php $gfQualityTab = 'proof'; ?>
+<nav class="gf-quality-tabs" aria-label="Navegação de qualidade"><a href="<?= htmlspecialchars($bp, ENT_QUOTES, 'UTF-8') ?>/admin/avaliacoes" class="<?= $gfQualityTab === 'avaliacoes' ? 'is-active' : '' ?>">Avaliações</a><a href="<?= htmlspecialchars($bp, ENT_QUOTES, 'UTF-8') ?>/admin/proof-of-road" class="<?= $gfQualityTab === 'proof' ? 'is-active' : '' ?>">Proof-of-Road</a><a href="<?= htmlspecialchars($bp, ENT_QUOTES, 'UTF-8') ?>/admin/checklists-incompletos" class="<?= $gfQualityTab === 'checklists' ? 'is-active' : '' ?>">Checklists incompletos</a><a href="<?= htmlspecialchars($bp, ENT_QUOTES, 'UTF-8') ?>/admin/revisoes-manuais">RevisÃµes manuais</a></nav>
 <div class="ops-topbar">
     <div class="ops-topbar__search"><i class="fas fa-magnifying-glass"></i><input type="search" id="porBusca" placeholder="Buscar por cliente ou guincheiro" autocomplete="off" aria-label="Buscar trilhas"></div>
     <div class="ops-topbar__meta"><span class="ops-topbar__status"><span class="ops-topbar__status-dot"></span><?php echo (int)$resumo['total']; ?> trilhas</span></div>

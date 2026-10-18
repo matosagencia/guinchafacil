@@ -2,7 +2,8 @@
 $bp  = defined('BASE_PATH') ? BASE_PATH : '';
 $cur = $_SERVER['REQUEST_URI'] ?? '';
 ?>
-<aside class="shell-sidebar sidebar sidebar--ops admin-shell-sidebar">
+<aside class="shell-sidebar sidebar sidebar--ops admin-shell-sidebar">
+    <div class="gf-f18f18-brand"><strong>Guincha<span>Fácil.</span></strong><small>Central GuinchaFácil</small></div>
     <?php include __DIR__ . '/../components/admin_nav_operacional.php'; ?>
     <div class="sidebar-sep"></div>
     <div class="sidebar-preview">

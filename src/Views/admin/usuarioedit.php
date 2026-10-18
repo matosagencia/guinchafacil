@@ -2,7 +2,22 @@
 $bp = defined('BASE_PATH') ? BASE_PATH : '';
 include __DIR__ . '/../layouts/header.php';
 ?>
-<link rel="stylesheet" href="<?php echo htmlspecialchars($bp); ?>/public/assets/css/pages/admin-usuarioedit.css">
+
+<link rel="stylesheet" href="<?= htmlspecialchars($bp, ENT_QUOTES, 'UTF-8') ?>/public/assets/css/pages/gf-f18f19-shell-unificado.css?v=20261018-2">
+<script>document.body.classList.add("gf-f18f19");</script>
+<link rel="stylesheet" href="<?php echo htmlspecialchars($bp); ?>/public/assets/css/pages/admin-usuarioedit.css">
+<!-- GF-F18F15-REPAIRED -->
+<link rel="stylesheet" href="<?php echo htmlspecialchars($bp, ENT_QUOTES, 'UTF-8'); ?>/public/assets/css/pages/gf-f18f14b-acabamento.css?v=20261018-f15">
+<!-- GF-F18F12-ASSET -->
+<link rel="stylesheet" href="<?php echo htmlspecialchars($bp, ENT_QUOTES, 'UTF-8'); ?>/public/assets/css/pages/gf-f18f12-pessoas-estrutura.css?v=20261018-1">
+<!-- GF-F18F14-ASSET -->
+<link rel="stylesheet" href="<?php echo htmlspecialchars($bp, ENT_QUOTES, 'UTF-8'); ?>/public/assets/css/pages/gf-f18f14-acabamento.css?v=20261018-1">
+<!-- /GF-F18F14-ASSET -->
+<!-- /GF-F18F12-ASSET -->
+<!-- GF-F18F12-SCOPE -->
+<script>document.body.classList.add("gf-f18f12");</script>
+<!-- /GF-F18F12-SCOPE -->
+
 <div class="main-wrapper shell admin-shell">
 <?php include __DIR__ . '/../layouts/sidebar_admin.php'; ?>
 <main class="main-content shell-main shell-content">

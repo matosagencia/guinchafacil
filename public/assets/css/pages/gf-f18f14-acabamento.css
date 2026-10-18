@@ -1,0 +1,53 @@
+/* GuinchaFacil F18F1.4 - somente usuarios, guinchos, usuarioform e usuarioedit */
+/* Neutraliza o deslocamento reservado para o cabecalho global ocultado. */
+body.admin.gf-f18f12 { padding-top: 0 !important; margin-top: 0 !important; }
+body.admin.gf-f18f12 > nav.gf-admin-topbar,
+body.admin.gf-f18f12 > nav.gf-order-crumb { display: none !important; }
+body.admin.gf-f18f12 .gf18f1-nav { margin-top: 0 !important; }
+body.admin.gf-f18f12 .main-wrapper.admin-shell { margin-top: 0 !important; padding-top: 0 !important; }
+body.admin.gf-f18f12 .main-content.shell-main { padding-top: 12px !important; }
+body.admin.gf-f18f12 .main-content .page-head { margin-top: 0 !important; margin-bottom: 16px !important; }
+/* Worklist: botoes de cadastro discretos e separados. */
+body.admin.gf-f18f12 .gf-f18f13-worklist-actions {
+  display: flex !important; align-items: center; flex-wrap: wrap; gap: 8px !important;
+  padding: 8px 14px !important; background: #fff !important; border: 0 !important;
+  margin: 0 !important;
+}
+body.admin.gf-f18f12 .gf-f18f13-worklist-actions a {
+  display: inline-flex !important; align-items: center; justify-content: center;
+  min-height: 30px; padding: 5px 11px !important; border: 1px solid #d8e3dc !important;
+  border-radius: 7px; background: #f2faf4 !important; color: #167e39 !important;
+  font-size: 12px !important; line-height: 1.25 !important; font-weight: 700 !important;
+  text-decoration: none !important; white-space: normal;
+}
+body.admin.gf-f18f12 .gf-f18f13-worklist-actions a:hover,
+body.admin.gf-f18f12 .gf-f18f13-worklist-actions a:focus-visible {
+  background: #e5f5e9 !important; border-color: #2fb34a !important; outline-offset: 2px;
+}
+/* Formularios: corrige spans, campos somente-leitura e metadados que herdaram texto branco. */
+body.admin.gf-f18f12 .main-content .card,
+body.admin.gf-f18f12 .main-content .card-body,
+body.admin.gf-f18f12 .main-content .table,
+body.admin.gf-f18f12 .main-content .table td,
+body.admin.gf-f18f12 .main-content .table th,
+body.admin.gf-f18f12 .main-content .list-group-item,
+body.admin.gf-f18f12 .main-content .card-body p,
+body.admin.gf-f18f12 .main-content .card-body small,
+body.admin.gf-f18f12 .main-content .card-body span:not(.badge):not(.badge-perfil),
+body.admin.gf-f18f12 .main-content .card-body label { color: #26384a !important; }
+body.admin.gf-f18f12 .main-content .text-muted,
+body.admin.gf-f18f12 .main-content .text-muted-theme,
+body.admin.gf-f18f12 .main-content .card-body .text-secondary { color: #62748a !important; }
+body.admin.gf-f18f12 .main-content .card-header { color: #172b3f !important; }
+body.admin.gf-f18f12 .main-content .card .table { --bs-table-color:#26384a; --bs-table-bg:#fff; --bs-table-border-color:#dce4ed; }
+body.admin.gf-f18f12 .main-content .card .table td,
+body.admin.gf-f18f12 .main-content .card .table th { border-color:#dce4ed !important; }
+body.admin.gf-f18f12 .main-content .form-control::placeholder { color:#708397 !important; opacity:1; }
+/* Mantem badges e links acionaveis com cores semanticas. */
+body.admin.gf-f18f12 .main-content .badge-perfil,
+body.admin.gf-f18f12 .main-content .badge { color: inherit; }
+body.admin.gf-f18f12 .main-content a:not(.btn) { text-decoration-thickness:1px; }
+@media (max-width: 800px) {
+ body.admin.gf-f18f12 .gf-f18f13-worklist-actions { padding:7px 10px !important; }
+ body.admin.gf-f18f12 .gf18f1-nav { margin: 0 8px 8px !important; }
+}

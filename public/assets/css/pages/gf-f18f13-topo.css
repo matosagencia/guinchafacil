@@ -1,0 +1,15 @@
+/* GF-F18F13 — escopo de cadastro novo, sem afetar outras paginas */
+body.admin.gf-f18f12.gf-f18f13-new-user .main-content.shell-main { padding-top: 4px !important; }
+body.admin.gf-f18f12.gf-f18f13-new-user .page-head { margin-bottom: 14px !important; }
+body.admin.gf-f18f12.gf-f18f13-new-user .main-wrapper.admin-shell { min-height: calc(100vh - 10px) !important; }
+body.admin.gf-f18f12.gf-f18f13-new-user .main-content .card { background:#fff!important;color:#192b39!important;border:1px solid #dce4ed!important;border-radius:10px!important;box-shadow:none!important; }
+body.admin.gf-f18f12.gf-f18f13-new-user .main-content .card-header { background:#f8fafb!important;color:#192b39!important;border-bottom:1px solid #dce4ed!important;font-weight:700; }
+body.admin.gf-f18f12.gf-f18f13-new-user .main-content .card-body { background:#fff!important;color:#192b39!important; }
+body.admin.gf-f18f12.gf-f18f13-new-user .main-content label { color:#253448!important; }
+body.admin.gf-f18f12.gf-f18f13-new-user .main-content .text-muted { color:#66758a!important; }
+body.admin.gf-f18f12.gf-f18f13-new-user .main-content input,body.admin.gf-f18f12.gf-f18f13-new-user .main-content select,body.admin.gf-f18f12.gf-f18f13-new-user .main-content textarea { background:#fff;color:#192b39;border-color:#ced9e5; }
+body.admin.gf-f18f12 .gf18f1-nav{margin-top:0!important;}
+body.admin.gf-f18f12 .shell-ops{min-height:calc(100vh - 125px)!important;}
+
+body.admin.gf-f18f12 .gf-f18f13-worklist-actions{display:flex;flex-wrap:wrap;gap:8px;padding:10px 14px;background:#f8fafb;border-bottom:1px solid #dce4ed}
+body.admin.gf-f18f12 .gf-f18f13-worklist-actions a{font-size:12px;color:#168641;text-decoration:none;font-weight:700}

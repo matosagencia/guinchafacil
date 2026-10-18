@@ -1,0 +1,136 @@
+/* GF-F18F110: Quality pages unified without altering business logic. */
+body.admin.gf-f18f110-quality { --sidebar-width:220px; background:#f3f5f7!important; color:#142338!important; }
+body.admin.gf-f18f110-quality > nav.gf-admin-topbar,
+body.admin.gf-f18f110-quality > nav.gf-order-crumb {display:none!important}
+body.admin.gf-f18f110-quality .main-wrapper.admin-shell {display:flex!important;align-items:stretch!important;gap:0!important;margin:0!important;padding:0!important;max-width:none!important;width:100%!important;min-height:100vh!important;background:#f3f5f7!important}
+body.admin.gf-f18f110-quality .main-wrapper.admin-shell > aside.admin-shell-sidebar {position:relative!important;inset:auto!important;transform:none!important;float:none!important;flex:0 0 var(--sidebar-width)!important;width:var(--sidebar-width)!important;max-width:var(--sidebar-width)!important;min-width:0!important;margin:0!important;padding:12px 8px!important;border-radius:0!important;background:#101519!important;box-sizing:border-box!important;align-self:stretch!important;overflow-x:hidden!important}
+body.admin.gf-f18f110-quality .main-wrapper.admin-shell > main.main-content {flex:1 1 0!important;min-width:0!important;margin:0!important;padding:16px 24px 40px!important;max-width:none!important;background:#f3f5f7!important;color:#142338!important}
+body.admin.gf-f18f110-quality .gf-quality-tabs {display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin:0 0 18px;padding:8px 0;border-bottom:1px solid #dae1e8}
+body.admin.gf-f18f110-quality .gf-quality-tabs a,body.admin.gf-f18f110-quality .gf-quality-tabs span {font-size:12px;display:inline-flex;align-items:center;white-space:nowrap;border-radius:7px;padding:10px 12px;text-decoration:none}
+body.admin.gf-f18f110-quality .gf-quality-tabs a {color:#26364a;background:#fff;border:1px solid #dbe3eb}
+body.admin.gf-f18f110-quality .gf-quality-tabs a.is-active {color:#146c32;background:#e7f7ea;border-color:#c1e6c8;font-weight:700}
+body.admin.gf-f18f110-quality .gf-quality-tabs span {color:#6f7c89;background:#ebeff3}
+body.admin.gf-f18f110-quality main.main-content .card,body.admin.gf-f18f110-quality main.main-content .stat-grid__item,body.admin.gf-f18f110-quality main.main-content .ops-topbar {background:#fff!important;color:#142338!important;border-color:#d9e2ec!important}
+body.admin.gf-f18f110-quality main.main-content .page-head,body.admin.gf-f18f110-quality main.main-content .page-head *,body.admin.gf-f18f110-quality main.main-content .card-body,body.admin.gf-f18f110-quality main.main-content .card-body *,body.admin.gf-f18f110-quality main.main-content table,body.admin.gf-f18f110-quality main.main-content .table td {color:#25354a!important}
+body.admin.gf-f18f110-quality main.main-content .table thead th {color:#3b536d!important;background:#eef3f8!important}
+body.admin.gf-f18f110-quality main.main-content .table tbody td {color:#26364a!important;background:#fff!important;border-color:#d9e2ec!important}
+body.admin.gf-f18f110-quality main.main-content .table tbody tr:hover td {background:#f3f9f4!important}
+body.admin.gf-f18f110-quality main.main-content .table a {color:#137b3b!important;text-decoration:underline}
+body.admin.gf-f18f110-quality main.main-content .text-muted {color:#64748b!important}
+body.admin.gf-f18f110-quality main.main-content .text-warning {color:#bd7600!important}
+body.admin.gf-f18f110-quality main.main-content .form-control,body.admin.gf-f18f110-quality main.main-content .form-select {color:#152338!important;background:#fff!important;border-color:#cbd5e1!important}
+body.admin.gf-f18f110-quality .ops-topbar {padding:10px 14px!important;border-radius:8px;margin:0 0 15px!important}
+body.admin.gf-f18f110-quality .ops-topbar input {background:#fff!important;color:#17283d!important}
+body.admin.gf-f18f110-quality .ops-summary {background:transparent!important;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-bottom:16px}
+body.admin.gf-f18f110-quality .ops-summary .ops-metric {background:#fff!important;color:#17283d!important;border:1px solid #d9e2ec!important;border-radius:8px}
+body.admin.gf-f18f110-quality .ops-summary .ops-metric * {color:#243650!important}
+body.admin.gf-f18f110-quality .gf-quality-checklists .shell-ops {display:grid!important;grid-template-columns:minmax(270px,340px) minmax(0,1fr)!important;width:100%!important;margin:0!important;min-width:0!important;background:#fff!important;border:1px solid #d9e2ec;border-radius:9px;overflow:hidden}
+body.admin.gf-f18f110-quality .gf-quality-checklists .shell-ops > .shell-ops-worklist {grid-column:1!important;min-width:0!important;margin:0!important;background:#fff!important;color:#243650!important}
+body.admin.gf-f18f110-quality .gf-quality-checklists .shell-ops > .shell-ops-workspace {grid-column:2!important;min-width:0!important;margin:0!important;background:#fff!important;color:#243650!important}
+body.admin.gf-f18f110-quality .gf-quality-checklists .shell-ops .ops-empty-state {color:#475569!important}
+body.admin.gf-f18f110-quality.is-sidebar-collapsed {--sidebar-width:68px}
+@media(max-width:850px){body.admin.gf-f18f110-quality .gf-quality-checklists .shell-ops{grid-template-columns:minmax(200px,280px) minmax(0,1fr)!important}}
+@media(max-width:680px){body.admin.gf-f18f110-quality .main-wrapper.admin-shell{display:block!important}body.admin.gf-f18f110-quality .main-wrapper.admin-shell > aside.admin-shell-sidebar{width:100%!important;max-width:none!important;min-height:0!important}body.admin.gf-f18f110-quality .gf-quality-checklists .shell-ops{display:block!important}body.admin.gf-f18f110-quality .ops-summary{grid-template-columns:1fr!important}}
+
+/* GF-F18F111 — ajuste de recuo superior e contraste. Escopo: Qualidade. */
+html:has(body.admin.gf-f18f110-quality),
+body.admin.gf-f18f110-quality {
+  margin: 0 !important;
+  padding: 0 !important;
+  min-height: 100% !important;
+  background: #f3f5f7 !important;
+}
+body.admin.gf-f18f110-quality > nav.gf-admin-topbar,
+body.admin.gf-f18f110-quality > nav.gf-order-crumb,
+body.admin.gf-f18f110-quality > .gf-admin-topbar,
+body.admin.gf-f18f110-quality > .gf-order-crumb { display: none !important; }
+body.admin.gf-f18f110-quality > .main-wrapper.admin-shell,
+body.admin.gf-f18f110-quality .main-wrapper.admin-shell {
+  position: relative !important;
+  top: auto !important;
+  left: auto !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  min-height: 100vh !important;
+  align-items: stretch !important;
+  gap: 0 !important;
+  overflow: visible !important;
+}
+body.admin.gf-f18f110-quality .main-wrapper.admin-shell > aside.admin-shell-sidebar {
+  position: relative !important;
+  inset: auto !important;
+  top: auto !important;
+  left: auto !important;
+  margin: 0 !important;
+  border-radius: 0 !important;
+  box-sizing: border-box !important;
+  align-self: stretch !important;
+  min-height: 100vh !important;
+}
+body.admin.gf-f18f110-quality .main-wrapper.admin-shell > main.main-content {
+  margin: 0 !important;
+  min-width: 0 !important;
+  overflow-wrap: anywhere;
+}
+/* Cabeçalhos e lista de checklists não podem herdar cor de tema escuro. */
+body.admin.gf-f18f110-quality .gf-quality-checklists .ops-worklist-header,
+body.admin.gf-f18f110-quality .gf-quality-checklists .ops-worklist-header h2,
+body.admin.gf-f18f110-quality .gf-quality-checklists .ops-worklist-header p,
+body.admin.gf-f18f110-quality .gf-quality-checklists .ops-worklist-header .eyebrow,
+body.admin.gf-f18f110-quality .gf-quality-checklists .ops-worklist-search input {
+  color: #25354a !important;
+}
+body.admin.gf-f18f110-quality .gf-quality-checklists .ops-worklist-search,
+body.admin.gf-f18f110-quality .gf-quality-checklists .ops-worklist-search input {
+  background: #fff !important;
+  border-color: #cbd5e1 !important;
+}
+body.admin.gf-f18f110-quality .gf-quality-checklists .ops-worklist-search input::placeholder {
+  color: #64748b !important;
+  opacity: 1;
+}
+@media(max-width:680px) {
+  body.admin.gf-f18f110-quality .main-wrapper.admin-shell > aside.admin-shell-sidebar {
+    min-height: 0 !important;
+  }
+}
+
+
+/* GF-F18F112: a sidebar compartilhada usa o mesmo tratamento de marca do admin. */
+body.admin.gf-f18f110-quality .main-wrapper.admin-shell > aside.admin-shell-sidebar .gf-f18f18-brand {display:block!important; margin:0!important; padding:10px 8px 22px!important; max-width:100%!important; box-sizing:border-box!important; line-height:1.35!important;}
+body.admin.gf-f18f110-quality .main-wrapper.admin-shell > aside.admin-shell-sidebar .gf-f18f18-brand strong {display:block!important; font-family:Manrope,Arial,sans-serif!important; font-size:22px!important; font-weight:800!important; letter-spacing:-.55px!important; line-height:1.4!important; white-space:normal!important; color:#fff!important;}
+body.admin.gf-f18f110-quality .main-wrapper.admin-shell > aside.admin-shell-sidebar .gf-f18f18-brand strong span {color:#33ba57!important;}
+body.admin.gf-f18f110-quality .main-wrapper.admin-shell > aside.admin-shell-sidebar .gf-f18f18-brand small {display:block!important; margin-top:9px!important; font-size:11px!important; font-weight:400!important; color:#cbd5e1!important; white-space:normal!important;}
+body.admin.gf-f18f110-quality .main-wrapper.admin-shell > aside.admin-shell-sidebar {border:0!important; border-radius:0!important; box-shadow:none!important;}
+body.admin.gf-f18f110-quality .main-wrapper.admin-shell > main.main-content {min-width:0!important; overflow-x:clip!important;}
+body.admin.gf-f18f110-quality.is-sidebar-collapsed .admin-shell-sidebar .gf-f18f18-brand {display:none!important;}
+
+/* GF-F18F115: sidebar ocupa a viewport; scroll interno invisivel.
+   Escopo: shell administrativo F18F (Pessoas e Qualidade). */
+@media (min-width: 681px) {
+  body.admin.gf-f18f19 .shell-ops > aside.gf-f18f18-sidebar,
+  body.admin.gf-f18f19 .main-wrapper.admin-shell > aside.admin-shell-sidebar,
+  body.admin.gf-f18f110-quality .main-wrapper.admin-shell > aside.admin-shell-sidebar {
+    position: sticky !important;
+    top: 0 !important;
+    bottom: auto !important;
+    height: 100vh !important;
+    height: 100dvh !important;
+    min-height: 0 !important;
+    max-height: 100vh !important;
+    max-height: 100dvh !important;
+    align-self: start !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    overscroll-behavior-y: contain;
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+  }
+  body.admin.gf-f18f19 .shell-ops > aside.gf-f18f18-sidebar::-webkit-scrollbar,
+  body.admin.gf-f18f19 .main-wrapper.admin-shell > aside.admin-shell-sidebar::-webkit-scrollbar,
+  body.admin.gf-f18f110-quality .main-wrapper.admin-shell > aside.admin-shell-sidebar::-webkit-scrollbar {
+    width: 0 !important; height: 0 !important; display: none !important;
+  }
+}

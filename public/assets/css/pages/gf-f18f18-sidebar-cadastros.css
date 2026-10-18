@@ -1,0 +1,40 @@
+/* GF-F18F18: harmonizacao dos paineis Pessoas/Guinchos e formularios com a Central. */
+body.admin.gf-f18f18 { --sidebar-width:220px; }
+body.admin.gf-f18f18 .gf-f18f18-sidebar,
+body.admin.gf-f18f18 .admin-shell-sidebar {
+  box-sizing:border-box; background:#101519!important; color:#e9f2ed!important;
+  border-radius:0!important; border:0!important;
+}
+body.admin.gf-f18f18 .gf-f18f18-brand {
+  padding:18px 16px 22px; color:#fff; line-height:1.2;
+}
+body.admin.gf-f18f18 .gf-f18f18-brand strong {display:block;font-size:24px;font-weight:800;letter-spacing:-.7px}
+body.admin.gf-f18f18 .gf-f18f18-brand strong span {color:#30b34e}
+body.admin.gf-f18f18 .gf-f18f18-brand small {display:block;font-size:11px;color:#acbab1;margin-top:13px}
+body.admin.gf-f18f18 .admin-shell-sidebar .ops-nav-link,
+body.admin.gf-f18f18 .gf-f18f18-sidebar .ops-nav-link {font-size:13px;min-height:42px}
+body.admin.gf-f18f18 .admin-shell-sidebar .ops-nav-link.is-active,
+body.admin.gf-f18f18 .gf-f18f18-sidebar .ops-nav-link.is-active {background:#163b27!important;color:#31d265!important}
+body.admin.gf-f18f18 .shell-ops {margin-top:0!important;border-radius:0!important}
+body.admin.gf-f18f18 .gf18f1-nav {margin:0!important;display:flex!important;align-items:center;flex-wrap:wrap;gap:8px;padding:10px 12px!important}
+body.admin.gf-f18f18 .gf-f18f18-create-actions {display:flex;gap:6px;flex-wrap:wrap;margin-left:auto}
+body.admin.gf-f18f18 .gf-f18f18-create {display:inline-flex;align-items:center;gap:6px;padding:8px 10px;text-decoration:none;border:1px solid #cbdad1;background:#fff;border-radius:9px;color:#176934;font-size:12px;font-weight:700;white-space:nowrap}
+body.admin.gf-f18f18 .gf-f18f18-create:hover {background:#e8f5ec;color:#125b2d}
+body.admin.gf-f18f18 .gf-f18f18-create--oficina {color:#ad520e;border-color:#f6cdab}
+body.admin.gf-f18f18 .gf-f18f18-create--oficina:hover {background:#fff1e6;color:#98420d}
+body.admin.gf-f18f18.is-sidebar-collapsed {--sidebar-width:68px}
+body.admin.gf-f18f18.is-sidebar-collapsed .gf-f18f18-brand strong,
+body.admin.gf-f18f18.is-sidebar-collapsed .gf-f18f18-brand small {display:none}
+body.admin.gf-f18f18.is-sidebar-collapsed .gf-f18f18-brand{height:24px;padding:0}
+@media(max-width:1100px){body.admin.gf-f18f18 .gf-f18f18-create-actions{margin-left:0;width:100%}}
+@media(max-width:650px){body.admin.gf-f18f18 .gf-f18f18-create{flex:1;justify-content:center}}
+
+/* Sidebar: tamanho e alinhamento dos links, consistente com Central */
+body.admin.gf-f18f18 .gf-f18f18-sidebar .ops-nav-link,
+body.admin.gf-f18f18 .admin-shell-sidebar .ops-nav-link {display:flex;align-items:center;gap:12px;border-radius:8px;padding:10px 12px;min-height:42px;overflow:hidden;text-overflow:ellipsis}
+body.admin.gf-f18f18 .gf-f18f18-sidebar .ops-nav-link__label,
+body.admin.gf-f18f18 .admin-shell-sidebar .ops-nav-link__label {min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+body.admin.gf-f18f18.is-sidebar-collapsed .gf-f18f18-sidebar .ops-nav-link__label,
+body.admin.gf-f18f18.is-sidebar-collapsed .admin-shell-sidebar .ops-nav-link__label {display:none!important}
+body.admin.gf-f18f18.is-sidebar-collapsed .gf-f18f18-sidebar .ops-nav-link,
+body.admin.gf-f18f18.is-sidebar-collapsed .admin-shell-sidebar .ops-nav-link {justify-content:center;padding:10px 6px}
