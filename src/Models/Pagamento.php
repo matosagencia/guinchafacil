@@ -2613,12 +2613,8 @@ class Pagamento
 
                     COALESCE(SUM(CASE WHEN pg.status = 'aprovado' AND COALESCE(pg.pago_guincho, 0) = 0 THEN pg.valor_guincho ELSE 0 END), 0) AS valor_pendente_guincho,
 
-                    COALESCE((SELECT SUM(CAST(JSON_UNQUOTE(JSON_EXTRACT(j.payload_json,'$.amount')) AS DECIMAL(10,2)))
-                              FROM payment_jobs j
-                              LEFT JOIN fin3_payout_dispatch_qa d ON d.job_id=j.id
-                              WHERE j.pagamento_id=pg.id AND j.job_type='pix_payout'
-                                AND j.status IN ('queued','retry','running')
-                                AND (d.state IS NULL OR d.state NOT IN ('uncertain','review'))), 0) AS valor_reservado_guincho,
+                    COALESCE(SUM(CASE WHEN pg.status = 'aprovado' AND COALESCE(pg.pago_guincho, 0) = 0
+                                      THEN COALESCE(reservas.valor_reservado, 0) ELSE 0 END), 0) AS valor_reservado_guincho,
 
                     COALESCE(SUM(CASE WHEN pg.status = 'estornado' THEN pg.valor_total ELSE 0 END), 0) AS valor_estornado,
 
@@ -2627,6 +2623,16 @@ class Pagamento
                  FROM pedidos p
 
                  LEFT JOIN pagamentos pg ON pg.pedido_id = p.id
+                 LEFT JOIN (
+                    SELECT j.pagamento_id,
+                           SUM(CAST(JSON_UNQUOTE(JSON_EXTRACT(j.payload_json,'$.amount')) AS DECIMAL(10,2))) AS valor_reservado
+                      FROM payment_jobs j
+                      LEFT JOIN fin3_payout_dispatch_qa d ON d.job_id = j.id
+                     WHERE j.job_type = 'pix_payout'
+                       AND j.status IN ('queued','retry','running')
+                       AND (d.state IS NULL OR d.state NOT IN ('uncertain','review'))
+                     GROUP BY j.pagamento_id
+                 ) reservas ON reservas.pagamento_id = pg.id
 
                  WHERE " . implode(' AND ', $where)
 
