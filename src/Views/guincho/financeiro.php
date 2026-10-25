@@ -74,7 +74,7 @@ $money = static fn($value): string => 'R$ ' . number_format((float)$value, 2, ',
                 <strong>Valor estornado</strong> = atendimento cancelado e devolvido ao cliente.
                 <strong>Retenção em cancelamentos</strong> = valor retido pela regra de cancelamento tardio.
             </span>
-        </div>
+        </div>        <div class="alert alert-success border mb-4">            <strong>Disponibilidade financeira:</strong>            R$ <?php echo number_format((float)($totais['valor_disponivel_guincho'] ?? 0), 2, ',', '.'); ?> livres,            após reserva ativa de R$ <?php echo number_format((float)($totais['valor_reservado_guincho'] ?? 0), 2, ',', '.'); ?>.        </div>
 
         <div class="row g-3 mb-4">
             <div class="col-6 col-xl-3">

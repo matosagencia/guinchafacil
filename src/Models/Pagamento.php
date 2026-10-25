@@ -2613,6 +2613,13 @@ class Pagamento
 
                     COALESCE(SUM(CASE WHEN pg.status = 'aprovado' AND COALESCE(pg.pago_guincho, 0) = 0 THEN pg.valor_guincho ELSE 0 END), 0) AS valor_pendente_guincho,
 
+                    COALESCE((SELECT SUM(CAST(JSON_UNQUOTE(JSON_EXTRACT(j.payload_json,'$.amount')) AS DECIMAL(10,2)))
+                              FROM payment_jobs j
+                              LEFT JOIN fin3_payout_dispatch_qa d ON d.job_id=j.id
+                              WHERE j.pagamento_id=pg.id AND j.job_type='pix_payout'
+                                AND j.status IN ('queued','retry','running')
+                                AND (d.state IS NULL OR d.state NOT IN ('uncertain','review'))), 0) AS valor_reservado_guincho,
+
                     COALESCE(SUM(CASE WHEN pg.status = 'estornado' THEN pg.valor_total ELSE 0 END), 0) AS valor_estornado,
 
                     COALESCE(SUM(CASE WHEN p.status = 'cancelado' THEN p.taxa_cancelamento ELSE 0 END), 0) AS taxa_retida_cancelamento
@@ -2646,6 +2653,10 @@ class Pagamento
                 'valor_pago_guincho' => (float)($row['valor_pago_guincho'] ?? 0),
 
                 'valor_pendente_guincho' => (float)($row['valor_pendente_guincho'] ?? 0),
+
+                'valor_reservado_guincho' => (float)($row['valor_reservado_guincho'] ?? 0),
+
+                'valor_disponivel_guincho' => max(0.0, (float)($row['valor_pendente_guincho'] ?? 0) - (float)($row['valor_reservado_guincho'] ?? 0)),
 
                 'valor_estornado' => (float)($row['valor_estornado'] ?? 0),
 
