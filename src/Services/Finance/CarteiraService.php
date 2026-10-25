@@ -255,7 +255,7 @@ class CarteiraService
                 "SELECT
                     COALESCE(SUM(CASE WHEN status = 'aprovado' THEN valor_guincho ELSE 0 END), 0) AS valor_liquido_aprovado,
                     COALESCE(SUM(CASE WHEN status = 'estornado' THEN valor_guincho ELSE 0 END), 0) AS valor_estornado
-                 FROM pagamentos"
+                 FROM pagamentos pg                 WHERE EXISTS (                    SELECT 1 FROM payout_ledger_entries le                    WHERE le.pagamento_id = pg.id                      AND le.entry_type = 'credito_guincho'                 )"
             )->fetch(PDO::FETCH_ASSOC);
 
             $creditoLedger = round((float)($ledger['credito_guincho'] ?? 0), 2);

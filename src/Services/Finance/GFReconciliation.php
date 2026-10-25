@@ -83,7 +83,7 @@ final class GFReconciliation
                 foreach(self::rows($db,'SELECT entry_type,valor FROM payout_ledger_entries WHERE pagamento_id=?',[$r['pagamento_id']]) as $entry) {
                     $amount=GFExactMoney::cents($entry['valor']);$remaining+=match($entry['entry_type']) {'credito_guincho'=>$amount,'debito_repasse_guincho','estorno_credito_guincho'=>-$amount,default=>0};
                 }
-                foreach(self::rows($db,"SELECT payload_json FROM payment_jobs WHERE pagamento_id=? AND job_type='pix_payout' AND status IN ('queued','retry','running')",[$r['pagamento_id']]) as $j) {
+                foreach(self::rows($db,"SELECT j.payload_json FROM payment_jobs j LEFT JOIN fin3_payout_dispatch_qa d ON d.job_id=j.id WHERE j.pagamento_id=? AND j.job_type='pix_payout' AND j.status IN ('queued','retry','running') AND (d.state IS NULL OR d.state NOT IN ('uncertain','review'))",[$r['pagamento_id']]) as $j) {
                     $payload=json_decode($j['payload_json'],true,512,JSON_THROW_ON_ERROR);$reserved+=GFExactMoney::cents(GFMoneyInput::decimal($payload['amount']??null));
                 }
                 self::check($remaining>=0 && $reserved<=$remaining,'FIN_RECON_RESERVED_BALANCE_EXCEEDED');
