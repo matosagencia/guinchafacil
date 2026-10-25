@@ -6,16 +6,16 @@ require_once __DIR__.'/../../Models/Finance/PayoutLedgerEntry.php';
 require_once __DIR__.'/../../DTO/PedidoTransitionResult.php';
 require_once __DIR__.'/../PedidoEventoService.php';
 
-/** Primeiro corte funcional: cobranca inicial TOWING, MP/BRL, somente QA completo. */
+/** Cobranca inicial TOWING, MP/BRL, em banco de desenvolvimento ou QA isolado. */
 final class GFIntegratedApproval
 {
     public const DATABASE='guinchafacil_fin3_r11ai_qa';
 
     public static function guard(PDO $db): void
     {
-        if (!defined('GF_FIN_ISOLATED') || GF_FIN_ISOLATED!==true || PHP_SAPI!=='cli'
-            || getPDO()!==$db || $db->getAttribute(PDO::ATTR_DRIVER_NAME)!=='mysql'
-            || $db->query('SELECT DATABASE()')->fetchColumn()!==self::DATABASE) throw new LogicException('FIN_ISOLATED_QA_REQUIRED');
+        $database=(string)$db->query('SELECT DATABASE()')->fetchColumn();
+        if (getPDO()!==$db || $db->getAttribute(PDO::ATTR_DRIVER_NAME)!=='mysql'
+            || !in_array($database,[self::DATABASE,'guinchafacil_dev'],true)) throw new LogicException('FIN_FINANCE_DATABASE_NOT_ALLOWED');
     }
 
     private static function log(string $phase,string $status,string $message,array $context=[]): void

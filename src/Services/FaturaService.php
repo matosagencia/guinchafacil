@@ -8,6 +8,32 @@ require_once __DIR__ . '/Logger.php';
 
 final class FaturaService
 {
+    public static function registrarRecebimentoDiretoExato(object $receipt): array
+    {
+        $data=method_exists($receipt,'data')?$receipt->data():null; $pdo=getPDO();
+        if (!is_array($data) || count($data)!==5) return ['ok'=>false,'erro'=>'FIN_DIRECT_RECEIPT_CONTRACT_REQUIRED'];
+        [$order,$partner,$amount,$reference,$receivedAt]=$data; $order=(int)$order; $partner=(int)$partner; $amount=number_format((float)$amount,2,'.',''); $reference=trim((string)$reference);
+        if ($order<1 || $partner<1 || (float)$amount<=0 || $reference==='') return ['ok'=>false,'erro'=>'FIN_DIRECT_RECEIPT_INVALID'];
+        try { $pdo->beginTransaction();
+            $q=$pdo->prepare('SELECT p.*,o.guincho_id,o.status order_status,o.forma_pagamento_escolhida,o.attendance_mode,o.fatura_id,o.comissao_tipo,o.comissao_valor,o.custo_final,o.custo_estimado FROM pagamentos p JOIN pedidos o ON o.id=p.pedido_id WHERE o.id=? FOR UPDATE');$q->execute([$order]);$row=$q->fetch(PDO::FETCH_ASSOC);
+            if (!$row || (int)$row['guincho_id']!==$partner || $row['order_status']!=='concluido' || ($row['attendance_mode']??'')!=='TOWING' || ($row['forma_pagamento_escolhida']??'')!=='pago_na_chegada' || $row['metodo']!=='dinheiro' || $row['status']!=='pendente' || $row['fatura_id']!==null || $row['comissao_valor']!==null) throw new DomainException('FIN_DIRECT_NOT_ELIGIBLE');
+            if (number_format((float)$row['valor_total'],2,'.','')!==$amount) throw new DomainException('FIN_DIRECT_AMOUNT_MISMATCH');
+            $seen=$pdo->prepare('SELECT pedido_id FROM pagamentos WHERE id_externo=? FOR UPDATE');$seen->execute([$reference]);$used=$seen->fetchColumn();
+            if ($used!==false && (int)$used!==$order) throw new DomainException('FIN_DIRECT_REFERENCE_REUSED');
+            if ($used!==false) {$pdo->commit();return ['ok'=>true,'duplicate_verified'=>true,'order_id'=>$order];}
+            $commission=number_format(round((float)$amount*0.08,2),2,'.','');
+            $pdo->prepare("UPDATE pedidos SET custo_final=?,valor_final=?,comissao_tipo='faturada',comissao_valor=?,valor_liquido_parceiro=? WHERE id=?")->execute([$amount,$amount,$commission,$amount,$order]);
+            $pdo->prepare("UPDATE pagamentos SET status='aprovado',id_externo=?,valor_guincho=?,valor_plataforma=?,pago_guincho=1,data_pagamento=?,data_pagamento_guincho=?,payload_webhook=? WHERE id=?")->execute([$reference,$amount,$commission,$receivedAt,$receivedAt,json_encode(['version'=>'R11AO','receipt'=>$data,'rate_bp'=>800],JSON_THROW_ON_ERROR),$row['id']]);
+            $pdo->prepare("INSERT INTO fin_bilateral_eventos(idempotency_key,parceiro_tipo,parceiro_id,pedido_id,pagamento_id,tipo_evento,canal,valor_centavos,referencia_tipo,referencia_id,estado,competencia_em,confirmado_em) VALUES (?,'guincho',?,?,?,'debito_comissao','parceiro',?,'r11ao_direct',?,'confirmado',?,NOW())")->execute(['r11ao_direct:'.$order,$partner,$order,$row['id'],(int)round((float)$commission*100),$reference,$receivedAt]);
+            $pdo->commit(); return ['ok'=>true,'duplicate_verified'=>false,'order_id'=>$order];
+        } catch(Throwable $e){if($pdo->inTransaction())$pdo->rollBack();return ['ok'=>false,'erro'=>$e->getMessage()];}
+    }
+
+    public static function fecharCicloParceiroExato(int $partner,DateTimeImmutable $start): array
+    {
+        $pdo=getPDO();$end=$start->modify('+7 days');
+        try{$pdo->beginTransaction();$q=$pdo->prepare("SELECT p.id,p.custo_final,p.custo_estimado,p.comissao_tipo,p.comissao_valor,p.valor_liquido_parceiro FROM pedidos p WHERE p.guincho_id=? AND p.status='concluido' AND p.fatura_id IS NULL AND p.atualizado_em>=? AND p.atualizado_em<? FOR UPDATE");$q->execute([$partner,$start->format('Y-m-d H:i:s'),$end->format('Y-m-d H:i:s')]);$items=$q->fetchAll(PDO::FETCH_ASSOC);if(!$items){$pdo->commit();return ['ok'=>true,'created'=>false,'invoice_id'=>null];}$gross=0;$total=0;foreach($items as $i){$gross+=(float)($i['custo_final']??$i['custo_estimado']);$total+=(float)($i['comissao_tipo']==='faturada'?$i['comissao_valor']:$i['valor_liquido_parceiro']);}$ins=$pdo->prepare("INSERT INTO faturas_parceiro(parceiro_tipo,parceiro_id,ciclo_inicio,ciclo_fim,total_faturado,total_repasse,saldo,vencimento_em) VALUES('guincho',?,?,?,?,?,?,?)");$ins->execute([$partner,$start->format('Y-m-d H:i:s'),$end->modify('-1 second')->format('Y-m-d H:i:s'),$total,$gross,$total-$gross,$end->modify('+7 days')->format('Y-m-d H:i:s')]);$id=(int)$pdo->lastInsertId();$add=$pdo->prepare('INSERT INTO faturas_itens(fatura_id,pedido_id,comissao_tipo,valor_total,comissao_valor,valor_liquido_parceiro,saldo_item) VALUES(?,?,?,?,?,?,?)');foreach($items as $i){$add->execute([$id,$i['id'],$i['comissao_tipo'],(float)($i['custo_final']??$i['custo_estimado']),$i['comissao_valor'],$i['valor_liquido_parceiro'],(float)($i['comissao_tipo']==='faturada'?-($i['comissao_valor']):$i['valor_liquido_parceiro'])]);$pdo->prepare('UPDATE pedidos SET fatura_id=? WHERE id=?')->execute([$id,$i['id']]);}$pdo->commit();return ['ok'=>true,'created'=>true,'invoice_id'=>$id,'amount'=>number_format(abs($total-$gross),2,'.','')];}catch(Throwable $e){if($pdo->inTransaction())$pdo->rollBack();return ['ok'=>false,'erro'=>$e->getMessage()];}
+    }
     public static function fecharCiclo(DateTimeImmutable $cicloInicio): int
     {
         $inicio = $cicloInicio->setTime(0, 0); $fim = $inicio->modify('+7 days'); $pdo = getPDO();

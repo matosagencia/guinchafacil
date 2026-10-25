@@ -3011,5 +3011,26 @@ class Pagamento
 
     }
 
+    /** R11AJ integration contract: approval and split use the caller transaction. */
+    public static function aprovarFinanceiroExato(PDO $pdo, int $id, string $external): void
+    {
+        if (!$pdo->inTransaction()) throw new LogicException('FIN_TRANSACTION_REQUIRED');
+        if (trim($external)==='') throw new InvalidArgumentException('FIN_EXTERNAL_PAYMENT_REQUIRED');
+        $q=$pdo->prepare("UPDATE pagamentos SET status='aprovado',id_externo=?,data_pagamento=NOW() WHERE id=? AND status IN ('pendente','recusado')");
+        $q->execute([$external,$id]);
+        if ($q->rowCount()!==1) throw new DomainException('FIN_PAYMENT_APPROVAL_WRITE_FAILED');
+    }
+
+    public static function atualizarSplitFinanceiroExato(PDO $pdo,int $id,mixed $partner,mixed $platform): void
+    {
+        if (!$pdo->inTransaction()) throw new LogicException('FIN_TRANSACTION_REQUIRED');
+        $partner=number_format((float)$partner,2,'.',''); $platform=number_format((float)$platform,2,'.','');
+        if ((float)$partner<0 || (float)$platform<0) throw new InvalidArgumentException('FIN_SPLIT_NEGATIVE');
+        $q=$pdo->prepare("UPDATE pagamentos SET valor_guincho=?,valor_plataforma=? WHERE id=? AND status='aprovado'");
+        $q->execute([$partner,$platform,$id]);
+        $q=$pdo->prepare('SELECT status,valor_guincho,valor_plataforma FROM pagamentos WHERE id=?');$q->execute([$id]);$row=$q->fetch(PDO::FETCH_ASSOC);
+        if (!$row || $row['status']!=='aprovado' || number_format((float)$row['valor_guincho'],2,'.','')!==$partner || number_format((float)$row['valor_plataforma'],2,'.','')!==$platform) throw new DomainException('FIN_SPLIT_WRITE_FAILED');
+    }
+
 }
 
