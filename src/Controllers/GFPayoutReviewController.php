@@ -2,6 +2,11 @@
 declare(strict_types=1);
 final class GFPayoutReviewController extends BaseController
 {
+    private function work(array $job):array
+    {
+        require_once __DIR__ . '/../Services/Finance/GFPayoutHttpExecutor.php';
+        return GFPayoutHttpExecutor::run($job);
+    }
     public function form():void
     {
         $user=AuthService::requireAuth('admin',false);$raw=$_GET['job_id']??'';
@@ -20,17 +25,12 @@ final class GFPayoutReviewController extends BaseController
         session_write_close();$r=$this->work(['mode'=>'review_create','actor'=>(int)$user['id'],'job'=>(int)$job,'request_key'=>$key,'reason'=>$reason]);
         $http=(int)$r['http'];unset($r['diagnostic'],$r['http']);$this->reply($http,$r);
     }
-    private function work(array $job):array
-    {
-        $config=$GLOBALS['gf_as_http_config']??null;if(!is_array($config) || !defined('GF_AS_HTTP_RUNTIME'))throw new LogicException('AU_RUNTIME_REQUIRED');
-        $prefix=$config['run'].'/review_'.bin2hex(random_bytes(8));$job+=['parent'=>$config['parent'],'result'=>$prefix.'.result.json'];apWrite($prefix.'.job.json',$job);apJoin(apLaunch($config['package'].'/worker.php',['--job='.$prefix.'.job.json'],$prefix),20);return apJson($job['result']);
-    }
     private function reply(int $http,array $data):void
     {
         http_response_code($http);
         if(AuthService::isJsonRequest()){header('Content-Type: application/json; charset=UTF-8');echo json_encode($data,JSON_THROW_ON_ERROR|JSON_UNESCAPED_UNICODE);return;}
         header('Content-Type: text/html; charset=UTF-8');$e=static fn(mixed $v):string=>htmlspecialchars((string)$v,ENT_QUOTES|ENT_SUBSTITUTE,'UTF-8');
-        $messages=['csrf_invalido'=>'Atualize a pagina e tente novamente.','triagem_ja_aberta'=>'Ja existe uma demanda em analise para este repasse.','idempotencia_divergente'=>'A solicitacao diverge do registro anterior. Confira os dados antes de continuar.','justificativa_invalida'=>'Confira o tamanho da justificativa.','acesso_negado'=>'Seu perfil nao permite esta operacao.'];
+        $messages=['resultado_indeterminado_consulte'=>'Nao foi possivel confirmar a resposta. Consulte o estado atual antes de repetir a mesma solicitacao.','csrf_invalido'=>'Atualize a pagina e tente novamente.','triagem_ja_aberta'=>'Ja existe uma demanda em analise para este repasse.','idempotencia_divergente'=>'A solicitacao diverge do registro anterior. Confira os dados antes de continuar.','justificativa_invalida'=>'Confira o tamanho da justificativa.','acesso_negado'=>'Seu perfil nao permite esta operacao.'];
         echo '<!doctype html><html lang="pt-BR"><meta charset="utf-8"><title>Triagem de repasse</title><main><h1>'.($http<400?'Demanda registrada':'Nao foi possivel concluir a solicitacao').'</h1>';
         if(!empty($data['ok']))echo '<p>Demanda '.$e($data['id']).' pendente de analise. Valor R$ '.$e($data['amount']).'. Nenhuma transferencia foi executada por esta solicitacao.</p>';
         else echo '<p>'.$e($messages[$data['erro']??'']??'Confira os dados e tente novamente. Se a falha persistir, consulte o registro da operacao.').'</p>';

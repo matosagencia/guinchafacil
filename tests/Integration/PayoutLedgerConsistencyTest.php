@@ -34,6 +34,9 @@ final class PayoutLedgerConsistencyTest extends TestCase
         // (0.045) — a reconciliação DE TRÊS PARTES (guincho+plataforma+reserva
         // == total) é coberta em PedidoTransitionServiceSplitLiquidoTest.
         $pdo->exec("INSERT INTO configuracoes (chave, valor) VALUES ('reserva_gateway_percentual', '0')");
+        foreach (['reserva_gateway_pix', 'reserva_gateway_debito', 'reserva_gateway_credito', 'reserva_gateway_boleto'] as $key) {
+            $pdo->exec("INSERT INTO configuracoes (chave, valor) VALUES ('{$key}', '0')");
+        }
         $pdo->exec("INSERT INTO configuracoes (chave, valor) VALUES ('tempo_expiracao_min', '5')");
         $pdo->exec("INSERT INTO configuracoes (chave, valor) VALUES ('raio_inicial_km', '10')");
 
@@ -60,8 +63,8 @@ final class PayoutLedgerConsistencyTest extends TestCase
         $this->assertTrue($resultado->ok, (string)$resultado->error);
 
         $totais = PayoutLedgerEntry::somaPorTipo();
-        $this->assertEqualsWithDelta(200.0, ($totais['credito_guincho'] ?? 0) + ($totais['credito_plataforma'] ?? 0), 0.01,
-            'Soma de crédito de guincho + plataforma deve fechar exatamente com o valor total aprovado.');
+        $this->assertEqualsWithDelta(200.0, ($totais['credito_guincho'] ?? 0) + ($totais['credito_plataforma'] ?? 0) + ($totais['reserva_gateway'] ?? 0), 0.01,
+            'Soma de crédito de guincho + plataforma + reserva deve fechar exatamente com o valor total aprovado.');
     }
 
     public function testPayoutDebitMatchesCreditAndZeroesNetBalance(): void
@@ -107,7 +110,7 @@ final class PayoutLedgerConsistencyTest extends TestCase
         $this->assertTrue($aprova->ok);
 
         $entriesAntes = PayoutLedgerEntry::listarPorPedido(923);
-        $this->assertCount(2, $entriesAntes, 'Antes do estorno: 1 crédito de guincho + 1 de plataforma.');
+        $this->assertCount(2, array_filter($entriesAntes, static fn (array $e): bool => in_array($e['entry_type'], ['credito_guincho', 'credito_plataforma'], true)), 'Antes do estorno: 1 crédito de guincho + 1 de plataforma.');
 
         // 'freeflow' não é suportado por EstornoService — força a rota de erro,
         // mas isso não deve gerar nenhum lançamento no ledger (nem mexer nos já existentes).

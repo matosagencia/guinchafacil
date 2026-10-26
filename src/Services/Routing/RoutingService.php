@@ -20,32 +20,50 @@ require_once __DIR__ . '/../../Models/Configuracao.php';
 final class RoutingService
 {
     private static array $cache = [];
+    private static array $fontes = [];
+    private static ?string $ultimaFonte = null;
     private const TIMEOUT_MS = 2500;
     private const CONNECT_TIMEOUT_MS = 1200;
     private const ORS_DEFAULT_BASE = 'https://api.heigit.org/openrouteservice';
 
     public static function distanciaKm(float $latO, float $lngO, float $latD, float $lngD): ?float
     {
+        if (defined('GF_ROUTING_QA_FIXTURE') && GF_ROUTING_QA_FIXTURE === true) {
+            $fixtureKey = self::chaveCache($latO, $lngO, $latD, $lngD);
+            self::$fontes[$fixtureKey] = 'qa_fixture:rua_do_proposito_36-rua_da_gamboa_247';
+            self::$ultimaFonte = self::$fontes[$fixtureKey];
+            self::$cache[$fixtureKey] = 1.25;
+            return 1.25;
+        }
         $key = self::chaveCache($latO, $lngO, $latD, $lngD);
         if (array_key_exists($key, self::$cache)) {
+            self::$ultimaFonte = self::$fontes[$key] ?? null;
             return self::$cache[$key];
         }
 
         // 1. OpenRouteService (primário)
         $metros = self::chamarOrs($latO, $lngO, $latD, $lngD);
 
+        $fonte = $metros !== null ? 'ors' : null;
         // 2. OSRM (fallback, se ORS falhar e OSRM estiver configurado)
         if ($metros === null) {
             $metros = self::chamarOsrm($latO, $lngO, $latD, $lngD);
+            if ($metros !== null) $fonte = 'osrm';
         }
 
+        self::$fontes[$key] = $fonte;
+        self::$ultimaFonte = $fonte;
         self::$cache[$key] = $metros !== null ? round($metros / 1000, 2) : null;
         return self::$cache[$key];
     }
 
+    public static function ultimaFonte(): ?string { return self::$ultimaFonte; }
+
     public static function limparCache(): void
     {
         self::$cache = [];
+        self::$fontes = [];
+        self::$ultimaFonte = null;
     }
 
     /**

@@ -381,6 +381,7 @@ $rotas = [
         '/admin/clientes/ajax'       => ['AdminController', 'clientesAjax', 'admin'],
         '/admin/oficinas/ajax'       => ['AdminController', 'oficinasAjax', 'admin'],
         '/admin/financeiro'          => ['AdminController', 'financeiro', 'admin'],
+        '/admin/financeiro/compensacao' => ['Fin2ApuracaoController', 'index', 'admin'],
         '/admin/oficinas-parceiras'  => ['OficinaParceriaController', 'admin', 'admin'],
         '/admin/prestadores-moveis' => ['AdminController', 'prestadoresMoveis', 'admin'],
         '/admin/financeiro/bypass-alertas' => ['OficinaParceriaController', 'bypassCasos', 'admin'],
@@ -446,6 +447,11 @@ $rotas = [
         '/pagamento/sucesso'  => ['PagamentoController', 'sucesso', null],
         '/pagamento/falha'    => ['PagamentoController', 'falha', null],
         '/pagamento/pendente' => ['PagamentoController', 'pendente', null],
+        // M1 — telas de triagem/listagem/consulta são GET.
+        '/admin/repasses/triagem' => ['GFPayoutReviewController', 'form', 'admin'],
+        '/admin/repasses/demandas' => ['GFPayoutDecisionController', 'listing', 'gerente'],
+        '/admin/repasses/demanda' => ['GFPayoutDecisionController', 'form', 'gerente'],
+        '/admin/repasses/recuperacao' => ['GFPayoutRecoveryController', 'form', 'admin'],
     ],
 
     'POST' => [
@@ -521,6 +527,10 @@ $rotas = [
 
         '/cliente/triagem/responder' => ['ClienteController', 'triagemResponder', 'cliente'],
         '/cliente/triagem/avaliar' => ['ClienteController', 'triagemAvaliarJson', 'cliente'],
+        // M1 — ações financeiras protegidas por CSRF e autorização.
+        '/admin/repasses/triagem/criar' => ['GFPayoutReviewController', 'create', 'admin'],
+        '/admin/repasses/demanda/decidir' => ['GFPayoutDecisionController', 'decide', 'gerente'],
+        '/admin/repasses/recuperacao/enfileirar' => ['GFPayoutRecoveryController', 'queue', 'admin'],
         '/cliente/perfil/salvar'   => ['ClienteController', 'perfilSalvar', 'cliente'],
         '/cliente/chat/enviar'     => ['ClienteController', 'chatEnviar', 'cliente'],
 

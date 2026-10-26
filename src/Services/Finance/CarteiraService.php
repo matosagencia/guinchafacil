@@ -203,8 +203,8 @@ class CarteiraService
         try {
             $stmt = getPDO()->prepare(
                 "SELECT
-                    p.id AS pedido_id, p.guincho_id, go.nome AS guincho_operador,
-                    pg.id AS pagamento_id, pg.status_pix, pg.valor_guincho,
+                    p.id AS pedido_id, p.status AS pedido_status, p.guincho_id, go.nome AS guincho_operador,
+                    pg.id AS pagamento_id, pg.status_pix, pg.valor_guincho,                    0 AS valor_repassado, pg.valor_guincho AS valor_pendente,                    0 AS valor_estornado, pg.valor_guincho AS remaining,
                     pg.criado_em AS pagamento_criado_em, pg.data_pagamento
                  FROM pagamentos pg
                  JOIN pedidos p ON p.id = pg.pedido_id
