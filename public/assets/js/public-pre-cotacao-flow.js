@@ -298,9 +298,15 @@
                     categoriaInformada
                 );
 
-                showStage('sintoma');
-
-                carregarTriagemServico();
+                // [FIX-B3] skipVeiculo deve respeitar STATE.modo:
+                // levar_carro vai para destino; assistência vai para sintoma.
+                if (STATE.modo === 'levar_carro') {
+                    showStage('destino');
+                    inicializarDestino();
+                } else {
+                    showStage('sintoma');
+                    carregarTriagemServico();
+                }
 
                 return;
             }
@@ -408,6 +414,8 @@
                         'class="choice-card" ' +
                         'data-servico="' +
                         escapeHtml(s.slug) +
+                        '" data-attendance-mode="' +
+                        escapeHtml(s.attendance_mode || '') +
                         '">' +
 
                         '<i class="fas ' +
@@ -471,6 +479,14 @@
                 'servico ->',
                 slug
             );
+
+            // Tipo de reboque do catálogo: leva ao destino sem oferecer
+            // assistência ON_SITE; a cotação oficial ocorre depois.
+            if (btn.getAttribute('data-attendance-mode') === 'TOWING') {
+                showStage('destino');
+                inicializarDestino();
+                return;
+            }
 
             carregarOpcoes(slug);
         }

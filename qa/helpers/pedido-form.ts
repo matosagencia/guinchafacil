@@ -33,45 +33,28 @@ async function preencherFormularioAteEstimativa(page: Page, opts: CriarPedidoVia
   await page.goto(appPath('/cliente/pedido/novo'), { waitUntil: 'domcontentloaded' });
   await waitForLeafletMap(page);
 
-  // Tela redesenhada (wizard sintoma -> detalhes -> confirmar): o veículo é um
-  // <select> #veiculo_id_select só quando a conta tem 2+ veículos; com 1 só,
-  // vira <input hidden> #veiculo_id já preenchido. Detecta os dois casos.
-  const veiculoSelect = page.locator('#veiculo_id_select');
-  if (await veiculoSelect.count()) {
-    await veiculoSelect.selectOption({ index: 1 });
-  } else {
-    const hiddenVeiculo = await page.locator('#veiculo_id').getAttribute('value').catch(() => '');
-    if (!hiddenVeiculo || hiddenVeiculo === '0') {
-      throw new Error('Conta de teste sem veículo cadastrado — não dá pra criar pedido pelo formulário. Cadastre um veículo em /cliente/veiculo/novo antes.');
-    }
+  const origem = page.locator('[data-role="origem"]');
+  const origemInput = origem.locator('[data-ap-input]');
+  await origemInput.fill(opts.origem);
+  await origem.locator('.gf-ap__item').first().click({ timeout: 30000 });
+  const origemConfirm = origem.locator('[data-ap-confirm-btn]');
+  if (await origemConfirm.isVisible().catch(() => false)) await origemConfirm.click();
+
+  const modo = page.locator('#stage-modo [data-mode="levar_carro"], #gfModes [data-mode="levar_carro"]').first();
+  if (await modo.count()) { await expect(modo).toBeVisible({ timeout: 20000 }); await modo.click(); }
+
+  const destino = page.locator('[data-role="destino"]');
+  if (await destino.count()) {
+    const destinoInput = destino.locator('[data-ap-input]');
+    await expect(destinoInput).toBeVisible({ timeout: 10000 });
+    await destinoInput.fill(opts.destino);
+    await destino.locator('.gf-ap__item').first().click({ timeout: 30000 });
+    const destinoConfirm = destino.locator('[data-ap-confirm-btn]');
+    if (await destinoConfirm.isVisible().catch(() => false)) await destinoConfirm.click();
   }
 
-  // Pula a triagem (chips de sintoma) e vai direto ao passo de confirmação:
-  // #btnPularTriagem seta tipo_problema='outro', marca destino como necessário
-  // e mostra a etapa "confirmar" (destino/custo/submit). Caminho estável que
-  // não depende de qual sintoma tem perguntas extras.
-  await page.click('#btnPularTriagem');
-
-  // Origem: busca por endereço (geocode real), não clique no mapa. O feedback
-  // fica em #origemFeedback (o antigo #badgeOrigem não existe mais).
-  await page.fill('#inputOrigem', opts.origem);
-  await page.click('#btnBuscarOrigem');
-  await expect(page.locator('#origemFeedback'), `Falha ao geocodificar origem "${opts.origem}"`)
-    .toContainText(/localiza..o encontrada/i, { timeout: 15000 });
-
-  // Destino: se houver oficinas cadastradas, o campo de endereço livre fica
-  // atrás da aba "Outro Endereço" (#tabOutro); senão já é o campo principal.
-  const tabOutro = page.locator('#tabOutro');
-  if (await tabOutro.count().catch(() => 0)) {
-    await tabOutro.click();
-  }
-  await page.fill('#inputDest', opts.destino);
-  await page.locator('#btnBuscarDestinoTab, #btnBuscarDestinoLivre').first().click();
-  await expect(page.locator('#destFeedback'), `Falha ao geocodificar destino "${opts.destino}"`)
-    .toContainText(/destino encontrado/i, { timeout: 15000 });
-  await expect(page.locator('#badgeDest')).toContainText(/Definido/i);
+  await expect(page.locator('#gfBtnFinal, #btnSubmit').first()).toBeEnabled({ timeout: 20000 });
 }
-
 export async function criarPedidoViaFormulario(page: Page, opts: CriarPedidoViaFormularioOpts): Promise<number> {
   // Todo o preenchimento (goto -> veículo -> tipo -> geocode de origem ->
   // geocode de destino -> espera do botão habilitar) depende de chamadas de
@@ -103,7 +86,7 @@ export async function criarPedidoViaFormulario(page: Page, opts: CriarPedidoViaF
     );
   }
 
-  await page.click('#btnSubmit');
+  await page.locator('#gfBtnFinal, #btnSubmit').first().click();
 
   await page.waitForURL(/\/(pagamento\/checkout|cliente\/dashboard)/i, { timeout: 20000 });
   const match = page.url().match(/\/pagamento\/checkout\/(\d+)/);

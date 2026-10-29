@@ -5,7 +5,7 @@ declare(strict_types=1);
  * §9 — Bloqueio financeiro operacional.
  *
  * Regra: guincho bloqueado se existe fatura com parceiro_tipo='guincho',
- * parceiro_id = :id e status IN ('vencida','bloqueada') em faturas_parceiro.
+ * parceiro_id = :id e status = 'bloqueada' em faturas_parceiro.
  *
  * Parceiro bloqueado:
  *   - não aparece no anel de candidatos (§7)
@@ -15,12 +15,19 @@ declare(strict_types=1);
  */
 final class BloqueioFinanceiroService
 {
+    private static function ativo(): bool
+    {
+        $stmt = getPDO()->prepare("SELECT valor FROM configuracoes WHERE chave = 'bloqueio_financeiro_ativo' LIMIT 1");
+        $stmt->execute();
+        return (string)$stmt->fetchColumn() === '1';
+    }
+
     /** Cache por request para consultas de 1 em 1. */
     private static array $cache = [];
 
     public static function guinchoEstaBloqueado(int $guinchoId): bool
     {
-        if ($guinchoId <= 0) {
+        if ($guinchoId <= 0 || !self::ativo()) {
             return false;
         }
         if (array_key_exists($guinchoId, self::$cache)) {
@@ -32,7 +39,7 @@ final class BloqueioFinanceiroService
                FROM faturas_parceiro
               WHERE parceiro_tipo = 'guincho'
                 AND parceiro_id   = :id
-                AND status IN ('vencida','bloqueada')
+                AND status = 'bloqueada'
               LIMIT 1"
         );
         $stmt->execute([':id' => $guinchoId]);
@@ -47,11 +54,12 @@ final class BloqueioFinanceiroService
      */
     public static function idsBloqueados(): array
     {
+        if (!self::ativo()) return [];
         $stmt = getPDO()->query(
             "SELECT DISTINCT parceiro_id
                FROM faturas_parceiro
               WHERE parceiro_tipo = 'guincho'
-                AND status IN ('vencida','bloqueada')"
+                AND status = 'bloqueada'"
         );
 
         return array_map('intval', $stmt->fetchAll(PDO::FETCH_COLUMN));
@@ -63,12 +71,13 @@ final class BloqueioFinanceiroService
      */
     public static function motivo(int $guinchoId): ?array
     {
+        if (!self::ativo()) return null;
         $stmt = getPDO()->prepare(
             "SELECT id, status, saldo, vencimento_em
                FROM faturas_parceiro
               WHERE parceiro_tipo = 'guincho'
                 AND parceiro_id   = :id
-                AND status IN ('vencida','bloqueada')
+                AND status = 'bloqueada'
               ORDER BY vencimento_em ASC
               LIMIT 1"
         );

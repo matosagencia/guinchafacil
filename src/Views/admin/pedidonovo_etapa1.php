@@ -17,23 +17,26 @@ $flash = $flash ?? null;
 include __DIR__ . '/../layouts/header.php';
 ?>
 <link rel="stylesheet" href="<?= $e($bp) ?>/public/assets/css/pages/admin-pedido-flow.css?v=20261002-1">
+<link rel="stylesheet" href="<?= $e($bp) ?>/public/assets/css/pages/lovable-admin-funil.css?v=20261016-4b">
 
+<link rel="stylesheet" href="<?= $e($bp) ?>/public/assets/css/pages/gf-admin-funil-lovable-light-v2.css?v=20261016">
+<link rel="stylesheet" href="<?= $e($bp) ?>/public/assets/css/pages/gf-admin-criar-pedido-lovable-v3.css?v=20261016-9">
 <div class="main-wrapper shell admin-shell">
 <?php include __DIR__ . '/../layouts/sidebar_admin.php'; ?>
-<main class="main-content shell-main shell-content">
+<main class="main-content shell-main shell-content gf-lovable-admin-flow gf-admin-order-v3">
 
-    <header class="page-head mb-4">
-        <div>
-            <span class="eyebrow">Administração</span>
-            <h1>
-                <i class="fas fa-route me-2 text-primary-custom"></i>
-                Novo pedido
-            </h1>
-            <p class="text-muted mb-0">
-                Passo 1 de 2 — escolha em nome de quem o pedido será criado.
-            </p>
-        </div>
+    <nav class="gf-order-crumb" aria-label="Localização"><a href="<?= $e($bp) ?>/admin/dashboard">Backoffice</a><span aria-hidden="true">›</span><a href="<?= $e($bp) ?>/admin/pedidos">Pedidos</a><span aria-hidden="true">›</span><strong>Novo pedido</strong></nav>
+    <header class="gf-order-intro">
+      <div><span class="gf-order-eyebrow">ATENDIMENTO / ABERTURA ASSISTIDA</span>
+        <h1>Novo pedido de socorro</h1>
+        <p>Selecione o cliente e o veículo antes de iniciar a triagem.</p></div>
+      <a class="gf-order-back" href="<?= $e($bp) ?>/admin/pedidos">Voltar aos pedidos</a>
     </header>
+    <ol class="gf-order-progress" aria-label="Etapas do pedido">
+      <li class="is-active" aria-current="step"><span>1</span><div><strong>Cliente e veículo</strong><small>Identificação</small></div></li>
+      <li><span>2</span><div><strong>Triagem e cotação</strong><small>Atendimento</small></div></li>
+    </ol>
+    <section class="gf-order-section-heading" aria-label="Contexto do pedido"><h2>Identificação do atendimento</h2><p>Dados vinculados ao pedido. Os cadastros rápidos continuam disponíveis.</p></section>
 
     <?php if (!empty($flash) && !empty($flash['message'])): ?>
     <div class="alert alert-<?= $e(($flash['type'] ?? '') === 'success' ? 'success' : 'danger') ?> mb-3">
@@ -59,10 +62,10 @@ include __DIR__ . '/../layouts/header.php';
     </div>
     <?php else: ?>
 
-    <form method="POST" action="<?= $e($bp) ?>/admin/pedido/novo/contexto" class="admin-flow-card">
+    <form method="POST" action="<?= $e($bp) ?>/admin/pedido/novo/contexto" class="admin-flow-card gf-order-form">
         <input type="hidden" name="csrf_token" value="<?= $e($csrf_token ?? '') ?>">
 
-        <div class="mb-3">
+        <div class="mb-3 gf-order-field">
             <label class="form-label">Cliente <span class="text-danger">*</span></label>
             <select class="form-select" name="cliente_id" id="cliente_id" required>
                 <option value="">Selecione um cliente…</option>
@@ -74,7 +77,7 @@ include __DIR__ . '/../layouts/header.php';
             </select>
         </div>
 
-        <div class="mb-3">
+        <div class="mb-3 gf-order-field">
             <label class="form-label">Veículo <span class="text-danger">*</span></label>
             <select class="form-select" name="veiculo_id" id="veiculo_id" required disabled>
                 <option value="">Selecione primeiro o cliente…</option>

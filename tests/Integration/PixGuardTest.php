@@ -8,7 +8,9 @@ final class PixGuardTest extends TestCase
     protected function setUp(): void
     {
         $pdo = getPDO();
+        $pdo->exec('SET FOREIGN_KEY_CHECKS=0');
         foreach (['pagamentos', 'pedidos', 'veiculos', 'usuarios'] as $t) { try { $pdo->exec("DELETE FROM {$t}"); } catch (Throwable) {} }
+        $pdo->exec('SET FOREIGN_KEY_CHECKS=1');
 
         // Fixtures mínimas exigidas pela FK fk_pedidos_cliente/fk_pedidos_veiculo (Pacote L1.3).
         $pdo->exec("

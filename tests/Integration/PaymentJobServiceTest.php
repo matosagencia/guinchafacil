@@ -10,12 +10,14 @@ final class PaymentJobServiceTest extends TestCase
     protected function setUp(): void
     {
         $pdo = getPDO();
+        $pdo->exec('SET FOREIGN_KEY_CHECKS=0');
         foreach (['payment_job_attempts', 'payment_jobs', 'pagamentos', 'pedidos', 'guinchos', 'veiculos', 'usuarios', 'configuracoes'] as $table) {
             try {
                 $pdo->exec("DELETE FROM {$table}");
             } catch (Throwable) {
             }
         }
+        $pdo->exec('SET FOREIGN_KEY_CHECKS=1');
 
         $pdo->exec("INSERT INTO configuracoes (chave, valor) VALUES ('comissao_plataforma', '0.15')");
 

@@ -187,7 +187,7 @@ function qaCreatePedido(int $clienteId, int $veiculoId, int $guinchoId): array
         throw new RuntimeException('Falha ao criar pedido QA de atendimento completo.');
     }
 
-    Pedido::atribuirGuincho((int)$pedidoId, $guinchoId);
+    getPDO()->prepare("UPDATE pedidos SET guincho_id = ?, status = 'a_caminho' WHERE id = ?")->execute([$guinchoId, (int)$pedidoId]);
     return Pedido::buscarPorId((int)$pedidoId) ?: [];
 }
 

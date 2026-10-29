@@ -5,7 +5,8 @@ $osrmBaseUrl = PorThresholds::routingFrontendBaseUrl();
 $flashMessages = $_SESSION['_flash'] ?? [];
 if (isset($flashMessages['message'])) $flashMessages = [$flashMessages];
 unset($_SESSION['_flash']);
-include __DIR__ . '/../layouts/header.php';require_once __DIR__ . '/../../Services/POR/PorThresholds.php';$statusLabels = [
+include __DIR__ . '/../layouts/header.php';
+echo '<link rel="stylesheet" href="' . htmlspecialchars($bp, ENT_QUOTES, 'UTF-8') . '/public/assets/css/pages/gf-f18e5-modais-lovable.css?v=2">';require_once __DIR__ . '/../../Services/POR/PorThresholds.php';$statusLabels = [
     'aguardando_pagamento' => 'Aguardando Pagamento',
     'aguardando_guincho'   => 'Aguardando Guincho',
     'a_caminho'            => 'A Caminho',
@@ -15,8 +16,10 @@ include __DIR__ . '/../layouts/header.php';require_once __DIR__ . '/../../Servi
     'cancelado'            => 'Cancelado',
 ];
 ?>
-<link rel="stylesheet" href="<?php echo htmlspecialchars($bp); ?>/public/assets/css/pages/admin-pedidodetalhe.css">
-<div class="main-wrapper shell admin-shell">
+<link rel="stylesheet" href="<?php echo htmlspecialchars($bp); ?>/public/assets/css/pages/admin-pedidodetalhe.css">
+<link rel="stylesheet" href="<?php echo htmlspecialchars($bp, ENT_QUOTES, 'UTF-8'); ?>/public/assets/css/pages/gf-f18e6-ficha-lovable.css?v=1">
+<link rel="stylesheet" href="<?php echo htmlspecialchars($bp, ENT_QUOTES, 'UTF-8'); ?>/public/assets/css/pages/gf-f18e7-geometria-por.css?v=1">
+<div class="main-wrapper shell admin-shell gf-order-detail">
 <?php include __DIR__ . '/../layouts/sidebar_admin.php'; ?>
 <main class="main-content shell-main shell-content">
 

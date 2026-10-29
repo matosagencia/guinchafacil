@@ -4,7 +4,8 @@ $mostrarMercadoPago = $mostrarMercadoPago ?? true;
 $mostrarPagSeguro = $mostrarPagSeguro ?? false;
 $mpPublicKey = $mpPublicKey ?? '';
 $pedidoId = (int)($pedido['id'] ?? 0);
-$valorPedido = (float)($pedido['custo_estimado'] ?? 0);
+$valorPedido = (float)($valorSnapshot ?? $pedido['custo_estimado'] ?? 0);
+$formaPagamentoEscolhida = strtolower(trim((string)($pedido['forma_pagamento_escolhida'] ?? '')));
 $psScriptBase = (defined('PS_ENV') && PS_ENV === 'production')
     ? 'https://stc.pagseguro.uol.com.br'
     : 'https://stc.sandbox.pagseguro.uol.com.br';
@@ -25,6 +26,27 @@ include __DIR__ . '/../layouts/header.php';
     </header>
 
     <div id="checkout-mensagem" class="alert d-none" role="alert"></div>
+
+    <?php if ($formaPagamentoEscolhida === 'pago_na_chegada'): ?>
+        <div class="alert alert-info" role="alert">
+            <i class="fas fa-hand-holding-dollar me-1"></i>
+            Este pedido foi configurado para pagamento na chegada, em dinheiro. O parceiro confirmará o recebimento ao concluir o atendimento.
+        </div>
+    <?php else: ?>
+        <div class="card mb-4 gf-payment-card">
+            <div class="card-body">
+                <h5 class="mb-2"><i class="fas fa-wallet me-1"></i>Escolha como pagar</h5>
+                <p class="text-muted mb-3">Você pode pagar online agora ou diretamente ao parceiro na chegada.</p>
+                <label class="d-block mb-2"><input type="radio" checked disabled> Pagar online agora</label>
+                <form method="post" action="<?php echo htmlspecialchars($bp); ?>/pagamento/checkout/" class="mt-2">
+                    <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($csrfToken); ?>">
+                    <input type="hidden" name="pedido_id" value="<?php echo $pedidoId; ?>">
+                    <input type="hidden" name="forma_pagamento" value="pago_na_chegada">
+                    <button type="submit" class="btn btn-outline-success">Pagar na chegada em dinheiro</button>
+                </form>
+            </div>
+        </div>
+    <?php endif; ?>
 
     <?php if (!$mostrarMercadoPago && !$mostrarPagSeguro): ?>
         <div class="alert alert-warning" role="alert">
@@ -257,6 +279,7 @@ include __DIR__ . '/../layouts/header.php';
     var CSRF_TOKEN = <?php echo json_encode($csrfToken ?? ''); ?>;
     var VALOR_PEDIDO = <?php echo json_encode($valorPedido); ?>;
     var MP_PUBLIC_KEY = <?php echo json_encode($mpPublicKey); ?>;
+    var PAYER_INICIAL = <?php echo json_encode($payerInicial ?? [], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>;
 
     function mostrarMensagemGlobal(texto, tipo) {
         var el = document.getElementById('checkout-mensagem');
@@ -322,6 +345,7 @@ include __DIR__ . '/../layouts/header.php';
         bricksBuilder.create('payment', 'mp-payment-brick-container', {
             initialization: {
                 amount: VALOR_PEDIDO,
+                ...(PAYER_INICIAL.email ? {payer: PAYER_INICIAL} : {}),
             },
             customization: {
                 paymentMethods: {
@@ -332,10 +356,14 @@ include __DIR__ . '/../layouts/header.php';
                 },
             },
             callbacks: {
-                onReady: function () {},
+                onReady: function () {
+                    window.__qaPaymentBrickState = { estado: 'ready' };
+                },
                 onError: function (error) {
                     console.error('[Brick][onError]', error);
-                    mostrarMensagemGlobal('Não foi possível carregar o formulário de pagamento do MercadoPago.', 'danger');
+                    var detalhe = error && (error.message || error.cause) ? (error.message || error.cause) : 'erro desconhecido';
+                    window.__qaPaymentBrickState = { estado: 'error', detalhe: String(detalhe) };
+                    mostrarMensagemGlobal('Não foi possível carregar o formulário de pagamento do MercadoPago: ' + String(detalhe), 'danger');
                 },
                 // §PAY-BRICK-01: o SDK do MP chama onSubmit com um único
                 // objeto { selectedPaymentMethod, formData } — NÃO com o
@@ -348,6 +376,10 @@ include __DIR__ . '/../layouts/header.php';
                 // exatamente o bug que apareceu no primeiro teste real.
                 onSubmit: function (dadosSubmit) {
                     var formData = (dadosSubmit && dadosSubmit.formData) ? dadosSubmit.formData : dadosSubmit;
+                    var controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
+                    var timeoutId = setTimeout(function () {
+                        if (controller) controller.abort();
+                    }, 45000);
                     return fetch(BP + '/pagamento/mercadopago/pagar', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
@@ -356,8 +388,19 @@ include __DIR__ . '/../layouts/header.php';
                             pedido_id: PEDIDO_ID,
                             formData: formData,
                         }),
+                        signal: controller ? controller.signal : undefined,
                     })
-                        .then(function (r) { return r.json(); })
+                        .then(function (r) {
+                            return r.json().then(function (body) {
+                                if (!r.ok) {
+                                    body = body && typeof body === 'object' ? body : {};
+                                    body.sucesso = false;
+                                    body.erro = body.erro || ('HTTP ' + r.status + ' ao processar pagamento');
+                                }
+                                return body;
+                            });
+                        })
+                        .finally(function () { clearTimeout(timeoutId); })
                         .then(function (resp) {
                             tratarRespostaPagamento(resp, 'mp-payment-status');
                             if (!resp.sucesso || resp.status !== 'aprovado') {
@@ -368,6 +411,7 @@ include __DIR__ . '/../layouts/header.php';
                         })
                         .catch(function (err) {
                             console.error('[Brick][onSubmit]', err);
+                            window.__qaUltimaRespostaPagamento = { sucesso: false, erro: (err && err.message) ? err.message : 'Erro de comunicação ao processar o pagamento.' };
                             mostrarMensagemGlobal('Erro de comunicação ao processar o pagamento.', 'danger');
                             return Promise.reject(err);
                         });

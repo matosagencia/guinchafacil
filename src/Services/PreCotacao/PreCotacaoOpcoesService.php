@@ -29,7 +29,7 @@ final class PreCotacaoOpcoesService
         $modo = in_array($modo, ['orientacao', 'local', 'reboque'], true) ? $modo : 'orientacao';
         $slugServico = trim($slugServico);
 
-        $taxaReboque = self::taxaBaseReboque();
+        // §23: disponibilidade somente; nenhum dinheiro calculado aqui.
 
         // ─── Modo REBOQUE (levar o carro) ───
         // Retorno antecipado: este modo NÃO consulta oficinas. A fonte de
@@ -44,13 +44,10 @@ final class PreCotacaoOpcoesService
                     'mensagem' => 'Nenhum guincho disponível na sua região agora.',
                 ];
             }
-            $distancia = self::calcularDistancia($latOrigem, $lngOrigem, $latDestino, $lngDestino);
             return [
                 'modo' => 'reboque',
                 'disponivel' => true,
-                'valor_reboque' => self::calcularValorReboque($distancia),
-                'taxa_base_reboque' => $taxaReboque,
-                'distancia_km' => $distancia,
+                'preco_status' => 'NAO_CALCULADO',
                 'fallback_tipo' => null,
             ];
         }
@@ -58,7 +55,6 @@ final class PreCotacaoOpcoesService
         // Só os modos de assistência consultam oficinas/especialistas.
         $temGuincho = GuinchoDisponibilidade::existeNoRaio($latOrigem, $lngOrigem);
         $oficinas = self::oficinasParaServico($latOrigem, $lngOrigem, $slugServico);
-        $valorDeslocamento = self::valorDeslocamentoServico($slugServico);
 
         // ─── Modo LOCAL (resolver no local) ───
         if ($modo === 'local') {
@@ -67,7 +63,6 @@ final class PreCotacaoOpcoesService
                     'modo' => 'local',
                     'disponivel' => false,
                     'fallback_tipo' => $temGuincho ? 'guincho' : 'suporte',
-                    'taxa_base_reboque' => $taxaReboque,
                     'servico' => $slugServico,
                     'mensagem' => 'Nenhuma oficina para ' . $slugServico . ' na sua região.',
                 ];
@@ -75,8 +70,6 @@ final class PreCotacaoOpcoesService
             return [
                 'modo' => 'local',
                 'disponivel' => true,
-                'valor_deslocamento' => $valorDeslocamento,
-                'abatido_do_reparo' => true,
                 'oficinas_encontradas' => count($oficinas),
                 'servico' => $slugServico,
                 'fallback_tipo' => null,
@@ -90,7 +83,6 @@ final class PreCotacaoOpcoesService
                 'modo' => 'orientacao',
                 'disponivel' => false,
                 'fallback_tipo' => $temGuincho ? 'guincho' : 'suporte',
-                'taxa_base_reboque' => $taxaReboque,
                 'servico' => $slugServico,
                 'mensagem' => 'Nenhuma oficina para ' . $slugServico . ' na sua região.',
             ];
@@ -99,61 +91,10 @@ final class PreCotacaoOpcoesService
         return [
             'modo' => 'orientacao',
             'disponivel' => true,
-            'valor_deslocamento' => $valorDeslocamento,
-            'taxa_base_reboque' => $taxaReboque,
-            'abatido_do_reparo' => true,
             'oficinas_encontradas' => count($oficinas),
-            'economia_estimada' => max(0.0, round($taxaReboque - $valorDeslocamento, 2)),
             'servico' => $slugServico,
             'fallback_tipo' => null,
         ];
-    }
-
-    private static function valorDeslocamentoServico(string $slug): float
-    {
-        $base = (float)(Configuracao::get('custo_saida_profissional_padrao', '80.00') ?: 80.0);
-        $comissao = (float)(Configuracao::get('comissao_assistencia_percentual', '0.21') ?: 0.21);
-        $valor = round($base * (1 + $comissao), 2);
-
-        try {
-            $override = Configuracao::get('custo_saida_' . $slug, null);
-            if ($override !== null && $override !== '') {
-                $valor = (float)$override;
-            }
-        } catch (Throwable $e) { /* mantém default */ }
-
-        return max(0.0, $valor);
-    }
-
-    private static function taxaBaseReboque(): float
-    {
-        try {
-            return (float)(Configuracao::get('taxa_fixa', '150.00') ?: 150.0);
-        } catch (Throwable $e) {
-            return 150.0;
-        }
-    }
-
-    private static function calcularValorReboque(float $distanciaKm): float
-    {
-        if ($distanciaKm <= 0.5) $distanciaKm = 5.0;
-        $base = self::taxaBaseReboque();
-        try {
-            $tarifaKm = (float)(Configuracao::get('tarifa_por_km', '3.50') ?: 3.5);
-        } catch (Throwable $e) {
-            $tarifaKm = 3.5;
-        }
-        return round($base + ($tarifaKm * $distanciaKm), 2);
-    }
-
-    private static function calcularDistancia(float $lat1, float $lng1, ?float $lat2, ?float $lng2): float
-    {
-        if ($lat2 === null || $lng2 === null) return 5.0;
-        $rad = M_PI / 180;
-        $a = sin(($lat2 - $lat1) * $rad / 2) ** 2
-            + cos($lat1 * $rad) * cos($lat2 * $rad) * sin(($lng2 - $lng1) * $rad / 2) ** 2;
-        $d = 6371.0 * 2 * asin(min(1.0, sqrt($a)));
-        return max(0.5, round($d, 2));
     }
 
     private static function oficinasParaServico(float $lat, float $lng, string $slug): array

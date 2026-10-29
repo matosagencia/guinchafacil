@@ -30,16 +30,21 @@ final class PedidoController
                 FILTER_VALIDATE_BOOLEAN,
                 FILTER_NULL_ON_FAILURE
             );
+            // Catálogo dinâmico também governa a decisão pública.
+            require_once __DIR__ . '/../Models/Catalog/ServiceType.php';
+            $slug = strtolower(trim((string)($draft['tipo_problema'] ?? $draft['tipo'] ?? '')));
+            if (!ServiceType::buscarPorSlugPublico($slug)) {
+                throw new InvalidArgumentException('PRICE-SERVICE-INACTIVE');
+            }
             $service = new DecisaoAtendimentoService();
             $decisao = $service->avaliar(
-                (int)($draft['pedido_id'] ?? 0),
+                0, // B-011: endpoint público nunca altera pedido existente
                 (string)($draft['tipo_problema'] ?? $draft['tipo'] ?? 'outro'),
                 (float)$lat,
                 (float)$lng,
                 [
                     'categoria' => (string)($draft['categoria'] ?? 'popular'),
-                    'distancia_km' => (float)($draft['distancia_km'] ?? 5.0),
-                    'custo_total' => (float)($draft['custo_total'] ?? $draft['valor'] ?? 0.0),
+                    // Campos de preço/distância enviados pelo cliente são ignorados.
                     'veiculo_pode_mover' => $veiculoPodeMover ?? true,
                 ]
             );
@@ -51,16 +56,8 @@ final class PedidoController
                     'payload' => $decisao,
                     'registrado_em' => date('c'),
                 ];
-                $pedidoId = (int)($draft['pedido_id'] ?? 0);
-                if ($pedidoId > 0) {
-                    $codigo = $escolha === 'assistencia'
-                        ? PedidoDecisaoSocorro::ORCAMENTO_INFORMADO
-                        : PedidoDecisaoSocorro::REBOQUE_SOLICITADO;
-                    PedidoDecisaoSocorro::registrar($pedidoId, $codigo, 'cliente', (int)($_SESSION['usuario_id'] ?? 0) ?: null, null, [
-                        'origem' => 'pre_cotacao',
-                        'recomendacao' => $decisao['recomendacao'] ?? null,
-                    ]);
-                }
+                // Sem persistência de decisão em pedido, mesmo que haja pedido_id no POST.
+
             }
 
             return $decisao + ['escolha' => $escolha !== '' ? $escolha : null];

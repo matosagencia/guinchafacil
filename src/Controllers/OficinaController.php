@@ -391,7 +391,7 @@ class OficinaController extends BaseController
         require_once __DIR__ . '/../Models/Configuracao.php';
         $cfg = Configuracao::getAll();
         $systemMode = (string)($cfg['system_mode'] ?? 'production');
-        $comissaoPercent = (float)($cfg['comissao_plataforma'] ?? 0.15) * 100;
+        $comissaoPercent = (float)($cfg['comissao_plataforma'] ?? 0.08) * 100;
 
         $csrfToken = AuthService::gerarCsrfToken();
 
@@ -416,9 +416,15 @@ class OficinaController extends BaseController
     {
         $oficina = $this->getOficina();
 
-        $stmt = getPDO()->prepare("SELECT tipo FROM oficina_servicos WHERE oficina_id = ? AND ativo = 1");
+        // Fonte canonica unica: /admin/catalogo-servicos/tipos -> service_types.
+        $stmt = getPDO()->query("SELECT id, code, name, description, attendance_mode
+                                  FROM service_types WHERE active = 1
+                                  ORDER BY category_id, id");
+        $servicosDisponiveis = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $stmt = getPDO()->prepare("SELECT service_type_id FROM oficina_service_types
+                                    WHERE oficina_id = ? AND active = 1");
         $stmt->execute([(int)$oficina['id']]);
-        $servicosAtuais = array_column($stmt->fetchAll(PDO::FETCH_ASSOC), 'tipo');
+        $servicosAtuais = array_map('intval', $stmt->fetchAll(PDO::FETCH_COLUMN));
 
         $csrfToken = AuthService::gerarCsrfToken();
         require __DIR__ . '/../Views/oficina/perfil.php';
@@ -455,7 +461,9 @@ class OficinaController extends BaseController
         }
 
         try {
-            getPDO()->prepare(
+            $pdo = getPDO();
+            $pdo->beginTransaction();
+            $pdo->prepare(
                 "UPDATE oficinas SET
                     nome = :nome, telefone = :telefone, endereco = :endereco,
                     latitude = :latitude, longitude = :longitude,
@@ -478,8 +486,27 @@ class OficinaController extends BaseController
                 ':banco_conta'   => $dados['banco_conta'],
                 ':id'            => (int)$oficina['id'],
             ]);
+            // Sincroniza somente parceiro EXPLICITAMENTE vinculado. Nunca cria/autoriza provider.
+            $linked = $pdo->prepare("SELECT l.provider_id FROM oficina_provider_links l
+                INNER JOIN providers p ON p.id=l.provider_id AND p.provider_type='WORKSHOP'
+                WHERE l.oficina_id=? FOR UPDATE");
+            $linked->execute([(int)$oficina['id']]);
+            $providerId=$linked->fetchColumn();
+            if ($providerId !== false) {
+                $sync=$pdo->prepare("UPDATE provider_workshop_settings
+                    SET address=?, latitude=?, longitude=?, updated_at=NOW()
+                    WHERE provider_id=?");
+                $sync->execute([$dados['endereco'],$dados['latitude'],$dados['longitude'],(int)$providerId]);
+                if ($sync->rowCount() === 0) {
+                    $exists=$pdo->prepare('SELECT 1 FROM provider_workshop_settings WHERE provider_id=?');
+                    $exists->execute([(int)$providerId]);
+                    if (!$exists->fetchColumn()) throw new RuntimeException('Provider vinculado sem configuracoes operacionais');
+                }
+            }
+            $pdo->commit();
             $this->setFlashMessage('Perfil atualizado!', 'success');
         } catch (Throwable $e) {
+            if (isset($pdo) && $pdo->inTransaction()) $pdo->rollBack();
             error_log('[OficinaController][perfilSalvar] ' . $e->getMessage());
             $this->setFlashMessage('Erro ao salvar perfil.', 'error');
         }
@@ -494,34 +521,35 @@ class OficinaController extends BaseController
         $oficina = $this->getOficina();
         $oficinaId = (int)$oficina['id'];
 
-        $permitidos = ['borracharia','eletrica','bateria','mecanica','chaveiro',
-                       'funilaria','ar_condicionado','injecao','suspensao'];
-        $marcados = array_values(array_intersect($permitidos, (array)($_POST['servicos'] ?? [])));
-
+        $idsSolicitados = (array)($_POST['service_type_ids'] ?? []);
+        $ids = [];
+        foreach ($idsSolicitados as $raw) {
+            if (!is_scalar($raw) || !preg_match('/^[1-9][0-9]*$/D', (string)$raw)) {
+                http_response_code(422); exit('Servico invalido');
+            }
+            $ids[(int)$raw] = true;
+        }
         try {
             $pdo = getPDO();
             $pdo->beginTransaction();
-
-            $pdo->prepare("DELETE FROM oficina_servicos WHERE oficina_id = ?")->execute([$oficinaId]);
-
-            if ($marcados) {
-                $vals = [];
-                $params = [];
-                foreach ($marcados as $t) {
-                    $vals[] = '(?, ?, 1)';
-                    $params[] = $oficinaId;
-                    $params[] = $t;
-                }
-                $sql = "INSERT INTO oficina_servicos (oficina_id, tipo, ativo) VALUES " . implode(',', $vals);
-                $pdo->prepare($sql)->execute($params);
+            // Sem vinculo nao ha concessao de elegibilidade operacional.
+            $stmt = $pdo->query('SELECT id FROM service_types WHERE active=1');
+            $permitidos = array_fill_keys(array_map('intval', $stmt->fetchAll(PDO::FETCH_COLUMN)), true);
+            if (array_diff_key($ids, $permitidos)) {
+                throw new InvalidArgumentException('Servico inexistente ou inativo no catalogo');
             }
-
+            $pdo->prepare('DELETE FROM oficina_service_types WHERE oficina_id=?')->execute([$oficinaId]);
+            $ins = $pdo->prepare('INSERT INTO oficina_service_types
+                (oficina_id, service_type_id, active) VALUES (?, ?, 1)');
+            foreach (array_keys($ids) as $serviceTypeId) {
+                $ins->execute([$oficinaId, $serviceTypeId]);
+            }
             $pdo->commit();
-            $this->setFlashMessage('Servicos atualizados!', 'success');
+            $this->setFlashMessage('Servicos do catalogo atualizados!', 'success');
         } catch (Throwable $e) {
             if (isset($pdo) && $pdo->inTransaction()) $pdo->rollBack();
             error_log('[OficinaController][salvarServicos] ' . $e->getMessage());
-            $this->setFlashMessage('Erro ao salvar servicos.', 'error');
+            $this->setFlashMessage('Erro ao salvar servicos do catalogo.', 'error');
         }
         $this->redirect('/oficina/perfil');
     }
@@ -656,6 +684,12 @@ class OficinaController extends BaseController
             $this->redirect('/oficina/dashboard');
         }
 
+        $statusPedido = (string)($pedido['status'] ?? '');
+        if (!in_array($statusPedido, ['oficina_aceitou', 'oficina_a_caminho'], true)) {
+            $this->setFlashMessage('Este pedido nao esta aguardando um novo orcamento.', 'warning');
+            $this->redirect('/oficina/pedido/' . $pedidoId);
+        }
+
         $valor = (float)($_POST['valor_total'] ?? 0);
         $desc  = trim((string)($_POST['descricao'] ?? ''));
         if ($valor <= 0 || $desc === '') {
@@ -665,6 +699,16 @@ class OficinaController extends BaseController
 
         try {
             $pdo = getPDO();
+            $pendente = $pdo->prepare(
+                "SELECT id FROM oficina_orcamentos
+                 WHERE pedido_id = ? AND oficina_id = ? AND status = 'pendente'
+                 ORDER BY id DESC LIMIT 1"
+            );
+            $pendente->execute([$pedidoId, (int)$oficina['id']]);
+            if ($pendente->fetchColumn()) {
+                $this->setFlashMessage('Ja existe um orcamento pendente para este pedido.', 'warning');
+                $this->redirect('/oficina/pedido/' . $pedidoId);
+            }
             $pdo->prepare(
                 "INSERT INTO oficina_orcamentos (pedido_id, oficina_id, valor_total, descricao, status)
                  VALUES (?, ?, ?, ?, 'pendente')"

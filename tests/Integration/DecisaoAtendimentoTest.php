@@ -10,6 +10,9 @@ final class DecisaoAtendimentoTest extends TestCase
 {
     protected function setUp(): void
     {
+        if (in_array('mysql', PDO::getAvailableDrivers(), true)) {
+            $this->markTestSkipped('Fixture SQLite-only: não recriar tabelas de decisão sobre o schema MySQL QA.');
+        }
         $pdo = getPDO();
         foreach (['pedido_decisoes_socorro', 'provider_workshop_settings', 'providers'] as $table) {
             try { $pdo->exec("DROP TABLE IF EXISTS {$table}"); } catch (Throwable) {}

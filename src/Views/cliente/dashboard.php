@@ -14,7 +14,8 @@ function cliente_saudacao(): string
 ?>
 <link rel="stylesheet" href="<?php echo $bp; ?>/public/assets/css/components/communications.css">
 <link rel="stylesheet" href="<?php echo $bp; ?>/public/assets/css/components/dashboard.css">
-<link rel="stylesheet" href="<?php echo $bp; ?>/public/assets/css/pages/client-dashboard.css">
+<link rel="stylesheet" href="<?php echo $bp; ?>/public/assets/css/pages/client-dashboard.css">
+<link rel="stylesheet" href="<?php echo htmlspecialchars($bp, ENT_QUOTES, 'UTF-8'); ?>/public/assets/css/pages/lovable-backoffice-cliente.css?v=20261016">
 
 <div class="main-wrapper">
 <?php include __DIR__ . '/../layouts/sidebar_cliente.php'; ?>

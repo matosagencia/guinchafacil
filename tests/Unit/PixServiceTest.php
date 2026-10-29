@@ -19,6 +19,9 @@ class PixServiceTest extends TestCase
         $pdo = getPDO();
         $pdo->exec("DELETE FROM pagamentos");
         $pdo->exec("DELETE FROM pedidos");
+        $pdo->exec("DELETE FROM guinchos WHERE id IN (1,2)");
+        $pdo->exec("DELETE FROM veiculos WHERE id IN (10,20,21,22)");
+        $pdo->exec("DELETE FROM usuarios WHERE id IN (1,2,10,20,21,22)");
     }
 
     // ─── mapearTipoChave (private static) ────────────────────────────────────
@@ -136,7 +139,11 @@ class PixServiceTest extends TestCase
     public function testReprocessarPagamentoPendenteNaoEProcessado(): void
     {
         // Pagamento existe mas status_pix = 'pendente', não 'falha'
-        getPDO()->exec("
+        $pdo = getPDO();
+        $pdo->exec("INSERT INTO usuarios (id, nome, email) VALUES (10, 'Cliente PIX 10', 'pix10@test.com')");
+        $pdo->exec("INSERT INTO veiculos (id, usuario_id, placa, marca, modelo, ano, cor, tipo) VALUES (10, 10, 'PIX0010', 'QA', 'Teste', 2026, 'Preto', 'carro')");
+        $pdo->exec("INSERT INTO pedidos (id, cliente_id, veiculo_id, status) VALUES (10, 10, 10, 'concluido')");
+        $pdo->exec("
             INSERT INTO pagamentos (pedido_id, metodo, status, status_pix, valor_guincho)
             VALUES (10, 'mercadopago', 'aprovado', 'pendente', 80.00)
         ");
@@ -231,8 +238,10 @@ class PixServiceTest extends TestCase
 
         // Setup: usuário, guincho, pedido, pagamento com status_pix='falha'
         $pdo->exec("INSERT INTO usuarios (id, nome, email) VALUES (1, 'Guincheiro', 'g@test.com')");
+        $pdo->exec("INSERT INTO usuarios (id, nome, email) VALUES (20, 'Cliente PIX 20', 'cliente20@test.com')");
         $pdo->exec("INSERT INTO guinchos (id, usuario_id, chave_pix, chave_pix_tipo) VALUES (1, 1, 'chave@test.com', 'email')");
-        $pdo->exec("INSERT INTO pedidos  (id, guincho_id, status) VALUES (20, 1, 'concluido')");
+        $pdo->exec("INSERT INTO veiculos (id, usuario_id, placa, marca, modelo, ano, cor, tipo) VALUES (20, 20, 'PIX0020', 'QA', 'Teste', 2026, 'Preto', 'carro')");
+        $pdo->exec("INSERT INTO pedidos  (id, cliente_id, veiculo_id, guincho_id, status) VALUES (20, 20, 20, 1, 'concluido')");
         $pdo->exec("INSERT INTO pagamentos (pedido_id, status, status_pix, valor_guincho, pix_tentativas)
                     VALUES (20, 'aprovado', 'falha', 150.00, 1)");
 
@@ -254,8 +263,10 @@ class PixServiceTest extends TestCase
         $pdo = getPDO();
 
         $pdo->exec("INSERT INTO usuarios (id, nome, email) VALUES (2, 'Guincheiro2', 'g2@test.com')");
+        $pdo->exec("INSERT INTO usuarios (id, nome, email) VALUES (21, 'Cliente PIX 21', 'cliente21@test.com')");
         $pdo->exec("INSERT INTO guinchos (id, usuario_id, chave_pix, chave_pix_tipo) VALUES (2, 2, 'chave2@test.com', 'email')");
-        $pdo->exec("INSERT INTO pedidos  (id, guincho_id, status) VALUES (21, 2, 'concluido')");
+        $pdo->exec("INSERT INTO veiculos (id, usuario_id, placa, marca, modelo, ano, cor, tipo) VALUES (21, 21, 'PIX0021', 'QA', 'Teste', 2026, 'Preto', 'carro')");
+        $pdo->exec("INSERT INTO pedidos  (id, cliente_id, veiculo_id, guincho_id, status) VALUES (21, 21, 21, 2, 'concluido')");
         $pdo->exec("INSERT INTO pagamentos (pedido_id, status, status_pix, valor_guincho, pix_tentativas)
                     VALUES (21, 'aprovado', 'falha', 80.00, 0)");
 
@@ -280,6 +291,9 @@ class PixServiceTest extends TestCase
         $pdo = getPDO();
 
         // Simula estado intermediário: outro processo já marcou como 'processando'
+        $pdo->exec("INSERT INTO usuarios (id, nome, email) VALUES (22, 'Cliente PIX 22', 'cliente22@test.com')");
+        $pdo->exec("INSERT INTO veiculos (id, usuario_id, placa, marca, modelo, ano, cor, tipo) VALUES (22, 22, 'PIX0022', 'QA', 'Teste', 2026, 'Preto', 'carro')");
+        $pdo->exec("INSERT INTO pedidos (id, cliente_id, veiculo_id, status) VALUES (22, 22, 22, 'concluido')");
         $pdo->exec("INSERT INTO pagamentos (pedido_id, status, status_pix, valor_guincho)
                     VALUES (22, 'aprovado', 'processando', 100.00)");
 

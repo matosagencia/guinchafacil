@@ -84,6 +84,15 @@ test.describe('pagamento sandbox', () => {
   test.beforeEach(async ({ page }) => {
     const { email, password } = clienteCreds();
     test.skip(!email || !password, 'Credenciais de cliente não configuradas.');
+    await page.route('**/api/pre-cotacao/endereco/sugestoes**', async route => {
+      const url = new URL(route.request().url());
+      const q = url.searchParams.get('q') || '';
+      const origem = /riachuelo/i.test(q);
+      const item = origem
+        ? { id: 'qa-origem', principal: 'Rua Riachuelo, 221', secundario: 'Centro - Rio de Janeiro - RJ', lat: -22.915086, lng: -43.1879307, cidade: 'Rio de Janeiro', uf: 'RJ', numero: '221', precisa_numero: false }
+        : { id: 'qa-destino', principal: 'Rua da Gamboa, 249', secundario: 'Gamboa - Rio de Janeiro - RJ', lat: -22.895, lng: -43.189, cidade: 'Rio de Janeiro', uf: 'RJ', numero: '249', precisa_numero: false };
+      await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ ok: true, data: { items: [item] } }) });
+    });
     await loginAs(page, email, password);
     await expectLoggedIn(page);
   });
@@ -95,10 +104,14 @@ test.describe('pagamento sandbox', () => {
     await page.goto(appPath(`/pagamento/checkout/${pedidoId}`));
     await expect(page.locator('body')).toContainText(/checkout|pagamento/i);
 
-    const mpForm = page.locator('form[action$="/pagamento/mercadopago"]').first();
-    await expect(mpForm).toBeVisible();
-    await expect(mpForm.locator('input[name="csrf_token"]')).toHaveValue(/.+/);
-    await expect(mpForm.locator('input[name="pedido_id"]')).toHaveValue(String(pedidoId));
+    const mpBrick = page.locator('#mp-payment-brick-container');
+    // O SDK do Mercado Pago e os secure fields carregam assincronamente.
+    // Em XAMPP/Windows, 10s pode ser insuficiente em cold start.
+    await expect(mpBrick).toBeVisible({ timeout: 30_000 });
+    await expect(mpBrick).toContainText(/meios de pagamento|cartão|pix/i);
+    await expect(page.locator('#checkout-mensagem')).toBeHidden();
+    await expect(page.locator('input[name="csrf_token"]')).toHaveCount(0);
+    await expect(page.locator('input[name="pedido_id"]')).toHaveCount(0);
   });
 
   test('E2E-PAY-002 | páginas de resultado de pagamento permanecem acessíveis ao cliente autenticado', async ({ page }) => {

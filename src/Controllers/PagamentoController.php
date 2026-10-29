@@ -348,6 +348,46 @@ class PagamentoController extends BaseController
         return $foundId > 0 ? (Pedido::buscarPorId($foundId) ?: null) : null;
     }
 
+    /** §12.2: pré-preenchimento opcional, com titularidade obrigatória quando existe draft. */
+    private function pagadorPreCotacao(): array
+    {
+        $draft = $_SESSION['pre_cotacao']['pagador'] ?? null;
+        if (!is_array($draft) || !$draft) { return []; }
+        $user = AuthService::getCurrentUser();
+        $cpfSessao = preg_replace('/\D+/', '', (string)($draft['cpf'] ?? ''));
+        $cpfUsuario = preg_replace('/\D+/', '', (string)($user['cpf'] ?? $user['documento'] ?? ''));
+        if (strlen($cpfSessao) !== 11 || strlen($cpfUsuario) !== 11 || !hash_equals($cpfUsuario, $cpfSessao)) {
+            throw new DomainException('CPF do pagador não corresponde ao cadastro autenticado.');
+        }
+        $email = trim((string)($draft['email'] ?? ''));
+        if ($email !== '' && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            throw new DomainException('E-mail do pagador inválido.');
+        }
+        $nome = trim((string)($draft['nome'] ?? ''));
+        return ['first_name' => preg_split('/\s+/u', $nome)[0] ?? '',
+            'email' => $email, 'identification' => ['type' => 'CPF', 'number' => $cpfSessao]];
+    }
+
+    /** §12.2: a cobrança principal é determinada exclusivamente pelo snapshot persistido. */
+    private function valorSnapshotOficial(int $pedidoId, array $pedido): float
+    {
+        if ((string)($pedido['status'] ?? '') === 'aguardando_pagamento') {
+            require_once __DIR__ . '/../Services/Conversion/ConversionPriceSnapshotService.php';
+            $complementar = ConversionPriceSnapshotService::customerTotal(getPDO(), $pedidoId);
+            if ($complementar !== null) return $complementar;
+        }
+        $stmt = getPDO()->prepare('SELECT customer_total FROM order_price_snapshots WHERE order_id = ? LIMIT 1');
+        $stmt->execute([$pedidoId]);
+        $valor = $stmt->fetchColumn();
+        if ($valor === false || !is_numeric($valor) || (float)$valor <= 0) {
+            throw new DomainException('Snapshot financeiro obrigatório ausente ou inválido. Pagamento bloqueado.');
+        }
+        if (abs(round((float)$valor, 2) - round((float)($pedido['custo_estimado'] ?? 0), 2)) > 0.001) {
+            throw new DomainException('Valor do pedido divergente do snapshot financeiro. Pagamento bloqueado.');
+        }
+        return round((float)$valor, 2);
+    }
+
     public function checkout(int $pedidoId): void
     {
         AuthService::requireAuth('cliente');
@@ -361,6 +401,14 @@ class PagamentoController extends BaseController
             $this->setFlashMessage($erroPedido ?? 'Não foi possível iniciar o pagamento.', 'error');
             $this->redirect('/cliente/pedido/' . $pedidoId);
         }
+        try {
+            $payerInicial = $this->pagadorPreCotacao();
+            $valorSnapshot = $this->valorSnapshotOficial($pedidoId, $pedido);
+        } catch (DomainException $e) {
+            $this->setFlashMessage($e->getMessage(), 'error');
+            $this->redirect('/cliente/pedido/' . $pedidoId);
+            return;
+        }
         $csrfToken = AuthService::gerarCsrfToken();
         $gatewayAtivo = $this->gatewayEfetivo();
         $mostrarMercadoPago = in_array($gatewayAtivo, ['mercadopago', 'todos', 'all'], true)
@@ -368,6 +416,30 @@ class PagamentoController extends BaseController
         $mostrarPagSeguro = in_array($gatewayAtivo, ['pagseguro', 'todos', 'all'], true) && $this->pagSeguroConfigurado();
         $mpPublicKey = defined('MP_PUBLIC_KEY') ? (string)MP_PUBLIC_KEY : '';
         require __DIR__ . '/../Views/pagamento/checkout.php';
+    }
+
+    public function selecionarForma(int $pedidoId = 0): void
+    {
+        $usuario = AuthService::requireAuth('cliente');
+        if (!AuthService::validarCsrfToken((string)($_POST['csrf_token'] ?? ''))) {
+            http_response_code(403); exit;
+        }
+        $pedidoId = $pedidoId > 0 ? $pedidoId : (int)($_POST['pedido_id'] ?? 0);
+        $pedido = Pedido::buscarPorId($pedidoId);
+        if (!$pedido || (int)($pedido['cliente_id'] ?? 0) !== (int)$usuario['id']) {
+            http_response_code(404); exit;
+        }
+        $forma = strtolower(trim((string)($_POST['forma_pagamento'] ?? '')));
+        if ($forma !== 'pago_na_chegada') {
+            $this->setFlashMessage('Forma de pagamento inválida.', 'error');
+            $this->redirect('/pagamento/checkout/' . $pedidoId);
+        }
+        $resultado = Pagamento::aplicarDestinoPagamento($pedidoId, $forma);
+        if (!($resultado['ok'] ?? false)) {
+            $this->setFlashMessage((string)($resultado['erro'] ?? 'Não foi possível selecionar a forma de pagamento.'), 'error');
+            $this->redirect('/pagamento/checkout/' . $pedidoId);
+        }
+        $this->redirect('/cliente/dashboard?msg=pagamento_na_chegada');
     }
 
     public function complementarCheckout(int $chargeItemId): void
@@ -380,6 +452,12 @@ class PagamentoController extends BaseController
         $payment = $ctx;
         $valorPedido = (float)$ctx['amount'];
         $pedidoId = (int)$ctx['order_id'];
+        try { $payerInicial = $this->pagadorPreCotacao(); }
+        catch (DomainException $e) {
+            $this->setFlashMessage($e->getMessage(), 'error');
+            $this->redirect('/cliente/pedido/' . $pedidoId);
+            return;
+        }
         $csrfToken = AuthService::gerarCsrfToken();
         $gatewayAtivo = $this->gatewayEfetivo();
         $mostrarMercadoPago = in_array($gatewayAtivo, ['mercadopago', 'todos', 'all'], true) && $this->validarConfigMercadoPago() === null;
@@ -396,6 +474,8 @@ class PagamentoController extends BaseController
         $user = AuthService::getCurrentUser();
         $ctx = SupplementalChargeService::buscarContextoPorPagamento($chargePaymentId);
         if (!$ctx || (int)$ctx['cliente_id'] !== (int)$user['id'] || ($ctx['status'] ?? '') !== 'PENDING') $this->responderJson(['sucesso'=>false,'erro'=>'Cobrança complementar inválida.'], 422);
+        try { $payerOficial = $this->pagadorPreCotacao(); }
+        catch (DomainException $e) { $this->responderJson(['sucesso'=>false,'erro'=>$e->getMessage()], 422); }
         $formData = is_array($body['formData'] ?? null) ? $body['formData'] : [];
         $method = (string)($formData['payment_method_id'] ?? '');
         if ($method === '') $this->responderJson(['sucesso'=>false,'erro'=>'Método de pagamento não identificado.'], 422);
@@ -404,11 +484,11 @@ class PagamentoController extends BaseController
         $result = $provider->criarPagamento([
             'pedidoId' => (int)$ctx['order_id'], 'externalReference' => $externalReference,
             'valor' => (float)$ctx['amount'], 'descricao' => 'Itens adicionais GuinchaFácil #' . (int)$ctx['order_id'],
-            'payerEmail' => (string)$user['email'], 'paymentMethodId' => $method,
+            'payerEmail' => (string)($payerOficial['email'] ?: $user['email'] ?? ''), 'paymentMethodId' => $method,
             'token' => (string)($formData['token'] ?? ''), 'parcelas' => (int)($formData['installments'] ?? 1),
             'issuerId' => (string)($formData['issuer_id'] ?? ''),
             'docTipo' => (string)($formData['payer']['identification']['type'] ?? 'CPF'),
-            'docNumero' => (string)($formData['payer']['identification']['number'] ?? ''),
+            'docNumero' => (string)($payerOficial['identification']['number'] ?? $formData['payer']['identification']['number'] ?? ''),
             'idempotencyKey' => 'charge-mp-' . $chargePaymentId . '-' . substr(hash('sha256', (string)($formData['token'] ?? '') . $method), 0, 24),
             'notificationUrl' => $this->urlApp('/webhook/mercadopago'),
         ]);
@@ -511,6 +591,12 @@ class PagamentoController extends BaseController
             $this->responderJson(['sucesso' => false, 'erro' => $erroPedido], 422);
         }
 
+        try {
+            $payerOficial = $this->pagadorPreCotacao();
+            $valorSnapshot = $this->valorSnapshotOficial($pedidoId, $pedido);
+        } catch (DomainException $e) {
+            $this->responderJson(['sucesso'=>false,'erro'=>$e->getMessage()], 422);
+        }
         $erroConfig = $this->validarConfigMercadoPago();
         if ($erroConfig !== null) {
             error_log('[PagamentoController][mercadoPagoTransparente] ' . $erroConfig);
@@ -527,7 +613,7 @@ class PagamentoController extends BaseController
         // §PAY-IDEMP-01: cria/reaproveita o registro pendente ANTES de cobrar
         // (mesmo padrão do fluxo redirect) — evita ficar sem rastro local se
         // o cliente fechar a aba entre a resposta da API e o retorno pra nós.
-        $pagamentoId = Pagamento::criar($pedidoId, 'mercadopago', (float)$pedido['custo_estimado'], 0, 0);
+        $pagamentoId = Pagamento::criar($pedidoId, 'mercadopago', $valorSnapshot, 0, 0);
         if (!$pagamentoId) {
             $this->responderJson(['sucesso' => false, 'erro' => 'Não foi possível registrar a transação. Tente novamente.'], 500);
         }
@@ -545,6 +631,7 @@ class PagamentoController extends BaseController
         // verdade (FILTER_VALIDATE_EMAIL) e só usa o valor do Brick se for
         // um e-mail válido — senão cai pro e-mail cadastrado do cliente.
         $payerEmailBrick = trim((string)($formData['payer']['email'] ?? ''));
+        if (!empty($payerOficial['email'])) { $payerEmailBrick = $payerOficial['email']; }
         $payerEmail = filter_var($payerEmailBrick, FILTER_VALIDATE_EMAIL)
             ? $payerEmailBrick
             : (string)($pedido['cliente_email'] ?? '');
@@ -552,7 +639,7 @@ class PagamentoController extends BaseController
         $provider = new MercadoPagoProvider();
         $resultado = $provider->criarPagamento([
             'pedidoId'        => $pedidoId,
-            'valor'           => (float)$pedido['custo_estimado'],
+            'valor'           => $valorSnapshot,
             'descricao'       => 'Serviço de Guincho - GuinchaFácil #' . $pedidoId,
             'payerEmail'      => $payerEmail,
             'paymentMethodId' => $paymentMethodId,
@@ -560,7 +647,7 @@ class PagamentoController extends BaseController
             'parcelas'        => (int)($formData['installments'] ?? 1),
             'issuerId'        => (string)($formData['issuer_id'] ?? ''),
             'docTipo'         => (string)($formData['payer']['identification']['type'] ?? 'CPF'),
-            'docNumero'       => (string)($formData['payer']['identification']['number'] ?? ''),
+            'docNumero'       => (string)($payerOficial['identification']['number'] ?? $formData['payer']['identification']['number'] ?? ''),
             'tentativa'       => $tentativa,
             'notificationUrl' => $this->urlApp('/webhook/mercadopago'),
         ]);
@@ -1033,4 +1120,53 @@ class PagamentoController extends BaseController
         $pedido = $this->pedidoContexto($pedidoId);
         require __DIR__ . '/../Views/pagamento/pendente.php';
     }
+    
+    private function validarCpfPagadorSessao(): ?string
+{
+    $pagador = $_SESSION['pre_cotacao']['pagador'] ?? null;
+
+    // Sem pré-cotação: preserva o checkout existente.
+    if ($pagador === null) {
+        return null;
+    }
+
+    if (!is_array($pagador)) {
+        return 'Dados do pagador inválidos.';
+    }
+
+    $usuario = AuthService::getCurrentUser();
+    $usuarioId = (int) ($usuario['id'] ?? 0);
+
+    if ($usuarioId <= 0) {
+        return 'Usuário não autenticado.';
+    }
+
+    $stmt = getPDO()->prepare(
+        'SELECT cpf FROM usuarios WHERE id = ? AND ativo = 1 LIMIT 1'
+    );
+    $stmt->execute([$usuarioId]);
+
+    $cpfCadastrado = preg_replace(
+        '/\D+/',
+        '',
+        (string) ($stmt->fetchColumn() ?: '')
+    );
+
+    $cpfSessao = preg_replace(
+        '/\D+/',
+        '',
+        (string) ($pagador['cpf'] ?? '')
+    );
+
+    if (
+        strlen($cpfCadastrado) !== 11 ||
+        strlen($cpfSessao) !== 11 ||
+        !hash_equals($cpfCadastrado, $cpfSessao)
+    ) {
+        return 'O CPF informado não corresponde ao CPF do usuário autenticado.';
+    }
+
+    return null;
+}
+
 }

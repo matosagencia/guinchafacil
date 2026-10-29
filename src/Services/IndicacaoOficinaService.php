@@ -37,7 +37,8 @@ final class IndicacaoOficinaService
         }
 
         $settings = ProviderWorkshopService::obterRegras($providerId);
-        if (!$provider || !$settings || !ProviderWorkshopService::isEligible($provider, $settings)) {
+        if (!$provider || !$settings || !ProviderWorkshopService::isEligible($provider, $settings)
+            || !ProviderWorkshopService::possuiLocalizacaoOperacional($providerId)) {
             throw new InvalidArgumentException('IND-001: oficina parceira inválida.');
         }
 

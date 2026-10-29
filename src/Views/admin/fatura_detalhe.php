@@ -66,6 +66,27 @@ $saldo = (float)($fatura['saldo'] ?? 0);
                 <td class="text-end"><strong><?= $money($i['valor_liquido_parceiro'] ?? 0) ?></strong></td>
                 <td><span class="badge bg-secondary"><?= htmlspecialchars((string)($i['comissao_tipo'] ?? '')) ?></span></td>
             </tr>
+            <?php $comp = $snapshotsItens[(int)($i['pedido_id'] ?? 0)] ?? null; ?>
+            <?php if ($comp && count($comp) >= 10): ?>
+            <tr class="table-light">
+                <td colspan="7" class="p-0">
+                    <details>
+                        <summary class="p-2 small" style="cursor:pointer;"><i class="fas fa-calculator me-1"></i>Composicao do preco</summary>
+                        <table class="table table-sm mb-0" style="font-size:.85rem;">
+                            <tr><td>Base (km x tarifa)</td><td class="text-end"><?= $money($comp['component_frete'] ?? 0) ?></td></tr>
+                            <tr><td>Intermediacao</td><td class="text-end"><?= $money($comp['component_intermediacao'] ?? 0) ?></td></tr>
+                            <?php if (($comp['component_elevacao'] ?? 0) > 0): ?><tr><td>Elevacao</td><td class="text-end"><?= $money($comp['component_elevacao']) ?></td></tr><?php endif; ?>
+                            <?php if (($comp['component_terreno'] ?? 0) > 0): ?><tr><td>Terreno</td><td class="text-end"><?= $money($comp['component_terreno']) ?></td></tr><?php endif; ?>
+                            <?php if (($comp['pedagio'] ?? 0) > 0): ?><tr><td>Pedagio</td><td class="text-end"><?= $money($comp['pedagio']) ?></td></tr><?php endif; ?>
+                            <tr class="fw-bold"><td>Total</td><td class="text-end"><?= $money($comp['valor_total'] ?? 0) ?></td></tr>
+                            <tr><td>Comissao <?= number_format(100 * (float)($comp['comissao_percentual'] ?? 0), 2, ',', '.') ?>%</td><td class="text-end text-danger">-<?= $money($comp['comissao'] ?? 0) ?></td></tr>
+                            <tr><td>Reserva <?= number_format(100 * (float)($comp['reserva_gateway_percentual'] ?? 0), 2, ',', '.') ?>%</td><td class="text-end text-danger">-<?= $money($comp['reserva_gateway'] ?? 0) ?></td></tr>
+                            <tr class="table-success fw-bold"><td>Liquido parceiro</td><td class="text-end"><?= $money($comp['provider_total'] ?? 0) ?></td></tr>
+                        </table>
+                    </details>
+                </td>
+            </tr>
+            <?php endif; ?>
             <?php endforeach; ?>
             </tbody>
         </table></div>

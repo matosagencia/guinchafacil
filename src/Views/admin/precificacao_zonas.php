@@ -47,7 +47,7 @@ $statusExpansaoBadge = [
     'pedra_viva' => 'ops-badge--service',
 ];
 ?>
-<link rel="stylesheet" href="<?php echo htmlspecialchars($bp); ?>/public/assets/css/pages/admin-central-operacional.css">
+<link rel="stylesheet" href="<?php echo htmlspecialchars($bp); ?>/public/assets/css/pages/admin-central-operacional.css"><link rel="stylesheet" href="<?php echo htmlspecialchars($bp, ENT_QUOTES, 'UTF-8'); ?>/public/assets/css/backoffice-layout.css?v=20261027-1"><link rel="stylesheet" href="<?php echo htmlspecialchars($bp, ENT_QUOTES, 'UTF-8'); ?>/public/assets/css/pages/gf-f18c-shell.css?v=20261017-18c1">
 <link rel="stylesheet" href="<?php echo htmlspecialchars($bp); ?>/public/assets/vendor/leaflet/leaflet.css">
 <script<?php echo csp_script_nonce_attr(); ?> src="<?php echo htmlspecialchars($bp); ?>/public/assets/vendor/leaflet/leaflet.js"></script>
 
@@ -145,7 +145,7 @@ $statusExpansaoBadge = [
 
     </div>
 
-<div class="shell-ops" id="zonasShell">
+<div class="shell-ops bo-operation-grid territory-shell" id="zonasShell">
 
     <aside class="shell-ops-sidebar" id="zonasSidebar">
         <?php include __DIR__ . '/../components/admin_nav_operacional.php'; ?>

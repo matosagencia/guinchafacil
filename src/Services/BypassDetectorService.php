@@ -16,11 +16,9 @@ final class BypassDetectorService
     {
         $pdo ??= getPDO();
         $stmt = $pdo->prepare("SELECT p.id, COALESCE(p.cancelado_em, p.criado_em) AS cancelado_at, p.usuario_id, i.provider_id,
-                p.modalidade_socorro, p.local_resgate_lat, p.local_resgate_lng,
-                ws.latitude, ws.longitude
+                p.modalidade_socorro, p.local_resgate_lat, p.local_resgate_lng
             FROM pedidos p
             JOIN pedido_indicacoes_oficina i ON i.pedido_id = p.id
-            JOIN provider_workshop_settings ws ON ws.provider_id = i.provider_id
             WHERE p.id = ? AND p.status = 'cancelado' LIMIT 1");
         $stmt->execute([$pedidoId]);
         $pedido = $stmt->fetch(PDO::FETCH_ASSOC);

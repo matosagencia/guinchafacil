@@ -29,6 +29,11 @@ function saida(array $dados): void
 function ensureGateGuincho(): int
 {
     $pdo = getPDO();
+    foreach (['doc_cnh_frente' => 'TEXT NULL', 'doc_cnh_verso' => 'TEXT NULL'] as $column => $definition) {
+        $check = $pdo->prepare("SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'guinchos' AND COLUMN_NAME = ?");
+        $check->execute([$column]);
+        if (!(int)$check->fetchColumn()) { $pdo->exec("ALTER TABLE guinchos ADD COLUMN `$column` $definition"); }
+    }
 
     $stmt = $pdo->prepare('SELECT id FROM usuarios WHERE email = ? LIMIT 1');
     $stmt->execute([QA_GATE_EMAIL]);

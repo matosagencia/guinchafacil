@@ -51,6 +51,14 @@ final class RoutingService
             if ($metros !== null) $fonte = 'osrm';
         }
 
+        // Bancada XAMPP: quando o DNS/rede externa está indisponível, permite
+        // continuar testes locais com uma estimativa determinística. Nunca é
+        // habilitado fora de APP_ENV=local e a fonte fica explícita no snapshot.
+        if ($metros === null && self::fallbackLocalHabilitado()) {
+            $metros = self::distanciaHaversineMetros($latO, $lngO, $latD, $lngD) * 1.25;
+            $fonte = 'haversine_local';
+        }
+
         self::$fontes[$key] = $fonte;
         self::$ultimaFonte = $fonte;
         self::$cache[$key] = $metros !== null ? round($metros / 1000, 2) : null;
@@ -205,6 +213,21 @@ final class RoutingService
         if (!is_finite($lat) || !is_finite($lng)) return false;
         if ($lat < -90 || $lat > 90 || $lng < -180 || $lng > 180) return false;
         return !($lat === 0.0 && $lng === 0.0);
+    }
+
+    private static function fallbackLocalHabilitado(): bool
+    {
+        $ambiente = strtolower(trim((string)(getenv('APP_ENV') ?: ($_ENV['APP_ENV'] ?? ''))));
+        return in_array($ambiente, ['local', 'development', 'dev'], true);
+    }
+
+    private static function distanciaHaversineMetros(float $latO, float $lngO, float $latD, float $lngD): float
+    {
+        $r = 6371008.8;
+        $dLat = deg2rad($latD - $latO);
+        $dLng = deg2rad($lngD - $lngO);
+        $a = sin($dLat / 2) ** 2 + cos(deg2rad($latO)) * cos(deg2rad($latD)) * sin($dLng / 2) ** 2;
+        return $r * 2 * asin(min(1.0, sqrt($a)));
     }
     
         /**

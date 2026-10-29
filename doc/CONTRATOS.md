@@ -658,3 +658,23 @@ Implementado por A em `RoutingService` (commits `3eddcf2` e `87cd06c`); descrito
 | 2026-10-13 | **v2.3** — revisão contra implementação e testes: gateway/comissão (exemplo numérico e pedágio), anéis (acumulado, mínimo 1, assinatura), backfill real, elevação por faixas implementada sem aprovação, §20 com vetores de teste e ordem A→C→B→D |
 | 2026-10-14 | **v2.4** — respostas do dono (piso removido, terreno em taxa fixa, gate de bloqueio só após pagamento provado, `local_isolado`, comissão por saúde da rede, rota mais rápida, moto 1,00); elevação contínua; pedágio fora da comissão; lista nominal de 19 pontos de evento; §21 roteamento; Free Flow como pendência |
 | 2026-10-14 | **v2.5** — decisões do dono: comissão 8% (D-14), §9 com carência de 5 dias, bloqueio só em `bloqueada`, quitação com juros e painel acessível (D-15), terreno mantido (D-16), Free Flow presumido (D-17), bancos dev/produção (D-18); §19 reorganizado; marcador truncado do §10.2 sinalizado |
+
+
+---
+
+## §22. Diretrizes Consolidadas do Dono (Parametrização Oficial)
+
+- **Elevação e Terreno (§5.4, §10):** Franquia de 100m; coef. `0.0002`/m; teto `0.25` (+25%); peso deadhead `0.50`; coef. descida `0.20`. Taxa terreno fixa: Leve R$ 50,00, Acentuado R$ 100,00, Manobra em ladeira R$ 60,00.
+- **Anéis de Busca (§7.4):** Mínimo de 1 elegível por anel; contagem acumulada do centro ao raio do anel; expansão até 50 km.
+- **Roteamento e Perfil (§21):** Perfil ORS `driving-car`; preferência `fastest` (mais rápida).
+- **Gate de Bloqueio (§9):** Carência de 120h (5 dias); encargos de 2% multa + 1% a.m. pro-rata; perdão exclusivo do Admin Master; gate mantido em `0` até webhook provado em sandbox.
+
+<!-- GF-FIN1-CONTRATO-20261018 -->
+### FIN.1 â€” GestÃ£o financeira e repasses (18/10/2026)
+
+- AdoÃ§Ã£o incremental do layout Lovable de referÃªncia em `/admin/financeiro`, com sidebar `100dvh`, logotipo, ausÃªncia de topbar legado e conservaÃ§Ã£o dos filtros, KPIs, CSV, PIX jobs e aÃ§Ãµes preexistentes.
+- Contrato bilateral: pagamento pelo gateway cria crÃ©dito contratual ao parceiro; pagamento diretamente ao parceiro cria obrigaÃ§Ã£o de comissÃ£o Ã  plataforma. Fechamento semanal compensa ambos por parceiro e ciclo.
+- `saldo_parceiro = creditos - debitos`; saldo positivo implica repasse, zero compensaÃ§Ã£o, negativo dÃ­vida do parceiro. InadimplÃªncia apenas sobre dÃ­vida lÃ­quida vencida apÃ³s carÃªncia e conciliaÃ§Ã£o.
+- Matching anelar progressivo: referÃªncia comum por faixa = maior custo de deslocamento entre elegÃ­veis da faixa. Oficinas sÃ£o responsÃ¡veis por remoÃ§Ã£o incluÃ­da conforme cadastro e oferta.
+- Esta fase Ã© APENAS visual/documental; a implementaÃ§Ã£o do razÃ£o bilateral e sua migraÃ§Ã£o exigem auditoria e homologaÃ§Ã£o prÃ³prias (FIN.2+).
+- Detalhes e critÃ©rios: `doc/FIN_1_GESTAO_FINANCEIRA_REPASSES.md`.

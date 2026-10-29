@@ -34,18 +34,7 @@ foreach (($tipos ?? []) as $t) {
     ];
 }
 ?>
-<link rel="stylesheet" href="<?php echo htmlspecialchars($bp); ?>/public/assets/css/pages/admin-central-operacional.css">
-
-<div class="ops-topbar" style="padding:10px 24px;border-bottom:1px solid var(--theme-border,#232c35);background:var(--theme-nav,#030405)">
-    <div class="ops-topbar__search"><i class="fas fa-magnifying-glass"></i><input type="search" id="tiposSearchTop" placeholder="Buscar por código, nome ou categoria" autocomplete="off" aria-label="Buscar tipos de serviço"></div>
-    <div class="ops-topbar__meta">
-        <span class="ops-topbar__status"><span class="ops-topbar__status-dot"></span><?php echo $totalTipos; ?> tipos cadastrados</span>
-        <a href="<?php echo htmlspecialchars($bp); ?>/admin/catalogo-servicos/tipo/novo" class="ops-dashboard-link"><i class="fas fa-circle-plus me-1"></i>Novo tipo de serviço</a>
-        <a href="<?php echo htmlspecialchars($bp); ?>/admin/catalogo-servicos/capacidades" class="ops-dashboard-link"><i class="fas fa-user-check me-1"></i>Aprovar serviços</a>
-        <a href="<?php echo htmlspecialchars($bp); ?>/admin/catalogo-servicos/tarifas" class="ops-dashboard-link"><i class="fas fa-tags me-1"></i>Tarifas</a>
-        <a href="<?php echo htmlspecialchars($bp); ?>/admin/catalogo-servicos/compatibilidade" class="ops-dashboard-link"><i class="fas fa-truck me-1"></i>Compatibilidade</a>
-    </div>
-</div>
+<link rel="stylesheet" href="<?php echo htmlspecialchars($bp); ?>/public/assets/css/pages/admin-central-operacional.css"><link rel="stylesheet" href="<?php echo htmlspecialchars($bp, ENT_QUOTES, 'UTF-8'); ?>/public/assets/css/pages/gf-f18c-shell.css?v=20261017-18c1"><div class="bo bo-operator gf-f18c-root" id="tiposBackofficeRoot">  <aside class="bo-sidebar gf-f18c-sidebar" id="tiposBackofficeSidebar" aria-label="Navegação do administrador">    <a class="gf-f18c-brand" href="<?php echo htmlspecialchars($bp, ENT_QUOTES, 'UTF-8'); ?>/admin/central">Guincha<span>Fácil</span><i>.</i></a>    <div class="gf-f18c-workspace"><span class="gf-f18c-avatar"><i class="fas fa-toolbox" aria-hidden="true"></i></span><span><strong>Central GuinchaFácil</strong><small>Catálogo e preços</small></span></div>    <?php include __DIR__ . '/../components/admin_nav_operacional.php'; ?>    <div class="gf-f18c-sidebar-footer"><a href="<?php echo htmlspecialchars($bp, ENT_QUOTES, 'UTF-8'); ?>/">Voltar ao site</a></div>  </aside>  <div class="bo-body">    <header class="bo-header">      <div class="gf-f18c-breadcrumb"><span>Backoffice <i class="fas fa-chevron-right" aria-hidden="true"></i> <strong>Catálogo de serviços</strong></span></div>      <div class="gf-f18c-header-actions">        <a href="<?php echo htmlspecialchars($bp); ?>/admin/catalogo-servicos/tipo/novo" class="bo-header-button" title="Novo tipo de serviço"><i class="fas fa-circle-plus"></i><span class="bo-header-action-label">Novo tipo</span></a>        <a href="<?php echo htmlspecialchars($bp); ?>/admin/catalogo-servicos/capacidades" class="bo-header-button" title="Aprovar serviços"><i class="fas fa-user-check"></i><span class="bo-header-action-label">Capacidades</span></a>        <a href="<?php echo htmlspecialchars($bp); ?>/admin/catalogo-servicos/tarifas" class="bo-header-button" title="Tarifas"><i class="fas fa-tags"></i><span class="bo-header-action-label">Tarifas</span></a>        <a href="<?php echo htmlspecialchars($bp); ?>/admin/catalogo-servicos/compatibilidade" class="bo-header-button" title="Compatibilidade"><i class="fas fa-truck"></i><span class="bo-header-action-label">Compatibilidade</span></a>        <a href="<?php echo htmlspecialchars($bp); ?>/admin/alertas" class="bo-header-button" aria-label="Abrir alertas operacionais"><i class="far fa-bell"></i></a>        <span class="gf-f18c-user"><?php echo htmlspecialchars((string)($_SESSION['user']['nome'] ?? 'Admin'), ENT_QUOTES, 'UTF-8'); ?></span>      </div>    </header>    <main class="bo-content">
 
 <section class="ops-summary" aria-label="Resumo de tipos de serviço">
     <article class="ops-metric">
@@ -88,11 +77,7 @@ foreach (($tipos ?? []) as $t) {
     </div>
 </div>
 
-<div class="shell-ops" id="tiposShell">
-
-    <aside class="shell-ops-sidebar" id="tiposSidebar">
-        <?php include __DIR__ . '/../components/admin_nav_operacional.php'; ?>
-    </aside>
+<div class="shell-ops bo-operation-grid" id="tiposShell">
 
     <section class="shell-ops-worklist" aria-label="Tipos de serviço">
         <header class="ops-worklist-header">
@@ -151,7 +136,7 @@ foreach (($tipos ?? []) as $t) {
         <?php endif; ?>
     </section>
 
-</div>
+</div>    </main>  </div></div>
 
 <script<?php echo csp_script_nonce_attr(); ?>>
 window.__tiposData = <?php echo json_encode($tiposPayload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES); ?>;
@@ -228,12 +213,7 @@ var TIPOS_BP = '<?php echo addslashes($bp); ?>';
     }
 
     var worklistSearch = document.getElementById('tiposWorklistSearch');
-    var topSearch = document.getElementById('tiposSearchTop');
     if (worklistSearch) worklistSearch.addEventListener('input', function (e) { applyFilter(e.target.value); });
-    if (topSearch) topSearch.addEventListener('input', function (e) {
-        if (worklistSearch) worklistSearch.value = e.target.value;
-        applyFilter(e.target.value);
-    });
 
     if (tipos.length > 0) selectTipo(0);
 })();

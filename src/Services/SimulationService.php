@@ -164,7 +164,7 @@ class SimulationService
     private function fase4AprovarPagamento(int $pedidoId, float $custo): void
     {
         $cfg        = Configuracao::getAll();
-        $comissao   = (float)($cfg['comissao_plataforma'] ?? 0.15);
+        $comissao   = (float)($cfg['comissao_plataforma'] ?? 0.08);
         $valGuincho = round($custo * (1 - $comissao), 2);
         $valPlat    = round($custo * $comissao, 2);
 

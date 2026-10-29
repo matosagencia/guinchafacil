@@ -2,8 +2,8 @@
 
 declare(strict_types=1);
 
-require_once __DIR__ . '/PaymentProviderInterface.php';
-require_once __DIR__ . '/../EstornoService.php';
+require_once __DIR__ . '/../Services/Payment/PaymentProviderInterface.php';
+require_once __DIR__ . '/../Services/EstornoService.php';
 
 /**
  * Pacote L1.7 (pendência #33). Delega para EstornoService::estornarMercadoPago(),
@@ -148,13 +148,33 @@ class MercadoPagoProvider implements PaymentProviderInterface
 
     protected static function httpPost(string $url, array $headers, string $body): array
     {
+        if (!function_exists('curl_init')) {
+            $context = stream_context_create([
+                'http' => [
+                    'method' => 'POST',
+                    'header' => implode("\r\n", $headers),
+                    'content' => $body,
+                    'timeout' => 20,
+                    'ignore_errors' => true,
+                ],
+            ]);
+            $resp = @file_get_contents($url, false, $context);
+            $statusLine = (string)($http_response_header[0] ?? '');
+            preg_match('/\s(\d{3})\s/', $statusLine, $matches);
+            return [
+                'body' => $resp === false ? '' : (string)$resp,
+                'code' => (int)($matches[1] ?? 0),
+                'error' => $resp === false ? 'HTTP client unavailable' : '',
+            ];
+        }
         $ch = curl_init($url);
         curl_setopt_array($ch, [
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_POST           => true,
             CURLOPT_POSTFIELDS     => $body,
             CURLOPT_HTTPHEADER     => $headers,
-            CURLOPT_TIMEOUT => 30,
+            CURLOPT_CONNECTTIMEOUT => 8,
+            CURLOPT_TIMEOUT => 20,
         ]);
         if ($ca = ca_bundle_path()) {
             curl_setopt($ch, CURLOPT_CAINFO, $ca);

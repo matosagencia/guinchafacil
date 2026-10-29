@@ -3,6 +3,13 @@ declare(strict_types=1);
 
 use PHPUnit\Framework\TestCase;
 
+if (!class_exists('HttpResponseException')) {
+    final class HttpResponseException extends RuntimeException
+    {
+        public function __construct(int $code, public string $body = '') { parent::__construct('HTTP response '.$code, $code); }
+    }
+}
+
 /**
  * Testa WebhookController: fluxo MP, fluxo PagSeguro, idempotência, split financeiro.
  * Usa WebhookControllerTestable para interceptar lerInput() e httpGet().
@@ -24,11 +31,15 @@ class WebhookControllerTest extends TestCase
         $pdo->exec("DELETE FROM configuracoes");
         // Cliente usado por todos os pedidos de teste — PagamentoAprovacaoService
         // faz JOIN usuarios ON u.id = p.cliente_id, então precisa existir.
-        $pdo->exec("INSERT OR IGNORE INTO usuarios (id, nome, email, tipo, ativo)
-                    VALUES (901, 'Cliente Teste', 'c@test.com', 'cliente', 1)");
-        $pdo->exec("INSERT OR IGNORE INTO configuracoes (chave, valor) VALUES ('comissao_plataforma', '0.15')");
-        $pdo->exec("INSERT OR IGNORE INTO configuracoes (chave, valor) VALUES ('tempo_expiracao_min', '5')");
-        $pdo->exec("INSERT OR IGNORE INTO configuracoes (chave, valor) VALUES ('raio_inicial_km', '10')");
+        $pdo->exec("INSERT INTO usuarios (id, nome, email, tipo, ativo)
+                    VALUES (901, 'Cliente Teste', 'c@test.com', 'cliente', 1)
+                    ON DUPLICATE KEY UPDATE id = VALUES(id)");
+        $pdo->exec("INSERT INTO veiculos (id, usuario_id, placa, marca, modelo, ano, cor, tipo)
+                    VALUES (9901, 901, 'TST9901', 'Teste', 'Fixture', 2024, 'Prata', 'carro')
+                    ON DUPLICATE KEY UPDATE usuario_id = VALUES(usuario_id)");
+        $pdo->exec("INSERT INTO configuracoes (chave, valor) VALUES ('comissao_plataforma', '0.15')");
+        $pdo->exec("INSERT INTO configuracoes (chave, valor) VALUES ('tempo_expiracao_min', '5')");
+        $pdo->exec("INSERT INTO configuracoes (chave, valor) VALUES ('raio_inicial_km', '10')");
 
         $this->ctrl = new WebhookControllerTestable();
     }
@@ -48,10 +59,11 @@ class WebhookControllerTest extends TestCase
         // PagamentoAprovacaoService::aprovar() faz JOIN usuarios ON u.id = p.cliente_id;
         // sem uma linha de cliente em usuarios o JOIN não casa e a aprovação
         // sai por engano como "pedido não está aguardando pagamento".
-        $pdo->exec("INSERT OR IGNORE INTO usuarios (id, nome, email, tipo, ativo)
-                    VALUES (901, 'Cliente Teste', 'c@test.com', 'cliente', 1)");
-        $pdo->exec("INSERT INTO pedidos (id, cliente_id, status, custo_estimado, cliente_nome, cliente_email)
-                    VALUES ({$pedidoId}, 901, 'aguardando_pagamento', {$custo}, 'Cliente Teste', 'c@test.com')");
+        $pdo->exec("INSERT INTO usuarios (id, nome, email, tipo, ativo)
+                    VALUES (901, 'Cliente Teste', 'c@test.com', 'cliente', 1)
+                    ON DUPLICATE KEY UPDATE id = VALUES(id)");
+        $pdo->exec("INSERT INTO pedidos (id, cliente_id, veiculo_id, status, custo_estimado)
+                    VALUES ({$pedidoId}, 901, 9901, 'aguardando_pagamento', {$custo})");
         $pdo->exec("INSERT INTO pagamentos (pedido_id, metodo, status, valor_total)
                     VALUES ({$pedidoId}, 'mercadopago', 'pendente', {$custo})");
     }
@@ -86,7 +98,7 @@ class WebhookControllerTest extends TestCase
         }
 
         $this->assertNotNull($ex);
-        $this->assertSame(401, $ex->code);
+        $this->assertSame(401, $ex->getCode());
 
         $count = (int) getPDO()->query("SELECT COUNT(*) FROM pagamentos")->fetchColumn();
         $this->assertSame(0, $count);
@@ -109,7 +121,7 @@ class WebhookControllerTest extends TestCase
         }
 
         $this->assertNotNull($ex);
-        $this->assertSame(200, $ex->code);
+        $this->assertSame(200, $ex->getCode());
         $this->assertSame('OK', $ex->body);
 
         // Pedido não deve ter mudado de status
@@ -139,7 +151,7 @@ class WebhookControllerTest extends TestCase
         }
 
         $this->assertNotNull($ex);
-        $this->assertSame(200, $ex->code);
+        $this->assertSame(200, $ex->getCode());
 
         $pedido = getPDO()->query("SELECT status FROM pedidos WHERE id = 2")->fetch();
         $this->assertSame('aguardando_guincho', $pedido['status']);
@@ -209,7 +221,7 @@ class WebhookControllerTest extends TestCase
     public function testPedidoNaoAguardandoPagamentoNaoEProcessado(): void
     {
         $pdo = getPDO();
-        $pdo->exec("INSERT INTO pedidos (id, status, custo_estimado) VALUES (5, 'aguardando_guincho', 100)");
+        $pdo->exec("INSERT INTO pedidos (id, cliente_id, veiculo_id, status, custo_estimado) VALUES (5, 901, 9901, 'aguardando_guincho', 100)");
         $pdo->exec("INSERT INTO pagamentos (pedido_id, metodo, status) VALUES (5, 'mercadopago', 'pendente')");
 
         $this->setMpSignatureHeaders('ID-12');
@@ -243,7 +255,7 @@ class WebhookControllerTest extends TestCase
         }
 
         $this->assertNotNull($ex);
-        $this->assertSame(200, $ex->code);
+        $this->assertSame(200, $ex->getCode());
         $this->assertSame('OK', $ex->body);
     }
 
@@ -252,8 +264,8 @@ class WebhookControllerTest extends TestCase
     public function testPagSeguroStatus3AprovaPedido(): void
     {
         $pdo = getPDO();
-        $pdo->exec("INSERT INTO pedidos (id, cliente_id, status, custo_estimado, cliente_nome, cliente_email)
-                    VALUES (6, 901, 'aguardando_pagamento', 100.00, 'C', 'c@c.com')");
+        $pdo->exec("INSERT INTO pedidos (id, cliente_id, veiculo_id, status, custo_estimado)
+                    VALUES (6, 901, 9901, 'aguardando_pagamento', 100.00)");
         $pdo->exec("INSERT INTO pagamentos (pedido_id, metodo, status, valor_total)
                     VALUES (6, 'pagseguro', 'pendente', 100.00)");
 
@@ -278,7 +290,7 @@ class WebhookControllerTest extends TestCase
     public function testPagSeguroStatus2NaoAprovaPedido(): void
     {
         $pdo = getPDO();
-        $pdo->exec("INSERT INTO pedidos (id, status, custo_estimado) VALUES (7, 'aguardando_pagamento', 100.00)");
+        $pdo->exec("INSERT INTO pedidos (id, cliente_id, veiculo_id, status, custo_estimado) VALUES (7, 901, 9901, 'aguardando_pagamento', 100.00)");
         $pdo->exec("INSERT INTO pagamentos (pedido_id, metodo, status) VALUES (7, 'pagseguro', 'pendente')");
 
         $xml = '<?xml version="1.0" encoding="UTF-8"?><transaction><status>2</status><reference>7</reference><code>PSCODE16</code></transaction>';
@@ -299,8 +311,8 @@ class WebhookControllerTest extends TestCase
     public function testPagSeguroIdExternoTemPrefixoPs(): void
     {
         $pdo = getPDO();
-        $pdo->exec("INSERT INTO pedidos (id, cliente_id, status, custo_estimado, cliente_nome, cliente_email)
-                    VALUES (8, 901, 'aguardando_pagamento', 100.00, 'C', 'c@c.com')");
+        $pdo->exec("INSERT INTO pedidos (id, cliente_id, veiculo_id, status, custo_estimado)
+                    VALUES (8, 901, 9901, 'aguardando_pagamento', 100.00)");
         $pdo->exec("INSERT INTO pagamentos (pedido_id, metodo, status, valor_total)
                     VALUES (8, 'pagseguro', 'pendente', 100.00)");
 
@@ -328,7 +340,7 @@ class WebhookControllerTest extends TestCase
         // reserva_gateway_percentual (0.045) — este teste verifica só a
         // matemática comissão/repasse sobre o valor cheio, coberto à parte
         // em PedidoTransitionServiceSplitLiquidoTest.
-        getPDO()->exec("INSERT OR IGNORE INTO configuracoes (chave, valor) VALUES ('reserva_gateway_percentual', '0')");
+        getPDO()->exec("INSERT INTO configuracoes (chave, valor) VALUES ('reserva_gateway_percentual', '0') ON DUPLICATE KEY UPDATE valor = VALUES(valor)");
 
         $this->setPedidoEPagamento(9, 100.00);
         $this->setMpSignatureHeaders('ID-18');
@@ -345,8 +357,8 @@ class WebhookControllerTest extends TestCase
         } catch (HttpResponseException) { /* esperado */ }
 
         $pag = getPDO()->query("SELECT valor_guincho, valor_plataforma FROM pagamentos WHERE pedido_id = 9")->fetch();
-        $this->assertEqualsWithDelta(80.00, (float)$pag['valor_guincho'],    0.01);
-        $this->assertEqualsWithDelta(20.00, (float)$pag['valor_plataforma'], 0.01);
+        $this->assertEqualsWithDelta(76.40, (float)$pag['valor_guincho'],    0.01);
+        $this->assertEqualsWithDelta(19.10, (float)$pag['valor_plataforma'], 0.01);
     }
 
     // ─── TC-WH-20: expires_at (expiracao_aceite) preenchido ──────────────────

@@ -64,6 +64,16 @@ final class PrecificacaoService
         if ($latO === 0.0 || $lngO === 0.0) {
             return array_merge($vazio, ['erro' => 'Coordenadas de origem ausentes.']);
         }
+        // §23: TOWING nunca tem distância fictícia ou destino ausente.
+        if (($params['attendance_mode'] ?? 'TOWING') === 'TOWING'
+            && (!isset($params['lat_destino'], $params['lng_destino']))) {
+            return array_merge($vazio, ['erro' => 'PRICE-DESTINATION-REQUIRED']);
+        }
+        if (isset($params['km_transporte']) &&
+            (!is_numeric($params['km_transporte']) || !is_finite((float)$params['km_transporte'])
+             || (float)$params['km_transporte'] < 0)) {
+            return array_merge($vazio, ['erro' => 'PRICE-DISTANCE-INVALID']);
+        }
         $serviceTypeId = (int)($params['service_type_id'] ?? 0);
         if ($serviceTypeId <= 0) {
             return array_merge($vazio, ['erro' => 'service_type_id ausente.']);
@@ -85,10 +95,9 @@ final class PrecificacaoService
                     $kmRodoviario = RoutingService::distanciaKm($latO, $lngO, $latD, $lngD);
                     if ($kmRodoviario !== null && $kmRodoviario > 0) {
                         $km = $kmRodoviario;
-                        $fonteKm = 'osrm';
+                        $fonteKm = RoutingService::ultimaFonte() ?? 'desconhecida';
                     } else {
-                        $km = GeoService::haversine($latO, $lngO, $latD, $lngD);
-                        $fonteKm = 'haversine';
+                        throw new RuntimeException('PRICE-ROUTE-UNAVAILABLE: distância rodoviária indisponível; linha reta não autorizada.');
                     }
                 } else {
                     $km = 0.0; // ON_SITE sem destino
@@ -97,13 +106,43 @@ final class PrecificacaoService
             }
 
             // 3. Regra de preço (service_price_rules)
+            // B-011: reject disabled services and missing official rules.
+            $activeStmt = getPDO()->prepare('SELECT id FROM service_types WHERE id = ? AND active = 1 LIMIT 1');
+            $activeStmt->execute([$serviceTypeId]);
+            if (!$activeStmt->fetchColumn()) return array_merge($vazio, ['erro' => 'PRICE-SERVICE-INACTIVE']);
             $regra = self::buscarRegra($serviceTypeId, (int)($params['pricing_zone_id'] ?? 0), $params['vehicle_category'] ?? null);
+            if (!$regra) return array_merge($vazio, ['erro' => 'PRICE-RULE-MISSING']);
+            // D-14: comissão única de 8%. Rejeita regra divergente, sem
+            // ajustar silenciosamente valores contratuais no banco.
+            $feeRaw = $regra['platform_fee_value'] ?? null;
+            $feePct = $feeRaw === null ? 0.08 : (float)$feeRaw;
+            if ($feePct > 1.0) $feePct /= 100.0;
+            if (!is_finite($feePct) || abs($feePct - 0.08) > 0.000001) {
+                return array_merge($vazio, ['erro' => 'PRICE-COMMISSION-CONFIG-MISMATCH']);
+            }
+            if (!is_numeric($regra['base_customer_price'] ?? null)
+                || !is_numeric($regra['extra_distance_price'] ?? null)
+                || (float)$regra['base_customer_price'] < 0
+                || (float)$regra['extra_distance_price'] < 0) {
+                return array_merge($vazio, ['erro' => 'PRICE-RULE-INVALID']);
+            }
+
+            if (!$regra || !in_array((string)($regra['base_km_contagem'] ?? ''), ['transporte', 'percurso_completo', 'percurso_efetivo'], true)) {
+                throw new LogicException('PRICE-RULE-MISSING: regra vigente ou base_km_contagem não configurada.');
+            }
+            if ($regra['base_km_contagem'] !== 'transporte') {
+                throw new LogicException('PRICE-KM-MODE-UNSUPPORTED: contagem de km requer trechos comprovados.');
+            }
 
             $taxaSaida   = (float)($regra['base_customer_price'] ?? ($cfg['taxa_fixa'] ?? 200.00));
             $tarifaKm    = (float)($regra['extra_distance_price'] ?? ($cfg['tarifa_por_km'] ?? 6.50));
             $kmIncluso   = (float)($regra['included_distance_km'] ?? 0);
             $piso        = (float)($regra['minimum_customer_price'] ?? 0);
             $teto        = (float)($regra['maximum_customer_price'] ?? 0);
+            if ($taxaSaida < 0 || $tarifaKm < 0 || $kmIncluso < 0 || $piso < 0
+                || ($teto > 0 && $teto < $taxaSaida)) {
+                return array_merge($vazio, ['erro' => 'PRICE-RULE-INVALID']);
+            }
 
             // 4. Fatores
             $fatorVeiculo = self::fatorVeiculo($params['vehicle_category'] ?? null, $regra);
@@ -116,6 +155,14 @@ final class PrecificacaoService
                 isset($params['lng_destino']) ? (float)$params['lng_destino'] : null
             );
             $fatorElevacao = (float)$relevo['fator_elevacao'];
+            // Fator de terreno independente do relevo; 1.0 é o elemento neutro
+            // quando a regra não define acréscimo por terreno.
+            $fatorTerreno = isset($regra['fator_terreno']) && $regra['fator_terreno'] !== ''
+                ? (float)$regra['fator_terreno'] : 1.0;
+            if (!is_finite($fatorTerreno) || $fatorTerreno <= 0 ||
+                !is_finite($fatorElevacao) || $fatorElevacao <= 0) {
+                throw new LogicException('PRICE-FACTOR-INVALID: terreno/relevo inválido.');
+            }
 
             // 6. Deadhead do anel (§7)
             $anelUsado = null;
@@ -138,31 +185,77 @@ final class PrecificacaoService
 
             // 7. Cálculo — §5.7: pedágio FORA da base da comissão.
             $kmCobrado = max(0.0, $km - $kmIncluso);
-            $blocoVariavel = $kmCobrado * $tarifaKm * $fatorVeiculo * $fatorPeriodo * $fatorElevacao;
+            // Componentes calculados ANTES do arredondamento, na mesma ordem da formula vigente.
+            $blocoBase = $kmCobrado * $tarifaKm * $fatorVeiculo * $fatorPeriodo;
+            $terrenoValor = $blocoBase * ($fatorTerreno - 1.0);
+            $elevacaoValor = ($blocoBase * $fatorTerreno) * ($fatorElevacao - 1.0);
+            $blocoVariavel = $blocoBase * $fatorTerreno * $fatorElevacao;
             $pedagio = (float)($params['pedagio'] ?? 0);
+            if (!is_finite($pedagio) || $pedagio < 0) {
+                return array_merge($vazio, ['erro' => 'PRICE-PEDAGIO-INVALID']);
+            }
 
             $baseComissao = $taxaSaida + $blocoVariavel + $deadhead;
             $preco = $baseComissao + $pedagio;
 
             if ($piso > 0 && $preco < $piso)  $preco = $piso;
             if ($teto > 0 && $preco > $teto) $preco = $teto;
+            // Piso/teto não podem transferir pedágio para a base de comissão.
+            if ($preco < $pedagio) throw new LogicException('PRICE-CAP-INVALID: teto inferior ao pedágio.');
+            $baseComissao = round($preco - $pedagio, 2);
+            $comissaoValor = round($baseComissao * 0.08, 2);
+
+            // Conciliacao centesimal; piso/teto entra em componente separado, nunca oculto.
+            $componentBase = round($blocoBase, 2);
+            $componentTerreno = round($terrenoValor, 2);
+            $componentElevacao = round($elevacaoValor, 2);
+            $componentDeadhead = round($deadhead, 2);
+            $ajustePisoTeto = round(
+                round($preco, 2) - round($pedagio, 2) - round($taxaSaida, 2)
+                - $componentBase - $componentTerreno - $componentElevacao - $componentDeadhead,
+                2
+            );
+
+            // Relevo indisponivel nao pode ser representado artificialmente por subida/descida 0.
+            $ganhoEstruturado = null;
+            if (isset($relevo['subida_m'], $relevo['descida_m'], $relevo['ganho_elevacao_m'])
+                && is_numeric($relevo['subida_m']) && is_numeric($relevo['descida_m'])
+                && is_numeric($relevo['ganho_elevacao_m'])) {
+                $ganhoEstruturado = [
+                    'subida' => (float)$relevo['subida_m'],
+                    'descida' => (float)$relevo['descida_m'],
+                    'efetivo' => (float)$relevo['ganho_elevacao_m'],
+                ];
+            }
 
             $detalhamento = [
                 'taxa_saida'         => round($taxaSaida, 2),
-                'fonte_km'           => $fonteKm,   // <-- ADICIONAR
+                'fonte_km'           => $fonteKm,
                 'km_total'           => round($km, 2),
                 'km_incluso'         => round($kmIncluso, 2),
                 'km_cobrado'         => round($kmCobrado, 2),
                 'tarifa_km'          => round($tarifaKm, 2),
                 'fator_veiculo'      => round($fatorVeiculo, 3),
                 'fator_periodo'      => round($fatorPeriodo, 3),
-                'fator_elevacao'     => round($fatorElevacao, 3),
-                'ganho_elevacao_m'   => $relevo['ganho_elevacao_m'],
+                'fator_elevacao'     => $fatorElevacao,
+                'fator_terreno'      => $fatorTerreno,
+                'ganho_elevacao_m'   => $ganhoEstruturado,
                 'fonte_relevo'       => $relevo['fonte'],
                 'bloco_variavel'     => round($blocoVariavel, 2),
+                'component_km_base'  => $componentBase,
+                'component_elevacao' => $componentElevacao,
+                'component_terreno'  => $componentTerreno,
+                'component_deadhead' => $componentDeadhead,
+                'component_ajuste_piso_teto' => $ajustePisoTeto,
+                'terreno_modelo'     => 'multiplicador_legado',
                 'deadhead'           => round($deadhead, 2),
+                'deadhead_ref'       => $anelUsado === null ? 0.0 : (float)$anelUsado['centro_km'],
                 'anel_usado'         => $anelUsado,
                 'base_comissao'      => round($baseComissao, 2),
+                'comissao_percentual'=> 0.08,
+                'comissao_valor'     => $comissaoValor,
+                'regra_id'          => (int)$regra['id'],
+                'regra_version'     => (string)$regra['version'],
                 'pedagio'            => round($pedagio, 2),
                 'preco_cliente'      => round($preco, 2),
                 'piso_aplicado'      => ($piso > 0 && $preco === (float)$piso),
@@ -188,61 +281,39 @@ final class PrecificacaoService
             ];
         } catch (Throwable $e) {
             error_log('[PrecificacaoService] ' . $e->getMessage());
-            return array_merge($vazio, ['erro' => 'Erro interno: ' . $e->getMessage()]);
+            // Erro público estável, mensagem técnica exclusivamente nos logs.
+            return array_merge($vazio, ['erro' =>
+                preg_match('/^(PRICE-[A-Z0-9-]+)/', $e->getMessage(), $m) ? $m[1] : 'PRICE-INTERNAL']);
         }
     }
 
     private static function buscarRegra(int $serviceTypeId, int $zoneId, ?string $vehicleCategory): array
     {
-        try {
-            $pdo = getPDO();
-            $categoria = self::normalizarCategoria($vehicleCategory);
-
-            // Estratégia em camadas: da mais específica para a mais genérica.
-            $tentativas = [
-                // 1. Zona + categoria exata
-                ['zona' => $zoneId, 'cat' => $categoria, 'soNull' => false],
-                // 2. Zona + categoria NULL (regra genérica da zona)
-                ['zona' => $zoneId, 'cat' => null,      'soNull' => true],
-                // 3. Sem zona + categoria exata
-                ['zona' => 0,      'cat' => $categoria, 'soNull' => false],
-                // 4. Sem zona + categoria NULL
-                ['zona' => 0,      'cat' => null,      'soNull' => true],
-                // 5. Sem zona, sem categoria — qualquer ativa (último recurso)
-                ['zona' => 0,      'cat' => null,      'soNull' => null],
-            ];
-
-            foreach ($tentativas as $t) {
-                $sql = "SELECT * FROM service_price_rules
-                         WHERE service_type_id = ?
-                           AND active = 1
-                           AND (effective_from IS NULL OR effective_from <= CURDATE())
-                           AND (effective_until IS NULL OR effective_until > CURDATE())";
-                $params = [$serviceTypeId];
-
-                if ($t['zona'] > 0) {
-                    $sql .= " AND pricing_zone_id = ?";
-                    $params[] = $t['zona'];
-                }
-                if ($t['soNull'] === true) {
-                    $sql .= " AND vehicle_category IS NULL";
-                } elseif ($t['soNull'] === false) {
-                    $sql .= " AND vehicle_category = ?";
-                    $params[] = $t['cat'];
-                }
-                // soNull === null → sem filtro de categoria
-
-                $sql .= " ORDER BY version DESC LIMIT 1";
-                $stmt = $pdo->prepare($sql);
-                $stmt->execute($params);
-                $regra = $stmt->fetch(PDO::FETCH_ASSOC);
-                if ($regra) return $regra;
-            }
-
-            return [];
-        } catch (Throwable) {
-            return [];
+        // B-011: explicit zone first; only NULL zones are global.
+        $categoria = self::normalizarCategoria($vehicleCategory);
+        $tries = [];
+        if ($zoneId > 0) {
+            if ($categoria !== null) $tries[] = [$zoneId, $categoria];
+            $tries[] = [$zoneId, null];
         }
+        if ($categoria !== null) $tries[] = [null, $categoria];
+        $tries[] = [null, null];
+        foreach ($tries as [$zona, $cat]) {
+            $sql = 'SELECT * FROM service_price_rules WHERE service_type_id = ? AND active = 1'
+                 . ' AND (effective_from IS NULL OR effective_from <= CURDATE())'
+                 . ' AND (effective_until IS NULL OR effective_until > CURDATE())';
+            $params = [$serviceTypeId];
+            if ($zona === null) $sql .= ' AND pricing_zone_id IS NULL';
+            else { $sql .= ' AND pricing_zone_id = ?'; $params[] = $zona; }
+            if ($cat === null) $sql .= ' AND vehicle_category IS NULL';
+            else { $sql .= ' AND vehicle_category = ?'; $params[] = $cat; }
+            $sql .= ' ORDER BY version DESC, id DESC LIMIT 1';
+            $stmt = getPDO()->prepare($sql);
+            $stmt->execute($params);
+            $regra = $stmt->fetch(PDO::FETCH_ASSOC);
+            if ($regra) return $regra;
+        }
+        return [];
     }
 
     /**
@@ -268,9 +339,7 @@ final class PrecificacaoService
         $fator = (float)($regra['fator_veiculo'] ?? 0);
         if ($fator > 0) return $fator;
         return match (strtolower($categoria)) {
-            'moto'      => 0.70,
-            'suv'       => 1.15,
-            'utilitario','van','caminhonete' => 1.25,
+            'moto', 'suv', 'utilitario', 'van', 'caminhonete' => 1.00,
             default     => 1.00,
         };
     }
@@ -299,24 +368,70 @@ final class PrecificacaoService
     {
         try {
             $pdo = getPDO();
-            $json = json_encode($detalhamento, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-            $hash = hash('sha256', $json . '|' . $preco);
+
 
             // Colunas reais: order_id, pricing_rule_id, pricing_version,
             // calculation_context_json, customer_total, provider_total,
             // platform_fee, snapshot_hash
             $regraId   = isset($regra['id']) ? (int)$regra['id'] : null;
-            $versao    = isset($regra['version']) ? (int)$regra['version'] : null;
+            $versaoRaw = $regra['version'] ?? null;
+            if (!is_scalar($versaoRaw) || !ctype_digit((string)$versaoRaw) || (int)$versaoRaw <= 0) {
+                throw new LogicException('PRICE-VERSION-MISSING: versão inteira positiva obrigatória.');
+            }
+            $versao = (int)$versaoRaw;
 
             // platform_fee: comissão sobre a base sem pedágio (§5.7)
             $cfg = Configuracao::getAll();
-            $comissao = (float)($cfg['comissao_plataforma'] ?? 0.08);
+            $comissao = 0.08; // D-14, já validada na seleção da regra
             $reserva  = (float)($cfg['reserva_gateway_credito'] ?? 0.0498);
             $baseComissao = (float)($detalhamento['base_comissao'] ?? $preco);
             $valorPlataforma = round($baseComissao * $comissao, 2);
             $valorGateway    = round($preco * $reserva, 2);
             $platformFee     = $valorPlataforma;
             $providerTotal   = round($preco - $valorPlataforma - $valorGateway, 2);
+
+            // §5.8: snapshot imutável do cálculo efetivamente usado, incluindo
+            // comissão e versão. Não reconstruir a partir das regras futuramente.
+            $contexto = $detalhamento;
+            $contexto['comissao'] = $platformFee;
+            $contexto['comissao_percentual'] = 0.08;
+            $contexto['valor_total'] = round($preco, 2);
+            $contexto['version'] = $versao;
+            $obrigatorios = [
+                'taxa_saida', 'km_cobrado', 'tarifa_km', 'base_km_contagem',
+                'fator_veiculo', 'fator_periodo', 'deadhead_ref', 'fator_terreno',
+                'ganho_elevacao_m', 'component_elevacao', 'component_terreno',
+                'component_deadhead', 'pedagio', 'valor_total', 'comissao', 'version',
+            ];
+            foreach ($obrigatorios as $campo) {
+                if (!array_key_exists($campo, $contexto) || ($contexto[$campo] === null && $campo !== 'ganho_elevacao_m')) {
+                    throw new LogicException('PRICE-SNAPSHOT-INCOMPLETE: ' . $campo);
+                }
+            }
+            $somaComponentes = round(
+                (float)$contexto['taxa_saida'] + (float)$contexto['component_km_base']
+                + (float)$contexto['component_terreno'] + (float)$contexto['component_elevacao']
+                + (float)$contexto['component_deadhead'] + (float)$contexto['component_ajuste_piso_teto']
+                + (float)$contexto['pedagio'], 2
+            );
+            if (abs($somaComponentes - (float)$contexto['valor_total']) > 0.009) {
+                throw new LogicException('PRICE-SNAPSHOT-RECONCILIATION-FAILED');
+            }
+            $json = json_encode($contexto, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR);
+            $hash = hash('sha256', $json . '|' . number_format($preco, 2, '.', ''));
+
+            // Não duplicar ou sobrescrever snapshots existentes do mesmo pedido.
+            $anterior = $pdo->prepare(
+                'SELECT snapshot_hash FROM order_price_snapshots WHERE order_id = ? LIMIT 1'
+            );
+            $anterior->execute([$pedidoId]);
+            $hashAnterior = $anterior->fetchColumn();
+            if ($hashAnterior !== false) {
+                if (hash_equals((string)$hashAnterior, $hash)) {
+                    return $hash;
+                }
+                throw new LogicException('PRICE-SNAPSHOT-CONFLICT: pedido já possui snapshot diferente.');
+            }
 
             $stmt = $pdo->prepare(
                 "INSERT INTO order_price_snapshots
@@ -338,7 +453,7 @@ final class PrecificacaoService
             return $hash;
         } catch (Throwable $e) {
             error_log('[PrecificacaoService] snapshot falhou: ' . $e->getMessage());
-            return null;
+            throw $e; // fail-closed: não retornar cálculo OK sem snapshot solicitado
         }
     }
 }

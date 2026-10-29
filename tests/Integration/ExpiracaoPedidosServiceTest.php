@@ -25,12 +25,14 @@ final class ExpiracaoPedidosServiceTest extends TestCase
     protected function setUp(): void
     {
         $pdo = getPDO();
+        if ($pdo->getAttribute(PDO::ATTR_DRIVER_NAME) === 'mysql') { $pdo->exec('SET FOREIGN_KEY_CHECKS=0'); }
         foreach (['pagamentos', 'pedidos', 'usuarios', 'veiculos'] as $table) {
             try {
                 $pdo->exec("DELETE FROM {$table}");
             } catch (Throwable) {
             }
         }
+        if ($pdo->getAttribute(PDO::ATTR_DRIVER_NAME) === 'mysql') { $pdo->exec('SET FOREIGN_KEY_CHECKS=1'); }
         $pdo->exec("
             INSERT INTO usuarios (id, nome, email, senha_hash, telefone, cpf, tipo) VALUES
             (1, 'Cliente Teste', 'cliente.expiracao@example.com', 'hash', '11999999999', '11111111111', 'cliente')
@@ -103,7 +105,7 @@ final class ExpiracaoPedidosServiceTest extends TestCase
             "INSERT INTO pedidos (id, status, custo_estimado, cliente_id, veiculo_id,
                 lat_origem, lng_origem, endereco_origem, lat_destino, lng_destino, endereco_destino,
                 expiracao_aceite, criado_em)
-             VALUES (303, 'aguardando_guincho', 149.90, 1, 1, -23.55, -46.63, 'Origem', -23.56, -46.64, 'Destino', '{$futuro}', datetime('now'))"
+             VALUES (303, 'aguardando_guincho', 149.90, 1, 1, -23.55, -46.63, 'Origem', -23.56, -46.64, 'Destino', '{$futuro}', NOW())"
         );
 
         $metrics = ExpiracaoPedidosService::executar();

@@ -51,7 +51,7 @@ class CarteiraService
                     COUNT(*) AS total_pedidos,
                     COALESCE(SUM(CASE WHEN pg.status = 'aprovado' AND COALESCE(pg.pago_guincho,0) = 0 THEN pg.valor_guincho ELSE 0 END), 0) AS saldo_em_compensacao,
                     COALESCE(SUM(CASE WHEN pg.status = 'aprovado' AND COALESCE(pg.pago_guincho,0) = 1 THEN pg.valor_guincho ELSE 0 END), 0) AS saldo_pago,
-                    COALESCE(SUM(CASE WHEN pg.status = 'estornado' THEN pg.valor_guincho ELSE 0 END), 0) AS saldo_estornado,
+                    COALESCE(SUM(CASE WHEN pg.status = 'estornado' THEN pg.valor_guincho ELSE 0 END), 0) AS saldo_estornado,                    COALESCE((SELECT SUM(le.valor) FROM payout_ledger_entries le WHERE le.pedido_id = p.id AND le.pagamento_id = pg.id AND le.entry_type = 'reserva_gateway'), 0) AS reserva_gateway,
                     COALESCE(SUM(CASE WHEN pg.status = 'aprovado' AND COALESCE(pg.pago_guincho,0) = 0 AND pg.status_pix = 'falha' THEN 1 ELSE 0 END), 0) AS repasses_com_falha,
                     MAX(pg.data_pagamento_guincho) AS ultimo_repasse_em
                  FROM pedidos p
@@ -85,7 +85,7 @@ class CarteiraService
                 'total_pedidos' => (int)($row['total_pedidos'] ?? 0),
                 'saldo_em_compensacao' => round((float)($row['saldo_em_compensacao'] ?? 0), 2),
                 'saldo_pago' => round((float)($row['saldo_pago'] ?? 0), 2),
-                'saldo_estornado' => round((float)($row['saldo_estornado'] ?? 0), 2),
+                'saldo_estornado' => round((float)($row['saldo_estornado'] ?? 0), 2),                'reserva_gateway' => round((float)($row['reserva_gateway'] ?? 0), 2),
                 'repasses_com_falha' => (int)($row['repasses_com_falha'] ?? 0),
                 'ultimo_repasse_em' => $row['ultimo_repasse_em'] ?? null,
             ];
@@ -124,7 +124,7 @@ class CarteiraService
                     g.placa_guincho,
                     COALESCE(SUM(CASE WHEN pg.status = 'aprovado' AND COALESCE(pg.pago_guincho,0) = 0 THEN pg.valor_guincho ELSE 0 END), 0) AS saldo_em_compensacao,
                     COALESCE(SUM(CASE WHEN pg.status = 'aprovado' AND COALESCE(pg.pago_guincho,0) = 1 THEN pg.valor_guincho ELSE 0 END), 0) AS saldo_pago,
-                    COALESCE(SUM(CASE WHEN pg.status = 'estornado' THEN pg.valor_guincho ELSE 0 END), 0) AS saldo_estornado,
+                    COALESCE(SUM(CASE WHEN pg.status = 'estornado' THEN pg.valor_guincho ELSE 0 END), 0) AS saldo_estornado,                    COALESCE((SELECT SUM(le.valor) FROM payout_ledger_entries le WHERE le.pedido_id IN (SELECT p2.id FROM pedidos p2 WHERE p2.guincho_id = g.id) AND le.entry_type = 'reserva_gateway'), 0) AS reserva_gateway,
                     COALESCE(SUM(CASE WHEN pg.status = 'aprovado' AND COALESCE(pg.pago_guincho,0) = 0 AND pg.status_pix = 'falha' THEN 1 ELSE 0 END), 0) AS repasses_com_falha
                  FROM guinchos g
                  JOIN usuarios u ON u.id = g.usuario_id

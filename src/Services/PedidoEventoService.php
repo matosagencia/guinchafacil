@@ -50,4 +50,12 @@ final class PedidoEventoService
                     . ' | pedido=' . $pedidoId . ' evento=' . $evento);
             }
         }
+    public static function registrarFinanceiro(PDO $pdo,int $pedidoId,string $evento,?string $anterior,?string $novo,?string $atorTipo,?int $atorId,?string $motivo,array $context=[]): void
+    {
+        GFIntegratedApproval::guard($pdo);
+        if (!$pdo->inTransaction()) throw new LogicException('FIN_TRANSACTION_REQUIRED');
+        $q=$pdo->prepare('INSERT INTO pedido_eventos (pedido_id,ator_id,ator_tipo,evento,status_anterior,status_novo,motivo,context_json,created_at) VALUES (?,?,?,?,?,?,?,?,NOW())');
+        $q->execute([$pedidoId,$atorId,$atorTipo,$evento,$anterior,$novo,$motivo,json_encode($context,JSON_THROW_ON_ERROR)]);
+        if ($q->rowCount()!==1) throw new RuntimeException('FIN_ORDER_EVENT_WRITE_FAILED');
+    }
 }

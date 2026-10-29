@@ -26,7 +26,7 @@ foreach (($produtos ?? []) as $p) {
     ];
 }
 ?>
-<link rel="stylesheet" href="<?php echo htmlspecialchars($bp); ?>/public/assets/css/pages/admin-central-operacional.css">
+<link rel="stylesheet" href="<?php echo htmlspecialchars($bp); ?>/public/assets/css/pages/admin-central-operacional.css"><link rel="stylesheet" href="<?php echo htmlspecialchars($bp, ENT_QUOTES, 'UTF-8'); ?>/public/assets/css/pages/gf-f18c-shell.css?v=20261017-18c1"><link rel="stylesheet" href="<?php echo htmlspecialchars($bp, ENT_QUOTES, 'UTF-8'); ?>/public/assets/css/backoffice-layout.css?v=20261027-1">
 
 <div class="ops-topbar" style="padding:10px 24px;border-bottom:1px solid var(--theme-border,#232c35);background:var(--theme-nav,#030405)">
     <div class="ops-topbar__search"><i class="fas fa-magnifying-glass"></i><input type="search" id="produtosSearchTop" placeholder="Buscar por SKU, nome ou categoria" autocomplete="off" aria-label="Buscar produtos"></div>

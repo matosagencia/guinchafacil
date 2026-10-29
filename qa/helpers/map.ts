@@ -2,7 +2,7 @@ import { expect, type Locator, type Page } from '@playwright/test';
 
 export async function waitForLeafletMap(page: Page): Promise<Locator> {
   await page.waitForSelector('.leaflet-container', { timeout: 15000 });
-  const map = page.locator('#map');
+  const map = page.locator('#map, [data-ap-map]').first();
   await expect(map).toBeVisible();
   return map;
 }

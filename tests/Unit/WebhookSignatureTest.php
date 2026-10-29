@@ -177,6 +177,12 @@ class WebhookSignatureTest extends TestCase
     {
         getPDO()->exec("DELETE FROM pagamentos");
         getPDO()->exec("DELETE FROM logs_webhook");
+        getPDO()->exec("DELETE FROM pedidos WHERE id IN (1,2)");
+        getPDO()->exec("DELETE FROM veiculos WHERE id IN (1,2)");
+        getPDO()->exec("DELETE FROM usuarios WHERE id IN (1,2)");
+        getPDO()->exec("INSERT INTO usuarios (id, nome, email) VALUES (1, 'Webhook QA 1', 'webhook1@test.com'), (2, 'Webhook QA 2', 'webhook2@test.com')");
+        getPDO()->exec("INSERT INTO veiculos (id, usuario_id, placa, marca, modelo, ano, cor, tipo) VALUES (1,1,'WH0001','QA','Teste',2026,'Preto','carro'), (2,2,'WH0002','QA','Teste',2026,'Preto','carro')");
+        getPDO()->exec("INSERT INTO pedidos (id, cliente_id, veiculo_id, status) VALUES (1,1,1,'concluido'), (2,2,2,'concluido')");
     }
 
     public function testIdExtjernoJaAprovadoNaoDeveSerReprocessado(): void

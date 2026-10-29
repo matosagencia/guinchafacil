@@ -43,39 +43,6 @@ require_once __DIR__ . '/src/Services/AuthService.php';
 require_once __DIR__ . '/src/Services/Logger.php';
 require_once __DIR__ . '/src/Controllers/BaseController.php';
 
-// [A-RESOLVER-BOOT-01] ServiceTypeResolver lazy lookup
-require_once __DIR__ . '/src/Services/Catalog/ServiceTypeResolver.php';
-
-\App\Services\Catalog\ServiceTypeResolver::definirLookupPorCodigo(
-    static function (string $code): ?int {
-        try {
-            $stmt = \getPDO()->prepare(
-                'SELECT id FROM service_types WHERE code = ? AND active = 1 LIMIT 1'
-            );
-            $stmt->execute([$code]);
-            $id = $stmt->fetchColumn();
-
-            return $id !== false ? (int) $id : null;
-        } catch (\Throwable $e) {
-            try {
-                \Logger::event([
-                    'level' => \Logger::LEVEL_ERROR,
-                    'class' => 'ServiceTypeResolver',
-                    'function' => 'lookupPorCodigo',
-                    'system' => 'Catalog',
-                    'code' => 'STR-LOOKUP-FAIL',
-                    'message' => 'Falha ao resolver service_type code=' . $code,
-                    'context' => ['code' => $code, 'exception' => $e->getMessage()],
-                ]);
-            } catch (\Throwable $logError) {
-                error_log('[STR-LOOKUP-FAIL] code=' . $code . ' error=' . $e->getMessage());
-            }
-
-            return null;
-        }
-    }
-);
-
 set_exception_handler(function (Throwable $e): void {
     Logger::exception('Router', 'exception_handler', 'PHP', $e, [
         'uri'  => $_SERVER['REQUEST_URI'] ?? null,
@@ -456,6 +423,7 @@ $rotas = [
 
     'POST' => [
         '/parceiros/interesse' => ['AuthController', 'parceirosInteresse', null],
+        '/pagamento/checkout' => ['PagamentoController', 'selecionarForma', 'cliente'],
 
         '/oficina/pedido/{id}/cancelar' => ['OficinaController', 'cancelarAtendimento', 'oficina'],
         '/admin/pedido/novo/contexto' => ['AdminController', 'pedidoNovoContexto', 'admin'],
@@ -521,6 +489,7 @@ $rotas = [
         '/admin/oficina/suspender' => ['OficinaParceriaController', 'suspender', 'admin'],
         '/admin/oficina/reativar' => ['OficinaParceriaController', 'reativar', 'admin'],
         '/admin/oficina/atualizar' => ['OficinaParceriaController', 'atualizar', 'admin'],
+    '/admin/oficina/vincular-localizacao' => ['OficinaParceriaController', 'vincularLocalizacao', 'admin'],
         '/admin/prestador-movel/regra-orcamento' => ['AdminController', 'salvarRegraOrcamentoPrestador', 'admin'],
         '/admin/oficina/indicacao/revisar' => ['OficinaParceriaController', 'revisar', 'admin'],
         '/admin/oficina/indicacao/estornar' => ['OficinaParceriaController', 'estornar', 'admin'],
@@ -721,6 +690,7 @@ $rotasDinamicas = [
     ['GET',  '/admin/qa/run/artifact/',  'AdminController',   'qaArtifact',       'admin'],
 
     ['GET',  '/pagamento/checkout/',     'PagamentoController','checkout',        'cliente'],
+    ['POST', '/pagamento/checkout/',     'PagamentoController','selecionarForma', 'cliente'],
     ['GET',  '/pagamento/complementar/', 'PagamentoController','complementarCheckout', 'cliente'],
     ['GET',  '/pagamento/sucesso/',      'PagamentoController','sucesso',         'cliente'],
     ['GET',  '/pagamento/falha/',        'PagamentoController','falha',           'cliente'],

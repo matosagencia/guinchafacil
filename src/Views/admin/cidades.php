@@ -45,7 +45,7 @@ foreach (($cidades ?? []) as $c) {
     ];
 }
 ?>
-<link rel="stylesheet" href="<?php echo htmlspecialchars($bp); ?>/public/assets/css/pages/admin-central-operacional.css">
+<link rel="stylesheet" href="<?php echo htmlspecialchars($bp); ?>/public/assets/css/pages/admin-central-operacional.css"><link rel="stylesheet" href="<?php echo htmlspecialchars($bp); ?>/public/assets/css/backoffice-layout.css?v=20261027-1"><link rel="stylesheet" href="<?php echo htmlspecialchars($bp, ENT_QUOTES, 'UTF-8'); ?>/public/assets/css/pages/gf-f18c-shell.css?v=20261017-18c1"><div class="bo bo-operator gf-f18c-root" id="cidadesBackofficeRoot">  <aside class="bo-sidebar gf-f18c-sidebar" id="cidadesBackofficeSidebar" aria-label="Navegação do administrador">    <a class="gf-f18c-brand" href="<?php echo htmlspecialchars($bp, ENT_QUOTES, 'UTF-8'); ?>/admin/central">Guincha<span>Fácil</span><i>.</i></a>    <div class="gf-f18c-workspace"><span class="gf-f18c-avatar"><i class="fas fa-city" aria-hidden="true"></i></span><span><strong>Central GuinchaFácil</strong><small>Território e planejamento</small></span></div>    <?php include __DIR__ . '/../components/admin_nav_operacional.php'; ?>    <div class="gf-f18c-sidebar-footer"><a href="<?php echo htmlspecialchars($bp, ENT_QUOTES, 'UTF-8'); ?>/">Voltar ao site</a></div>  </aside>  <div class="bo-body">    <header class="bo-header">      <div class="gf-f18c-breadcrumb"><span>Backoffice <i class="fas fa-chevron-right" aria-hidden="true"></i> <strong>Território e planejamento</strong></span></div>      <div class="gf-f18c-header-actions"><a href="<?php echo htmlspecialchars($bp); ?>/admin/planejamento" class="bo-header-button"><i class="fas fa-calculator"></i><span class="bo-header-action-label">Planejamento</span></a><a href="<?php echo htmlspecialchars($bp); ?>/admin/precificacao/zonas" class="bo-header-button"><i class="fas fa-draw-polygon"></i><span class="bo-header-action-label">Zonas</span></a><span class="gf-f18c-user"><?php echo htmlspecialchars((string)($_SESSION['user']['nome'] ?? 'Admin'), ENT_QUOTES, 'UTF-8'); ?></span></div>    </header>    <main class="bo-content">
 
 <div class="ops-topbar" style="padding:10px 24px;border-bottom:1px solid var(--theme-border,#232c35);background:var(--theme-nav,#030405)">
     <div class="ops-topbar__search"><i class="fas fa-magnifying-glass"></i><input type="search" id="cidadesSearchTop" placeholder="Buscar por nome ou UF" autocomplete="off" aria-label="Buscar cidades"></div>
@@ -53,7 +53,7 @@ foreach (($cidades ?? []) as $c) {
         <span class="ops-topbar__status"><span class="ops-topbar__status-dot"></span><?php echo $totalCidades; ?> cadastradas</span>
         <a href="<?php echo htmlspecialchars($bp); ?>/admin/planejamento" class="ops-dashboard-link"><i class="fas fa-calculator me-1"></i>Planejamento</a>
     </div>
-</div>
+</div><nav class="bo-module-tabs" aria-label="Território e planejamento">    <a href="<?php echo htmlspecialchars($bp); ?>/admin/cidades" aria-current="page"><i class="fas fa-city me-1"></i>Cidades</a>    <a href="<?php echo htmlspecialchars($bp); ?>/admin/planejamento"><i class="fas fa-calculator me-1"></i>Planejamento</a>    <a href="<?php echo htmlspecialchars($bp); ?>/admin/precificacao/zonas"><i class="fas fa-draw-polygon me-1"></i>Zonas e cobertura</a></nav>
 
 <section class="ops-summary" aria-label="Resumo de cidades-alvo">
     <article class="ops-metric">
@@ -182,7 +182,7 @@ foreach (($cidades ?? []) as $c) {
 </div>
 
 <script<?php echo csp_script_nonce_attr(); ?>>
-window.__cidadesData = <?php echo json_encode($cidadesPayload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES); ?>;
+</main>  </div></div>window.__cidadesData = <?php echo json_encode($cidadesPayload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES); ?>;
 var CID_BP = '<?php echo addslashes($bp); ?>';
 var CID_CSRF = <?php echo json_encode($csrfToken ?? ''); ?>;
 

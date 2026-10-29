@@ -91,6 +91,26 @@ $getOrigemFunilBadge = static function ($origem): string {
     ); ?>/public/assets/css/pages/admin-central-operacional.css"
 >
 
+<link rel="stylesheet" href="<?php echo htmlspecialchars($bp, ENT_QUOTES, 'UTF-8'); ?>/public/assets/css/pages/gf-admin-pedidos-lovable-v1.css">
+
+<?php /* Fase 18E: navegação por abas sobre rotas existentes */ ?>
+<link rel="stylesheet" href="<?= htmlspecialchars($bp, ENT_QUOTES, 'UTF-8') ?>/public/assets/css/pages/gf-f18e-operacao-tabs.css">
+<link rel="stylesheet" href="<?= htmlspecialchars($bp, ENT_QUOTES, 'UTF-8') ?>/public/assets/css/pages/gf-f18e2-shell-operacao.css?v=20261017-2">
+<link rel="stylesheet" href="<?= htmlspecialchars($bp, ENT_QUOTES, 'UTF-8') ?>/public/assets/css/pages/gf-f18e3-operacao-fix.css?v=20261017-3">
+<div class="gf18e-tabs-host"><?php include __DIR__ . '/../components/admin_operacao_tabs.php'; ?></div>
+<div class="shell-ops gf-orders-v1" id="pedShell">
+    <aside
+        class="shell-ops-sidebar"
+        id="pedSidebar"
+    >
+        <?php
+        include __DIR__ . '/../components/admin_nav_operacional.php';
+        ?>
+    </aside>
+
+    <main class="gf-orders-main">
+      <nav class="gf-orders-breadcrumb" aria-label="Localização">Backoffice <span aria-hidden="true">›</span> <strong>Pedidos</strong></nav>
+      <div class="gf-orders-head"><div><small>OPERAÇÃO / PEDIDOS</small><h1>Gestão de pedidos</h1><p>Acompanhe cada chamado e aja com rapidez.</p></div></div>
 <div
     class="ops-topbar"
     style="padding:10px 24px;border-bottom:1px solid var(--theme-border,#232c35);background:var(--theme-nav,#030405)"
@@ -292,19 +312,8 @@ $getOrigemFunilBadge = static function ($origem): string {
     </a>
 </section>
 
-<div
-    class="shell-ops"
-    id="pedShell"
->
-    <aside
-        class="shell-ops-sidebar"
-        id="pedSidebar"
-    >
-        <?php
-        include __DIR__ . '/../components/admin_nav_operacional.php';
-        ?>
-    </aside>
 
+      <div class="gf-orders-panels">
     <section
         class="shell-ops-worklist"
         aria-label="Pedidos"
@@ -604,6 +613,8 @@ $getOrigemFunilBadge = static function ($origem): string {
 
         <?php endif; ?>
     </section>
+      </div>
+    </main>
 </div>
 
 <script<?php echo csp_script_nonce_attr(); ?>

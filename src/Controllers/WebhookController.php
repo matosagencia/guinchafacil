@@ -256,13 +256,18 @@ class WebhookController
     private function registrarEventoMercadoPago(string $eventId, string $evento, string $payload): ?bool
     {
         try {
-            $stmt = getPDO()->prepare(
-                "INSERT IGNORE INTO logs_webhook
-                    (fonte, evento, provedor, event_id, payload, status_http, criado_em)
-                 VALUES ('mercadopago', ?, 'mercadopago', ?, ?, 200, NOW())"
+            $pdo = getPDO();
+            $marker = '"event_id":"' . addslashes($eventId) . '"';
+            $check = $pdo->prepare("SELECT id FROM logs_webhook WHERE fonte='mercadopago' AND evento=? AND dados LIKE ? LIMIT 1");
+            $check->execute([$evento, '%' . $marker . '%']);
+            if ($check->fetchColumn() !== false) return false;
+            $dados = json_encode(['event_id' => $eventId, 'provedor' => 'mercadopago'], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+            $stmt = $pdo->prepare(
+                "INSERT INTO logs_webhook (fonte, evento, dados, payload, status_http, criado_em)
+                 VALUES ('mercadopago', ?, ?, ?, 200, NOW())"
             );
-            $stmt->execute([$evento, $eventId, $payload]);
-            return $stmt->rowCount() === 1;
+            $stmt->execute([$evento, $dados, $payload]);
+            return true;
         } catch (Throwable $e) {
             Logger::log(Logger::LEVEL_ERROR, 'WebhookController', 'registrarEventoMercadoPago', 'webhook',
                 'Falha ao registrar evento MercadoPago: ' . $e->getMessage(),

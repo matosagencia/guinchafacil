@@ -261,7 +261,7 @@ $adminCtx = $adminCtx ?? [];
     <input type="hidden" name="tipo_problema" value="">
     <input type="hidden" name="service_type_id" id="service_type_id" value="">
     <input type="hidden" name="decisao_atendimento" id="decisao_atendimento" value="">
-    <input type="hidden" name="valor_cotado" value="">
+    
 </form>
 
 <script<?php echo function_exists('csp_script_nonce_attr') ? csp_script_nonce_attr() : '' ?>>
@@ -322,7 +322,6 @@ $adminCtx = $adminCtx ?? [];
     // B-STID-01 do AdminController precisa:
     //   - tipo_problema (slug: pneu/eletrica/bateria/mecanica/chaveiro)
     //   - categoria (popular/moto/suv/caminhonete/eletrico)
-    //   - valor_cotado (para o B-GUARD-02)
     //   - decisao_atendimento (assistencia/reboque)
     //
     // Sem isso, o hidden tipo_problema ficava com o default 'outro'
@@ -343,9 +342,6 @@ $adminCtx = $adminCtx ?? [];
         if (state.veiculo) {
             setHidden(form, 'categoria', state.veiculo);
         }
-        if (state.valorCotado != null) {
-            setHidden(form, 'valor_cotado', state.valorCotado);
-        }
 
         // A decisao vem do preencherHiddenFields('assistencia'|'reboque')
         // do proprio flow. Reforcamos aqui para o caso de o flow nao ter
@@ -358,7 +354,6 @@ $adminCtx = $adminCtx ?? [];
         console.log('[admin-funil] hidden sincronizados:', {
             tipo_problema: state.servico || null,
             categoria: state.veiculo || null,
-            valor_cotado: state.valorCotado != null ? state.valorCotado : null,
             decisao_atendimento: (form.querySelector('[name="decisao_atendimento"]') || {}).value || null
         });
     });

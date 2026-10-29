@@ -4,18 +4,14 @@ include __DIR__ . '/../layouts/header.php';
 $v = fn($k) => htmlspecialchars((string)($p[$k] ?? ''));
 $comissaoPct = isset($comissaoPct) ? (float)$comissaoPct : 15;
 ?>
-<link rel="stylesheet" href="<?php echo htmlspecialchars($bp); ?>/public/assets/css/pages/admin-central-operacional.css">
+<link rel="stylesheet" href="<?php echo htmlspecialchars($bp); ?>/public/assets/css/pages/admin-central-operacional.css"><link rel="stylesheet" href="<?php echo htmlspecialchars($bp); ?>/public/assets/css/backoffice-layout.css?v=20261027-1"><link rel="stylesheet" href="<?php echo htmlspecialchars($bp, ENT_QUOTES, 'UTF-8'); ?>/public/assets/css/pages/gf-f18c-shell.css?v=20261017-18c1"><div class="bo bo-operator gf-f18c-root" id="planejamentoBackofficeRoot">  <aside class="bo-sidebar gf-f18c-sidebar" id="planejamentoBackofficeSidebar" aria-label="Navegação do administrador">    <a class="gf-f18c-brand" href="<?php echo htmlspecialchars($bp, ENT_QUOTES, 'UTF-8'); ?>/admin/central">Guincha<span>Fácil</span><i>.</i></a>    <div class="gf-f18c-workspace"><span class="gf-f18c-avatar"><i class="fas fa-calculator" aria-hidden="true"></i></span><span><strong>Central GuinchaFácil</strong><small>Território e planejamento</small></span></div>    <?php include __DIR__ . '/../components/admin_nav_operacional.php'; ?>    <div class="gf-f18c-sidebar-footer"><a href="<?php echo htmlspecialchars($bp, ENT_QUOTES, 'UTF-8'); ?>/">Voltar ao site</a></div>  </aside>  <div class="bo-body">    <header class="bo-header">      <div class="gf-f18c-breadcrumb"><span>Backoffice <i class="fas fa-chevron-right" aria-hidden="true"></i> <strong>Território e planejamento</strong></span></div>      <div class="gf-f18c-header-actions"><a href="<?php echo htmlspecialchars($bp); ?>/admin/cidades" class="bo-header-button"><i class="fas fa-city"></i><span class="bo-header-action-label">Cidades</span></a><a href="<?php echo htmlspecialchars($bp); ?>/admin/precificacao/zonas" class="bo-header-button"><i class="fas fa-draw-polygon"></i><span class="bo-header-action-label">Zonas</span></a><span class="gf-f18c-user"><?php echo htmlspecialchars((string)($_SESSION['user']['nome'] ?? 'Admin'), ENT_QUOTES, 'UTF-8'); ?></span></div>    </header>    <main class="bo-content">
 
 <div class="ops-topbar" style="padding:10px 24px;border-bottom:1px solid var(--theme-border,#232c35);background:var(--theme-nav,#030405)">
     <div class="ops-topbar__search"><i class="fas fa-calculator"></i><span style="color:var(--theme-muted);font-size:.85rem;">Break-even, mídia paga (Meta e Google Ads), independência e comparação de praças — recalcula ao vivo.</span></div>
     <div class="ops-topbar__meta"><span class="ops-topbar__status"><span class="ops-topbar__status-dot"></span>Simulador</span></div>
-</div>
+</div><nav class="bo-module-tabs" aria-label="Território e planejamento">    <a href="<?php echo htmlspecialchars($bp); ?>/admin/cidades"><i class="fas fa-city me-1"></i>Cidades</a>    <a href="<?php echo htmlspecialchars($bp); ?>/admin/planejamento<?php echo !empty($cidadeId) ? '?cidade_id=' . (int)$cidadeId : ''; ?>" aria-current="page"><i class="fas fa-calculator me-1"></i>Planejamento</a>    <a href="<?php echo htmlspecialchars($bp); ?>/admin/precificacao/zonas"><i class="fas fa-draw-polygon me-1"></i>Zonas e cobertura</a></nav>
 
 <div class="shell-ops shell-ops--no-worklist" id="planejamentoShell">
-
-    <aside class="shell-ops-sidebar" id="planejamentoSidebar">
-        <?php include __DIR__ . '/../components/admin_nav_operacional.php'; ?>
-    </aside>
 
     <section class="shell-ops-workspace" id="planejamentoWorkspace" aria-label="Planejamento de lançamento" style="padding:24px;">
 
@@ -240,12 +236,7 @@ $comissaoPct = isset($comissaoPct) ? (float)$comissaoPct : 15;
         </div></div>
     </div>
 
-    </section>
-
-</div>
-
-<?php
-// Não usa layouts/footer.php: esta página usa .shell-ops--no-worklist,
+    </section></div>    </main>  </div></div><?php// Não usa layouts/footer.php: esta página usa .shell-ops--no-worklist,
 // mesma arquitetura de grid do Dashboard — não há uma entidade única aqui
 // pra virar worklist clicável (é uma calculadora, não uma listagem).
 ?>

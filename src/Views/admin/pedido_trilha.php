@@ -4,8 +4,9 @@ $bp = defined('BASE_PATH') ? BASE_PATH : '';
 $osrmBaseUrl = PorThresholds::routingFrontendBaseUrl();
 include __DIR__ . '/../layouts/header.php';
 ?>
-<link rel="stylesheet" href="<?php echo htmlspecialchars($bp); ?>/public/assets/css/pages/admin-pedido-trilha.css">
-<div class="main-wrapper shell admin-shell">
+<link rel="stylesheet" href="<?php echo htmlspecialchars($bp); ?>/public/assets/css/pages/admin-pedido-trilha.css">
+<link rel="stylesheet" href="<?php echo htmlspecialchars($bp, ENT_QUOTES, 'UTF-8'); ?>/public/assets/css/pages/gf-f18e7-geometria-por.css?v=1">
+<div class="main-wrapper shell admin-shell gf-por-detail">
 <?php include __DIR__ . '/../layouts/sidebar_admin.php'; ?>
 <main class="main-content shell-main shell-content">
 

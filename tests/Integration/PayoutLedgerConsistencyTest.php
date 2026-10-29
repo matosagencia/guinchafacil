@@ -21,12 +21,14 @@ final class PayoutLedgerConsistencyTest extends TestCase
     protected function setUp(): void
     {
         $pdo = getPDO();
+        $pdo->exec('SET FOREIGN_KEY_CHECKS=0');
         foreach (['payout_ledger_entries', 'pedido_idempotency', 'pagamentos', 'pedidos', 'veiculos', 'usuarios', 'configuracoes'] as $table) {
             try {
                 $pdo->exec("DELETE FROM {$table}");
             } catch (Throwable) {
             }
         }
+        $pdo->exec('SET FOREIGN_KEY_CHECKS=1');
 
         $pdo->exec("INSERT INTO configuracoes (chave, valor) VALUES ('comissao_plataforma', '0.15')");
         // §SPLIT-LIQUIDO-01: isola este teste (reconciliação guincho+plataforma

@@ -1,6 +1,8 @@
 <?php
 declare(strict_types=1);
 
+require_once __DIR__ . '/../Services/PartnerLocationService.php';
+
 final class PedidoIndicacaoOficina
 {
     public const SELECIONADA='SELECIONADA';
@@ -19,17 +21,50 @@ final class PedidoIndicacaoOficina
     {
         $sql='SELECT i.*, p.legal_name, p.trade_name, p.pix_key, ws.address, ws.latitude, ws.longitude, ws.taxa_indicacao_fixa, ws.regra_versao, ws.status_parceria, ws.raio_checkin_m FROM pedido_indicacoes_oficina i JOIN providers p ON p.id=i.provider_id LEFT JOIN provider_workshop_settings ws ON ws.provider_id=p.id WHERE i.pedido_id=? LIMIT 1';
         if($lock) $sql.=' FOR UPDATE';
-        $s=getPDO()->prepare($sql);$s->execute([$pedidoId]);return $s->fetch(PDO::FETCH_ASSOC)?:null;
+        $s=getPDO()->prepare($sql);$s->execute([$pedidoId]);$row=$s->fetch(PDO::FETCH_ASSOC)?:null;
+        return self::comLocalizacaoCentral($row);
     }
     public static function buscarPorId(int $id, bool $lock=false): ?array
     {
         $sql='SELECT i.*, p.legal_name, p.trade_name, p.pix_key, ws.address, ws.latitude, ws.longitude, ws.taxa_indicacao_fixa, ws.regra_versao, ws.status_parceria, ws.raio_checkin_m FROM pedido_indicacoes_oficina i JOIN providers p ON p.id=i.provider_id LEFT JOIN provider_workshop_settings ws ON ws.provider_id=p.id WHERE i.id=? LIMIT 1';
         if($lock) $sql.=' FOR UPDATE';
-        $s=getPDO()->prepare($sql);$s->execute([$id]);return $s->fetch(PDO::FETCH_ASSOC)?:null;
+        $s=getPDO()->prepare($sql);$s->execute([$id]);$row=$s->fetch(PDO::FETCH_ASSOC)?:null;
+        return self::comLocalizacaoCentral($row);
+    }
+
+    private static function comLocalizacaoCentral(?array $row): ?array
+    {
+        if (!$row) return null;
+        if ($row['latitude'] !== null && $row['longitude'] !== null) {
+            $row['location_source'] = 'provider_settings';
+            return $row;
+        }
+        foreach (PartnerLocationService::listarWorkshopsOperacionais() as $location) {
+            if ((int)$location['provider_id'] !== (int)($row['provider_id'] ?? 0)) continue;
+            if ($location['latitude'] !== null && $location['longitude'] !== null) {
+                $row['latitude'] = $location['latitude'];
+                $row['longitude'] = $location['longitude'];
+                $row['location_source'] = $location['location_source'];
+            }
+            break;
+        }
+        return $row;
     }
     public static function listarOficinasAtivas(): array
     {
-        $s=getPDO()->query("SELECT p.*,ws.taxa_indicacao_fixa,ws.taxa_resgate_direto,ws.permite_resgate_direto,ws.recebe_veiculo_patio,ws.faz_resgate_direto,ws.raio_checkin_m,ws.address,ws.latitude,ws.longitude FROM providers p JOIN provider_workshop_settings ws ON ws.provider_id=p.id WHERE p.provider_type IN ('WORKSHOP','INDIVIDUAL') AND p.approval_status='APPROVED' AND p.active=1 AND ws.status_parceria='ATIVO' AND (ws.recebe_veiculo_patio=1 OR ws.faz_resgate_direto=1) ORDER BY COALESCE(p.trade_name,p.legal_name)");return $s->fetchAll(PDO::FETCH_ASSOC);
+        $s=getPDO()->query("SELECT p.*,ws.taxa_indicacao_fixa,ws.taxa_resgate_direto,ws.permite_resgate_direto,ws.recebe_veiculo_patio,ws.faz_resgate_direto,ws.raio_checkin_m,ws.address,ws.latitude,ws.longitude FROM providers p JOIN provider_workshop_settings ws ON ws.provider_id=p.id WHERE p.provider_type IN ('WORKSHOP','INDIVIDUAL') AND p.approval_status='APPROVED' AND p.active=1 AND ws.status_parceria='ATIVO' AND (ws.recebe_veiculo_patio=1 OR ws.faz_resgate_direto=1) ORDER BY COALESCE(p.trade_name,p.legal_name)");
+        $rows=$s->fetchAll(PDO::FETCH_ASSOC) ?: [];
+        $locations=[];
+        if (class_exists('PartnerLocationService')) {
+            foreach (PartnerLocationService::listarWorkshopsOperacionais() as $location) {
+                $locations[(int)$location['provider_id']]=$location;
+            }
+        }
+        return array_values(array_filter($rows, static function(array $row) use ($locations): bool {
+            if (($row['provider_type'] ?? '') !== 'WORKSHOP') return true;
+            $location=$locations[(int)($row['id'] ?? 0)] ?? null;
+            return $location !== null && $location['latitude'] !== null && $location['longitude'] !== null;
+        }));
     }
     public static function listarPendentes(): array
     {

@@ -16,11 +16,14 @@ final class FaturaService
         if ($order<1 || $partner<1 || (float)$amount<=0 || $reference==='') return ['ok'=>false,'erro'=>'FIN_DIRECT_RECEIPT_INVALID'];
         try { $pdo->beginTransaction();
             $q=$pdo->prepare('SELECT p.*,o.guincho_id,o.status order_status,o.forma_pagamento_escolhida,o.attendance_mode,o.fatura_id,o.comissao_tipo,o.comissao_valor,o.custo_final,o.custo_estimado FROM pagamentos p JOIN pedidos o ON o.id=p.pedido_id WHERE o.id=? FOR UPDATE');$q->execute([$order]);$row=$q->fetch(PDO::FETCH_ASSOC);
-            if (!$row || (int)$row['guincho_id']!==$partner || $row['order_status']!=='concluido' || ($row['attendance_mode']??'')!=='TOWING' || ($row['forma_pagamento_escolhida']??'')!=='pago_na_chegada' || $row['metodo']!=='dinheiro' || $row['status']!=='pendente' || $row['fatura_id']!==null || $row['comissao_valor']!==null) throw new DomainException('FIN_DIRECT_NOT_ELIGIBLE');
-            if (number_format((float)$row['valor_total'],2,'.','')!==$amount) throw new DomainException('FIN_DIRECT_AMOUNT_MISMATCH');
             $seen=$pdo->prepare('SELECT pedido_id FROM pagamentos WHERE id_externo=? FOR UPDATE');$seen->execute([$reference]);$used=$seen->fetchColumn();
             if ($used!==false && (int)$used!==$order) throw new DomainException('FIN_DIRECT_REFERENCE_REUSED');
-            if ($used!==false) {$pdo->commit();return ['ok'=>true,'duplicate_verified'=>true,'order_id'=>$order];}
+            if ($used!==false) {
+                if (!$row || (int)$row['guincho_id']!==$partner || $row['status']!=='aprovado' || $row['id_externo']!==$reference || number_format((float)$row['valor_total'],2,'.','')!==$amount) throw new DomainException('FIN_DIRECT_IDEMPOTENCY_DRIFT');
+                $pdo->commit();return ['ok'=>true,'duplicate_verified'=>true,'order_id'=>$order];
+            }
+            if (!$row || (int)$row['guincho_id']!==$partner || $row['order_status']!=='concluido' || ($row['attendance_mode']??'')!=='TOWING' || ($row['forma_pagamento_escolhida']??'')!=='pago_na_chegada' || $row['metodo']!=='dinheiro' || $row['status']!=='pendente' || $row['fatura_id']!==null || $row['comissao_valor']!==null) throw new DomainException('FIN_DIRECT_NOT_ELIGIBLE');
+            if (number_format((float)$row['valor_total'],2,'.','')!==$amount) throw new DomainException('FIN_DIRECT_AMOUNT_MISMATCH');
             $commission=number_format(round((float)$amount*0.08,2),2,'.','');
             $pdo->prepare("UPDATE pedidos SET custo_final=?,valor_final=?,comissao_tipo='faturada',comissao_valor=?,valor_liquido_parceiro=? WHERE id=?")->execute([$amount,$amount,$commission,$amount,$order]);
             $pdo->prepare("UPDATE pagamentos SET status='aprovado',id_externo=?,valor_guincho=?,valor_plataforma=?,pago_guincho=1,data_pagamento=?,data_pagamento_guincho=?,payload_webhook=? WHERE id=?")->execute([$reference,$amount,$commission,$receivedAt,$receivedAt,json_encode(['version'=>'R11AO','receipt'=>$data,'rate_bp'=>800],JSON_THROW_ON_ERROR),$row['id']]);
@@ -57,8 +60,33 @@ final class FaturaService
         } return $criados;
     }
     public static function marcarPaga(int $faturaId,string $transacaoId,string $metodo): bool
-    { if($faturaId<1||trim($transacaoId)==='')return false;$pdo=getPDO();try{$pdo->beginTransaction();$q=$pdo->prepare('SELECT saldo FROM faturas_parceiro WHERE id=?'.self::lock($pdo));$q->execute([$faturaId]);$f=$q->fetch(PDO::FETCH_ASSOC);if(!$f){$pdo->rollBack();return false;}$seen=$pdo->prepare('SELECT id FROM faturas_pagamentos WHERE transacao_id=?');$seen->execute([$transacaoId]);if($seen->fetchColumn()){$pdo->rollBack();return true;}$pdo->prepare('INSERT INTO faturas_pagamentos (fatura_id,transacao_id,metodo,valor) VALUES (?,?,?,?)')->execute([$faturaId,$transacaoId,$metodo,abs((float)$f['saldo'])]);$pdo->prepare("UPDATE faturas_parceiro SET status='paga',paga_em=NOW(),pix_transacao_id=? WHERE id=? AND status<>'paga'")->execute([$transacaoId,$faturaId]);$pdo->commit();return true;}catch(Throwable $e){if($pdo->inTransaction())$pdo->rollBack();Logger::exception(__CLASS__,__FUNCTION__,'marcar_paga',$e,['fatura_id'=>$faturaId]);return false;} }
-    public static function bloquearPorVencimento(): int {$s=getPDO()->prepare("UPDATE faturas_parceiro SET status='bloqueada' WHERE status='aberta' AND vencimento_em<NOW()");$s->execute();return $s->rowCount();}
+    {
+        $transacaoId=trim($transacaoId);$metodo=trim($metodo);
+        if($faturaId<1||$transacaoId===''||$metodo==='')return false;
+        $pdo=getPDO();
+        try{
+            $pdo->beginTransaction();
+            $q=$pdo->prepare('SELECT id,status,saldo,pix_transacao_id FROM faturas_parceiro WHERE id=?'.self::lock($pdo));
+            $q->execute([$faturaId]);$f=$q->fetch(PDO::FETCH_ASSOC);
+            if(!$f){$pdo->rollBack();return false;}
+            $seen=$pdo->prepare('SELECT fatura_id,valor,metodo FROM faturas_pagamentos WHERE transacao_id=?'.self::lock($pdo));
+            $seen->execute([$transacaoId]);$old=$seen->fetch(PDO::FETCH_ASSOC);
+            if($old){
+                $same=(int)$old['fatura_id']===$faturaId && (string)$old['metodo']===$metodo && (string)$old['valor']===number_format(abs((float)$f['saldo']),2,'.','');
+                if(!$same){$pdo->rollBack();return false;}
+                if($f['status']==='paga' && $f['pix_transacao_id']===$transacaoId){$pdo->commit();return true;}
+                $pdo->rollBack();return false;
+            }
+            if($f['status']==='paga' || !in_array($f['status'],['aberta','vencida','bloqueada'],true)){$pdo->rollBack();return false;}
+            $valor=number_format(abs((float)$f['saldo']),2,'.','');
+            $pdo->prepare('INSERT INTO faturas_pagamentos (fatura_id,transacao_id,metodo,valor) VALUES (?,?,?,?)')->execute([$faturaId,$transacaoId,$metodo,$valor]);
+            $u=$pdo->prepare("UPDATE faturas_parceiro SET status='paga',paga_em=NOW(),pix_transacao_id=? WHERE id=? AND status IN ('aberta','vencida','bloqueada')");
+            $u->execute([$transacaoId,$faturaId]);
+            if($u->rowCount()!==1)throw new RuntimeException('FIN_INVOICE_STATUS_RACE');
+            $pdo->commit();return true;
+        }catch(Throwable $e){if($pdo->inTransaction())$pdo->rollBack();Logger::exception(__CLASS__,__FUNCTION__,'marcar_paga',$e,['fatura_id'=>$faturaId]);return false;}
+    }
+    public static function bloquearPorVencimento(): int {$s=getPDO()->prepare("UPDATE faturas_parceiro SET status='bloqueada' WHERE status='aberta' AND vencimento_em < DATE_SUB(NOW(), INTERVAL 7 DAY)");$s->execute();return $s->rowCount();}
     public static function desbloquear(int $faturaId): bool {$s=getPDO()->prepare("UPDATE faturas_parceiro SET status='aberta' WHERE id=? AND status='bloqueada'");$s->execute([$faturaId]);return $s->rowCount()===1;}
     private static function lock(PDO $pdo):string{return $pdo->getAttribute(PDO::ATTR_DRIVER_NAME)==='sqlite'?'':' FOR UPDATE';}
 }

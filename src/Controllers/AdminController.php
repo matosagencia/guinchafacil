@@ -59,6 +59,11 @@ require_once __DIR__ . '/../DTO/PedidoQuoteRequest.php';
 require_once __DIR__ . '/../Services/Catalog/ServiceTypeResolver.php';
 class AdminController extends BaseController
 {
+    public static function csvSafeCell(mixed $value): string
+    {
+        $value = (string)$value;
+        return preg_match('/^[=+\-@]/', $value) === 1 ? "'" . $value : $value;
+    }
     public function __construct() { parent::__construct(); }
 
     /** Valida CPF brasileiro (algoritmo oficial dos digitos verificadores). */
@@ -2049,6 +2054,15 @@ $lngDestino = ($_POST['lng_destino'] ?? '') !== '' ? (float)$_POST['lng_destino'
             'metodo' => trim((string)($_GET['metodo'] ?? '')),
         ];
         $pagamentos = Pagamento::listar($filtrosPagamento, 1, 9999);
+        Logger::log('INFO', __CLASS__, __FUNCTION__, 'financeiro', 'exportacao_csv_financeiro', [
+            'context' => [
+                'data_inicio' => $dataInicio,
+                'data_fim' => $dataFim,
+                'status' => $filtrosPagamento['status'],
+                'metodo' => $filtrosPagamento['metodo'],
+                'quantidade' => count($pagamentos),
+            ],
+        ]);
         header('Content-Type: text/csv; charset=UTF-8');
         header('Content-Disposition: attachment; filename="financeiro_' . date('Ymd') . '.csv"');
         $out = fopen('php://output', 'w');
@@ -2056,11 +2070,11 @@ $lngDestino = ($_POST['lng_destino'] ?? '') !== '' ? (float)$_POST['lng_destino'
         fputcsv($out, ['ID', 'Pedido', 'Método', 'Valor Total', 'Valor Guincho', 'Comissão', 'Status', 'Data'], ';');
         foreach ($pagamentos as $p) {
             fputcsv($out, [
-                $p['id'], $p['pedido_id'], $p['metodo_normalizado'] ?? $p['metodo'],
-                number_format($p['valor_total'],     2, ',', '.'),
-                number_format($p['valor_guincho'],   2, ',', '.'),
-                number_format($p['valor_plataforma'],2, ',', '.'),
-                $p['status'], $p['data_pagamento'],
+                self::csvSafeCell($p['id']), self::csvSafeCell($p['pedido_id']), self::csvSafeCell($p['metodo_normalizado'] ?? $p['metodo']),
+                self::csvSafeCell(number_format($p['valor_total'],     2, ',', '.')),
+                self::csvSafeCell(number_format($p['valor_guincho'],   2, ',', '.')),
+                self::csvSafeCell(number_format($p['valor_plataforma'],2, ',', '.')),
+                self::csvSafeCell($p['status']), self::csvSafeCell($p['data_pagamento']),
             ], ';');
         }
         fclose($out);

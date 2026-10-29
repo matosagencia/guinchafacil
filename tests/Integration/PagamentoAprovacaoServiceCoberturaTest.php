@@ -71,6 +71,7 @@ final class PagamentoAprovacaoServiceCoberturaTest extends TestCase
         $this->ensureColumn('guinchos', 'lat_atual', 'REAL');
         $this->ensureColumn('guinchos', 'lng_atual', 'REAL');
 
+        if ($pdo->getAttribute(PDO::ATTR_DRIVER_NAME) === 'mysql') { $pdo->exec('SET FOREIGN_KEY_CHECKS=0'); }
         foreach ([
             'pagamentos',
             'pedidos',
@@ -90,12 +91,13 @@ final class PagamentoAprovacaoServiceCoberturaTest extends TestCase
             }
         }
 
-        $pdo->exec("INSERT OR IGNORE INTO configuracoes (chave, valor) VALUES ('tempo_expiracao_min', '5')");
-        $pdo->exec("INSERT OR IGNORE INTO configuracoes (chave, valor) VALUES ('raio_inicial_km', '10')");
-        $pdo->exec("INSERT OR IGNORE INTO configuracoes (chave, valor) VALUES ('raio_maximo_km', '50')");
+        if ($pdo->getAttribute(PDO::ATTR_DRIVER_NAME) === 'mysql') { $pdo->exec('SET FOREIGN_KEY_CHECKS=1'); }
+        $pdo->exec("INSERT IGNORE INTO configuracoes (chave, valor) VALUES ('tempo_expiracao_min', '5')");
+        $pdo->exec("INSERT IGNORE INTO configuracoes (chave, valor) VALUES ('raio_inicial_km', '10')");
+        $pdo->exec("INSERT IGNORE INTO configuracoes (chave, valor) VALUES ('raio_maximo_km', '50')");
 
         $this->trace('setUp: seeding client, vehicle, service catalog and tow provider');
-        $colsStmt = $pdo->query('PRAGMA table_info(guinchos)');
+        $colsStmt = $pdo->query("SELECT COLUMN_NAME AS name FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'guinchos'");
         $cols = $colsStmt ? array_map(static fn(array $row): string => (string)($row['name'] ?? ''), $colsStmt->fetchAll(PDO::FETCH_ASSOC)) : [];
         $this->trace('setUp: guinchos columns=' . implode(',', $cols));
         $this->seedBaseData();
@@ -206,8 +208,9 @@ final class PagamentoAprovacaoServiceCoberturaTest extends TestCase
             ]);
 
         $this->trace('seedBaseData: inserting catalogo de servico e servico do especialista');
-        $pdo->prepare("INSERT INTO service_types (id, code, name, attendance_mode, active, created_at, updated_at)
-                       VALUES (?, ?, ?, 'ON_SITE', 1, NOW(), NOW())")
+        $pdo->exec("INSERT IGNORE INTO service_categories (id, name, active) VALUES (1, 'QA', 1)");
+        $pdo->prepare("INSERT INTO service_types (id, category_id, code, name, attendance_mode, active, created_at, updated_at)
+                       VALUES (?, 1, ?, ?, 'ON_SITE', 1, NOW(), NOW())")
             ->execute([self::SERVICE_TYPE_ID, self::SERVICE_CODE, self::SERVICE_NAME]);
         $pdo->prepare("INSERT INTO servicos_especialista (id, codigo, nome, ativo)
                        VALUES (?, ?, ?, 1)")
@@ -246,8 +249,6 @@ final class PagamentoAprovacaoServiceCoberturaTest extends TestCase
         if (!$guinchoId) {
             throw new RuntimeException('Falha ao criar guincho QA de integracao.');
         }
-        $pdo->prepare('UPDATE guinchos SET id = ? WHERE rowid = ?')
-            ->execute([(int)$guinchoId, (int)$guinchoId]);
         Guincho::solicitarReboque((int)$guinchoId, [
             'placa_guincho' => 'QATI01',
             'cidade_placa' => 'Rio de Janeiro',
@@ -319,8 +320,8 @@ final class PagamentoAprovacaoServiceCoberturaTest extends TestCase
                 5.0,
             ]);
 
-        $pdo->prepare('INSERT INTO especialista_servicos (especialista_id, servico_id, habilitado, created_at, updated_at)
-                       VALUES (?,?,1,NOW(),NOW())')
+        $pdo->prepare('INSERT INTO especialista_servicos (especialista_id, servico_id, habilitado)
+                       VALUES (?,?,1)')
             ->execute([9201, self::SERVICE_TYPE_ID]);
 
         $this->trace('seedEspecialistaDisponivel: especialista pronto id=9201');
@@ -330,6 +331,7 @@ final class PagamentoAprovacaoServiceCoberturaTest extends TestCase
     private function criarPedido(string $descricao, float $lat, float $lng, ?int $incidenteId = null): int
     {
         $this->trace('criarPedido: start descricao=' . $descricao . ' lat=' . $lat . ' lng=' . $lng . ' incidente=' . (string)($incidenteId ?? 'null'));
+        if ($incidenteId !== null) { getPDO()->prepare("INSERT IGNORE INTO incidentes (id, cliente_id, veiculo_id, tipo_problema, status, criado_em, atualizado_em) VALUES (?, 9101, 9101, 'QA', 'aberto', NOW(), NOW())")->execute([$incidenteId]); }
         $pedidoId = Pedido::criar([
             'cliente_id' => 9101,
             'veiculo_id' => 9101,
@@ -395,7 +397,7 @@ final class PagamentoAprovacaoServiceCoberturaTest extends TestCase
 
         $pdo = getPDO();
         $pdo->exec('CREATE TABLE IF NOT EXISTS especialistas (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            id INTEGER PRIMARY KEY AUTO_INCREMENT,
             usuario_id INTEGER NOT NULL,
             nome_profissional TEXT,
             cpf_cnpj TEXT,
@@ -414,13 +416,13 @@ final class PagamentoAprovacaoServiceCoberturaTest extends TestCase
             atualizado_em TEXT
         )');
         $pdo->exec('CREATE TABLE IF NOT EXISTS servicos_especialista (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            id INTEGER PRIMARY KEY AUTO_INCREMENT,
             codigo TEXT NOT NULL UNIQUE,
             nome TEXT,
             ativo INTEGER NOT NULL DEFAULT 1
         )');
         $pdo->exec('CREATE TABLE IF NOT EXISTS especialista_servicos (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            id INTEGER PRIMARY KEY AUTO_INCREMENT,
             especialista_id INTEGER NOT NULL,
             servico_id INTEGER NOT NULL,
             habilitado INTEGER NOT NULL DEFAULT 1,
@@ -428,7 +430,7 @@ final class PagamentoAprovacaoServiceCoberturaTest extends TestCase
             updated_at TEXT
         )');
         $pdo->exec('CREATE TABLE IF NOT EXISTS incidentes (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            id INTEGER PRIMARY KEY AUTO_INCREMENT,
             cliente_id INTEGER NOT NULL,
             veiculo_id INTEGER NOT NULL,
             tipo_problema TEXT NOT NULL,
@@ -442,7 +444,7 @@ final class PagamentoAprovacaoServiceCoberturaTest extends TestCase
             atualizado_em TEXT
         )');
         $pdo->exec('CREATE TABLE IF NOT EXISTS atendimentos_especialista (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            id INTEGER PRIMARY KEY AUTO_INCREMENT,
             incidente_id INTEGER NOT NULL,
             especialista_id INTEGER NOT NULL,
             servico_solicitado_id INTEGER NOT NULL,
@@ -460,7 +462,12 @@ final class PagamentoAprovacaoServiceCoberturaTest extends TestCase
     private function ensureColumn(string $table, string $column, string $definition): void
     {
         $pdo = getPDO();
-        $stmt = $pdo->query("PRAGMA table_info({$table})");
+        if ($pdo->getAttribute(PDO::ATTR_DRIVER_NAME) === 'mysql') {
+            $stmt = $pdo->prepare('SELECT COLUMN_NAME AS name FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ?');
+            $stmt->execute([$table]);
+        } else {
+            $stmt = $pdo->query("PRAGMA table_info({$table})");
+        }
         $cols = $stmt ? $stmt->fetchAll(PDO::FETCH_ASSOC) : [];
         foreach ($cols as $col) {
             if ((string)($col['name'] ?? '') === $column) {

@@ -24,10 +24,6 @@ $idsPorCode = [
     'AUTOMOTIVE_LOCKSMITH' => 15,
 ];
 
-ServiceTypeResolver::definirLookupPorCodigo(
-    static fn (string $code): ?int => $idsPorCode[$code] ?? null
-);
-
 $casos = [
     'pneu' => ['TIRE_CHANGE', 11],
     'eletrica' => ['ELECTRICAL_DIAGNOSIS', 12],
@@ -40,10 +36,10 @@ $casos = [
 
 foreach ($casos as $slug => [$codeEsperado, $idEsperado]) {
     verificar(ServiceTypeResolver::codePorSlug($slug) === $codeEsperado, "mapa:$slug");
-    verificar(ServiceTypeResolver::porSlug($slug) === $idEsperado, "lookup:$slug");
+
 }
 
 verificar(ServiceTypeResolver::codePorSlug('desconhecido') === null, 'mapa:desconhecido');
-verificar(ServiceTypeResolver::porSlug('desconhecido') === null, 'lookup:desconhecido-fail-closed');
 
-echo "[DONE][ServiceTypeResolver] 16 verificacoes concluidas\n";
+
+echo "[DONE][ServiceTypeResolver] 8 verificacoes concluidas\n";

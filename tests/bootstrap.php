@@ -43,6 +43,10 @@ function getPDO(): PDO {
             $host = getenv('PHPUNIT_DB_HOST') ?: $host;
             $port = getenv('PHPUNIT_DB_PORT') ?: '3306';
             $pdo = new PDO("mysql:host={$host};port={$port};dbname={$name};charset=utf8mb4", $user, $pass, $options);
+            $actual = (string)$pdo->query('SELECT DATABASE()')->fetchColumn();
+            if (!str_starts_with($actual, 'guinchafacil_phpunit_qa')) {
+                throw new RuntimeException('TEST-DATABASE-GUARD: PHPUnit bloqueado fora de banco QA: ' . $actual);
+            }
         }
     }
     return $pdo;
@@ -50,4 +54,15 @@ function getPDO(): PDO {
 
 if (file_exists(__DIR__ . '/../config.php')) {
     require_once __DIR__ . '/../config.php';
+}
+
+// Serviços legados sem namespace usados por testes arquivados.
+foreach ([
+    __DIR__ . '/../src/Services/EstornoService.php',
+    __DIR__ . '/../src/Services/PixFaturaService.php',
+    __DIR__ . '/../src/Services/PixService.php',
+    __DIR__ . '/../src/Models/Pagamento.php',
+    __DIR__ . '/../src/Controllers/WebhookController.php',
+] as $legacyPath) {
+    if (file_exists($legacyPath)) require_once $legacyPath;
 }

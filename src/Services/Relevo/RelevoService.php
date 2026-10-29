@@ -60,7 +60,7 @@ final class RelevoService
     {
         $cfg = Configuracao::getAll();
         $franquia = (float)($cfg['elevacao_franquia_m']     ?? 100.0);
-        $coef     = (float)($cfg['elevacao_coeficiente']    ?? 0.0002);
+        $coef     = (float)($cfg['elevacao_coef_por_m']    ?? 0.0002);
         $teto     = (float)($cfg['elevacao_teto']           ?? 0.25);
         $peso     = (float)($cfg['elevacao_peso_deadhead']  ?? 0.5);
 

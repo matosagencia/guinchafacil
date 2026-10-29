@@ -73,6 +73,20 @@ $bp = defined('BASE_PATH') ? BASE_PATH : '';
             </div>
         </div>
 
+        <?php if ($usuario['tipo'] === 'oficina'): ?>
+        <div class="card mb-3" style="border-color:#f97316">
+          <div class="card-header"><i class="fas fa-screwdriver-wrench me-2" style="color:#f97316"></i>Oficina parceira</div>
+          <div class="card-body">
+            <?php if (!empty($extra)): ?>
+              <p><strong>Estabelecimento:</strong> <?php echo htmlspecialchars((string)$extra['nome'], ENT_QUOTES, 'UTF-8'); ?></p>
+              <p><strong>Endereço:</strong> <?php echo htmlspecialchars((string)$extra['endereco'], ENT_QUOTES, 'UTF-8'); ?></p>
+              <p><strong>Modalidade:</strong> <?php echo htmlspecialchars((string)$extra['tipo'], ENT_QUOTES, 'UTF-8'); ?></p>
+              <p><strong>Raio:</strong> <?php echo (int)$extra['raio_atendimento_km']; ?> km</p>
+              <p><strong>Disponibilidade:</strong> <?php echo !empty($extra['disponivel']) ? 'Online' : 'Offline'; ?></p>
+            <?php else: ?><p class="text-danger">Conta sem registro correspondente em oficinas. Verifique o vínculo.</p><?php endif; ?>
+          </div>
+        </div>
+        <?php endif; ?>
         <?php if (!empty($extra) && $usuario['tipo'] === 'guincho'): ?>
         <div class="card">
             <div class="card-header"><i class="fas fa-truck me-2"></i>Dados do Guincho</div>

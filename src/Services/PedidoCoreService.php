@@ -6,6 +6,7 @@ require_once __DIR__ . '/../DTO/PedidoQuoteRequest.php';
 require_once __DIR__ . '/../DTO/PedidoCreateRequest.php';
 require_once __DIR__ . '/Pedido/ModalidadeResolver.php';
 require_once __DIR__ . '/Pricing/PedidoPricingService.php';
+require_once __DIR__ . '/Pricing/OrderPriceSnapshotWriter.php';
 require_once __DIR__ . '/Pedido/PedidoTransitionService.php';
 require_once __DIR__ . '/GeoService.php';
 require_once __DIR__ . '/../Models/Pedido.php';
@@ -50,6 +51,24 @@ final class PedidoCoreService
             'prioridade' => $request->quote->prioridade,
         ]);
 
+        if ($request->serviceTypeId !== null && $request->serviceTypeId !== (int)$quote['service_type_id']) {
+            throw new InvalidArgumentException('PRICE-SERVICE-CATALOG-CONFLICT');
+        }
+        // Quando veio da pré-cotação aceita, reprecificação divergente exige
+        // novo consentimento; não muda o total durante o checkout silenciosamente.
+        $pre = $_SESSION['pre_cotacao'] ?? null;
+        if ($request->actorType === 'cliente' && is_array($pre)
+            && ($pre['status'] ?? '') === 'aceita'
+            && (int)($pre['service_type_id'] ?? 0) === (int)$quote['service_type_id']
+            && abs((float)($pre['lat_origem'] ?? 999) - (float)$request->quote->localResgateLat) < 0.00001
+            && abs((float)($pre['lng_origem'] ?? 999) - (float)$request->quote->localResgateLng) < 0.00001) {
+            if (abs((float)($pre['valor'] ?? -1) - (float)$quote['total']) > 0.011
+                || (int)($pre['regra_id'] ?? 0) !== (int)$quote['regra_id']
+                || (string)($pre['regra_version'] ?? '') !== (string)$quote['regra_version']) {
+                throw new RuntimeException('PRICE-QUOTE-CHANGED');
+            }
+        }
+
         $started = !$this->pdo->inTransaction();
         if ($started) {
             $this->pdo->beginTransaction();
@@ -76,6 +95,8 @@ final class PedidoCoreService
             }
 
             $this->persistirContextoPedido($pedidoId, $quote, $request);
+            // A3.1/C3: persistir no mesmo PDO/transacao; falha deve interromper a criacao.
+            OrderPriceSnapshotWriter::persist($this->pdo, (int)$pedidoId, $quote);
             $this->registrarEvento($pedidoId, 'PEDIDO_CRIADO', [
                 'actor_type' => $request->actorType,
                 'actor_id' => $request->actorId,
@@ -128,7 +149,7 @@ final class PedidoCoreService
                 $context
             ));
             if (!$result->ok) {
-                throw new RuntimeException($result->message);
+                throw new RuntimeException($result->error ?? 'PEDIDO_TRANSITION_FAILED');
             }
             $this->registrarEvento($pedidoId, $event, $context + ['status_novo' => $target]);
             return;
@@ -137,48 +158,59 @@ final class PedidoCoreService
         $this->registrarEvento($pedidoId, $event, $context);
     }
 
+    /** Identidade do serviço e modalidade vêm de service_types, não de palavras. */
     private function resolverModalidadeOficial(PedidoQuoteRequest $request, array $context): string
     {
-        $resolvida = $this->modalidadeResolver->resolver($request->tipoProblema, [
-            'endereco_destino' => $request->enderecoDestino,
-            'decisao_atendimento' => $context['decisao_atendimento'] ?? null,
-        ]);
-
-        $isAdmin = ($context['actor_type'] ?? '') === 'admin';
-        $override = strtoupper(trim((string)($context['modalidade_override'] ?? '')));
-        if ($isAdmin && !empty($context['allow_modalidade_override']) && in_array($override, [ModalidadeResolver::SOCORRO_LOCAL, ModalidadeResolver::REBOQUE_PRANCHA, 'REBOQUE_TRADICIONAL'], true)) {
-            return $override === 'REBOQUE_TRADICIONAL' ? ModalidadeResolver::REBOQUE_PRANCHA : $override;
+        $tipo = $this->tipoAtivo($request->tipoProblema, $request->serviceTypeId);
+        $modo = (string)($tipo['attendance_mode'] ?? '');
+        if (!in_array($modo, ['TOWING','ON_SITE'], true)) {
+            throw new InvalidArgumentException('PRICE-MODE-UNSUPPORTED');
         }
+        $esperada = $modo === 'TOWING'
+            ? ModalidadeResolver::REBOQUE_PRANCHA : ModalidadeResolver::SOCORRO_LOCAL;
+        $override = strtoupper(trim((string)($context['modalidade_override'] ?? '')));
+        if ($override === 'REBOQUE_TRADICIONAL') $override = ModalidadeResolver::REBOQUE_PRANCHA;
+        if (($context['actor_type'] ?? '') === 'admin' && !empty($context['allow_modalidade_override'])
+            && $override !== '' && $override !== $esperada) {
+            throw new InvalidArgumentException('PRICE-MODE-CATALOG-CONFLICT');
+        }
+        return $esperada;
+    }
 
-        return $resolvida;
+    private function tipoAtivo(string $referencia, ?int $serviceTypeId = null): array
+    {
+        require_once __DIR__ . '/../Models/Catalog/ServiceType.php';
+        $referencia = trim($referencia);
+        // O tipo de pedido público é public_slug; integrações internas podem usar code.
+        $tipo = ServiceType::buscarPorSlugPublico($referencia);
+        if (!$tipo) {
+            $st = $this->pdo->prepare('SELECT * FROM service_types WHERE code = ? AND active = 1 LIMIT 1');
+            $st->execute([strtoupper($referencia)]);
+            $tipo = $st->fetch(PDO::FETCH_ASSOC) ?: null;
+        }
+        if ($serviceTypeId !== null && ($serviceTypeId <= 0 || !$tipo
+            || (int)$tipo['id'] !== $serviceTypeId)) {
+            throw new InvalidArgumentException('PRICE-SERVICE-CATALOG-CONFLICT');
+        }
+        if (!$tipo) throw new InvalidArgumentException('PRICE-SERVICE-INACTIVE');
+        return $tipo;
     }
 
     private function dadosPrecificacaoOficial(PedidoQuoteRequest $request, string $modalidade, array $context): array
     {
+        $tipo = $this->tipoAtivo($request->tipoProblema, $request->serviceTypeId);
         $veiculo = $request->veiculoId ? Veiculo::buscarPorId((int)$request->veiculoId) : null;
-        $categoria = is_array($veiculo) ? TarifaService::categoriaDeVeiculo($veiculo) : null;
-        $cidade = Cidade::resolverPorCoordenada((float)$request->localResgateLat, (float)$request->localResgateLng);
-        $distancia = 0.0;
-
-        if ($modalidade === ModalidadeResolver::REBOQUE_PRANCHA) {
-            if ($request->destinoLat === null || $request->destinoLng === null) {
-                throw new InvalidArgumentException('Coordenadas de destino sao obrigatorias para reboque.');
-            }
-            $distancia = round(GeoService::haversine(
-                (float)$request->localResgateLat,
-                (float)$request->localResgateLng,
-                (float)$request->destinoLat,
-                (float)$request->destinoLng
-            ), 2);
-        }
-
+        // Categoria é obtida do cadastro do veículo quando existente.
+        $categoria = is_array($veiculo) ? TarifaService::categoriaDeVeiculo($veiculo)
+            : ($request->categoriaVeiculo ?? 'popular');
         return [
-            'distancia_km_oficial' => $distancia,
-            'categoria_veiculo_oficial' => $categoria,
-            'cidade_id_oficial' => isset($cidade['id']) ? (int)$cidade['id'] : null,
-            'prioridade_oficial' => (($context['actor_type'] ?? '') === 'admin') && !empty($context['allow_priority']) && !empty($context['prioridade']),
-            'modalidade_resolvida' => $modalidade,
-            'continuidade' => $request->continuidade,
+            'lat_origem' => (float)$request->localResgateLat,
+            'lng_origem' => (float)$request->localResgateLng,
+            'lat_destino' => $modalidade === ModalidadeResolver::REBOQUE_PRANCHA ? $request->destinoLat : null,
+            'lng_destino' => $modalidade === ModalidadeResolver::REBOQUE_PRANCHA ? $request->destinoLng : null,
+            'service_type_id' => (int)$tipo['id'],
+            'vehicle_category' => $categoria,
+            // NUNCA passa a distância, a zona, o preço ou a comissão do payload.
         ];
     }
 
@@ -236,7 +268,7 @@ final class PedidoCoreService
             'local_resgate_lat' => $request->quote->localResgateLat,
             'local_resgate_lng' => $request->quote->localResgateLng,
             'attendance_mode' => ($quote['modalidade_socorro'] ?? '') === ModalidadeResolver::SOCORRO_LOCAL ? 'ON_SITE' : 'TOWING',
-            'service_type_id' => $request->serviceTypeId,
+            'service_type_id' => (int)($quote['service_type_id'] ?? 0),
         ] as $column => $value) {
             if (isset($columns[$column])) {
                 $sets[] = $column . ' = ?';

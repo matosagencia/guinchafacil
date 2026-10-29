@@ -68,6 +68,12 @@ class MercadoPagoProvider implements PaymentProviderInterface
             $payload['issuer_id'] = (string)$dados['issuerId'];
         }
 
+        $notificationUrl = (string)($payload['notification_url'] ?? '');
+        $host = (string)(parse_url($notificationUrl, PHP_URL_HOST) ?? '');
+        if ($notificationUrl === '' || in_array(strtolower($host), ['localhost', '127.0.0.1', '::1'], true)) {
+            unset($payload['notification_url']);
+        }
+
         $body = json_encode($payload);
         // §A5 — chamada extraída para httpPost() (mesmo padrão de
         // PixService::httpPost()) especificamente para poder ser
@@ -141,7 +147,26 @@ class MercadoPagoProvider implements PaymentProviderInterface
     }
 
     protected static function httpPost(string $url, array $headers, string $body): array
-    {
+    {
+        if (!function_exists('curl_init')) {
+            $context = stream_context_create([
+                'http' => [
+                    'method' => 'POST',
+                    'header' => implode("\r\n", $headers),
+                    'content' => $body,
+                    'timeout' => 20,
+                    'ignore_errors' => true,
+                ],
+            ]);
+            $resp = @file_get_contents($url, false, $context);
+            $statusLine = (string)($http_response_header[0] ?? '');
+            preg_match('/\s(\d{3})\s/', $statusLine, $matches);
+            return [
+                'body' => $resp === false ? '' : (string)$resp,
+                'code' => (int)($matches[1] ?? 0),
+                'error' => $resp === false ? 'HTTP client unavailable' : '',
+            ];
+        }
         $ch = curl_init($url);
         curl_setopt_array($ch, [
             CURLOPT_RETURNTRANSFER => true,

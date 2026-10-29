@@ -75,7 +75,7 @@ class AdminPlanejamentoController extends BaseController
         }
         // Comissão vem da configuração real da plataforma (fração -> %) —
         // não é segmentada por cidade, é uma regra única da plataforma.
-        $comissaoFrac = (float)($cfg['comissao_plataforma'] ?? 0.15);
+        $comissaoFrac = (float)($cfg['comissao_plataforma'] ?? 0.08);
         $comissaoPct = $comissaoFrac > 1 ? $comissaoFrac : $comissaoFrac * 100;
         $csrfToken = AuthService::gerarCsrfToken();
         $flash = $this->getFlashMessage();

@@ -65,7 +65,7 @@ require_once __DIR__ . '/../../Models/Configuracao.php';
 require_once __DIR__ . '/../../Models/Catalog/ProviderCapability.php';
 require_once __DIR__ . '/../GeoService.php';
 require_once __DIR__ . '/../TarifaService.php';
-require_once __DIR__ . '/../Logger.php';
+require_once __DIR__ . '/../Logger.php';require_once __DIR__ . '/ConversionPriceSnapshotService.php';
 
 final class ConversionService
 {
@@ -87,6 +87,42 @@ final class ConversionService
                 "Conversão para reboque recusada pelo cliente — pedido #{$pedidoId}",
                 ['pedido_id' => $pedidoId, 'cliente_id' => $clienteId]);
             return PedidoTransitionResult::success(Pedido::buscarPorId($pedidoId) ?? [], ['conversao' => 'recusada']);
+        }
+
+        // B-011: A conversão complementar exige snapshot próprio imutável.
+        // A tabela atual order_price_snapshots é UNIQUE(order_id) e pertence
+        // à cotação original ON_SITE. Não cobrar substituindo esse snapshot.
+        // Remover o bloqueio SOMENTE com migration+ledger+QA de conversão.
+        // O snapshot complementar é gravado atomically with the conversion below.
+
+        // B-011: cotar ANTES de transicionar ou arquivar pagamento.
+        $prePedido = Pedido::buscarPorId($pedidoId);
+        if (!$prePedido || (int)($prePedido['cliente_id'] ?? 0) !== $clienteId) {
+            return PedidoTransitionResult::failure('PRICE-ORDER-UNAUTHORIZED');
+        }        $pagarNaChegada = strtolower(trim((string)($prePedido['forma_pagamento_escolhida'] ?? ''))) === 'pago_na_chegada';
+        $destinoLatPrev = isset($destino['lat']) ? (float)$destino['lat'] : null;
+        $destinoLngPrev = isset($destino['lng']) ? (float)$destino['lng'] : null;
+        $destinoEnderecoPrev = trim((string)($destino['endereco'] ?? ''));
+        if ($destinoLatPrev === null || $destinoLngPrev === null || $destinoEnderecoPrev === ''
+            || !GeoService::coordenadasValidas($destinoLatPrev, $destinoLngPrev)) {
+            return PedidoTransitionResult::failure('PRICE-DESTINATION-REQUIRED');
+        }
+        require_once __DIR__ . '/../Pricing/CotacaoUnificadaService.php';
+        require_once __DIR__ . '/../../Models/Veiculo.php';
+        $veiculoPrev = !empty($prePedido['veiculo_id'])
+            ? Veiculo::buscarPorId((int)$prePedido['veiculo_id']) : null;
+        $categoriaPrev = $veiculoPrev ? TarifaService::categoriaDeVeiculo($veiculoPrev) : 'popular';
+        $codigoPrev = ($categoriaPrev === 'moto') ? 'TOW_MOTORCYCLE' : 'TOW_CAR';
+        $preQuote = CotacaoUnificadaService::calcular([
+            'service_code' => $codigoPrev,
+            'lat_origem' => (float)$prePedido['lat_origem'],
+            'lng_origem' => (float)$prePedido['lng_origem'],
+            'lat_destino' => $destinoLatPrev,
+            'lng_destino' => $destinoLngPrev,
+            'vehicle_category' => $categoriaPrev,
+        ]);
+        if (!($preQuote['ok'] ?? false)) {
+            return PedidoTransitionResult::failure((string)($preQuote['erro'] ?? 'PRICE-CALCULATION-FAILED'));
         }
 
         $step1 = PedidoTransitionService::transition(new PedidoTransitionRequest(
@@ -125,47 +161,10 @@ final class ConversionService
             );
         }
 
-        $distanciaKm = max(0.1, GeoService::haversine(
-            (float)$pedido['lat_origem'],
-            (float)$pedido['lng_origem'],
-            $destinoLat,
-            $destinoLng
-        ));
-
-        $veiculo = null;
-        if (!empty($pedido['veiculo_id'])) {
-            require_once __DIR__ . '/../../Models/Veiculo.php';
-            $veiculo = Veiculo::buscarPorId((int)$pedido['veiculo_id']);
-        }
-        $categoria = $veiculo ? TarifaService::categoriaDeVeiculo($veiculo) : 'popular';
-
-        // §DESLOCAMENTO-01/Etapa 13: mesma ordem de resolução usada em
-        // ClienteController — tenta a zona de precificação primeiro (ver
-        // ZonePricingService), só cai no cálculo global de reboque
-        // (TarifaService) quando não houver zona/regra aplicável na origem.
-        require_once __DIR__ . '/../Pricing/ZonePricingService.php';
-        require_once __DIR__ . '/../../Models/Catalog/ServiceType.php';
-        require_once __DIR__ . '/../../Models/Cidade.php';
-        $codigoReboque = (isset($veiculo['tipo']) && (string)$veiculo['tipo'] === 'moto') ? 'TOW_MOTORCYCLE' : 'TOW_CAR';
-        $tipoReboque = ServiceType::buscarPorCodigo($codigoReboque);
-        $custoReboque = null;
-        if ($tipoReboque) {
-            $zonaPreco = ZonePricingService::calcularPreco(
-                (float)$pedido['lat_origem'], (float)$pedido['lng_origem'],
-                (int)$tipoReboque['id'], (string)($veiculo['tipo'] ?? ''), $distanciaKm
-            );
-            if ($zonaPreco !== null) {
-                $custoReboque = $zonaPreco['valor'];
-            }
-        }
-        if ($custoReboque === null) {
-            // §PRECO-POR-CIDADE-01: mesma resolução de cidade-alvo por
-            // coordenada usada em ClienteController, aplicada aqui pro
-            // recálculo de reboque pós-conversão pane->reboque.
-            $cidadeResolvida = Cidade::resolverPorCoordenada((float)$pedido['lat_origem'], (float)$pedido['lng_origem']);
-            $tarifa = TarifaService::calcularDetalhado($distanciaKm, $categoria, false, null, $cidadeResolvida['id'] ?? null);
-            $custoReboque = (float)($tarifa['valor'] ?? 0);
-        }
+        // Usa exatamente o mesmo motor e a mesma rota já calculados no preflight.
+        // O crédito de conversão continua item financeiro separado, auditado adiante.
+        $distanciaKm = (float)$preQuote['km_transporte'];
+        $custoReboque = (float)$preQuote['preco_cliente'];
 
         $pdo = getPDO();
 
@@ -200,7 +199,7 @@ final class ConversionService
                 return PedidoTransitionResult::success(Pedido::buscarPorId($pedidoId) ?? [], ['conversao' => 'ja_processada']);
             }
 
-            // Arquiva o pagamento aprovado do socorro no local ANTES de
+            // Pagamento em dinheiro não possui aprovação de gateway. Nesse            // ramo, a conversão recalcula o valor e devolve o pedido à fila;            // a confirmação financeira ocorre no encerramento do atendimento.            if ($pagarNaChegada) {                $pdo->prepare("UPDATE pedidos SET lat_destino=?, lng_destino=?, endereco_destino=?, distancia_km=?, custo_estimado=?, status='aguardando_guincho', guincho_id=NULL, attendance_mode='TOWING' WHERE id=?")                    ->execute([$destinoLat, $destinoLng, $destinoEndereco, $distanciaKm, $custoReboque, $pedidoId]);                ConversionPriceSnapshotService::persist($pdo, $pedidoId, $preQuote);                PedidoEventoService::registrar($pdo, $pedidoId, 'conversao_dinheiro_fila', 'conversao_aprovada_cliente', 'aguardando_guincho', 'cliente', $clienteId, 'pago_na_chegada');                $pdo->commit();                return PedidoTransitionResult::success(Pedido::buscarPorId($pedidoId) ?? [], ['conversao' => 'pago_na_chegada', 'cobranca_online' => false]);            }            // Arquiva o pagamento aprovado do socorro no local ANTES de
             // calcular o crédito — o valor arquivado é a fonte inequívoca
             // (nunca mais uma query solta em `pagamentos` que não
             // distinguia qual fase estava sendo lida) e, de quebra, libera
@@ -247,7 +246,7 @@ final class ConversionService
                     SET lat_destino = ?, lng_destino = ?, endereco_destino = ?,
                         distancia_km = ?, custo_estimado = ?
                   WHERE id = ?"
-            )->execute([$destinoLat, $destinoLng, $destinoEndereco, $distanciaKm, $custoReboque, $pedidoId]);
+            )->execute([$destinoLat, $destinoLng, $destinoEndereco, $distanciaKm, $custoReboque, $pedidoId]);            ConversionPriceSnapshotService::persist($pdo, $pedidoId, $preQuote);
 
             $pdo->commit();
         } catch (Throwable $e) {

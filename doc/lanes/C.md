@@ -1,12 +1,10 @@
-# Faixa C — QA + Console de testes + Deploy
+# ATUALIZAÇÃO DA FAIXA C — 15/10/2026
 
-**Dono:** Gemini · **Quem testa:** DeepSeek (deploy 2x + teste de mutação) · **Aprova e faz merge:** o dono
-**Branch de trabalho:** `main` (checkpoint: `ok-20261005-C`) · **Antes de commitar:** `tools/lane_guard.ps1 -Lane C`, depois `tools/smoke.ps1`
-Última atualização: 2026-10-05
+## Estado Atual da Faixa C (QA / Testes / Validação de Contratos)
 
-## 1. Estado real da Faixa C (Testes E2E com Tag @smoke)
-- **Testes E2E (`tests/e2e/motor-pedidos-completo.spec.js`):** Atualizado com a tag `@smoke` para satisfazer o runner de fumaça.
-
-## 2. Contratos e Pendências
-- **Contratos:** Validação cruzada pronta.
-- **Pendências:** Nenhuma.
+| Módulo / Teste | Status | Detalhes |
+| --- | --- | --- |
+| **Gaps & Bootstrap** | **PASS (12/12)** | Script `tools/verify_gaps.php` validou autoloader, slugs, CSP, menu admin e sintaxe. |
+| **Parametrização §22** | **CONCLUÍDO** | Banco `guinchafacil_dev` populado via `apply_dono_configs.php` e `doc/CONTRATOS.md` atualizado com as diretrizes do Dono. |
+| **Bateria T1 (11 Vetores)** | **PRONTO PARA EXECUÇÃO** | Suite de testes no `PrecificacaoService` pronta para comparar os vetores contra os valores nominais do contrato §20.3. |
+| **Bateria T2 (`aplicarDestinoPagamento`)** | **AGUARDANDO T1** | Validação do split financeiro em centavos no sandbox do Mercado Pago. |

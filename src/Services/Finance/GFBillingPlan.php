@@ -8,7 +8,7 @@ final class GFBillingPlan
         $status=$row['stored_status']??null;if(!in_array($status,['aberta','paga','vencida','bloqueada'],true))throw new DomainException('FIN_BILLING_STATUS_UNSUPPORTED');
         if(!is_int($row['invoice_id']??null) || $row['invoice_id']<1 || !is_int($row['partner_id']??null) || $row['partner_id']<1)throw new InvalidArgumentException('FIN_BILLING_ID_INVALID');
         $amount=GFMoneyInput::decimal($row['amount']??null);$outstanding=GFMoneyInput::decimal($row['outstanding']??null);$paid=$status==='paga';if($outstanding!==($paid?'0.00':$amount))throw new DomainException('FIN_BILLING_OUTSTANDING_DRIFT');
-        $age=GFInvoiceReadModel::bucket((string)$row['due_at'],$reference,$paid);$positive=GFExactMoney::cents($outstanding)>0;$candidate=$status==='aberta' && $age['overdue'] && $positive;
+        $age=GFInvoiceReadModel::bucket((string)$row['due_at'],$reference,$paid);$positive=GFExactMoney::cents($outstanding)>0;$candidate=$status==='aberta' && $age['overdue'] && (int)$age['overdue_days']>7 && $positive;
         $review=!$paid && ((!$positive) || ($status==='vencida') || ($status==='bloqueada' && !$age['overdue']));
         return ['invoice_id'=>$row['invoice_id'],'partner_id'=>$row['partner_id'],'due_at'=>$row['due_at'],'stored_status'=>$status,'amount'=>$amount,'outstanding'=>$outstanding]+$age+[
             'block_candidate'=>$candidate,'proposed_status'=>$candidate?'bloqueada':null,'currently_blocked'=>$enabled && $status==='bloqueada','would_block_if_applied'=>$enabled && $candidate,'review_required'=>$review,'notification_proposed'=>false];
@@ -22,7 +22,7 @@ final class GFBillingPlan
         }
         ksort($partners,SORT_NUMERIC);foreach($partners as &$p){$p['would_be_blocked_if_applied']=$enabled && ($p['currently_blocked'] || $p['has_candidate']);$p['outstanding']=GFExactMoney::decimal($p['outstanding_cents']);$p['candidate_amount']=GFExactMoney::decimal($p['candidate_cents']);unset($p['outstanding_cents'],$p['candidate_cents']);}unset($p);
         return ['version'=>'R11AY','scope'=>'QA_ADMIN_BILLING_PLAN','reference'=>$reference,'timezone'=>'America/Sao_Paulo','reference_semantics'=>'CURRENT_STATE_AGING_NOT_HISTORICAL_BALANCE','invoices'=>$out,'partners'=>array_values($partners),'totals'=>array_map(static fn(int $n):string=>GFExactMoney::decimal($n),$totals),
-            'policy'=>['blocking_enabled'=>$enabled,'configuration_key'=>'bloqueio_financeiro_ativo','candidate_rule'=>'aberta AND due_at<reference AND outstanding>0','notify_on_block'=>false,'applies_writes'=>false],
+            'policy'=>['blocking_enabled'=>$enabled,'configuration_key'=>'bloqueio_financeiro_ativo','grace_days'=>7,'candidate_rule'=>'aberta AND overdue_days>7 AND outstanding>0','notify_on_block'=>false,'applies_writes'=>false],
             'limits'=>['external_collection'=>false,'automatic_block'=>false,'status_mutation'=>false,'plan_is_authorization'=>false,'refunds_and_compensation'=>false,'partial_invoice_payment'=>'NOT_SUPPORTED_BY_CURRENT_VERIFIED_MODEL']];
     }
     public static function build(PDO $db,int $actor,?int $partner,string $reference):array

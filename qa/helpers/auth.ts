@@ -34,10 +34,16 @@ export async function loginAs(page: Page, email: string, password: string): Prom
   // já foram vistos estourar 30s sem nenhum problema real de login — só
   // lentidão acumulada do ambiente. 60s dá folga sem mascarar uma falha real
   // (um login realmente quebrado ainda estoura isso).
-  await page.waitForURL(/\/(cliente|guincho|admin)(\/|$)|\/dashboard/i, { timeout: 60000 });
+  await Promise.race([
+    page.waitForURL(/\/(cliente|guincho|admin)(\/|$)|\/dashboard/i, { timeout: 60000 }),
+    page.locator('a[href$="/logout"], a[href*="/logout"], form[action*="/logout"]').first().waitFor({ state: 'visible', timeout: 60000 }),
+  ]);
   await page.waitForLoadState('domcontentloaded');
 }
 
 export async function expectLoggedIn(page: Page): Promise<void> {
-  await expect(page).toHaveURL(/dashboard|cliente|guincho|admin/i);
+  await Promise.race([
+    expect(page).toHaveURL(/dashboard|cliente|guincho|admin/i),
+    expect(page.locator('a[href$="/logout"], a[href*="/logout"], form[action*="/logout"]').first()).toBeVisible(),
+  ]);
 }

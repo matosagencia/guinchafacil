@@ -7,211 +7,58 @@ require_once __DIR__ . '/../Models/Pedido.php';
 require_once __DIR__ . '/GeoService.php';
 require_once __DIR__ . '/Logger.php';
 require_once __DIR__ . '/TarifaService.php';
+require_once __DIR__ . '/PartnerLocationService.php';
 
 final class DecisaoAtendimentoService
 {
     private const TIPOS_SUPORTE = [];
 
+    /** Decisão operacional: SEM preço, SEM split e SEM distância artificial. */
     public function avaliar(int $pedidoId, string $tipoProblema, float $lat, float $lng, array $opcoes = []): array
     {
-        $tipoRaw = strtolower(trim($tipoProblema));
-        if (in_array($tipoRaw, self::TIPOS_SUPORTE, true)) {
-            return [
-                'acao' => 'encaminhar_suporte',
-                'opcoes_disponiveis' => [],
-                'opcao_assistencia' => ['disponivel' => false],
-                'opcao_reboque' => [],
-                'recomendacao' => null,
-                'justificativa' => 'Vamos te orientar pelo suporte. Nao e necessario cotar agora.',
-                'mensagem_suporte' => 'Fale com o suporte apos o login pelo chat do pedido, ou entre em contato com a central.',
-                'desconto_fallback_percentual' => $this->descontoPercentual(),
-                'oficina_mais_proxima' => null,
-            ];
-        }
-
+        // Esta classe não escreve pedido vindo do endpoint público; pedidoId ignorado.
         $tipo = self::normalizarTipo($tipoProblema);
-        $categoria = (string)($opcoes['categoria'] ?? 'popular');
-        $veiculoPodeMover = (bool)($opcoes['veiculo_pode_mover'] ?? true);
-
-        if (!$this->comparativoHabilitado()) {
-            return $this->somenteReboque($pedidoId, $tipo, (float)($opcoes['distancia_km'] ?? 5.0),
-                'O comparativo de assistencia esta desabilitado. Seguimos com reboque.', $categoria);
-        }
-
         $oficinas = $this->oficinasNoRaio($lat, $lng, $tipo);
-        // v22: se precisa de reboque e não há guincho online → WhatsApp
-        $reboquesOnline = $this->reboquesOnlineNoRaio($lat, $lng);
-        $precisaReboque = ($tipo === 'reboque') || (count($oficinas) === 0);
-        if ($precisaReboque && $reboquesOnline === 0) {
+        $online = $this->reboquesOnlineNoRaio($lat, $lng);
+        $reboque = $online > 0;
+        $assistencia = $this->comparativoHabilitado()
+            && $tipo !== 'reboque' && count($oficinas) > 0;
+        $necessitaReboque = $tipo === 'reboque' || !$assistencia;
+        $opcoesDisp = [];
+        if ($assistencia) $opcoesDisp[] = 'assistencia';
+        if ($reboque) $opcoesDisp[] = 'reboque';
+        if ($necessitaReboque && !$reboque) {
             return [
-                'acao' => 'encaminhar_whatsapp',
-                'opcoes_disponiveis' => [],
+                'acao' => 'encaminhar_whatsapp', 'opcoes_disponiveis' => [],
                 'opcao_assistencia' => ['disponivel' => false],
                 'opcao_reboque' => ['disponivel' => false],
                 'recomendacao' => null,
-                'justificativa' => 'Nenhum guincho online na sua região agora. Vamos te ajudar direto pelo WhatsApp.',
-                'mensagem_suporte' => 'Fale com nossa central no WhatsApp para solicitar um guincho.',
-                'reboques_online' => 0,
-                'desconto_fallback_percentual' => $this->descontoPercentual(),
-                'oficina_mais_proxima' => null,
+                'justificativa' => 'Nenhum guincho disponivel neste momento.',
+                'mensagem_suporte' => 'Entre em contato com a central para atendimento.',
+                'reboques_online' => 0, 'oficina_mais_proxima' => null,
+                'preco_status' => 'NAO_CALCULADO',
             ];
         }
-
-        if (count($oficinas) === 0) {
-            $distanciaFallback = max(5.0, (float)($opcoes['distancia_km'] ?? 5.0));
-            $result = $this->somenteReboque($pedidoId, $tipo, $distanciaFallback,
-                'Sem assistencia na sua regiao agora. Podemos levar seu veiculo ate a oficina que voce escolher.', $categoria);
-            $result['sem_oficina'] = true;
-            return $result;
-        }
-
-        if ($tipo === 'colisao' && !$veiculoPodeMover) {
-            return $this->somenteReboque($pedidoId, $tipo, (float)$oficinas[0]['distancia_km'],
-                'O veiculo nao pode se mover com seguranca. Reboque e obrigatorio.', $categoria, $oficinas[0]);
-        }
-
-        $oficinaMaisProxima = $oficinas[0];
-        $distanciaOficina = (float)$oficinaMaisProxima['distancia_km'];
-        $custoAssistencia = $this->calcularAssistencia($oficinaMaisProxima);
-        $custoReboque     = $this->calcularReboque($distanciaOficina, $categoria);
-        $recomendacao     = $custoReboque > $custoAssistencia ? 'assistencia' : 'reboque';
-        $justificativa    = $recomendacao === 'assistencia'
-            ? 'A assistencia no local sai mais barata que o reboque. Se o profissional nao conseguir resolver, voce pode converter para reboque com '
-                . $this->descontoPercentualFormatado() . ' de desconto.'
-            : 'O reboque ate a oficina mais proxima ficou mais em conta que a saida da assistencia.';
-
-        $payload = [
-            'opcoes_disponiveis' => ['assistencia', 'reboque'],
-            'opcao_assistencia' => $this->comporOpcaoFinanceira([
-                'disponivel' => true,
+        $melhor = $necessitaReboque ? 'reboque' : 'assistencia';
+        return [
+            'opcoes_disponiveis' => $opcoesDisp,
+            'opcao_assistencia' => [
+                'disponivel' => $assistencia,
                 'profissionais_proximos' => count($oficinas),
-                'distancia_km' => round($distanciaOficina, 1),
-                'custo_saida' => $custoAssistencia,
-                'mensagem' => 'Um profissional vai ate voce. Voce paga apenas a saida dele.',
-            ], 'custo_saida', 'comissao_assistencia_percentual'),
-            'opcao_reboque' => $this->comporOpcaoFinanceira([
-                'distancia_ate_oficina_km' => round($distanciaOficina, 1),
-                'custo_total' => $custoReboque,
-                'mensagem' => 'Vamos levar seu veiculo ate a oficina mais proxima.',
-            ], 'custo_total', 'comissao_reboque_percentual'),
-            'recomendacao' => $recomendacao,
-            'justificativa' => $justificativa,
-            'desconto_fallback_percentual' => $this->descontoPercentual(),
-            'oficina_mais_proxima' => $this->formatarOficina($oficinaMaisProxima),
+                'mensagem' => 'Disponibilidade verificada. Valor calculado na cotacao oficial.',
+            ],
+            'opcao_reboque' => [
+                'disponivel' => $reboque,
+                'mensagem' => 'Reboque disponivel. Valor calculado na cotacao oficial.',
+            ],
+            'recomendacao' => $melhor,
+            'justificativa' => $necessitaReboque
+                ? 'A modalidade selecionada necessita de reboque.'
+                : 'Ha atendimento local elegivel. A cotacao oficial definira o valor.',
+            'oficina_mais_proxima' => $oficinas ? $this->formatarOficina($oficinas[0]) : null,
             'oficinas_encontradas' => array_map(fn($o) => $this->formatarOficina($o), $oficinas),
+            'preco_status' => 'NAO_CALCULADO',
         ];
-
-        $this->persistirSnapshotBruto($pedidoId, $payload);
-
-        Logger::log(Logger::LEVEL_INFO, __CLASS__, __FUNCTION__, 'decisao_atendimento', 'Comparativo calculado.', [
-            'tipo_problema' => $tipo, 'recomendacao' => $recomendacao,
-            'custo_assistencia' => $custoAssistencia, 'custo_reboque' => $custoReboque,
-        ]);
-
-        return $payload;
-    }
-
-    private function somenteReboque(int $pedidoId, string $tipo, float $distancia, string $motivo, string $categoria, ?array $oficina = null): array
-    {
-        if ($distancia <= 0.5) $distancia = 5.0; // nunca zerar
-        $custoReboque = $this->calcularReboque($distancia, $categoria);
-        $payload = [
-            'opcoes_disponiveis' => ['reboque'],
-            'opcao_assistencia' => ['disponivel' => false],
-            'opcao_reboque' => $this->comporOpcaoFinanceira([
-                'distancia_ate_oficina_km' => round($distancia, 1),
-                'custo_total' => $custoReboque,
-                'mensagem' => 'Vamos levar seu veiculo ate a oficina mais proxima.',
-            ], 'custo_total', 'comissao_reboque_percentual'),
-            'recomendacao' => 'reboque',
-            'justificativa' => $motivo,
-            'desconto_fallback_percentual' => $this->descontoPercentual(),
-            'oficina_mais_proxima' => $oficina ? $this->formatarOficina($oficina) : null,
-        ];
-        $this->persistirSnapshotBruto($pedidoId, $payload);
-        return $payload;
-    }
-
-    /**
-     * FINANCIAL-SNAPSHOT-v1
-     * O motor e a fonte exclusiva dos valores do provider. Aceita configuracao
-     * percentual em escala decimal (0.21) ou humana (21), mas sempre devolve
-     * valores monetarios arredondados a dois decimais.
-     *
-     * @param array<string,mixed> $opcao
-     * @return array<string,mixed>
-     */
-    private function comporOpcaoFinanceira(array $opcao, string $campoBruto, string $chaveComissao): array
-    {
-        $bruto = round(max(0.0, (float)($opcao[$campoBruto] ?? 0.0)), 2);
-        $percentual = $this->comissaoPercentual($chaveComissao);
-        $liquido = round($bruto * (1.0 - $percentual), 2);
-        $comissao = round($bruto - $liquido, 2);
-
-        $opcao[$campoBruto . '_bruto'] = $bruto;
-        $opcao['custo_provider_liquido'] = $liquido;
-        $opcao['comissao_valor'] = $comissao;
-        $opcao['comissao_percentual'] = $percentual;
-
-        return $opcao;
-    }
-
-    private function comissaoPercentual(string $chave): float
-    {
-        $fallback = (float)Configuracao::get('comissao_assistencia_percentual', '0.21');
-        $raw = (float)Configuracao::get($chave, (string)$fallback);
-        $percentual = $raw > 1.0 ? $raw / 100.0 : $raw;
-
-        return max(0.0, min(1.0, $percentual));
-    }
-
-    /** @param array<string,mixed> $decisao */
-    private function persistirSnapshotBruto(int $pedidoId, array $decisao): void
-    {
-        if ($pedidoId <= 0) {
-            return;
-        }
-
-        $assistencia = $decisao['opcao_assistencia'] ?? [];
-        $reboque = $decisao['opcao_reboque'] ?? [];
-        $custoAssistencia = !empty($assistencia['disponivel'])
-            ? (float)($assistencia['custo_saida_bruto'] ?? $assistencia['custo_saida'] ?? 0.0)
-            : null;
-        $custoReboque = !empty($reboque)
-            ? (float)($reboque['custo_total_bruto'] ?? $reboque['custo_total'] ?? 0.0)
-            : null;
-
-        $oficina = $decisao['oficina_mais_proxima'] ?? [];
-        if (!Pedido::registrarSnapshotDecisao(
-            $pedidoId,
-            is_array($oficina) ? (int)($oficina['provider_id'] ?? 0) : null,
-            is_array($oficina) ? (string)($oficina['nome'] ?? '') : null,
-            (string)($decisao['acao'] ?? $decisao['recomendacao'] ?? ''),
-            $custoAssistencia,
-            $custoReboque,
-            isset($decisao['recomendacao']) ? (string)$decisao['recomendacao'] : null
-        )) {
-            Logger::log(Logger::LEVEL_INFO, __CLASS__, __FUNCTION__, 'financial_snapshot',
-                'Snapshot bruto nao gravado. Confirme a migration contract_pedido_financial_snapshot_v1.', [
-                    'pedido_id' => $pedidoId,
-                    'custo_assistencia' => $custoAssistencia,
-                    'custo_reboque' => $custoReboque,
-                ]);
-        }
-    }
-
-    private function calcularAssistencia(?array $oficina = null): float
-    {
-        $taxaOficina = isset($oficina['taxa_resgate_direto']) ? (float)$oficina['taxa_resgate_direto'] : 0.0;
-        if ($taxaOficina > 0) return round($taxaOficina, 2);
-        $base     = (float)Configuracao::get('custo_saida_profissional_padrao', '80.00');
-        $comissao = (float)Configuracao::get('comissao_assistencia_percentual', '0.21');
-        return round($base * (1 + $comissao), 2);
-    }
-
-    private function calcularReboque(float $distanciaKm, string $categoria): float
-    {
-        return TarifaService::calcular(max(5.0, $distanciaKm), $categoria);
     }
 
     public function descontoPercentual(): float
@@ -244,7 +91,7 @@ final class DecisaoAtendimentoService
             'pneu' => 'pneu',
             'chaveiro' => 'chaveiro',
             'colisao' => 'colisao',
-            default => 'pane_mecanica',
+            default => $tipo,
         };
     }
 
@@ -263,32 +110,20 @@ final class DecisaoAtendimentoService
 
     private function buscarProvidersNoRaio(float $lat, float $lng): array
     {
-        try {
-            $stmt = getPDO()->query(
-                "SELECT p.id AS provider_id,
-                        COALESCE(NULLIF(TRIM(p.trade_name), ''), p.legal_name) AS nome,
-                        ws.latitude, ws.longitude,
-                        COALESCE(ws.taxa_resgate_direto, 0) AS taxa_resgate_direto,
-                        COALESCE(NULLIF(ws.raio_resgate_direto_km, 0), 30) AS raio_resgate_direto_km
-                   FROM providers p
-                   JOIN provider_workshop_settings ws ON ws.provider_id = p.id
-                  WHERE p.active = 1 AND p.approval_status = 'APPROVED'
-                    AND ws.status_parceria = 'ATIVO' AND ws.faz_resgate_direto = 1
-                    AND ws.latitude IS NOT NULL AND ws.longitude IS NOT NULL"
-            );
-            $rows = [];
-            foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
-                $dist = GeoService::haversine($lat, $lng, (float)$row['latitude'], (float)$row['longitude']);
-                if ($dist <= (float)$row['raio_resgate_direto_km']) {
-                    $row['distancia_km'] = round($dist, 2);
-                    $rows[] = $row;
-                }
+        $rows = [];
+        foreach (PartnerLocationService::listarWorkshopsOperacionais() as $row) {
+            if ($row['latitude'] === null || $row['longitude'] === null) {
+                error_log('[DecisaoAtendimentoService] Oficina inelegivel sem coordenadas: provider_id=' . (int)$row['provider_id']);
+                continue;
             }
-            usort($rows, fn($a, $b) => $a['distancia_km'] <=> $b['distancia_km']);
-            return $rows;
-        } catch (Throwable $e) {
-            return [];
+            $dist = GeoService::haversine($lat, $lng, (float)$row['latitude'], (float)$row['longitude']);
+            if ($dist <= (float)$row['raio_resgate_direto_km']) {
+                $row['distancia_km'] = round($dist, 2);
+                $rows[] = $row;
+            }
         }
+        usort($rows, fn($a, $b) => $a['distancia_km'] <=> $b['distancia_km']);
+        return $rows;
     }
 
     private function buscarOficinasNoRaio(float $lat, float $lng, string $tipoProblema): array
@@ -368,7 +203,7 @@ final class DecisaoAtendimentoService
             'id' => (int)($o['provider_id'] ?? 0),
             'nome' => (string)($o['nome'] ?? ''),
             'distancia_km' => round((float)($o['distancia_km'] ?? 0), 2),
-            'taxa_saida' => $this->calcularAssistencia($o),
+            'taxa_saida' => null, // preço somente pela autoridade oficial
         ], $oficinas);
     }
 

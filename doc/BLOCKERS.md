@@ -315,3 +315,59 @@ replicando o DDL exato do banco de dev. Rodado em prod via
 [NOVO] Tabela oficina_orcamentos criada
 [NOVO] Tabela oficina_repasses criada
 [NOVO] Tabela oficina_evidencias criada
+
+## Drift — migration_contract_pedido_idempotencia_v1 (2026-10-15)
+**Sintoma:** migrador reporta "Checksum divergente" ao tentar reaplicar. `schema_migrations.success = 1` em 2026-10-10.
+**Efeito:** `logs_webhook` não tem UNIQUE em `(origem, evento)`, apesar de §12.1 exigir.
+**Implicação:** idempotência de webhook não tem trava atômica no dev. T2 não valida esse ponto.
+**Ação futura (T4):** comparar arquivo atual com o que foi aplicado, decidir entre nova migration aditiva (`migration_webhook_unique_origem_evento_v1.sql` com `INFORMATION_SCHEMA` guard) ou correção do drift via `UPDATE schema_migrations`.
+**Não bloqueia:** T2 (idempotência de pedido é nível `forma_pagamento_escolhida`, não webhook), T1 (já fechado).
+
+## BLOCKER B-011 - Cotação abaixo do engate mínimo (motor de preço)
+
+**Data:** 2026-10-16
+**Faixa:** A (motor de preço)
+**Severidade:** alta (preço abaixo do custo operacional)
+**Status:** Ativo — aguardando Faixa A
+
+**Sintoma:**
+GET /pre-cotacao entre Niterói (-22.8913577,-43.1199646) e Rua da Gamboa 131
+(-22.8966702,-43.1992353), categoria=popular, retornou:
+
+  service_code: TOW_CAR
+  distancia_km: 8.1
+  valor: R$ 156,63
+
+**Esperado:** ≥ R$ 200 (taxa_engate confirmada em service_price_rules).
+
+**Reprodução:**
+1. /pre-cotacao?debug=1
+2. Endereço de retirada: Rua Barão de Amazonas, Niterói
+3. "Levar o carro" → Carro → destino: R. da Gamboa, 131, Rio de Janeiro
+4. Observar R$ 156,63 (< taxa_engate)
+
+**Hipóteses (A decide):**
+- `service_price_rules` para TOW_CAR/popular não está aplicando `base_customer_price`
+- `preco = taxa_saida + (km_cobrado × tarifa)` está sendo calculado como
+  `preco = km_cobrado × tarifa` (faltou somar a taxa de saída)
+- A regra usada não é a de TOW_CAR (regra id 35/36) mas uma mais antiga
+
+**Impacto:** toda cotação de reboque recente no dev provavelmente está subprecificada.
+Considerar `minimum_customer_price` como piso de emergência.
+
+**Não bloqueia:** wizard, autocomplete, mapa, registro em 2 etapas.
+<!-- GF-FIN1-CONTRATO-20261018 -->
+### FIN.1 â€” GestÃ£o financeira e repasses (18/10/2026)
+
+- AdoÃ§Ã£o incremental do layout Lovable de referÃªncia em `/admin/financeiro`, com sidebar `100dvh`, logotipo, ausÃªncia de topbar legado e conservaÃ§Ã£o dos filtros, KPIs, CSV, PIX jobs e aÃ§Ãµes preexistentes.
+- Contrato bilateral: pagamento pelo gateway cria crÃ©dito contratual ao parceiro; pagamento diretamente ao parceiro cria obrigaÃ§Ã£o de comissÃ£o Ã  plataforma. Fechamento semanal compensa ambos por parceiro e ciclo.
+- `saldo_parceiro = creditos - debitos`; saldo positivo implica repasse, zero compensaÃ§Ã£o, negativo dÃ­vida do parceiro. InadimplÃªncia apenas sobre dÃ­vida lÃ­quida vencida apÃ³s carÃªncia e conciliaÃ§Ã£o.
+- Matching anelar progressivo: referÃªncia comum por faixa = maior custo de deslocamento entre elegÃ­veis da faixa. Oficinas sÃ£o responsÃ¡veis por remoÃ§Ã£o incluÃ­da conforme cadastro e oferta.
+- Esta fase Ã© APENAS visual/documental; a implementaÃ§Ã£o do razÃ£o bilateral e sua migraÃ§Ã£o exigem auditoria e homologaÃ§Ã£o prÃ³prias (FIN.2+).
+- Detalhes e critÃ©rios: `doc/FIN_1_GESTAO_FINANCEIRA_REPASSES.md`.
+# Pendências financeiras após homologação M1–M5 (2026-10-27)
+
+- M1: falta homologação com provedor real e confirmação visual de `WALLET_MAIN_UI_RESERVATIONS`.
+- M5: escopo financeiro aprovado, mas a regressão geral ainda tem 75 erros, 9 falhas e um teste sem classe, fora do escopo financeiro.
+- Não declarar o sistema financeiro integralmente concluído até executar esses dois cenários e limpar a regressão geral.
+

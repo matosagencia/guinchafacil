@@ -19,15 +19,18 @@
 $bp = defined('BASE_PATH') ? BASE_PATH : '';
 include __DIR__ . '/../layouts/header.php';
 
-$totalCompensacao = 0.0; $totalPago = 0.0; $totalEstornado = 0.0; $totalFalhas = 0;
+$totalCompensacao = 0.0; $totalPago = 0.0; $totalEstornado = 0.0; $totalReservaGateway = 0.0; $totalFalhas = 0;
 foreach ($resumo['linhas'] ?? [] as $l) {
     $totalCompensacao += (float)$l['saldo_em_compensacao'];
     $totalPago += (float)$l['saldo_pago'];
-    $totalEstornado += (float)$l['saldo_estornado'];
+    $totalEstornado += (float)$l['saldo_estornado'];    $totalReservaGateway += (float)($l['reserva_gateway'] ?? 0);
     $totalFalhas += (int)$l['repasses_com_falha'];
 }
 ?>
-<link rel="stylesheet" href="<?php echo htmlspecialchars($bp); ?>/public/assets/css/pages/admin-central-operacional.css">
+<link rel="stylesheet" href="<?php echo htmlspecialchars($bp); ?>/public/assets/css/pages/admin-central-operacional.css">
+<!-- GF-FIN2-R4-SHELL -->
+<link rel="stylesheet" href="<?php echo htmlspecialchars($bp, ENT_QUOTES, 'UTF-8'); ?>/public/assets/css/pages/gf-fin2-r4-shell-unificado.css?v=20261019-r4">
+<link rel="stylesheet" href="<?= htmlspecialchars($bp, ENT_QUOTES, 'UTF-8') ?>/public/assets/css/pages/gf-fin2-r5-layout.css?v=20261019-r5">
 
 <div class="ops-topbar" style="padding:10px 24px;border-bottom:1px solid var(--theme-border,#232c35);background:var(--theme-nav,#030405)">
     <div class="ops-topbar__search">
@@ -76,7 +79,7 @@ foreach ($resumo['linhas'] ?? [] as $l) {
         <strong class="ops-metric__value">R$ <?php echo number_format($totalPago, 2, ',', '.'); ?></strong>
         <span class="ops-metric__trend">Repasse Pix confirmado</span>
     </article>
-    <article class="ops-metric">
+    <article class="ops-metric">        <span class="ops-metric__label">Reserva de gateway</span>        <strong class="ops-metric__value">R$ <?php echo number_format($totalReservaGateway, 2, ',', '.'); ?></strong>        <span class="ops-metric__trend">Retenção registrada no ledger</span>    </article>    <article class="ops-metric">
         <span class="ops-metric__label">Estornado</span>
         <strong class="ops-metric__value">R$ <?php echo number_format($totalEstornado, 2, ',', '.'); ?></strong>
     </article>
@@ -89,6 +92,7 @@ foreach ($resumo['linhas'] ?? [] as $l) {
 <div class="shell-ops" id="cartShell">
 
     <aside class="shell-ops-sidebar" id="cartSidebar">
+        <div class="gf-fin2-brand"><strong>Guincha<span>Fácil.</span></strong><small>Central GuinchaFácil</small></div>
         <?php include __DIR__ . '/../components/admin_nav_operacional.php'; ?>
     </aside>
 

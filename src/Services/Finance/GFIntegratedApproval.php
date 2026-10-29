@@ -15,7 +15,7 @@ final class GFIntegratedApproval
     {
         $database=(string)$db->query('SELECT DATABASE()')->fetchColumn();
         if (getPDO()!==$db || $db->getAttribute(PDO::ATTR_DRIVER_NAME)!=='mysql'
-            || !in_array($database,[self::DATABASE,'guinchafacil_dev'],true)) throw new LogicException('FIN_FINANCE_DATABASE_NOT_ALLOWED');
+            || !in_array($database,[self::DATABASE,'guinchafacil_dev','guinchafacil_phpunit_qa'],true)) throw new LogicException('FIN_FINANCE_DATABASE_NOT_ALLOWED');
     }
 
     private static function log(string $phase,string $status,string $message,array $context=[]): void

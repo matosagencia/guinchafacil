@@ -26,7 +26,7 @@ final class ConversionServiceCreditoTest extends TestCase
     protected function setUp(): void
     {
         $pdo = getPDO();
-        foreach (['pedido_idempotency', 'pagamentos_arquivados', 'pagamentos', 'pedidos', 'veiculos', 'usuarios', 'guinchos', 'configuracoes'] as $table) {
+        foreach (['order_conversion_price_snapshots', 'pedido_idempotency', 'pagamentos_arquivados', 'pagamentos', 'pedidos', 'veiculos', 'usuarios', 'guinchos', 'configuracoes'] as $table) {
             try {
                 $pdo->exec("DELETE FROM {$table}");
             } catch (Throwable) {
@@ -39,6 +39,38 @@ final class ConversionServiceCreditoTest extends TestCase
             (1, 1, 'CRD1A23', 'Marca Teste', 'Modelo Teste', 2020, 'Prata', 'carro')");
         $pdo->exec("INSERT INTO configuracoes (chave, valor) VALUES ('tempo_expiracao_min', '5')");
         $pdo->exec("INSERT INTO configuracoes (chave, valor) VALUES ('raio_inicial_km', '10')");
+
+        // Fixture completo do catálogo/preço: a conversão usa a mesma porta
+        // oficial de cotação do checkout e, portanto, precisa de pai, tipo,
+        // zona geográfica e regra vigente no banco QA.
+        $pdo->exec("INSERT INTO service_categories (id, code, name, active)
+                    VALUES (1, 'assistencia', 'Assistência', 1)
+                    ON DUPLICATE KEY UPDATE code=VALUES(code), name=VALUES(name), active=1");
+        $pdo->exec("INSERT INTO service_types
+                    (id, category_id, code, public_slug, name, attendance_mode,
+                     requires_destination, allows_conversion_to_towing, active)
+                    VALUES (1, 1, 'TOW_CAR', 'reboque-carro', 'Reboque Carro', 'TOWING', 1, 0, 1)
+                    ON DUPLICATE KEY UPDATE category_id=1, code='TOW_CAR',
+                    name='Reboque Carro', attendance_mode='TOWING', active=1");
+        $pdo->exec("INSERT INTO pricing_zones
+                    (id, cidade_id, code, name, polygon_geojson, active, created_at, updated_at)
+                    VALUES (1, NULL, 'QA_SP', 'Zona QA',
+                    '{\"type\":\"Polygon\",\"coordinates\":[[[-47.50,-24.50],[-45.50,-24.50],[-45.50,-22.50],[-47.50,-22.50],[-47.50,-24.50]]]}',
+                    1, NOW(), NOW())
+                    ON DUPLICATE KEY UPDATE cidade_id=NULL, polygon_geojson=VALUES(polygon_geojson), active=1");
+        $pdo->exec("INSERT INTO service_price_rules
+                    (pricing_zone_id, service_type_id, vehicle_category,
+                     base_customer_price, minimum_customer_price, provider_base_amount,
+                     platform_fee_type, platform_fee_value, included_distance_km,
+                     extra_distance_price, included_minutes, extra_minute_price,
+                     night_multiplier, holiday_multiplier, effective_from, active,
+                     version, created_at, updated_at, base_km_contagem)
+                    VALUES (1, 1, NULL, 160.00, 180.00, 0.00, 'PERCENTAGE', 0.0800,
+                    0.00, 3.00, 0, 0.00, 1.00, 1.00, '2026-01-01', 1, 1,
+                    NOW(), NOW(), 'transporte')
+                    ON DUPLICATE KEY UPDATE active=1, platform_fee_value=0.0800,
+                    base_km_contagem='transporte', base_customer_price=160.00,
+                    minimum_customer_price=180.00, extra_distance_price=3.00");
     }
 
     private function criarPedidoOnSitePago(int $id, float $valorPagoOnSite): void
@@ -54,10 +86,17 @@ final class ConversionServiceCreditoTest extends TestCase
     private function custoBrutoSemCredito(int $pedidoId): float
     {
         $pdo = getPDO();
-        $pedido = $pdo->query("SELECT distancia_km FROM pedidos WHERE id = {$pedidoId}")->fetch(PDO::FETCH_ASSOC);
-        require_once __DIR__ . '/../../src/Services/TarifaService.php';
-        $tarifa = TarifaService::calcularDetalhado((float)$pedido['distancia_km'], 'popular', false);
-        return (float)$tarifa['valor'];
+        $pedido = $pdo->query("SELECT lat_origem, lng_origem, lat_destino, lng_destino FROM pedidos WHERE id = {$pedidoId}")->fetch(PDO::FETCH_ASSOC);
+        require_once __DIR__ . '/../../src/Services/Pricing/CotacaoUnificadaService.php';
+        $cotacao = CotacaoUnificadaService::calcular([
+            'service_code' => 'TOW_CAR',
+            'lat_origem' => (float)$pedido['lat_origem'],
+            'lng_origem' => (float)$pedido['lng_origem'],
+            'lat_destino' => (float)$pedido['lat_destino'],
+            'lng_destino' => (float)$pedido['lng_destino'],
+            'vehicle_category' => 'popular',
+        ]);
+        return (float)$cotacao['preco_cliente'];
     }
 
     public function testCreditoAbatidoDoCustoDoReboqueComplementar(): void

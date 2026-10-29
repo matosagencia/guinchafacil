@@ -16,13 +16,7 @@ $bancos = [
     '707'=>'707 — Banco Daycoval','745'=>'745 — Citibank','748'=>'748 — Sicredi','756'=>'756 — Sicoob',
 ];
 
-$servicosDisponiveis = [
-    'borracharia'=>['Pneu / borracharia','fa-circle-notch'],'eletrica'=>['Elétrica automotiva','fa-bolt'],
-    'bateria'=>['Bateria / partida','fa-car-battery'],'mecanica'=>['Mecânica geral','fa-gears'],
-    'chaveiro'=>['Chaveiro automotivo','fa-key'],'funilaria'=>['Funilaria e pintura','fa-spray-can'],
-    'ar_condicionado'=>['Ar-condicionado','fa-snowflake'],'injecao'=>['Injeção eletrônica','fa-microchip'],
-    'suspensao'=>['Suspensão / freios','fa-arrows-up-down'],
-];
+
 ?>
 <link rel="stylesheet" href="<?= $bp ?>/public/assets/css/themes/oficina.css">
 <link rel="stylesheet" href="<?= $bp ?>/public/assets/css/components/dashboard.css">
@@ -110,14 +104,14 @@ $servicosDisponiveis = [
         <form method="POST" action="<?= $bp ?>/oficina/servicos/salvar" class="tow-card p-4">
             <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken) ?>">
             <h3 class="tow-panel-title mb-1">Serviços oferecidos</h3>
-            <p class="tow-panel-subtitle mb-3">Marque tudo que sua oficina faz.</p>
+            <p class="tow-panel-subtitle mb-3">Marque somente os servicos que realmente executa. Tipos ativos definidos pelo Admin.</p>
             <div class="row g-2">
-                <?php foreach ($servicosDisponiveis as $slug => [$label, $icone]): ?>
+                <?php foreach ($servicosDisponiveis as $servico): ?>
                     <div class="col-md-4 col-sm-6">
                         <label class="d-flex align-items-center gap-2 p-3" style="border:1px solid #5c3d28;border-radius:10px;cursor:pointer;background:#3a2318">
-                            <input type="checkbox" name="servicos[]" value="<?= $slug ?>" <?= in_array($slug, $servicosAtuais, true) ? 'checked':'' ?>>
-                            <i class="fas <?= $icone ?>" style="color:#d97706"></i>
-                            <span style="color:#fef3e8"><?= htmlspecialchars($label) ?></span>
+                            <input type="checkbox" name="service_type_ids[]" value="<?= (int)$servico['id'] ?>" <?= in_array((int)$servico['id'], $servicosAtuais, true) ? 'checked':'' ?>>
+                            <i class="fas <?= ($servico['attendance_mode'] === 'TOWING') ? 'fa-truck' : 'fa-wrench' ?>" style="color:#d97706"></i>
+                            <span style="color:#fef3e8"><?= htmlspecialchars((string)$servico['name'], ENT_QUOTES, 'UTF-8') ?> <small style="display:block;opacity:.7"><?= htmlspecialchars((string)$servico['code'], ENT_QUOTES, 'UTF-8') ?></small></span>
                         </label>
                     </div>
                 <?php endforeach; ?>

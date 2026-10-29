@@ -41,7 +41,10 @@ foreach (($repasses['linhas'] ?? []) as $r) {
     ];
 }
 ?>
-<link rel="stylesheet" href="<?php echo htmlspecialchars($bp); ?>/public/assets/css/pages/admin-central-operacional.css">
+<link rel="stylesheet" href="<?php echo htmlspecialchars($bp); ?>/public/assets/css/pages/admin-central-operacional.css">
+<!-- GF-FIN2-R4-SHELL -->
+<link rel="stylesheet" href="<?php echo htmlspecialchars($bp, ENT_QUOTES, 'UTF-8'); ?>/public/assets/css/pages/gf-fin2-r4-shell-unificado.css?v=20261019-r4">
+<link rel="stylesheet" href="<?= htmlspecialchars($bp, ENT_QUOTES, 'UTF-8') ?>/public/assets/css/pages/gf-fin2-r5-layout.css?v=20261019-r5">
 
 <div class="ops-topbar" style="padding:10px 24px;border-bottom:1px solid var(--theme-border,#232c35);background:var(--theme-nav,#030405)">
     <div class="ops-topbar__search"><i class="fas fa-magnifying-glass"></i><input type="search" id="saquesSearchTop" placeholder="Buscar por nº do pedido ou guincheiro" autocomplete="off" aria-label="Buscar repasses"></div>
@@ -67,8 +70,8 @@ foreach (($repasses['linhas'] ?? []) as $r) {
     </article>
 </section>
 
-<?php if (!empty($msgMap[$_GET['msg']] ?? null)): ?>
-<div class="alert alert-<?php echo $msgMap[$_GET['msg']][0]; ?>" style="margin:0 24px 16px;"><?php echo $msgMap[$_GET['msg']][1]; ?></div>
+<?php $gfMsgKey = (string)($_GET['msg'] ?? ''); if ($gfMsgKey !== '' && isset($msgMap[$gfMsgKey])): ?>
+<div class="alert alert-<?php echo $msgMap[$gfMsgKey][0]; ?>" style="margin:0 24px 16px;"><?php echo $msgMap[$gfMsgKey][1]; ?></div>
 <?php endif; ?>
 
 <?php if (!$repasses['ok']): ?>
@@ -88,6 +91,7 @@ foreach (($repasses['linhas'] ?? []) as $r) {
 <div class="shell-ops" id="saquesShell">
 
     <aside class="shell-ops-sidebar" id="saquesSidebar">
+        <div class="gf-fin2-brand"><strong>Guincha<span>Fácil.</span></strong><small>Central GuinchaFácil</small></div>
         <?php include __DIR__ . '/../components/admin_nav_operacional.php'; ?>
     </aside>
 

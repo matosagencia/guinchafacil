@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/../Models/Provider/Provider.php';
+require_once __DIR__ . '/PartnerLocationService.php';
 require_once __DIR__ . '/../Models/Configuracao.php';
 require_once __DIR__ . '/AuditTrailService.php';
 
@@ -95,7 +96,24 @@ final class ProviderWorkshopService
                 AND ws.status_parceria = 'ATIVO'
               ORDER BY COALESCE(p.trade_name, p.legal_name), p.id"
         );
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+        $locations = [];
+        foreach (PartnerLocationService::listarWorkshopsOperacionais() as $location) {
+            $locations[(int)$location['provider_id']] = $location;
+        }
+        $eligible = [];
+        foreach ($rows as $row) {
+            $id = (int)($row['id'] ?? 0);
+            $location = $locations[$id] ?? null;
+            if (!$location || $location['latitude'] === null || $location['longitude'] === null) {
+                continue;
+            }
+            $row['latitude'] = $location['latitude'];
+            $row['longitude'] = $location['longitude'];
+            $row['location_source'] = $location['location_source'];
+            $eligible[] = $row;
+        }
+        return $eligible;
     }
 
     public static function listarOficinasElegiveis(): array
@@ -153,6 +171,15 @@ final class ProviderWorkshopService
         $stmt->execute([$providerId]);
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
         return $row ?: null;
+    }
+
+    public static function possuiLocalizacaoOperacional(int $providerId): bool
+    {
+        foreach (PartnerLocationService::listarWorkshopsOperacionais() as $location) {
+            if ((int)$location['provider_id'] !== $providerId) continue;
+            return $location['latitude'] !== null && $location['longitude'] !== null;
+        }
+        return false;
     }
 
     public static function cadastrar(array $dados, int $actorId): array

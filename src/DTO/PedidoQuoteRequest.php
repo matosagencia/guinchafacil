@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 final class PedidoQuoteRequest
 {
+    public ?int $serviceTypeId;
     public ?int $clienteId;
     public ?int $veiculoId;
     public string $tipoProblema;
@@ -24,6 +25,7 @@ final class PedidoQuoteRequest
 
     public function __construct(array $data)
     {
+        $this->serviceTypeId = isset($data['service_type_id']) ? (int)$data['service_type_id'] : null;
         $this->clienteId = isset($data['cliente_id']) ? (int)$data['cliente_id'] : (isset($data['clienteId']) ? (int)$data['clienteId'] : null);
         $this->veiculoId = isset($data['veiculo_id']) ? (int)$data['veiculo_id'] : (isset($data['veiculoId']) ? (int)$data['veiculoId'] : null);
         $tipoProblema = trim((string)($data['tipo_problema'] ?? $data['tipoProblema'] ?? 'outro'));
