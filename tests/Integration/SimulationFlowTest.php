@@ -33,7 +33,7 @@ final class SimulationFlowTest extends TestCase
             $pdo->exec("UPDATE guinchos SET reboque_aprovado = 1 WHERE id = 1");
         } catch (Throwable) {
         }
-        $pdo->exec("INSERT INTO service_types (id, code, name, attendance_mode, active) VALUES (9001, 'TOW_TEST', 'Reboque Teste', 'TOWING', 1)");
+        $pdo->exec("INSERT INTO service_types (id, category_id, code, name, attendance_mode, active) VALUES (9001, 1, 'TOW_TEST', 'Reboque Teste', 'TOWING', 1)");
         $pdo->exec("INSERT INTO provider_capabilities (provider_id, service_type_id, enabled, approval_status) VALUES (1, 9001, 1, 'APPROVED')");
     }
 

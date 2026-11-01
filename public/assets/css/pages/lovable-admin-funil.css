@@ -1,0 +1,41 @@
+/* GuinchaFacil — Lovable-inspired Admin backoffice, Fase 4B.
+   Scoped to two admin flow pages only. No changes to pricing/checkout behavior. */
+.gf-lovable-admin-flow {
+  --gfbo-bg: #090d0b; --gfbo-surface: #131a15; --gfbo-elevated: #1b261f;
+  --gfbo-border: #25372b; --gfbo-text: #f2f7f3; --gfbo-muted: #9aaea0;
+  --gfbo-accent: #2fb34a; --gfbo-accent-hover: #1f8a36;
+  background:var(--gfbo-bg); color:var(--gfbo-text); min-height:calc(100vh - 64px);
+  padding:clamp(18px,2.2vw,36px); font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+.gf-lovable-admin-flow .page-head {display:flex;align-items:flex-start;justify-content:space-between;gap:18px;padding:0 0 22px;border-bottom:1px solid var(--gfbo-border);}
+.gf-lovable-admin-flow .page-head .eyebrow,.gf-lovable-admin-flow .eyebrow {color:#58d57a;font-size:.71rem;font-weight:750;letter-spacing:.12em;text-transform:uppercase;}
+.gf-lovable-admin-flow h1,.gf-lovable-admin-flow .title {color:var(--gfbo-text);font-size:clamp(1.5rem,2vw,2rem);font-weight:750;line-height:1.24;letter-spacing:-.035em;}
+.gf-lovable-admin-flow p,.gf-lovable-admin-flow .text-muted,.gf-lovable-admin-flow .muted {color:var(--gfbo-muted) !important;}
+.gf-lovable-admin-flow .admin-flow-card,.gf-lovable-admin-flow > .card,.gf-lovable-admin-flow .admin-flow-context {
+ max-width:none;background:var(--gfbo-surface);border:1px solid var(--gfbo-border);border-radius:14px;
+ color:var(--gfbo-text);box-shadow:0 10px 36px rgba(0,0,0,.14);
+}
+.gf-lovable-admin-flow .admin-flow-card {max-width:920px;padding:clamp(20px,3vw,34px);margin:24px 0;}
+.gf-lovable-admin-flow > .card {padding:clamp(20px,2.8vw,32px);margin-top:20px;}
+.gf-lovable-admin-flow .admin-flow-context {padding:18px 22px;display:flex;align-items:center;justify-content:space-between;gap:14px;}
+.gf-lovable-admin-flow .admin-flow-context__label {color:var(--gfbo-muted);}
+.gf-lovable-admin-flow .admin-flow-context strong {color:var(--gfbo-text);}
+.gf-lovable-admin-flow .form-label,.gf-lovable-admin-flow .label,.gf-lovable-admin-flow legend {color:var(--gfbo-text);font-weight:650;}
+.gf-lovable-admin-flow .form-select,.gf-lovable-admin-flow .form-control {
+ background:var(--gfbo-elevated);color:var(--gfbo-text);border:1px solid #39503e;border-radius:9px;min-height:44px;
+}
+.gf-lovable-admin-flow .form-select:focus,.gf-lovable-admin-flow .form-control:focus {outline:2px solid #2fb34a;outline-offset:1px;box-shadow:none;}
+.gf-lovable-admin-flow .form-select:disabled {opacity:.55;cursor:not-allowed;}
+.gf-lovable-admin-flow .btn-primary,.gf-lovable-admin-flow button[type=submit].btn {background:var(--gfbo-accent);border-color:var(--gfbo-accent);color:#07150b;font-weight:700;border-radius:9px;min-height:42px;}
+.gf-lovable-admin-flow .btn-primary:hover,.gf-lovable-admin-flow button[type=submit].btn:hover {background:#47cc65;border-color:#47cc65;}
+.gf-lovable-admin-flow .btn-secondary,.gf-lovable-admin-flow .btn-outline-secondary {background:transparent;border:1px solid #405447;border-radius:9px;color:var(--gfbo-text);}
+.gf-lovable-admin-flow .btn-secondary:hover,.gf-lovable-admin-flow .btn-outline-secondary:hover {background:#25372b;color:#fff;}
+.gf-lovable-admin-flow .admin-flow-actions {border-top:1px solid var(--gfbo-border);padding-top:22px;margin-top:24px;}
+.gf-lovable-admin-flow .alert {border-radius:10px;}
+.gf-lovable-admin-flow .choice-fieldset {background:transparent;}
+.gf-lovable-admin-flow .choice-card,.gf-lovable-admin-flow .decision-card {background:#19251d;color:var(--gfbo-text);border:1px solid #36513d;border-radius:12px;}
+.gf-lovable-admin-flow .choice-card:hover,.gf-lovable-admin-flow .decision-card:hover {border-color:#54ce6d;}
+.gf-lovable-admin-flow .gf-ap__panel {border-radius:12px;}
+/* Forms inside the quote stage intentionally retain their semantic state colors and map controls. */
+.gf-lovable-admin-flow :focus-visible {outline:2px solid #60df7d;outline-offset:2px;}
+@media (max-width: 768px) {.gf-lovable-admin-flow {padding:15px;} .gf-lovable-admin-flow .admin-flow-context {align-items:flex-start;flex-direction:column;} .gf-lovable-admin-flow .admin-flow-actions {display:flex;flex-direction:column-reverse;} .gf-lovable-admin-flow .admin-flow-actions>* {width:100%;}}

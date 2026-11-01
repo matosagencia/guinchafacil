@@ -1,0 +1,32 @@
+/* FIN.1 | financeiro e repasses | presentation only, scoped */
+body:has(#financeiroShell){margin:0!important;background:#f4f6f8!important}
+body:has(#financeiroShell)>header,body:has(#financeiroShell)>.admin-header,body:has(#financeiroShell)>.ops-topbar{display:none!important}
+#financeiroShell.gf-finance-v3.shell-ops{display:grid!important;grid-template-columns:220px minmax(0,1fr)!important;margin:0!important;padding:0!important;min-height:100dvh!important;max-width:none!important;width:100%!important;background:#f4f6f8!important;gap:0!important}
+#financeiroShell>.gf-finance-v3-sidebar{grid-column:1!important;grid-row:1!important;position:sticky!important;top:0!important;align-self:start!important;width:220px!important;min-width:220px!important;max-width:220px!important;height:100dvh!important;min-height:100dvh!important;max-height:100dvh!important;overflow-y:auto!important;overflow-x:hidden!important;scrollbar-width:none!important;-ms-overflow-style:none!important;background:#111518!important;margin:0!important;border:0!important}
+#financeiroShell>.gf-finance-v3-sidebar::-webkit-scrollbar{width:0!important;height:0!important;display:none!important}
+#financeiroShell .ops-sidebar-brand__name{font-weight:800!important;letter-spacing:-.045em}
+#financeiroShell .gf-finance-v3-main{grid-column:2!important;grid-row:1!important;min-width:0!important;margin:0!important;background:#f4f6f8!important}
+#financeiroShell .gf-finance-v3-breadcrumb{display:none!important}
+#financeiroShell .gf-finance-page{padding:16px 28px 0!important;max-width:none!important}
+#financeiroShell .page-head{display:flex!important;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;margin:0 0 24px!important}
+#financeiroShell .page-head h1{font-size:clamp(22px,2.2vw,30px)!important;letter-spacing:-.035em!important;line-height:1.2!important}
+#financeiroShell .page-head .eyebrow{color:#219e43!important;text-transform:uppercase;font-size:10px!important;font-weight:800!important}
+#financeiroShell .page-head p{font-size:12px;color:#708096!important;margin-top:7px!important}
+#financeiroShell .page-head a[href*='/admin/financeiro/csv']{border:1px solid #d8dfe5!important;background:transparent!important;border-radius:6px!important;color:#183047!important;padding:9px 14px!important;text-decoration:none}
+#financeiroShell .gf-finance-filters{border-radius:7px!important;margin-bottom:22px!important}
+#financeiroShell .gf-finance-filters .card-body{padding:18px!important}
+#financeiroShell .gf-finance-filters .form-label{font-size:11px!important;color:#66758a!important;margin-bottom:7px!important}
+#financeiroShell .gf-finance-filters input,#financeiroShell .gf-finance-filters select{min-height:38px!important;border-radius:5px!important;font-size:12px!important}
+#financeiroShell .gf-finance-page .card{border-radius:7px!important;border:1px solid #d8dee6!important;box-shadow:none!important}
+#financeiroShell .gf-finance-kpis{gap:0!important;overflow:hidden;border:1px solid #d8dee6;border-radius:7px;background:#fff;margin-bottom:22px!important}
+#financeiroShell .gf-finance-kpi{border-radius:0!important;border:0!important;border-right:1px solid #e2e7ed!important;min-width:0!important}
+#financeiroShell .gf-finance-kpi:last-child{border-right:0!important}
+#financeiroShell .gf-finance-kpi__label{font-size:11px!important;color:#708096!important}
+#financeiroShell .gf-finance-kpi strong{font-variant-numeric:tabular-nums!important;font-weight:800!important}
+#financeiroShell .gf-finance-v3-transactions{gap:16px!important;margin:0 28px 22px!important}
+#financeiroShell .gf-finance-v3-transactions>.shell-ops-worklist,#financeiroShell .gf-finance-v3-transactions>.shell-ops-workspace{border-radius:7px!important;min-width:0!important}
+#financeiroShell .gf-finance-v3-workshop{border-radius:7px!important}
+#financeiroShell .table-responsive{overflow-x:auto}
+#financeiroShell a:focus-visible,#financeiroShell button:focus-visible,#financeiroShell input:focus-visible,#financeiroShell select:focus-visible{outline:2px solid #16833b!important;outline-offset:2px}
+@media(max-width:1050px){#financeiroShell .gf-finance-page{padding:16px 18px 0!important}#financeiroShell .gf-finance-v3-transactions{margin:0 18px 18px!important}}
+@media(max-width:760px){#financeiroShell.gf-finance-v3.shell-ops{grid-template-columns:minmax(0,1fr)!important}#financeiroShell>.gf-finance-v3-sidebar{position:relative!important;grid-column:1!important;grid-row:auto!important;width:100%!important;min-width:0!important;max-width:none!important;height:auto!important;min-height:0!important;max-height:none!important;overflow:visible!important}#financeiroShell .gf-finance-v3-main{grid-column:1!important;grid-row:auto!important}#financeiroShell .gf-finance-page{padding:14px!important}#financeiroShell .gf-finance-v3-transactions{margin:0 14px 16px!important}}

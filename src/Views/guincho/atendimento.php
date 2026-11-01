@@ -25,7 +25,7 @@ require_once __DIR__ . '/../components/vehicle_brand_badge.php';
 <link rel="stylesheet" href="<?php echo htmlspecialchars($bp); ?>/public/assets/css/pages/tow-atendimento.css">
 <div class="main-wrapper">
 <?php include __DIR__ . '/../layouts/sidebar_guincho.php'; ?>
-<main class="main-content">
+<main class="main-content"><?php include __DIR__ . '/../layouts/profile_panel_topbar.php'; ?>
 
     <header class="page-head mb-4">
         <div>

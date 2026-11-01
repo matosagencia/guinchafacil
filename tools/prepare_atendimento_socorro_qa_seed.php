@@ -84,7 +84,7 @@ const ESPECIALISTA_INICIO_LNG = -43.365498;
 // Guincho comum (assume DEPOIS da conversão) nasce a 700m da origem —
 // mesmo ponto de partida do RJ-TOW-001.
 const GUINCHO_INICIO_LAT = -22.999862;
-const GUINCHO_INICIO_LNG = -43.36489;
+const GUINCHO_INICIO_LNG = -43.36489;const QA_OFICINA_NOME = 'QA Oficina Barra Socorro';function qaSocorroEnsureOficina(): void{    $pdo = getPDO();    $stmt = $pdo->prepare('SELECT id FROM oficinas WHERE nome = ? LIMIT 1');    $stmt->execute([QA_OFICINA_NOME]);    $id = $stmt->fetchColumn();    if ($id) {        $pdo->prepare('UPDATE oficinas SET tipo = ?, ativo = 1, disponivel = 1, latitude = ?, longitude = ?, raio_atendimento_km = ? WHERE id = ?')            ->execute(['assistencia_local', ORIGEM_LAT, ORIGEM_LNG, 8, (int)$id]);        return;    }    $pdo->prepare('INSERT INTO oficinas (nome, endereco, tipo, ativo, disponivel, latitude, longitude, raio_atendimento_km) VALUES (?, ?, ?, 1, 1, ?, ?, ?)')        ->execute([QA_OFICINA_NOME, ORIGEM_ENDERECO, 'assistencia_local', ORIGEM_LAT, ORIGEM_LNG, 8]);}function qaSocorroEnsureWorkshopProvider(int $guinchoId): void{    $pdo = getPDO();    $providerId = 4;    $exists = $pdo->prepare("SELECT COUNT(*) FROM providers WHERE id = ? AND provider_type = 'WORKSHOP'");    $exists->execute([$providerId]);    if (!(int)$exists->fetchColumn()) return;    $pdo->prepare('UPDATE providers SET approval_status = ?, active = 1, legacy_guincho_id = ? WHERE id = ?')        ->execute(['APPROVED', $guinchoId, $providerId]);    $pdo->prepare('UPDATE provider_workshop_settings SET status_parceria = ?, permite_resgate_direto = 1, recebe_veiculo_patio = 1, faz_resgate_direto = 1, raio_resgate_direto_km = 8, address = ?, latitude = ?, longitude = ?, updated_at = NOW() WHERE provider_id = ?')        ->execute(['ATIVO', ORIGEM_ENDERECO, ORIGEM_LAT, ORIGEM_LNG, $providerId]);    $pdo->prepare('INSERT IGNORE INTO oficina_provider_links (oficina_id, provider_id) VALUES (?, ?)')        ->execute([3, $providerId]);}
 
 function qaSocorroHasColumn(string $table, string $column): bool
 {
@@ -201,7 +201,7 @@ function qaSocorroEnsureEspecialista(int $usuarioId, int $serviceTypeId): array
     ProviderCapability::aprovar($capabilityId, 0);
 
     return Guincho::buscarPorId((int)$guincho['id']) ?: $guincho;
-}
+}/** Mantém o prestador do cenário também no catálogo consumido pelo dispatcher de oficinas. */function qaSocorroEnsureEspecialistaDispatch(int $usuarioId): void{    $pdo = getPDO();    $servico = $pdo->prepare('SELECT id FROM servicos_especialista WHERE codigo = ? LIMIT 1');    $servico->execute(['ELECTRICAL_DIAGNOSIS']);    $servicoId = (int)$servico->fetchColumn();    if ($servicoId <= 0) {        $pdo->prepare('INSERT INTO servicos_especialista (codigo, nome, ativo) VALUES (?, ?, 1)')            ->execute(['ELECTRICAL_DIAGNOSIS', 'Diagnóstico de Pane Elétrica']);        $servicoId = (int)$pdo->lastInsertId();    } else {        $pdo->prepare('UPDATE servicos_especialista SET nome = ?, ativo = 1 WHERE id = ?')            ->execute(['Diagnóstico de Pane Elétrica', $servicoId]);    }    $stmt = $pdo->prepare('SELECT id FROM especialistas WHERE usuario_id = ? LIMIT 1');    $stmt->execute([$usuarioId]);    $especialistaId = (int)$stmt->fetchColumn();    if ($especialistaId <= 0) {        $pdo->prepare('INSERT INTO especialistas (usuario_id, nome_profissional, cpf_cnpj, documento_tipo, chave_pix, chave_pix_tipo, aprovado, disponivel, lat_atual, lng_atual, raio_atendimento_km) VALUES (?, ?, ?, ?, ?, ?, 1, 1, ?, ?, ?)')            ->execute([$usuarioId, 'QA Especialista Socorro', '44455566677', 'cpf', 'qa-socorro-especialista-chave-pix', 'email', ESPECIALISTA_INICIO_LAT, ESPECIALISTA_INICIO_LNG, 30]);        $especialistaId = (int)$pdo->lastInsertId();    } else {        $pdo->prepare('UPDATE especialistas SET aprovado = 1, disponivel = 1, lat_atual = ?, lng_atual = ?, raio_atendimento_km = ? WHERE id = ?')            ->execute([ESPECIALISTA_INICIO_LAT, ESPECIALISTA_INICIO_LNG, 30, $especialistaId]);    }    $pdo->prepare('INSERT INTO especialista_servicos (especialista_id, servico_id, habilitado) VALUES (?, ?, 1) ON DUPLICATE KEY UPDATE habilitado = 1')        ->execute([$especialistaId, $servicoId]);}
 
 /** Guincho comum de reboque — mesmo padrão do RJ-TOW-001 (reboque_aprovado=1 direto). */
 function qaSocorroEnsureGuinchoReboque(int $usuarioId): array
@@ -328,7 +328,7 @@ function qaSocorroResetPedidoParaAguardandoPagamento(array $pedido, int $service
     }
     $pdo->prepare('DELETE FROM pedido_localizacoes WHERE pedido_id = ?')->execute([(int)$pedido['id']]);
     $pdo->prepare('DELETE FROM pedido_percurso_resumos WHERE pedido_id = ?')->execute([(int)$pedido['id']]);
-    $pdo->prepare("DELETE FROM pagamentos WHERE pedido_id = ?")->execute([(int)$pedido['id']]);
+    $pdo->prepare("DELETE FROM pagamentos WHERE pedido_id = ?")->execute([(int)$pedido['id']]);    qaSocorroEnsurePriceSnapshot((int)$pedido['id']);
 
     return Pedido::buscarPorId((int)$pedido['id']) ?: $pedido;
 }
@@ -368,10 +368,10 @@ function qaSocorroCreatePedido(int $clienteId, int $veiculoId, int $serviceTypeI
 
     $pdo = getPDO();
     $pdo->prepare('UPDATE pedidos SET service_type_id = ?, attendance_mode = ? WHERE id = ?')
-        ->execute([$serviceTypeId, 'ON_SITE', (int)$pedidoId]);
+        ->execute([$serviceTypeId, 'ON_SITE', (int)$pedidoId]);    qaSocorroEnsurePriceSnapshot((int)$pedidoId);
 
     return Pedido::buscarPorId((int)$pedidoId) ?: [];
-}
+}function qaSocorroEnsurePriceSnapshot(int $pedidoId): void{    $pdo = getPDO();    $contexto = json_encode([        'service_type_id' => 8,        'service_code' => 'ELECTRICAL_DIAGNOSIS',        'valor_total' => 89.90,        'pricing_engine' => 'QA_FIXTURE',    ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR);    $hash = hash('sha256', $contexto . '|89.90');    $pdo->prepare('INSERT INTO order_price_snapshots (order_id, pricing_rule_id, pricing_version, calculation_context_json, customer_total, provider_total, platform_fee, snapshot_hash, created_at) VALUES (?, NULL, 1, ?, 89.90, 82.71, 7.19, ?, NOW()) ON DUPLICATE KEY UPDATE pricing_version = VALUES(pricing_version), calculation_context_json = VALUES(calculation_context_json), customer_total = VALUES(customer_total), provider_total = VALUES(provider_total), platform_fee = VALUES(platform_fee), snapshot_hash = VALUES(snapshot_hash)')        ->execute([$pedidoId, $contexto, $hash]);}
 
 function qaSocorroSeedInitialPoint(int $pedidoId, int $guinchoId, int $usuarioId, float $lat, float $lng): void
 {
@@ -422,9 +422,9 @@ try {
         $especialistaUsuario = qaSocorroEnsureUsuario(QA_ESPECIALISTA_EMAIL, 'guincho', 'Especialista QA Socorro', '21999993002', '10987654303');
         $guinchoUsuario = qaSocorroEnsureUsuario(QA_GUINCHO_EMAIL, 'guincho', 'Guincho QA Socorro', '21999993003', '10987654304');
 
-        $especialista = qaSocorroEnsureEspecialista((int)$especialistaUsuario['id'], (int)$tipoServico['id']);
+        $especialista = qaSocorroEnsureEspecialista((int)$especialistaUsuario['id'], (int)$tipoServico['id']);        qaSocorroEnsureEspecialistaDispatch((int)$especialistaUsuario['id']);
         $guinchoReboque = qaSocorroEnsureGuinchoReboque((int)$guinchoUsuario['id']);
-        $veiculo = qaSocorroEnsureVeiculo((int)$cliente['id']);
+        $veiculo = qaSocorroEnsureVeiculo((int)$cliente['id']);        qaSocorroEnsureOficina();        qaSocorroEnsureWorkshopProvider((int)$especialista['id']);
 
         $pedido = qaSocorroFindReusablePedido((int)$cliente['id']);
         if ($pedido) {

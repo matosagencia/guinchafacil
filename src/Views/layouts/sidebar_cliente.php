@@ -1,5 +1,5 @@
 <?php $bp = defined('BASE_PATH') ? BASE_PATH : ''; $cur = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/'; ?>
-<aside class="sidebar">
+<aside class="bo-sidebar sidebar gf-unified-sidebar gf-profile-sidebar gf-f18c-sidebar" aria-label="Navegação do cliente">    <a class="gf-profile-brand" href="<?php echo $bp; ?>/cliente/dashboard"><img src="<?php echo $bp; ?>/public/assets/img/logo-48.png" alt="GuinchaFácil" width="30" height="30"><span>Guincha<strong>Fácil</strong></span></a>    <div class="gf-profile-workspace"><span class="gf-profile-avatar"><i class="fas fa-user" aria-hidden="true"></i></span><span><strong>Área do cliente</strong><small>Workspace pessoal</small></span></div>
     <div class="sidebar-title">Principal</div>
     <a href="<?php echo $bp; ?>/cliente/dashboard"     class="sidebar-link <?php echo $cur === '/cliente/dashboard' ? 'active':''; ?>"><i class="fas fa-gauge"></i> Painel</a>
     <a href="<?php echo $bp; ?>/cliente/pedido/novo"   class="sidebar-link <?php echo strpos($cur,'pedidonovo') !== false || strpos($cur,'pedido/novo') !== false ? 'active':''; ?>"><i class="fas fa-circle-plus"></i> Pedir Socorro</a>
@@ -8,5 +8,5 @@
     <div class="sidebar-title mt-3">Conta</div>
     <a href="<?php echo $bp; ?>/cliente/veiculos"      class="sidebar-link <?php echo str_starts_with($cur, '/cliente/veiculos') ? 'active':''; ?>"><i class="fas fa-car"></i> Veículos</a>
     <a href="<?php echo $bp; ?>/cliente/oficinas"      class="sidebar-link <?php echo str_starts_with($cur, '/cliente/oficinas') ? 'active':''; ?>"><i class="fas fa-wrench"></i> Oficinas</a>
-    <a href="<?php echo $bp; ?>/cliente/perfil"        class="sidebar-link <?php echo str_starts_with($cur, '/cliente/perfil') ? 'active':''; ?>"><i class="fas fa-user-pen"></i> Meu Perfil</a>
+    <a href="<?php echo $bp; ?>/cliente/perfil"        class="sidebar-link <?php echo str_starts_with($cur, '/cliente/perfil') ? 'active':''; ?>"><i class="fas fa-user-pen"></i> Meu Perfil</a>    <div class="gf-profile-sidebar-footer"><a href="<?php echo $bp; ?>/">Voltar ao site</a></div>
 </aside>

@@ -78,6 +78,11 @@ final class TriageSessionService
             'endereco_destino' => trim((string)($entrada['endereco_destino'] ?? $destino['endereco'] ?? '')),
             'distancia_km' => self::numero($entrada['distancia_km'] ?? $entrada['distancia'] ?? null),
             'custo_estimado' => self::numero($entrada['custo_estimado'] ?? $entrada['valor_estimado'] ?? null),
+            'forma_pagamento' => in_array(
+                strtolower(trim((string)($entrada['forma_pagamento'] ?? 'online'))),
+                ['online', 'pago_na_chegada'],
+                true
+            ) ? strtolower(trim((string)($entrada['forma_pagamento'] ?? 'online'))) : 'online',
         ];
 
         require_once __DIR__ . '/../Models/Catalog/ServiceType.php';

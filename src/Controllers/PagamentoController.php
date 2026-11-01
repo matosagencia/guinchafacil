@@ -351,21 +351,21 @@ class PagamentoController extends BaseController
     /** §12.2: pré-preenchimento opcional, com titularidade obrigatória quando existe draft. */
     private function pagadorPreCotacao(): array
     {
-        $draft = $_SESSION['pre_cotacao']['pagador'] ?? null;
-        if (!is_array($draft) || !$draft) { return []; }
         $user = AuthService::getCurrentUser();
+        $draft = $_SESSION['pre_cotacao']['pagador'] ?? [];
+        if (!is_array($draft)) { $draft = []; }
         $cpfSessao = preg_replace('/\D+/', '', (string)($draft['cpf'] ?? ''));
         $cpfUsuario = preg_replace('/\D+/', '', (string)($user['cpf'] ?? $user['documento'] ?? ''));
-        if (strlen($cpfSessao) !== 11 || strlen($cpfUsuario) !== 11 || !hash_equals($cpfUsuario, $cpfSessao)) {
+        if ($cpfSessao !== '' && (strlen($cpfSessao) !== 11 || strlen($cpfUsuario) !== 11 || !hash_equals($cpfUsuario, $cpfSessao))) {
             throw new DomainException('CPF do pagador não corresponde ao cadastro autenticado.');
         }
-        $email = trim((string)($draft['email'] ?? ''));
+        $email = trim((string)($draft['email'] ?? $user['email'] ?? ''));
         if ($email !== '' && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
             throw new DomainException('E-mail do pagador inválido.');
         }
-        $nome = trim((string)($draft['nome'] ?? ''));
+        $nome = trim((string)($draft['nome'] ?? $user['nome'] ?? $user['name'] ?? ''));
         return ['first_name' => preg_split('/\s+/u', $nome)[0] ?? '',
-            'email' => $email, 'identification' => ['type' => 'CPF', 'number' => $cpfSessao]];
+            'email' => $email, 'identification' => ['type' => 'CPF', 'number' => ($cpfSessao !== '' ? $cpfSessao : $cpfUsuario)]];
     }
 
     /** §12.2: a cobrança principal é determinada exclusivamente pelo snapshot persistido. */

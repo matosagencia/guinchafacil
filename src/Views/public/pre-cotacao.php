@@ -20,7 +20,8 @@ $prefillLng = $prefillLng ?? '';
 <link rel="stylesheet" href="<?= $e($bp) ?>/public/assets/vendor/bootstrap/css/bootstrap.min.css">
 <link rel="stylesheet" href="<?= $e($bp) ?>/public/assets/vendor/fontawesome/css/all.min.css">
 <link rel="stylesheet" href="<?= $e($bp) ?>/public/assets/vendor/leaflet/leaflet.css">
-<link rel="stylesheet" href="<?= $e($bp) ?>/public/assets/css/pages/pre-cotacao.css?v=20261016-5">
+<link rel="stylesheet" href="<?= $e($bp) ?>/public/assets/css/pages/pre-cotacao.css?v=20261101-1">
+<link rel="stylesheet" href="<?= $e($bp) ?>/public/assets/css/gf-layout.css?v=20261101-1">
 <script<?= $nonce ?> src="<?= $e($bp) ?>/public/assets/vendor/leaflet/leaflet.js"></script>
 </head>
 <body class="gf-preq-body">
@@ -31,6 +32,7 @@ $prefillLng = $prefillLng ?? '';
         <a href="<?= $e($bp) ?>/guincho/niteroi-rj"><i class="fas fa-map-marker-alt"></i> Niterói, RJ</a>
     </div>
 </div>
+<header class="gf-site-header"><div class="gf-container"><a class="gf-brand" href="<?= $e($bp) ?>/">Guincha<span>Fácil</span>.</a><nav class="gf-nav" aria-label="Navegação principal"><a href="<?= $e($bp) ?>/pre-cotacao" class="is-active">Como funciona</a><a href="<?= $e($bp) ?>/guincho/niteroi-rj">Onde atendemos</a><a href="<?= $e($bp) ?>/parceiros">Seja um parceiro</a></nav><a class="gf-btn gf-btn--primary gf-btn--sm" href="<?= $e($bp) ?>/pre-cotacao">Pedir guincho</a></div></header>
 
 <main class="gf-preq">
     <div class="gf-container">
@@ -235,7 +237,7 @@ $prefillLng = $prefillLng ?? '';
                             <span class="gf-compare__badge">B</span>
                             <strong>Rebocar</strong>
                             <span class="gf-compare__price" data-price="reboque">R$ --</span>
-                            <span class="gf-compare__hint">Levamos o veículo até o destino que você informou.</span>
+                            <span class="gf-compare__hint">Você paga esse valor apenas para acionar o reboque até você. Deseja rebocar? Se quiser, na próxima fase informe o destino e passamos o cálculo completo.</span>
                         </button>
                     </div>
 
@@ -299,7 +301,9 @@ $prefillLng = $prefillLng ?? '';
                 <p>Confira o valor antes de se cadastrar.</p>
             </div>
         </div>
-        <div class="gf-summary" style="max-width:520px;margin:0 auto;">
+        <div class="gf-preq__grid gf-preq__grid--result">
+        <section class="gf-result-form">
+        <div class="gf-summary gf-summary--result-form">
             <div class="gf-summary__title">
                 <h3><?= $e((string)($cotacao['service_code'] ?? 'TOW_CAR')) ?></h3>
                 <span><?= number_format((float)$cotacao['distancia_km'], 1, ',', '.') ?> km</span>
@@ -317,6 +321,12 @@ $prefillLng = $prefillLng ?? '';
                     <label style="display:block;margin:7px 0;font-size:13px;cursor:pointer;">
                         <input type="radio" name="forma_pagamento" value="online" checked>
                         Pagar online agora <small>(cartão, Pix ou boleto)</small>
+                        <span class="gf-payment-brands" aria-label="Bandeiras e meios aceitos">
+                            <svg viewBox="0 0 54 22" role="img" aria-label="Visa"><rect width="54" height="22" rx="4" fill="#1434CB"/><text x="27" y="15" text-anchor="middle" fill="#fff" font-size="11" font-family="Arial" font-weight="700">VISA</text></svg>
+                            <svg viewBox="0 0 54 22" role="img" aria-label="Mastercard"><rect width="54" height="22" rx="4" fill="#111827"/><circle cx="23" cy="11" r="6" fill="#EB001B"/><circle cx="31" cy="11" r="6" fill="#F79E1B" fill-opacity=".95"/><text x="27" y="19" text-anchor="middle" fill="#fff" font-size="4" font-family="Arial">MASTERCARD</text></svg>
+                            <svg viewBox="0 0 54 22" role="img" aria-label="Pix"><rect width="54" height="22" rx="4" fill="#e8f6ec"/><path d="M11 11 17 5l6 6-6 6-6-6Zm12 0 6-6 6 6-6 6-6-6Z" fill="#0d5a2e"/><text x="42" y="14" fill="#0d5a2e" font-size="7" font-family="Arial" font-weight="700">PIX</text></svg>
+                            <svg viewBox="0 0 54 22" role="img" aria-label="Boleto"><rect width="54" height="22" rx="4" fill="#f3f4f6"/><path d="M10 6v10M14 6v10M18 6v10M23 6v10M28 6v10M34 6v10M39 6v10M44 6v10" stroke="#374151" stroke-width="1.4"/><text x="27" y="20" text-anchor="middle" fill="#374151" font-size="4" font-family="Arial">BOLETO</text></svg>
+                        </span>
                     </label>
                     <label style="display:block;margin:7px 0;font-size:13px;cursor:pointer;">
                         <input type="radio" name="forma_pagamento" value="pago_na_chegada">
@@ -332,12 +342,35 @@ $prefillLng = $prefillLng ?? '';
                 Ir direto para o cadastro
             </a>
         </div>
+        </section>
+        <aside class="gf-aside gf-aside--result">
+            <div class="gf-summary gf-summary--result-side">
+                <div class="gf-summary__title">
+                    <h3>Sua solicitaÃ§Ã£o</h3>
+                    <i class="fas fa-shield-halved" style="color:#0d5a2e"></i>
+                </div>
+                <div class="gf-summary__path">
+                    <span><i></i> <em><?= $e((string)($cotacao['endereco_origem'] ?? 'Ponto de retirada')) ?></em></span>
+                    <span><i></i> <em><?= $e((string)($cotacao['endereco_destino'] ?? 'Destino informado')) ?></em></span>
+                </div>
+                <div class="gf-summary__total">
+                    <span>Total<small>VÃ¡lida por 15 minutos</small></span>
+                    <strong>R$ <?= number_format((float)$cotacao['valor'], 2, ',', '.') ?></strong>
+                </div>
+            </div>
+            <div class="gf-assurance">
+                <i class="fas fa-lock"></i>
+                <p>Sem cobranÃ§a nesta etapa.<br><strong>VocÃª decide antes de continuar.</strong></p>
+            </div>
+        </aside>
+        </div>
 
     <?php endif; ?>
 
     </div>
 </main>
-<script<?= $nonce ?> src="<?= $e($bp) ?>/public/assets/js/pre-cotacao-flow.js?v=20261016-7"></script>
-<script<?= $nonce ?> src="<?= $e($bp) ?>/public/assets/js/pre-cotacao-map.js?v=20261016-5"></script>
+<footer class="gf-site-footer"><div class="gf-container"><div class="gf-footer-bottom"><span>&copy; <?= date('Y') ?> GuinchaFácil. Todos os direitos reservados.</span><span>Assistência 24 horas · Niterói, RJ</span></div></div></footer>
+<script<?= $nonce ?> src="<?= $e($bp) ?>/public/assets/js/pre-cotacao-flow.js?v=20261101-2"></script>
+<script<?= $nonce ?> src="<?= $e($bp) ?>/public/assets/js/pre-cotacao-map.js?v=20261030-6"></script>
 </body>
 </html>

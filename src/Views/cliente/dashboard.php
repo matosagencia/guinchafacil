@@ -15,11 +15,11 @@ function cliente_saudacao(): string
 <link rel="stylesheet" href="<?php echo $bp; ?>/public/assets/css/components/communications.css">
 <link rel="stylesheet" href="<?php echo $bp; ?>/public/assets/css/components/dashboard.css">
 <link rel="stylesheet" href="<?php echo $bp; ?>/public/assets/css/pages/client-dashboard.css">
-<link rel="stylesheet" href="<?php echo htmlspecialchars($bp, ENT_QUOTES, 'UTF-8'); ?>/public/assets/css/pages/lovable-backoffice-cliente.css?v=20261016">
+<link rel="stylesheet" href="<?php echo htmlspecialchars($bp, ENT_QUOTES, 'UTF-8'); ?>/public/assets/css/pages/lovable-backoffice-cliente.css?v=20261016"><script>document.body.classList.add('gf-unified-dashboard');</script>
 
-<div class="main-wrapper">
+<div class="main-wrapper gf-unified-shell">
 <?php include __DIR__ . '/../layouts/sidebar_cliente.php'; ?>
-<main class="main-content">
+<main class="main-content gf-unified-main">    <header class="gf-panel-topbar"><div class="gf-panel-breadcrumb"><span>Painel <i class="fas fa-chevron-right" aria-hidden="true"></i> <strong>Cliente</strong></span></div><div class="gf-panel-actions"><span><?= htmlspecialchars($primeiroNome) ?></span><a href="<?= htmlspecialchars($bp) ?>/logout" data-confirm-logout><i class="fas fa-right-from-bracket" aria-hidden="true"></i> Sair</a></div></header>
     <div class="app-dashboard">
         <header class="page-head mb-4">
             <div>

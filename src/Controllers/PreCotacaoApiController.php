@@ -203,9 +203,12 @@ final class PreCotacaoApiController extends BaseController
         }
 
         $temGuincho = false;
+        $oficinas = [];
         try {
             require_once __DIR__ . '/../Services/GuinchoDisponibilidade.php';
             $temGuincho = (bool)GuinchoDisponibilidade::existeNoRaio($lat, $lng);
+            require_once __DIR__ . '/../Services/DecisaoAtendimentoService.php';
+            $oficinas = (new DecisaoAtendimentoService())->oficinasProximasPublico($lat, $lng);
         } catch (Throwable $e) {
             Logger::exception('PreCotacaoApiController', 'cobertura', 'disponibilidade', $e, ['phase' => 'COBERTURA-FAIL']);
         }
@@ -214,7 +217,15 @@ final class PreCotacaoApiController extends BaseController
             'ok' => true,
             'data' => [
                 'tem_guincho' => $temGuincho,
-                'qtd_oficinas' => 0,
+                'tem_oficina' => count($oficinas) > 0,
+                'qtd_oficinas' => count($oficinas),
+                'oficinas' => array_map(static function (array $oficina): array {
+                    return [
+                        'id' => (int)($oficina['provider_id'] ?? $oficina['id'] ?? 0),
+                        'nome' => (string)($oficina['nome'] ?? 'Oficina parceira'),
+                        'distancia_km' => (float)($oficina['distancia_km'] ?? 0),
+                    ];
+                }, $oficinas),
             ],
         ], JSON_UNESCAPED_UNICODE);
     }
@@ -231,7 +242,13 @@ final class PreCotacaoApiController extends BaseController
             require_once __DIR__ . '/../Models/Catalog/ServiceType.php';
             foreach (\ServiceType::listarAtivos() as $tipo) {
                 $modo = (string)($tipo['attendance_mode'] ?? '');
-                $slug = strtolower((string)($tipo['code'] ?? ''));
+                // O catálogo antigo nem sempre possui public_slug. Nesses
+                // casos, o code ativo é o identificador público estável e é
+                // resolvido pelo mesmo fallback do ServiceType.
+                $slug = strtolower(trim((string)($tipo['public_slug'] ?? '')));
+                if ($slug === '') {
+                    $slug = strtolower(trim((string)($tipo['code'] ?? '')));
+                }
                 if ($slug === '') {
                     continue;
                 }

@@ -54,6 +54,22 @@
     function $(id) { return document.getElementById(id); }
     function $$(sel, root) { return (root || document).querySelectorAll(sel); }
 
+    function renderCotacaoResumo() {
+        var valorEl = $('gfCotacaoValor');
+        var modalidadeEl = $('gfCotacaoModalidade');
+        var detalhesEl = $('gfCotacaoDetalhes');
+        if (!valorEl) return;
+        var valor = Number(STATE.valorCotado);
+        valorEl.textContent = Number.isFinite(valor) && valor > 0
+            ? valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
+            : 'R$ --';
+        var reboque = STATE.modo === 'reboque' || STATE.modo === 'levar_carro';
+        if (modalidadeEl) modalidadeEl.textContent = reboque ? 'Reboque para o destino escolhido' : 'Assistência no local';
+        if (detalhesEl) detalhesEl.textContent = reboque
+            ? 'Estimativa do transporte do veículo, sujeita à confirmação do destino.'
+            : 'Estimativa do atendimento no local, sujeita à avaliação do especialista.';
+    }
+
     function showStage(name) {
         if (STAGES.indexOf(name) === -1) return;
 
@@ -82,6 +98,15 @@
         document.body.classList.add('stage-' + name);
 
         currentStage = name;
+
+        var stageIndex = STAGES.indexOf(name) + 1;
+        document.querySelectorAll('[data-step-indicator], .gf-steps li').forEach(function (indicator, position) {
+            var index = Number(indicator.getAttribute('data-step-indicator')) || (position + 1);
+            indicator.classList.toggle('is-current', index === stageIndex);
+            indicator.classList.toggle('is-done', index < stageIndex);
+        });
+
+        if (name === 'cotacao') renderCotacaoResumo();
 
         log('stage ->', name, '(prev:', prev + ')');
 
@@ -907,10 +932,7 @@
                 '[data-ap-map]'
             );
 
-        if (
-            mapEl &&
-            !mapEl.__gfMapBound
-        ) {
+        if (mapEl) {
             wrap.setAttribute(
                 'data-ap-init-lat',
                 STATE.endereco.lat
@@ -921,14 +943,22 @@
                 STATE.endereco.lng
             );
 
-            if (
+            var picker = wrap.__gfAddressPicker;
+            if (picker && picker.map) {
+                // The destination picker is created while its stage is hidden.
+                // Leaflet needs a size recalculation after the stage becomes visible.
+                setTimeout(function () {
+                    picker.map.invalidateSize();
+                    picker.map.setView([
+                        Number(STATE.endereco.lat),
+                        Number(STATE.endereco.lng)
+                    ], 15);
+                }, 0);
+            } else if (
                 window.gfAddressPicker &&
                 window.gfAddressPicker.boot
             ) {
-                wrap.removeAttribute(
-                    '__gfApBooted'
-                );
-
+                delete wrap.__gfApBooted;
                 window.gfAddressPicker.boot();
             }
         }

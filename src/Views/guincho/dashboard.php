@@ -53,9 +53,9 @@ function tow_saudacao(): string
      .tow-* sem CSS real definido. -->
 <link rel="stylesheet" href="<?php echo $bp; ?>/public/assets/css/pages/tow-dashboard.css">
 
-<div class="main-wrapper">
+<script>document.body.classList.add('gf-unified-dashboard');</script><div class="main-wrapper gf-unified-shell">
 <?php include __DIR__ . '/../layouts/sidebar_guincho.php'; ?>
-<main class="main-content">
+<main class="main-content gf-unified-main">    <header class="gf-panel-topbar"><div class="gf-panel-breadcrumb"><span>Painel <i class="fas fa-chevron-right" aria-hidden="true"></i> <strong>Guincho</strong></span></div><div class="gf-panel-actions"><span><?= htmlspecialchars($operadorNome) ?></span><a href="<?= htmlspecialchars($bp) ?>/logout" data-confirm-logout><i class="fas fa-right-from-bracket" aria-hidden="true"></i> Sair</a></div></header>
     <div class="app-dashboard">
         <header class="page-head mb-4">
             <div>

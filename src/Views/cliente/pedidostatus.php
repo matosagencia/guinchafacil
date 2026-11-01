@@ -6,6 +6,7 @@ $bp = defined('BASE_PATH') ? BASE_PATH : '';
 $pedido = $pedido ?? [];
 $csrfToken = $csrfToken ?? (class_exists('AuthService') ? AuthService::gerarCsrfToken() : '');
 $flash = $flash ?? null;
+$csrfToken = (string)$csrfToken;
 
 $statusLabels = [
     'aguardando_pagamento'         => ['Aguardando pagamento',       'warning'],
@@ -35,6 +36,7 @@ $st = (string)($pedido['status'] ?? '');
 include __DIR__ . '/../layouts/header.php';
 ?>
 <div class="main-wrapper">
+    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken, ENT_QUOTES, 'UTF-8') ?>" data-role="pedido-csrf">
 <?php include __DIR__ . '/../layouts/sidebar_cliente.php'; ?>
 <main class="main-content" style="padding:1.5rem">
 
@@ -116,7 +118,7 @@ include __DIR__ . '/../layouts/header.php';
                         <i class="fas fa-list me-1"></i> Meus pedidos
                     </a>
                     <?php if (in_array($st, ['aguardando_pagamento','aguardando_guincho','aguardando_oficina'], true)): ?>
-                        <button type="button" class="btn btn-outline-danger" id="btnCancelarPedido">
+                        <button type="button" class="btn btn-outline-danger" id="btnCancelarPedido" data-pedido-id="<?= (int)($pedido['id'] ?? 0) ?>">
                             <i class="fas fa-times me-1"></i> Cancelar pedido
                         </button>
                     <?php endif; ?>
@@ -134,3 +136,41 @@ include __DIR__ . '/../layouts/header.php';
 </main>
 </div>
 <?php include __DIR__ . '/../layouts/footer.php'; ?>
+<script<?= function_exists('csp_script_nonce_attr') ? csp_script_nonce_attr() : '' ?>>
+(function () {
+    const button = document.getElementById('btnCancelarPedido');
+    if (!button) return;
+    const csrf = document.querySelector('[data-role="pedido-csrf"]')?.value || '';
+    const base = <?= json_encode($bp, JSON_UNESCAPED_SLASHES) ?>;
+    const pedidoId = button.dataset.pedidoId;
+    button.addEventListener('click', async function () {
+        if (button.disabled) return;
+        button.disabled = true;
+        try {
+            const previewResponse = await fetch(base + '/cliente/cancelamento-preview/' + pedidoId, {
+                credentials: 'same-origin', headers: { 'Accept': 'application/json' }
+            });
+            const preview = await previewResponse.json();
+            if (!previewResponse.ok || !preview.ok) throw new Error(preview.erro || 'Não foi possível consultar o cancelamento.');
+            const taxa = Number(preview.taxa || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+            const aviso = preview.taxa > 0 ? '\nTaxa prevista: ' + taxa : '\nSem taxa de cancelamento.';
+            if (!window.confirm('Cancelar o pedido #' + pedidoId + '?' + aviso)) return;
+            const motivo = window.prompt('Informe o motivo do cancelamento:');
+            if (!motivo || !motivo.trim()) return;
+            const body = new URLSearchParams({ csrf_token: csrf, motivo: motivo.trim(), snapshot_id: String(preview.snapshot_id || '') });
+            const response = await fetch(base + '/cliente/pedido/cancelar/' + pedidoId, {
+                method: 'POST', credentials: 'same-origin',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'Accept': 'application/json' },
+                body
+            });
+            const result = await response.json();
+            if (!response.ok || !result.ok) throw new Error(result.erro || 'Não foi possível cancelar o pedido.');
+            window.location.reload();
+        } catch (error) {
+            window.alert(error.message || 'Não foi possível cancelar o pedido.');
+        } finally {
+            button.disabled = false;
+        }
+    });
+}());
+</script>

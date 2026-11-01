@@ -1,0 +1,61 @@
+/* Fase 18C — Central operacional. Escopo limitado à página, sem mexer no backend. */
+body.admin:has(.gf-f18c-root){background:#f4f6f8;color:#0f172a}
+body.admin:has(.gf-f18c-root)>nav.gf-order-crumb{display:none!important}
+body.admin .gf-f18c-root{--bo-sidebar-width:220px;display:grid;grid-template-columns:var(--bo-sidebar-width) minmax(0,1fr);min-height:calc(100vh - 0px);width:100%;max-width:none;background:#f4f6f8;color:#0f172a;font-family:Manrope,Inter,system-ui,sans-serif}
+body.admin .gf-f18c-root.gf-f18c-collapsed{--bo-sidebar-width:68px}
+body.admin .gf-f18c-root .gf-f18c-sidebar{display:flex;flex-direction:column;position:sticky;top:0;align-self:start;height:100vh;overflow-y:auto;overflow-x:hidden;width:auto;min-width:0;padding:18px 8px;background:#101417;color:#e5e7eb;border-right:1px solid #222b28}
+body.admin .gf-f18c-root .gf-f18c-brand{font-size:22px;font-weight:800;white-space:nowrap;text-decoration:none;color:#fff;margin:6px 12px 22px}
+body.admin .gf-f18c-root .gf-f18c-brand span,body.admin .gf-f18c-root .gf-f18c-brand i{color:#2fb34a;font-style:normal}
+body.admin .gf-f18c-root .gf-f18c-workspace{display:flex;align-items:center;gap:9px;padding:10px 12px 23px;color:#fff;font-size:12px}
+body.admin .gf-f18c-root .gf-f18c-workspace small{display:block;color:#9ba6ad;font-size:10px}
+body.admin .gf-f18c-root .gf-f18c-avatar{display:grid;place-items:center;border-radius:7px;width:32px;height:32px;flex:none;background:#e8f7ec;color:#28a647}
+body.admin .gf-f18c-root .gf-f18c-sidebar-footer{margin-top:auto;padding:20px 12px;font-size:12px}
+body.admin .gf-f18c-root .gf-f18c-sidebar-footer a{color:#b6c3cd}
+body.admin .gf-f18c-root.gf-f18c-collapsed .gf-f18c-brand{font-size:0;margin-left:9px}
+body.admin .gf-f18c-root.gf-f18c-collapsed .gf-f18c-brand:before{content:'GF';font-size:17px}
+body.admin .gf-f18c-root.gf-f18c-collapsed .gf-f18c-brand span,body.admin .gf-f18c-root.gf-f18c-collapsed .gf-f18c-workspace>span:last-child,body.admin .gf-f18c-root.gf-f18c-collapsed .gf-f18c-sidebar-footer{display:none}
+body.admin .gf-f18c-root .bo-body{min-width:0;display:flex;flex-direction:column;background:#f4f6f8}
+body.admin .gf-f18c-root .bo-header{height:72px;min-height:72px;display:flex;align-items:center;justify-content:space-between;padding:0 24px;background:#fff;color:#0f172a;border-bottom:1px solid #dfe6ec;box-shadow:none}
+body.admin .gf-f18c-root .gf-f18c-breadcrumb{display:flex;gap:16px;align-items:center;font-size:12px;color:#64748b}
+body.admin .gf-f18c-root .gf-f18c-breadcrumb strong{color:#0f172a}
+body.admin .gf-f18c-root .gf-f18c-breadcrumb button{width:36px;height:36px;border:0;background:transparent;color:#334155;border-radius:7px;cursor:pointer}
+body.admin .gf-f18c-root .gf-f18c-breadcrumb i{font-size:10px;margin:0 6px}
+body.admin .gf-f18c-root .gf-f18c-header-actions{display:flex;gap:20px;align-items:center;font-size:12px;color:#334155}
+body.admin .gf-f18c-root .gf-f18c-header-actions a{color:#334155}
+body.admin .gf-f18c-root .bo-content{display:block;min-width:0;flex:1;padding-bottom:32px;background:#f4f6f8}
+body.admin .gf-f18c-root .ops-topbar{margin:0!important;padding:13px 20px!important;background:#f4f6f8!important;border-color:#e2e8f0!important}
+body.admin .gf-f18c-root .ops-summary.bo-metrics{margin:16px 20px!important}
+body.admin .gf-f18c-root .bo-operation-grid.shell-ops{display:grid!important;grid-template-columns:310px minmax(0,1fr)!important;width:auto!important;max-width:none!important;margin:16px 20px 26px!important;gap:0!important;background:#fff!important;border:1px solid #dfe6ec!important}
+body.admin .gf-f18c-root .bo-orders,body.admin .gf-f18c-root .bo-incident{background:#fff!important;color:#0f172a!important;min-width:0!important}
+body.admin .gf-f18c-root .bo-incident :is(h1,h2,h3,h4,strong,p,small,span,li,label){color:inherit}
+body.admin .gf-f18c-root .bo-incident :is(.ops-detail,.ops-detail-card,.ops-workspace-panel){background:#fff;color:#0f172a}
+body.admin .gf-f18c-root .bo-incident :is(input,select,textarea){color:#0f172a;background:#fff}
+body.admin .gf-f18c-root :is(a,button,input,select,textarea):focus-visible{outline:2px solid #2fb34a;outline-offset:2px}
+@media(max-width:1120px){body.admin .gf-f18c-root .bo-operation-grid.shell-ops{grid-template-columns:280px minmax(0,1fr)!important}body.admin .gf-f18c-root .ops-summary.bo-metrics{grid-template-columns:repeat(4,minmax(0,1fr))!important}}
+@media(max-width:800px){body.admin .gf-f18c-root{grid-template-columns:1fr}body.admin .gf-f18c-root .gf-f18c-sidebar{position:relative;height:auto;max-height:240px}body.admin .gf-f18c-root .bo-operation-grid.shell-ops{display:block!important;margin:12px!important}body.admin .gf-f18c-root .ops-summary.bo-metrics{grid-template-columns:repeat(2,minmax(0,1fr))!important;margin:12px!important}body.admin .gf-f18c-root .bo-header{padding:0 12px}body.admin .gf-f18c-root .gf-f18c-header-actions .gf-f18c-user{display:none}}
+
+/* Fase 18D — correcoes restritas a /admin/central; sem mudar a logica operacional. */
+/* O header legado permanece no DOM, mas nao deve reservar faixa superior. */
+html:has(body.admin .gf-f18c-root),
+body.admin:has(.gf-f18c-root) {
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+  scroll-padding-top: 0 !important;
+}
+body.admin .gf-f18c-root {
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+}
+/* Oculta apenas o indicador visual de scroll; preserva roda e teclado. */
+@media (min-width: 801px) {
+  body.admin .gf-f18c-root .gf-f18c-sidebar {
+    overflow-y: auto !important;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  body.admin .gf-f18c-root .gf-f18c-sidebar::-webkit-scrollbar {
+    width: 0 !important;
+    height: 0 !important;
+    display: none !important;
+  }
+}

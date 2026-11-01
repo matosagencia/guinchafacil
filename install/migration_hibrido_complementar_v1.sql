@@ -27,25 +27,7 @@
 -- socorro no local para o cálculo do crédito de conversão (antes uma query
 -- ambígua em `pagamentos` filtrando só por status='aprovado').
 
-ALTER TABLE `pedidos`
-    MODIFY COLUMN `status` ENUM(
-        'aguardando_pagamento',
-        'aguardando_guincho',
-        'a_caminho',
-        'no_local',
-        'em_reboque',
-        'concluido',
-        'cancelado',
-        'diagnostico_iniciado',
-        'diagnostico_concluido',
-        'autorizacao_servico_pendente',
-        'em_execucao_servico',
-        'teste_final',
-        'conversao_reboque_pendente',
-        'conversao_aprovada_cliente',
-        'preparacao_veiculo',
-        'aguardando_pagamento_reboque_hibrido'
-    ) NOT NULL DEFAULT 'aguardando_pagamento';
+-- Adiciona somente o valor ausente, preservando estados já existentes e a-- ordem atual do enum. A segunda execução vira um SELECT inofensivo.SET @has_hibrido_status = (    SELECT COUNT(*) FROM information_schema.COLUMNS    WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'pedidos'      AND COLUMN_NAME = 'status'      AND COLUMN_TYPE LIKE '%aguardando_pagamento_reboque_hibrido%');SET @sql_hibrido_status = IF(    @has_hibrido_status > 0,    'SELECT ''SKIP: status hibrido ja existe'' AS migration_status',    'ALTER TABLE `pedidos` MODIFY COLUMN `status` ENUM(''aguardando_pagamento'',''aguardando_guincho'',''a_caminho'',''no_local'',''em_reboque'',''concluido'',''cancelado'',''diagnostico_iniciado'',''diagnostico_concluido'',''autorizacao_servico_pendente'',''em_execucao_servico'',''teste_final'',''conversao_reboque_pendente'',''conversao_aprovada_cliente'',''preparacao_veiculo'',''aguardando_pagamento_orcamento'',''aguardando_pagamento_reboque_hibrido'') NOT NULL DEFAULT ''aguardando_pagamento''');PREPARE stmt_hibrido_status FROM @sql_hibrido_status;EXECUTE stmt_hibrido_status;DEALLOCATE PREPARE stmt_hibrido_status;
 
 CREATE TABLE IF NOT EXISTS pagamentos_arquivados (
     id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,

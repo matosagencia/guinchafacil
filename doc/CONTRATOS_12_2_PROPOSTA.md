@@ -1,0 +1,7 @@
+# §12.2 — Pagador do registro e integridade do checkout (proposta ao Dono)
+
+Fonte: sessão `$_SESSION['pre_cotacao']['pagador']`, preenchida pela Faixa B. Nos GETs do checkout principal e complementar, o backend valida a correspondência entre CPF da sessão e do usuário autenticado e disponibiliza `payer.first_name`, `payer.email` e `payer.identification` para o Brick. Sem sessão, não pré-preenche. Divergência/ausência do CPF autenticado quando há draft interrompe com erro.
+
+No POST Mercado Pago principal, o total deriva de `order_price_snapshots.customer_total` e deve ser idêntico a `pedidos.custo_estimado`; snapshots ausentes, inválidos ou divergentes bloqueiam pagamento, antes do registro local e da requisição ao gateway. O mesmo POST revalida a identidade do pagador; não confia na identidade vinda do navegador quando há draft. Na cobrança complementar, mantém-se `SupplementalChargeService::buscarContextoPorPagamento()` como fonte de `amount`, pois corresponde somente aos adicionais, com validação da identidade e da titularidade.
+
+**Pendências antes da homologação:** confirmar fonte oficial do CPF autenticado (`AuthService::getCurrentUser()` com `cpf`/`documento`); testar comportamento real do Mercado Pago Payment Brick para `initialization.payer`; validar autenticação e todos os endpoints legados de checkout; testar sessão ausente, divergência, snapshot ausente, total divergente e cobrança complementar. O §23 exige snapshot único via `PrecificacaoService`; não habilitar cobrança sobre pedido sem snapshot.

@@ -1,0 +1,38 @@
+/* GuinchaFacil F18E.2 - bridge de apresentacao escopado ao hub Operacao. */
+/* Esta folha nao altera eventos, forms, IDs ou APIs. */
+@media (min-width: 769px) {
+  body.admin:has(#pedShell, #despachoShell, #alertasShell, #ocShell) { --gf18e2-side:220px; margin:0!important; padding:0!important; background:#f4f6f8!important; color:#0f172a; }
+  body.admin:has(#pedShell, #despachoShell, #alertasShell, #ocShell)>nav.gf-order-crumb,
+  body.admin:has(#pedShell, #despachoShell, #alertasShell, #ocShell)>header { display:none!important; }
+  body.admin:has(#pedShell, #despachoShell, #alertasShell, #ocShell) .shell-ops { width:calc(100% - var(--gf18e2-side));margin-left:var(--gf18e2-side)!important; grid-template-columns:minmax(0,1fr)!important; min-height:calc(100vh - 168px); max-width:none!important; background:#f4f6f8!important; }
+  body.admin:has(#pedShell, #despachoShell, #alertasShell, #ocShell) .shell-ops-sidebar { position:fixed!important;top:0!important;bottom:0!important;left:0!important;width:var(--gf18e2-side)!important;max-width:var(--gf18e2-side)!important;height:100dvh!important;z-index:100!important;overflow-y:auto!important;overflow-x:hidden!important; background:#101417!important;grid-column:auto!important; }
+  body.admin:has(#pedShell, #despachoShell, #alertasShell, #ocShell) .shell-ops-sidebar {scrollbar-width:none!important;-ms-overflow-style:none!important}
+  body.admin:has(#pedShell, #despachoShell, #alertasShell, #ocShell) .shell-ops-sidebar::-webkit-scrollbar{display:none!important;width:0!important}
+  body.admin:has(#pedShell, #despachoShell, #alertasShell, #ocShell)>.ops-topbar,
+  body.admin:has(#pedShell, #despachoShell, #alertasShell, #ocShell)>.ops-summary,
+  body.admin:has(#pedShell, #despachoShell, #alertasShell, #ocShell)>.gf18e-tabs-host,
+  body.admin:has(#pedShell, #despachoShell, #alertasShell, #ocShell)>.alert {margin-left:var(--gf18e2-side)!important;}
+  body.admin:has(#pedShell, #despachoShell, #alertasShell, #ocShell)>.ops-topbar{height:72px!important;display:flex;align-items:center;padding:0 20px!important;background:#fff!important;border-bottom:1px solid #e2e8f0!important;color:#0f172a!important}
+  body.admin:has(#pedShell, #despachoShell, #alertasShell, #ocShell)>.ops-summary{margin-top:0!important;margin-right:0!important;margin-bottom:0!important;background:#fff!important;border-color:#e2e8f0!important}
+  body.admin:has(#pedShell, #despachoShell, #alertasShell, #ocShell)>.gf18e-tabs-host{padding:0 16px!important;background:#fff!important;border-bottom:1px solid #e2e8f0!important}
+  body.admin:has(#pedShell, #despachoShell, #alertasShell, #ocShell) .shell-ops-worklist{grid-column:1!important;min-width:0!important;background:#fff!important;color:#0f172a!important;border-right:1px solid #e2e8f0!important}
+  body.admin:has(#pedShell, #despachoShell, #alertasShell, #ocShell) .shell-ops-workspace{min-width:0!important;background:#f4f6f8!important;color:#0f172a!important}
+  body.admin:has(#despachoShell, #alertasShell, #ocShell) .shell-ops{grid-template-columns:310px minmax(0,1fr)!important}
+  body.admin:has(#pedShell) .gf-orders-main{grid-column:1!important;min-width:0;background:#f4f6f8!important;color:#0f172a!important}
+  body.admin:has(#despachoShell, #alertasShell, #ocShell) .ops-worklist-header,
+  body.admin:has(#despachoShell, #alertasShell, #ocShell) .ops-worklist-search{background:#fff!important;color:#0f172a!important;border-color:#e2e8f0!important}
+  body.admin:has(#despachoShell, #alertasShell, #ocShell) .ops-worklist-header h2,
+  body.admin:has(#despachoShell, #alertasShell, #ocShell) .ops-worklist-header p{color:#0f172a!important}
+  body.admin:has(#despachoShell, #alertasShell, #ocShell) .ops-worklist-results{background:#fff!important}
+  body.admin:has(#despachoShell, #alertasShell, #ocShell) .ops-worklist-results a{color:#0f172a}
+  body.admin:has(#pedShell, #despachoShell, #alertasShell, #ocShell) .ops-order-facts{background:#fff!important;color:#0f172a!important;border-color:#e2e8f0!important}
+  body.admin:has(#pedShell, #despachoShell, #alertasShell, #ocShell) .ops-order-fact{border-color:#e2e8f0!important}
+  body.admin:has(#pedShell, #despachoShell, #alertasShell, #ocShell) .ops-order-fact__label{color:#64748b!important}
+  body.admin:has(#pedShell, #despachoShell, #alertasShell, #ocShell) .ops-order-fact__value{color:#0f172a!important}
+}
+@media (max-width:768px){
+  body.admin:has(#pedShell, #despachoShell, #alertasShell, #ocShell){margin:0!important;padding:0!important}
+  body.admin:has(#pedShell, #despachoShell, #alertasShell, #ocShell)>nav.gf-order-crumb{display:none!important}
+  body.admin:has(#pedShell, #despachoShell, #alertasShell, #ocShell) .shell-ops-sidebar{scrollbar-width:none!important}
+  body.admin:has(#pedShell, #despachoShell, #alertasShell, #ocShell) .shell-ops-sidebar::-webkit-scrollbar{display:none!important}
+}

@@ -1,0 +1,6 @@
+/* Navegação secundária fiel aos tons, alturas e linhas da referência Lovable. */
+.gf18e-operacao-tabs{display:flex;align-items:center;gap:6px;flex-wrap:wrap;padding:10px 16px;background:#fff;border:1px solid #e2e8f0;border-radius:6px;margin:0 0 14px;font-family:Manrope,Arial,sans-serif}
+.gf18e-operacao-tab{font-size:12px;font-weight:650;color:#526374;text-decoration:none;padding:8px 12px;border-radius:5px;white-space:nowrap}
+.gf18e-operacao-tab:hover,.gf18e-operacao-tab:focus-visible{background:#e8f7ec;color:#177a32;outline-offset:2px}
+.gf18e-operacao-tab.is-active{background:#e8f7ec;color:#22833c;border-left:3px solid #2fb34a}
+@media(max-width:500px){.gf18e-operacao-tabs{overflow-x:auto;flex-wrap:nowrap;scrollbar-width:thin}}

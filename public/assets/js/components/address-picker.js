@@ -290,7 +290,7 @@
         Array.prototype.forEach.call(nodes, function (n) {
             if (n.__gfApBooted) return;
             n.__gfApBooted = true;
-            new Picker(n);
+            n.__gfAddressPicker = new Picker(n);
         });
     }
 

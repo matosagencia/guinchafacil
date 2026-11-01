@@ -1,0 +1,19 @@
+/* Fase 18E.6 — detalhe de pedido. Somente apresentação; modais seguem CSS próprio. */
+body.admin:has(.gf-order-detail) { margin:0 !important; padding-top:0 !important; background:#f3f5f7 !important; color:#102036; overflow-x:hidden; }
+body.admin:has(.gf-order-detail) > header,body.admin:has(.gf-order-detail) > .navbar,body.admin:has(.gf-order-detail) > .site-header,body.admin:has(.gf-order-detail) > .gf-header { display:none !important; }
+body.admin .gf-order-detail { display:grid !important; grid-template-columns:176px minmax(0,1fr) !important; min-height:100vh; gap:0 !important; margin:0 !important; padding:0 !important; width:100% !important; max-width:100% !important; background:#f3f5f7; }
+body.admin .gf-order-detail > .admin-shell-sidebar,body.admin .gf-order-detail > .shell-sidebar { grid-column:1; grid-row:1; position:sticky; top:0; height:100vh; max-height:100vh; overflow-y:auto; scrollbar-width:none; background:#101417 !important; }
+body.admin .gf-order-detail > .admin-shell-sidebar::-webkit-scrollbar,body.admin .gf-order-detail > .shell-sidebar::-webkit-scrollbar {display:none;}
+body.admin .gf-order-detail > .shell-main,body.admin .gf-order-detail > .main-content {grid-column:2;grid-row:1; min-width:0; width:100%; max-width:100%; padding:24px !important; margin:0 !important; background:#f3f5f7 !important; color:#142338 !important; overflow-wrap:anywhere; }
+body.admin .gf-order-detail .card,body.admin .gf-order-detail .bg-dark:not(.modal *),body.admin .gf-order-detail .panel {border-color:#dbe3eb; }
+body.admin .gf-order-detail .card:not(.pd-dark-keep) { background:#fff !important; color:#142338 !important; border:1px solid #dbe3eb !important; border-radius:8px; box-shadow:none; }
+body.admin .gf-order-detail .card:not(.pd-dark-keep) > .card-header {background:#fff !important;color:#102036 !important;border-color:#dbe3eb;}
+body.admin .gf-order-detail .card:not(.pd-dark-keep) .card-body,body.admin .gf-order-detail .card:not(.pd-dark-keep) .table {color:#142338;}
+body.admin .gf-order-detail .card:not(.pd-dark-keep) .text-muted,body.admin .gf-order-detail .pd-label {color:#52647a !important;}
+body.admin .gf-order-detail .card:not(.pd-dark-keep) a:not(.btn) {color:#176b3c;}
+body.admin .gf-order-detail h1,body.admin .gf-order-detail h2,body.admin .gf-order-detail h3,body.admin .gf-order-detail h4,body.admin .gf-order-detail h5 {color:inherit;}
+body.admin .gf-order-detail .table-responsive,body.admin .gf-order-detail .pd-map {max-width:100%;}
+body.admin .gf-order-detail .btn-toolbar,body.admin .gf-order-detail .d-flex {min-width:0;}
+body.admin .gf-order-detail .modal {color:#102036;}
+body.admin .gf-order-detail .modal-content,body.admin .gf-order-detail .modal-content .card {background:#fff !important;color:#102036 !important;}
+@media(max-width:760px) { body.admin .gf-order-detail {display:block !important;} body.admin .gf-order-detail > .shell-sidebar {position:relative;height:auto;max-height:none;width:100%;} body.admin .gf-order-detail > .main-content {padding:14px !important;} body.admin .gf-order-detail .row > [class*=col-] {min-width:0;} }

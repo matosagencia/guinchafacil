@@ -1,0 +1,927 @@
+/* Design system do backoffice: shell Lovable para hubs administrativos. */
+.bo-admin,
+.bo-operator,
+body.admin {
+  --bo-bg: #090d0b;
+  --bo-surface: #131a15;
+  --bo-surface-elevated: #1b261f;
+  --bo-border: #223628;
+  --bo-text-main: #f0fdf4;
+  --bo-text-muted: #86efac;
+  --bo-accent: #2fb34a;
+  --bo-accent-hover: #1f8a36;
+  --bo-accent-soft: rgba(47,179,74,.12);
+  --bo-danger: #ef4444;
+  --bo-warning: #f59e0b;
+}
+
+/* Substitui o container Bootstrap legado do cabeçalho móvel do admin. */
+body.admin .bo-global-nav__inner {
+  width: 100%;
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  min-height: var(--topbar-height, 64px);
+}
+
+/* Os módulos admin com shell próprio não usam a barra global legada. O
+ * próprio shell fornece navegação/contexto; manter as duas barras criava a
+ * faixa preta duplicada no topo das subpáginas. */
+body.admin:has(.main-wrapper.admin-shell) > nav.gf-admin-topbar {
+  display: none !important;
+}
+body.admin:has(.main-wrapper.admin-shell) .main-wrapper.admin-shell {
+  grid-template-columns: 220px minmax(0, 1fr);
+  min-height: 100vh;
+  background: #080a0d;
+}
+body.admin:has(.main-wrapper.admin-shell) .main-wrapper.admin-shell > .main-content {
+  min-width: 0;
+  padding: 24px;
+}
+
+/* Alias estrutural para os módulos que ainda fecham pelo layout legado.
+ * O conteúdo interno permanece intacto, mas o shell passa a compartilhar os
+ * mesmos contratos de sidebar/conteúdo usados pelo backoffice novo. */
+body.admin:has(.main-wrapper.admin-shell) .admin-shell-sidebar.bo-sidebar {
+  grid-column: 1;
+  width: 220px;
+  min-width: 0;
+  position: sticky;
+  top: 0;
+  align-self: start;
+  height: 100vh;
+  min-height: 100vh;
+  padding: 0 0 24px;
+  background: #0d1013;
+  border-right: 1px solid #272d34;
+  box-shadow: none;
+  overflow-y: auto;
+}
+body.admin:has(.main-wrapper.admin-shell) .admin-shell-sidebar .gf-f18c-workspace {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 10px 12px 23px;
+  color: #fff;
+  font-size: 12px;
+}
+body.admin:has(.main-wrapper.admin-shell) .admin-shell-sidebar .gf-f18c-workspace small {
+  display: block;
+  color: #9ba6ad;
+  font-size: 10px;
+}
+body.admin:has(.main-wrapper.admin-shell) .admin-shell-sidebar .gf-f18c-avatar {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 7px;
+  background: #e8f7ec;
+  color: #28a647;
+}
+body.admin:has(.main-wrapper.admin-shell) .admin-shell-sidebar .gf-f18c-sidebar-footer {
+  margin-top: auto;
+  padding: 20px 12px;
+  font-size: 12px;
+}
+body.admin:has(.main-wrapper.admin-shell) .admin-shell-sidebar .gf-f18c-sidebar-footer a {
+  color: #b6c3cd;
+}
+body.admin:has(.main-wrapper.admin-shell) .admin-shell-sidebar .gf-f18f18-brand {
+  height: 58px;
+  min-height: 58px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 0 18px;
+  border-bottom: 1px solid #272d34;
+}
+body.admin:has(.main-wrapper.admin-shell) .admin-shell-sidebar .gf-f18f18-brand strong {
+  color: #f4f7fa;
+  font-size: 1rem;
+  letter-spacing: -.02em;
+}
+body.admin:has(.main-wrapper.admin-shell) .admin-shell-sidebar .gf-f18f18-brand strong span {
+  color: #2fb34a;
+}
+body.admin:has(.main-wrapper.admin-shell) .admin-shell-sidebar .gf-f18f18-brand small {
+  margin-top: 2px;
+  color: #68737e;
+  font-size: .62rem;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+body.admin:has(.main-wrapper.admin-shell) .admin-shell-sidebar .ops-nav {
+  padding: 12px 10px 0;
+}
+body.admin:has(.main-wrapper.admin-shell) .admin-shell-sidebar .ops-nav-section {
+  padding: 14px 6px 4px;
+}
+body.admin:has(.main-wrapper.admin-shell) .admin-shell-sidebar .ops-nav-section__title,
+body.admin:has(.main-wrapper.admin-shell) .admin-shell-sidebar .sidebar-section-header {
+  color: #68737e;
+  font-size: .61rem;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+body.admin:has(.main-wrapper.admin-shell) .admin-shell-sidebar .ops-nav-link {
+  min-height: 36px;
+  border-radius: 6px;
+  color: #8f99a4;
+  font-size: .78rem;
+}
+body.admin:has(.main-wrapper.admin-shell) .admin-shell-sidebar .ops-nav-link:hover,
+body.admin:has(.main-wrapper.admin-shell) .admin-shell-sidebar .ops-nav-link.is-active,
+body.admin:has(.main-wrapper.admin-shell) .admin-shell-sidebar .ops-nav-link.active {
+  color: #f4f7fa;
+  background: rgba(47,179,74,.14);
+}
+body.admin:has(.main-wrapper.admin-shell) .admin-shell-sidebar .ops-nav-link.is-active::before,
+body.admin:has(.main-wrapper.admin-shell) .admin-shell-sidebar .ops-nav-link.active::before {
+  background: #2fb34a;
+}
+body.admin:has(.main-wrapper.admin-shell) .admin-shell > .shell-main.bo-content,
+body.admin:has(.main-wrapper.admin-shell) .admin-shell > .main-content {
+  grid-column: 2;
+  min-width: 0;
+}
+
+/* Conteúdo comum de todas as telas legadas: mesmo ritmo visual dos hubs
+ * Financeiro/Central/Usuários, mantendo os componentes Bootstrap existentes. */
+body.admin:has(.main-wrapper.admin-shell) .shell-content > .page-head,
+body.admin:has(.main-wrapper.admin-shell) .shell-content > header.page-head {
+  max-width: 1440px;
+  margin: 0 auto 18px;
+  padding: 0 0 16px;
+  border-bottom: 1px solid #272d34;
+}
+body.admin:has(.main-wrapper.admin-shell) .shell-content > .ops-topbar,
+body.admin:has(.main-wrapper.admin-shell) .shell-content > .gf-quality-tabs {
+  max-width: 1440px;
+  margin-left: auto;
+  margin-right: auto;
+}
+body.admin:has(.main-wrapper.admin-shell) .shell-content > .card,
+body.admin:has(.main-wrapper.admin-shell) .shell-content > .stat-grid,
+body.admin:has(.main-wrapper.admin-shell) .shell-content > form,
+body.admin:has(.main-wrapper.admin-shell) .shell-content > section,
+body.admin:has(.main-wrapper.admin-shell) .shell-content > .table-responsive {
+  max-width: 1440px;
+  margin-left: auto;
+  margin-right: auto;
+}
+body.admin:has(.main-wrapper.admin-shell) .shell-content .card {
+  background: #111419;
+  color: #f4f7fa;
+  border: 1px solid #272d34;
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(0,0,0,.12);
+}
+body.admin:has(.main-wrapper.admin-shell) .shell-content .card-header,
+body.admin:has(.main-wrapper.admin-shell) .shell-content .table thead th {
+  background: #171b20;
+  color: #cbd5df;
+  border-color: #272d34;
+}
+body.admin:has(.main-wrapper.admin-shell) .shell-content .table {
+  --bs-table-bg: #111419;
+  --bs-table-color: #f4f7fa;
+  --bs-table-border-color: #272d34;
+  margin-bottom: 0;
+}
+body.admin:has(.main-wrapper.admin-shell) .shell-content .table tbody tr:hover > * {
+  background: rgba(47,179,74,.08);
+  color: #fff;
+}
+body.admin:has(.main-wrapper.admin-shell) .shell-content .form-control,
+body.admin:has(.main-wrapper.admin-shell) .shell-content .form-select,
+body.admin:has(.main-wrapper.admin-shell) .shell-content input,
+body.admin:has(.main-wrapper.admin-shell) .shell-content select,
+body.admin:has(.main-wrapper.admin-shell) .shell-content textarea {
+  background: #0d1013;
+  color: #f4f7fa;
+  border-color: #34404b;
+}
+body.admin:has(.main-wrapper.admin-shell) .shell-content .form-control:focus,
+body.admin:has(.main-wrapper.admin-shell) .shell-content .form-select:focus,
+body.admin:has(.main-wrapper.admin-shell) .shell-content input:focus,
+body.admin:has(.main-wrapper.admin-shell) .shell-content select:focus,
+body.admin:has(.main-wrapper.admin-shell) .shell-content textarea:focus {
+  border-color: #2fb34a;
+  box-shadow: 0 0 0 .2rem rgba(47,179,74,.16);
+}
+body.admin:has(.main-wrapper.admin-shell) .shell-content label,
+body.admin:has(.main-wrapper.admin-shell) .shell-content .form-label {
+  color: #cbd5df;
+  font-weight: 600;
+}
+body.admin:has(.main-wrapper.admin-shell) .shell-content .btn-primary,
+body.admin:has(.main-wrapper.admin-shell) .shell-content .btn-success {
+  background: #2fb34a;
+  border-color: #2fb34a;
+  color: #07110a;
+  font-weight: 700;
+}
+body.admin:has(.main-wrapper.admin-shell) .shell-content .btn-primary:hover,
+body.admin:has(.main-wrapper.admin-shell) .shell-content .btn-success:hover {
+  background: #3bc958;
+  border-color: #3bc958;
+}
+body.admin:has(.main-wrapper.admin-shell) .shell-content .text-muted,
+body.admin:has(.main-wrapper.admin-shell) .shell-content small {
+  color: #8f99a4 !important;
+}
+
+@media (max-width: 991.98px) {
+  body.admin:has(.main-wrapper.admin-shell) .main-wrapper.admin-shell {
+    display: flex;
+    flex-direction: column;
+  }
+  body.admin:has(.main-wrapper.admin-shell) .admin-shell-sidebar.bo-sidebar {
+    width: 100%;
+    height: auto;
+    min-height: auto;
+    position: static;
+    min-height: auto;
+  }
+  body.admin:has(.main-wrapper.admin-shell) .main-wrapper.admin-shell > .main-content {
+    padding: 16px 12px;
+  }
+  body.admin:has(.main-wrapper.admin-shell) .shell-content .table-responsive {
+    overflow-x: auto;
+  }
+}
+
+/* O funil de criação tem design claro próprio e não deve herdar os tokens
+ * escuros das telas admin legadas. */
+body.admin:has(.gf-admin-order-v3) > nav.gf-admin-topbar {
+  display: none !important;
+}
+body.admin:has(.gf-admin-order-v3) .main-wrapper.admin-shell {
+  grid-template-columns: 220px minmax(0, 1fr);
+  min-height: 100vh;
+  background: #f3f5f7 !important;
+}
+body.admin:has(.gf-admin-order-v3) .gf-admin-order-v3 {
+  background: #f3f5f7 !important;
+  color: #142033 !important;
+  padding: 0 28px 48px !important;
+}
+body.admin:has(.gf-admin-order-v3) .gf-admin-order-v3 .form-control,
+body.admin:has(.gf-admin-order-v3) .gf-admin-order-v3 .form-select,
+body.admin:has(.gf-admin-order-v3) .gf-admin-order-v3 input,
+body.admin:has(.gf-admin-order-v3) .gf-admin-order-v3 select,
+body.admin:has(.gf-admin-order-v3) .gf-admin-order-v3 textarea {
+  background: #f8fafb !important;
+  color: #18283a !important;
+  border-color: #d5dde5 !important;
+}
+body.admin:has(.gf-admin-order-v3) .gf-admin-order-v3 .gf-order-form,
+body.admin:has(.gf-admin-order-v3) .gf-admin-order-v3 .gf-order-triage-card,
+body.admin:has(.gf-admin-order-v3) .gf-admin-order-v3 .admin-flow-context {
+  background: #fff !important;
+  color: #142033 !important;
+  border-color: #dce2e8 !important;
+}
+body.admin:has(.gf-admin-order-v3) .gf-admin-order-v3 label,
+body.admin:has(.gf-admin-order-v3) .gf-admin-order-v3 .form-label,
+body.admin:has(.gf-admin-order-v3) .gf-admin-order-v3 legend {
+  color: #314156 !important;
+}
+
+@media (max-width: 850px) {
+  body.admin:has(.gf-admin-order-v3) .gf-admin-order-v3 {
+    padding: 0 14px 32px !important;
+  }
+}
+
+/* Configurações agora usa o shell do Central também no workspace: superfície
+ * clara, cartões brancos e campos legíveis, sem perder os grupos existentes. */
+body.admin:has(#gfAdminConfigRoot) #gfAdminConfigRoot .gf-admin-config-content {
+  padding: 24px 20px 40px;
+  background: #f4f6f8;
+  color: #0f172a;
+}
+body.admin:has(#gfAdminConfigRoot) #gfAdminConfigRoot .gf-admin-config-content .page-head {
+  max-width: none;
+  margin: 0 0 18px;
+  padding: 0 0 16px;
+  border-bottom: 1px solid #dfe6ec;
+}
+body.admin:has(#gfAdminConfigRoot) #gfAdminConfigRoot .gf-admin-config-content .card,
+body.admin:has(#gfAdminConfigRoot) #gfAdminConfigRoot .gf-admin-config-content .config-effective-grid > div {
+  background: #fff !important;
+  color: #0f172a !important;
+  border-color: #dfe6ec !important;
+  box-shadow: 0 4px 14px rgba(15,23,42,.06);
+}
+body.admin:has(#gfAdminConfigRoot) #gfAdminConfigRoot .gf-admin-config-content :is(h1,h2,h3,h4,strong,.form-label,label,legend) {
+  color: #172033 !important;
+}
+body.admin:has(#gfAdminConfigRoot) #gfAdminConfigRoot .gf-admin-config-content :is(p,.text-muted,.config-info-text,.config-info-small,small) {
+  color: #64748b !important;
+}
+body.admin:has(#gfAdminConfigRoot) #gfAdminConfigRoot .gf-admin-config-content :is(.form-control,.form-select,input,select,textarea) {
+  background: #fff !important;
+  color: #172033 !important;
+  border-color: #cfd9e2 !important;
+}
+body.admin:has(#gfAdminConfigRoot) #gfAdminConfigRoot .gf-admin-config-content .card-header {
+  background: #f8fafc !important;
+  color: #172033 !important;
+  border-color: #dfe6ec !important;
+}
+
+body.admin .gf-f18c-header-actions .gf-f18c-logout {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #334155;
+  text-decoration: none;
+  font-size: 12px;
+  font-weight: 700;
+}
+body.admin .gf-f18c-header-actions .gf-f18c-logout:hover {
+  color: #b42318;
+}
+
+/* Shell legado compatibilizado com o grid operacional: todos os perfis
+ * autenticados mantêm a mesma geometria; somente os tokens de cor mudam. */
+body.cliente .navbar > .bo-global-nav__inner,
+body.guincho .navbar > .bo-global-nav__inner,
+body.oficina .navbar > .bo-global-nav__inner {
+  width: 100%;
+  min-height: 64px;
+  height: 64px;
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  flex-wrap: nowrap;
+  gap: 12px;
+}
+
+/* Contrato semântico compartilhado pelos dashboards migrados. */
+.gf-unified-shell { display: grid; grid-template-columns: 230px minmax(0, 1fr); }
+.gf-unified-shell .gf-unified-sidebar { width: auto; min-width: 0; }
+.gf-unified-main { min-width: 0; }
+@media (max-width: 991.98px) {
+  .gf-unified-shell { display: flex; flex-direction: column; }
+}
+
+body.cliente .navbar,
+body.guincho .navbar,
+body.oficina .navbar {
+  height: 64px;
+  min-height: 64px;
+  background: var(--theme-nav, #050f07) !important;
+  border-bottom: 1px solid var(--theme-border, #285632);
+  box-shadow: 0 1px 0 rgba(0,0,0,.12);
+  color: var(--theme-text, #f4fff6);
+}
+
+/* Dashboards de perfil usam a mesma faixa contextual do Central. A navbar
+ * pública/legada fica apenas no mobile, onde continua sendo o menu principal. */
+@media (min-width: 992px) {
+  body.cliente:not(.gf-unified-dashboard) { margin-top: -64px !important; }
+  body.cliente .main-wrapper,
+  body[data-role="cliente"] .main-wrapper,
+  body.guincho .main-wrapper,
+  body[data-role="guincho"] .main-wrapper,
+  body.oficina .main-wrapper,
+  body[data-role="oficina"] .main-wrapper { margin-top: -64px !important; }
+  body.cliente:has(.main-wrapper) > nav.navbar,
+  body.guincho:has(.main-wrapper) > nav.navbar,
+  body.oficina:has(.main-wrapper) > nav.navbar { display: none !important; height: 0 !important; min-height: 0 !important; overflow: hidden !important; }
+  body.guincho > nav.navbar,
+  body.oficina > nav.navbar { display: none !important; height: 0 !important; min-height: 0 !important; overflow: hidden !important; }
+  body.guincho .gf-unified-topbar,
+  body.oficina .gf-unified-topbar { display: none !important; height: 0 !important; min-height: 0 !important; overflow: hidden !important; }
+  body.guincho:not(.gf-unified-dashboard),
+  body.oficina:not(.gf-unified-dashboard) { padding-top: 0 !important; }
+  body.cliente:has(.main-wrapper) .main-wrapper,
+  body.guincho:has(.main-wrapper) .main-wrapper,
+  body.oficina:has(.main-wrapper) .main-wrapper { margin-top: 0 !important; }
+  body.gf-unified-dashboard > nav.navbar { display: none !important; height: 0 !important; min-height: 0 !important; overflow: hidden !important; }
+  body.gf-unified-dashboard .gf-unified-shell { min-height: 100vh; margin-top: 0 !important; }
+  body.cliente:has(.gf-unified-shell) > nav.gf-unified-topbar,
+  body.guincho:has(.gf-unified-shell) > nav.gf-unified-topbar,
+  body.oficina:has(.gf-unified-shell) > nav.gf-unified-topbar { display: none !important; }
+  body.cliente:has(.gf-unified-shell) > nav.navbar,
+  body.guincho:has(.gf-unified-shell) > nav.navbar,
+  body.oficina:has(.gf-unified-shell) > nav.navbar { display: none !important; }
+  body.cliente:has(.gf-unified-shell) .gf-unified-shell,
+  body.guincho:has(.gf-unified-shell) .gf-unified-shell,
+  body.oficina:has(.gf-unified-shell) .gf-unified-shell { min-height: 100vh; margin-top: -64px !important; }
+  body.cliente:has(.gf-unified-shell) > nav.gf-unified-topbar,
+  body.guincho:has(.gf-unified-shell) > nav.gf-unified-topbar,
+  body.oficina:has(.gf-unified-shell) > nav.gf-unified-topbar { height: 0 !important; min-height: 0 !important; overflow: hidden !important; }
+  body.cliente:has(.gf-unified-shell) .gf-unified-shell .gf-unified-sidebar,
+  body.guincho:has(.gf-unified-shell) .gf-unified-shell .gf-unified-sidebar,
+  body.oficina:has(.gf-unified-shell) .gf-unified-shell .gf-unified-sidebar { position: sticky; top: 0; height: 100vh; }
+}
+
+.gf-panel-topbar {
+  min-height: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 0 24px;
+  margin: -24px -24px 24px;
+  background: var(--theme-surface, #fff);
+  border-bottom: 1px solid var(--theme-border, #dfe6ec);
+}
+
+/* O conteúdo do painel é uma superfície contínua. O cabeçalho contextual
+ * atravessa toda a largura útil do main, enquanto cada perfil recebe o tom
+ * mais claro disponível dentro da própria paleta. */
+body.cliente .main-content,
+body.guincho .main-content,
+body.oficina .main-content { background: #ffffff; }
+body.cliente .main-content { background: #fbfffc; }
+body.guincho .main-content { background: #fffdf8; }
+body.oficina .main-content { background: #f8fbff; }
+body.admin .main-content { background: #111812; }
+body.cliente .main-content > .gf-panel-topbar,
+body.guincho .main-content > .gf-panel-topbar,
+body.oficina .main-content > .gf-panel-topbar,
+body.admin .main-content > .gf-panel-topbar {
+  width: calc(100% + 48px);
+  margin-left: -24px;
+  margin-right: -24px;
+  margin-top: -24px;
+}
+.gf-panel-breadcrumb { color: var(--theme-muted, #64748b); font-size: .78rem; }
+.gf-panel-breadcrumb i { margin: 0 8px; font-size: .62rem; }
+.gf-panel-breadcrumb strong { color: var(--theme-text, #172033); }
+.gf-panel-actions { display: flex; align-items: center; gap: 14px; color: var(--theme-text, #172033); font-size: .76rem; font-weight: 700; }
+.gf-panel-actions a { color: var(--theme-text, #172033); text-decoration: none; }
+.gf-panel-actions a:hover { color: var(--theme-accent, #2fb34a); }
+
+/* Sidebar de perfis: mesma anatomia do Central, com tokens claros do cliente. */
+body.cliente .gf-profile-sidebar {
+  position: sticky;
+  top: 0;
+  align-self: start;
+  height: 100vh;
+  min-height: 100vh;
+  width: 230px;
+  min-width: 0;
+  padding: 18px 8px;
+  overflow-y: auto;
+  background: #f4faf5;
+  color: #17261d;
+  border-right: 1px solid #cde5d1;
+}
+body.cliente .gf-profile-brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 6px 12px 22px;
+  color: #17261d;
+  font-size: 18px;
+  font-weight: 800;
+  text-decoration: none;
+}
+body.cliente .gf-profile-brand img { width: 30px; height: 30px; object-fit: contain; border-radius: 8px; }
+body.cliente .gf-profile-brand strong { color: #2fb34a; }
+body.cliente .gf-profile-workspace { display:flex; align-items:center; gap:9px; padding:10px 12px 23px; color:#17261d; font-size:12px; }
+body.cliente .gf-profile-workspace small { display:block; color:#5c7964; font-size:10px; }
+body.cliente .gf-profile-avatar { display:grid; place-items:center; flex:none; width:32px; height:32px; border-radius:7px; background:#dff3e3; color:#249343; }
+body.cliente .gf-profile-sidebar .sidebar-title { margin:14px 6px 5px; padding:0 6px; color:#6b8370; font-size:.61rem; letter-spacing:.12em; text-transform:uppercase; }
+body.cliente .gf-profile-sidebar .sidebar-link { min-height:36px; margin:0; padding:9px 12px; border-radius:6px; color:#52705a; font-size:.78rem; }
+body.cliente .gf-profile-sidebar .sidebar-link:hover,
+body.cliente .gf-profile-sidebar .sidebar-link.active { color:#176b31; background:rgba(47,179,74,.13); }
+body.cliente .gf-profile-sidebar .sidebar-link.active { font-weight:700; }
+body.cliente .gf-profile-sidebar .sidebar-link i { color:inherit; }
+body.cliente .gf-profile-sidebar-footer { margin-top:auto; padding:20px 12px; font-size:12px; }
+body.cliente .gf-profile-sidebar-footer a { color:#52705a; text-decoration:none; }
+@media (max-width:991.98px) { body.cliente .gf-profile-sidebar { position:static; width:100%; height:auto; min-height:0; } }
+
+/* Guincho e oficina usam a mesma anatomia do sidebar do cliente; apenas a
+ * identidade de cor muda por perfil. */
+body.guincho .gf-profile-sidebar,
+body.oficina .gf-profile-sidebar {
+  position: sticky; top: 0; align-self: start; height: 100vh; min-height: 100vh;
+  width: 230px; min-width: 0; padding: 18px 8px; overflow-y: auto;
+  color: var(--theme-text, #172033); border-right: 1px solid var(--theme-border, #dfe6ec);
+  background: var(--theme-surface, #fff);
+  scrollbar-width: none;
+}
+body.guincho .gf-profile-sidebar { scrollbar-width: none; }
+body.guincho .gf-profile-sidebar::-webkit-scrollbar,
+body.oficina .gf-profile-sidebar::-webkit-scrollbar,
+body.cliente .gf-profile-sidebar::-webkit-scrollbar { width: 0; height: 0; display: none; }
+body.guincho .gf-profile-brand, body.oficina .gf-profile-brand {
+  display:flex; align-items:center; gap:8px; margin:6px 12px 22px;
+  color:var(--theme-text,#172033); font-size:18px; font-weight:800; text-decoration:none;
+}
+body.guincho .gf-profile-brand img, body.oficina .gf-profile-brand img { width:30px; height:30px; object-fit:contain; border-radius:8px; }
+body.guincho .gf-profile-brand strong { color:#f59e0b; }
+body.oficina .gf-profile-brand strong { color:#2563eb; }
+body.guincho .gf-profile-workspace, body.oficina .gf-profile-workspace { display:flex; align-items:center; gap:9px; padding:10px 12px 23px; color:var(--theme-text,#172033); font-size:12px; }
+body.guincho .gf-profile-workspace small, body.oficina .gf-profile-workspace small { display:block; color:var(--theme-muted,#64748b); font-size:10px; }
+body.guincho .gf-profile-avatar, body.oficina .gf-profile-avatar { display:grid; place-items:center; flex:none; width:32px; height:32px; border-radius:7px; color:#fff; }
+body.guincho .gf-profile-avatar { background:#f59e0b; }
+body.oficina .gf-profile-avatar { background:#2563eb; }
+body.guincho .gf-profile-sidebar .sidebar-title, body.oficina .gf-profile-sidebar .sidebar-title { margin:14px 6px 5px; padding:0 6px; color:var(--theme-muted,#64748b); font-size:.61rem; letter-spacing:.12em; text-transform:uppercase; }
+body.guincho .gf-profile-sidebar .sidebar-link, body.oficina .gf-profile-sidebar .sidebar-link { min-height:36px; margin:0; padding:9px 12px; border-radius:6px; color:var(--theme-muted,#64748b); font-size:.78rem; }
+body.guincho .gf-profile-sidebar .sidebar-link:hover, body.guincho .gf-profile-sidebar .sidebar-link.active { color:#92400e; background:rgba(245,158,11,.14); }
+body.oficina .gf-profile-sidebar .sidebar-link:hover, body.oficina .gf-profile-sidebar .sidebar-link.active { color:#1d4ed8; background:rgba(37,99,235,.12); }
+body.guincho .gf-profile-sidebar .sidebar-link.active, body.oficina .gf-profile-sidebar .sidebar-link.active { font-weight:700; }
+body.guincho .gf-profile-sidebar-footer, body.oficina .gf-profile-sidebar-footer { margin-top:auto; padding:20px 12px; font-size:12px; }
+body.guincho .gf-profile-sidebar-footer a, body.oficina .gf-profile-sidebar-footer a { color:var(--theme-muted,#64748b); text-decoration:none; }
+@media (max-width:991.98px) { body.guincho .gf-profile-sidebar, body.oficina .gf-profile-sidebar { position:static; width:100%; height:auto; min-height:0; } }
+@media (max-width: 767.98px) {
+  .gf-panel-topbar { min-height: 60px; padding: 0 14px; margin: -16px -12px 18px; }
+  .gf-panel-actions span { display: none; }
+}
+
+/* Topbar compartilhada: mesma altura, marca e área de conta do shell admin;
+ * as cores continuam sendo definidas pelo tema de cada perfil. */
+body.cliente .gf-unified-topbar .bo-global-nav__inner,
+body.guincho .gf-unified-topbar .bo-global-nav__inner,
+body.oficina .gf-unified-topbar .bo-global-nav__inner {
+  max-width: 1600px;
+  margin: 0 auto;
+}
+
+body.cliente .gf-unified-topbar .navbar-brand,
+body.guincho .gf-unified-topbar .navbar-brand,
+body.oficina .gf-unified-topbar .navbar-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 214px;
+  color: var(--theme-text, #f4fff6) !important;
+  font-weight: 800;
+  letter-spacing: -.02em;
+  text-decoration: none;
+}
+
+body.cliente .gf-unified-topbar .navbar-brand img,
+body.guincho .gf-unified-topbar .navbar-brand img,
+body.oficina .gf-unified-topbar .navbar-brand img {
+  width: 30px;
+  height: 30px;
+  object-fit: contain;
+  flex: 0 0 30px;
+}
+
+body.cliente .gf-unified-topbar .badge-perfil,
+body.guincho .gf-unified-topbar .badge-perfil,
+body.oficina .gf-unified-topbar .badge-perfil {
+  margin-left: 4px;
+  border: 1px solid var(--theme-border, #285632);
+  background: var(--theme-surface-2, rgba(255,255,255,.08));
+  color: var(--theme-text-muted, #b7d8bd);
+  font-size: .65rem;
+  line-height: 1;
+}
+
+body.cliente .gf-unified-topbar #navbarMain > ul:last-child,
+body.guincho .gf-unified-topbar #navbarMain > ul:last-child,
+body.oficina .gf-unified-topbar #navbarMain > ul:last-child {
+  align-items: center;
+  gap: 8px;
+}
+
+body.cliente .gf-unified-topbar #navbarMain > ul:last-child .nav-link,
+body.guincho .gf-unified-topbar #navbarMain > ul:last-child .nav-link,
+body.oficina .gf-unified-topbar #navbarMain > ul:last-child .nav-link {
+  color: var(--theme-text, #f4fff6) !important;
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: .82rem;
+  font-weight: 700;
+}
+
+body.cliente .gf-unified-topbar #navbarMain > ul:last-child .nav-link:hover,
+body.guincho .gf-unified-topbar #navbarMain > ul:last-child .nav-link:hover,
+body.oficina .gf-unified-topbar #navbarMain > ul:last-child .nav-link:hover {
+  background: var(--theme-surface-2, rgba(255,255,255,.08));
+}
+
+body.cliente .gf-unified-topbar #navbarMain > ul:last-child .text-danger,
+body.guincho .gf-unified-topbar #navbarMain > ul:last-child .text-danger,
+body.oficina .gf-unified-topbar #navbarMain > ul:last-child .text-danger {
+  color: #fca5a5 !important;
+}
+
+/* O cliente conserva o perfil claro definido na diretriz; a estrutura é a
+ * mesma, apenas os tokens de superfície e texto mudam. */
+body.cliente .gf-unified-topbar {
+  background: #fff !important;
+  border-bottom-color: #dbe7df;
+  color: #17261d;
+}
+body.cliente .gf-unified-topbar .navbar-brand,
+body.cliente .gf-unified-topbar #navbarMain > ul:last-child .nav-link {
+  color: #17261d !important;
+}
+body.cliente .gf-unified-topbar .badge-perfil {
+  background: #eef8f0;
+  border-color: #c9e4cf;
+  color: #27613a;
+}
+body.cliente .gf-unified-topbar #navbarMain > ul:last-child .nav-link:hover {
+  background: #eef8f0;
+}
+body.cliente .gf-unified-topbar #navbarMain > ul:last-child .text-danger {
+  color: #b42318 !important;
+}
+
+body.cliente .navbar #navbarMain,
+body.guincho .navbar #navbarMain,
+body.oficina .navbar #navbarMain {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+body.cliente .navbar #navbarMain + .navbar-nav,
+body.guincho .navbar #navbarMain + .navbar-nav,
+body.oficina .navbar #navbarMain + .navbar-nav {
+  flex: 0 0 auto;
+  margin-left: auto !important;
+}
+
+@media (min-width: 992px) {
+  body.cliente .navbar #navbarMain,
+  body.guincho .navbar #navbarMain,
+  body.oficina .navbar #navbarMain {
+    display: flex !important;
+    align-items: center;
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+  body.cliente .navbar #navbarMain > ul:first-child,
+  body.guincho .navbar #navbarMain > ul:first-child,
+  body.oficina .navbar #navbarMain > ul:first-child {
+    display: none !important;
+  }
+  body.cliente .navbar #navbarMain > ul:last-child,
+  body.guincho .navbar #navbarMain > ul:last-child,
+  body.oficina .navbar #navbarMain > ul:last-child {
+    margin-left: auto !important;
+    flex-direction: row;
+  }
+}
+
+@media (max-width: 767.98px) {
+  body.cliente .navbar > .bo-global-nav__inner,
+  body.guincho .navbar > .bo-global-nav__inner,
+  body.oficina .navbar > .bo-global-nav__inner { padding: 0 12px; }
+}
+
+@media (max-width: 767.98px) {
+  body.admin .bo-global-nav__inner { padding: 0 12px; }
+}
+
+/* Compatibilidade visual para as telas legadas que ainda usam o shell clássico. */
+body.admin .main-wrapper.admin-shell {
+  min-height: 100vh;
+  background: var(--bo-bg, #090d0b);
+}
+
+body.admin .main-wrapper.admin-shell .main-content,
+body.admin .main-wrapper.admin-shell .shell-main {
+  background: var(--bo-bg, #090d0b);
+  color: var(--bo-text-main, #f0fdf4);
+  padding: 24px;
+}
+
+body.admin .main-wrapper.admin-shell .page-head {
+  padding: 0 0 16px;
+  border-bottom: 1px solid var(--bo-border, #223628);
+}
+
+body.admin .main-wrapper.admin-shell .card,
+body.admin .main-wrapper.admin-shell .stat-grid__item {
+  background: var(--bo-surface, #131a15);
+  color: var(--bo-text-main, #f0fdf4);
+  border-color: var(--bo-border, #223628);
+}
+
+body.admin .main-wrapper.admin-shell .card-header,
+body.admin .main-wrapper.admin-shell .table thead th {
+  background: var(--bo-surface-elevated, #1b261f);
+  color: var(--bo-text-main, #f0fdf4);
+  border-color: var(--bo-border, #223628);
+}
+
+body.admin .main-wrapper.admin-shell .table {
+  --bs-table-bg: var(--bo-surface, #131a15);
+  --bs-table-color: var(--bo-text-main, #f0fdf4);
+  --bs-table-border-color: var(--bo-border, #223628);
+}
+
+body.admin .main-wrapper.admin-shell .form-control,
+body.admin .main-wrapper.admin-shell .form-select {
+  background-color: var(--bo-bg, #090d0b);
+  color: var(--bo-text-main, #f0fdf4);
+  border-color: var(--bo-border, #223628);
+}
+
+body.admin .main-wrapper.admin-shell .form-control:focus,
+body.admin .main-wrapper.admin-shell .form-select:focus {
+  border-color: var(--bo-accent, #2fb34a);
+  box-shadow: 0 0 0 .2rem rgba(47,179,74,.18);
+}
+
+body.admin .main-wrapper.admin-shell .btn-primary,
+body.admin .main-wrapper.admin-shell .btn-success {
+  background: var(--bo-accent, #2fb34a);
+  border-color: var(--bo-accent, #2fb34a);
+}
+
+body.admin .catalogo-subpage .ops-topbar {
+  margin: 0 0 18px;
+  padding: 12px 16px;
+  border: 1px solid var(--bo-border, #223628);
+  border-radius: 10px;
+  background: var(--bo-surface, #131a15);
+}
+
+body.admin .catalogo-subpage .page-head { margin-bottom: 18px; }
+
+/* Catálogo: tabelas claras e densas como as referências do backoffice. */
+body.admin :is(#tiposShell,#capShell,#produtosShell,#zonasShell,.catalogo-subpage) .table {
+  --bs-table-bg: #ffffff;
+  --bs-table-color: #172536;
+  --bs-table-border-color: #dce4ec;
+  background: #ffffff;
+  color: #172536;
+}
+body.admin :is(#tiposShell,#capShell,#produtosShell,#zonasShell,.catalogo-subpage) .table thead th {
+  background: #f3f6f8;
+  color: #526274;
+  border-color: #dce4ec;
+  font-size: .72rem;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+body.admin :is(#tiposShell,#capShell,#produtosShell,#zonasShell,.catalogo-subpage) .table tbody tr:hover > * {
+  background: #eef8f0;
+}
+body.admin :is(#capShell,#produtosShell) { min-height: calc(100vh - 150px); }
+
+body.admin {
+  background: var(--bo-bg, #090d0b);
+  color: var(--bo-text-main, #f0fdf4);
+}
+
+.shell-ops {
+  background: var(--bo-bg, #090d0b);
+  color: var(--bo-text-main, #f0fdf4);
+}
+
+.shell-ops-workspace,
+.shell-ops-worklist,
+.shell-ops-sidebar {
+  border-color: var(--bo-border, #223628);
+}
+
+.bo-page-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 18px;
+}
+
+.bo-page-head h1 { margin: 0; letter-spacing: -.02em; }
+.bo-page-head p { max-width: 760px; color: var(--bo-text-muted, #86efac); margin: 6px 0 0; }
+
+.bo-module-tabs {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin: 0;
+  padding: 8px 24px;
+  background: var(--bo-bg, #090d0b);
+  border-top: 1px solid var(--bo-border, #223628);
+  border-bottom: 1px solid var(--bo-border, #223628);
+}
+
+/* As páginas-hub seguem o mesmo alinhamento horizontal do shell operacional. */
+#cidadesShell,
+#planejamentoShell {
+  min-height: calc(100vh - 150px);
+  margin-top: 0;
+}
+
+#cidadesShell .shell-ops-workspace,
+#planejamentoShell .shell-ops-workspace {
+  min-width: 0;
+  overflow: auto;
+}
+
+#cidadesShell .shell-ops-worklist,
+#planejamentoShell .shell-ops-sidebar {
+  background: var(--bo-surface, #131a15);
+}
+
+#cidadesShell .shell-ops-workspace {
+  background: var(--bo-bg, #090d0b);
+}
+
+#planejamentoShell .shell-ops-workspace > .page-head,
+#planejamentoShell .shell-ops-workspace > .card,
+#planejamentoShell .shell-ops-workspace > form,
+#planejamentoShell .shell-ops-workspace > section {
+  max-width: 1440px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.bo-module-tabs a {
+  color: var(--bo-text-muted, #86efac);
+  padding: 8px 12px;
+  border-radius: 7px;
+  text-decoration: none;
+  font-size: .82rem;
+  font-weight: 600;
+}
+
+.bo-module-tabs a:hover,
+.bo-module-tabs a[aria-current="page"] {
+  color: #fff;
+  background: var(--bo-accent, #2fb34a);
+}
+
+.bo-kpi-strip {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1px;
+  margin-bottom: 18px;
+  background: var(--bo-border, #223628);
+  border: 1px solid var(--bo-border, #223628);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.bo-kpi { padding: 14px 16px; background: var(--bo-surface, #131a15); }
+.bo-kpi small { display: block; color: var(--bo-text-muted, #86efac); text-transform: uppercase; letter-spacing: .08em; font-size: .68rem; }
+.bo-kpi strong { display: block; margin-top: 4px; font-size: 1.4rem; font-variant-numeric: tabular-nums; }
+
+.bo-card {
+  background: var(--bo-surface, #131a15);
+  border: 1px solid var(--bo-border, #223628);
+  border-radius: 10px;
+  box-shadow: 0 10px 30px rgba(0,0,0,.12);
+}
+
+.bo-context-actions { display: inline-flex; align-items: center; gap: 4px; margin-right: 8px; }
+.bo-header-action-label { margin-left: 6px; font-size: .75rem; font-weight: 700; }
+.bo-header-button { color: inherit; text-decoration: none; }
+body.admin:has(#cidadesBackofficeRoot) > .ops-topbar,
+body.admin:has(#cidadesBackofficeRoot) > .bo-module-tabs { display: none !important; }
+body.admin:has(#planejamentoShell) .bo-module-tabs,
+body.admin:has(#planejamentoShell) > .ops-topbar,
+body.admin:has(#zonasShell) > .ops-topbar { display: none !important; }
+
+body.admin:has(#planejamentoShell) #planejamentoShell,
+body.admin:has(#zonasShell) #zonasShell {
+  border-top: 1px solid var(--bo-border, #223628);
+}
+body.admin:has(#planejamentoBackofficeRoot) #planejamentoShell {
+  display: block !important;
+  margin: 0 !important;
+  border: 0 !important;
+  min-height: 0 !important;
+}
+body.admin:has(#planejamentoBackofficeRoot) #planejamentoWorkspace {
+  width: 100%;
+  max-width: 1440px;
+  margin: 0 auto;
+}
+body.admin .territory-shell { min-height: calc(100vh - 150px); }
+@media (max-width: 900px) { .bo-header-action-label { display: none; } }
+
+@media (max-width: 900px) {
+  .bo-kpi-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .bo-page-head { flex-direction: column; }
+}
+
+@media (max-width: 600px) {
+  .bo-kpi-strip { grid-template-columns: 1fr; }
+  .bo-module-tabs { overflow-x: auto; flex-wrap: nowrap; }
+  .bo-module-tabs a { white-space: nowrap; }
+}
+/* Padrao de icones SVG do backoffice: evita que SVG sem dimensoes exploda o shell. */
+body.admin .bo-sidebar svg,
+body.admin .bo-header svg,
+body.admin .gf-f18c-root svg,
+body.admin .gf-f18f18-root svg,
+body.admin .gf-fin2-root svg {
+  width: 1.1em;
+  height: 1.1em;
+  max-width: 24px;
+  max-height: 24px;
+  flex: 0 0 auto;
+}
+

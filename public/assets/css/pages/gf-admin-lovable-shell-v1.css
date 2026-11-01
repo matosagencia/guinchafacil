@@ -1,0 +1,49 @@
+/* GF Admin Lovable shell v1 — Central / Financeiro / Dashboard
+   Sidebar dark, operational workspace light, based on approved screenshots.
+   Presentation only. No business logic, no synthetic data. */
+#opsShell, #financeiroShell, #dashboardShell {
+ --gf-paper:#f5f7f9;--gf-white:#fff;--gf-ink:#111827;--gf-subtle:#66778b;
+ --gf-line:#d7dee5;--gf-green:#35b34c;--gf-nav:#101417;
+ color:var(--gf-ink);background:var(--gf-paper);border:0;
+ font-family:Inter,system-ui,-apple-system,"Segoe UI",Arial,sans-serif;
+}
+/* Scope shell to avoid modifying other roles/pages */
+#opsShell .shell-ops-sidebar,#financeiroShell .shell-ops-sidebar,#dashboardShell .shell-ops-sidebar {
+ background:#101417 !important;color:#e9f0ed !important;border-right:0 !important;
+ box-shadow:none;min-width:0;
+}
+#opsShell .ops-sidebar-brand,#financeiroShell .ops-sidebar-brand,#dashboardShell .ops-sidebar-brand {background:#101417;border-bottom-color:#222c28}
+#opsShell .ops-sidebar-brand__name,#financeiroShell .ops-sidebar-brand__name,#dashboardShell .ops-sidebar-brand__name{color:#f8faf9}
+#opsShell .ops-nav,#financeiroShell .ops-nav,#dashboardShell .ops-nav{background:#101417;color:#dfe6e2}
+#opsShell .ops-nav-section__title,#financeiroShell .ops-nav-section__title,#dashboardShell .ops-nav-section__title{color:#8e9e98;font-size:10px;letter-spacing:.04em}
+#opsShell .ops-nav-link,#financeiroShell .ops-nav-link,#dashboardShell .ops-nav-link{color:#e4e9e6;border-radius:5px;font-size:13px;min-height:38px}
+#opsShell .ops-nav-link:hover,#financeiroShell .ops-nav-link:hover,#dashboardShell .ops-nav-link:hover{background:#203027;color:#fff}
+#opsShell .ops-nav-link.is-active,#financeiroShell .ops-nav-link.is-active,#dashboardShell .ops-nav-link.is-active{background:#35b34c !important;color:#fff !important;font-weight:650}
+#opsShell .ops-nav-link.is-active i,#financeiroShell .ops-nav-link.is-active i,#dashboardShell .ops-nav-link.is-active i{color:#fff}
+#opsShell .shell-ops-worklist,#financeiroShell .shell-ops-worklist,#dashboardShell .shell-ops-worklist{background:#fff !important;border-right:1px solid var(--gf-line)!important;color:#111827}
+#opsShell .shell-ops-workspace,#financeiroShell .shell-ops-workspace,#dashboardShell .shell-ops-workspace{background:#f5f7f9 !important;color:#111827}
+#opsShell .ops-worklist-header,#financeiroShell .ops-worklist-header{background:#fff;border-bottom:1px solid var(--gf-line);padding:17px 18px}
+#opsShell .ops-worklist-header h2,#financeiroShell .ops-worklist-header h2{color:#101827;font-weight:750;font-size:15px}
+#opsShell .ops-worklist-header p,#financeiroShell .ops-worklist-header p{color:#718096;font-size:11px}
+#opsShell .ops-worklist-search,#financeiroShell .ops-worklist-search{background:#fff;padding:13px 16px;border-bottom:1px solid #e1e6ea}
+#opsShell .ops-worklist-search input,#financeiroShell .ops-worklist-search input{border:1px solid #d5dce3;border-radius:5px;background:#f3f5f7;color:#15212d;font-size:12px}
+#opsShell .ops-worklist-results,#financeiroShell .ops-worklist-results{background:#fff;color:#111827}
+#opsShell .ops-worklist-results button,#financeiroShell .ops-worklist-results button{color:#162332;border-bottom-color:#e3e8ed}
+#opsShell .ops-worklist-results button:hover,#financeiroShell .ops-worklist-results button:hover{background:#f0f8f1}
+#opsShell .ops-worklist-results button[aria-selected="true"],#opsShell .ops-worklist-results button.is-active,
+#financeiroShell .ops-worklist-results button[aria-selected="true"],#financeiroShell .ops-worklist-results button.is-active{background:#e5f5e7;border-left:3px solid #39b853}
+#opsShell .card,#financeiroShell .card,#dashboardShell .card,
+#opsShell .ops-workspace-card,#financeiroShell .ops-workspace-card{background:#fff !important;color:#111827;border:1px solid #d8dee5 !important;border-radius:6px!important;box-shadow:none!important}
+#opsShell .card-header,#financeiroShell .card-header,#dashboardShell .card-header{background:#fff!important;color:#111827;border-bottom:1px solid #d8dee5}
+#opsShell .eyebrow,#financeiroShell .eyebrow,#dashboardShell .eyebrow{color:#2da947;font-size:10px;font-weight:750;letter-spacing:.025em}
+#opsShell h1,#opsShell h2,#opsShell h3,#financeiroShell h1,#financeiroShell h2,#financeiroShell h3,#dashboardShell h1,#dashboardShell h2,#dashboardShell h3{color:#111827}
+#opsShell .btn-primary,#financeiroShell .btn-primary,#dashboardShell .btn-primary{background:#36b44f;border-color:#36b44f;color:#fff}
+#opsShell input,#opsShell select,#financeiroShell input,#financeiroShell select{color:#142132}
+#dashboardShell .shell-ops-workspace{padding:24px !important}
+#dashboardShell .page-head{background:transparent;border:0}
+/* Existing admin topbar and summary cards are outside shell in some views.
+   Style only their own namespace, no cross-profile overrides. */
+.ops-topbar{background:#fff!important;color:#111827!important;border-bottom:1px solid #d8dee5!important}
+.ops-topbar input{background:#f3f5f7!important;color:#111827!important;border:1px solid #d8dee5!important}
+@media(max-width:1050px){#opsShell .shell-ops-sidebar,#financeiroShell .shell-ops-sidebar,#dashboardShell .shell-ops-sidebar{max-width:230px}}
+@media(max-width:767px){#opsShell .shell-ops-workspace,#financeiroShell .shell-ops-workspace,#dashboardShell .shell-ops-workspace{min-width:0}#dashboardShell .shell-ops-workspace{padding:14px!important}}

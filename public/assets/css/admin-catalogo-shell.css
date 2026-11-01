@@ -1,0 +1,184 @@
+/* Catálogo e produtos: paleta clara do backoffice Lovable. */
+body.admin[data-admin-path^="/admin/catalogo-servicos"],
+body.admin[data-admin-path^="/admin/produto"],
+body.admin[data-admin-path^="/admin/produtos"] {
+  --catalog-bg: #f4f6f8;
+  --catalog-surface: #ffffff;
+  --catalog-surface-soft: #f8fafb;
+  --catalog-line: #dce4ec;
+  --catalog-text: #172536;
+  --catalog-muted: #64748b;
+  --catalog-accent: #168441;
+  background: var(--catalog-bg) !important;
+  color: var(--catalog-text) !important;
+  font-family: Manrope, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
+  font-size: 13px;
+}
+
+body.admin[data-admin-path^="/admin/catalogo-servicos"] .main-wrapper,
+body.admin[data-admin-path^="/admin/produto"] .main-wrapper,
+body.admin[data-admin-path^="/admin/produtos"] .main-wrapper,
+body.admin[data-admin-path^="/admin/catalogo-servicos"] .shell-ops,
+body.admin[data-admin-path^="/admin/produtos"] .shell-ops {
+  background: var(--catalog-bg) !important;
+}
+
+body.admin[data-admin-path^="/admin/catalogo-servicos"] .main-content,
+body.admin[data-admin-path^="/admin/produto"] .main-content,
+body.admin[data-admin-path^="/admin/produtos"] .main-content {
+  padding: 24px !important;
+  color: var(--catalog-text) !important;
+}
+
+body.admin[data-admin-path^="/admin/catalogo-servicos"] .card,
+body.admin[data-admin-path^="/admin/produto"] .card,
+body.admin[data-admin-path^="/admin/produtos"] .card {
+  background: var(--catalog-surface) !important;
+  border: 1px solid var(--catalog-line) !important;
+  border-radius: 10px !important;
+  box-shadow: 0 4px 14px rgba(15, 23, 42, .05) !important;
+  color: var(--catalog-text) !important;
+}
+
+body.admin[data-admin-path^="/admin/catalogo-servicos"] .card-header,
+body.admin[data-admin-path^="/admin/produto"] .card-header,
+body.admin[data-admin-path^="/admin/produtos"] .card-header {
+  background: var(--catalog-surface-soft) !important;
+  border-bottom: 1px solid var(--catalog-line) !important;
+  color: var(--catalog-text) !important;
+  font-weight: 800;
+}
+
+body.admin[data-admin-path^="/admin/catalogo-servicos"] .table,
+body.admin[data-admin-path^="/admin/produto"] .table,
+body.admin[data-admin-path^="/admin/produtos"] .table {
+  --bs-table-bg: var(--catalog-surface) !important;
+  --bs-table-color: var(--catalog-text) !important;
+  --bs-table-border-color: var(--catalog-line) !important;
+  --bs-table-striped-bg: #f8fafb !important;
+  --bs-table-striped-color: var(--catalog-text) !important;
+  background: var(--catalog-surface) !important;
+  color: var(--catalog-text) !important;
+  font-size: .82rem;
+}
+
+body.admin[data-admin-path^="/admin/catalogo-servicos"] .table thead th,
+body.admin[data-admin-path^="/admin/produto"] .table thead th,
+body.admin[data-admin-path^="/admin/produtos"] .table thead th {
+  background: #eef2f5 !important;
+  color: #526274 !important;
+  border-color: var(--catalog-line) !important;
+  font-size: .68rem;
+  font-weight: 800;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+
+body.admin[data-admin-path^="/admin/catalogo-servicos"] .table tbody tr:hover > *,
+body.admin[data-admin-path^="/admin/produto"] .table tbody tr:hover > *,
+body.admin[data-admin-path^="/admin/produtos"] .table tbody tr:hover > * {
+  background: #edf8f0 !important;
+}
+
+body.admin[data-admin-path^="/admin/catalogo-servicos"] .form-control,
+body.admin[data-admin-path^="/admin/catalogo-servicos"] .form-select,
+body.admin[data-admin-path^="/admin/produto"] .form-control,
+body.admin[data-admin-path^="/admin/produto"] .form-select,
+body.admin[data-admin-path^="/admin/produtos"] .form-control,
+body.admin[data-admin-path^="/admin/produtos"] .form-select {
+  background: #fff !important;
+  border: 1px solid #cbd5df !important;
+  color: var(--catalog-text) !important;
+  border-radius: 7px !important;
+}
+
+body.admin[data-admin-path^="/admin/catalogo-servicos"] .btn-primary,
+body.admin[data-admin-path^="/admin/produto"] .btn-primary,
+body.admin[data-admin-path^="/admin/produtos"] .btn-primary {
+  background: var(--catalog-accent) !important;
+  border-color: var(--catalog-accent) !important;
+}
+
+/* Compatibilidade visual para as subpáginas que ainda usam a estrutura shell-ops. */
+body.admin[data-admin-path^="/admin/catalogo-servicos"] .ops-topbar,
+body.admin[data-admin-path^="/admin/produtos"] .ops-topbar {
+  background: var(--catalog-surface) !important;
+  border: 1px solid var(--catalog-line) !important;
+  border-radius: 10px !important;
+  box-shadow: 0 4px 14px rgba(15, 23, 42, .04) !important;
+  color: var(--catalog-text) !important;
+  margin: 0 0 18px !important;
+}
+
+body.admin[data-admin-path^="/admin/catalogo-servicos"] .ops-topbar input,
+body.admin[data-admin-path^="/admin/produtos"] .ops-topbar input,
+body.admin[data-admin-path^="/admin/catalogo-servicos"] .shell-ops,
+body.admin[data-admin-path^="/admin/produtos"] .shell-ops {
+  background: var(--catalog-surface) !important;
+  color: var(--catalog-text) !important;
+}
+
+body.admin[data-admin-path^="/admin/catalogo-servicos"] .shell-ops,
+body.admin[data-admin-path^="/admin/produtos"] .shell-ops {
+  border: 1px solid var(--catalog-line) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 4px 14px rgba(15, 23, 42, .04) !important;
+  overflow: hidden;
+}
+
+body.admin[data-admin-path^="/admin/catalogo-servicos"] .shell-ops-sidebar,
+body.admin[data-admin-path^="/admin/catalogo-servicos"] .shell-ops-worklist,
+body.admin[data-admin-path^="/admin/catalogo-servicos"] .shell-ops-workspace,
+body.admin[data-admin-path^="/admin/produtos"] .shell-ops-sidebar,
+body.admin[data-admin-path^="/admin/produtos"] .shell-ops-worklist,
+body.admin[data-admin-path^="/admin/produtos"] .shell-ops-workspace {
+  background: var(--catalog-surface) !important;
+  color: var(--catalog-text) !important;
+  border-color: var(--catalog-line) !important;
+}
+
+body.admin[data-admin-path^="/admin/catalogo-servicos"] .shell-ops-sidebar,
+body.admin[data-admin-path^="/admin/catalogo-servicos"] .shell-ops-worklist,
+body.admin[data-admin-path^="/admin/produtos"] .shell-ops-sidebar,
+body.admin[data-admin-path^="/admin/produtos"] .shell-ops-worklist {
+  background: var(--catalog-surface-soft) !important;
+}
+
+body.admin[data-admin-path^="/admin/catalogo-servicos"] .shell-ops h1,
+body.admin[data-admin-path^="/admin/catalogo-servicos"] .shell-ops h2,
+body.admin[data-admin-path^="/admin/catalogo-servicos"] .shell-ops h3,
+body.admin[data-admin-path^="/admin/produtos"] .shell-ops h1,
+body.admin[data-admin-path^="/admin/produtos"] .shell-ops h2,
+body.admin[data-admin-path^="/admin/produtos"] .shell-ops h3 {
+  color: var(--catalog-text) !important;
+  font-family: Manrope, sans-serif !important;
+}
+
+body.admin[data-admin-path^="/admin/catalogo-servicos"] .table-dark,
+body.admin[data-admin-path^="/admin/produtos"] .table-dark {
+  --bs-table-bg: var(--catalog-surface) !important;
+  --bs-table-color: var(--catalog-text) !important;
+  background: var(--catalog-surface) !important;
+  color: var(--catalog-text) !important;
+}
+
+body.admin[data-admin-path^="/admin/catalogo-servicos"] .table td,
+body.admin[data-admin-path^="/admin/catalogo-servicos"] .table th,
+body.admin[data-admin-path^="/admin/produto"] .table td,
+body.admin[data-admin-path^="/admin/produto"] .table th,
+body.admin[data-admin-path^="/admin/produtos"] .table td,
+body.admin[data-admin-path^="/admin/produtos"] .table th {
+  background-color: transparent;
+  color: inherit;
+  border-color: var(--catalog-line) !important;
+  font-family: Manrope, sans-serif !important;
+}
+
+body.admin[data-admin-path^="/admin/catalogo-servicos"] .btn,
+body.admin[data-admin-path^="/admin/produto"] .btn,
+body.admin[data-admin-path^="/admin/produtos"] .btn,
+body.admin[data-admin-path^="/admin/catalogo-servicos"] label,
+body.admin[data-admin-path^="/admin/produto"] label,
+body.admin[data-admin-path^="/admin/produtos"] label {
+  font-family: Manrope, sans-serif !important;
+}

@@ -1,0 +1,39 @@
+/* GuinchaFacil — compatibilidade de tokens por perfil.
+ * B-UI 2026-10-16. Fonte principal: themes/{admin,client,tow,oficina}.css
+ * Nao modifica autenticacao, precificacao ou contratos do funil.
+ * O role real vem do layout autenticado; data-theme e opcional.
+ */
+body.admin, body[data-role="admin"], body[data-theme="executive"],
+body[data-role="operador"], body[data-theme="dispatch"],
+body[data-role="financeiro"], body[data-theme="finance"] {
+  --admin-bg-base: #07090c; --admin-bg-surface: #11151a;
+  --admin-bg-elevated: #171d24; --admin-border: #29313a;
+  --admin-accent: #2fb34a; --admin-accent-hover: #42d564;
+  --admin-text-main: #f7f9fb; --admin-text-muted: #a6b0ba;
+  --admin-alert-critical: #ef4444; --admin-alert-warning: #f59e0b;
+  --admin-density-padding: 10px 14px; --admin-font-size-base: .875rem;
+}
+body[data-role="operador"], body[data-theme="dispatch"] {
+  --admin-density-padding: 6px 10px; --admin-font-size-base: .8125rem;
+}
+body[data-role="financeiro"], body[data-theme="finance"] {
+  --admin-density-padding: 8px 12px;
+}
+body.cliente, body[data-role="cliente"], body[data-theme="client"] {
+  --admin-bg-base: #f4f8f5; --admin-bg-surface: #fff;
+  --admin-bg-elevated: #edf6ef; --admin-border: #d4e6d8;
+  --admin-accent: #2fb34a; --admin-accent-hover: #248f3a;
+  --admin-text-main: #142018; --admin-text-muted: #607066;
+}
+body.guincho, body[data-role="guincho"], body[data-theme="driver"] {
+  --admin-bg-base: #061209; --admin-bg-surface: #0d2413;
+  --admin-bg-elevated: #15351d; --admin-border: #285632;
+  --admin-accent: #42d564; --admin-accent-hover: #2fb34a;
+  --admin-text-main: #f1fff3; --admin-text-muted: #a8cbb0;
+}
+body.oficina, body[data-role="oficina"], body[data-theme="workshop"] {
+  --admin-bg-base: #1a0f08; --admin-bg-surface: #2a1810;
+  --admin-bg-elevated: #392217; --admin-border: #5c3d28;
+  --admin-accent: #d97706; --admin-accent-hover: #f97316;
+  --admin-text-main: #fff7ed; --admin-text-muted: #fed7aa;
+}

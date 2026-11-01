@@ -45,6 +45,7 @@ $statusLabel = $labels[$st] ?? ucfirst(str_replace('_', ' ', $st));
 <div class="main-wrapper">
 <?php include __DIR__ . '/../layouts/sidebar_oficina.php'; ?>
 <main class="main-content">
+<?php include __DIR__ . '/../layouts/profile_panel_topbar.php'; ?>
     <div class="app-dashboard" style="max-width:900px">
 
         <header class="page-head mb-4">

@@ -1,0 +1,15 @@
+/* Lovable: sidebar dark remains controlled by admin theme; only workspace/light forms here. */
+.gf-lovable-admin-flow{--gfbo-bg:#f4f6f8;--gfbo-surface:#fff;--gfbo-elevated:#f3f5f7;--gfbo-border:#d8dfe7;--gfbo-text:#122033;--gfbo-muted:#77879b;--gfbo-accent:#35b34c;--gfbo-accent-hover:#279f3d;background:#f4f6f8!important;color:#122033!important;min-height:calc(100vh - 64px);}
+.gf-lovable-admin-flow .page-head,.gf-lovable-admin-flow .admin-flow-context{background:#fff!important;border:1px solid #d8dfe7!important;color:#122033!important;box-shadow:none!important;border-radius:6px!important;padding:18px 22px!important}
+.gf-lovable-admin-flow .page-head{background:transparent!important;border:0!important;padding-left:0!important}
+.gf-lovable-admin-flow h1,.gf-lovable-admin-flow .title,.gf-lovable-admin-flow .admin-flow-context strong{color:#122033!important}
+.gf-lovable-admin-flow .eyebrow,.gf-lovable-admin-flow .page-head .eyebrow{color:#2baa49!important;letter-spacing:.04em!important;font-size:10px!important}
+.gf-lovable-admin-flow p,.gf-lovable-admin-flow .text-muted,.gf-lovable-admin-flow .muted{color:#77879b!important}
+.gf-lovable-admin-flow .admin-flow-card,.gf-lovable-admin-flow>.card,.gf-lovable-admin-flow .card{background:#fff!important;color:#122033!important;border:1px solid #d8dfe7!important;border-radius:6px!important;box-shadow:none!important}
+.gf-lovable-admin-flow .form-label,.gf-lovable-admin-flow .label,.gf-lovable-admin-flow legend{color:#24354a!important}
+.gf-lovable-admin-flow .form-control,.gf-lovable-admin-flow .form-select{background:#f4f6f8!important;color:#142336!important;border:1px solid #cfd8e2!important;border-radius:5px!important}
+.gf-lovable-admin-flow .choice-card,.gf-lovable-admin-flow .decision-card{background:#fff!important;color:#152334!important;border:1px solid #d8dfe7!important;border-radius:6px!important}
+.gf-lovable-admin-flow .btn-primary,.gf-lovable-admin-flow button[type=submit].btn{background:#35b34c!important;border-color:#35b34c!important;color:#fff!important;border-radius:5px!important}
+.gf-lovable-admin-flow .btn-outline-secondary{border-color:#ced9e2!important;color:#314256!important;background:#fff!important}
+.gf-lovable-admin-flow .admin-flow-actions{border-color:#e0e5e9!important}
+.gf-lovable-admin-flow :focus-visible{outline:2px solid #35b34c;outline-offset:2px}

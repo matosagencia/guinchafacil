@@ -77,3 +77,7 @@ Guia de deploy completo (Docker, extrato de dados, HTTPS, atualização periódi
 ## 6. Pendências fora deste ciclo
 
 Nenhuma.
+# Atualização QA — provider unificado (2026-10-29)
+
+Os testes devem preparar um único provider para o papel de especialista/oficina, com localização em `provider_workshop_settings`, capacidade de `ELECTRICAL_DIAGNOSIS` e, separadamente, um provider de reboque quando a conversão exigir outro guincho. O seed deve ser idempotente e validar aprovação, disponibilidade, parceria, coordenadas e raio antes do smoke.
+

@@ -26,12 +26,17 @@ final class ConversionServiceCreditoTest extends TestCase
     protected function setUp(): void
     {
         $pdo = getPDO();
+        $driver = $pdo->getAttribute(PDO::ATTR_DRIVER_NAME);
+        if ($driver === 'sqlite') { $pdo->exec('PRAGMA foreign_keys = OFF'); }
+        if ($driver === 'mysql') { $pdo->exec('SET FOREIGN_KEY_CHECKS=0'); }
         foreach (['order_conversion_price_snapshots', 'pedido_idempotency', 'pagamentos_arquivados', 'pagamentos', 'pedidos', 'veiculos', 'usuarios', 'guinchos', 'configuracoes'] as $table) {
             try {
                 $pdo->exec("DELETE FROM {$table}");
             } catch (Throwable) {
             }
         }
+        if ($driver === 'sqlite') { $pdo->exec('PRAGMA foreign_keys = ON'); }
+        if ($driver === 'mysql') { $pdo->exec('SET FOREIGN_KEY_CHECKS=1'); }
 
         $pdo->exec("INSERT INTO usuarios (id, nome, email, senha_hash, telefone, cpf, tipo) VALUES
             (1, 'Cliente Teste', 'cliente.credito@example.com', 'hash', '11999999999', '11111111111', 'cliente')");

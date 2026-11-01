@@ -1,0 +1,6 @@
+<?php declare(strict_types=1);$e=static fn(mixed $v):string=>htmlspecialchars((string)$v,ENT_QUOTES|ENT_SUBSTITUTE,'UTF-8');$base=defined('BASE_PATH')?BASE_PATH:''; ?>
+<!doctype html><html lang="pt-BR"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Triagem de repasse</title><main><a href="<?= $e($base) ?>/admin/saques">Voltar aos repasses</a><h1>Registrar triagem de repasse</h1>
+<p>Job <?= $e($r['job']['id']) ?> · R$ <?= $e($r['job']['amount']) ?> · <?= $e($r['job']['status']) ?></p>
+<p>Esta acao abre uma demanda para analise. Nao executa transferencia. Um resultado incerto precisa ser conciliado antes de qualquer reprocessamento.</p>
+<?php if($r['existing_case']!==null): ?><p>Demanda em analise: <a href="<?= $e($base) ?>/admin/repasses/demanda?demanda_id=<?= $e($r['existing_case']['id']) ?>"><?= $e($r['existing_case']['id']) ?></a>.</p><?php endif ?>
+<form action="<?= $e($base) ?>/admin/repasses/triagem/criar" method="post"><input type="hidden" name="csrf_token" value="<?= $e($csrf) ?>"><input type="hidden" name="request_key" value="<?= $e($key) ?>"><input type="hidden" name="job_id" value="<?= $e($r['job']['id']) ?>"><label for="justificativa">Justificativa</label><textarea id="justificativa" name="justificativa" maxlength="1000" required></textarea><button>Registrar demanda</button></form></main></html>

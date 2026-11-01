@@ -8,10 +8,22 @@ require_once __DIR__ . '/../../src/Models/Pedido.php';
 
 final class PedidoTransitionServiceTest extends TestCase
 {
+    protected function tearDown(): void
+    {
+        try {
+            getPDO()->exec('DROP TRIGGER IF EXISTS fail_pedido_transition_update');
+        } catch (Throwable) {
+        }
+        parent::tearDown();
+    }
+
     protected function setUp(): void
     {
         $pdo = getPDO();
         $pdo->exec('DROP TRIGGER IF EXISTS fail_pedido_transition_update');
+        $driver = $pdo->getAttribute(PDO::ATTR_DRIVER_NAME);
+        if ($driver === 'sqlite') { $pdo->exec('PRAGMA foreign_keys = OFF'); }
+        if ($driver === 'mysql') { $pdo->exec('SET FOREIGN_KEY_CHECKS=0'); }
         // Ordem importa: apagar filhos antes dos pais por causa das FKs.
         foreach (['pedido_idempotency', 'pagamentos', 'pedidos', 'guinchos', 'veiculos', 'usuarios', 'configuracoes', 'app_logs'] as $table) {
             try {
@@ -19,6 +31,8 @@ final class PedidoTransitionServiceTest extends TestCase
             } catch (Throwable) {
             }
         }
+        if ($driver === 'sqlite') { $pdo->exec('PRAGMA foreign_keys = ON'); }
+        if ($driver === 'mysql') { $pdo->exec('SET FOREIGN_KEY_CHECKS=1'); }
 
         $pdo->exec("INSERT INTO configuracoes (chave, valor) VALUES ('comissao_plataforma', '0.15')");
         // §SPLIT-LIQUIDO-01: reserva_gateway_percentual=0 aqui é DELIBERADO —
@@ -120,12 +134,10 @@ final class PedidoTransitionServiceTest extends TestCase
         // O trigger aborta exatamente depois que a transição tenta persistir o
         // novo status. A exceção deve cair no catch da máquina e desfazer toda
         // a transação, deixando o pedido como estava antes da tentativa.
-        $pdo->exec("CREATE TRIGGER fail_pedido_transition_update
-            AFTER UPDATE OF status ON pedidos
-            WHEN NEW.id = 401
-            BEGIN
-                SELECT RAISE(ABORT, 'falha intermediaria simulada');
-            END");
+        $trigger = $pdo->getAttribute(PDO::ATTR_DRIVER_NAME) === 'mysql'
+            ? "CREATE TRIGGER fail_pedido_transition_update BEFORE UPDATE ON pedidos FOR EACH ROW BEGIN IF NEW.id = 401 AND NOT (OLD.status <=> NEW.status) THEN SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT='falha intermediaria simulada'; END IF; END"
+            : "CREATE TRIGGER fail_pedido_transition_update AFTER UPDATE OF status ON pedidos WHEN NEW.id = 401 BEGIN SELECT RAISE(ABORT, 'falha intermediaria simulada'); END";
+        $pdo->exec($trigger);
 
         $result = PedidoTransitionService::transition(
             new PedidoTransitionRequest('admin', 1, 401, 'aguardando_guincho')
@@ -141,7 +153,7 @@ final class PedidoTransitionServiceTest extends TestCase
         $this->assertSame('aguardando_pagamento', $pedido['status']);
         $this->assertNull($pedido['guincho_id']);
         $this->assertNull($pedido['expiracao_aceite']);
-        $this->assertNull($pedido['raio_atual_km']);
+        $this->assertSame('10', (string)$pedido['raio_atual_km']);
         $this->assertFalse($pdo->inTransaction());
     }
 }

@@ -775,6 +775,14 @@ window.__basePath = <?php echo json_encode($bp, JSON_UNESCAPED_UNICODE | JSON_UN
 
 </div>
 
+<footer class="bo-footer gf-admin-dashboard-footer">
+    <div class="bo-footer__meta">
+        <span><span class="status-dot" aria-hidden="true"></span> Dados operacionais do GuinchaFácil</span>
+        <span>GuinchaFácil / Backoffice</span>
+    </div>
+    <?php require __DIR__ . '/../components/gf-footer-payments.php'; ?>
+</footer>
+
 
 
 <?php

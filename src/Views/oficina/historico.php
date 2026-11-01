@@ -8,6 +8,7 @@ $labels = ['oficina_aceitou'=>'Aceito','oficina_a_caminho'=>'A caminho','no_loca
 <div class="main-wrapper" style="display:flex;min-height:100vh">
     <?php include __DIR__ . '/../layouts/sidebar_oficina.php'; ?>
     <main class="main-content" style="flex:1;padding:1.5rem">
+<?php include __DIR__ . '/../layouts/profile_panel_topbar.php'; ?>
         <h1 style="font-size:1.4rem;font-weight:700;color:var(--ofi-primary-darker);margin-bottom:1rem"><i class="fas fa-clock-rotate-left me-2"></i>Historico</h1>
         <div class="ofi-card">
             <?php if (empty($pedidos)): ?>

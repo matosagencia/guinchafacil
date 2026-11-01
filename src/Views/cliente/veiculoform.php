@@ -35,7 +35,7 @@ $editando = !empty($veiculo['id']);
                 </div>
                 <div class="card-body">
                     <form method="POST" action="<?php echo $bp; ?>/cliente/veiculo/salvar" enctype="multipart/form-data">
-                        <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($csrfToken ?? ''); ?>">
+                        <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($csrfToken ?? ''); ?>">                        <?php if (!empty($triageSessionId)): ?>                        <input type="hidden" name="triage_session_id" value="<?php echo htmlspecialchars($triageSessionId); ?>">                        <?php endif; ?>
                         <?php if ($editando): ?>
                         <input type="hidden" name="id" value="<?php echo (int)$veiculo['id']; ?>">
                         <?php endif; ?>

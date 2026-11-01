@@ -24,6 +24,11 @@ final class ProviderVehicleCompatibilityEvaluateTest extends TestCase
         $pdo->exec("DELETE FROM provider_service_vehicle_capabilities");
         $pdo->exec("DELETE FROM order_vehicle_requirements");
         $pdo->exec("DELETE FROM service_vehicle_requirements");
+        $pdo->exec("INSERT IGNORE INTO service_categories (id, code, name) VALUES (1, 'QA', 'QA')");
+        $pdo->exec("INSERT IGNORE INTO service_types (id, category_id, code, name, attendance_mode, active) VALUES (7, 1, 'QA_TOW', 'Reboque QA', 'TOWING', 1)");
+        $pdo->exec("INSERT IGNORE INTO usuarios (id, nome, email, senha_hash, telefone, cpf, tipo, ativo) VALUES (1, 'Cliente QA', 'compat@test.local', 'hash', '11999990002', '90000000002', 'cliente', 1)");
+        $pdo->exec("INSERT IGNORE INTO veiculos (id, usuario_id, placa, marca, modelo, ano, cor, tipo) VALUES (99, 1, 'QAA0001', 'QA', 'Teste', 2020, 'Prata', 'carro')");
+        $pdo->exec("INSERT IGNORE INTO pedidos (id, cliente_id, veiculo_id, status, lat_origem, lng_origem, endereco_origem, lat_destino, lng_destino, endereco_destino, distancia_km, custo_estimado, valor_estimado) VALUES (500, 1, 99, 'aguardando_guincho', -23.55, -46.63, 'Origem QA', -23.56, -46.64, 'Destino QA', 1, 100, 100)");
 
         // Snapshot do pedido: automóvel de passeio, não elétrico, confirmado.
         $pdo->prepare(

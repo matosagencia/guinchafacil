@@ -34,6 +34,7 @@ final class DiagnosticoOrcamentoEstoqueTest extends TestCase
     protected function setUp(): void
     {
         $pdo = getPDO();
+        $pdo->exec('DROP TRIGGER IF EXISTS fail_pedido_transition_update');
         foreach (['order_charge_items', 'estoque_movimentos', 'provider_produtos_estoque', 'produtos', 'pedido_orcamentos', 'pedido_diagnosticos', 'pedidos', 'guinchos', 'veiculos', 'usuarios'] as $table) {
             try {
                 $pdo->exec("DELETE FROM {$table}");
@@ -48,6 +49,7 @@ final class DiagnosticoOrcamentoEstoqueTest extends TestCase
         ");
         $pdo->exec("INSERT INTO veiculos (id, usuario_id, placa, marca, modelo, ano, cor, tipo) VALUES (1, 1, 'TST1A23', 'Marca', 'Modelo', 2020, 'Prata', 'carro')");
         $pdo->exec("INSERT INTO guinchos (id, usuario_id, aprovado, disponivel) VALUES (" . self::PROVIDER_ID . ", 2, 1, 1)");
+        $pdo->exec("INSERT IGNORE INTO providers (id, provider_type, legal_name, created_at, updated_at) VALUES (" . self::PROVIDER_ID . ", 'GUINCHO', 'Guincho QA', NOW(), NOW())");
 
         $this->produtoId = Produto::criar([
             'sku' => 'BAT-QA-DIAG', 'nome' => 'Bateria QA Diagnóstico', 'categoria' => 'bateria',
@@ -63,7 +65,7 @@ final class DiagnosticoOrcamentoEstoqueTest extends TestCase
             "INSERT INTO pedidos (id, status, custo_estimado, cliente_id, veiculo_id, guincho_id,
                 lat_origem, lng_origem, endereco_origem, lat_destino, lng_destino, endereco_destino,
                 attendance_mode, criado_em)
-             VALUES (?, 'autorizacao_servico_pendente', 149.90, ?, 1, ?, -23.55, -46.63, 'Origem', -23.56, -46.64, 'Destino', 'ON_SITE', datetime('now'))"
+             VALUES (?, 'autorizacao_servico_pendente', 149.90, ?, 1, ?, -23.55, -46.63, 'Origem', -23.56, -46.64, 'Destino', 'ON_SITE', NOW())"
         );
         $stmt->execute([$pedidoId, self::CLIENTE_ID, self::PROVIDER_ID]);
     }

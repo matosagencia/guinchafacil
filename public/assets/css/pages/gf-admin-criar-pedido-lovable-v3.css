@@ -1,0 +1,38 @@
+/* GF Lovable Admin — Criar pedido v3. Escopo restrito à etapa administrativa. */
+.main-wrapper.shell.admin-shell:has(.gf-admin-order-v3){background:#f3f5f7!important;align-items:stretch;min-height:calc(100vh - 60px)}
+.gf-admin-order-v3{--gf-bg:#f3f5f7;--gf-white:#fff;--gf-text:#142033;--gf-muted:#64748b;--gf-line:#d8dfe5;--gf-green:#35b34c;background:var(--gf-bg)!important;color:var(--gf-text)!important;min-width:0;flex:1;padding:0 28px 48px!important;max-width:none!important}
+.gf-admin-order-v3 *{box-sizing:border-box}
+.gf-admin-order-v3 .gf-order-crumb{display:flex;gap:13px;align-items:center;border-bottom:1px solid var(--gf-line);background:#fff;margin:0 -28px 26px;padding:18px 28px;font-size:12px;color:#75849a}
+.gf-admin-order-v3 .gf-order-crumb a{color:#64748b;text-decoration:none}.gf-admin-order-v3 .gf-order-crumb strong{color:#172033;font-weight:600}
+.gf-admin-order-v3 .gf-order-intro{display:flex;justify-content:space-between;align-items:center;gap:15px;margin-bottom:24px}
+.gf-admin-order-v3 .gf-order-eyebrow{font-size:10px;font-weight:800;letter-spacing:.07em;color:#259c43}
+.gf-admin-order-v3 .gf-order-intro h1{font-size:27px!important;font-weight:750!important;line-height:1.2!important;color:#142033!important;margin:7px 0!important}
+.gf-admin-order-v3 .gf-order-intro p{font-size:13px;color:#66778b;margin:0}
+.gf-admin-order-v3 .gf-order-back{background:#fff;border:1px solid #d9e0e6;border-radius:6px;color:#253347;padding:9px 13px;white-space:nowrap;text-decoration:none;font-size:12px}
+.gf-admin-order-v3 .gf-order-back:hover{border-color:#35b34c;color:#16862c}
+.gf-admin-order-v3 .gf-order-progress{list-style:none;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));padding:0;margin:0 0 24px;gap:12px}
+.gf-admin-order-v3 .gf-order-progress li{min-width:0;display:flex;align-items:center;gap:12px;background:white;border:1px solid #dae1e7;border-radius:7px;padding:13px 16px;color:#66788b}
+.gf-admin-order-v3 .gf-order-progress li>span{display:grid;place-items:center;flex:0 0 30px;height:30px;border:1px solid #cbd5de;background:#f6f8f9;border-radius:50%;font-size:13px;font-weight:800}
+.gf-admin-order-v3 .gf-order-progress li strong{display:block;font-size:13px;color:#233047}.gf-admin-order-v3 .gf-order-progress li small{display:block;font-size:11px;color:#8795a3}
+.gf-admin-order-v3 .gf-order-progress .is-active{border-color:#35b34c;box-shadow:inset 3px 0 #35b34c}.gf-admin-order-v3 .gf-order-progress .is-active>span,.gf-admin-order-v3 .gf-order-progress .is-complete>span{background:#e3f5e5;color:#159536;border-color:#b7dfbf}
+.gf-admin-order-v3 .gf-order-section-heading{margin:0 0 14px}.gf-admin-order-v3 .gf-order-section-heading h2{font-size:16px;color:#162134;font-weight:700;margin:0 0 4px}.gf-admin-order-v3 .gf-order-section-heading p{font-size:12px;color:#66788b;margin:0}
+.gf-admin-order-v3 .gf-order-form,.gf-admin-order-v3 .gf-order-triage-card{background:#fff!important;border:1px solid #dce2e8!important;box-shadow:none!important;border-radius:7px!important;max-width:none;padding:25px!important;margin:0!important;color:#142033!important}
+.gf-admin-order-v3 .gf-order-form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:20px;row-gap:12px}
+.gf-admin-order-v3 .gf-order-form .admin-flow-actions{grid-column:1/-1;display:flex;justify-content:flex-end;gap:10px;padding-top:18px;border-top:1px solid #e2e7ec}
+.gf-admin-order-v3 .form-label,.gf-admin-order-v3 label{color:#314156;font-weight:600;font-size:12px}
+.gf-admin-order-v3 .form-select,.gf-admin-order-v3 .form-control,.gf-admin-order-v3 input:not([type=hidden]),.gf-admin-order-v3 select,.gf-admin-order-v3 textarea{background:#f8fafb;color:#18283a;border-color:#d5dde5;border-radius:6px;min-height:39px}
+.gf-admin-order-v3 input:focus,.gf-admin-order-v3 select:focus,.gf-admin-order-v3 textarea:focus{outline:2px solid #35b34c44;outline-offset:1px}
+.gf-admin-order-v3 .text-muted,.gf-admin-order-v3 .muted{color:#66788b!important}
+.gf-admin-order-v3 .btn-primary,.gf-admin-order-v3 button[type=submit].btn{background:#35b34c!important;border-color:#35b34c!important;color:white!important;font-weight:650}
+.gf-admin-order-v3 .btn-secondary,.gf-admin-order-v3 .btn-outline-secondary{background:#fff!important;color:#273549!important;border:1px solid #d5dde5!important}
+.gf-admin-order-v3 .admin-flow-context{background:#fff!important;border:1px solid #dce2e8!important;border-radius:7px!important;display:flex;justify-content:space-between;align-items:center;gap:15px;color:#142033!important;margin-bottom:18px;padding:15px 20px}
+.gf-admin-order-v3 .admin-flow-context strong,.gf-admin-order-v3 .gf-order-triage-card h1{color:#142033!important}
+.gf-admin-order-v3 .gf-order-triage-card>.eyebrow{color:#269944;font-size:10px;font-weight:750}
+.gf-admin-order-v3 .gf-order-triage-card>.title{font-size:21px;color:#142033!important}
+.gf-admin-order-v3 .gf-order-triage-card .card,.gf-admin-order-v3 .gf-order-triage-card [data-step]{color:#142033}
+.gf-admin-order-v3 .alert{border-radius:7px}
+/* Diálogos fora do main: corrigir contraste sem alterar a lógica JS */
+dialog.qf-dlg{color:#142033;background:#fff;border:1px solid #dce2e8;border-radius:9px;max-width:min(680px,94vw)}
+dialog.qf-dlg label,dialog.qf-dlg h3{color:#142033}
+dialog.qf-dlg input,dialog.qf-dlg select{background:#f8fafb;color:#142033;border:1px solid #d5dde5}
+@media(max-width:850px){.gf-admin-order-v3{padding:0 14px 32px!important}.gf-admin-order-v3 .gf-order-crumb{margin:0 -14px 20px;padding:14px}.gf-admin-order-v3 .gf-order-intro{align-items:flex-start;flex-direction:column}.gf-admin-order-v3 .gf-order-form{grid-template-columns:1fr}.gf-admin-order-v3 .gf-order-progress{gap:7px}.gf-admin-order-v3 .gf-order-progress li{padding:9px 7px;gap:5px}.gf-admin-order-v3 .gf-order-progress li strong{font-size:11px}.gf-admin-order-v3 .admin-flow-context{flex-direction:column;align-items:flex-start}}

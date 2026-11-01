@@ -21,9 +21,17 @@ include __DIR__ . '/../layouts/header.php';
 
 <link rel="stylesheet" href="<?= $e($bp) ?>/public/assets/css/pages/gf-admin-funil-lovable-light-v2.css?v=20261016">
 <link rel="stylesheet" href="<?= $e($bp) ?>/public/assets/css/pages/gf-admin-criar-pedido-lovable-v3.css?v=20261016-9">
-<div class="main-wrapper shell admin-shell">
-<?php include __DIR__ . '/../layouts/sidebar_admin.php'; ?>
-<main class="main-content shell-main shell-content gf-lovable-admin-flow gf-admin-order-v3">
+<link rel="stylesheet" href="<?= $e($bp) ?>/public/assets/css/pages/gf-f18c-shell.css?v=20261101-4">
+<div class="bo bo-operator gf-f18c-root gf-admin-order-root" id="gfAdminOrderRoot">
+<aside class="bo-sidebar gf-f18c-sidebar" aria-label="NavegaÃ§Ã£o do administrador">
+    <a class="gf-f18c-brand" href="<?= $e($bp) ?>/admin/central">Guincha<span>FÃ¡cil</span><i>.</i></a>
+    <div class="gf-f18c-workspace"><span class="gf-f18c-avatar"><i class="fas fa-shield-halved" aria-hidden="true"></i></span><span><strong>Central GuinchaFÃ¡cil</strong><small>Workspace operacional</small></span></div>
+    <?php include __DIR__ . '/../components/admin_nav_operacional.php'; ?>
+    <div class="gf-f18c-sidebar-footer"><a href="<?= $e($bp) ?>/">Voltar ao site</a></div>
+</aside>
+<div class="bo-body">
+<header class="bo-header"><div class="gf-f18c-breadcrumb"><span>Backoffice <i class="fas fa-chevron-right" aria-hidden="true"></i> <strong>Novo pedido</strong></span></div><div class="gf-f18c-header-actions"><span class="gf-f18c-user"><?= $e($_SESSION['user']['nome'] ?? 'Administrador') ?></span><a class="gf-f18c-logout" href="<?= $e($bp) ?>/logout" data-confirm-logout><i class="fas fa-right-from-bracket" aria-hidden="true"></i><span>Sair</span></a></div></header>
+<main class="bo-content gf-lovable-admin-flow gf-admin-order-v3">
 
     <nav class="gf-order-crumb" aria-label="Localização"><a href="<?= $e($bp) ?>/admin/dashboard">Backoffice</a><span aria-hidden="true">›</span><a href="<?= $e($bp) ?>/admin/pedidos">Pedidos</a><span aria-hidden="true">›</span><strong>Novo pedido</strong></nav>
     <header class="gf-order-intro">
@@ -101,6 +109,7 @@ include __DIR__ . '/../layouts/header.php';
     <?php endif; ?>
 
 </main>
+</div>
 </div>
 
 <script<?= function_exists('csp_script_nonce_attr') ? csp_script_nonce_attr() : '' ?>>

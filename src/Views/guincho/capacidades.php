@@ -16,7 +16,7 @@ $statusLabel = [
 ?>
 <div class="main-wrapper">
 <?php include __DIR__ . '/../layouts/sidebar_guincho.php'; ?>
-<main class="main-content">
+<main class="main-content"><?php include __DIR__ . '/../layouts/profile_panel_topbar.php'; ?>
     <div class="mini-shell">
         <header class="page-head mb-4">
             <div>
@@ -56,20 +56,7 @@ $statusLabel = [
                                 <?php endif; ?>
                             </div>
                             <p class="small text-muted mb-2 mt-1"><?php echo htmlspecialchars((string)($t['description'] ?? '')); ?></p>
-                            <div class="row g-2">
-                                <div class="col-12 col-md-6">
-                                    <label class="form-label small mb-0">Raio de atendimento (km)</label>
-                                    <input type="number" min="0" class="form-control form-control-sm"
-                                           name="coverage_radius_km[<?php echo (int)$t['id']; ?>]"
-                                           value="<?php echo htmlspecialchars((string)($minha['coverage_radius_km'] ?? '')); ?>"
-                                           placeholder="Até onde você atende este serviço">
-                                </div>
-                                <div class="col-12 col-md-6 d-flex align-items-end">
-                                    <p class="small text-muted mb-1">
-                                        <i class="fas fa-circle-info me-1"></i>O preço deste serviço é definido pela GuinchaFácil (não por você).
-                                    </p>
-                                </div>
-                            </div>
+                            <p class="small text-muted mb-0 mt-2">                                <i class="fas fa-circle-info me-1"></i>O preço deste serviço é definido pela GuinchaFácil. O raio de atendimento é ajustado em Veículo e Operação, no seu perfil.                            </p>
                         </div>
                     </div>
                 </div>

@@ -18,6 +18,8 @@ final class ServicePricingRuleCalcularTotalTest extends TestCase
     protected function setUp(): void
     {
         $pdo = getPDO();
+        $pdo->exec("INSERT IGNORE INTO service_categories (id, code, name) VALUES (1, 'QA', 'QA')");
+        $pdo->exec("INSERT IGNORE INTO service_types (id, category_id, code, name, attendance_mode, active) VALUES (1, 1, 'QA_SERVICE', 'Serviço QA', 'ON_SITE', 1)");
         foreach (['service_pricing_rules', 'feriados', 'configuracoes'] as $table) {
             try {
                 $pdo->exec("DELETE FROM {$table}");

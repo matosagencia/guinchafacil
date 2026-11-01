@@ -28,12 +28,23 @@ function maskEnvValue(string $value): string {
 }
 ?>
 <link rel="stylesheet" href="<?php echo htmlspecialchars($bp); ?>/public/assets/css/pages/admin-configuracoes.css?v=20260813-2">
+<link rel="stylesheet" href="<?php echo htmlspecialchars($bp); ?>/public/assets/css/pages/gf-f18c-shell.css?v=20261101-4">
 
-<div class="main-wrapper shell admin-shell">
+<div class="bo bo-operator gf-f18c-root gf-admin-config-root" id="gfAdminConfigRoot">
 
-<?php include __DIR__ . '/../layouts/sidebar_admin.php'; ?>
+<aside class="bo-sidebar gf-f18c-sidebar" aria-label="NavegaÃ§Ã£o do administrador">
+    <a class="gf-f18c-brand" href="<?php echo htmlspecialchars($bp); ?>/admin/central">Guincha<span>FÃ¡cil</span><i>.</i></a>
+    <div class="gf-f18c-workspace"><span class="gf-f18c-avatar"><i class="fas fa-shield-halved" aria-hidden="true"></i></span><span><strong>Central GuinchaFÃ¡cil</strong><small>Workspace operacional</small></span></div>
+    <?php include __DIR__ . '/../components/admin_nav_operacional.php'; ?>
+    <div class="gf-f18c-sidebar-footer"><a href="<?php echo htmlspecialchars($bp); ?>/">Voltar ao site</a></div>
+</aside>
+<div class="bo-body">
+<header class="bo-header">
+    <div class="gf-f18c-breadcrumb"><span>Backoffice <i class="fas fa-chevron-right" aria-hidden="true"></i> <strong>Configurações</strong></span></div>
+    <div class="gf-f18c-header-actions"><span class="gf-f18c-user"><?php echo htmlspecialchars((string)($_SESSION['user']['nome'] ?? 'Administrador')); ?></span><a class="gf-f18c-logout" href="<?php echo htmlspecialchars($bp); ?>/logout" data-confirm-logout><i class="fas fa-right-from-bracket" aria-hidden="true"></i><span>Sair</span></a></div>
+</header>
+<main class="bo-content gf-admin-config-content">
 
-<main class="main-content shell-main shell-content">
 
 
 
@@ -975,6 +986,8 @@ function maskEnvValue(string $value): string {
 
 
 </main>
+</div>
+</div>
 
 <script<?php echo csp_script_nonce_attr(); ?>>
 (function () {

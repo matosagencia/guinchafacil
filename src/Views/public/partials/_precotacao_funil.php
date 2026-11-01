@@ -215,8 +215,19 @@ $csrf_token = $csrf_token ?? '';
 
     <!-- ─── ESTAGIO 6: SUBMIT (invisivel ate o JS preparar) ─── -->
     <div class="col-12" id="stage-cotacao" hidden>
+        <div class="card border-success mb-3" id="gfCotacaoResumo" aria-live="polite">
+            <div class="card-body">
+                <p class="text-uppercase small text-success fw-bold mb-1">Cotação disponível</p>
+                <h3 class="mb-2">Seu atendimento</h3>
+                <div class="d-flex justify-content-between align-items-center gap-3">
+                    <span id="gfCotacaoModalidade">Atendimento</span>
+                    <strong class="fs-3 text-success" id="gfCotacaoValor">R$ --</strong>
+                </div>
+                <small class="text-muted" id="gfCotacaoDetalhes">Valor estimado para a localização informada.</small>
+            </div>
+        </div>
         <button type="submit" class="btn-main w-100" id="gfBtnFinal">
-            Ver minha cotacao
+            Continuar com esta cotação
         </button>
     </div>
 

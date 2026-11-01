@@ -161,3 +161,7 @@ Conferidos no zip enviado (protocolo v2, seção 8):
 - Nunca imprimir segredos (`.env`, tokens, senhas). Mascarar com `***`.
 - Para inspecionar variáveis do MP: `grep -E "^MP_" .env | sed 's/=.*/=***/'`.
 - O console de testes bloqueia se `MP_ENV != sandbox` e só manipula dados `E2E_`.
+# Atualização prioritária — provider unificado (2026-10-29)
+
+Especialista e oficina são papéis do mesmo provider operacional. A fonte de verdade é `providers` com `provider_workshop_settings`, capacidades e localização centralizada; tabelas legadas `oficinas` e `guinchos` permanecem apenas como compatibilidade/vínculo quando aplicável. O matching deve consultar o provider aprovado, ativo, com parceria ativa, coordenadas válidas e raio suficiente.
+

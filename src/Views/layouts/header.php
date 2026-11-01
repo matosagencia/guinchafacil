@@ -26,6 +26,7 @@ $roleThemeMap = [
     'admin'        => 'executive',
     'funcionario'  => 'dispatch',
     'gerente'      => 'dispatch',
+    'cliente'      => 'client',
     'oficina'      => 'workshop',
     'guincho'      => 'driver',
     'especialista' => 'driver',
@@ -64,13 +65,14 @@ $debugModeAtivo = DebugMode::jsFlag();
     <link href="<?php echo htmlspecialchars($bp); ?>/public/assets/css/base.css" rel="stylesheet">
     <link href="<?php echo htmlspecialchars($bp); ?>/public/assets/css/shell.css?v=20260802-2" rel="stylesheet">
        <!-- Onda 5.1: Manrope + gf-layout.css -->    <link rel="preconnect" href="https://fonts.googleapis.com">    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">    <link rel="stylesheet" href="<?php echo htmlspecialchars($bp ?? (defined('BASE_PATH') ? BASE_PATH : '')); ?>/public/assets/css/gf-layout.css">
+    <link rel="stylesheet" href="<?php echo htmlspecialchars($bp ?? (defined('BASE_PATH') ? BASE_PATH : '')); ?>/public/assets/css/components/gf-footer-payments.css?v=20261101-2">
     <?php if ($temaArquivo): ?>
     <link href="<?php echo htmlspecialchars($bp); ?>/public/assets/css/themes/<?php echo htmlspecialchars($temaArquivo); ?>.css" rel="stylesheet">
     <?php endif; ?>
     <?php if ($dataTheme !== ''): ?>
     <link href="<?php echo htmlspecialchars($bp); ?>/public/assets/css/admin-themes.css?v=20261015-1" rel="stylesheet">
+    <link href="<?php echo htmlspecialchars($bp); ?>/public/assets/css/backoffice-layout.css?v=20261101-13" rel="stylesheet">
     <?php if (($tipo ?? '') === 'admin'): ?>
-    <link href="<?php echo htmlspecialchars($bp); ?>/public/assets/css/backoffice-layout.css?v=20261027-2" rel="stylesheet">
     <?php $adminPathForTheme = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/'; ?>
     <?php if (str_starts_with($adminPathForTheme, '/admin/catalogo-servicos') || str_starts_with($adminPathForTheme, '/admin/produto') || str_starts_with($adminPathForTheme, '/admin/produtos')): ?>
     <link href="<?php echo htmlspecialchars($bp); ?>/public/assets/css/admin-catalogo-shell.css?v=20261027-1" rel="stylesheet">
@@ -139,6 +141,21 @@ $debugModeAtivo = DebugMode::jsFlag();
   });
 })();
 </script>
+<script<?php echo csp_script_nonce_attr(); ?>>
+(function () {
+  document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.gf-f18c-header-actions').forEach(function (actions) {
+      if (actions.querySelector('.gf-f18c-logout')) return;
+      var link = document.createElement('a');
+      link.className = 'gf-f18c-logout';
+      link.href = (document.body.dataset.basePath || '') + '/logout';
+      link.setAttribute('data-confirm-logout', '');
+      link.innerHTML = '<i class="fas fa-right-from-bracket" aria-hidden="true"></i><span>Sair</span>';
+      actions.appendChild(link);
+    });
+  });
+})();
+</script>
 <?php endif; ?>
 <?php if ($temaClass === 'admin'): ?>
 <script<?php echo csp_script_nonce_attr(); ?>>
@@ -173,7 +190,7 @@ $debugModeAtivo = DebugMode::jsFlag();
 
 
 
-<nav class="<?php echo $temaClass === 'admin' ? 'gf-order-crumb gf-admin-topbar' : 'navbar navbar-expand-lg'; ?>">
+<nav class="<?php echo $temaClass === 'admin' ? 'gf-order-crumb gf-admin-topbar' : 'navbar navbar-expand-lg gf-unified-topbar'; ?>">
 
     <div class="bo-global-nav__inner">
 

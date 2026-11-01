@@ -14,6 +14,7 @@ $tipoLabels = [
 <div class="main-wrapper">
 <?php include __DIR__ . '/../layouts/sidebar_oficina.php'; ?>
 <main class="main-content">
+<?php include __DIR__ . '/../layouts/profile_panel_topbar.php'; ?>
     <div class="app-dashboard">
 
         <header class="page-head mb-4">

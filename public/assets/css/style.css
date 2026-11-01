@@ -109,7 +109,7 @@ body {
     top: 0; left: 0; right: 0;
     z-index: 1030;
     min-height: 64px;
-}
+}/* No painel do cliente, o bloco de navegação e a identificação do usuário * ficam encostados à direita, sem deslocar a marca. */body.cliente .navbar > .bo-global-nav__inner {    display: flex;    align-items: center;    width: 100%;}body.cliente .navbar #navbarMain {    margin-left: auto;    flex: 0 1 auto;}
 .navbar-brand {
     font-weight: 800;
     font-size: 1.25rem;

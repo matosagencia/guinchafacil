@@ -1,0 +1,75 @@
+/* 18E3: apenas modulo Operacao, nenhuma regra de negocio alterada. */
+@media(min-width:769px){
+body.admin:has(#pedShell,#despachoShell,#alertasShell,#ocShell){overflow-x:clip!important}
+body.admin:has(#pedShell,#despachoShell,#alertasShell,#ocShell) .shell-ops,
+body.admin:has(#pedShell,#despachoShell,#alertasShell,#ocShell) .shell-ops-workspace,
+body.admin:has(#pedShell) .gf-orders-main {min-width:0!important;max-width:100%!important;box-sizing:border-box!important}
+body.admin:has(#pedShell) .gf-orders-panels{display:grid!important;grid-template-columns:minmax(250px,365px) minmax(0,1fr)!important;width:100%!important;min-width:0!important}
+body.admin:has(#pedShell) .gf-orders-panels>*{min-width:0!important;max-width:100%!important}
+}
+body.admin:has(#pedShell,#despachoShell,#alertasShell,#ocShell) .shell-ops-workspace{overflow-wrap:anywhere}
+body.admin:has(#pedShell,#despachoShell,#alertasShell,#ocShell) .ops-incident-actions,
+body.admin:has(#pedShell,#despachoShell,#alertasShell,#ocShell) .ops-workspace-actions,
+body.admin:has(#pedShell,#despachoShell,#alertasShell,#ocShell) .ops-action-buttons{display:flex!important;flex-wrap:wrap!important;gap:8px!important;max-width:100%!important}
+body.admin:has(#despachoShell,#alertasShell,#ocShell) .shell-ops-worklist,
+body.admin:has(#despachoShell,#alertasShell,#ocShell) .ops-worklist-results,
+body.admin:has(#despachoShell,#alertasShell,#ocShell) .ops-worklist-item{background:#fff!important;color:#0f172a!important}
+body.admin:has(#despachoShell,#alertasShell,#ocShell) .ops-worklist-item{border-bottom:1px solid #e2e8f0!important}
+body.admin:has(#despachoShell,#alertasShell,#ocShell) .ops-worklist-item:is(:hover,:focus-visible),
+body.admin:has(#despachoShell,#alertasShell,#ocShell) .ops-worklist-item.is-active,
+body.admin:has(#despachoShell,#alertasShell,#ocShell) .ops-worklist-item.is-selected{background:#e8f7ec!important}
+body.admin:has(#despachoShell,#alertasShell,#ocShell) .ops-worklist-item :is(a,span,strong,small,p,time),
+body.admin:has(#despachoShell,#alertasShell,#ocShell) .ops-worklist-item__top,
+body.admin:has(#despachoShell,#alertasShell,#ocShell) .ops-worklist-item__customer,
+body.admin:has(#despachoShell,#alertasShell,#ocShell) .ops-worklist-item__vehicle,
+body.admin:has(#despachoShell,#alertasShell,#ocShell) .ops-worklist-item__footer{color:#0f172a!important}
+body.admin:has(#despachoShell,#alertasShell,#ocShell) .ops-worklist-item__customer,
+body.admin:has(#despachoShell,#alertasShell,#ocShell) .ops-worklist-item__footer small{color:#475569!important}
+body.admin:has(#despachoShell,#alertasShell,#ocShell) .shell-ops-workspace .ops-empty-state,
+body.admin:has(#despachoShell,#alertasShell,#ocShell) .shell-ops-worklist .ops-empty-state{color:#334155!important}
+body.admin:has(#despachoShell,#alertasShell,#ocShell) .ops-empty-state :is(p,span,small,i){color:#64748b!important}
+body.admin:has(#pedShell,#despachoShell,#alertasShell,#ocShell) .ops-order-facts,
+body.admin:has(#pedShell,#despachoShell,#alertasShell,#ocShell) .ops-order-fact{background:#fff!important;color:#0f172a!important}
+body.admin:has(#pedShell,#despachoShell,#alertasShell,#ocShell) .ops-order-fact__value{color:#0f172a!important;font-weight:600!important}
+body.admin:has(#pedShell,#despachoShell,#alertasShell,#ocShell) .ops-order-fact__label{color:#475569!important}
+body.admin:has(#pedShell,#despachoShell,#alertasShell,#ocShell) .shell-ops-workspace .table-responsive{max-width:100%!important;overflow-x:auto!important}
+@media(max-width:768px){body.admin:has(#pedShell,#despachoShell,#alertasShell,#ocShell){overflow-x:hidden!important}body.admin:has(#pedShell) .gf-orders-panels{display:block!important;width:100%!important}}
+
+
+/* Fase 18E.4: ajustes finais visuais, restritos ao modulo Operacao. */
+@media (min-width:769px) {
+  body.admin:has(#pedShell) .gf-orders-main,
+  body.admin:has(#pedShell) .gf-orders-panels,
+  body.admin:has(#pedShell) .shell-ops-workspace,
+  body.admin:has(#pedShell) .ops-order-header,
+  body.admin:has(#pedShell) .ops-order-facts {
+    min-width:0!important; max-width:100%!important;
+  }
+  body.admin:has(#pedShell) .gf-orders-panels {
+    grid-template-columns:minmax(240px, 30%) minmax(0, 1fr)!important;
+  }
+}
+body.admin:has(#pedShell) .ops-order-header,
+body.admin:has(#pedShell) .ops-order-header>*,
+body.admin:has(#pedShell) .ops-incident-actions,
+body.admin:has(#pedShell) .ops-workspace-actions,
+body.admin:has(#pedShell) .ops-action-buttons {
+  min-width:0!important;max-width:100%!important;
+}
+body.admin:has(#pedShell) .ops-order-header {display:flex!important;flex-wrap:wrap!important;gap:10px!important;align-items:flex-start!important}
+body.admin:has(#pedShell) .ops-order-header :is(a,button){white-space:normal!important;overflow-wrap:normal!important;max-width:100%!important}
+body.admin:has(#pedShell) .ops-order-facts {display:grid!important;grid-template-columns:repeat(auto-fit,minmax(min(100%,160px),1fr))!important}
+body.admin:has(#pedShell) .ops-order-fact {min-width:0!important;overflow-wrap:anywhere!important}
+body.admin:has(#despachoShell) .ops-order-header :is(h1,h2,h3,strong,span,p):not(.ops-badge) {color:#0f172a!important}
+body.admin:has(#despachoShell) .ops-order-header :is(small,.text-muted){color:#475569!important}
+body.admin:has(#ocShell) .ops-topbar {display:flex!important;min-width:0!important;max-width:100%!important;flex-wrap:wrap!important;gap:8px!important}
+body.admin:has(#ocShell) .ops-topbar__search {min-width:0!important;flex:1 1 280px!important}
+body.admin:has(#ocShell) .ops-topbar__meta {min-width:0!important;flex:0 1 auto!important;display:flex!important;flex-wrap:wrap!important;gap:8px!important;justify-content:flex-end!important}
+body.admin:has(#ocShell) .ops-topbar :is(a,button){max-width:100%!important}
+/* Contem tabelas largas na area propria, sem cortar botoes ou campos. */
+body.admin:has(#pedShell,#despachoShell,#alertasShell,#ocShell) .shell-ops-workspace {min-width:0!important;max-width:100%!important}
+body.admin:has(#pedShell,#despachoShell,#alertasShell,#ocShell) .shell-ops-workspace :is(.table-responsive,.ops-table-wrap) {overflow-x:auto!important;max-width:100%!important}
+@media(max-width:768px){
+ body.admin:has(#pedShell) .gf-orders-panels {display:block!important}
+ body.admin:has(#pedShell) .ops-order-header {display:flex!important;flex-wrap:wrap!important}
+}

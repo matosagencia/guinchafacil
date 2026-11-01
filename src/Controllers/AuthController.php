@@ -3,6 +3,7 @@
 require_once __DIR__ . '/../Services/NotificacaoService.php';
 require_once __DIR__ . '/../Services/EnderecoFormatter.php';
 require_once __DIR__ . '/../Models/Pricing/PricingZone.php';
+require_once __DIR__ . '/../Services/TriageSessionService.php';
 // File: guinchafacil/src/Controllers/AuthController.php
 // Refatorado com transações seguras e validações aprimoradas
 
@@ -395,6 +396,7 @@ class AuthController extends BaseController
             'endereco_destino' => substr($destino, 0, 500),
             'destino' => substr($destino, 0, 220),
             'distancia_km' => $distancia,
+            'custo_estimado' => (float)$detalhe['valor'],
             'valor'          => (float)$detalhe['valor'],
             'tarifa'         => $detalhe,
             'origem_tarifa'  => 'precificacao_oficial',
@@ -431,8 +433,26 @@ class AuthController extends BaseController
             ? $formaPagamento
             : 'online';
 
-        require_once __DIR__ . '/../Services/PreQuoteDemandService.php';
-        PreQuoteDemandService::registrar($_SESSION['pre_cotacao'], 'accepted');
+        // Converte a pré-cotação aceita em uma sessão de triagem antes do
+        // cadastro. Assim o contexto atravessa cadastro, veículo e checkout.
+        try {
+            // Compatibilidade com sessões criadas antes da triagem exigir o
+            // nome explícito do custo estimado.
+            if (!isset($_SESSION['pre_cotacao']['custo_estimado'])) {
+                $_SESSION['pre_cotacao']['custo_estimado'] = (float)($_SESSION['pre_cotacao']['valor'] ?? 0);
+            }
+            $triagem = TriageSessionService::finalizar($_SESSION['pre_cotacao']);
+            $_SESSION['pre_cotacao']['triage_session_id'] = $triagem['id'];
+
+            require_once __DIR__ . '/../Services/PreQuoteDemandService.php';
+            PreQuoteDemandService::registrar($_SESSION['pre_cotacao'], 'accepted');
+        } catch (Throwable $e) {
+            error_log('[AuthController][aceitarPreCotacao] falha ao criar triagem: ' . $e->getMessage());
+            $_SESSION['pre_cotacao']['status'] = 'pendente';
+            $this->setFlashMessage('NÃ£o foi possÃ­vel continuar agora. Revise a cotaÃ§Ã£o e tente novamente.', 'error');
+            $this->redirect('/pre-cotacao?resultado=1');
+            return;
+        }
 
         // §23 B-UNIFIC-23: pré-cotação aceita → registro em 2 etapas.
         $this->redirect('/registro/funil');
@@ -1934,7 +1954,12 @@ class AuthController extends BaseController
         ));
 
         if ($triageSessionId === '') {
-            return is_array($cotacao) ? '/checkout/veiculo' : null;
+            if (!is_array($cotacao)) return null;
+            // Compatibilidade para cotações antigas aceitas antes da criação
+            // da triagem: materializa o contexto agora, sem perder a cotação.
+            $triagem = TriageSessionService::finalizar($cotacao);
+            $_SESSION['pre_cotacao']['triage_session_id'] = $triagem['id'];
+            $triageSessionId = $triagem['id'];
         }
 
         if (!preg_match('/^[A-Za-z0-9_-]{8,128}$/', $triageSessionId)) {
@@ -2011,12 +2036,27 @@ class AuthController extends BaseController
 
     private function pullFlash(): ?array
     {
-        if (empty($_SESSION['_flash']) || !is_array($_SESSION['_flash'])) {
+        if (empty($_SESSION['_flash'])) {
+            return null;
+        }
+        if (is_string($_SESSION['_flash'])) {
+            $flash = ['message' => $_SESSION['_flash'], 'type' => 'info', 'time' => time()];
+            unset($_SESSION['_flash']);
+            return $flash;
+        }
+        if (!is_array($_SESSION['_flash'])) {
+            unset($_SESSION['_flash']);
             return null;
         }
         $flash = array_pop($_SESSION['_flash']);
         if (empty($_SESSION['_flash'])) {
             unset($_SESSION['_flash']);
+        }
+        if (is_string($flash)) {
+            return ['message' => $flash, 'type' => 'info', 'time' => time()];
+        }
+        if (!is_array($flash)) {
+            return null;
         }
         return $flash;
     }

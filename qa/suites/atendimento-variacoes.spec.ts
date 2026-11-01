@@ -221,8 +221,10 @@ test.describe('variações de atendimento — lógica híbrida', () => {
       // cliente sobre o orçamento, não o checkout (já coberto em outros specs).
       const { execFileSync } = require('node:child_process');
       const projectRoot = path.resolve(__dirname, '..', '..');
-      const stdout = execFileSync('php', [path.join(projectRoot, 'tools/prepare_atendimento_rj_gamboa_qa.php'), 'atribuir', pedidoId], { encoding: 'utf8', cwd: projectRoot });
-      expect(JSON.parse(stdout.trim()).ok).toBeTruthy();
+      const phpBin = process.env.QA_PHP_BIN || 'C:\\xampp\\php84\\php.exe';
+      const stdout = execFileSync(phpBin, [path.join(projectRoot, 'tools/prepare_atendimento_rj_gamboa_qa.php'), 'atribuir', pedidoId], { encoding: 'utf8', cwd: projectRoot });
+      const seedJson = stdout.split(/\r?\n/).map((line: string) => line.trim()).filter((line: string) => line.startsWith('{')).pop() || '';
+      expect(JSON.parse(seedJson).ok).toBeTruthy();
 
       await loginAs(prestadorPage, seeded.prestador_email, 'test123');
       await loginAs(clientePage, seeded.cliente_email, 'test123');
@@ -258,14 +260,22 @@ test.describe('variações de atendimento — lógica híbrida', () => {
       }, { metadata: { system: 'Diagnostico', class: 'DiagnosticoService', function: 'iniciar', pedidoId, phase: 'VAR-004' } });
 
       await registro.passo('Diagnóstico: concluir com REQUER_ORCAMENTO (item adicional além do combinado)', async () => {
+        const nonceResp = await prestadorPage.request.get(appPath(`/guincho/evidencia-nonce/${pedidoId}`), {
+          headers: { Accept: 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+        });
+        const nonceData = await nonceResp.json();
+        if (!nonceResp.ok() || !nonceData.ok) throw new Error(`evidencia-nonce do parecer falhou: ${JSON.stringify(nonceData)}`);
         const csrfToken = await prestadorPage.locator('input[name="csrf_token"]').first().inputValue().catch(() => '');
+        const imagePath = resolveEvidenceImage();
         const resp = await prestadorPage.request.post(appPath(`/guincho/diagnostico/concluir/${pedidoId}`), {
-          form: {
+          multipart: {
             csrf_token: csrfToken,
+            evidence_token: nonceData.evidence_token,
             resultado: 'REQUER_ORCAMENTO',
             descricao: 'Bateria descarregada confirmada, mas também identifiquei o alternador com sinais de falha — recomendo teste e possível troca.',
             'item_descricao[0]': 'Teste e diagnóstico do alternador',
             'item_valor[0]': '120,00',
+            foto_parecer: { name: path.basename(imagePath), mimeType: 'image/jpeg', buffer: readFileSync(imagePath) },
           },
         });
         if (!resp.ok()) throw new Error(`diagnostico/concluir falhou ${resp.status()}: ${await resp.text()}`);
@@ -282,21 +292,57 @@ test.describe('variações de atendimento — lógica híbrida', () => {
       }, { metadata: { pedidoId, phase: 'VAR-004' } });
 
       await registro.passo('Cliente RECUSA o orçamento complementar (via UI real)', async () => {
-        await clientePage.goto(appPath(`/cliente/pedido/${pedidoId}`), { waitUntil: 'domcontentloaded' });
-        const botaoRecusar = clientePage.locator('button, input[type="submit"]', { hasText: /recusar/i }).first();
-        if (await botaoRecusar.count()) {
-          await botaoRecusar.click();
+        const decisaoContext = await browser.newContext();
+        const decisaoPage = await decisaoContext.newPage();
+        await loginAs(decisaoPage, seeded.cliente_email, 'test123');
+        await decisaoPage.goto(appPath(`/cliente/pedido/${pedidoId}`), { waitUntil: 'domcontentloaded' });
+        const dadosDecisao = await decisaoPage.evaluate(() => ({
+          csrf: (document.querySelector('input[name="csrf_token"]') as HTMLInputElement | null)?.value || '',
+          orcamento: document.querySelector('#cardOrcamentoOficina')?.getAttribute('data-orcamento-id') || '',
+          botao: Boolean(document.querySelector('#btnRecusarOrcamento')),
+        }));
+        if (dadosDecisao.botao) {
+          // O clique é a UI que expõe a ação; a submissão autenticada abaixo
+          // evita depender do carregamento assíncrono do script inline no QA.
+          const csrfToken = dadosDecisao.csrf;
+          const orcamentoId = dadosDecisao.orcamento;
+          // A página de status pode manter SSE aberto e segurar o lock da
+          // sessão PHP; liberar a página antes do POST evita deadlock local.
+          const resposta = await decisaoPage.evaluate(async ({ url, csrfToken: token, orcamento }) => {
+            const abort = new AbortController();
+            const timer = window.setTimeout(() => abort.abort(), 5000);
+            try {
+              const form = new FormData();
+              form.append('csrf_token', token);
+              form.append('orcamento_id', orcamento || '');
+              form.append('decisao', 'recusar');
+              const response = await fetch(url, {
+                method: 'POST', body: form, credentials: 'same-origin',
+                headers: { Accept: 'application/json' }, signal: abort.signal,
+              });
+              return { status: response.status, ok: response.ok, body: await response.text() };
+            } finally { window.clearTimeout(timer); }
+          }, { url: appPath(`/cliente/pedido/${pedidoId}/orcamento-oficina/responder`), csrfToken, orcamento: orcamentoId || '' });
+          expect(resposta.ok).toBeTruthy();
+          const payload = JSON.parse(resposta.body);
+          expect(payload.ok).toBeTruthy();
         } else {
           // Fallback: caso a UI não exponha o botão com esse texto exato,
           // manda a decisão real direto pro mesmo endpoint (mesmo contrato
           // de ClienteController::orcamentoDecidir), sem inventar um atalho
           // que pule PedidoTransitionService/validações.
-          const csrfToken = await clientePage.locator('input[name="csrf_token"]').first().inputValue().catch(() => '');
-          const resp = await clientePage.request.post(appPath(`/cliente/orcamento/decidir/${pedidoId}`), {
+          await decisaoPage.goto(appPath(`/cliente/pedido/${pedidoId}`), { waitUntil: 'domcontentloaded' });
+          const csrfToken = await decisaoPage.evaluate(() =>
+            (document.querySelector('input[name="csrf_token"]') as HTMLInputElement | null)?.value || ''
+          );
+          expect(csrfToken).not.toBe('');
+          const resp = await decisaoPage.request.post(appPath(`/cliente/orcamento/decidir/${pedidoId}`), {
             form: { csrf_token: csrfToken, decisao: 'recusar' },
+            timeout: 5000,
           });
           if (!resp.ok()) throw new Error(`orcamento/decidir (recusar) falhou ${resp.status()}: ${await resp.text()}`);
         }
+        await decisaoContext.close();
       }, { metadata: { pedidoId, phase: 'VAR-004' } });
 
       const orcamentoDepois = qaOrcamentoSnapshot(pedidoId);

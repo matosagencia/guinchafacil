@@ -134,6 +134,7 @@ class ClienteController extends BaseController
     public function veiculoForm(): void
     {
         AuthService::requireAuth('cliente');
+        $triageSessionId = trim((string)($_GET['triage_session_id'] ?? ''));
         $uid      = $this->usuarioId();
         $veiculo  = null;
         $vid      = (int)($_GET['id'] ?? 0);
@@ -229,6 +230,11 @@ class ClienteController extends BaseController
             Veiculo::atualizar($vid, $dados);
         } else {
             Veiculo::criar($uid, $dados);
+        }
+        $triageSessionId = trim((string)($_POST['triage_session_id'] ?? ''));
+        if ($triageSessionId !== '') {
+            $this->redirect('/checkout/veiculo?triage_session_id=' . rawurlencode($triageSessionId));
+            return;
         }
         $this->redirect('/cliente/veiculos?salvo=1');
     }
@@ -1555,6 +1561,7 @@ class ClienteController extends BaseController
      */
     public function responderOrcamentoOficina(int $pedidoId): void
     {
+        error_log('[responderOrcamentoOficina][start] pedido=' . $pedidoId);
         AuthService::requireAuth('cliente');
         header('Content-Type: application/json; charset=UTF-8');
         header('Cache-Control: no-store');
@@ -1585,6 +1592,7 @@ class ClienteController extends BaseController
         }
 
         $orcamento = OficinaOrcamento::buscarPorId($orcamentoId);
+        error_log('[responderOrcamentoOficina][validated] pedido=' . $pedidoId . ' orcamento=' . $orcamentoId . ' decisao=' . $decisao);
         if (!$orcamento
             || (int)$orcamento['pedido_id'] !== $pedidoId
             || $orcamento['status'] !== 'pendente') {
@@ -1620,6 +1628,7 @@ class ClienteController extends BaseController
 
             // ── RECUSAR ─────────────────────────────────────────
             $ok = OficinaOrcamento::recusar($orcamentoId);
+            error_log('[responderOrcamentoOficina][recusar] pedido=' . $pedidoId . ' orcamento=' . $orcamentoId . ' ok=' . ($ok ? '1' : '0'));
             if (!$ok) {
                 throw new RuntimeException('Não foi possível recusar (concorrência).');
             }
@@ -1628,6 +1637,7 @@ class ClienteController extends BaseController
             // e precisa confirmar (endpoint /cliente/pedido/{id}/converter-reboque-com-desconto).
             $pdo->prepare("UPDATE pedidos SET status = 'conversao_reboque_pendente' WHERE id = ?")
                 ->execute([$pedidoId]);
+            error_log('[responderOrcamentoOficina][pedido_updated] pedido=' . $pedidoId);
                 require_once __DIR__ . '/../Services/PedidoEventoService.php';
                 PedidoEventoService::registrar(
                     $pdo, $pedidoId, 'conversao_reboque_pendente',

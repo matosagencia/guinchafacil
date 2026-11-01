@@ -21,6 +21,7 @@ $money = static fn($v): string => 'R$ ' . number_format((float)$v, 2, ',', '.');
 <div class="main-wrapper" style="display:flex;min-height:100vh">
 <?php include __DIR__ . '/../layouts/sidebar_oficina.php'; ?>
 <main class="main-content" style="flex:1;padding:1.5rem">
+<?php include __DIR__ . '/../layouts/profile_panel_topbar.php'; ?>
     <div class="fin-shell">
         <header class="page-head mb-4">
             <div>

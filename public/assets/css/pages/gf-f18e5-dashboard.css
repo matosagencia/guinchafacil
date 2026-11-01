@@ -1,0 +1,116 @@
+/* Fase 18E.5: dashboard operacional — shell único Lovable, CSS isolado. */
+body.admin:has(.gf18e5-dashboard){background:#f4f6f8;color:#0f172a}
+body.admin:has(.gf18e5-dashboard)>nav.gf-order-crumb{display:none!important}
+body.admin:has(.gf18e5-dashboard)>header,body.admin:has(.gf18e5-dashboard)>.site-header{display:none!important}
+body.admin .gf18e5-dashboard{display:grid!important;grid-template-columns:176px minmax(0,1fr)!important;width:100%!important;max-width:none!important;min-height:100vh;margin:0!important;background:#f4f6f8!important;color:#0f172a!important;overflow:visible!important}
+body.admin .gf18e5-dashboard .shell-ops-sidebar{position:sticky!important;top:0!important;align-self:start!important;height:100vh!important;min-height:100vh!important;overflow-y:auto!important;overflow-x:hidden!important;background:#101417!important;color:#f8fafc!important;border:0!important;width:auto!important;min-width:0!important;padding:14px 8px!important;scrollbar-width:none}
+body.admin .gf18e5-dashboard .shell-ops-sidebar::-webkit-scrollbar{width:0;height:0}
+body.admin .gf18e5-dashboard .shell-ops-workspace{min-width:0!important;max-width:100%!important;width:auto!important;padding:16px 18px 40px!important;margin:0!important;background:#f4f6f8!important;color:#0f172a!important;overflow:visible!important}
+body.admin .gf18e5-dashboard .gf18e-operacao-tabs{margin:0 0 14px!important;background:#fff!important;border:1px solid #e2e8f0;border-radius:6px;min-height:44px;display:flex;flex-wrap:wrap;gap:3px;padding:6px 10px}
+body.admin .gf18e5-dashboard .ops-topbar{margin:0 0 12px!important;border:1px solid #e2e8f0!important;border-radius:6px!important;background:#fff!important;color:#0f172a!important;max-width:100%!important;min-width:0!important;display:flex;flex-wrap:wrap;gap:8px}
+body.admin .gf18e5-dashboard .ops-topbar__search{min-width:0;flex:1 1 270px}
+body.admin .gf18e5-dashboard .ops-summary{margin:0 0 16px!important;width:100%!important;display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr));background:#fff!important;border:1px solid #dbe3eb!important;border-radius:6px!important;overflow:hidden}
+body.admin .gf18e5-dashboard .ops-metric{background:#fff!important;color:#0f172a!important;border-right:1px solid #e2e8f0!important;min-width:0!important;padding:12px!important}
+body.admin .gf18e5-dashboard .ops-metric__label{color:#475569!important;white-space:normal}
+body.admin .gf18e5-dashboard .ops-metric__value{color:#0f172a!important;font-variant-numeric:tabular-nums}
+body.admin .gf18e5-dashboard .page-head,body.admin .gf18e5-dashboard .page-head h1{color:#0f172a!important}
+body.admin .gf18e5-dashboard .card{min-width:0;background:#fff!important;color:#0f172a!important;border:1px solid #dbe3eb!important;border-radius:6px}
+body.admin .gf18e5-dashboard .card .card-header{background:#fff!important;color:#0f172a!important;border-bottom:1px solid #e2e8f0!important}
+body.admin .gf18e5-dashboard .card .card-body{color:#0f172a!important}
+body.admin .gf18e5-dashboard .text-muted{color:#64748b!important}
+body.admin .gf18e5-dashboard .row,body.admin .gf18e5-dashboard .lower-grid{min-width:0;max-width:100%}
+body.admin .gf18e5-dashboard .table-responsive{overflow-x:auto;max-width:100%}
+body.admin .gf18e5-dashboard input,body.admin .gf18e5-dashboard select{max-width:100%}
+@media(max-width:1100px){body.admin .gf18e5-dashboard .ops-summary{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:700px){body.admin .gf18e5-dashboard{display:block!important}body.admin .gf18e5-dashboard .shell-ops-sidebar{position:relative!important;height:auto!important;min-height:0!important}body.admin .gf18e5-dashboard .shell-ops-workspace{padding:12px!important}body.admin .gf18e5-dashboard .ops-summary{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+/* Fase 18E.10 — resumo executivo sem paineis duplicados.
+ * Ocultacao somente de apresentacao: consultas, DOM e atualizacoes permanecem
+ * para evitar alteracoes nos contratos de scripts existentes.
+ * Estas informacoes continuam nos hubs especializados. */
+body.admin .gf18e5-dashboard #territorioMetasCard,
+body.admin .gf18e5-dashboard .card:has(> .card-header .fa-clipboard-question),
+body.admin .gf18e5-dashboard .col-lg-4:has(.fa-vial-circle-check),
+body.admin .gf18e5-dashboard .col-lg-5:has(#chartPreQuoteDemand),
+body.admin .gf18e5-dashboard .col-lg-7:has([data-dashboard-last-orders]){display:none!important}
+/* O grafico de status e a principal visao sintese de volume. */
+body.admin .gf18e5-dashboard .col-lg-5:has(#chartStatus){flex:0 0 100%!important;width:100%!important;max-width:100%!important}
+/* Desfaz valores claros da tabela e KPIs herdados dos temas anteriores. */
+body.admin .gf18e5-dashboard .card .table{--bs-table-color:#0f172a!important;--bs-table-bg:#fff!important;color:#0f172a!important}
+body.admin .gf18e5-dashboard .card .table td,
+body.admin .gf18e5-dashboard .card .table th{color:#334155!important}
+body.admin .gf18e5-dashboard .card .card-body strong:not(.text-success):not(.text-danger),
+body.admin .gf18e5-dashboard .card .card-body .fw-semibold{color:#0f172a!important}
+body.admin .gf18e5-dashboard .card .card-body .text-success{color:#15803d!important}
+body.admin .gf18e5-dashboard .card .card-body .text-danger{color:#b91c1c!important}
+/* Header visual das abas usa as regras homologadas da Operacao. */
+body.admin .gf18e5-dashboard .gf18e-operacao-tabs a{text-decoration:none!important;margin-right:4px;padding:7px 10px;border-radius:5px;color:#334155!important}
+body.admin .gf18e5-dashboard .gf18e-operacao-tabs a:hover{background:#e8f7ec!important;color:#166534!important}
+
+/* E11: cabecalho compacto, faixa superior zerada e legenda dos graficos */
+body.admin:has(.gf18e5-dashboard){margin-top:0!important;padding-top:0!important;--theme-text:#334155!important}
+body.admin:has(.gf18e5-dashboard)>nav.gf-order-crumb{display:none!important}
+body.admin:has(.gf18e5-dashboard)>header:not(.gf18e5-dashboard header){display:none!important}
+body.admin .gf18e5-dashboard{min-height:100vh!important}
+body.admin .gf18e5-dashboard .shell-ops-workspace{padding-top:12px!important}
+body.admin .gf18e5-dashboard .gf18e-operacao-tabs{gap:5px!important;align-items:center!important}
+body.admin .gf18e5-dashboard .gf18e-operacao-tabs a{display:inline-flex!important;align-items:center!important;gap:4px!important;padding:7px 11px!important;color:#334155!important;text-decoration:none!important}
+body.admin .gf18e5-dashboard .gf18e-operacao-tabs a.is-active,body.admin .gf18e5-dashboard .gf18e-operacao-tabs a[aria-current="page"]{background:#e8f7ec!important;color:#15803d!important;border-left:2px solid #2fb34a}
+body.admin .gf18e5-dashboard .card canvas{max-width:100%!important}
+
+/* GF-18E12-CHART-SIZE */
+.gf18e5-dashboard #chartStatus {
+    display: block !important;
+    width: 100% !important;
+    max-width: 320px !important;
+    height: 320px !important;
+    max-height: 320px !important;
+    margin: 0 auto 16px !important;
+}
+
+@media (max-width: 576px) {
+    .gf18e5-dashboard #chartStatus {
+        max-width: 260px !important;
+        height: 260px !important;
+        max-height: 260px !important;
+    }
+}
+/* GF-18E13-RESUMO-FINAL-START */
+/* QA de release pertence a Qualidade/Sistema, nao ao Resumo executivo. */
+body.admin .gf18e5-dashboard .lower-grid > .card:has(.fa-vial-circle-check) {
+    display: none !important;
+}
+/* Reorganiza os dois indicadores restantes sem area vazia. */
+body.admin .gf18e5-dashboard .lower-grid {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 14px !important;
+    align-items: stretch !important;
+}
+/* O card de status ocupa toda a largura, mas a rosca permanece compacta. */
+body.admin .gf18e5-dashboard #chartStatus {
+    display: block !important;
+    width: 100% !important;
+    max-width: 300px !important;
+    height: 300px !important;
+    max-height: 300px !important;
+    margin: 0 auto 14px !important;
+}
+body.admin .gf18e5-dashboard [data-dashboard-status-list] {
+    max-width: 100% !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+}
+@media (max-width: 850px) {
+    body.admin .gf18e5-dashboard .lower-grid {
+        grid-template-columns: minmax(0, 1fr) !important;
+    }
+}
+@media (max-width: 576px) {
+    body.admin .gf18e5-dashboard #chartStatus {
+        max-width: 240px !important;
+        height: 240px !important;
+        max-height: 240px !important;
+    }
+}
+/* GF-18E13-RESUMO-FINAL-END */

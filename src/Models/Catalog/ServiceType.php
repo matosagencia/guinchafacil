@@ -106,7 +106,18 @@ class ServiceType
         );
         $stmt->execute([$slug]);
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
-        return $row ?: null;
+        if ($row) {
+            return $row;
+        }
+
+        // Alguns tipos sistêmicos ainda não possuem public_slug. O code é
+        // único no catálogo e permite que o funil público use a lista completa
+        // do mesmo catálogo do cliente e do admin.
+        $stmt = getPDO()->prepare(
+            "SELECT * FROM " . self::TBL . " WHERE LOWER(code) = ? AND active = 1 LIMIT 1"
+        );
+        $stmt->execute([$slug]);
+        return $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
     }
 
     // ─── Leitores de regra estrutural (§2.3 do roadmap) ─────────────────────

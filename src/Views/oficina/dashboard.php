@@ -14,10 +14,12 @@ $primeiroPedido = $pedidosVisiveis[0] ?? null;
 <link rel="stylesheet" href="<?= $bp ?>/public/assets/css/components/dashboard.css">
 <link rel="stylesheet" href="<?= $bp ?>/public/assets/css/pages/tow-dashboard.css">
 <script<?= function_exists('csp_script_nonce_attr') ? csp_script_nonce_attr() : '' ?>>document.addEventListener('DOMContentLoaded',function(){document.body.classList.add('guincho','oficina');});</script>
+<script>document.body.classList.add('gf-unified-dashboard');</script>
 
-<div class="main-wrapper">
+<div class="main-wrapper gf-unified-shell">
 <?php include __DIR__ . '/../layouts/sidebar_oficina.php'; ?>
-<main class="main-content">
+<main class="main-content gf-unified-main">
+    <header class="gf-panel-topbar"><div class="gf-panel-breadcrumb"><span>Painel <i class="fas fa-chevron-right" aria-hidden="true"></i> <strong>Oficina</strong></span></div><div class="gf-panel-actions"><span><?= htmlspecialchars($nome) ?></span><a href="<?= htmlspecialchars($bp) ?>/logout" data-confirm-logout><i class="fas fa-right-from-bracket" aria-hidden="true"></i> Sair</a></div></header>
     <div class="app-dashboard">
 
         <header class="page-head mb-4">

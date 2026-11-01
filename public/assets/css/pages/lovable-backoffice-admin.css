@@ -1,0 +1,13 @@
+/* GuinchaFácil | Fase 2: acabamento Lovable | ADMIN — dark */
+/* Exclusivo ao dashboard administrativo; sem redefinir o tema dos demais perfis. */
+body.admin .admin-dashboard-topbar{background:#11151a;border:1px solid #29313a;border-radius:16px;padding:14px 18px;gap:12px;box-shadow:0 10px 28px rgba(0,0,0,.18)}
+body.admin .admin-dashboard-topbar .ops-topbar__search{border-radius:10px;background:#171d24;border:1px solid #29313a}
+body.admin .admin-dashboard-topbar input[type=search]{color:#f7f9fb;background:transparent}
+body.admin .admin-dashboard-topbar input[type=search]::placeholder{color:#a6b0ba}
+body.admin .ops-summary{gap:14px;margin-block:18px 22px}
+body.admin .ops-summary .ops-metric{background:#11151a;border:1px solid #29313a;border-radius:16px;box-shadow:0 8px 24px rgba(0,0,0,.13);padding:clamp(15px,1.5vw,22px)}
+body.admin .ops-summary .ops-metric__label{color:#a6b0ba;font-size:.79rem;font-weight:600}
+body.admin .ops-summary .ops-metric__value{color:#f7f9fb;font-weight:800;letter-spacing:-.035em;font-variant-numeric:tabular-nums}
+body.admin .admin-dashboard-topbar a.ops-dashboard-link{border-radius:9px;transition:background .16s ease,color .16s ease}
+body.admin :is(.admin-dashboard-topbar,.ops-summary) :is(a,button,input):focus-visible{outline:3px solid #42d564;outline-offset:2px}
+@media(max-width:760px){body.admin .admin-dashboard-topbar{flex-direction:column;align-items:stretch}body.admin .ops-summary{grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:10px}}

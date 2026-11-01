@@ -678,3 +678,7 @@ Implementado por A em `RoutingService` (commits `3eddcf2` e `87cd06c`); descrito
 - Matching anelar progressivo: referÃªncia comum por faixa = maior custo de deslocamento entre elegÃ­veis da faixa. Oficinas sÃ£o responsÃ¡veis por remoÃ§Ã£o incluÃ­da conforme cadastro e oferta.
 - Esta fase Ã© APENAS visual/documental; a implementaÃ§Ã£o do razÃ£o bilateral e sua migraÃ§Ã£o exigem auditoria e homologaÃ§Ã£o prÃ³prias (FIN.2+).
 - Detalhes e critÃ©rios: `doc/FIN_1_GESTAO_FINANCEIRA_REPASSES.md`.
+# Contrato prioritário — identidade operacional unificada (2026-10-29)
+
+Para cobertura e despacho, ler coordenadas e elegibilidade de `providers` + `provider_workshop_settings` + capacidades aprovadas. O provider precisa estar `APPROVED`, `active=1`, parceria `ATIVO`, operação habilitada e dentro do raio. `oficinas`/`guinchos` legados só complementam vínculos e não podem contradizer o provider central.
+

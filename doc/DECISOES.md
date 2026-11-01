@@ -202,3 +202,7 @@
 - Matching anelar progressivo: referÃªncia comum por faixa = maior custo de deslocamento entre elegÃ­veis da faixa. Oficinas sÃ£o responsÃ¡veis por remoÃ§Ã£o incluÃ­da conforme cadastro e oferta.
 - Esta fase Ã© APENAS visual/documental; a implementaÃ§Ã£o do razÃ£o bilateral e sua migraÃ§Ã£o exigem auditoria e homologaÃ§Ã£o prÃ³prias (FIN.2+).
 - Detalhes e critÃ©rios: `doc/FIN_1_GESTAO_FINANCEIRA_REPASSES.md`.
+# Decisão prioritária — unificação especialista/oficina (2026-10-29)
+
+O mesmo provider pode atuar como especialista/oficina e, quando aprovado para reboque, como guincho. Não devemos criar identidades operacionais duplicadas para o mesmo prestador. `legacy_guincho_id` e `oficina_provider_links` são vínculos de compatibilidade, não novas fontes de verdade.
+

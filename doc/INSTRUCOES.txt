@@ -1,0 +1,67 @@
+1. Header — não, faltam 2 correções
+O patch do <body> foi aplicado, mas há 2 problemas:
+
+(a) O <link> do admin-themes.css não está lá. Sem ele o CSS nunca carrega, os temas por perfil não funcionam.
+
+(b) $dataTheme é definido depois do </head>. Se você adicionar o <link> onde ele deveria ficar (dentro do <head>), $dataTheme ainda não existe. Precisa mover a definição para cima.
+
+Correção — 2 patches no header.php
+Patch 1 — mover o bloco $roleThemeMap para junto do $temaArquivoMap (linha ~20). De:
+
+php
+$temaArquivoMap = ['cliente' => 'client', ...];
+$temaArquivo = $temaArquivoMap[$temaClass] ?? null;
+Para:
+
+php
+$temaArquivoMap = ['cliente' => 'client', ...];
+$temaArquivo = $temaArquivoMap[$temaClass] ?? null;
+
+// §23 · B-UNIFIC-23: role → tema do backoffice.
+$roleThemeMap = [
+    'admin'        => 'executive',
+    'funcionario'  => 'dispatch',
+    'gerente'      => 'dispatch',
+    'oficina'      => 'workshop',
+    'guincho'      => 'driver',
+    'especialista' => 'driver',
+];
+$dataRole  = $temaClass !== '' ? $temaClass : '';
+$dataTheme = $roleThemeMap[$temaClass] ?? '';
+Patch 2 — adicionar o <link> do CSS logo após o bloco que carrega themes/{tema}.css (linha ~75, dentro do <head>):
+
+De:
+
+php
+<?php if ($temaArquivo): ?>
+<link href="<?php echo htmlspecialchars($bp); ?>/public/assets/css/themes/<?php echo htmlspecialchars($temaArquivo); ?>.css" rel="stylesheet">
+<?php endif; ?>
+Para:
+
+php
+<?php if ($temaArquivo): ?>
+<link href="<?php echo htmlspecialchars($bp); ?>/public/assets/css/themes/<?php echo htmlspecialchars($temaArquivo); ?>.css" rel="stylesheet">
+<?php endif; ?>
+<?php if ($dataTheme !== ''): ?>
+<link href="<?php echo htmlspecialchars($bp); ?>/public/assets/css/admin-themes.css?v=20261015-1" rel="stylesheet">
+<?php endif; ?>
+Patch 3 — remover o bloco duplicado depois do </head> (o <body> mantém as variáveis, só não redeclara):
+
+De:
+
+php
+<?php
+// §23 · B-UNIFIC-23: mapeia role → tema do backoffice. Cliente/visitante
+// continuam sem data-theme (usam o CSS base do design system).
+$roleThemeMap = [ ... ];
+$dataRole  = $temaClass !== '' ? $temaClass : '';
+$dataTheme = $roleThemeMap[$temaClass] ?? '';
+?>
+<body class="...">
+Para:
+
+php
+<body class="<?php echo htmlspecialchars($temaClass); ?>"
+      data-base-path="<?php echo htmlspecialchars($bp); ?>"
+      <?php if ($dataRole !== ''): ?>data-role="<?php echo htmlspecialchars($dataRole); ?>"<?php endif; ?>
+      <?php if ($dataTheme !== ''): ?>data-theme="<?php echo htmlspecialchars($dataTheme); ?>"<?php endif; ?>>

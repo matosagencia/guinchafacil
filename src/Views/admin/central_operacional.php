@@ -53,7 +53,7 @@ include __DIR__ . '/../layouts/header.php';
   <div class="bo-body">
     <header class="bo-header">
       <div class="gf-f18c-breadcrumb"><button type="button" id="gfF18cCollapse" aria-label="Recolher ou expandir menu" aria-controls="gfF18cSidebar" aria-expanded="true"><i class="fas fa-chevron-left" aria-hidden="true"></i></button><span>Backoffice <i class="fas fa-chevron-right" aria-hidden="true"></i> <strong>Central operacional</strong></span></div>
-      <div class="gf-f18c-header-actions"><a href="<?php echo htmlspecialchars($bp, ENT_QUOTES, 'UTF-8'); ?>/admin/alertas" aria-label="Abrir alertas operacionais"><i class="far fa-bell" aria-hidden="true"></i></a><span class="gf-f18c-user"><?php echo htmlspecialchars((string)($_SESSION['user']['nome'] ?? 'Operador'), ENT_QUOTES, 'UTF-8'); ?></span></div>
+      <div class="gf-f18c-header-actions"><a href="<?php echo htmlspecialchars($bp, ENT_QUOTES, 'UTF-8'); ?>/admin/alertas" aria-label="Abrir alertas operacionais"><i class="far fa-bell" aria-hidden="true"></i></a><span class="gf-f18c-user"><?php echo htmlspecialchars((string)($_SESSION['user']['nome'] ?? 'Operador'), ENT_QUOTES, 'UTF-8'); ?></span><a class="gf-f18c-logout" href="<?php echo htmlspecialchars($bp, ENT_QUOTES, 'UTF-8'); ?>/logout" data-confirm-logout><i class="fas fa-right-from-bracket" aria-hidden="true"></i><span>Sair</span></a></div>
     </header>
     <main class="bo-content">
 <div class="ops-topbar" style="padding:10px 24px;border-bottom:1px solid var(--theme-border,#232c35);background:var(--theme-nav,#030405)">

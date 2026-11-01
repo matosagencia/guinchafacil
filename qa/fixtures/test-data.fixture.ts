@@ -46,10 +46,10 @@ export type MpTestUser = {
  */
 export function mpBuyerTestUser(): MpTestUser {
   return {
-    userId: process.env.MP_BUYER_TEST_USER_ID || '',
-    username: process.env.MP_BUYER_TEST_USERNAME || '',
-    password: process.env.MP_BUYER_TEST_PASSWORD || '',
-    verificationCode: process.env.MP_BUYER_TEST_VERIFICATION_CODE || ''
+    userId: process.env.MP_BUYER_TEST_USER_ID || process.env.MP_TEST_BUYER_USER_ID || '',
+    username: process.env.MP_BUYER_TEST_USERNAME || process.env.MP_TEST_BUYER_USERNAME || '',
+    password: process.env.MP_BUYER_TEST_PASSWORD || process.env.MP_TEST_BUYER_PASSWORD || '',
+    verificationCode: process.env.MP_BUYER_TEST_VERIFICATION_CODE || process.env.MP_TEST_BUYER_VERIFICATION_CODE || ''
   };
 }
 
@@ -61,9 +61,9 @@ export function mpBuyerTestUser(): MpTestUser {
  */
 export function mpSellerTestUser(): MpTestUser {
   return {
-    userId: process.env.MP_SELLER_TEST_USER_ID || '',
-    username: process.env.MP_SELLER_TEST_USERNAME || '',
-    password: process.env.MP_SELLER_TEST_PASSWORD || '',
-    verificationCode: process.env.MP_SELLER_TEST_VERIFICATION_CODE || ''
+    userId: process.env.MP_SELLER_TEST_USER_ID || process.env.MP_TEST_SELLER_USER_ID || '',
+    username: process.env.MP_SELLER_TEST_USERNAME || process.env.MP_TEST_SELLER_USERNAME || '',
+    password: process.env.MP_SELLER_TEST_PASSWORD || process.env.MP_TEST_SELLER_PASSWORD || '',
+    verificationCode: process.env.MP_SELLER_TEST_VERIFICATION_CODE || process.env.MP_TEST_SELLER_VERIFICATION_CODE || ''
   };
 }

@@ -1,0 +1,46 @@
+/* GF Admin funil F11 — refinamento visual. Sem alterar o motor JS, submit ou API B-011. */
+.gf-admin-order-v3 {--gf-f11-ink:#172536;--gf-f11-subtle:#657587;--gf-f11-border:#dbe4ea;--gf-f11-surface:#fff;}
+.gf-admin-order-v3 .gf-order-crumb{margin-bottom:18px}
+.gf-admin-order-v3 .gf-order-intro{margin-bottom:15px}
+.gf-admin-order-v3 .gf-order-progress{margin-bottom:14px}
+.gf-admin-order-v3 .admin-flow-context{margin-bottom:12px;padding:12px 17px}
+.gf-admin-order-v3 .gf-ops-availability{margin:0 0 12px;padding:16px 18px;box-shadow:0 2px 12px rgba(20,32,48,.025)}
+.gf-admin-order-v3 .gf-ops-availability__intro{display:flex;flex-wrap:wrap;align-items:center;gap:4px 12px}
+.gf-admin-order-v3 .gf-ops-availability__intro .gf-order-eyebrow{flex-basis:100%}
+.gf-admin-order-v3 .gf-ops-availability__intro h2{font-size:15px;line-height:1.3;margin:3px 0}
+.gf-admin-order-v3 .gf-ops-availability__intro p{font-size:11px;margin:3px 0 10px}
+.gf-admin-order-v3 .gf-ops-availability__metric{padding:9px 15px;display:grid;grid-template-columns:1fr auto;align-items:center;gap:2px 10px}
+.gf-admin-order-v3 .gf-ops-availability__metric span{font-size:12px}
+.gf-admin-order-v3 .gf-ops-availability__metric strong{grid-column:2;grid-row:1 / span 2;font-size:24px;font-variant-numeric:tabular-nums}
+.gf-admin-order-v3 .gf-ops-availability__metric small{grid-column:1;font-size:10px}
+.gf-admin-order-v3 .gf-ops-availability__note{margin:9px 0 0;font-size:11px}
+.gf-admin-order-v3 .gf-f11-stage-tracker{display:grid;grid-template-columns:minmax(0,1fr) minmax(160px,32%);gap:3px 18px;align-items:center;background:#fff;border:1px solid var(--gf-f11-border);border-radius:8px;padding:13px 18px;margin-bottom:12px;color:var(--gf-f11-ink)}
+.gf-admin-order-v3 .gf-f11-stage-tracker__label{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.gf-admin-order-v3 .gf-f11-stage-tracker__label>span{font-size:10px;letter-spacing:.05em;font-weight:800;color:#219341}
+.gf-admin-order-v3 .gf-f11-stage-tracker__label strong{font-size:13px;color:var(--gf-f11-ink)}
+.gf-admin-order-v3 .gf-f11-stage-tracker__meter{height:7px;background:#eaf0ed;border-radius:999px;overflow:hidden}
+.gf-admin-order-v3 .gf-f11-stage-tracker__meter span{display:block;width:14.28%;height:100%;background:#2eb44e;border-radius:inherit;transition:width .18s ease-out}
+.gf-admin-order-v3 .gf-f11-stage-tracker>small{grid-column:1/-1;color:var(--gf-f11-subtle);font-size:11px}
+.gf-admin-order-v3 .gf-order-triage-card{padding:19px 22px!important;overflow:visible}
+.gf-admin-order-v3 .gf-order-triage-card>.eyebrow{margin-bottom:3px}
+.gf-admin-order-v3 .gf-order-triage-card>.title{font-size:20px!important;margin-bottom:4px!important}
+.gf-admin-order-v3 .gf-order-triage-card>.muted{font-size:12px!important}
+.gf-admin-order-v3 .gf-order-triage-card .choice-fieldset{min-width:0;max-width:100%;}
+.gf-admin-order-v3 .gf-order-triage-card .choice-fieldset .label,.gf-admin-order-v3 .gf-order-triage-card legend{color:#1c2c3d!important;font-weight:750}
+.gf-admin-order-v3 .gf-order-triage-card .choice-card{border-radius:10px!important;background:#fff!important;border:1px solid #d8e1e8!important;color:#203249!important;min-width:0;box-shadow:none!important;transition:border-color .15s,background .15s,box-shadow .15s}
+.gf-admin-order-v3 .gf-order-triage-card .choice-card strong{color:#192b3c!important}
+.gf-admin-order-v3 .gf-order-triage-card .choice-card small{color:#64748b!important}
+.gf-admin-order-v3 .gf-order-triage-card .choice-card:is(:hover,:focus-visible){border-color:#2fad4b!important;box-shadow:0 0 0 2px #35b34c20!important}
+.gf-admin-order-v3 .gf-order-triage-card .choice-card[aria-pressed=true],.gf-admin-order-v3 .gf-order-triage-card .choice-card.is-selected{border-color:#21a344!important;background:#f0fbf2!important}
+.gf-admin-order-v3 .gf-order-triage-card .gf-ap{border-radius:10px;overflow:hidden;max-width:100%}
+.gf-admin-order-v3 .gf-order-triage-card .gf-ap__map{min-height:350px;max-height:530px}
+.gf-admin-order-v3 .gf-order-triage-card .gf-ap__panel{max-width:min(390px,calc(100% - 24px));color:#172638!important}
+.gf-admin-order-v3 .gf-order-triage-card .gf-ap__panel input,.gf-admin-order-v3 .gf-order-triage-card .gf-ap__panel label{color:#1f3044}
+.gf-admin-order-v3 #stage-cotacao .pag-destino-grid{gap:12px}
+.gf-admin-order-v3 #stage-cotacao .pag-destino-opt{background:#fff;border:1px solid #d8e2e9;border-radius:8px;padding:13px;color:#1c2b3d}
+.gf-admin-order-v3 #stage-cotacao .pag-destino-opt strong{color:#182b3b}
+.gf-admin-order-v3 #stage-cotacao .pag-destino-opt small{color:#667789}
+.gf-admin-order-v3 #gfBtnFinal{min-height:46px;background:#2eae47;color:#fff;border-radius:7px;font-weight:700}
+@media(max-width:860px){.gf-admin-order-v3 .gf-order-triage-card{padding:15px!important}.gf-admin-order-v3 .gf-f11-stage-tracker{grid-template-columns:1fr}.gf-admin-order-v3 .gf-f11-stage-tracker__meter{margin-top:5px}}
+@media(max-width:600px){.gf-admin-order-v3 .gf-ops-availability__grid{grid-template-columns:1fr}.gf-admin-order-v3 .gf-order-triage-card .gf-ap__map{min-height:300px}.gf-admin-order-v3 .gf-order-triage-card .gf-ap__panel{max-width:calc(100% - 14px)}.gf-admin-order-v3 .gf-order-intro h1{font-size:23px!important}}
+@media(prefers-reduced-motion:reduce){.gf-admin-order-v3 .gf-f11-stage-tracker__meter span,.gf-admin-order-v3 .choice-card{transition:none!important}}

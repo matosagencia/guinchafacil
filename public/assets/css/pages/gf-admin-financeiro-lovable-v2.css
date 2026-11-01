@@ -1,0 +1,29 @@
+/* Lovable admin finance: light workspace and compact cards; scoped to finance. */
+body:has(.gf-finance-page){background:#f4f6f8;color:#111827}
+.gf-finance-page{background:#f4f6f8;color:#152030;min-height:75vh;padding-top:19px!important;padding-bottom:34px!important}
+.gf-finance-page .page-head{background:transparent!important;border:none!important;display:flex;align-items:center;justify-content:space-between;gap:15px}
+.gf-finance-page .page-head h1{font-size:25px;letter-spacing:-.03em;font-weight:760;color:#122033;margin:4px 0}
+.gf-finance-page .page-head p{font-size:12px;color:#7b8ba0}
+.gf-finance-page .eyebrow{color:#24a647;font-size:10px;font-weight:780;letter-spacing:.02em}
+.gf-finance-page .card{background:#fff!important;color:#142132!important;border:1px solid #d7dfe7!important;border-radius:6px!important;box-shadow:none!important}
+.gf-finance-page .card-header{background:#fff!important;color:#101a2b!important;font-weight:680;font-size:13px;border-bottom:1px solid #d7dfe7}
+.gf-finance-page .form-label{color:#75859a;font-size:11px}
+.gf-finance-page .form-control,.gf-finance-page .form-select{background:#f3f5f7;color:#142132;border:1px solid #d8dfe6;border-radius:5px;font-size:12px;min-height:35px}
+.gf-finance-page .btn-primary{background:#35b34c!important;border-color:#35b34c!important;color:#fff!important}
+.gf-finance-kpis{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));border:1px solid #d7dfe7;border-radius:6px;overflow:hidden;background:#fff;margin:20px 0 24px}
+.gf-finance-kpi{padding:15px 12px;min-height:100px;border-right:1px solid #d7dfe7;min-width:0}
+.gf-finance-kpi:last-child{border-right:none}
+.gf-finance-kpi__label{display:flex;justify-content:space-between;align-items:center;gap:7px;color:#79899d;font-size:10px;margin-bottom:13px}
+.gf-finance-kpi__label i{color:#31ac4b}
+.gf-finance-kpi strong{font-size:clamp(13px,1.3vw,21px);color:#101827;font-weight:760;white-space:nowrap;letter-spacing:-.035em}
+.gf-finance-kpi small{display:block;color:#8493a3;font-size:9px;margin-top:6px}
+.gf-finance-filters .card-body{padding:16px!important}
+.gf-finance-secondary-info,.gf-finance-technical{background:#fff;border:1px solid #d7dfe7;border-radius:6px;margin-bottom:18px;padding:10px 14px}
+.gf-finance-secondary-info summary,.gf-finance-technical summary{font-weight:600;font-size:12px;cursor:pointer;color:#324459}
+.gf-finance-technical[open]{padding-bottom:18px}
+.gf-finance-technical>.row{margin-top:14px}
+.gf-finance-page .table{color:#152030;font-size:12px}
+.gf-finance-page .table td,.gf-finance-page .table th{border-color:#e4e9ee}
+.gf-finance-legacy-search{min-height:45px!important}
+@media(max-width:1199px){.gf-finance-kpis{grid-template-columns:repeat(4,minmax(0,1fr))}.gf-finance-kpi{border-bottom:1px solid #d7dfe7}}
+@media(max-width:720px){.gf-finance-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.gf-finance-page{padding-left:12px!important;padding-right:12px!important}.gf-finance-page .page-head{align-items:flex-start;flex-direction:column}}

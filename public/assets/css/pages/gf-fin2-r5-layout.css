@@ -1,0 +1,71 @@
+/* FIN2-R5: harmonizacao visual; nao altera dados ou permissoes. */
+:root { --gf-fin-r5-bg:#f4f6f8; --gf-fin-r5-card:#fff; --gf-fin-r5-line:#d8e0e8; --gf-fin-r5-ink:#102238; --gf-fin-r5-muted:#61758b; }
+/* The nav is part of the content, never a global header. */
+body.admin:has(#financeiroShell),body.admin:has(#saquesShell),body.admin:has(#cartShell){background:var(--gf-fin-r5-bg)!important;}
+body.admin:has(#financeiroShell) .gf-finance-v3-tabs,
+body.admin:has(#financeiroShell) .gf-finance-tabs,
+body.admin:has(#saquesShell) .gf-finance-v3-tabs,
+body.admin:has(#cartShell) .gf-finance-v3-tabs {background:var(--gf-fin-r5-bg)!important;color:var(--gf-fin-r5-ink)!important;border-color:var(--gf-fin-r5-line)!important;}
+/* Subnavigation originally renders as a black legacy bar; restyle in-place (do not hide its links). */
+body.admin:has(#financeiroShell) :is(.finance-tabs,.gf-finance-nav,.gf-finance-v3-nav,.financeiro-nav),
+body.admin:has(#saquesShell) :is(.finance-tabs,.gf-finance-nav,.gf-finance-v3-nav,.financeiro-nav),
+body.admin:has(#cartShell) :is(.finance-tabs,.gf-finance-nav,.gf-finance-v3-nav,.financeiro-nav){background:#fff!important;border-bottom:1px solid var(--gf-fin-r5-line)!important;color:var(--gf-fin-r5-ink)!important;}
+/* Old worklist/workspace panels were dark. Preserve markup, inputs, click handlers and URLs. */
+body.admin:has(#financeiroShell) :is(.shell-ops-worklist,.shell-ops-workspace,.ops-worklist-header,.ops-order-header,.ops-order-facts),
+body.admin:has(#saquesShell) :is(.shell-ops-worklist,.shell-ops-workspace,.ops-worklist-header,.ops-order-header,.ops-order-facts),
+body.admin:has(#cartShell) :is(.shell-ops-worklist,.shell-ops-workspace,.ops-worklist-header,.ops-order-header,.ops-order-facts){background:var(--gf-fin-r5-card)!important;color:var(--gf-fin-r5-ink)!important;border-color:var(--gf-fin-r5-line)!important;}
+body.admin:has(#saquesShell) :is(.ops-topbar,.ops-summary,.ops-metric),
+body.admin:has(#cartShell) :is(.ops-topbar,.ops-summary,.ops-metric){background:#fff!important;color:var(--gf-fin-r5-ink)!important;border-color:var(--gf-fin-r5-line)!important;}
+body.admin:has(#saquesShell) :is(.ops-metric__value,.ops-order-header,.ops-order-fact__value),
+body.admin:has(#cartShell) :is(.ops-metric__value,.ops-order-header,.ops-order-fact__value){color:var(--gf-fin-r5-ink)!important;}
+body.admin:has(#saquesShell) :is(.ops-metric__label,.ops-metric__trend,.ops-order-fact__label),
+body.admin:has(#cartShell) :is(.ops-metric__label,.ops-metric__trend,.ops-order-fact__label){color:var(--gf-fin-r5-muted)!important;}
+body.admin:has(#financeiroShell) :is(.ops-worklist-item,.ops-empty-state,.ops-order-fact),
+body.admin:has(#saquesShell) :is(.ops-worklist-item,.ops-empty-state,.ops-order-fact),
+body.admin:has(#cartShell) :is(.ops-worklist-item,.ops-empty-state,.ops-order-fact){background:#fff!important;color:var(--gf-fin-r5-ink)!important;border-color:var(--gf-fin-r5-line)!important;}
+body.admin:has(#financeiroShell) :is(.ops-worklist-item__top,.ops-worklist-item__customer,.ops-worklist-item__footer),
+body.admin:has(#saquesShell) :is(.ops-worklist-item__top,.ops-worklist-item__customer,.ops-worklist-item__footer),
+body.admin:has(#cartShell) :is(.ops-worklist-item__top,.ops-worklist-item__customer,.ops-worklist-item__footer){color:var(--gf-fin-r5-ink)!important;}
+body.admin:has(#financeiroShell) :is(.ops-worklist-item.is-selected,.ops-worklist-item[aria-selected="true"]),
+body.admin:has(#saquesShell) :is(.ops-worklist-item.is-selected,.ops-worklist-item[aria-selected="true"]),
+body.admin:has(#cartShell) :is(.ops-worklist-item.is-selected,.ops-worklist-item[aria-selected="true"]){background:#e9f7ee!important;border-left:3px solid #2dbb57!important;}
+/* Do not alter warning/error banners: accounting mismatch must remain visible. */
+body.admin:has(#saquesShell) #saquesShell,
+body.admin:has(#cartShell) #cartShell{background:#fff!important;border-top:1px solid var(--gf-fin-r5-line)!important;}
+body.admin:has(#saquesShell) .shell-ops-worklist,
+body.admin:has(#cartShell) .shell-ops-worklist{border-right:1px solid var(--gf-fin-r5-line)!important;}
+/* Sidebar remains fixed from the first viewport pixel and independently scrollable. */
+@media(min-width:761px){
+ body.admin:has(#financeiroShell) #financeiroSidebar,
+ body.admin:has(#saquesShell) #saquesSidebar,
+ body.admin:has(#cartShell) #cartSidebar{position:fixed!important;inset:0 auto 0 0!important;height:100dvh!important;overflow-y:auto!important;scrollbar-width:none!important;z-index:80!important;}
+ body.admin:has(#financeiroShell) #financeiroSidebar::-webkit-scrollbar,
+ body.admin:has(#saquesShell) #saquesSidebar::-webkit-scrollbar,
+ body.admin:has(#cartShell) #cartSidebar::-webkit-scrollbar{display:none!important;}
+}
+/* Reduce the black strip in financial navigation without hiding tabs. */
+body.admin:has(#financeiroShell) :is(.gf-finance-v3-top-tabs,.gf-finance-nav-tabs),
+body.admin:has(#saquesShell) :is(.gf-finance-v3-top-tabs,.gf-finance-nav-tabs),
+body.admin:has(#cartShell) :is(.gf-finance-v3-top-tabs,.gf-finance-nav-tabs){background:#fff!important;color:var(--gf-fin-r5-ink)!important;}
+
+/* Navigation rendered by header.php: preserve functional links, replace black bar. */
+body.admin:has(#financeiroShell) .admin-module-tabs,
+body.admin:has(#saquesShell) .admin-module-tabs,
+body.admin:has(#cartShell) .admin-module-tabs{
+ background:#fff!important;color:#102238!important;border-bottom:1px solid #d8e0e8!important;
+ margin:0!important;padding:8px 24px!important;min-height:48px!important;box-shadow:none!important;
+}
+body.admin:has(#financeiroShell) .admin-module-tab,
+body.admin:has(#saquesShell) .admin-module-tab,
+body.admin:has(#cartShell) .admin-module-tab{
+ background:transparent!important;color:#354c62!important;border:1px solid transparent!important;
+ border-radius:7px!important;text-decoration:none!important;
+}
+body.admin:has(#financeiroShell) .admin-module-tab.is-active,
+body.admin:has(#saquesShell) .admin-module-tab.is-active,
+body.admin:has(#cartShell) .admin-module-tab.is-active{
+ background:#eaf7ed!important;color:#116b36!important;border-color:#b9e5c4!important;
+}
+body.admin:has(#financeiroShell) .admin-module-tab:focus-visible,
+body.admin:has(#saquesShell) .admin-module-tab:focus-visible,
+body.admin:has(#cartShell) .admin-module-tab:focus-visible{outline:2px solid #15803d!important;outline-offset:2px!important;}

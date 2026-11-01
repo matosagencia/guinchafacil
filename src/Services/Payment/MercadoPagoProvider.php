@@ -149,7 +149,7 @@ class MercadoPagoProvider implements PaymentProviderInterface
     protected static function httpPost(string $url, array $headers, string $body): array
     {
         if (!function_exists('curl_init')) {
-            $context = stream_context_create([
+            $ssl = ['verify_peer' => true, 'verify_peer_name' => true];            if (function_exists('ca_bundle_path') && ($ca = ca_bundle_path())) {                $ssl['cafile'] = $ca;            }            $context = stream_context_create([
                 'http' => [
                     'method' => 'POST',
                     'header' => implode("\r\n", $headers),
@@ -157,15 +157,14 @@ class MercadoPagoProvider implements PaymentProviderInterface
                     'timeout' => 20,
                     'ignore_errors' => true,
                 ],
-            ]);
+                'ssl' => $ssl,            ]);
             $resp = @file_get_contents($url, false, $context);
             $statusLine = (string)($http_response_header[0] ?? '');
             preg_match('/\s(\d{3})\s/', $statusLine, $matches);
-            return [
+            $lastError = error_get_last();            return [
                 'body' => $resp === false ? '' : (string)$resp,
                 'code' => (int)($matches[1] ?? 0),
-                'error' => $resp === false ? 'HTTP client unavailable' : '',
-            ];
+                'error' => $resp === false ? (string)($lastError['message'] ?? 'HTTP client unavailable') : '',            ];
         }
         $ch = curl_init($url);
         curl_setopt_array($ch, [

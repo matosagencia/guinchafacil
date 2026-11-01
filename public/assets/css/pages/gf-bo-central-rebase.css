@@ -1,0 +1,17 @@
+/* Fase 18B rebase: ponte visual para a central atual; nao altera handlers. */
+body.admin .ops-summary.bo-metrics {display:grid!important;grid-template-columns:repeat(8,minmax(0,1fr));gap:0;padding:0;margin:14px 20px 20px;background:#fff;border:1px solid #e2e8f0;border-radius:7px;overflow:hidden;color:#101827}
+body.admin .ops-summary.bo-metrics .ops-metric {min-width:0;border:0;border-right:1px solid #e2e8f0;border-radius:0;box-shadow:none;background:#fff;padding:16px 12px;color:#0f172a}
+body.admin .ops-summary.bo-metrics .ops-metric:last-child {border-right:0}
+body.admin .ops-summary.bo-metrics .ops-metric__label {font-size:11px;color:#64748b;line-height:1.35}
+body.admin .ops-summary.bo-metrics .ops-metric__value {font-variant-numeric:tabular-nums;font-size:clamp(16px,1.6vw,24px);color:#0f172a}
+body.admin .ops-summary.bo-metrics .ops-metric.is-warning .ops-metric__value {color:#b45309}
+body.admin .ops-summary.bo-metrics .ops-metric.is-danger .ops-metric__value {color:#b91c1c}
+body.admin .bo-operation-grid.shell-ops {display:grid;grid-template-columns:220px 310px minmax(0,1fr);gap:0;margin:0 20px 24px;width:auto;max-width:none;min-width:0;border:1px solid #e2e8f0;background:#f8fafc;border-radius:7px;overflow:hidden}
+body.admin .bo-operation-grid .bo-orders, body.admin .bo-operation-grid .bo-incident {min-width:0;background:#fff;color:#0f172a;border-color:#e2e8f0}
+body.admin .bo-operation-grid .bo-orders {width:auto;border-right:1px solid #e2e8f0}
+body.admin .bo-operation-grid .bo-incident {width:auto}
+body.admin .bo-operation-grid .ops-worklist-header {background:#fff;color:#0f172a}
+body.admin .bo-operation-grid .ops-worklist-search input {background:#f8fafc;border:1px solid #e2e8f0;color:#0f172a;border-radius:6px}
+body.admin .bo-operation-grid :is(input,button,a):focus-visible {outline:2px solid #2fb34a;outline-offset:2px}
+@media(max-width:1250px) {body.admin .ops-summary.bo-metrics {grid-template-columns:repeat(4,minmax(0,1fr))}body.admin .bo-operation-grid.shell-ops {grid-template-columns:68px 290px minmax(0,1fr)}}
+@media(max-width:760px) {body.admin .ops-summary.bo-metrics {grid-template-columns:repeat(2,minmax(0,1fr));margin:10px}body.admin .bo-operation-grid.shell-ops {display:block;margin:0 10px 18px}body.admin .bo-operation-grid .bo-orders {border-right:0;border-bottom:1px solid #e2e8f0}}

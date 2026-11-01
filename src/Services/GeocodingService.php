@@ -372,8 +372,29 @@ class GeocodingService
     private static function httpGet(string $url, array $headers, int $timeout = 10): ?string
     {
         if (!function_exists('curl_init')) {
-            error_log('[GeocodingService] cURL indisponivel para requisicao HTTP.');
-            return null;
+            // Fallback para o PHP do Apache quando php_curl.dll não está
+            // carregado, mantendo o reverse geocoding funcional.
+            $context = stream_context_create([
+                'http' => [
+                    'method' => 'GET',
+                    'timeout' => max(1, $timeout),
+                    'ignore_errors' => true,
+                    'header' => implode("\r\n", $headers),
+                ],
+                'ssl' => ['verify_peer' => true, 'verify_peer_name' => true],
+            ]);
+            $response = @file_get_contents($url, false, $context);
+            $status = 0;
+            foreach (($http_response_header ?? []) as $header) {
+                if (preg_match('~^HTTP/\S+\s+(\d{3})~', $header, $m)) {
+                    $status = (int)$m[1];
+                }
+            }
+            if ($response === false || ($status !== 0 && ($status < 200 || $status >= 300))) {
+                error_log('[GeocodingService] fallback HTTP falhou com status ' . $status . '.');
+                return null;
+            }
+            return (string)$response;
         }
 
         $ch = curl_init($url);

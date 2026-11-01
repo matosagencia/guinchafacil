@@ -29,15 +29,21 @@ final class PagamentoAprovacaoServiceArquivadoTest extends TestCase
     protected function setUp(): void
     {
         $pdo = getPDO();
+        $driver = $pdo->getAttribute(PDO::ATTR_DRIVER_NAME);
+        if ($driver === 'sqlite') { $pdo->exec('PRAGMA foreign_keys = OFF'); }
+        if ($driver === 'mysql') { $pdo->exec('SET FOREIGN_KEY_CHECKS=0'); }
         foreach ([
             'pedido_idempotency', 'pagamentos_arquivados', 'pagamentos', 'payout_ledger_entries',
             'pedidos', 'veiculos', 'usuarios', 'guinchos', 'provider_capabilities', 'service_types', 'configuracoes',
+            'order_conversion_price_snapshots',
         ] as $table) {
             try {
                 $pdo->exec("DELETE FROM {$table}");
             } catch (Throwable) {
             }
         }
+        if ($driver === 'sqlite') { $pdo->exec('PRAGMA foreign_keys = ON'); }
+        if ($driver === 'mysql') { $pdo->exec('SET FOREIGN_KEY_CHECKS=1'); }
 
         $pdo->exec("INSERT INTO usuarios (id, nome, email, senha_hash, telefone, cpf, tipo) VALUES
             (1, 'Cliente Teste', 'cliente.webhook@example.com', 'hash', '11999999999', '11111111111', 'cliente')");
@@ -45,6 +51,36 @@ final class PagamentoAprovacaoServiceArquivadoTest extends TestCase
             (1, 1, 'WHK1A23', 'Marca Teste', 'Modelo Teste', 2020, 'Prata', 'carro')");
         $pdo->exec("INSERT INTO configuracoes (chave, valor) VALUES ('tempo_expiracao_min', '5')");
         $pdo->exec("INSERT INTO configuracoes (chave, valor) VALUES ('raio_inicial_km', '10')");
+
+        // Fixture do catálogo/preço exigido pela porta oficial de cotação usada
+        // pela conversão complementar.
+        $pdo->exec("INSERT INTO service_categories (id, code, name, active)
+                    VALUES (1, 'assistencia', 'Assistencia', 1)
+                    ON DUPLICATE KEY UPDATE active=1");
+        $pdo->exec("INSERT INTO service_types
+                    (id, category_id, code, public_slug, name, attendance_mode,
+                     requires_destination, allows_conversion_to_towing, active)
+                    VALUES (1, 1, 'TOW_CAR', 'reboque-carro', 'Reboque Carro',
+                            'TOWING', 1, 0, 1)
+                    ON DUPLICATE KEY UPDATE category_id=1, active=1,
+                    attendance_mode='TOWING'");
+        $pdo->exec("INSERT INTO pricing_zones
+                    (id, cidade_id, code, name, polygon_geojson, active, created_at, updated_at)
+                    VALUES (1, NULL, 'QA_SP', 'Zona QA',
+                    '{\"type\":\"Polygon\",\"coordinates\":[[[-47.50,-24.50],[-45.50,-24.50],[-45.50,-22.50],[-47.50,-22.50],[-47.50,-24.50]]]}',
+                    1, NOW(), NOW())
+                    ON DUPLICATE KEY UPDATE active=1");
+        $pdo->exec("INSERT INTO service_price_rules
+                    (pricing_zone_id, service_type_id, vehicle_category,
+                     base_customer_price, minimum_customer_price, provider_base_amount,
+                     platform_fee_type, platform_fee_value, included_distance_km,
+                     extra_distance_price, included_minutes, extra_minute_price,
+                     night_multiplier, holiday_multiplier, effective_from, active,
+                     version, created_at, updated_at, base_km_contagem)
+                    VALUES (1, 1, NULL, 160.00, 180.00, 0.00, 'PERCENTAGE', 0.0800,
+                    0.00, 3.00, 0, 0.00, 1.00, 1.00, '2026-01-01', 1, 1,
+                    NOW(), NOW(), 'transporte')
+                    ON DUPLICATE KEY UPDATE active=1");
     }
 
     private function criarPedidoConvertidoNaoHibrido(int $id): string
@@ -117,14 +153,12 @@ final class PagamentoAprovacaoServiceArquivadoTest extends TestCase
         // pagamento aprovado de um pedido em
         // 'aguardando_pagamento_reboque_hibrido', mesmo sendo legítimo.
         $pdo = getPDO();
-        $pdo->exec("INSERT INTO service_types (id, code, name, attendance_mode, active) VALUES
-            (1, 'TOW_CAR', 'Reboque Carro', 'TOWING', 1)");
         $pdo->exec("INSERT INTO usuarios (id, nome, email, senha_hash, telefone, cpf, tipo) VALUES
             (2, 'Guincho Teste', 'guincho.webhook@example.com', 'hash', '11988888888', '22222222222', 'guincho')");
-        $pdo->exec("INSERT INTO guinchos (id, usuario_id, aprovado, disponivel) VALUES (20, 2, 1, 0)");
+        $pdo->exec("INSERT INTO guinchos (id, usuario_id, aprovado, reboque_aprovado, disponivel) VALUES (20, 2, 1, 1, 0)");
         $pdo->exec("INSERT INTO provider_capabilities
                         (provider_id, service_type_id, enabled, approval_status, created_at, updated_at)
-                     VALUES (20, 1, 1, 'APPROVED', datetime('now'), datetime('now'))");
+                     VALUES (20, 1, 1, 'APPROVED', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)");
 
         $pdo->exec("INSERT INTO pedidos (id, status, custo_estimado, cliente_id, veiculo_id, guincho_id, attendance_mode,
                         lat_origem, lng_origem, endereco_origem)

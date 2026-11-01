@@ -213,6 +213,7 @@ $rotas = [
         '/api/pre-cotacao/validar-uf-destino' => ['PedidoController', 'validarUfDestino', null],
         '/api/pre-cotacao/endereco/sugestoes' => ['PreCotacaoApiController', 'sugestoes', null],
         '/api/pre-cotacao/endereco/reverso'   => ['PreCotacaoApiController', 'reverso', null],
+        '/debug/seed-precotacao' => ['DebugController', 'seedPreCotacao', null],
         '/api/pre-cotacao/cobertura'          => ['PreCotacaoApiController', 'cobertura', null],
         '/api/pre-cotacao/triagem-servicos'   => ['PreCotacaoApiController', 'triagemServicos', null],
         '/api/pre-cotacao/opcoes'              => ['PreCotacaoApiController', 'opcoes', null],
@@ -567,6 +568,7 @@ $rotas = [
 
         '/checkout/cliente' => ['CheckoutController', 'salvarCliente', null],
         '/checkout/veiculo' => ['CheckoutController', 'salvarVeiculo', 'cliente'],
+        '/checkout/pagar'   => ['CheckoutController', 'pagar', 'cliente'],
 
         '/pagamento/mercadopago' => ['PagamentoController', 'iniciarMercadoPago', 'cliente'],
         '/pagamento/pagseguro'   => ['PagamentoController', 'iniciarPagSeguro', 'cliente'],

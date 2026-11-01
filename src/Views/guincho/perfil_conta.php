@@ -5,7 +5,7 @@ include __DIR__ . '/../layouts/header.php';
 ?>
 <div class="main-wrapper">
 <?php include __DIR__ . '/../layouts/sidebar_guincho.php'; ?>
-<main class="main-content">
+<main class="main-content"><?php include __DIR__ . '/../layouts/profile_panel_topbar.php'; ?>
     <div class="page-header">
         <div>
             <div class="page-title"><i class="fas fa-user-pen me-2 text-primary-custom"></i>Meu Perfil</div>

@@ -22,6 +22,18 @@
   justify-content: center;
 }
 
+/* O rodape pode ser carregado junto com folhas legadas que definem
+ * `svg { width: 100% }`. Os logos de pagamento devem permanecer compactos. */
+.gf-site-footer .gf-footer-payments,
+.gf-footer .gf-footer-payments,
+.gf-payment-card .gf-footer-payments {
+  overflow: hidden;
+}
+
+.gf-footer-payments .gf-footer-payments__brands {
+  width: 100%;
+}
+
 .gf-payment-brand {
   align-items: center;
   border: 1px solid #374151;
@@ -34,7 +46,21 @@
   padding: 5px 10px;
 }
 
-.gf-payment-brand svg { display: block; height: 17px; width: auto; }
+.gf-footer-payments .gf-payment-brand {
+  flex: 0 0 auto;
+  width: auto;
+  max-width: 160px;
+}
+
+.gf-footer-payments .gf-payment-brand svg {
+  display: block !important;
+  flex: 0 0 auto;
+  height: 17px !important;
+  min-height: 0 !important;
+  max-height: 17px !important;
+  max-width: 57px !important;
+  width: auto !important;
+}
 .gf-payment-brand--pix { background: #fff; color: #008a7b; }
 .gf-payment-brand--visa { background: #1a1f71; border-color: #1a1f71; color: #fff; }
 .gf-payment-brand--mastercard { background: #fff; color: #111827; }
@@ -52,7 +78,14 @@
   margin: 14px 0 0;
 }
 
-.gf-footer-payments__security svg { flex: 0 0 auto; height: 15px; width: 15px; }
+.gf-footer-payments__security svg {
+  display: block !important;
+  flex: 0 0 15px;
+  height: 15px !important;
+  max-height: 15px !important;
+  max-width: 15px !important;
+  width: 15px !important;
+}
 
 .gf-payment-card {
   background: var(--gf-preto, #0A0A0A);

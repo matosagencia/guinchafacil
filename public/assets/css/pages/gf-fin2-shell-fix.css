@@ -1,0 +1,25 @@
+/* FIN2: escopo estritamente /admin/financeiro */
+body:has(#financeiroShell) { margin:0!important; padding:0!important; background:#f3f5f8!important; }
+body:has(#financeiroShell) > header,
+body:has(#financeiroShell) > nav.navbar,
+body:has(#financeiroShell) > .navbar,
+body:has(#financeiroShell) > .admin-header,
+body:has(#financeiroShell) > .topbar,
+body:has(#financeiroShell) > .ops-topbar { display:none!important; }
+#financeiroShell { margin:0!important; top:0!important; min-height:100dvh!important; }
+#financeiroShell > #financeiroSidebar {
+ display:flex!important; flex-direction:column!important; grid-row:1!important;
+ position:sticky!important; top:0!important; align-self:start!important;
+ height:100dvh!important; min-height:100dvh!important; max-height:100dvh!important;
+ overflow-y:auto!important; overflow-x:hidden!important; scrollbar-width:none!important;
+ -ms-overflow-style:none!important; background:#101417!important; border:0!important;
+}
+#financeiroSidebar::-webkit-scrollbar { display:none!important; width:0!important; height:0!important; }
+#financeiroSidebar .gf-fin2-brand { display:block; margin:0 0 25px; padding:20px 16px 8px; color:#fff; }
+#financeiroSidebar .gf-fin2-brand strong {display:block;font-size:23px;letter-spacing:-.05em;line-height:1.2;font-weight:800;}
+#financeiroSidebar .gf-fin2-brand strong span {color:#2db854;}
+#financeiroSidebar .gf-fin2-brand small {display:block;margin-top:12px;font-size:11px;color:#cbd5e1;}
+#financeiroSidebar .ops-nav, #financeiroSidebar .gf18e-nav { display:block!important; visibility:visible!important; opacity:1!important; }
+#financeiroSidebar .ops-nav-link {display:flex!important; align-items:center!important;}
+#financeiroShell > #financeiroMain {min-width:0!important; margin:0!important; padding-top:0!important;}
+@media(max-width:760px) {#financeiroShell > #financeiroSidebar {position:relative!important;height:auto!important;min-height:0!important;max-height:none!important;}}

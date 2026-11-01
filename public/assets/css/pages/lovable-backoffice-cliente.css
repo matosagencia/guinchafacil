@@ -1,0 +1,13 @@
+/* GuinchaFácil | Fase 2: acabamento Lovable | CLIENTE — light */
+/* Escopo limitado à página de dashboard; não altera funis nem preço. */
+body.cliente .app-dashboard {max-width:1480px;margin-inline:auto;padding-bottom:44px}
+body.cliente .app-dashboard .page-head {padding:clamp(16px,2vw,28px);border:1px solid #e5ede7;border-radius:20px;background:#fff;box-shadow:0 8px 30px rgba(16,40,22,.04)}
+body.cliente .app-dashboard .page-head h1{font-size:clamp(1.45rem,2.2vw,2rem);letter-spacing:-.035em;line-height:1.2;color:#142018}
+body.cliente .app-dashboard .page-head p{color:#607066}
+body.cliente .app-dashboard .client-rescue-card{border-radius:20px;border:1px solid #cfe7d5;background:linear-gradient(112deg,#fff,#f2fbf4);box-shadow:0 12px 28px rgba(31,110,54,.07);padding:clamp(16px,2vw,28px)}
+body.cliente .app-dashboard .quick-rescue__row .form-control{min-height:46px;border-color:#dce9df;border-radius:10px}
+body.cliente .app-dashboard .quick-rescue__row .btn-primary{background:#2fb34a;border-color:#2fb34a;border-radius:10px;font-weight:700;min-height:46px}
+body.cliente .app-dashboard .quick-rescue__row .btn-primary:hover{background:#1f8a36;border-color:#1f8a36}
+body.cliente .app-dashboard :is(.app-hero,.client-hero,.app-panel,.dash-panel,.service-card){border-radius:18px}
+body.cliente .app-dashboard :is(a,button,input):focus-visible{outline:3px solid #2fb34a;outline-offset:2px}
+@media(max-width:760px){body.cliente .app-dashboard .page-head{padding:18px}body.cliente .app-dashboard .quick-rescue__row{flex-direction:column}body.cliente .app-dashboard .quick-rescue__row>.input-group{max-width:100%!important;width:100%}}

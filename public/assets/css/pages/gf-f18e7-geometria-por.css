@@ -1,0 +1,141 @@
+/* Fase 18E.7 — patch de geometria e contraste, sem tocar nas APIs ou mapas. */
+body.admin:has(.gf-order-detail),body.admin:has(.gf-por-detail){margin:0!important;overflow-x:hidden;background:#f3f5f7!important}
+body.admin .gf-order-detail,body.admin .gf-por-detail{
+ display:flex!important; flex-flow:row nowrap!important; align-items:stretch!important;
+ grid-template-columns:none!important; gap:0!important; position:relative!important;
+ width:100%!important; max-width:100%!important; min-height:100vh!important;
+ overflow:clip!important; margin:0!important; padding:0!important;
+ background:#f3f5f7!important; color:#142338!important;
+}
+body.admin .gf-order-detail > .shell-sidebar,
+body.admin .gf-por-detail > .shell-sidebar{
+ flex:0 0 190px!important; width:190px!important; min-width:190px!important;
+ max-width:190px!important; position:sticky!important; top:0!important;
+ height:100vh!important; max-height:100vh!important;
+ overflow-y:auto!important; overflow-x:hidden!important; z-index:20!important;
+ margin:0!important; inset-inline-start:auto!important; transform:none!important;
+ scrollbar-width:none; background:#101417!important;
+}
+body.admin .gf-order-detail > .shell-sidebar::-webkit-scrollbar,
+body.admin .gf-por-detail > .shell-sidebar::-webkit-scrollbar{display:none}
+body.admin .gf-order-detail > .shell-main,
+body.admin .gf-por-detail > .shell-main{
+ position:relative!important; flex:1 1 0%!important; display:block!important;
+ width:auto!important; min-width:0!important; max-width:none!important;
+ margin:0!important; margin-left:0!important; inset-inline-start:auto!important;
+ transform:none!important; padding:20px 24px!important; box-sizing:border-box!important;
+ background:#f3f5f7!important; color:#142338!important; overflow:visible!important;
+}
+body.admin .gf-order-detail > .shell-main > *,
+body.admin .gf-por-detail > .shell-main > * {max-width:100%;min-width:0}
+body.admin .gf-order-detail .row,
+body.admin .gf-por-detail .row{min-width:0}
+body.admin .gf-order-detail .row > *,body.admin .gf-por-detail .row > *{min-width:0}
+body.admin .gf-order-detail .card:not(.pd-dark-keep),
+body.admin .gf-por-detail .card{background:#fff!important;color:#142338!important;border:1px solid #dbe3eb!important;box-shadow:none!important;border-radius:8px}
+body.admin .gf-order-detail .card:not(.pd-dark-keep) .card-header,
+body.admin .gf-por-detail .card .card-header{background:#fff!important;color:#142338!important;border-bottom:1px solid #dbe3eb!important}
+body.admin .gf-order-detail .card:not(.pd-dark-keep) .card-body,
+body.admin .gf-por-detail .card .card-body{color:#142338!important}
+body.admin .gf-order-detail .card:not(.pd-dark-keep) .text-muted,
+body.admin .gf-order-detail .card:not(.pd-dark-keep) small,
+body.admin .gf-por-detail .text-muted,
+body.admin .gf-por-detail .card small{color:#52647a!important}
+body.admin .gf-order-detail .card:not(.pd-dark-keep) .text-white,
+body.admin .gf-por-detail .card .text-white{color:#142338!important}
+body.admin .gf-order-detail .card:not(.pd-dark-keep) .table,
+body.admin .gf-por-detail .card .table{color:#142338!important;--bs-table-color:#142338;--bs-table-bg:#fff}
+body.admin .gf-order-detail .table-responsive,
+body.admin .gf-por-detail .table-responsive{max-width:100%;overflow-x:auto}
+body.admin .gf-order-detail .pd-map,body.admin .gf-por-detail .trilha-map{max-width:100%}
+body.admin .gf-order-detail .page-head h1,
+body.admin .gf-por-detail .page-head h1{color:#102036!important}
+body.admin .gf-order-detail .page-head p,
+body.admin .gf-por-detail .page-head p{color:#64748b!important}
+body.admin .gf-order-detail .page-head .d-flex,
+body.admin .gf-por-detail .page-head .d-flex{flex-wrap:wrap;gap:8px}
+body.admin .gf-order-detail .modal .text-white{color:inherit!important}
+/* Compactação sem remover a navegação ou ocultar botões de ação */
+@media(max-width:900px){
+ body.admin .gf-order-detail > .shell-sidebar,body.admin .gf-por-detail > .shell-sidebar{flex-basis:68px!important;width:68px!important;min-width:68px!important;max-width:68px!important}
+ body.admin .gf-order-detail > .shell-main,body.admin .gf-por-detail > .shell-main{padding:16px!important}
+}
+@media(max-width:600px){
+ body.admin .gf-order-detail,body.admin .gf-por-detail{display:block!important;overflow:visible!important}
+ body.admin .gf-order-detail > .shell-sidebar,body.admin .gf-por-detail > .shell-sidebar{position:relative!important;width:100%!important;min-width:0!important;max-width:100%!important;height:auto!important;max-height:none!important;overflow:visible!important}
+ body.admin .gf-order-detail > .shell-main,body.admin .gf-por-detail > .shell-main{padding:12px!important;width:100%!important}
+}
+
+/* Fase 18E.8 — contraste de dados no tema claro (somente ficha e POR).
+   Corrige variáveis Bootstrap de tabelas e textos herdados do shell legado.
+   Não interfere em modais, mapa Leaflet, sidebar ou chat escuro. */
+body.admin .gf-order-detail > .shell-main,
+body.admin .gf-por-detail > .shell-main {
+  --bs-body-color: #0f172a;
+  --bs-secondary-color: #475569;
+  --bs-tertiary-color: #64748b;
+  --bs-table-color: #0f172a;
+  --bs-table-bg: #ffffff;
+}
+body.admin .gf-order-detail > .shell-main .card:not(.pd-dark-keep),
+body.admin .gf-por-detail > .shell-main .card {
+  --bs-body-color: #0f172a;
+  --bs-table-color: #0f172a;
+  --bs-table-bg: #ffffff;
+  --bs-table-border-color: #cbd5e1;
+}
+body.admin .gf-order-detail > .shell-main .card:not(.pd-dark-keep) .table,
+body.admin .gf-por-detail > .shell-main .card .table {
+  --bs-table-color: #0f172a !important;
+  --bs-table-bg: #ffffff !important;
+  --bs-table-striped-color: #0f172a !important;
+  --bs-table-striped-bg: #f8fafc !important;
+  --bs-table-hover-color: #0f172a !important;
+  color: #0f172a !important;
+}
+body.admin .gf-order-detail > .shell-main .card:not(.pd-dark-keep) .table > :not(caption) > * > *,
+body.admin .gf-por-detail > .shell-main .card .table > :not(caption) > * > * {
+  color: #0f172a !important;
+  background-color: transparent;
+  border-bottom-color: #cbd5e1;
+  opacity: 1 !important;
+}
+body.admin .gf-order-detail > .shell-main .card:not(.pd-dark-keep) .pd-label,
+body.admin .gf-order-detail > .shell-main .card:not(.pd-dark-keep) .text-muted,
+body.admin .gf-por-detail > .shell-main .card .text-muted {
+  color: #475569 !important;
+  opacity: 1 !important;
+}
+body.admin .gf-order-detail > .shell-main .card:not(.pd-dark-keep) :is(.card-title,.card-header,h2,h3,h4,h5,h6,strong,dt),
+body.admin .gf-por-detail > .shell-main .card :is(.card-title,.card-header,h2,h3,h4,h5,h6,strong,dt) {
+  color: #0f172a !important;
+}
+body.admin .gf-order-detail > .shell-main .card:not(.pd-dark-keep) :is(p,dd,li,label,small),
+body.admin .gf-por-detail > .shell-main .card :is(p,dd,li,label,small) {
+  color: #334155;
+}
+body.admin .gf-order-detail > .shell-main .card:not(.pd-dark-keep) a:not(.btn),
+body.admin .gf-por-detail > .shell-main .card a:not(.btn) {
+  color: #166534;
+}
+/* Preserva fundos escuros intencionais do chat e de áreas técnicas. */
+body.admin .gf-order-detail > .shell-main :is(.leaflet-container,.leaflet-control,.modal,.pd-dark-keep),
+body.admin .gf-por-detail > .shell-main :is(.leaflet-container,.leaflet-control,.modal) {
+  --bs-body-color: initial;
+}
+
+/* Fase 18E.9 - elimina exclusivamente o cabecalho legado duplicado.
+   O menu administrativo e renderizado em .gf-order-detail / .gf-por-detail. */
+body.admin:has(.gf-order-detail) > nav.gf-order-crumb,
+body.admin:has(.gf-por-detail) > nav.gf-order-crumb,
+body.admin:has(.gf-order-detail) > nav.gf-admin-topbar,
+body.admin:has(.gf-por-detail) > nav.gf-admin-topbar {
+  display: none !important;
+  height: 0 !important;
+  min-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+}
+body.admin:has(.gf-order-detail),
+body.admin:has(.gf-por-detail) { padding-top: 0 !important; }

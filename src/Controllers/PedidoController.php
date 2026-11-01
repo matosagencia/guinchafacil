@@ -49,6 +49,78 @@ final class PedidoController
                 ]
             );
 
+            // Previa visual apenas; o valor definitivo continua sendo
+            // recalculado por AuthController::preCotacao no envio final.
+            $precos = ['assistencia' => null, 'reboque' => null, 'status' => 'parcial'];
+            try {
+                $destLat = filter_var($draft['lat_destino'] ?? null, FILTER_VALIDATE_FLOAT);
+                $destLng = filter_var($draft['lng_destino'] ?? null, FILTER_VALIDATE_FLOAT);
+                require_once __DIR__ . '/../Services/Pricing/CotacaoUnificadaService.php';
+                $cotacaoPreview = CotacaoUnificadaService::calcular([
+                    'lat_origem' => (float)$lat,
+                    'lng_origem' => (float)$lng,
+                    'lat_destino' => $destLat !== false ? (float)$destLat : null,
+                    'lng_destino' => $destLng !== false ? (float)$destLng : null,
+                    'public_slug' => ($destLat !== false && $destLng !== false && ($decisao['opcao_reboque']['disponivel'] ?? false)) ? 'reboque' : $slug,
+                    'vehicle_category' => (string)($draft['categoria'] ?? 'popular'),
+                ]);
+                if (($cotacaoPreview['ok'] ?? false) === true) {
+                    $precos['reboque'] = round((float)($cotacaoPreview['preco_cliente'] ?? 0), 2);
+                    $precos['status'] = 'ok';
+                } elseif (in_array(($cotacaoPreview['erro'] ?? ''), ['PRICE-ROUTE-UNAVAILABLE', 'PRICE-INTERNAL'], true)
+                    && $destLat !== false && $destLng !== false) {
+                    // O preview pode usar linha reta somente como estimativa visual
+                    // quando o Apache estiver sem o cliente HTTP de roteamento. O
+                    // valor definitivo continua sendo recalculado no POST final.
+                    require_once __DIR__ . '/../Services/GeoService.php';
+                    require_once __DIR__ . '/../Services/Precificacao/PrecificacaoService.php';
+                    require_once __DIR__ . '/../Services/Pricing/ZonePricingService.php';
+                    $tipoReboque = ServiceType::buscarPorSlugPublico('reboque');
+                    if (is_array($tipoReboque)) {
+                        $zonaPreview = ZonePricingService::resolverZonaTarifariaPorCoordenada(
+                            (float)$lat,
+                            (float)$lng,
+                            (int)$tipoReboque['id'],
+                            (string)($draft['categoria'] ?? 'popular')
+                        );
+                        $zonaIdPreview = (int)($zonaPreview['zona_tarifaria_id'] ?? 0);
+                        $kmEstimado = round(GeoService::haversine(
+                            (float)$lat,
+                            (float)$lng,
+                            (float)$destLat,
+                            (float)$destLng
+                        ), 2);
+                        if ($zonaIdPreview > 0 && $kmEstimado > 0) {
+                            $estimativa = PrecificacaoService::calcular([
+                                'lat_origem' => (float)$lat,
+                                'lng_origem' => (float)$lng,
+                                'lat_destino' => (float)$destLat,
+                                'lng_destino' => (float)$destLng,
+                                'service_type_id' => (int)$tipoReboque['id'],
+                                'vehicle_category' => (string)($draft['categoria'] ?? 'popular'),
+                                'attendance_mode' => (string)($tipoReboque['attendance_mode'] ?? 'TOWING'),
+                                'pricing_zone_id' => $zonaIdPreview,
+                                'km_transporte' => $kmEstimado,
+                                'pedagio' => 0.0,
+                                'quando' => date('Y-m-d H:i:s'),
+                            ]);
+                            if (($estimativa['ok'] ?? false) === true) {
+                                $precos['reboque'] = round((float)$estimativa['preco_cliente'], 2);
+                                $precos['status'] = 'estimado';
+                            }
+                        }
+                    }
+                }
+            } catch (Throwable $e) {
+                Logger::log(Logger::LEVEL_INFO, __CLASS__, __FUNCTION__, 'pre-cotacao',
+                    'Previa de preco indisponivel; cotacao oficial permanece no POST final.',
+                    ['erro' => $e->getMessage()]);
+            }
+            if ($decisao['opcao_assistencia']['disponivel'] ?? false) {
+                $precos['assistencia'] = round((float)Configuracao::get('custo_saida_profissional_padrao', '80.00'), 2);
+            }
+            $decisao['precos'] = $precos;
+
             $escolha = strtolower(trim((string)($payload['escolha'] ?? '')));
             if (in_array($escolha, ['assistencia', 'reboque'], true)) {
                 $_SESSION['pre_cotacao_decisao'] = [

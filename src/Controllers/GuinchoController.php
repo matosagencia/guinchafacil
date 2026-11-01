@@ -1323,7 +1323,15 @@ class GuinchoController extends BaseController
 
 
 
-        $tiposServico = ServiceType::listarAtivos();
+        $servicosOcultos = [
+            'MECHANICAL_ASSISTANCE', 'ELECTRICAL_DIAGNOSIS', 'JUMP_START',
+            'BATTERY_TEST', 'BATTERY_REPLACEMENT', 'TIRE_INFLATION',
+            'TIRE_CHANGE', 'AUTOMOTIVE_LOCKSMITH', 'FUEL_DELIVERY',
+        ];
+        $tiposServico = array_values(array_filter(
+            ServiceType::listarAtivos(),
+            static fn(array $tipo): bool => !in_array((string)($tipo['code'] ?? ''), $servicosOcultos, true)
+        ));
 
         $minhasCapacidades = ProviderCapability::listarPorPrestador((int)$guincho['id']);
 
@@ -1385,15 +1393,9 @@ class GuinchoController extends BaseController
 
             }
 
-            // PreÃ§o NÃƒO vem do prestador â€” quem define Ã© o admin (config/tarifas).
-
-            // O prestador sÃ³ informa o raio de atendimento daquele serviÃ§o.
-
-            ProviderCapability::declarar((int)$guincho['id'], $serviceTypeId, [
-
-                'coverage_radius_km' => $_POST['coverage_radius_km'][$serviceTypeId] ?? null,
-
-            ]);
+            // Preço não vem do prestador — quem define é o admin (config/tarifas).
+            // O raio operacional é único e fica em guincho/perfil, não por serviço.
+            ProviderCapability::declarar((int)$guincho['id'], $serviceTypeId);
 
         }
 
@@ -3538,6 +3540,11 @@ class GuinchoController extends BaseController
     {
 
         AuthService::requireAuth('guincho');
+
+        // A tela de estoque foi retirada do painel do guincho; os dados
+        // operacionais agora ficam concentrados no perfil.
+        $this->redirect('/guincho/perfil');
+        return;
 
         $usuario = AuthService::getCurrentUser();
 

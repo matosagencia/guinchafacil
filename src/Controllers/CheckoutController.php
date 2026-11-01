@@ -7,9 +7,24 @@ require_once __DIR__ . '/../Services/TriageSessionService.php';
 require_once __DIR__ . '/../Models/Veiculo.php';
 require_once __DIR__ . '/../Models/Pedido.php';
 require_once __DIR__ . '/../Models/Pagamento.php';
+require_once __DIR__ . '/../Services/Payment/PaymentProviderFactory.php';
 
 final class CheckoutController extends BaseController
 {
+    public function formCliente(): void
+    {
+        $cotacao = $_SESSION['pre_cotacao'] ?? null;
+        if (!is_array($cotacao) || (int)($cotacao['expira_em'] ?? 0) <= time()) {
+            $this->setFlashMessage('Sua cotaÃ§Ã£o expirou. Gere uma nova para continuar.', 'warning');
+            $this->redirect('/pre-cotacao');
+            return;
+        }
+
+        $csrf_token = AuthService::gerarCsrfToken();
+        $flash = $this->getFlashMessage();
+        require __DIR__ . '/../Views/public/checkout-cliente.php';
+    }
+
     public function veiculo(): void
     {
         $usuario = AuthService::requireAuth('cliente');
@@ -58,14 +73,57 @@ final class CheckoutController extends BaseController
 
             // A escolha feita na pré-cotação atravessa o cadastro e é aplicada
             // somente depois que o pedido autenticado existe.
-            $forma = strtolower(trim((string)($_SESSION['pre_cotacao']['forma_pagamento'] ?? 'online')));
-            if ($forma === 'pago_na_chegada') {
+            $forma = strtolower(trim((string)(
+                $_SESSION['pre_cotacao']['forma_pagamento']
+                    ?? $triagem['dados']['forma_pagamento']
+                    ?? 'online'
+            )));
+            if ($forma === 'online') {
+                $resultado = Pagamento::aplicarDestinoPagamento(
+                    (int)$pedidoId,
+                    'online',
+                    PaymentProviderFactory::gatewayAtivoRaw()
+                );
+                if (!($resultado['ok'] ?? false)) {
+                    Logger::log(Logger::LEVEL_ERROR, 'CheckoutController', 'pagar', 'checkout', '[CHECKOUT-ONLINE-FAIL] Falha ao registrar pagamento online.', ['pedido_id' => $pedidoId]);
+                    http_response_code(500); echo 'NÃ£o foi possÃ­vel preparar o pagamento online.'; exit;
+                }
+            } elseif ($forma === 'pago_na_chegada') {
                 $resultado = Pagamento::aplicarDestinoPagamento((int)$pedidoId, 'pago_na_chegada');
                 if (!($resultado['ok'] ?? false)) {
                     Logger::log(Logger::LEVEL_ERROR, 'CheckoutController', 'pagar', 'checkout', '[CHECKOUT-CASH-FAIL] Falha ao registrar pagamento na chegada.', ['pedido_id' => $pedidoId]);
                     http_response_code(500); echo 'Não foi possível registrar a forma de pagamento escolhida.'; exit;
                 }
                 unset($_SESSION['pre_cotacao']['forma_pagamento']);
+                $this->redirect('/cliente/dashboard?msg=pedido_criado');
+            }
+        } else {
+            // O navegador pode perder a sessão curta da pré-cotação depois do
+            // cadastro. A triagem já persistida continua sendo a fonte segura
+            // da escolha feita pelo cliente.
+            $forma = strtolower(trim((string)(
+                $triagem['dados']['forma_pagamento']
+                    ?? $_SESSION['pre_cotacao']['forma_pagamento']
+                    ?? 'online'
+            )));
+            if ($forma === 'online' && empty($triagem['pedido_financeiro_preparado'])) {
+                $resultado = Pagamento::aplicarDestinoPagamento(
+                    (int)$pedidoId,
+                    'online',
+                    PaymentProviderFactory::gatewayAtivoRaw()
+                );
+                if (!($resultado['ok'] ?? false)) {
+                    http_response_code(500);
+                    echo 'NÃ£o foi possÃ­vel preparar o pagamento online.';
+                    exit;
+                }
+            } elseif ($forma === 'pago_na_chegada') {
+                $resultado = Pagamento::aplicarDestinoPagamento((int)$pedidoId, 'pago_na_chegada');
+                if (!($resultado['ok'] ?? false)) {
+                    http_response_code(500);
+                    echo 'Não foi possível registrar a forma de pagamento escolhida.';
+                    exit;
+                }
                 $this->redirect('/cliente/dashboard?msg=pedido_criado');
             }
         }

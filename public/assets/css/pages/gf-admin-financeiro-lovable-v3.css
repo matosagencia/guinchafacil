@@ -1,0 +1,54 @@
+/* Fase 7: reconstrucao estrutural do Financeiro. Sem alterar comportamento dos controladores. */
+body:has(.gf-finance-v3){background:#f4f6f8!important;color:#152033!important}
+body:has(.gf-finance-v3)>.ops-topbar, body:has(.gf-finance-v3)>.gf-finance-legacy-search{display:none!important}
+.gf-finance-v3.shell-ops{display:grid!important;grid-template-columns:220px minmax(0,1fr)!important;grid-template-rows:auto!important;gap:0!important;width:100%!important;max-width:none!important;margin:0!important;min-height:100vh!important;align-items:stretch!important;background:#f4f6f8!important}
+.gf-finance-v3>.gf-finance-v3-sidebar.shell-ops-sidebar{grid-column:1!important;grid-row:1!important;display:block!important;position:sticky!important;top:0!important;align-self:start!important;height:100vh!important;min-height:100vh!important;overflow-y:auto!important;overflow-x:hidden!important;background:#111518!important;color:#dce5e1!important;width:220px!important;max-width:220px!important;border-right:1px solid #293238!important;z-index:15}
+.gf-finance-v3-main{grid-column:2!important;grid-row:1!important;min-width:0!important;max-width:100%!important;background:#f4f6f8!important;padding-bottom:26px;color:#142134!important}
+.gf-finance-v3-breadcrumb{min-height:64px;display:flex;align-items:center;gap:14px;background:#fff;border-bottom:1px solid #d8dfe6;padding:0 28px;color:#708197;font-size:12px}
+.gf-finance-v3-breadcrumb strong{color:#152135;font-weight:600}
+.gf-finance-v3 .gf-finance-page{margin:0!important;padding:24px 28px 0!important;min-height:auto!important;background:transparent!important}
+.gf-finance-v3 .page-head{margin:0 0 24px!important}
+.gf-finance-v3 .page-head h1{font-size:26px!important;font-weight:750!important;color:#142134!important}
+.gf-finance-v3 .page-head p{margin:5px 0 0!important;color:#748297!important}
+.gf-finance-v3 .gf-finance-filters{margin:0 0 22px!important}
+.gf-finance-v3 .gf-finance-filters .card-body{padding:16px!important}
+.gf-finance-v3 .gf-finance-filters form.row{display:grid!important;grid-template-columns:repeat(8,minmax(0,1fr));gap:12px!important;margin:0!important;align-items:end}
+.gf-finance-v3 .gf-finance-filters form.row>div{width:auto!important;max-width:none!important;flex:none!important;padding:0!important;min-width:0!important}
+.gf-finance-v3 .gf-finance-filters form.row>div.col-12{grid-column:1/-1;display:flex!important;gap:8px!important}
+.gf-finance-v3 .form-control,.gf-finance-v3 .form-select{background:#f3f5f7!important;color:#142134!important;border:1px solid #d7dfe7!important;min-width:0!important}
+.gf-finance-v3 .gf-finance-kpis{margin:0 0 22px!important}
+.gf-finance-v3 .gf-finance-kpi strong{color:#101827!important;font-size:clamp(14px,1.35vw,21px)!important}
+.gf-finance-v3 .gf-finance-page .card,.gf-finance-v3 .gf-finance-v3-workshop{background:#fff!important;color:#152033!important;border:1px solid #d8dfe6!important;border-radius:6px!important;box-shadow:none!important}
+.gf-finance-v3 .gf-finance-page .card-header{background:#fff!important;color:#152033!important}
+.gf-finance-v3 .gf-finance-page .table{--bs-table-bg:#fff;--bs-table-color:#142134;--bs-table-border-color:#e0e6ed;background:#fff!important;color:#142134!important}
+.gf-finance-v3 .gf-finance-page .table tbody tr:hover{--bs-table-hover-bg:#f5f8f6}
+.gf-finance-v3 .gf-finance-v3-transactions{display:grid!important;grid-template-columns:minmax(270px,32%) minmax(0,1fr)!important;gap:20px!important;margin:0 28px 22px!important;min-height:540px!important;background:transparent!important}
+.gf-finance-v3 .gf-finance-v3-transactions>.shell-ops-worklist,.gf-finance-v3 .gf-finance-v3-transactions>.shell-ops-workspace{display:block!important;grid-column:auto!important;grid-row:auto!important;min-width:0!important;max-width:none!important;height:auto!important;min-height:540px!important;background:#fff!important;border:1px solid #d8dfe6!important;border-radius:7px!important;overflow:hidden!important;color:#142134!important}
+.gf-finance-v3 .gf-finance-v3-transactions>.shell-ops-worklist{max-height:690px!important;display:flex!important;flex-direction:column!important}
+.gf-finance-v3 #financeiroWorklistResults{overflow:auto!important;flex:1 1 auto!important}
+.gf-finance-v3 .ops-worklist-header,.gf-finance-v3 .ops-worklist-search,.gf-finance-v3 .ops-order-header{background:#fff!important;color:#152033!important}
+.gf-finance-v3 .shell-ops-workspace,.gf-finance-v3 .shell-ops-workspace *:not(.btn):not(.badge):not(i):not(.ops-signal){text-shadow:none!important}
+.gf-finance-v3 .shell-ops-workspace h1,.gf-finance-v3 .shell-ops-workspace h2,.gf-finance-v3 .shell-ops-workspace h3,.gf-finance-v3 .shell-ops-workspace strong,.gf-finance-v3 .shell-ops-workspace .card-header{color:#142134!important}
+.gf-finance-v3 .shell-ops-workspace .text-muted,.gf-finance-v3 .shell-ops-workspace small{color:#65768b!important}
+.gf-finance-v3 .shell-ops-workspace .card,.gf-finance-v3 .shell-ops-workspace .ops-order-card{background:#fff!important;color:#142134!important;border-color:#d8dfe6!important}
+.gf-finance-v3 .gf-finance-v3-workshop{margin:0 28px 24px!important;padding:0!important;overflow:hidden}
+.gf-finance-v3 .gf-finance-v3-workshop>summary{cursor:pointer;padding:14px 17px;color:#13243a;font-size:13px;font-weight:650;list-style-position:inside}
+.gf-finance-v3 .gf-finance-v3-workshop>summary span{font-weight:400;color:#78869a;margin-left:12px;font-size:11px}
+.gf-finance-v3 .gf-finance-v3-workshop>section{margin:0!important;padding:18px!important}
+.gf-finance-v3 .gf-finance-v3-workshop .card{background:#fff!important;color:#142134!important}
+.gf-finance-v3 .gf-finance-v3-workshop .table{color:#142134!important}
+.gf-finance-v3 .gf-finance-secondary-info{margin-bottom:15px!important}
+.gf-finance-v3 .gf-finance-technical{margin-bottom:22px!important}
+@media(max-width:1400px){.gf-finance-v3 .gf-finance-filters form.row{grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media(max-width:1050px){.gf-finance-v3 .gf-finance-v3-transactions{grid-template-columns:1fr!important}.gf-finance-v3 .gf-finance-v3-transactions>.shell-ops-worklist{max-height:340px!important;min-height:250px!important}.gf-finance-v3 .gf-finance-kpis{grid-template-columns:repeat(4,minmax(0,1fr))!important}}
+@media(max-width:760px){.gf-finance-v3.shell-ops{grid-template-columns:1fr!important}.gf-finance-v3>.gf-finance-v3-sidebar.shell-ops-sidebar{position:relative!important;grid-column:1!important;height:auto!important;min-height:0!important;max-height:260px!important;width:100%!important;max-width:100%!important}.gf-finance-v3-main{grid-column:1!important;grid-row:2!important}.gf-finance-v3 .gf-finance-page{padding:16px 12px 0!important}.gf-finance-v3 .gf-finance-v3-transactions{margin:0 12px 16px!important}.gf-finance-v3 .gf-finance-v3-workshop{margin:0 12px 16px!important}.gf-finance-v3 .gf-finance-kpis{grid-template-columns:repeat(2,minmax(0,1fr))!important}.gf-finance-v3 .gf-finance-filters form.row{grid-template-columns:repeat(2,minmax(0,1fr))}.gf-finance-v3-breadcrumb{padding:0 14px}}
+
+/* Fase 8: contraste de tabelas e detalhe financeiro (evita heranca dark). */
+.gf-finance-v3 .gf-finance-page table,.gf-finance-v3 .gf-finance-page table tbody,.gf-finance-v3 .gf-finance-page table tr,.gf-finance-v3 .gf-finance-page table td,.gf-finance-v3 .gf-finance-page table th,.gf-finance-v3 .gf-finance-v3-workshop table td,.gf-finance-v3 .gf-finance-v3-workshop table th{--bs-table-color:#152033!important;--bs-table-bg:#fff!important;color:#152033!important;background-color:#fff!important}
+.gf-finance-v3 .gf-finance-page table thead th,.gf-finance-v3 .gf-finance-v3-workshop table thead th{background:#eef2f5!important;color:#203049!important}
+.gf-finance-v3 .gf-finance-page table td a,.gf-finance-v3 .gf-finance-page table td span:not(.badge),.gf-finance-v3 .gf-finance-page table td small,.gf-finance-v3 .gf-finance-v3-workshop table td a{color:#23344b!important}
+.gf-finance-v3 .shell-ops-workspace .card-body,.gf-finance-v3 .shell-ops-workspace .card-body td,.gf-finance-v3 .shell-ops-workspace .card-body span:not(.badge),.gf-finance-v3 .shell-ops-workspace .card-body label{color:#24354a!important}
+.gf-finance-v3 .shell-ops-workspace .card-body .text-danger{color:#b42332!important}
+.gf-finance-v3 .shell-ops-workspace .card-body .text-success{color:#167a38!important}
+.gf-finance-v3 .gf-finance-v3-transactions .ops-worklist-item{color:#203049!important}
+.gf-finance-v3 .gf-finance-v3-transactions .ops-worklist-item small{color:#60738a!important}

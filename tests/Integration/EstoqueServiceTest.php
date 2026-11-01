@@ -20,9 +20,11 @@ final class EstoqueServiceTest extends TestCase
     protected function setUp(): void
     {
         $pdo = getPDO();
+        $pdo->exec("INSERT IGNORE INTO usuarios (id, nome, email, senha_hash, telefone, cpf, tipo, ativo) VALUES (1, 'Provider QA', 'provider-estoque@test.local', 'hash', '11999990001', '90000000001', 'guincho', 1)");
         $pdo->exec("DELETE FROM estoque_movimentos");
         $pdo->exec("DELETE FROM provider_produtos_estoque");
         $pdo->exec("DELETE FROM produtos");
+        $pdo->exec("INSERT IGNORE INTO guinchos (id, usuario_id, aprovado, disponivel) VALUES (1, 1, 1, 1)");
 
         $this->produtoId = Produto::criar([
             'sku' => 'BAT-TEST', 'nome' => 'Bateria Teste', 'categoria' => 'bateria',

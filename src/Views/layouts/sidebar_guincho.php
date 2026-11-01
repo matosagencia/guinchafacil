@@ -12,7 +12,7 @@ try {
     }
 } catch (\Throwable $e) { /* silencioso */ }
 ?>
-<aside class="sidebar">
+<aside class="bo-sidebar sidebar gf-unified-sidebar gf-profile-sidebar gf-f18c-sidebar" aria-label="Navegação do guincho">    <a class="gf-profile-brand" href="<?php echo $bp; ?>/guincho/dashboard"><img src="<?php echo $bp; ?>/public/assets/img/logo-48.png" alt="GuinchaFácil" width="30" height="30"><span>Guincha<strong>Fácil</strong></span></a>    <div class="gf-profile-workspace"><span class="gf-profile-avatar"><i class="fas fa-truck-pickup" aria-hidden="true"></i></span><span><strong>Área do guincho</strong><small>Workspace operacional</small></span></div>
     <div class="sidebar-title">Operação</div>
     <a href="<?php echo $bp; ?>/guincho/dashboard"  class="sidebar-link <?php echo strpos($cur,'dashboard')  !== false ? 'active':''; ?>"><i class="fas fa-gauge"></i> Painel</a>
     <a href="<?php echo $bp; ?>/guincho/dashboard#fila-ofertas" class="sidebar-link <?php echo strpos($cur,'dashboard') !== false && strpos($cur,'ofertas') !== false ? 'active':''; ?>"><i class="fas fa-bell"></i> Ofertas</a>
@@ -24,6 +24,5 @@ try {
     <?php if ($sbMostrarTornarGuincho): ?>
     <a href="<?php echo $bp; ?>/guincho/tornar-se-guincho" class="sidebar-link <?php echo strpos($cur,'tornar-se-guincho') !== false ? 'active':''; ?>"><i class="fas fa-truck-pickup"></i> Tornar-se guincheiro</a>
     <?php endif; ?>
-    <a href="<?php echo $bp; ?>/guincho/estoque"    class="sidebar-link <?php echo strpos($cur,'estoque')     !== false ? 'active':''; ?>"><i class="fas fa-boxes-stacked"></i> Meu Estoque</a>
-    <a href="<?php echo $bp; ?>/guincho/perfil"     class="sidebar-link <?php echo strpos($cur,'perfil')     !== false ? 'active':''; ?>"><i class="fas fa-user-pen"></i> Meu Perfil</a>
+    <a href="<?php echo $bp; ?>/guincho/perfil"     class="sidebar-link <?php echo strpos($cur,'perfil')     !== false ? 'active':''; ?>"><i class="fas fa-user-pen"></i> Meu Perfil</a>    <div class="gf-profile-sidebar-footer"><a href="<?php echo $bp; ?>/">Voltar ao site</a></div>
 </aside>

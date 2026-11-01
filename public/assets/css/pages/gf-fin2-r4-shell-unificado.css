@@ -1,0 +1,27 @@
+/* GF FIN2 R4 - escopo financeiro apenas. Sidebar fixa e responsiva. */
+@media(min-width:761px){
+ body.admin:has(#financeiroShell),body.admin:has(#saquesShell),body.admin:has(#cartShell){--gf-fin-sidebar:220px; margin:0!important;padding:0!important;padding-left:var(--gf-fin-sidebar)!important;background:#f3f5f8!important;overflow-x:clip!important;}
+ body.admin:has(#financeiroShell) > nav.gf-admin-topbar,body.admin:has(#financeiroShell) > nav.gf-order-crumb,
+ body.admin:has(#saquesShell) > nav.gf-admin-topbar,body.admin:has(#saquesShell) > nav.gf-order-crumb,
+ body.admin:has(#cartShell) > nav.gf-admin-topbar,body.admin:has(#cartShell) > nav.gf-order-crumb {display:none!important;}
+ body.admin:has(#financeiroShell) #financeiroSidebar,body.admin:has(#saquesShell) #saquesSidebar,body.admin:has(#cartShell) #cartSidebar {
+ position:fixed!important;left:0!important;top:0!important;bottom:0!important;z-index:80!important;width:var(--gf-fin-sidebar)!important;max-width:var(--gf-fin-sidebar)!important;min-width:var(--gf-fin-sidebar)!important;height:100vh!important;height:100dvh!important;min-height:0!important;max-height:100dvh!important;box-sizing:border-box!important;margin:0!important;border:0!important;border-radius:0!important;padding:12px 8px!important;display:flex!important;flex-direction:column!important;overflow-y:auto!important;overflow-x:hidden!important;scrollbar-width:none!important;-ms-overflow-style:none!important;background:#101519!important;}
+ body.admin:has(#financeiroShell) #financeiroSidebar::-webkit-scrollbar,body.admin:has(#saquesShell) #saquesSidebar::-webkit-scrollbar,body.admin:has(#cartShell) #cartSidebar::-webkit-scrollbar {display:none!important;width:0!important;height:0!important;}
+ body.admin:has(#saquesShell) #saquesShell,body.admin:has(#cartShell) #cartShell {display:grid!important;grid-template-columns:minmax(260px,340px) minmax(0,1fr)!important;min-width:0!important;width:100%!important;max-width:100%!important;margin:0!important;padding:0!important;gap:0!important;}
+ body.admin:has(#saquesShell) #saquesShell > aside,body.admin:has(#cartShell) #cartShell > aside {grid-column:auto!important;}
+ body.admin:has(#financeiroShell) #financeiroShell {display:block!important;width:100%!important;max-width:100%!important;margin:0!important;padding:0!important;}
+ body.admin:has(#financeiroShell) #financeiroMain {width:100%!important;margin:0!important;padding-top:0!important;min-width:0!important;}
+ body.admin.is-sidebar-collapsed:has(#financeiroShell),body.admin.is-sidebar-collapsed:has(#saquesShell),body.admin.is-sidebar-collapsed:has(#cartShell){--gf-fin-sidebar:68px;}
+}
+body.admin:has(#financeiroShell) > nav.gf-admin-topbar,body.admin:has(#financeiroShell) > nav.gf-order-crumb,body.admin:has(#saquesShell) > nav.gf-admin-topbar,body.admin:has(#saquesShell) > nav.gf-order-crumb,body.admin:has(#cartShell) > nav.gf-admin-topbar,body.admin:has(#cartShell) > nav.gf-order-crumb {display:none!important;}
+#financeiroSidebar .gf-fin2-brand,#saquesSidebar .gf-fin2-brand,#cartSidebar .gf-fin2-brand {display:block!important;color:#fff!important;margin:0 0 16px!important;padding:10px 8px 14px!important;line-height:1.35!important;}
+#financeiroSidebar .gf-fin2-brand strong,#saquesSidebar .gf-fin2-brand strong,#cartSidebar .gf-fin2-brand strong{display:block!important;color:#fff!important;font-size:22px!important;letter-spacing:-.55px!important;line-height:1.35!important;}
+#financeiroSidebar .gf-fin2-brand strong span,#saquesSidebar .gf-fin2-brand strong span,#cartSidebar .gf-fin2-brand strong span{color:#33ba57!important;}
+#financeiroSidebar .gf-fin2-brand small,#saquesSidebar .gf-fin2-brand small,#cartSidebar .gf-fin2-brand small{display:block!important;margin-top:9px!important;color:#cbd5e1!important;font-size:11px!important;}
+body.admin.is-sidebar-collapsed .gf-fin2-brand{display:none!important;}
+body.admin:has(#saquesShell),body.admin:has(#cartShell){background:#f3f5f8!important;}
+body.admin:has(#saquesShell) .ops-topbar,body.admin:has(#cartShell) .ops-topbar{background:#fff!important;color:#102138!important;border-color:#d8e0eb!important;}
+body.admin:has(#saquesShell) .ops-summary,body.admin:has(#cartShell) .ops-summary {background:#f3f5f8!important;}
+@media(max-width:760px){body.admin:has(#financeiroShell),body.admin:has(#saquesShell),body.admin:has(#cartShell){padding-left:0!important;margin:0!important;}
+ #financeiroSidebar,#saquesSidebar,#cartSidebar{position:relative!important;top:auto!important;left:auto!important;height:auto!important;max-height:none!important;width:100%!important;max-width:none!important;min-width:0!important;}
+ #saquesShell,#cartShell{display:block!important;}}

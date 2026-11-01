@@ -7,7 +7,7 @@ $registros = $historico ?? $pedidos ?? [];
 
 <div class="main-wrapper">
 <?php include __DIR__ . '/../layouts/sidebar_guincho.php'; ?>
-<main class="main-content">
+<main class="main-content"><?php include __DIR__ . '/../layouts/profile_panel_topbar.php'; ?>
     <div class="tow-history">
         <header class="page-head mb-4">
             <div>

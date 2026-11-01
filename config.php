@@ -67,7 +67,7 @@ define('MP_ACCESS_TOKEN',  (env('MP_ENV', 'production') === 'sandbox') ? env('MP
 define('MP_PUBLIC_KEY',    (env('MP_ENV', 'production') === 'sandbox') ? env('MP_PUBLIC_KEY_SANDBOX') : env('MP_PUBLIC_KEY_PROD'));
 // Secret para validação HMAC-SHA256 dos webhooks (§5.2)
 // Obter em: MP > Sua conta > Webhooks
-define('MP_WEBHOOK_SECRET', env('MP_WEBHOOK_SECRET'));
+// O Mercado Pago usa segredos distintos por ambiente. Mantém// MP_WEBHOOK_SECRET como fallback para compatibilidade legada.$mpWebhookSecret = strtolower((string)env('MP_ENV', 'production')) === 'sandbox'    ? env('MP_SANDBOX_ASSINATURA_SECRETA', env('MP_WEBHOOK_SECRET'))    : env('MP_PROD_ASSINATURA_SECRETA', env('MP_WEBHOOK_SECRET'));define('MP_WEBHOOK_SECRET', $mpWebhookSecret);
 
 // ------------------------------------------------------------
 // §CA-BUNDLE-01: bundle de CAs para chamadas cURL a APIs externas
