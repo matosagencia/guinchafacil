@@ -1,0 +1,48 @@
+/* Shell público: deve vencer estilos legados da home e do wizard. */
+html body .gf-utility-bar {
+    display: block !important;
+    width: 100% !important;
+    min-height: 34px;
+    background: #0a0a0a !important;
+    color: #fff !important;
+}
+
+html body .gf-site-header {
+    display: block !important;
+    width: 100% !important;
+    min-height: 84px;
+    background: #fff !important;
+    border-bottom: 1px solid #e5e7eb !important;
+    position: relative !important;
+    z-index: 100 !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+html body .gf-site-header .gf-container {
+    min-height: 84px;
+}
+
+html body .gf-site-footer {
+    display: block !important;
+    width: 100% !important;
+    min-height: 260px;
+    background: #0a0a0a !important;
+    color: rgba(255,255,255,.85) !important;
+    position: relative !important;
+    z-index: 50 !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    clear: both;
+}
+
+html body .gf-site-footer .gf-footer-top,
+html body .gf-site-footer .gf-footer-bottom {
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+html body .gf-site-footer .gf-footer-top a,
+html body .gf-site-footer .gf-footer-top h3 {
+    visibility: visible !important;
+}

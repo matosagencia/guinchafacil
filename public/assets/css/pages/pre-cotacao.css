@@ -27,6 +27,23 @@ body.gf-preq-body {
     line-height: 1.5;
 }
 
+/* O shell público da pré-cotação é obrigatório e fica fora do wizard. */
+body.gf-preq-body > .gf-utility-bar,
+body.gf-preq-body > .gf-site-header,
+body.gf-preq-body > .gf-site-footer {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+body.gf-preq-body > .gf-site-header {
+    position: relative;
+    z-index: 20;
+}
+body.gf-preq-body > .gf-site-footer {
+    position: relative;
+    z-index: 10;
+}
+
 /* ─── Utility bar ─────────────────────────────────────────────── */
 .gf-utility-bar {
     background: var(--gf-ink);
@@ -233,6 +250,22 @@ body.gf-preq-body {
     display: inline-flex;
     align-items: center;
     gap: 6px;
+}
+.gf-location-row #btnGps {
+    position: relative !important;
+    z-index: 1000;
+    background: var(--gf-accent) !important;
+    border: 1px solid var(--gf-primary) !important;
+    border-radius: 8px;
+    padding: 8px 12px;
+    color: var(--gf-deep-green);
+    box-shadow: 0 2px 8px rgba(20, 80, 35, .12);
+}
+.gf-location-row #btnGps:hover,
+.gf-location-row #btnGps:focus-visible {
+    background: #d8f3df !important;
+    outline: 0;
+    box-shadow: 0 0 0 3px rgba(34, 197, 94, .18);
 }
 .gf-location-row span { color: var(--gf-muted); font-size: 10px; }
 
@@ -724,3 +757,8 @@ body.gf-preq-body {
     border-radius: 50%;
     display: block;
 }
+/* Serviços consolidados das oficinas elegíveis na etapa 3 */
+.gf-service-group { margin: 0 0 1.25rem; padding: 1rem; border: 1px solid #dce8df; border-radius: 16px; background: #fbfefb; }
+.gf-service-group__head { display:flex; justify-content:space-between; gap:1rem; align-items:baseline; margin-bottom:.75rem; color:#183b29; }
+.gf-service-group__head small { color:#6b7a70; font-size:.78rem; }
+.gf-service-group__items { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:.6rem; }

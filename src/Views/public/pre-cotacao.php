@@ -1,6 +1,6 @@
 <?php
 // src/Views/public/pre-cotacao.php
-// §23 · Layout Lovable + wizard progressivo.
+// Layout público com wizard progressivo.
 $bp = defined('BASE_PATH') ? BASE_PATH : '';
 $e = static fn(string $v): string => htmlspecialchars($v, ENT_QUOTES, 'UTF-8');
 $flash = $flash ?? null;
@@ -8,31 +8,15 @@ $resultado = ($_GET['resultado'] ?? '') === '1' && !empty($cotacao) && (int)($co
 $nonce = function_exists('csp_script_nonce_attr') ? csp_script_nonce_attr() : '';
 $prefillLat = $prefillLat ?? '';
 $prefillLng = $prefillLng ?? '';
+$meta_title = 'Socorro e guincho - GuinchaFacil';
+$meta_description = 'Informe sua localizacao e receba uma cotacao de guincho ou assistencia antes do cadastro.';
+$body_class = 'gf-preq-body';
+$nav_atual = 'pre-cotacao';
+$utility_cidade = 'Niteroi, RJ';
+$extra_css = ['/public/assets/vendor/leaflet/leaflet.css','/public/assets/css/pages/pre-cotacao.css?v=20261101-4'];
+require __DIR__ . '/_header-public.php';
 ?>
-<!doctype html>
-<html lang="pt-BR">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<?php require __DIR__ . '/../components/marketing_tracking.php'; ?>
-<title>Socorro e guincho — GuinchaFácil</title>
-<meta name="description" content="Informe sua localização e receba uma cotação de guincho ou assistência antes do cadastro.">
-<link rel="stylesheet" href="<?= $e($bp) ?>/public/assets/vendor/bootstrap/css/bootstrap.min.css">
-<link rel="stylesheet" href="<?= $e($bp) ?>/public/assets/vendor/fontawesome/css/all.min.css">
-<link rel="stylesheet" href="<?= $e($bp) ?>/public/assets/vendor/leaflet/leaflet.css">
-<link rel="stylesheet" href="<?= $e($bp) ?>/public/assets/css/pages/pre-cotacao.css?v=20261101-1">
-<link rel="stylesheet" href="<?= $e($bp) ?>/public/assets/css/gf-layout.css?v=20261101-1">
-<script<?= $nonce ?> src="<?= $e($bp) ?>/public/assets/vendor/leaflet/leaflet.js"></script>
-</head>
-<body class="gf-preq-body">
-
-<div class="gf-utility-bar">
-    <div class="gf-container">
-        <span><span class="gf-status-dot"></span> Socorro 24h. Todos os dias. Em qualquer imprevisto.</span>
-        <a href="<?= $e($bp) ?>/guincho/niteroi-rj"><i class="fas fa-map-marker-alt"></i> Niterói, RJ</a>
-    </div>
-</div>
-<header class="gf-site-header"><div class="gf-container"><a class="gf-brand" href="<?= $e($bp) ?>/">Guincha<span>Fácil</span>.</a><nav class="gf-nav" aria-label="Navegação principal"><a href="<?= $e($bp) ?>/pre-cotacao" class="is-active">Como funciona</a><a href="<?= $e($bp) ?>/guincho/niteroi-rj">Onde atendemos</a><a href="<?= $e($bp) ?>/parceiros">Seja um parceiro</a></nav><a class="gf-btn gf-btn--primary gf-btn--sm" href="<?= $e($bp) ?>/pre-cotacao">Pedir guincho</a></div></header>
+<script src="<?php echo $e($bp); ?>/public/assets/vendor/leaflet/leaflet.js"></script>
 
 <main class="gf-preq">
     <div class="gf-container">
@@ -58,8 +42,8 @@ $prefillLng = $prefillLng ?? '';
         </nav>
 
         <div class="gf-preq__grid">
-            <!-- ════════ FORM WIZARD ════════ -->
-            <form method="post" action="<?= $e($bp) ?>/pre-cotacao" id="gfPreqForm" data-marketing-event="generate_lead" novalidate>
+            <!-- ???????? FORM WIZARD ???????? -->
+            <?php if (false): ?><form method="post" action="<?= $e($bp) ?>/pre-cotacao" id="gfPreqForm" data-marketing-event="generate_lead" novalidate>
                 <input type="hidden" name="csrf_token" value="<?= $e((string)($csrf_token ?? '')) ?>">
                 <input type="hidden" name="lat_origem" id="lat_origem" value="<?= $e((string)$prefillLat) ?>">
                 <input type="hidden" name="lng_origem" id="lng_origem" value="<?= $e((string)$prefillLng) ?>">
@@ -73,7 +57,7 @@ $prefillLng = $prefillLng ?? '';
                     <div class="gf-alert"><?= $e($flash['message'] ?? '') ?></div>
                 <?php endif; ?>
 
-                <!-- ETAPA 1 — Localização -->
+                <!-- ETAPA 1 - Localização -->
                 <fieldset class="gf-step is-active" data-step="1">
                     <div class="gf-form__heading">
                         <span class="eyebrow">Etapa 01 / 06</span>
@@ -100,7 +84,7 @@ $prefillLng = $prefillLng ?? '';
                     </div>
                 </fieldset>
 
-                <!-- ETAPA 2 — Como ajudar (bifurcação) -->
+                <!-- ETAPA 2 - Como ajudar (bifurcação) -->
                 <fieldset class="gf-step" data-step="2">
                     <button type="button" class="gf-step__back" data-back="1"><i class="fas fa-chevron-left"></i> Voltar</button>
                     <div class="gf-form__heading">
@@ -131,7 +115,7 @@ $prefillLng = $prefillLng ?? '';
                     </div>
                 </fieldset>
 
-                <!-- ETAPA 3 — O que aconteceu? -->
+                <!-- ETAPA 3 - O que aconteceu? -->
                 <fieldset class="gf-step" data-step="3">
                     <button type="button" class="gf-step__back" data-back="2"><i class="fas fa-chevron-left"></i> Voltar</button>
                     <div class="gf-form__heading">
@@ -141,7 +125,15 @@ $prefillLng = $prefillLng ?? '';
                     </div>
                     <div class="gf-services" id="gfSintomas">
                         <?php
-                        $sintomas = [
+                        require_once __DIR__ . '/../../Models/Catalog/ServiceType.php';
+                        $sintomas = [];
+                        foreach (ServiceType::listarDisponiveisNoFunil() as $tipo) {
+                            $slug = strtolower(trim((string)($tipo['public_slug'] ?? $tipo['code'] ?? '')));
+                            if ($slug === '') continue;
+                            $sintomas[] = [$slug, 'fa-wrench', (string)$tipo['name'], (string)($tipo['description'] ?? '')];
+                        }
+                        /* legacy fallback only when no approved capability exists */
+                        if (false && !$sintomas) $sintomas = [
                             ['pneu',        'fa-circle-notch', 'Pneu',      'Furado, murcho ou danificado'],
                             ['eletrica',    'fa-bolt',         'Elétrica',  'Não liga, painel apagado'],
                             ['bateria',     'fa-car-battery',  'Bateria',   'Não pega partida'],
@@ -161,7 +153,7 @@ $prefillLng = $prefillLng ?? '';
                     </div>
                 </fieldset>
 
-                <!-- ETAPA 4 — Veículo -->
+                <!-- ETAPA 4 - Veículo -->
                 <fieldset class="gf-step" data-step="4">
                     <button type="button" class="gf-step__back" data-back="3"><i class="fas fa-chevron-left"></i> Voltar</button>
                     <div class="gf-form__heading">
@@ -172,10 +164,10 @@ $prefillLng = $prefillLng ?? '';
                     <div class="gf-services" id="gfVeiculos">
                         <?php
                         $veiculos = [
-                            ['popular',    'fa-car',              'Carro',       'Veículo de passeio comum.'],
+                            ['popular',    'fa-car',              'Carro',       'Ve�culo de passeio comum.'],
                             ['moto',       'fa-motorcycle',       'Moto',        'Motocicleta ou scooter.'],
-                            ['suv',        'fa-car-side',         'SUV',         'Veículo alto ou utilitário.'],
-                            ['utilitario', 'fa-truck-pickup',     'Utilitário',  'Van, picape ou caminhonete.'],
+                            ['suv',        'fa-car-side',         'SUV',         'Ve�culo alto ou utilit�rio.'],
+                            ['utilitario', 'fa-truck-pickup',     'Utilit�rio',  'Van, picape ou caminhonete.'],
                         ];
                         foreach ($veiculos as $v): ?>
                         <button type="button" class="gf-service" data-categoria="<?= $e($v[0]) ?>">
@@ -190,7 +182,7 @@ $prefillLng = $prefillLng ?? '';
                     <input type="hidden" name="categoria" id="categoria" value="popular">
                 </fieldset>
 
-                <!-- ETAPA 5 — Destino -->
+                <!-- ETAPA 5 - Destino -->
                 <fieldset class="gf-step" data-step="5">
                     <button type="button" class="gf-step__back" data-back="4"><i class="fas fa-chevron-left"></i> Voltar</button>
                     <div class="gf-form__heading">
@@ -202,10 +194,10 @@ $prefillLng = $prefillLng ?? '';
                         <label for="destino">Endereço de destino</label>
                         <i class="fas fa-map-pin gf-field__icon" aria-hidden="true"></i>
                         <input type="text" id="destino" name="destino" maxlength="220"
-                               placeholder="Oficina ou endereço completo" autocomplete="street-address">
+                               placeholder="Oficina ou endere�o completo" autocomplete="street-address">
                     </div>
                     <div class="gf-field">
-                        <label for="numero_destino_vis">Número</label>
+                            <label for="numero_destino_vis">Número</label>
                         <input type="text" id="numero_destino_vis" maxlength="20" inputmode="numeric" placeholder="Ex.: 280">
                     </div>
                     <div class="gf-form__footer">
@@ -215,7 +207,7 @@ $prefillLng = $prefillLng ?? '';
                     </div>
                 </fieldset>
 
-                <!-- ETAPA 6 — Comparativo + Confirmar -->
+                <!-- ETAPA 6 - Comparativo + Confirmar -->
                 <fieldset class="gf-step" data-step="6">
                     <button type="button" class="gf-step__back" data-back="5"><i class="fas fa-chevron-left"></i> Voltar</button>
                     <div class="gf-form__heading">
@@ -243,23 +235,24 @@ $prefillLng = $prefillLng ?? '';
 
                     <div class="gf-form__footer">
                         <button class="gf-btn gf-btn--primary" type="submit" id="btnSubmit" disabled>
-                            Ver minha cotação <i class="fas fa-arrow-right"></i>
+                        Ver minha cotação <i class="fas fa-arrow-right"></i>
                         </button>
                     </div>
                     <p class="gf-form__note">
-                        <i class="fas fa-shield-halved"></i> Sem compromisso. Nenhuma cobrança agora.
+                        <i class="fas fa-shield-halved"></i> Sem compromisso. Nenhuma cobran�a agora.
                     </p>
                 </fieldset>
-            </form>
+            </form><?php endif; ?>
+            <?php $legacyAction = $bp . '/pre-cotacao'; $legacyHidden = []; require __DIR__ . '/partials/_precotacao_funil_legado.php'; ?>
 
-            <!-- ════════ ASIDE — MAPA + RESUMO ════════ -->
+            <!-- ???????? ASIDE - MAPA + RESUMO ???????? -->
             <aside class="gf-aside">
                 <div class="gf-map-wrap">
                     <div id="gfMap" class="gf-map" role="region" aria-label="Mapa de cobertura"></div>
                 </div>
                 <div class="gf-map-label">
                     <i class="fas fa-map-pin"></i>
-                    <span id="mapLabel">Aguardando endereço…</span>
+                    <span id="mapLabel">Aguardando endereço.</span>
                     <span class="gf-map-label__pill">Área ilustrativa</span>
                 </div>
 
@@ -271,7 +264,7 @@ $prefillLng = $prefillLng ?? '';
                     <div class="gf-summary__service">
                         <span class="gf-summary__icon"><i class="fas fa-route" id="summaryIcon"></i></span>
                         <div>
-                            <strong id="summaryService">Aguardando…</strong>
+                            <strong id="summaryService">Aguardando.</strong>
                             <p id="summaryServiceDesc">Comece informando o endereço</p>
                         </div>
                     </div>
@@ -309,7 +302,7 @@ $prefillLng = $prefillLng ?? '';
                 <span><?= number_format((float)$cotacao['distancia_km'], 1, ',', '.') ?> km</span>
             </div>
             <div class="gf-summary__total">
-                <span>Total<small>Válida por 15 minutos</small></span>
+                        <span>Total<small>Válida por 15 minutos</small></span>
                 <strong>R$ <?= number_format((float)$cotacao['valor'], 2, ',', '.') ?></strong>
             </div>
             <form method="post" action="<?= $e($bp) ?>/pre-cotacao/aceitar" style="margin-top:22px;">
@@ -346,7 +339,7 @@ $prefillLng = $prefillLng ?? '';
         <aside class="gf-aside gf-aside--result">
             <div class="gf-summary gf-summary--result-side">
                 <div class="gf-summary__title">
-                    <h3>Sua solicitaÃ§Ã£o</h3>
+                    <h3>Sua solicitação</h3>
                     <i class="fas fa-shield-halved" style="color:#0d5a2e"></i>
                 </div>
                 <div class="gf-summary__path">
@@ -354,13 +347,13 @@ $prefillLng = $prefillLng ?? '';
                     <span><i></i> <em><?= $e((string)($cotacao['endereco_destino'] ?? 'Destino informado')) ?></em></span>
                 </div>
                 <div class="gf-summary__total">
-                    <span>Total<small>VÃ¡lida por 15 minutos</small></span>
+                    <span>Total<small>Válida por 15 minutos</small></span>
                     <strong>R$ <?= number_format((float)$cotacao['valor'], 2, ',', '.') ?></strong>
                 </div>
             </div>
             <div class="gf-assurance">
                 <i class="fas fa-lock"></i>
-                <p>Sem cobranÃ§a nesta etapa.<br><strong>VocÃª decide antes de continuar.</strong></p>
+                <p>Sem cobrança nesta etapa.<br><strong>Você decide antes de continuar.</strong></p>
             </div>
         </aside>
         </div>
@@ -369,8 +362,7 @@ $prefillLng = $prefillLng ?? '';
 
     </div>
 </main>
-<footer class="gf-site-footer"><div class="gf-container"><div class="gf-footer-bottom"><span>&copy; <?= date('Y') ?> GuinchaFácil. Todos os direitos reservados.</span><span>Assistência 24 horas · Niterói, RJ</span></div></div></footer>
 <script<?= $nonce ?> src="<?= $e($bp) ?>/public/assets/js/pre-cotacao-flow.js?v=20261101-2"></script>
 <script<?= $nonce ?> src="<?= $e($bp) ?>/public/assets/js/pre-cotacao-map.js?v=20261030-6"></script>
-</body>
-</html>
+<?php require __DIR__ . '/_footer-public.php'; ?>
+

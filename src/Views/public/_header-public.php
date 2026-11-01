@@ -82,6 +82,7 @@ $nonceAttr = function_exists('csp_script_nonce_attr') ? csp_script_nonce_attr() 
     <link href="<?php echo htmlspecialchars($bp); ?>/public/assets/css/tokens.css" rel="stylesheet">
     <link href="<?php echo htmlspecialchars($bp); ?>/public/assets/css/gf-layout.css" rel="stylesheet">
     <link href="<?php echo htmlspecialchars($bp); ?>/public/assets/css/components/gf-footer-payments.css" rel="stylesheet">
+    <link href="<?php echo htmlspecialchars($bp); ?>/public/assets/css/public-shell-fix.css?v=20261101-1" rel="stylesheet">
 <?php if (!empty($extra_css)) foreach ((array)$extra_css as $_x) { echo '    <link rel="stylesheet" href="' . htmlspecialchars($bp . $_x, ENT_QUOTES, 'UTF-8') . '">' . PHP_EOL; } ?>
 </head>
 <body class="<?php echo htmlspecialchars($body_class, ENT_QUOTES, 'UTF-8'); ?>" data-base-path="<?php echo htmlspecialchars($bp); ?>">
