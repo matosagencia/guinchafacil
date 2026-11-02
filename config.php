@@ -230,11 +230,11 @@ function getPDO(): PDO {
     if ($pdo === null) {
         try {
             $dsn = 'mysql:host=' . DB_HOST . ';dbname=' . DB_NAME . ';charset=' . DB_CHARSET;
-            $pdo = new PDO($dsn, DB_USER, DB_PASS, [
+            // PHP 8.5 moveu o atributo MySQL para Pdo\Mysql; mantenha fallback            // para PHP 8.4 e versões anteriores ainda usadas no ambiente local.            // O valor 1002 é o identificador estável de ATTR_INIT_COMMAND.            // Evita acessar a constante depreciada PDO::MYSQL_ATTR_INIT_COMMAND            // em PHP 8.5 e também funciona nos PHP anteriores.            $mysqlInitCommand = 1002;            $pdo = new PDO($dsn, DB_USER, DB_PASS, [
                 PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
                 PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
                 PDO::ATTR_EMULATE_PREPARES   => false,
-                PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES ' . DB_CHARSET,
+                $mysqlInitCommand           => 'SET NAMES ' . DB_CHARSET,
             ]);
         } catch (PDOException $e) {
             error_log('Erro de conexão com banco: ' . $e->getMessage());
