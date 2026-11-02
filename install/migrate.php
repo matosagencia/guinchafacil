@@ -246,9 +246,20 @@ out('');
 
 try {
 
-    $dsn = 'mysql:host=' . DB_HOST . ';charset=utf8mb4';
+    $migrationHost = getenv('MIGRATION_DB_HOST') ?: DB_HOST;
+    $migrationUser = getenv('MIGRATION_DB_USER') ?: DB_USER;
+    $migrationPass = getenv('MIGRATION_DB_PASS');
+    if ($migrationPass === false) {
+        $migrationPass = DB_PASS;
+    }
+    $migrationDb = getenv('MIGRATION_DB_NAME') ?: DB_NAME;
+    if ($migrationDb === '') {
+        throw new RuntimeException('Banco de migração não definido. Use MIGRATION_DB_NAME ou DB_NAME.');
+    }
 
-    $pdo = new PDO($dsn, DB_USER, DB_PASS, [
+    $dsn = 'mysql:host=' . $migrationHost . ';charset=utf8mb4';
+
+    $pdo = new PDO($dsn, $migrationUser, $migrationPass, [
 
         PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
 
@@ -256,7 +267,7 @@ try {
         PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => true,
     ]);
 
-    $db = DB_NAME;
+    $db = $migrationDb;
 
     $pdo->exec("CREATE DATABASE IF NOT EXISTS `{$db}` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
 
@@ -280,7 +291,7 @@ try {
 
 // automático + execução manual, ou dois requests HTTP simultâneos).
 
-$migrationLockName = 'guinchafacil_migrate_' . DB_NAME;
+$migrationLockName = 'guinchafacil_migrate_' . $db;
 
 $migrationLockAcquired = (int)$pdo->query(
 
