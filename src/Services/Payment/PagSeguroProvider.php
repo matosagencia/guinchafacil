@@ -6,7 +6,7 @@ require_once __DIR__ . '/PaymentProviderInterface.php';
 require_once __DIR__ . '/../EstornoService.php';
 
 /**
- * Pacote L1.7 (pendência #33). Delega para EstornoService::estornarPagSeguro()
+ * Pacote L1.7 (pend�ncia #33). Delega para EstornoService::estornarPagSeguro()
  * pelo mesmo motivo documentado em MercadoPagoProvider.
  */
 final class PagSeguroProvider implements PaymentProviderInterface
@@ -22,23 +22,23 @@ final class PagSeguroProvider implements PaymentProviderInterface
     }
 
     /**
-     * Checkout transparente PagSeguro (API v1 "Checkout Transparente" —
+     * Checkout transparente PagSeguro (API v1 "Checkout Transparente" -
      * developer.pagbank.com.br/v1/reference/checkout-transparente): fluxo
-     * documentado e estável (sessão -> PagSeguroDirectPayment.js no browser
-     * -> senderHash/creditCardToken -> POST /v2/transactions aqui). NÃO
-     * cobre Pix (a API v1 não expõe Pix; a "Orders API" mais nova cobre,
-     * mas sem documentação de endpoint confirmada o suficiente pra
-     * implementar sem testar ao vivo — ficou fora desta rodada, registrado
-     * como pendência). Cartão e boleto ficam 100% transparentes (sem
-     * redirect); só o formulário de cartão exige os campos de titular e
-     * endereço de cobrança que a API do PagSeguro sempre exigiu — não é
-     * escolha de UX nossa, é requisito deles pra aceitar a cobrança.
+     * documentado e est�vel (sess�o -> PagSeguroDirectPayment.js no browser
+     * -> senderHash/creditCardToken -> POST /v2/transactions aqui). N�O
+     * cobre Pix (a API v1 n�o exp�e Pix; a "Orders API" mais nova cobre,
+     * mas sem documenta��o de endpoint confirmada o suficiente pra
+     * implementar sem testar ao vivo - ficou fora desta rodada, registrado
+     * como pend�ncia). Cart�o e boleto ficam 100% transparentes (sem
+     * redirect); s� o formul�rio de cart�o exige os campos de titular e
+     * endere�o de cobran�a que a API do PagSeguro sempre exigiu - n�o �
+     * escolha de UX nossa, � requisito deles pra aceitar a cobran�a.
      *
-     * A confirmação real de status ('aprovado') continua vindo do webhook
-     * IPN existente (WebhookController::pagSeguro(), já implementado e
-     * testado) — a resposta síncrona daqui só informa o status inicial da
-     * transação (normalmente "1 - aguardando pagamento" ou "3 - paga" pra
-     * alguns métodos), sem alterar esse contrato.
+     * A confirma��o real de status ('aprovado') continua vindo do webhook
+     * IPN existente (WebhookController::pagSeguro(), j� implementado e
+     * testado) - a resposta s�ncrona daqui s� informa o status inicial da
+     * transa��o (normalmente "1 - aguardando pagamento" ou "3 - paga" pra
+     * alguns m�todos), sem alterar esse contrato.
      */
     public function criarPagamento(array $dados): array
     {
@@ -52,7 +52,7 @@ final class PagSeguroProvider implements PaymentProviderInterface
             'receiverEmail'    => PS_EMAIL,
             'currency'         => 'BRL',
             'itemId1'          => '1',
-            'itemDescription1' => mb_substr((string)($dados['descricao'] ?? 'Serviço de Guincho - GuinchaFácil'), 0, 100),
+            'itemDescription1' => mb_substr((string)($dados['descricao'] ?? 'Servi�o de Guincho - GuinchaF�cil'), 0, 100),
             'itemAmount1'      => number_format($valor, 2, '.', ''),
             'itemQuantity1'    => '1',
             'reference'        => (string)$pedidoId,
@@ -62,7 +62,7 @@ final class PagSeguroProvider implements PaymentProviderInterface
             'senderAreaCode'   => (string)($dados['telefoneDdd'] ?? ''),
             'senderPhone'      => (string)($dados['telefoneNumero'] ?? ''),
             'senderHash'       => (string)($dados['senderHash'] ?? ''),
-            // Serviço (reboque), não produto físico — sem frete a calcular.
+            // Servi�o (reboque), n�o produto f�sico - sem frete a calcular.
             'shippingType'     => '3',
             'notificationURL'  => (string)($dados['notificationUrl'] ?? ''),
         ];
@@ -108,16 +108,16 @@ final class PagSeguroProvider implements PaymentProviderInterface
 
         if ($curlErr !== '') {
             error_log('[PagSeguroProvider][criarPagamento] cURL: ' . $curlErr);
-            return ['sucesso' => false, 'status' => 'erro', 'idExterno' => null, 'detalhe' => [], 'erro' => 'Erro de comunicação com o PagSeguro.'];
+            return ['sucesso' => false, 'status' => 'erro', 'idExterno' => null, 'detalhe' => [], 'erro' => 'Erro de comunica��o com o PagSeguro.'];
         }
 
-        // §PS-XML-01 (mesmo padrão do WebhookController): SimpleXML, nunca regex em XML.
+        // �PS-XML-01 (mesmo padr�o do WebhookController): SimpleXML, nunca regex em XML.
         libxml_use_internal_errors(true);
         $xml = simplexml_load_string((string)$resp);
 
         if ($xml === false) {
-            error_log('[PagSeguroProvider][criarPagamento] Resposta não é XML válido (HTTP ' . $httpCode . '): ' . substr((string)$resp, 0, 500));
-            return ['sucesso' => false, 'status' => 'erro', 'idExterno' => null, 'detalhe' => [], 'erro' => 'Resposta inválida do PagSeguro.'];
+            error_log('[PagSeguroProvider][criarPagamento] Resposta n�o � XML v�lido (HTTP ' . $httpCode . '): ' . substr((string)$resp, 0, 500));
+            return ['sucesso' => false, 'status' => 'erro', 'idExterno' => null, 'detalhe' => [], 'erro' => 'Resposta inv�lida do PagSeguro.'];
         }
 
         if ($xml->getName() === 'errors') {
@@ -132,8 +132,8 @@ final class PagSeguroProvider implements PaymentProviderInterface
 
         $psStatus = (string)($xml->status ?? '');
         $status = match ($psStatus) {
-            '3', '4' => 'aprovado', // 3=paga, 4=disponível
-            '1', '2', '5', '6', '7' => 'pendente', // aguardando/em análise/em disputa/devolvida(*)/cancelada tratada abaixo
+            '3', '4' => 'aprovado', // 3=paga, 4=dispon�vel
+            '1', '2', '5', '6', '7' => 'pendente', // aguardando/em an�lise/em disputa/devolvida(*)/cancelada tratada abaixo
             default => 'pendente',
         };
         if ($psStatus === '7') { // cancelada
@@ -156,11 +156,11 @@ final class PagSeguroProvider implements PaymentProviderInterface
     }
 
     /**
-     * Passo 1 do Checkout Transparente PagSeguro: cria a sessão que o
+     * Passo 1 do Checkout Transparente PagSeguro: cria a sess�o que o
      * PagSeguroDirectPayment.js do browser precisa antes de gerar o
-     * senderHash/tokenizar o cartão. Sessão é de uso único e expira rápido
-     * — deve ser pedida de novo a cada tentativa de pagamento, nunca
-     * reaproveitada entre carregamentos de página.
+     * senderHash/tokenizar o cart�o. Sess�o � de uso �nico e expira r�pido
+     * - deve ser pedida de novo a cada tentativa de pagamento, nunca
+     * reaproveitada entre carregamentos de p�gina.
      *
      * @return array{sucesso:bool, sessionId:?string, erro:?string}
      */
@@ -183,7 +183,7 @@ final class PagSeguroProvider implements PaymentProviderInterface
 
         if ($curlErr !== '') {
             error_log('[PagSeguroProvider][criarSessao] cURL: ' . $curlErr);
-            return ['sucesso' => false, 'sessionId' => null, 'erro' => 'Erro de comunicação com o PagSeguro.'];
+            return ['sucesso' => false, 'sessionId' => null, 'erro' => 'Erro de comunica��o com o PagSeguro.'];
         }
 
         libxml_use_internal_errors(true);
@@ -192,7 +192,7 @@ final class PagSeguroProvider implements PaymentProviderInterface
 
         if ($sessionId === '') {
             error_log('[PagSeguroProvider][criarSessao] Sem session id na resposta: ' . substr((string)$resp, 0, 300));
-            return ['sucesso' => false, 'sessionId' => null, 'erro' => 'PagSeguro não retornou sessão válida.'];
+            return ['sucesso' => false, 'sessionId' => null, 'erro' => 'PagSeguro n�o retornou sess�o v�lida.'];
         }
 
         return ['sucesso' => true, 'sessionId' => $sessionId, 'erro' => null];

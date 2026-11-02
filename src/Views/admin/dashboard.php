@@ -81,11 +81,20 @@ function admin_tempo_relativo(string $quando): string
 
 
 <link rel="stylesheet" href="<?php echo htmlspecialchars($bp, ENT_QUOTES, 'UTF-8'); ?>/public/assets/css/pages/gf-f18e5-dashboard.css?v=20261017">
-<div class="shell-ops shell-ops--no-worklist gf18e5-dashboard" id="dashboardShell">
-  <aside class="shell-ops-sidebar" id="dashboardSidebar">
+<link rel="stylesheet" href="<?php echo htmlspecialchars($bp, ENT_QUOTES, 'UTF-8'); ?>/public/assets/css/pages/gf-f18c-shell.css?v=20261101-4">
+<div class="bo bo-operator gf-f18c-root gf18e5-dashboard" id="dashboardShell">
+  <aside class="bo-sidebar gf-f18c-sidebar" id="dashboardSidebar" aria-label="Navegação do administrador">
+    <a class="gf-f18c-brand" href="<?php echo htmlspecialchars($bp, ENT_QUOTES, 'UTF-8'); ?>/admin/central">Guincha<span>Fácil</span><i>.</i></a>
+    <div class="gf-f18c-workspace"><span class="gf-f18c-avatar"><i class="fas fa-shield-halved" aria-hidden="true"></i></span><span><strong>Central GuinchaFácil</strong><small>Workspace operacional</small></span></div>
     <?php include __DIR__ . '/../components/admin_nav_operacional.php'; ?>
+    <div class="gf-f18c-sidebar-footer"><a href="<?php echo htmlspecialchars($bp, ENT_QUOTES, 'UTF-8'); ?>/">Voltar ao site</a></div>
   </aside>
   <section class="shell-ops-workspace" id="dashboardWorkspace" aria-label="Visão em tempo real da plataforma">
+    <header class="bo-header">
+      <div class="gf-f18c-breadcrumb"><span>Backoffice <i class="fas fa-chevron-right" aria-hidden="true"></i> <strong>Dashboard</strong></span></div>
+      <div class="gf-f18c-header-actions"><a href="<?php echo htmlspecialchars($bp); ?>/admin/alertas" aria-label="Abrir alertas operacionais"><i class="far fa-bell" aria-hidden="true"></i></a><span class="gf-f18c-user"><?php echo htmlspecialchars((string)($_SESSION['user']['nome'] ?? 'Administrador'), ENT_QUOTES, 'UTF-8'); ?></span><a class="gf-f18c-logout" href="<?php echo htmlspecialchars($bp); ?>/logout" data-confirm-logout><i class="fas fa-right-from-bracket" aria-hidden="true"></i><span>Sair</span></a></div>
+    </header>
+    <main class="bo-content" id="dashboardContent">
     <?php include __DIR__ . '/../components/admin_operacao_tabs.php'; ?>
 <div class="ops-topbar admin-dashboard-topbar">
 
@@ -769,6 +778,7 @@ window.__basePath = <?php echo json_encode($bp, JSON_UNESCAPED_UNICODE | JSON_UN
 
 
 
+    </main>
     </section>
 
 

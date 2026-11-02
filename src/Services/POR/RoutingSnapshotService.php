@@ -29,12 +29,12 @@ class RoutingSnapshotService
         $coveredDistanceM = self::coveredDistance($pedido, $lastValidPoint, $mode);
         $progressPercent = self::progressPercent($plannedDistanceM, $coveredDistanceM, $status);
 
-        // Âncora para projeção client-side (dead reckoning) enquanto o GPS
-        // real não manda um ponto novo: idade do último ponto VÁLIDO (tempo
-        // de servidor, sem risco de desvio de relógio do dispositivo) + a
-        // velocidade média já estimada para esta corrida. O cliente usa isso
-        // para mover o ícone estimando a posição, sem nunca decidir sozinho
-        // que o guincho "chegou" — isso continua exigindo GPS real.
+        // �ncora para proje��o client-side (dead reckoning) enquanto o GPS
+        // real n�o manda um ponto novo: idade do �ltimo ponto V�LIDO (tempo
+        // de servidor, sem risco de desvio de rel�gio do dispositivo) + a
+        // velocidade m�dia j� estimada para esta corrida. O cliente usa isso
+        // para mover o �cone estimando a posi��o, sem nunca decidir sozinho
+        // que o guincho "chegou" - isso continua exigindo GPS real.
         $anchorAgeS = null;
         if ($lastValidPoint) {
             $ref = $lastValidPoint['received_at'] ?? $lastValidPoint['device_timestamp'] ?? null;
@@ -64,7 +64,7 @@ class RoutingSnapshotService
             'rejected_points' => (int)($summary['rejected_points'] ?? 0),
             'distance_validated_m' => round((float)($summary['distance_validated_m'] ?? 0), 1),
             'last_point_at' => $summary['last_point_at'] ?? null,
-            // Campos aditivos p/ projeção client-side (dead reckoning):
+            // Campos aditivos p/ proje��o client-side (dead reckoning):
             'current_lat' => round($current['lat'], 6),
             'current_lng' => round($current['lng'], 6),
             'target_lat' => round($target['lat'], 6),
@@ -197,10 +197,10 @@ class RoutingSnapshotService
     private static function modeLabel(string $mode): string
     {
         return match ($mode) {
-            'guincho_origem' => 'Guincho até a origem',
-            'origem_destino' => 'Origem até o destino',
-            'concluido' => 'Atendimento concluído',
-            default => 'Visão geral',
+            'guincho_origem' => 'Guincho at� a origem',
+            'origem_destino' => 'Origem at� o destino',
+            'concluido' => 'Atendimento conclu�do',
+            default => 'Vis�o geral',
         };
     }
 
@@ -285,7 +285,7 @@ class RoutingSnapshotService
     private static function etaLabel(int $etaMinutes, string $status): string
     {
         if ($status === 'concluido') {
-            return 'Atendimento concluído';
+            return 'Atendimento conclu�do';
         }
 
         if ($etaMinutes <= 0) {

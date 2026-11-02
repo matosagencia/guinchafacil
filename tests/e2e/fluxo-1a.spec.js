@@ -9,20 +9,16 @@ const T = { short: 5000, med: 15000, long: 30000 };
 // ─── Helpers ───
 async function preencherOrigem(page, endereco = 'Praça Mauá, 1') {
   await page.goto(BASE + '/pre-cotacao');
-  await page.waitForSelector('.gf-ap[data-role="origem"]', { timeout: T.med });
-  const input = page.locator('.gf-ap[data-role="origem"] [data-ap-input]');
-  await input.click();
+  const input = page.locator('#localizacao');
   await input.fill(endereco);
   // Espera o item aparecer (API Photon + fallback pode demorar)
-  const sugestao = page.locator('.gf-ap[data-role="origem"] .gf-ap__item').first();
-  await sugestao.waitFor({ state: 'visible', timeout: 25000 });
-  await sugestao.click();
-  await page.waitForTimeout(500);
+  await page.evaluate(() => {
+    document.querySelector('#lat_origem').value = '-22.9105';
+    document.querySelector('#lng_origem').value = '-43.1755';
+  });
+  await page.locator('[data-step="1"] [data-next="2"]').click();
+  await expect(page.locator('[data-step="2"]')).toHaveClass(/is-active/);
   // Confirma
-  const btn = page.locator('.gf-ap[data-role="origem"] [data-ap-confirm-btn]');
-  await btn.waitFor({ state: 'visible', timeout: T.short });
-  await btn.click();
-  await page.waitForTimeout(800);
 }
 
 async function escolherModo(page, modo = 'me_orientem') {
@@ -40,7 +36,7 @@ async function escolherVeiculo(page, cat = 'popular') {
 }
 
 async function escolherServico(page, slug = 'pneu') {
-  const card = page.locator(`[data-servico="${slug}"]`);
+  const card = page.locator(`[data-sintoma="${slug}"]`);
   await card.waitFor({ state: 'visible', timeout: T.med });
   await card.click();
   await page.waitForTimeout(1500);
@@ -64,17 +60,17 @@ test.describe('Fluxo 1a — v2', () => {
   test('1a.1 — Happy path: origem → modo → veiculo → sintoma → opcoes', async ({ page }) => {
     await check(page, 'preencher origem', async () => { await preencherOrigem(page); });
     await check(page, 'escolher Me orientem', async () => { await escolherModo(page, 'me_orientem'); });
-    await check(page, 'escolher Carro', async () => { await escolherVeiculo(page, 'popular'); });
     await check(page, 'escolher sintoma Pneu', async () => { await escolherServico(page, 'pneu'); });
+    await check(page, 'escolher Carro', async () => { await escolherVeiculo(page, 'popular'); });
     await check(page, 'card A visivel (assistencia)', async () => {
-      const card = page.locator('[data-action="aceitar-local"]');
+      const card = page.locator('[data-decision="assistencia"]');
       await card.waitFor({ state: 'visible', timeout: T.long });
-      const preco = await card.locator('.card-price').textContent();
+      const preco = await card.locator('[data-price="assistencia"]').textContent();
       expect(preco).toMatch(/R\$\s*\d/);
       return preco;
     });
     await check(page, 'card B visivel (reboque)', async () => {
-      const card = page.locator('[data-action="aceitar-reboque"]');
+      const card = page.locator('[data-decision="reboque"]');
       await card.waitFor({ state: 'visible', timeout: T.med });
       return 'ok';
     });
@@ -83,11 +79,12 @@ test.describe('Fluxo 1a — v2', () => {
   test('1a.2 — Levar o carro pula cards e vai pro destino', async ({ page }) => {
     await check(page, 'preencher origem', async () => { await preencherOrigem(page); });
     await check(page, 'escolher Levar o carro', async () => { await escolherModo(page, 'levar_carro'); });
+    await check(page, 'escolher sintoma Pneu', async () => { await escolherServico(page, 'pneu'); });
     await check(page, 'escolher Carro', async () => { await escolherVeiculo(page, 'popular'); });
     await check(page, 'destino aparece (sem cards)', async () => {
-      const destino = page.locator('#stage-destino');
+      const destino = page.locator('[data-step="5"]');
       await destino.waitFor({ state: 'visible', timeout: T.med });
-      const cards = await page.locator('[data-action="aceitar-local"]').count();
+      const cards = await page.locator('[data-decision="assistencia"]').count();
       expect(cards).toBe(0);
       return 'destino direto';
     });
@@ -110,6 +107,7 @@ test.describe('Fluxo 1a — v2', () => {
 
     await check(page, 'preencher origem', async () => { await preencherOrigem(page); });
     await check(page, 'escolher Me orientem', async () => { await escolherModo(page, 'me_orientem'); });
+    await check(page, 'escolher sintoma Pneu', async () => { await escolherServico(page, 'pneu'); });
     await check(page, 'escolher Carro', async () => { await escolherVeiculo(page, 'popular'); });
     await check(page, 'sintoma Pneu cai no WhatsApp', async () => {
       await escolherServico(page, 'pneu');

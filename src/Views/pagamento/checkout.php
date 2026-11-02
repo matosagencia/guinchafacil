@@ -6,6 +6,7 @@ $mpPublicKey = $mpPublicKey ?? '';
 $pedidoId = (int)($pedido['id'] ?? 0);
 $valorPedido = (float)($valorSnapshot ?? $pedido['custo_estimado'] ?? 0);
 $formaPagamentoEscolhida = strtolower(trim((string)($pedido['forma_pagamento_escolhida'] ?? '')));
+$isAdminCheckout = !empty($isAdminCheckout);
 $psScriptBase = (defined('PS_ENV') && PS_ENV === 'production')
     ? 'https://stc.pagseguro.uol.com.br'
     : 'https://stc.sandbox.pagseguro.uol.com.br';
@@ -14,14 +15,28 @@ include __DIR__ . '/../layouts/header.php';
 <link rel="stylesheet" href="<?php echo htmlspecialchars($bp); ?>/public/assets/css/tokens.css">
 <link rel="stylesheet" href="<?php echo htmlspecialchars($bp); ?>/public/assets/css/components/gf-footer-payments.css">
 <link rel="stylesheet" href="<?php echo htmlspecialchars($bp); ?>/public/assets/css/pages/cliente-pagamento.css">
-<div class="main-wrapper">
-<?php include __DIR__ . '/../layouts/sidebar_cliente.php'; ?>
-<main class="main-content">
+<?php if ($isAdminCheckout): ?>
+<link rel="stylesheet" href="<?php echo htmlspecialchars($bp); ?>/public/assets/css/pages/admin-checkout.css?v=20261101-1">
+<?php endif; ?>
+<div class="main-wrapper shell <?= $isAdminCheckout ? 'admin-shell admin-checkout-shell' : '' ?>">
+<?php include __DIR__ . '/../layouts/' . ($isAdminCheckout ? 'sidebar_admin.php' : 'sidebar_cliente.php'); ?>
+<main class="main-content shell-main shell-content">
+    <?php if ($isAdminCheckout): ?>
+        <header class="bo-header admin-checkout-header" role="banner">
+            <div class="bo-header-start">
+                <span class="bo-breadcrumb gf-order-crumb">Backoffice <span aria-hidden="true">›</span> <strong>Pagamento</strong></span>
+            </div>
+            <div class="bo-header-actions gf-f18c-header-actions">
+                <a class="bo-header-button" href="<?php echo htmlspecialchars($bp, ENT_QUOTES, 'UTF-8'); ?>/admin/central"><i class="fas fa-gauge-high" aria-hidden="true"></i><span class="bo-header-action-label">Central</span></a>
+                <a class="bo-header-button" href="<?php echo htmlspecialchars($bp, ENT_QUOTES, 'UTF-8'); ?>/logout" data-confirm-logout><i class="fas fa-right-from-bracket" aria-hidden="true"></i><span class="bo-header-action-label">Sair</span></a>
+            </div>
+        </header>
+    <?php endif; ?>
     <header class="page-head mb-4">
         <div>
             <span class="eyebrow">Pagamento</span>
             <h1><i class="fas fa-credit-card me-2 text-primary-custom"></i>Checkout do Pagamento</h1>
-            <p>Pedido #<?php echo $pedidoId; ?> — valor: R$ <?php echo number_format($valorPedido, 2, ',', '.'); ?>. Finalize sem sair desta página.</p>
+            <p>Pedido #<?php echo $pedidoId; ?> - valor: R$ <?php echo number_format($valorPedido, 2, ',', '.'); ?>. Finalize sem sair desta p�gina.</p>
         </div>
     </header>
 
@@ -30,13 +45,13 @@ include __DIR__ . '/../layouts/header.php';
     <?php if ($formaPagamentoEscolhida === 'pago_na_chegada'): ?>
         <div class="alert alert-info" role="alert">
             <i class="fas fa-hand-holding-dollar me-1"></i>
-            Este pedido foi configurado para pagamento na chegada, em dinheiro. O parceiro confirmará o recebimento ao concluir o atendimento.
+            Este pedido foi configurado para pagamento na chegada, em dinheiro. O parceiro confirmar� o recebimento ao concluir o atendimento.
         </div>
     <?php else: ?>
         <div class="card mb-4 gf-payment-card">
             <div class="card-body">
                 <h5 class="mb-2"><i class="fas fa-wallet me-1"></i>Escolha como pagar</h5>
-                <p class="text-muted mb-3">Você pode pagar online agora ou diretamente ao parceiro na chegada.</p>
+                <p class="text-muted mb-3">Voc� pode pagar online agora ou diretamente ao parceiro na chegada.</p>
                 <label class="d-block mb-2"><input type="radio" checked disabled> Pagar online agora</label>
                 <form method="post" action="<?php echo htmlspecialchars($bp); ?>/pagamento/checkout/" class="mt-2">
                     <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($csrfToken); ?>">
@@ -50,22 +65,22 @@ include __DIR__ . '/../layouts/header.php';
 
     <?php if (!$mostrarMercadoPago && !$mostrarPagSeguro): ?>
         <div class="alert alert-warning" role="alert">
-            Nenhum provedor de pagamento está disponível no momento.
+            Nenhum provedor de pagamento est� dispon�vel no momento.
         </div>
     <?php endif; ?>
 
     <?php
         $mapaProblema = [
-            'mecanico'    => 'Problema mecânico',
-            'eletrico'    => 'Problema elétrico',
+            'mecanico'    => 'Problema mec�nico',
+            'eletrico'    => 'Problema el�trico',
             'pneu'        => 'Pneu',
             'bateria'     => 'Bateria',
-            'combustivel' => 'Falta de combustível',
+            'combustivel' => 'Falta de combust�vel',
             'acidente'    => 'Acidente',
-            'colisao'     => 'Colisão',
+            'colisao'     => 'Colis�o',
             'outro'       => 'Outro',
         ];
-        $descricaoProblema = $mapaProblema[$pedido['tipo_problema'] ?? ''] ?? ($pedido['tipo_problema'] ?? '—');
+        $descricaoProblema = $mapaProblema[$pedido['tipo_problema'] ?? ''] ?? ($pedido['tipo_problema'] ?? '-');
         $veiculoDescricao = trim(
             (string)($pedido['marca'] ?? '') . ' ' . (string)($pedido['modelo'] ?? '')
         );
@@ -73,10 +88,10 @@ include __DIR__ . '/../layouts/header.php';
     ?>
 
     <div class="row g-4 checkout-row">
-        <!-- Recibo / resumo da solicitação -->
+        <!-- Recibo / resumo da solicita��o -->
         <div class="col-12 col-lg-5 col-xl-4">
             <div class="card h-100 checkout-recibo">
-                <div class="card-header"><i class="fas fa-receipt me-2"></i>Resumo da solicitação</div>
+                <div class="card-header"><i class="fas fa-receipt me-2"></i>Resumo da solicita��o</div>
                 <div class="card-body">
                     <div class="recibo-linha recibo-total">
                         <span>Total a pagar</span>
@@ -87,40 +102,40 @@ include __DIR__ . '/../layouts/header.php';
 
                     <dl class="recibo-lista">
                         <dt>Pedido</dt>
-                        <dd>#<?php echo $pedidoId; ?><?php echo $criadoEm ? ' — ' . htmlspecialchars($criadoEm) : ''; ?></dd>
+                        <dd>#<?php echo $pedidoId; ?><?php echo $criadoEm ? ' - ' . htmlspecialchars($criadoEm) : ''; ?></dd>
 
                         <dt>Problema relatado</dt>
                         <dd><?php echo htmlspecialchars($descricaoProblema); ?></dd>
 
                         <?php if ($veiculoDescricao !== ''): ?>
-                        <dt>Veículo</dt>
+                        <dt>Ve�culo</dt>
                         <dd>
                             <?php echo htmlspecialchars($veiculoDescricao); ?>
                             <?php if (!empty($pedido['placa'])): ?>
-                                — placa <?php echo htmlspecialchars($pedido['placa']); ?>
+                                - placa <?php echo htmlspecialchars($pedido['placa']); ?>
                             <?php endif; ?>
                         </dd>
                         <?php endif; ?>
 
                         <dt>Origem</dt>
-                        <dd><?php echo htmlspecialchars($pedido['endereco_origem'] ?? '—'); ?></dd>
+                        <dd><?php echo htmlspecialchars($pedido['endereco_origem'] ?? '-'); ?></dd>
 
                         <dt>Destino</dt>
-                        <dd><?php echo htmlspecialchars($pedido['endereco_destino'] ?? '—'); ?></dd>
+                        <dd><?php echo htmlspecialchars($pedido['endereco_destino'] ?? '-'); ?></dd>
 
                         <?php if (!empty($pedido['distancia_km'])): ?>
-                        <dt>Distância estimada</dt>
+                        <dt>Dist�ncia estimada</dt>
                         <dd><?php echo number_format((float)$pedido['distancia_km'], 1, ',', '.'); ?> km</dd>
                         <?php endif; ?>
 
                         <dt>Cliente</dt>
-                        <dd><?php echo htmlspecialchars($pedido['cliente_nome'] ?? '—'); ?></dd>
+                        <dd><?php echo htmlspecialchars($pedido['cliente_nome'] ?? '-'); ?></dd>
                     </dl>
 
                     <hr class="config-hr">
 
                     <div class="recibo-linha">
-                        <span>Valor do serviço</span>
+                        <span>Valor do servi�o</span>
                         <span>R$ <?php echo number_format($valorPedido, 2, ',', '.'); ?></span>
                     </div>
                     <div class="recibo-linha recibo-total">
@@ -129,13 +144,13 @@ include __DIR__ . '/../layouts/header.php';
                     </div>
 
                     <p class="text-muted small mt-3 mb-0">
-                        <i class="fas fa-lock me-1"></i>Pagamento processado direto pelo gateway — seus dados de cartão não passam pelos nossos servidores.
+                        <i class="fas fa-lock me-1"></i>Pagamento processado direto pelo gateway - seus dados de cart�o n�o passam pelos nossos servidores.
                     </p>
                 </div>
             </div>
         </div>
 
-        <!-- Formulário de checkout -->
+        <!-- Formul�rio de checkout -->
         <div class="col-12 col-lg-7 col-xl-8">
             <div class="row g-4">
                 <?php if ($mostrarMercadoPago): ?>
@@ -143,7 +158,7 @@ include __DIR__ . '/../layouts/header.php';
                     <div class="card h-100 gf-payment-card">
                         <div class="card-header"><i class="fas fa-bolt me-2"></i>MercadoPago</div>
                         <div class="card-body">
-                            <p class="text-muted">Cartão, Pix ou boleto — aprovação sem sair desta página.</p>
+                            <p class="text-muted">Cart�o, Pix ou boleto - aprova��o sem sair desta p�gina.</p>
                             <?php require __DIR__ . '/../components/gf-footer-payments.php'; ?>
                             <div id="mp-payment-brick-container"></div>
                             <div id="mp-payment-status" class="mt-3"></div>
@@ -157,11 +172,11 @@ include __DIR__ . '/../layouts/header.php';
                     <div class="card h-100">
                         <div class="card-header"><i class="fas fa-building-columns me-2"></i>PagSeguro</div>
                         <div class="card-body">
-                            <p class="text-muted">Cartão ou boleto via PagSeguro, sem sair desta página.</p>
+                            <p class="text-muted">Cart�o ou boleto via PagSeguro, sem sair desta p�gina.</p>
 
                             <div class="btn-group w-100 mb-3" role="group">
                                 <input type="radio" class="btn-check" name="ps-metodo" id="ps-metodo-cartao" value="creditCard" checked>
-                                <label class="btn btn-outline-success" for="ps-metodo-cartao">Cartão de crédito</label>
+                                <label class="btn btn-outline-success" for="ps-metodo-cartao">Cart�o de cr�dito</label>
                                 <input type="radio" class="btn-check" name="ps-metodo" id="ps-metodo-boleto" value="boleto">
                                 <label class="btn btn-outline-success" for="ps-metodo-boleto">Boleto</label>
                             </div>
@@ -185,7 +200,7 @@ include __DIR__ . '/../layouts/header.php';
                                 <div id="ps-campos-cartao">
                                     <hr class="config-hr">
                                     <div class="mb-2">
-                                        <label class="form-label">Número do cartão</label>
+                                        <label class="form-label">N�mero do cart�o</label>
                                         <input type="text" class="form-control" id="ps-cc-numero" placeholder="0000 0000 0000 0000">
                                     </div>
                                     <div class="row g-2 mb-2">
@@ -207,7 +222,7 @@ include __DIR__ . '/../layouts/header.php';
                                         </div>
                                     </div>
                                     <div class="mb-2">
-                                        <label class="form-label">Nome impresso no cartão</label>
+                                        <label class="form-label">Nome impresso no cart�o</label>
                                         <input type="text" class="form-control" id="ps-cc-nome">
                                     </div>
                                     <div class="mb-2">
@@ -215,14 +230,14 @@ include __DIR__ . '/../layouts/header.php';
                                         <input type="text" class="form-control" id="ps-cc-nascimento" placeholder="dd/mm/aaaa">
                                     </div>
                                     <hr class="config-hr">
-                                    <p class="text-muted small mb-2">Endereço de cobrança (exigido pelo PagSeguro para cartão)</p>
+                                    <p class="text-muted small mb-2">Endere�o de cobran�a (exigido pelo PagSeguro para cart�o)</p>
                                     <div class="row g-2 mb-2">
                                         <div class="col-8">
                                             <label class="form-label">Rua</label>
                                             <input type="text" class="form-control" id="ps-end-rua">
                                         </div>
                                         <div class="col-4">
-                                            <label class="form-label">Número</label>
+                                            <label class="form-label">N�mero</label>
                                             <input type="text" class="form-control" id="ps-end-numero">
                                         </div>
                                     </div>
@@ -280,6 +295,7 @@ include __DIR__ . '/../layouts/header.php';
     var VALOR_PEDIDO = <?php echo json_encode($valorPedido); ?>;
     var MP_PUBLIC_KEY = <?php echo json_encode($mpPublicKey); ?>;
     var PAYER_INICIAL = <?php echo json_encode($payerInicial ?? [], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>;
+    var IS_ADMIN_CHECKOUT = <?php echo $isAdminCheckout ? 'true' : 'false'; ?>;
 
     function mostrarMensagemGlobal(texto, tipo) {
         var el = document.getElementById('checkout-mensagem');
@@ -291,26 +307,28 @@ include __DIR__ . '/../layouts/header.php';
     }
 
     function tratarRespostaPagamento(resp, statusElId) {
-        // §QA-RESP-CAPTURA-01: guarda a última resposta em window pra QA
+        // �QA-RESP-CAPTURA-01: guarda a �ltima resposta em window pra QA
         // (Playwright) conseguir ler o resultado real sem depender de
-        // reconstruir o corpo da resposta de rede via CDP depois do fetch —
+        // reconstruir o corpo da resposta de rede via CDP depois do fetch -
         // isso corre risco de race contra o window.location.href logo
         // abaixo (no sucesso), que descarta o recurso de rede antes do
         // teste conseguir ler o body (visto nos logs: "Protocol error
         // (Network.getResponseBody): No resource with given identifier
-        // found"). Não afeta usuários reais, só expõe um valor extra em
+        // found"). N�o afeta usu�rios reais, s� exp�e um valor extra em
         // window.
         window.__qaUltimaRespostaPagamento = resp;
         var statusEl = document.getElementById(statusElId);
         if (!resp || !resp.sucesso) {
-            var msg = (resp && resp.erro) ? resp.erro : 'Não foi possível processar o pagamento. Tente novamente.';
+            var msg = (resp && resp.erro) ? resp.erro : 'N�o foi poss�vel processar o pagamento. Tente novamente.';
             mostrarMensagemGlobal(msg, 'danger');
             return;
         }
 
         if (resp.status === 'aprovado') {
             mostrarMensagemGlobal('Pagamento aprovado! Redirecionando...', 'success');
-            window.location.href = resp.redirect || (BP + '/pagamento/sucesso/' + PEDIDO_ID);
+            window.location.href = IS_ADMIN_CHECKOUT
+                ? (BP + '/admin/pedido/' + PEDIDO_ID + '?pagamento=aprovado')
+                : (resp.redirect || (BP + '/pagamento/sucesso/' + PEDIDO_ID));
             return;
         }
 
@@ -323,19 +341,19 @@ include __DIR__ . '/../layouts/header.php';
                 statusEl.innerHTML = '<div class="alert alert-info">Boleto gerado. <a target="_blank" rel="noopener" href="'
                     + detalhe.boleto_url + '">Abrir boleto</a></div>';
             } else if (statusEl) {
-                statusEl.innerHTML = '<div class="alert alert-info">Pagamento em análise. Avisaremos assim que for confirmado.</div>';
+                statusEl.innerHTML = '<div class="alert alert-info">Pagamento em an�lise. Avisaremos assim que for confirmado.</div>';
             }
             return;
         }
 
-        mostrarMensagemGlobal('O pagamento não foi aprovado. Verifique os dados e tente novamente.', 'danger');
+        mostrarMensagemGlobal('O pagamento n�o foi aprovado. Verifique os dados e tente novamente.', 'danger');
     }
 
-    // ─── MercadoPago Payment Brick ──────────────────────────────────────
+    // ??? MercadoPago Payment Brick ??????????????????????????????????????
     <?php if ($mostrarMercadoPago): ?>
     (function initMercadoPagoBrick() {
         if (!MP_PUBLIC_KEY || typeof MercadoPago === 'undefined') {
-            mostrarMensagemGlobal('MercadoPago não pôde ser carregado. Tente atualizar a página.', 'warning');
+            mostrarMensagemGlobal('MercadoPago n�o p�de ser carregado. Tente atualizar a p�gina.', 'warning');
             return;
         }
 
@@ -363,16 +381,16 @@ include __DIR__ . '/../layouts/header.php';
                     console.error('[Brick][onError]', error);
                     var detalhe = error && (error.message || error.cause) ? (error.message || error.cause) : 'erro desconhecido';
                     window.__qaPaymentBrickState = { estado: 'error', detalhe: String(detalhe) };
-                    mostrarMensagemGlobal('Não foi possível carregar o formulário de pagamento do MercadoPago: ' + String(detalhe), 'danger');
+                    mostrarMensagemGlobal('N�o foi poss�vel carregar o formul�rio de pagamento do MercadoPago: ' + String(detalhe), 'danger');
                 },
-                // §PAY-BRICK-01: o SDK do MP chama onSubmit com um único
-                // objeto { selectedPaymentMethod, formData } — NÃO com o
+                // �PAY-BRICK-01: o SDK do MP chama onSubmit com um �nico
+                // objeto { selectedPaymentMethod, formData } - N�O com o
                 // formData direto (confirmado na doc oficial do Payment
                 // Brick, sdk-js/docs/bricks/payment.md). Tratar esse
-                // parâmetro inteiro como se já fosse o formData manda
-                // payment_method_id/token um nível mais fundo do que o
+                // par�metro inteiro como se j� fosse o formData manda
+                // payment_method_id/token um n�vel mais fundo do que o
                 // backend espera, e PagamentoController::mercadoPagoTransparente()
-                // recusa com "Método de pagamento não identificado." —
+                // recusa com "M�todo de pagamento n�o identificado." -
                 // exatamente o bug que apareceu no primeiro teste real.
                 onSubmit: function (dadosSubmit) {
                     var formData = (dadosSubmit && dadosSubmit.formData) ? dadosSubmit.formData : dadosSubmit;
@@ -404,24 +422,28 @@ include __DIR__ . '/../layouts/header.php';
                         .then(function (resp) {
                             tratarRespostaPagamento(resp, 'mp-payment-status');
                             if (!resp.sucesso || resp.status !== 'aprovado') {
-                                // Mantém a Promise resolvida (Brick espera isso), mas sem
-                                // redirecionar — o Brick volta a ficar interativo pra nova tentativa.
+                                // Mant�m a Promise resolvida (Brick espera isso), mas sem
+                                // redirecionar - o Brick volta a ficar interativo pra nova tentativa.
                                 return Promise.resolve();
                             }
                         })
                         .catch(function (err) {
                             console.error('[Brick][onSubmit]', err);
-                            window.__qaUltimaRespostaPagamento = { sucesso: false, erro: (err && err.message) ? err.message : 'Erro de comunicação ao processar o pagamento.' };
-                            mostrarMensagemGlobal('Erro de comunicação ao processar o pagamento.', 'danger');
+                            window.__qaUltimaRespostaPagamento = { sucesso: false, erro: (err && err.message) ? err.message : 'Erro de comunica��o ao processar o pagamento.' };
+                            mostrarMensagemGlobal('Erro de comunica��o ao processar o pagamento.', 'danger');
                             return Promise.reject(err);
                         });
                 },
             },
+        }).catch(function (error) {
+            console.error('[Brick][create]', error);
+            window.__qaPaymentBrickState = { estado: 'error', detalhe: String(error && error.message ? error.message : error) };
+            mostrarMensagemGlobal('Não foi possível carregar o formulário de pagamento. Atualize a página e tente novamente.', 'warning');
         });
     })();
     <?php endif; ?>
 
-    // ─── PagSeguro Checkout Transparente ────────────────────────────────
+    // ??? PagSeguro Checkout Transparente ????????????????????????????????
     <?php if ($mostrarPagSeguro): ?>
     (function initPagSeguroTransparente() {
         var sessionId = null;
@@ -446,7 +468,7 @@ include __DIR__ . '/../layouts/header.php';
                 .then(function (r) { return r.json(); })
                 .then(function (resp) {
                     if (!resp.sucesso) {
-                        throw new Error(resp.erro || 'Falha ao iniciar sessão PagSeguro.');
+                        throw new Error(resp.erro || 'Falha ao iniciar sess�o PagSeguro.');
                     }
                     sessionId = resp.sessionId;
                     if (typeof PagSeguroDirectPayment !== 'undefined') {
@@ -458,13 +480,13 @@ include __DIR__ . '/../layouts/header.php';
         if (typeof PagSeguroDirectPayment !== 'undefined') {
             carregarSessao().catch(function (err) {
                 console.error('[PagSeguro][sessao]', err);
-                mostrarMensagemGlobal('Não foi possível iniciar o checkout PagSeguro. Tente atualizar a página.', 'warning');
+                mostrarMensagemGlobal('N�o foi poss�vel iniciar o checkout PagSeguro. Tente atualizar a p�gina.', 'warning');
             });
 
-            // §PS-HASH-01: senderHash NÃO deve disparar no carregamento da
-            // página nem no submit — a doc do PagSeguro pede pra gerar assim
-            // que o comprador começa a preencher os dados (aqui: quando sai
-            // do campo de CPF), senão o hash pode vir vazio/atrasado.
+            // �PS-HASH-01: senderHash N�O deve disparar no carregamento da
+            // p�gina nem no submit - a doc do PagSeguro pede pra gerar assim
+            // que o comprador come�a a preencher os dados (aqui: quando sai
+            // do campo de CPF), sen�o o hash pode vir vazio/atrasado.
             var cpfEl = document.getElementById('ps-cpf');
             if (cpfEl) {
                 cpfEl.addEventListener('blur', function () {
@@ -511,7 +533,7 @@ include __DIR__ . '/../layouts/header.php';
                         })
                         .catch(function (err) {
                             console.error('[PagSeguro][pagar]', err);
-                            mostrarMensagemGlobal('Erro de comunicação ao processar o pagamento.', 'danger');
+                            mostrarMensagemGlobal('Erro de comunica��o ao processar o pagamento.', 'danger');
                         })
                         .finally(function () {
                             submitBtn.disabled = false;
@@ -524,7 +546,7 @@ include __DIR__ . '/../layouts/header.php';
                 }
 
                 if (typeof PagSeguroDirectPayment === 'undefined') {
-                    mostrarMensagemGlobal('PagSeguro não carregou corretamente. Atualize a página.', 'warning');
+                    mostrarMensagemGlobal('PagSeguro n�o carregou corretamente. Atualize a p�gina.', 'warning');
                     return;
                 }
 
@@ -559,13 +581,13 @@ include __DIR__ . '/../layouts/header.php';
                             },
                             error: function (err) {
                                 console.error('[PagSeguro][createCardToken]', err);
-                                mostrarMensagemGlobal('Não foi possível validar os dados do cartão. Confira e tente novamente.', 'danger');
+                                mostrarMensagemGlobal('N�o foi poss�vel validar os dados do cart�o. Confira e tente novamente.', 'danger');
                             },
                         });
                     },
                     error: function (err) {
                         console.error('[PagSeguro][getBrand]', err);
-                        mostrarMensagemGlobal('Não foi possível identificar a bandeira do cartão.', 'danger');
+                        mostrarMensagemGlobal('N�o foi poss�vel identificar a bandeira do cart�o.', 'danger');
                     },
                 });
             });
@@ -574,3 +596,4 @@ include __DIR__ . '/../layouts/header.php';
     <?php endif; ?>
 })();
 </script>
+<?php include __DIR__ . '/../layouts/footer.php'; ?>

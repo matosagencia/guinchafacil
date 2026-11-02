@@ -29,29 +29,7 @@ function cliente_saudacao(): string
             </div>
         </header>
 
-        <?php if (empty($pedidoAndamento)): ?>
-        <section class="client-rescue-card mb-4">
-            <div class="client-rescue-copy">
-                <div class="app-panel__title mb-1"><i class="fas fa-circle-exclamation me-2 text-primary-custom"></i>Onde está o veículo?</div>
-                <div class="dash-panel-subtitle">Use o GPS ou digite um ponto de referência.</div>
-            </div>
-            <form class="quick-rescue__row d-flex gap-2 flex-wrap" method="post" action="<?php echo $bp; ?>/cliente/pedido/rascunho" data-quick-rescue data-reverse-url="<?php echo $bp; ?>/geocode/reverse" data-geocode-url="<?php echo $bp; ?>/geocode">
-                <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($csrfToken ?? ''); ?>">
-                <input type="hidden" name="lat_origem" value="<?php echo htmlspecialchars((string)($pedidoRascunho['lat_origem'] ?? '')); ?>">
-                <input type="hidden" name="lng_origem" value="<?php echo htmlspecialchars((string)($pedidoRascunho['lng_origem'] ?? '')); ?>">
-                <div class="input-group flex-grow-1">
-                    <span class="input-group-text bg-white border-end-0"><i class="fas fa-location-dot text-primary-custom"></i></span>
-                    <input type="text" class="form-control quick-rescue__input border-start-0" name="endereco_origem" data-quick-rescue-input value="<?php echo htmlspecialchars((string)($pedidoRascunho['endereco_origem'] ?? '')); ?>" placeholder="Onde está o veículo?" maxlength="220" required>
-                </div>
-                <div class="input-group" style="max-width:140px;">
-                    <span class="input-group-text bg-white border-end-0">Nº</span>
-                    <input type="text" class="form-control quick-rescue__input border-start-0" name="numero_origem" data-quick-rescue-number value="<?php echo htmlspecialchars((string)($pedidoRascunho['numero_origem'] ?? '')); ?>" placeholder="12" maxlength="20">
-                </div>
-                <button type="button" class="btn btn-outline-secondary" data-quick-rescue-gps aria-label="Usar minha localização atual"><i class="fas fa-location-crosshairs"></i></button>
-                <button type="submit" class="btn btn-primary quick-rescue__cta" data-action="localize">Pedir socorro</button>
-            </form>
-        </section>
-        <?php endif; ?>
+        <?php if (empty($pedidoAndamento)): ?>        <section class="client-rescue-card mb-4">            <div class="client-rescue-copy">                <div class="app-panel__title mb-1"><i class="fas fa-circle-exclamation me-2 text-primary-custom"></i>Comece seu pedido</div>                <div class="dash-panel-subtitle">A localização, o problema e a cobertura serão definidos no mesmo funil da pré-cotação.</div>            </div>            <a class="btn btn-primary quick-rescue__cta" href="<?php echo $bp; ?>/cliente/pedido/novo">Pedir socorro</a>        </section>        <?php endif; ?>
 
         <section class="app-hero client-hero mb-4">
             <div class="client-hero-info">
@@ -71,31 +49,7 @@ function cliente_saudacao(): string
             <a href="<?php echo $bp; ?>/cliente/pedido/novo" class="client-hero-mark" aria-label="Pedir socorro"><i class="fas fa-arrow-up-right-from-square"></i></a>
         </section>
 
-        <?php
-        // Catálogo administrável pelo admin (/admin/servicos). Fallback para os
-        // 5 atalhos originais só se a tabela ainda não tiver sido semeada —
-        // garante que a tela nunca fique vazia por falta de dado de instalação.
-        $servicosParaExibir = $servicosCatalogo ?? [];
-        if (empty($servicosParaExibir)) {
-            $servicosParaExibir = [
-                ['chave' => 'reboque_agora', 'nome' => 'Reboque agora', 'descricao' => 'Atendimento imediato', 'tipo_problema' => 'outro', 'icone' => 'fa-truck-pickup', 'cor' => 'tow'],
-                ['chave' => 'bateria', 'nome' => 'Bateria', 'descricao' => 'Partida auxiliar', 'tipo_problema' => 'bateria', 'icone' => 'fa-bolt', 'cor' => 'battery'],
-                ['chave' => 'pneu', 'nome' => 'Pneu', 'descricao' => 'Troca e suporte', 'tipo_problema' => 'pneu', 'icone' => 'fa-circle-dot', 'cor' => 'tire'],
-                ['chave' => 'pane_seca', 'nome' => 'Pane seca', 'descricao' => 'Falta de combustível', 'tipo_problema' => 'combustivel', 'icone' => 'fa-gas-pump', 'cor' => 'fuel'],
-                ['chave' => 'agendar', 'nome' => 'Agendar', 'descricao' => 'Transporte programado', 'tipo_problema' => '', 'icone' => 'fa-clock', 'cor' => 'schedule'],
-            ];
-        }
-        ?>
-        <div class="client-service-grid mb-4">
-            <?php foreach ($servicosParaExibir as $srv): ?>
-            <a class="client-service-tile" href="<?php echo $bp; ?>/cliente/pedido/novo<?php echo !empty($srv['tipo_problema']) ? '?tipo=' . urlencode($srv['tipo_problema']) : ''; ?>">
-                <div class="client-service-icon client-service-icon--<?php echo htmlspecialchars($srv['cor']); ?>"><i class="fas <?php echo htmlspecialchars($srv['icone']); ?>"></i></div>
-                <strong><?php echo htmlspecialchars($srv['nome']); ?></strong>
-                <span><?php echo htmlspecialchars((string)($srv['descricao'] ?? '')); ?></span>
-            </a>
-            <?php endforeach; ?>
-        </div>
-
+        <section class="app-panel mb-4">            <span class="eyebrow">Cesta de serviços</span>            <h2 class="h4 mb-2">Escolha o atendimento dentro do pedido</h2>            <p class="text-muted mb-3">A lista oficial será carregada na etapa “Qual é o problema?”, igual à pré-cotação e aos pedidos criados pelo admin.</p>            <a class="btn btn-outline-primary" href="<?php echo $bp; ?>/cliente/pedido/novo">Abrir cesta de serviços</a>        </section>
         <?php if (!empty($incidentesAtivos)): ?>
         <section class="app-panel mb-4" aria-labelledby="incidentesAtivosTitulo">
             <div class="d-flex justify-content-between align-items-center mb-3">

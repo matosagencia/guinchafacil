@@ -7,37 +7,37 @@ require_once __DIR__ . '/../Logger.php';
 
 /**
  * src/Services/Finance/CarteiraService.php
- * Pacote L2.3 — "Carteiras"/"Saques" da nav reorganizada.
+ * Pacote L2.3 - "Carteiras"/"Saques" da nav reorganizada.
  *
- * DECISÃO DE PRODUTO (confirmada com o usuário em 2026-08-01): este serviço
- * é 100% VISIBILIDADE sobre o dinheiro que já se move hoje — ele NÃO cria
+ * DECIS�O DE PRODUTO (confirmada com o usu�rio em 2026-08-01): este servi�o
+ * � 100% VISIBILIDADE sobre o dinheiro que j� se move hoje - ele N�O cria
  * nenhum saldo retido nem fluxo de "solicitar saque". O repasse Pix real ao
- * guincheiro já é automático (ver PaymentJobService::enqueuePixPayout() +
+ * guincheiro j� � autom�tico (ver PaymentJobService::enqueuePixPayout() +
  * PixService::transferir() + Pagamento::confirmarRepassePix()), disparado
- * assim que o pedido conclui — não existe hoje (nem esta classe cria) um
+ * assim que o pedido conclui - n�o existe hoje (nem esta classe cria) um
  * modelo de "guincheiro pede saque, admin libera". Mudar isso seria uma
- * mudança de comportamento financeiro real, fora do escopo combinado.
+ * mudan�a de comportamento financeiro real, fora do escopo combinado.
  *
- * O que esta classe faz: lê `pagamentos` + `payout_ledger_entries` (fonte
- * de verdade já existente e testada) e apresenta 3 estados por guincheiro:
- *   - em_compensacao: aprovado, ainda não repassado (pago_guincho=0)
+ * O que esta classe faz: l� `pagamentos` + `payout_ledger_entries` (fonte
+ * de verdade j� existente e testada) e apresenta 3 estados por guincheiro:
+ *   - em_compensacao: aprovado, ainda n�o repassado (pago_guincho=0)
  *   - pago: repasse Pix confirmado (pago_guincho=1)
  *   - estornado: pagamento estornado (status='estornado')
  *
- * PRINCÍPIO DE DEBUGABILIDADE (pedido explícito do usuário: "quero tudo
- * debugável nos mínimos detalhes para prevenir erros silenciosos"): TODO
- * método aqui retorna um envelope com 'ok' explícito. Se uma query falhar,
- * o método NUNCA retorna silenciosamente um saldo zerado como se fosse um
- * resultado legítimo — ele retorna ok=false + a mensagem de erro real, e a
- * tela precisa mostrar isso como uma falha, não como "sem saldo". Toda
- * chamada também loga via Logger::log/Logger::exception (DEBUG no sucesso
- * com os valores computados, ERROR na falha com stack trace), então dá pra
+ * PRINC�PIO DE DEBUGABILIDADE (pedido expl�cito do usu�rio: "quero tudo
+ * debug�vel nos m�nimos detalhes para prevenir erros silenciosos"): TODO
+ * m�todo aqui retorna um envelope com 'ok' expl�cito. Se uma query falhar,
+ * o m�todo NUNCA retorna silenciosamente um saldo zerado como se fosse um
+ * resultado leg�timo - ele retorna ok=false + a mensagem de erro real, e a
+ * tela precisa mostrar isso como uma falha, n�o como "sem saldo". Toda
+ * chamada tamb�m loga via Logger::log/Logger::exception (DEBUG no sucesso
+ * com os valores computados, ERROR na falha com stack trace), ent�o d� pra
  * auditar em app_logs/app-YYYY-MM-DD.jsonl exatamente o que rodou.
  */
 class CarteiraService
 {
     /**
-     * Saldo consolidado de um guincheiro específico.
+     * Saldo consolidado de um guincheiro espec�fico.
      * @return array{ok:bool, erro:?string, guincho_id:int, saldo_em_compensacao:float,
      *   saldo_pago:float, saldo_estornado:float, total_pedidos:int, ultimo_repasse_em:?string}
      */
@@ -62,16 +62,16 @@ class CarteiraService
             $row = $stmt->fetch(PDO::FETCH_ASSOC);
 
             if ($row === false) {
-                // Consulta rodou sem exceção mas não retornou linha nenhuma —
-                // situação anômala (nem guincho inexistente deveria zerar o
+                // Consulta rodou sem exce��o mas n�o retornou linha nenhuma -
+                // situa��o an�mala (nem guincho inexistente deveria zerar o
                 // fetch de um agregado com LEFT JOIN). Trata como falha
-                // explícita em vez de mascarar como saldo zero.
+                // expl�cita em vez de mascarar como saldo zero.
                 Logger::log(Logger::LEVEL_WARN, 'CarteiraService', 'saldoGuincho', 'financeiro',
-                    "Query de saldo não retornou linha para guincho #{$guinchoId} — resultado anômalo, tratado como falha explícita.",
+                    "Query de saldo n�o retornou linha para guincho #{$guinchoId} - resultado an�malo, tratado como falha expl�cita.",
                     ['guincho_id' => $guinchoId]);
                 return [
                     'ok' => false,
-                    'erro' => 'Consulta de saldo não retornou nenhuma linha (resultado anômalo).',
+                    'erro' => 'Consulta de saldo n�o retornou nenhuma linha (resultado an�malo).',
                     'guincho_id' => $guinchoId,
                     'saldo_em_compensacao' => 0.0, 'saldo_pago' => 0.0, 'saldo_estornado' => 0.0,
                     'repasses_com_falha' => 0, 'total_pedidos' => 0, 'ultimo_repasse_em' => null,
@@ -91,7 +91,7 @@ class CarteiraService
             ];
 
             Logger::log(Logger::LEVEL_DEBUG, 'CarteiraService', 'saldoGuincho', 'financeiro',
-                "Saldo calculado para guincho #{$guinchoId}: compensação=R$ {$resultado['saldo_em_compensacao']}, pago=R$ {$resultado['saldo_pago']}, estornado=R$ {$resultado['saldo_estornado']}, falhas={$resultado['repasses_com_falha']}.",
+                "Saldo calculado para guincho #{$guinchoId}: compensa��o=R$ {$resultado['saldo_em_compensacao']}, pago=R$ {$resultado['saldo_pago']}, estornado=R$ {$resultado['saldo_estornado']}, falhas={$resultado['repasses_com_falha']}.",
                 ['guincho_id' => $guinchoId, 'duration_ms' => (int)round((microtime(true) - $inicio) * 1000), 'resultado' => $resultado]);
 
             return $resultado;
@@ -108,9 +108,9 @@ class CarteiraService
     }
 
     /**
-     * Resumo consolidado de TODOS os guincheiros aprovados, para a tela-índice
-     * /admin/carteiras. Uma única query agregada (evita N+1 de saldoGuincho()
-     * por guincho — importante já que esta tela pode listar dezenas de
+     * Resumo consolidado de TODOS os guincheiros aprovados, para a tela-�ndice
+     * /admin/carteiras. Uma �nica query agregada (evita N+1 de saldoGuincho()
+     * por guincho - importante j� que esta tela pode listar dezenas de
      * guincheiros).
      * @return array{ok:bool, erro:?string, linhas:array<int,array<string,mixed>>}
      */
@@ -155,10 +155,10 @@ class CarteiraService
     }
 
     /**
-     * Extrato detalhado (linha a linha) de um guincheiro — cada pedido/
-     * pagamento com seu status financeiro completo. Esta é a tela de "prova"
-     * por trás do número agregado (debugabilidade: todo valor mostrado no
-     * resumo tem que ser rastreável até aqui).
+     * Extrato detalhado (linha a linha) de um guincheiro - cada pedido/
+     * pagamento com seu status financeiro completo. Esta � a tela de "prova"
+     * por tr�s do n�mero agregado (debugabilidade: todo valor mostrado no
+     * resumo tem que ser rastre�vel at� aqui).
      */
     public static function extratoGuincho(int $guinchoId, int $limite = 200): array
     {
@@ -192,11 +192,11 @@ class CarteiraService
     }
 
     /**
-     * "Saques" (Pacote L2.3) — como não existe fluxo de solicitação manual
-     * (ver docblock da classe), este é o painel operacional real equivalente:
-     * todos os repasses Pix que precisam de atenção do admin (pendentes,
+     * "Saques" (Pacote L2.3) - como n�o existe fluxo de solicita��o manual
+     * (ver docblock da classe), este � o painel operacional real equivalente:
+     * todos os repasses Pix que precisam de aten��o do admin (pendentes,
      * processando, ou com falha), pra ele acompanhar/reprocessar via a
-     * action já existente AdminController::pixReprocessar().
+     * action j� existente AdminController::pixReprocessar().
      */
     public static function repassesPendentesOuComFalha(int $limite = 200): array
     {
@@ -232,12 +232,12 @@ class CarteiraService
     }
 
     /**
-     * Checagem de reconciliação (debugabilidade): compara o que o ledger
-     * append-only (payout_ledger_entries, fonte "contábil") registrou como
-     * crédito ao guincho contra o que `pagamentos.valor_guincho` (fonte
+     * Checagem de reconcilia��o (debugabilidade): compara o que o ledger
+     * append-only (payout_ledger_entries, fonte "cont�bil") registrou como
+     * cr�dito ao guincho contra o que `pagamentos.valor_guincho` (fonte
      * "operacional") tem para pagamentos aprovados. Se as duas fontes
-     * divergirem, é sinal de bug real em algum dos dois caminhos — a tela
-     * mostra isso como um alerta explícito, não deixa passar em silêncio.
+     * divergirem, � sinal de bug real em algum dos dois caminhos - a tela
+     * mostra isso como um alerta expl�cito, n�o deixa passar em sil�ncio.
      */
     public static function checarReconciliacaoGlobal(): array
     {
@@ -261,8 +261,8 @@ class CarteiraService
             $creditoLedger = round((float)($ledger['credito_guincho'] ?? 0), 2);
             $creditoPagamentos = round((float)($pagamentos['valor_liquido_aprovado'] ?? 0), 2);
             $diferenca = round($creditoLedger - $creditoPagamentos, 2);
-            // Tolerância de 1 centavo por pedido acumulado (arredondamento) —
-            // acima disso é divergência real que merece investigação.
+            // Toler�ncia de 1 centavo por pedido acumulado (arredondamento) -
+            // acima disso � diverg�ncia real que merece investiga��o.
             $consistente = abs($diferenca) <= 0.02;
 
             $resultado = [
@@ -279,11 +279,11 @@ class CarteiraService
 
             if (!$consistente) {
                 Logger::log(Logger::LEVEL_WARN, 'CarteiraService', 'checarReconciliacaoGlobal', 'financeiro',
-                    "Divergência de reconciliação detectada: ledger=R$ {$creditoLedger} vs pagamentos=R$ {$creditoPagamentos} (diferença R$ {$diferenca}).",
+                    "Diverg�ncia de reconcilia��o detectada: ledger=R$ {$creditoLedger} vs pagamentos=R$ {$creditoPagamentos} (diferen�a R$ {$diferenca}).",
                     $resultado);
             } else {
                 Logger::log(Logger::LEVEL_DEBUG, 'CarteiraService', 'checarReconciliacaoGlobal', 'financeiro',
-                    'Reconciliação OK — ledger e pagamentos batem (dentro da tolerância de arredondamento).', $resultado);
+                    'Reconcilia��o OK - ledger e pagamentos batem (dentro da toler�ncia de arredondamento).', $resultado);
             }
 
             return $resultado;
@@ -291,7 +291,7 @@ class CarteiraService
             Logger::exception('CarteiraService', 'checarReconciliacaoGlobal', 'financeiro', $e, []);
             return [
                 'ok' => false,
-                'erro' => 'Falha ao checar reconciliação: ' . $e->getMessage(),
+                'erro' => 'Falha ao checar reconcilia��o: ' . $e->getMessage(),
                 'consistente' => false,
                 'credito_guincho_ledger' => 0.0, 'credito_guincho_pagamentos' => 0.0, 'diferenca' => 0.0,
                 'debito_repasse_ledger' => 0.0, 'estorno_guincho_ledger' => 0.0, 'valor_estornado_pagamentos' => 0.0,

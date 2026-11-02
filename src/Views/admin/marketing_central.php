@@ -3,7 +3,7 @@ $bp = defined('BASE_PATH') ? BASE_PATH : '';
 include __DIR__ . '/../layouts/header.php';
 $esc = static fn($v) => htmlspecialchars((string)$v, ENT_QUOTES, 'UTF-8');
 $money = static fn($v) => 'R$ ' . number_format((float)$v, 2, ',', '.');
-$zonaLabel = ['nao_ativada' => 'Sem jogada', 'pedra_morta' => 'Pedra morta', 'pedra_viva' => 'Pedra viva'];
+$zonaLabel = ['nao_ativada' => 'Prioridade a definir', 'pedra_morta' => 'Expansão estratégica', 'pedra_viva' => 'Prioridade estratégica'];
 $zonaClass = ['nao_ativada' => 'secondary', 'pedra_morta' => 'danger', 'pedra_viva' => 'success'];
 $chartCanais = array_slice($porCanal ?? [], 0, 8);
 $chartServicos = array_slice($demandaServicos ?? [], 0, 8);

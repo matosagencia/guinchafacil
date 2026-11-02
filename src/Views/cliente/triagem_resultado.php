@@ -12,7 +12,7 @@ $resultadoLabels = [
 ?>
 <div class="main-wrapper">
 <?php include __DIR__ . '/../layouts/sidebar_cliente.php'; ?>
-<main class="main-content">
+<main class="main-content"><?php include __DIR__ . '/partials/_panel_topbar_cliente.php'; ?>
 
     <header class="page-head mb-4">
         <div>

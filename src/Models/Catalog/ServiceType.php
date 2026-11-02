@@ -25,6 +25,21 @@ class ServiceType
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    /** Tipos ativos com pelo menos um prestador aprovado e habilitado. */
+    public static function listarDisponiveisNoFunil(): array
+    {
+        $stmt = getPDO()->query(
+            "SELECT DISTINCT st.*, sc.code AS category_code, sc.name AS category_name
+             FROM " . self::TBL . " st
+             JOIN service_categories sc ON sc.id = st.category_id
+             JOIN provider_capabilities pc ON pc.service_type_id = st.id
+                AND pc.enabled = 1 AND pc.approval_status = 'APPROVED'
+             WHERE st.active = 1
+             ORDER BY sc.sort_order ASC, st.name ASC"
+        );
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
     public static function listarTodos(): array
     {
         $stmt = getPDO()->query(

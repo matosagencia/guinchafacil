@@ -15,7 +15,7 @@ class EvidenceService
     {
         $point = PedidoLocalizacao::buscarUltimoValidoPorPedido((int)$pedido['id']);
         if (!$point) {
-            throw new RuntimeException('Nenhum ponto válido recente disponível para evidência.');
+            throw new RuntimeException('Nenhum ponto v�lido recente dispon�vel para evid�ncia.');
         }
 
         $expiresAt = date('c', time() + 300);
@@ -43,27 +43,27 @@ class EvidenceService
     ): array
     {
         if (($file['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) {
-            throw new RuntimeException('Arquivo de evidência ausente.');
+            throw new RuntimeException('Arquivo de evid�ncia ausente.');
         }
 
         $payload = self::verifyPayload($nonceToken, (int)$pedido['id'], $tipo);
         $point = PedidoLocalizacao::buscarPorId((int)$payload['point_id']);
         if (!$point || (int)$point['pedido_id'] !== (int)$pedido['id']) {
-            throw new RuntimeException('Ponto de evidência inválido.');
+            throw new RuntimeException('Ponto de evid�ncia inv�lido.');
         }
 
         $maxAgeSeconds = PorThresholds::photoGpsMaxAgeSeconds();
         $pointTs = !empty($point['device_timestamp']) ? ((int)$point['device_timestamp'] / 1000) : strtotime((string)$point['server_timestamp']);
         if ((time() - (int)$pointTs) > $maxAgeSeconds) {
-            throw new RuntimeException('Ponto GPS da evidência expirado.');
+            throw new RuntimeException('Ponto GPS da evid�ncia expirado.');
         }
 
-        // §A3 — raio único (PorThresholds::arrivalRadiusM()), antes duplicado
+        // �A3 - raio �nico (PorThresholds::arrivalRadiusM()), antes duplicado
         // aqui e em PedidoTransitionService::validatePreconditions() com o
         // mesmo default (150/200) mas cada um lendo Configuracao::getAll()
-        // por conta própria.
-        // Diagnóstico/orçamento ocorre no local de origem. Essas evidências
-        // devem usar a mesma geofence de chegada, e não a do destino.
+        // por conta pr�pria.
+        // Diagn�stico/or�amento ocorre no local de origem. Essas evid�ncias
+        // devem usar a mesma geofence de chegada, e n�o a do destino.
         $naOrigem = in_array($tipo, ['coleta', 'diagnostico', 'orcamento'], true);
         $radius = $naOrigem
             ? PorThresholds::arrivalRadiusM()
@@ -76,7 +76,7 @@ class EvidenceService
             : GeofenceService::isNearDestination($pedido, (float)$point['latitude'], (float)$point['longitude'], $radius);
 
         if (!$isNear) {
-            throw new RuntimeException('Evidência rejeitada fora da geofence permitida.');
+            throw new RuntimeException('Evid�ncia rejeitada fora da geofence permitida.');
         }
 
         if (($file['size'] ?? 0) > 5 * 1024 * 1024) {
@@ -87,14 +87,14 @@ class EvidenceService
         $mime = (string)$finfo->file((string)$file['tmp_name']);
         $allowed = ['image/jpeg' => 'jpg', 'image/png' => 'png'];
         if (!isset($allowed[$mime])) {
-            throw new RuntimeException('Tipo MIME inválido para evidência.');
+            throw new RuntimeException('Tipo MIME inv�lido para evid�ncia.');
         }
 
-        // Pacote L1.5 — evidências NÃO ficam mais em public/uploads (webroot,
-        // acessível por URL direta sem autorização). Passam a ser salvas em
-        // storage/private/evidencias, fora do diretório servido pelo Apache
-        // (bloqueado também via .htaccess na raiz do projeto). O único acesso
-        // possível passa a ser a rota autorizada /evidencia/{id}.
+        // Pacote L1.5 - evid�ncias N�O ficam mais em public/uploads (webroot,
+        // acess�vel por URL direta sem autoriza��o). Passam a ser salvas em
+        // storage/private/evidencias, fora do diret�rio servido pelo Apache
+        // (bloqueado tamb�m via .htaccess na raiz do projeto). O �nico acesso
+        // poss�vel passa a ser a rota autorizada /evidencia/{id}.
         $destDir = self::privateStorageDir();
         if (!is_dir($destDir)) {
             @mkdir($destDir, 0770, true);
@@ -109,23 +109,23 @@ class EvidenceService
             $allowed[$mime]
         );
         $destPath = $destDir . DIRECTORY_SEPARATOR . $storedName;
-        // is_uploaded_file() só é true em requisições HTTP reais; testes
-        // automatizados (e o fallback de CLI/simulação já usado em
+        // is_uploaded_file() s� � true em requisi��es HTTP reais; testes
+        // automatizados (e o fallback de CLI/simula��o j� usado em
         // PedidoTransitionService::salvarComprovanteManual()) usam rename().
         $moved = is_uploaded_file((string)$file['tmp_name'])
             ? move_uploaded_file((string)$file['tmp_name'], $destPath)
             : rename((string)$file['tmp_name'], $destPath);
         if (!$moved) {
-            throw new RuntimeException('Falha ao mover arquivo de evidência.');
+            throw new RuntimeException('Falha ao mover arquivo de evid�ncia.');
         }
 
         $sha256 = (string)hash_file('sha256', $destPath);
 
-        // §A2 — a partir daqui o arquivo já foi movido para o storage privado
-        // (não é uma operação transacional, não tem como evitar). Se o
-        // INSERT falhar por qualquer motivo — incluindo as UNIQUE KEYs de
-        // nonce/dedupe (migration_evidencia_nonce_dedupe_v1.sql) — o arquivo
-        // não pode ficar órfão em disco: removemos antes de propagar o erro.
+        // �A2 - a partir daqui o arquivo j� foi movido para o storage privado
+        // (n�o � uma opera��o transacional, n�o tem como evitar). Se o
+        // INSERT falhar por qualquer motivo - incluindo as UNIQUE KEYs de
+        // nonce/dedupe (migration_evidencia_nonce_dedupe_v1.sql) - o arquivo
+        // n�o pode ficar �rf�o em disco: removemos antes de propagar o erro.
         try {
             $evidenciaId = PedidoEvidencia::criar([
                 'pedido_id' => (int)$pedido['id'],
@@ -154,13 +154,13 @@ class EvidenceService
             $msg = $e->getMessage();
             // Mensagem varia entre MySQL/MariaDB ("... for key 'uk_nonce_token'")
             // e SQLite ("UNIQUE constraint failed: pedido_evidencias.nonce_token"),
-            // por isso o match é pelo nome da coluna (comum aos dois formatos),
-            // não pelo nome completo do índice.
+            // por isso o match � pelo nome da coluna (comum aos dois formatos),
+            // n�o pelo nome completo do �ndice.
             if ((string)$e->getCode() === '23000' && str_contains($msg, 'nonce_token')) {
-                throw new RuntimeException('Este nonce de evidência já foi utilizado.');
+                throw new RuntimeException('Este nonce de evid�ncia j� foi utilizado.');
             }
             if ((string)$e->getCode() === '23000' && str_contains($msg, 'sha256')) {
-                throw new RuntimeException('Esta evidência já foi registrada para este pedido/etapa.');
+                throw new RuntimeException('Esta evid�ncia j� foi registrada para este pedido/etapa.');
             }
             throw $e;
         } catch (Throwable $e) {
@@ -177,7 +177,7 @@ class EvidenceService
         ];
     }
 
-    /** Diretório privado de storage, fora de public/ (Pacote L1.5). */
+    /** Diret�rio privado de storage, fora de public/ (Pacote L1.5). */
     public static function privateStorageDir(): string
     {
         return rtrim(dirname((string)PUBLIC_PATH), '/\\') . DIRECTORY_SEPARATOR . 'storage'
@@ -197,7 +197,7 @@ class EvidenceService
         [$body, $sig] = array_pad(explode('.', $token, 2), 2, '');
         $expected = hash_hmac('sha256', $body, (string)ENCRYPTION_KEY);
         if ($body === '' || $sig === '' || !hash_equals($expected, $sig)) {
-            throw new RuntimeException('Nonce de evidência inválido.');
+            throw new RuntimeException('Nonce de evid�ncia inv�lido.');
         }
 
         $normalized = strtr($body, '-_', '+/');
@@ -208,13 +208,13 @@ class EvidenceService
         $json = base64_decode($normalized, true);
         $payload = json_decode((string)$json, true);
         if (!is_array($payload)) {
-            throw new RuntimeException('Nonce de evidência corrompido.');
+            throw new RuntimeException('Nonce de evid�ncia corrompido.');
         }
         if ((int)($payload['pedido_id'] ?? 0) !== $pedidoId || (string)($payload['tipo'] ?? '') !== $tipo) {
-            throw new RuntimeException('Nonce de evidência incompatível com a operação.');
+            throw new RuntimeException('Nonce de evid�ncia incompat�vel com a opera��o.');
         }
         if (strtotime((string)($payload['expires_at'] ?? '')) < time()) {
-            throw new RuntimeException('Nonce de evidência expirado.');
+            throw new RuntimeException('Nonce de evid�ncia expirado.');
         }
 
         return $payload;

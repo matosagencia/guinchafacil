@@ -27,18 +27,22 @@ include __DIR__ . '/../layouts/header.php';
 <div class="main-wrapper shell admin-shell">
 <?php include __DIR__ . '/../layouts/sidebar_cliente.php'; ?>
 <main class="main-content shell-main shell-content">
+    <?php include __DIR__ . '/partials/_panel_topbar_cliente.php'; ?>
     <header class="page-head mb-4">
         <div><span class="eyebrow">Pedir socorro</span><h1><i class="fas fa-truck-pickup me-2 text-primary-custom"></i>Novo pedido</h1>
         <?php if ($veiculoResumo !== ''): ?><p class="text-muted mb-0">Veículo: <strong><?= $e($veiculoResumo) ?></strong></p><?php endif; ?></div>
     </header>
     <div class="card gf-client-funnel-card">
         <nav class="gf-steps" aria-label="Etapas da solicitação"><ol><li class="is-current"><span>01</span>Localização</li><li><span>02</span>Como ajudar</li><li><span>03</span>O que houve</li><li><span>04</span>Veículo</li><li><span>05</span>Destino</li><li><span>06</span>Confirmar</li></ol></nav>
-        <?php require __DIR__ . '/partials/_precotacao_funil_cliente.php'; ?>
+        <div class="gf-preq__grid">
+            <?php require __DIR__ . '/partials/_precotacao_funil_cliente.php'; ?>
+            <?php require __DIR__ . '/../public/partials/_precotacao_aside.php'; ?>
+        </div>
     </div>
 </main>
 </div>
 <script<?= function_exists('csp_script_nonce_attr') ? csp_script_nonce_attr() : '' ?> src="<?= $e($bp) ?>/public/assets/vendor/leaflet/leaflet.js"></script>
-<script<?= function_exists('csp_script_nonce_attr') ? csp_script_nonce_attr() : '' ?>>window.__gfBasePath=<?= json_encode($bp) ?>;window.__gfFlowOptions={skipVeiculo:true,veiculoCategoria:<?= json_encode($veiculoCategoria) ?>,consultarReboques:false};</script>
-<script<?= function_exists('csp_script_nonce_attr') ? csp_script_nonce_attr() : '' ?> src="<?= $e($bp) ?>/public/assets/js/components/address-picker.js?v=20260929-11"></script>
-<script<?= function_exists('csp_script_nonce_attr') ? csp_script_nonce_attr() : '' ?> src="<?= $e($bp) ?>/public/assets/js/public-pre-cotacao-flow.js?v=20260929-11"></script>
+<script<?= function_exists('csp_script_nonce_attr') ? csp_script_nonce_attr() : '' ?>>window.__gfBasePath=<?= json_encode($bp) ?>;</script>
+<script<?= function_exists('csp_script_nonce_attr') ? csp_script_nonce_attr() : '' ?> src="<?= $e($bp) ?>/public/assets/js/pre-cotacao-flow.js?v=20261101-4"></script>
+<script<?= function_exists('csp_script_nonce_attr') ? csp_script_nonce_attr() : '' ?> src="<?= $e($bp) ?>/public/assets/js/pre-cotacao-map.js?v=20261101-1"></script>
 <?php include __DIR__ . '/../layouts/footer.php'; ?>

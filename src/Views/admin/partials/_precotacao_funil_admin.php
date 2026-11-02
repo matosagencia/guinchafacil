@@ -17,6 +17,18 @@
 $bp = $bp ?? (defined('BASE_PATH') ? BASE_PATH : '');
 $csrf_token = $csrf_token ?? '';
 $adminCtx = $adminCtx ?? [];
+
+// O admin usa exatamente o mesmo formulário e a mesma máquina do funil
+// público; somente o contexto do cliente/veículo/prestador é adicional.
+$legacyAction = $bp . '/admin/pedido/criar';
+$legacyHidden = [
+    'cliente_id' => (int)($adminCtx['cliente_id'] ?? 0),
+    'veiculo_id' => (int)($adminCtx['veiculo_id'] ?? 0),
+    'veiculo_categoria' => (string)($adminCtx['veiculo_categoria'] ?? 'popular'),
+    'guincho_id' => (int)($adminCtx['guincho_id'] ?? 0),
+];
+require __DIR__ . '/../../public/partials/_precotacao_funil_legado.php';
+return;
 ?>
 <?php $provedorHabilitado = $provedorHabilitado ?? ''; ?>
 <?php $e = $e ?? static fn($v) => htmlspecialchars((string)$v, ENT_QUOTES, 'UTF-8'); ?>
@@ -195,24 +207,24 @@ $adminCtx = $adminCtx ?? [];
 
             <div class="pag-destino-grid">
                 <label class="pag-destino-opt">
-                    <input type="radio" name="destino_pagamento" value="pago_agora">
+                    <input type="radio" name="destino_pagamento" value="pago_na_chegada" required>
                     <span>
-                        <strong><i class="fas fa-money-bill-wave me-1"></i>Pago agora</strong>
-                        <small>Baixa manual auditável  o admin confirma o pagamento.</small>
+                        <strong><i class="fas fa-money-bill-wave me-1"></i>Dinheiro - pagar no local</strong>
+                        <small>O cliente paga ao parceiro na chegada; o pagamento permanece pendente.</small>
                     </span>
                 </label>
                 <label class="pag-destino-opt">
-                    <input type="radio" name="destino_pagamento" value="pago_na_chegada">
+                    <input type="radio" name="destino_pagamento" value="pago_agora" required>
                     <span>
-                        <strong><i class="fas fa-hand-holding-dollar me-1"></i>Pago na chegada</strong>
-                        <small>Pedido segue sem checkout. Cobrança combinada com o cliente.</small>
+                        <strong><i class="fas fa-hand-holding-dollar me-1"></i>JÃ¡ pago - faturar parceiro</strong>
+                        <small>Use somente quando o cliente já tiver pago. O pedido segue sem checkout.</small>
                     </span>
                 </label>
                 <?php if ($provedorHabilitado !== ''): ?>
                 <label class="pag-destino-opt">
-                    <input type="radio" name="destino_pagamento" value="online">
+                    <input type="radio" name="destino_pagamento" value="online" required>
                     <span>
-                        <strong><i class="fas fa-globe me-1"></i>Online (<?= $e($provedorHabilitado) ?>)</strong>
+                        <strong><i class="fas fa-credit-card me-1"></i>CartÃ£o - Payment Brick (<?= $e($provedorHabilitado) ?>)</strong>
                         <small>Gera checkout do provedor e devolve o link para o admin enviar ao cliente.</small>
                     </span>
                 </label>
@@ -223,7 +235,7 @@ $adminCtx = $adminCtx ?? [];
                 </div>
                 <?php endif; ?>
                 <label class="pag-destino-opt">
-                    <input type="radio" name="destino_pagamento" value="sem_cobranca">
+                    <input type="radio" name="legacy_destino_pagamento" value="sem_cobranca" disabled hidden>
                     <span>
                         <strong><i class="fas fa-handshake-angle me-1"></i>Sem cobrança</strong>
                         <small>Isenção auditável  nenhum checkout é gerado.</small>
@@ -363,6 +375,23 @@ $adminCtx = $adminCtx ?? [];
     // ----------------------------------------------------------------
     var wrap = document.getElementById('provedorOnlineWrap');
     var radios = document.querySelectorAll('input[name="destino_pagamento"]');
+    var legacyPayment = document.querySelector('input[value="sem_cobranca"]');
+    if (legacyPayment && legacyPayment.closest('.pag-destino-opt')) {
+        legacyPayment.closest('.pag-destino-opt').hidden = true;
+    }
+    var adminPaymentForm = document.querySelector('#gfPreqForm');
+    if (adminPaymentForm) {
+        adminPaymentForm.addEventListener('submit', function (event) {
+            var selected = adminPaymentForm.querySelector('input[name="destino_pagamento"]:checked');
+            if (!selected) {
+                event.preventDefault();
+                window.alert('Selecione como o pedido será pago antes de continuar.');
+            } else if (selected.value === 'pago_agora'
+                && !window.confirm('Confirme: o cliente JÁ PAGOU e o parceiro será faturado depois?')) {
+                event.preventDefault();
+            }
+        });
+    }
     if (wrap && radios.length) {
         function atualizar() {
             var marcado = document.querySelector('input[name="destino_pagamento"]:checked');

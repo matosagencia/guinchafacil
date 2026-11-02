@@ -5,15 +5,15 @@ declare(strict_types=1);
 namespace App\Services\Catalog;
 
 /**
- * Traduz slugs pÃºblicos do funil para o catÃ¡logo interno service_types.
+ * Traduz slugs públicos do funil para o catálogo interno service_types.
  *
- * O mapa Ã© fechado deliberadamente. IDs nunca sÃ£o codificados aqui: o
- * callback registrado no bootstrap consulta somente cÃ³digos ativos.
+ * O mapa é fechado deliberadamente. IDs nunca são codificados aqui: o
+ * callback registrado no bootstrap consulta somente códigos ativos.
  */
 final class ServiceTypeResolver
 {
     /**
-     * Retorna o ID ativo do serviÃ§o, ou null em toda condiÃ§Ã£o nÃ£o resolvida.
+     * Retorna o ID ativo do serviço, ou null em toda condição não resolvida.
      */
     public static function porSlug(string $slug): ?int
     {
@@ -31,7 +31,7 @@ final class ServiceTypeResolver
     }
 
     /**
-     * Parte pura, validÃ¡vel sem banco.
+     * Parte pura, validável sem banco.
      */
     public static function codePorSlug(string $slug): ?string
     {

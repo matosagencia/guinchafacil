@@ -8,28 +8,28 @@ require_once __DIR__ . '/../Models/Configuracao.php';
 require_once __DIR__ . '/Finance/BloqueioFinanceiroService.php';
 
 /**
- * Fonte read-only de disponibilidade para REBOQUE, agora com anéis
- * concêntricos de deadhead compartilhado (§5.5 e §7 do CONTRATOS.md).
+ * Fonte read-only de disponibilidade para REBOQUE, agora com an�is
+ * conc�ntricos de deadhead compartilhado (�5.5 e �7 do CONTRATOS.md).
  *
- * Regra de negócio:
- *  - Sem guincho apto agora, o fluxo termina antes da criação do pedido.
- *  - Preço é cotado com o deadhead do centro do menor anel que tenha
- *    MIN_CANDIDATOS elegíveis, garantindo igualdade entre os candidatos
+ * Regra de neg�cio:
+ *  - Sem guincho apto agora, o fluxo termina antes da cria��o do pedido.
+ *  - Pre�o � cotado com o deadhead do centro do menor anel que tenha
+ *    MIN_CANDIDATOS eleg�veis, garantindo igualdade entre os candidatos
  *    daquele anel.
- *  - Parceiro bloqueado financeiramente (§9) não entra em nenhum anel.
+ *  - Parceiro bloqueado financeiramente (�9) n�o entra em nenhum anel.
  *
- * Este serviço NÃO cria pedido, NÃO altera estado e NÃO grava eventos.
+ * Este servi�o N�O cria pedido, N�O altera estado e N�O grava eventos.
  */
 final class GuinchoDisponibilidade
 {
-    /** Default quando `configuracoes.guincho_aneis_km` não está definido. */
+    /** Default quando `configuracoes.guincho_aneis_km` n�o est� definido. */
     private const ANEIS_PADRAO = [2, 5, 10, 20, 35];
 
-    /** Default quando `configuracoes.guincho_anel_min_candidatos` não existe. */
+    /** Default quando `configuracoes.guincho_anel_min_candidatos` n�o existe. */
     private const MIN_CANDIDATOS_PADRAO = 3;
 
     /**
-     * Devolve todos os anéis com seus candidatos elegíveis ordenados.
+     * Devolve todos os an�is com seus candidatos eleg�veis ordenados.
      *
      * Estrutura de retorno:
      * [
@@ -47,7 +47,7 @@ final class GuinchoDisponibilidade
      *   ...
      * ]
      *
-     * Nunca lança: erro de infra devolve [] (fail closed).
+     * Nunca lan�a: erro de infra devolve [] (fail closed).
      */
     public static function candidatosPorAnel(
         float $lat,
@@ -68,7 +68,7 @@ final class GuinchoDisponibilidade
             $aneisKm      = self::aneisConfigurados($cfg);
             $bloqueados   = BloqueioFinanceiroService::idsBloqueados();
 
-            // Query base — todos os candidatos elegíveis dentro do maior anel.
+            // Query base - todos os candidatos eleg�veis dentro do maior anel.
             // O raio por guincho continua vindo de CoberturaService, aplicado
             // em PHP logo abaixo (mesmo comportamento do existeNoRaio antigo).
             $sql = "SELECT
@@ -91,14 +91,14 @@ final class GuinchoDisponibilidade
                        )";
 
             if ($bloqueados) {
-                // placeholders int seguros (ids vêm do próprio banco)
+                // placeholders int seguros (ids v�m do pr�prio banco)
                 $ph = implode(',', array_map('intval', $bloqueados));
                 $sql .= " AND g.id NOT IN ({$ph})";
             }
 
             $stmt = getPDO()->query($sql);
 
-            // Distribui candidatos nos anéis.
+            // Distribui candidatos nos an�is.
             $aneis = self::esqueletoAneis($aneisKm);
             $maiorAnelKm = (float)end($aneisKm);
 
@@ -125,7 +125,7 @@ final class GuinchoDisponibilidade
 
                 $idx = self::indiceDoAnel($dist, $aneisKm);
                 if ($idx === null) {
-                    continue; // além do maior anel
+                    continue; // al�m do maior anel
                 }
 
                 $aneis[$idx]['candidatos'][] = [
@@ -139,16 +139,16 @@ final class GuinchoDisponibilidade
             foreach ($aneis as $i => $_) {
                 $lista = $aneis[$i]['candidatos'];
                 usort($lista, static function (array $a, array $b): int {
-                    // 1. menor distância real
+                    // 1. menor dist�ncia real
                     if ($a['dist_km'] !== $b['dist_km']) {
                         return $a['dist_km'] <=> $b['dist_km'];
                     }
-                    // 2. maior reputação
+                    // 2. maior reputa��o
                     if ($a['reputacao'] !== $b['reputacao']) {
                         return $b['reputacao'] <=> $a['reputacao'];
                     }
-                    // 3. TODO: aceites recentes (30d) — falta coluna/índice.
-                    // 4. desempate aleatório estável na sessão (por id).
+                    // 3. TODO: aceites recentes (30d) - falta coluna/�ndice.
+                    // 4. desempate aleat�rio est�vel na sess�o (por id).
                     return $a['id'] <=> $b['id'];
                 });
                 $aneis[$i]['candidatos'] = $lista;
@@ -157,17 +157,17 @@ final class GuinchoDisponibilidade
 
             return $aneis;
         } catch (Throwable) {
-            // Fail closed: erro de infraestrutura nunca autoriza criação.
+            // Fail closed: erro de infraestrutura nunca autoriza cria��o.
             return [];
         }
     }
 
     /**
      * Aplica a regra de escolha (§7.4): menor anel com >= $minCandidatos
-     * elegíveis. Devolve o anel escolhido ou null se nenhum atende.
+     * eleg�veis. Devolve o anel escolhido ou null se nenhum atende.
      *
-     * Não cai em WhatsApp aqui — isso é do consumidor
-     * (PreCotacaoOpcoesService). Este método só devolve null.
+     * N�o cai em WhatsApp aqui - isso � do consumidor
+     * (PreCotacaoOpcoesService). Este m�todo s� devolve null.
      */
     public static function escolherAnel(
         array $aneis,
@@ -183,9 +183,9 @@ final class GuinchoDisponibilidade
 
     /**
      * Compatibilidade com chamadores legados. Devolve true se existe
-     * ao menos 1 elegível em qualquer anel. Não distingue densidade.
+     * ao menos 1 eleg�vel em qualquer anel. N�o distingue densidade.
      *
-     * @deprecated Usar candidatosPorAnel() para cotação com deadhead.
+     * @deprecated Usar candidatosPorAnel() para cota��o com deadhead.
      */
     public static function existeNoRaio(
         float $lat,
@@ -203,8 +203,8 @@ final class GuinchoDisponibilidade
     }
 
     /**
-     * Lê `configuracoes.guincho_aneis_km` (CSV, ex.: "2,5,10,20,35").
-     * Cai no default se ausente ou inválido.
+     * L� `configuracoes.guincho_aneis_km` (CSV, ex.: "2,5,10,20,35").
+     * Cai no default se ausente ou inv�lido.
      *
      * @return float[]
      */
@@ -225,7 +225,7 @@ final class GuinchoDisponibilidade
 
     /**
      * Cada item tem min, max e centro (deadhead_ref = centro do anel).
-     * O primeiro anel começa em 0 km.
+     * O primeiro anel come�a em 0 km.
      *
      * @param float[] $limitesKm
      */
@@ -249,8 +249,8 @@ final class GuinchoDisponibilidade
     }
 
     /**
-     * Devolve o índice do anel cujo [min, max) contém $dist. O último anel
-     * inclui o limite superior (dist <= max). Null se além do maior.
+     * Devolve o �ndice do anel cujo [min, max) cont�m $dist. O �ltimo anel
+     * inclui o limite superior (dist <= max). Null se al�m do maior.
      *
      * @param float[] $limitesKm
      */

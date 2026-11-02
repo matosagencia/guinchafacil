@@ -27,7 +27,7 @@ if ($cidadeId !== null) {
 ?>
 <link rel="stylesheet" href="<?php echo htmlspecialchars($bp, ENT_QUOTES, 'UTF-8'); ?>/public/assets/css/backoffice-layout.css?v=20261027-1"><div class="main-wrapper shell admin-shell catalogo-subpage">
 <?php include __DIR__ . '/../layouts/sidebar_admin.php'; ?>
-<main class="main-content shell-main shell-content">
+<main class="main-content shell-main shell-content"><?php include __DIR__ . '/partials/_panel_topbar_admin.php'; ?>
 
     <?php
     $totalRegras = count($regras ?? []);

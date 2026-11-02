@@ -1,14 +1,14 @@
 <?php
 /**
- * Financeiro — reestruturada pro padrão shell-ops (mesma arquitetura de
+ * Financeiro - reestruturada pro padrão shell-ops (mesma arquitetura de
  * /admin/central, /admin/alertas, /admin/documentos...), preservando 100%
- * dos gráficos, KPIs, filtros e listas de insight já existentes. A única
- * mudança estrutural é que a antiga tabela "Pagamentos" (+ a tabela solta
- * "Fila de Repasse PIX" ao lado dela) vira a worklist clicável do
- * shell-ops: cada pagamento é um item da lista, e o workspace mostra o
- * detalhe completo do pagamento selecionado — incluindo os payment jobs de
+ * dos gr�ficos, KPIs, filtros e listas de insight já existentes. A Única
+ * mudan�a estrutural � que a antiga tabela "Pagamentos" (+ a tabela solta
+ * "Fila de Repasse PIX" ao lado dela) vira a worklist clic�vel do
+ * shell-ops: cada pagamento � um item da lista, e o workspace mostra o
+ * detalhe completo do pagamento selecionado - incluindo os payment jobs de
  * repasse PIX vinculados a ele (correlacionados por pagamento_id no JS,
- * sem round-trip: os dados já vêm carregados do servidor, igual ao padrão
+ * sem round-trip: os dados já v�m carregados do servidor, igual ao padrão
  * usado em Alertas Operacionais e Documentos).
  *
  * @var array $pagamentos
@@ -21,8 +21,8 @@ include __DIR__ . '/../layouts/header.php';
 
 /**
  * §GATEWAY-STATUS-02: mapeia bandeira/forma de pagamento (payment_method_id
- * do MP, ou paymentMethod.type/brand do PagSeguro) pra um ícone + rótulo
- * reconhecível — só apresentação, por isso fica na view e não no model.
+ * do MP, ou paymentMethod.type/brand do PagSeguro) pra um �cone + r�tulo
+ * reconhec�vel - s� apresenta��o, por isso fica na view e não no model.
  */
 $formaPagamentoIcone = static function (string $bandeira, string $forma): array {
     $chave = strtolower($bandeira !== '' ? $bandeira : $forma);
@@ -41,8 +41,8 @@ $formaPagamentoIcone = static function (string $bandeira, string $forma): array 
         'boleto'        => ['fa-solid fa-barcode', 'Boleto'],
         'ticket'        => ['fa-solid fa-barcode', 'Boleto'],
         'pec'           => ['fa-solid fa-barcode', 'Boleto'],
-        'credit_card'   => ['fa-solid fa-credit-card', 'Cartão de crédito'],
-        'debit_card'    => ['fa-solid fa-credit-card', 'Cartão de débito'],
+        'credit_card'   => ['fa-solid fa-credit-card', 'Cart�o de cr�dito'],
+        'debit_card'    => ['fa-solid fa-credit-card', 'Cart�o de d�bito'],
     ];
     return $mapa[$chave] ?? ['fa-solid fa-money-bill', ucfirst($chave ?: 'outro')];
 };
@@ -92,8 +92,8 @@ if ($pedidoIds !== []) {
 }
 
 // Monta os dados de cada pagamento (linha da worklist + payload do
-// workspace) uma única vez aqui, incluindo o resumo de gateway e os jobs
-// de repasse PIX vinculados — evita reimplementar essa lógica em JS.
+// workspace) uma Única vez aqui, incluindo o resumo de gateway e os jobs
+// de repasse PIX vinculados - evita reimplementar essa l�gica em JS.
 $jobsPorPagamento = [];
 foreach (($paymentJobs ?? []) as $job) {
     $pid = (int)($job['pagamento_id'] ?? 0);
@@ -116,17 +116,17 @@ foreach (($pagamentos ?? []) as $p) {
     $pagamentosPayload[] = [
         'id' => (int)$p['id'],
         'pedido_id' => (int)$p['pedido_id'],
-        'cliente_nome' => (string)($p['cliente_nome'] ?? '—'),
-        'guincho_nome' => (string)($p['guincho_nome'] ?? '—'),
-        'metodo' => (string)($p['metodo_normalizado'] ?? $p['metodo'] ?? '—'),
-        'status' => (string)($p['status'] ?? '—'),
-        'tipo_problema' => (string)($p['tipo_problema'] ?? '—'),
+        'cliente_nome' => (string)($p['cliente_nome'] ?? '-'),
+        'guincho_nome' => (string)($p['guincho_nome'] ?? '-'),
+        'metodo' => (string)($p['metodo_normalizado'] ?? $p['metodo'] ?? '-'),
+        'status' => (string)($p['status'] ?? '-'),
+        'tipo_problema' => (string)($p['tipo_problema'] ?? '-'),
         'valor_total' => (float)($p['valor_total'] ?? 0),
         'valor_guincho' => (float)($p['valor_guincho'] ?? 0),
         'valor_plataforma' => (float)($p['valor_plataforma'] ?? 0),
         'retencao' => $retencao,
         'status_pix' => (string)($p['status_pix'] ?? ''),
-        'data' => (string)($p['data_pagamento'] ?? $p['criado_em'] ?? '—'),
+        'data' => (string)($p['data_pagamento'] ?? $p['criado_em'] ?? '-'),
         'gw_status' => (string)($gw['status'] ?? ''),
         'gw_detalhe' => (string)($gw['detalhe'] ?? ''),
         'forma_pagamento_icone' => $iconeClasse,
@@ -138,8 +138,8 @@ foreach (($pagamentos ?? []) as $p) {
                 'status' => (string)($job['status'] ?? 'queued'),
                 'attempt_count' => (int)($job['attempt_count'] ?? 0),
                 'max_attempts' => (int)($job['max_attempts'] ?? 0),
-                'worker_id' => (string)($job['worker_id'] ?? '—'),
-                'available_at' => (string)($job['available_at'] ?? '—'),
+                'worker_id' => (string)($job['worker_id'] ?? '-'),
+                'available_at' => (string)($job['available_at'] ?? '-'),
                 'last_error' => (string)($job['last_error'] ?? ''),
             ];
         }, $jobsPorPagamento[(int)$p['id']] ?? []),
@@ -167,7 +167,7 @@ foreach (($pagamentos ?? []) as $p) {
         <?php include __DIR__ . '/../components/admin_nav_operacional.php'; ?>
     </aside>
     <main class="gf-finance-v3-main" id="financeiroMain">
-        <nav class="gf-finance-v3-breadcrumb" aria-label="Você está em">Backoffice <span aria-hidden="true">›</span> <strong>Financeiro</strong></nav>
+        <nav class="gf-finance-v3-breadcrumb" aria-label="Voc� está em">Backoffice <span aria-hidden="true">></span> <strong>Financeiro</strong></nav>
 
 <div class="gf-finance-page" style="padding:0 24px;">
 
@@ -187,27 +187,27 @@ foreach (($pagamentos ?? []) as $p) {
 
 <header class="page-head mt-3 mb-4">
     <div>
-        <span class="eyebrow">FINANCEIRO / CONCILIAÇÃO</span>
-        <h1>Gestão financeira &amp; repasses</h1>
-        <p>Transparência nos valores. Precisão em cada repasse.</p>
+        <span class="eyebrow">FINANCEIRO / CONCILIA��O</span>
+        <h1>Gestáo financeira &amp; repasses</h1>
+        <p>Transpar�ncia nos valores. Precis�o em cada repasse.</p>
     </div>
     <a href="<?php echo htmlspecialchars($bp . '/admin/financeiro/csv?' . http_build_query($queryBase ?? [])); ?>" class="btn btn-outline-primary btn-sm">
         <i class="fas fa-file-csv me-1"></i>Exportar CSV
     </a>
 </header>
 
-<details class="gf-finance-secondary-info"><summary>Sobre o período do relatório</summary><div class="alert alert-info mb-3">
+<details class="gf-finance-secondary-info"><summary>Sobre o per�odo do relatério</summary><div class="alert alert-info mb-3">
     <i class="fas fa-circle-info me-2"></i>
-    Os relatórios agora usam, por padrão, todo o intervalo encontrado na base:
-    <strong><?php echo htmlspecialchars((string)($dataInicio ?? '—')); ?></strong> até
-    <strong><?php echo htmlspecialchars((string)($dataFim ?? '—')); ?></strong>.
+    Os relatérios agora usam, por padrão, todo o intervalo encontrado na base:
+    <strong><?php echo htmlspecialchars((string)($dataInicio ?? '-')); ?></strong> até
+    <strong><?php echo htmlspecialchars((string)($dataFim ?? '-')); ?></strong>.
 </div></details>
 
 <div class="card mb-3 gf-finance-filters">
     <div class="card-body">
         <form method="get" action="<?php echo htmlspecialchars($bp . '/admin/financeiro'); ?>" class="row g-2">
             <div class="col-md-2">
-                <label class="form-label">Início</label>
+                <label class="form-label">In�cio</label>
                 <input type="date" name="inicio" class="form-control" value="<?php echo htmlspecialchars((string)($dataInicio ?? '')); ?>">
             </div>
             <div class="col-md-2">
@@ -225,7 +225,7 @@ foreach (($pagamentos ?? []) as $p) {
                 </select>
             </div>
             <div class="col-md-2">
-                <label class="form-label">Método</label>
+                <label class="form-label">M�todo</label>
                 <select name="metodo" class="form-select">
                     <?php foreach ($metodoOptions as $value => $label): ?>
                     <option value="<?php echo htmlspecialchars($value); ?>" <?php echo (($filtrosPagamento['metodo'] ?? '') === $value) ? 'selected' : ''; ?>>
@@ -277,25 +277,25 @@ $gfFinanceMetrics = [
  ['Comissão da plataforma', 'R$ '.number_format((float)($totais['valor_plataforma'] ?? 0),2,',','.'), 'fas fa-shield-halved'],
  ['Repasse pendente', 'R$ '.number_format((float)($paymentInsights['repasse_pendente'] ?? 0),2,',','.'), 'fas fa-clock'],
  ['Pagamentos filtrados', (string)(int)($totalPagamentos ?? 0), 'fas fa-magnifying-glass'],
- ['Ticket médio', 'R$ '.number_format((float)($paymentInsights['ticket_medio'] ?? 0),2,',','.'), 'fas fa-circle-dollar-to-slot'],
+ ['Ticket m�dio', 'R$ '.number_format((float)($paymentInsights['ticket_medio'] ?? 0),2,',','.'), 'fas fa-circle-dollar-to-slot'],
  ['Estornos', 'R$ '.number_format((float)($paymentInsights['valor_estornado'] ?? 0),2,',','.'), 'fas fa-arrow-rotate-left'],
 ];
 ?>
 <?php foreach ($gfFinanceMetrics as $m): ?>
 <article class="gf-finance-kpi"><span class="gf-finance-kpi__label"><?= htmlspecialchars($m[0]) ?><i class="<?= htmlspecialchars($m[2]) ?>" aria-hidden="true"></i></span><strong><?= htmlspecialchars($m[1]) ?></strong></article>
 <?php endforeach; ?>
-<article class="gf-finance-kpi gf-finance-kpi--extra"><span class="gf-finance-kpi__label">Repasse concluído<i class="fas fa-check" aria-hidden="true"></i></span><strong>Consultar jobs</strong><small>Detalhes na fila de repasses</small></article>
+<article class="gf-finance-kpi gf-finance-kpi--extra"><span class="gf-finance-kpi__label">Repasse conclu�do<i class="fas fa-check" aria-hidden="true"></i></span><strong>Consultar jobs</strong><small>Detalhes na fila de repasses</small></article>
 </section>
 <div class="row g-3 mb-4">
     <div class="col-lg-6">
         <div class="card h-100">
             <div class="card-header">
                 <i class="fas fa-truck me-2"></i>Top Guinchos por Repasse
-                <i class="fas fa-info-circle ms-1 hint-icon" title="Guinchos com maior valor total de repasse (valor_guincho) nos pedidos concluídos do período — ajuda a identificar os operadores mais ativos e o volume que passa pela carteira de cada um."></i>
+                <i class="fas fa-info-circle ms-1 hint-icon" title="Guinchos com maior valor total de repasse (valor_guincho) nos pedidos conclu�dos do per�odo - ajuda a identificar os operadores mais ativos e o volume que passa pela carteira de cada um."></i>
             </div>
             <div class="card-body">
                 <?php if (empty($topGuinchos)): ?>
-                <div class="text-muted small">Sem dados suficientes no período.</div>
+                <div class="text-muted small">Sem dados suficientes no per�odo.</div>
                 <?php else: ?>
                 <div class="table-responsive">
                     <table class="table table-sm align-middle mb-0">
@@ -303,7 +303,7 @@ $gfFinanceMetrics = [
                         <tbody>
                             <?php foreach ($topGuinchos as $row): ?>
                             <tr>
-                                <td><?php echo htmlspecialchars((string)($row['nome'] ?? '—')); ?></td>
+                                <td><?php echo htmlspecialchars((string)($row['nome'] ?? '-')); ?></td>
                                 <td class="text-end"><?php echo (int)($row['corridas'] ?? 0); ?></td>
                                 <td class="text-end"><?php echo 'R$ ' . number_format((float)($row['valor_guincho'] ?? 0), 2, ',', '.'); ?></td>
                             </tr>
@@ -319,11 +319,11 @@ $gfFinanceMetrics = [
         <div class="card h-100">
             <div class="card-header">
                 <i class="fas fa-users me-2"></i>Top Clientes por Faturamento
-                <i class="fas fa-info-circle ms-1 hint-icon" title="Clientes com maior valor total pago à plataforma no período — útil pra identificar contas de maior volume/recorrência."></i>
+                <i class="fas fa-info-circle ms-1 hint-icon" title="Clientes com maior valor total pago � plataforma no per�odo - �til pra identificar contas de maior volume/recorr�ncia."></i>
             </div>
             <div class="card-body">
                 <?php if (empty($topClientes)): ?>
-                <div class="text-muted small">Sem dados suficientes no período.</div>
+                <div class="text-muted small">Sem dados suficientes no per�odo.</div>
                 <?php else: ?>
                 <div class="table-responsive">
                     <table class="table table-sm align-middle mb-0">
@@ -331,7 +331,7 @@ $gfFinanceMetrics = [
                         <tbody>
                             <?php foreach ($topClientes as $row): ?>
                             <tr>
-                                <td><?php echo htmlspecialchars((string)($row['nome'] ?? '—')); ?></td>
+                                <td><?php echo htmlspecialchars((string)($row['nome'] ?? '-')); ?></td>
                                 <td class="text-end"><?php echo (int)($row['pedidos'] ?? 0); ?></td>
                                 <td class="text-end"><?php echo 'R$ ' . number_format((float)($row['valor_total'] ?? 0), 2, ',', '.'); ?></td>
                             </tr>
@@ -345,12 +345,12 @@ $gfFinanceMetrics = [
     </div>
 </div>
 
-<details class="gf-finance-technical"><summary>Gráficos, indicadores de processamento e auditoria</summary><div class="row g-3 mb-4">
+<details class="gf-finance-technical"><summary>Gr�ficos, indicadores de processamento e auditoria</summary><div class="row g-3 mb-4">
     <div class="col-lg-4">
         <div class="card h-100">
             <div class="card-header">
                 <i class="fas fa-chart-pie me-2"></i>Pagamentos por Status
-                <i class="fas fa-info-circle ms-1 hint-icon" title="Distribuição dos pagamentos pelo status atual no gateway: aprovado, pendente, recusado, cancelado ou estornado. Pagamento 'aprovado' aqui não significa que o guincho já recebeu o repasse — isso depende da liquidação do gateway e da fila de repasse PIX."></i>
+                <i class="fas fa-info-circle ms-1 hint-icon" title="Distribui��o dos pagamentos pelo status atual no gateway: aprovado, pendente, recusado, cancelado ou estornado. Pagamento 'aprovado' aqui não significa que o guincho já recebeu o repasse - isso depende da liquida��o do gateway e da fila de repasse PIX."></i>
             </div>
             <div class="card-body">
                 <canvas id="chartPaymentStatus" height="220"></canvas>
@@ -360,8 +360,8 @@ $gfFinanceMetrics = [
     <div class="col-lg-4">
         <div class="card h-100">
             <div class="card-header">
-                <i class="fas fa-credit-card me-2"></i>Métodos de Pagamento
-                <i class="fas fa-info-circle ms-1 hint-icon" title="Quantidade de pagamentos por gateway usado (Mercado Pago, PagSeguro). O gateway ativo pra novos pedidos é definido pelo admin em Configurações — o cliente nunca escolhe."></i>
+                <i class="fas fa-credit-card me-2"></i>M�todos de Pagamento
+                <i class="fas fa-info-circle ms-1 hint-icon" title="Quantidade de pagamentos por gateway usado (Mercado Pago, PagSeguro). O gateway ativo pra novos pedidos � definido pelo admin em Configurações - o cliente nunca escolhe."></i>
             </div>
             <div class="card-body">
                 <canvas id="chartPaymentMethod" height="220"></canvas>
@@ -372,7 +372,7 @@ $gfFinanceMetrics = [
         <div class="card h-100">
             <div class="card-header">
                 <i class="fas fa-wave-square me-2"></i>Receita Aprovada por Dia
-                <i class="fas fa-info-circle ms-1 hint-icon" title="Soma dos pagamentos com status 'aprovado' agrupada por dia. É receita reconhecida no pedido, não necessariamente dinheiro já disponível para saque — depende da liquidação do gateway (ver Fila de Repasse PIX)."></i>
+                <i class="fas fa-info-circle ms-1 hint-icon" title="Soma dos pagamentos com status 'aprovado' agrupada por dia. � receita reconhecida no pedido, não necessariamente dinheiro já dispon�vel para saque - depende da liquida��o do gateway (ver Fila de Repasse PIX)."></i>
             </div>
             <div class="card-body">
                 <canvas id="chartPaymentSeries" height="220"></canvas>
@@ -406,20 +406,20 @@ $gfFinanceMetrics = [
 <?php if (($systemMode ?? 'production') === 'freeflow'): ?>
 <div class="alert alert-info mb-4">
     <i class="fas fa-circle-info me-2"></i>
-    O ambiente está em <strong>freeflow</strong>: os atendimentos são concluídos sem fila real de repasse PIX.
-    Por isso, os contadores de <strong>Jobs</strong> permanecem zerados até o ambiente operar com repasse assíncrono habilitado.
+    O ambiente está em <strong>freeflow</strong>: os atendimentos s�o conclu�dos sem fila real de repasse PIX.
+    Por isso, os contadores de <strong>Jobs</strong> permanecem zerados até o ambiente operar com repasse ass�ncrono habilitado.
 </div>
 <?php endif; ?>
 
 </div>
 
-<div class="gf-finance-v3-transactions" aria-label="Transações e conciliação">
+<div class="gf-finance-v3-transactions" aria-label="Transa��es e concilia��o">
 
     <section class="shell-ops-worklist" aria-label="Pagamentos">
         <header class="ops-worklist-header">
             <span class="eyebrow">Extrato</span>
             <h2>Pagamentos</h2>
-            <p><span id="financeiroWorklistCount"><?php echo count($pagamentosPayload); ?></span> nesta página</p>
+            <p><span id="financeiroWorklistCount"><?php echo count($pagamentosPayload); ?></span> nesta p�gina</p>
         </header>
 
         <div class="ops-worklist-search">
@@ -471,7 +471,7 @@ $gfFinanceMetrics = [
                 <?php $prevQuery = http_build_query(array_merge($queryBase ?? [], ['pagina' => max(1, (int)($pagina ?? 1) - 1)])); ?>
                 <?php $nextQuery = http_build_query(array_merge($queryBase ?? [], ['pagina' => min((int)($totalPaginas ?? 1), (int)($pagina ?? 1) + 1)])); ?>
                 <a class="btn btn-outline-secondary btn-sm" href="<?php echo htmlspecialchars(($bp ?: '') . '/admin/financeiro?' . $prevQuery); ?>">&laquo;</a>
-                <span class="small text-muted">Pág. <?php echo (int)($pagina ?? 1); ?>/<?php echo (int)($totalPaginas ?? 1); ?></span>
+                <span class="small text-muted">P�g. <?php echo (int)($pagina ?? 1); ?>/<?php echo (int)($totalPaginas ?? 1); ?></span>
                 <a class="btn btn-outline-secondary btn-sm" href="<?php echo htmlspecialchars(($bp ?: '') . '/admin/financeiro?' . $nextQuery); ?>">&raquo;</a>
             </div>
         </nav>
@@ -534,12 +534,12 @@ var FIN_QUERY = <?php echo json_encode('/admin/financeiro?' . http_build_query($
         html += '<div class="card mb-3"><div class="card-header"><i class="fas fa-money-bill-wave me-2"></i>Valores</div><div class="card-body">';
         html += '<table class="table table-sm mb-0 ghd-table">';
         html += '<tr><td class="ghd-label ghd-label--35">Guincho</td><td>' + escapeHtml(p.guincho_nome) + '</td></tr>';
-        html += '<tr><td class="ghd-label">Método</td><td>' + escapeHtml(p.metodo) + '</td></tr>';
+        html += '<tr><td class="ghd-label">M�todo</td><td>' + escapeHtml(p.metodo) + '</td></tr>';
         html += '<tr><td class="ghd-label">Problema</td><td>' + escapeHtml(p.tipo_problema) + '</td></tr>';
         html += '<tr><td class="ghd-label">Total</td><td>' + money(p.valor_total) + '</td></tr>';
         html += '<tr><td class="ghd-label">Guincho</td><td>' + money(p.valor_guincho) + '</td></tr>';
         html += '<tr><td class="ghd-label">Plataforma</td><td>' + money(p.valor_plataforma) + '</td></tr>';
-        html += '<tr><td class="ghd-label">Retenção</td><td>' + (p.retencao > 0 ? money(p.retencao) : '—') + '</td></tr>';
+        html += '<tr><td class="ghd-label">Retenão</td><td>' + (p.retencao > 0 ? money(p.retencao) : '-') + '</td></tr>';
         html += '</table></div></div>';
 
         if (p.composicao) {
@@ -566,16 +566,16 @@ var FIN_QUERY = <?php echo json_encode('/admin/financeiro?' . http_build_query($
             html += '<div class="small text-muted mt-1"><i class="' + escapeHtml(p.forma_pagamento_icone) + ' me-1"></i>Cliente pagou via: <strong>' + escapeHtml(p.forma_pagamento_label) + '</strong></div>';
             if (p.gw_detalhe) html += '<div class="small text-muted">' + escapeHtml(p.gw_detalhe) + '</div>';
         } else {
-            html += '<span class="text-muted small">—</span>';
+            html += '<span class="text-muted small">-</span>';
         }
         html += '</div></div>';
 
         html += '<div class="card"><div class="card-header"><i class="fas fa-list-check me-2"></i>Fila de Repasse PIX (guincho)' +
-            '<i class="fas fa-info-circle ms-1 hint-icon" title="Isso é sobre o repasse ao GUINCHO, não sobre o pagamento do cliente."></i></div><div class="card-body p-0">';
+            '<i class="fas fa-info-circle ms-1 hint-icon" title="Isso � sobre o repasse ao GUINCHO, não sobre o pagamento do cliente."></i></div><div class="card-body p-0">';
         if (!p.jobs.length) {
             html += '<div class="p-3 text-muted small">Nenhum payment job de repasse vinculado a este pagamento.</div>';
         } else {
-            html += '<div class="table-responsive"><table class="table table-sm mb-0 align-middle"><thead><tr><th>Job</th><th>Status</th><th>Tentativas</th><th>Worker</th><th>Próx. Tentativa</th><th>Erro</th><th class="text-end">Ação</th></tr></thead><tbody>';
+            html += '<div class="table-responsive"><table class="table table-sm mb-0 align-middle"><thead><tr><th>Job</th><th>Status</th><th>Tentativas</th><th>Worker</th><th>Pr�x. Tentativa</th><th>Erro</th><th class="text-end">A��o</th></tr></thead><tbody>';
             p.jobs.forEach(function (job) {
                 var badge = jobBadgeClass[job.status] || 'secondary';
                 html += '<tr>';
@@ -584,7 +584,7 @@ var FIN_QUERY = <?php echo json_encode('/admin/financeiro?' . http_build_query($
                 html += '<td>' + job.attempt_count + ' / ' + job.max_attempts + '</td>';
                 html += '<td>' + escapeHtml(job.worker_id) + '</td>';
                 html += '<td>' + escapeHtml(job.available_at) + '</td>';
-                html += '<td>' + (job.last_error ? '<span class="text-danger small">' + escapeHtml(job.last_error) + '</span>' : '<span class="text-muted">—</span>') + '</td>';
+                html += '<td>' + (job.last_error ? '<span class="text-danger small">' + escapeHtml(job.last_error) + '</span>' : '<span class="text-muted">-</span>') + '</td>';
                 html += '<td class="text-end">';
                 if (job.status !== 'completed') {
                     html += '<form method="post" action="' + FIN_BP + '/admin/payment-job/retry/' + job.id + '">' +
@@ -637,8 +637,8 @@ var FIN_QUERY = <?php echo json_encode('/admin/financeiro?' . http_build_query($
 </script>
 
 <?php
-// Não usa layouts/footer.php: esta página usa .shell-ops (grid próprio),
-// igual à Central Operacional, Alertas, Documentos, Guinchos, Usuários...
+// Não usa layouts/footer.php: esta p�gina usa .shell-ops (grid pr�prio),
+// igual � Central Operacional, Alertas, Documentos, Guinchos, Usu�rios...
 ?>
 <script<?php echo csp_script_nonce_attr(); ?> src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script<?php echo csp_script_nonce_attr(); ?> src="<?php echo htmlspecialchars($bp); ?>/public/assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
@@ -730,18 +730,19 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 });
 </script>
-<details class="gf-finance-v3-workshop"><summary>Oficinas parceiras · extrato e revisão <span>Expandir controles de cobrança e liquidação</span></summary>
+<details class="gf-finance-v3-workshop"><summary>Oficinas parceiras � extrato e revisão <span>Expandir controles de cobran�a e liquida��o</span></summary>
 <section class="container-fluid mt-4 mb-5" aria-labelledby="workshop-ledger-title">
     <div class="d-flex justify-content-between align-items-center mb-3">
-        <div><h2 id="workshop-ledger-title" class="h4 mb-1">Oficinas parceiras · extrato e revisão</h2><p class="text-muted mb-0">Indicações, cobranças, liquidações e estornos imutáveis.</p></div>
+        <div><h2 id="workshop-ledger-title" class="h4 mb-1">Oficinas parceiras � extrato e revisão</h2><p class="text-muted mb-0">Indica��es, cobran�as, liquida��es e estornos imut�veis.</p></div>
         <a class="btn btn-outline-secondary" href="<?= htmlspecialchars($bp) ?>/admin/oficinas-parceiras">Gerenciar oficinas</a>
     </div>
-    <div class="row g-3 mb-3"><div class="col-md-3"><div class="card"><div class="card-body"><small>Total de indicações</small><div class="h4 mb-0"><?= (int)($workshopResumo['total_indicacoes'] ?? 0) ?></div></div></div></div><div class="col-md-3"><div class="card"><div class="card-body"><small>Check-ins pendentes</small><div class="h4 mb-0"><?= (int)($workshopResumo['checkins_pendentes'] ?? 0) ?></div></div></div></div><div class="col-md-3"><div class="card"><div class="card-body"><small>Taxas geradas</small><div class="h4 mb-0">R$ <?= number_format((float)($workshopResumo['total_taxas'] ?? 0), 2, ',', '.') ?></div></div></div></div><div class="col-md-3"><div class="card"><div class="card-body"><small>Total liquidado</small><div class="h4 mb-0">R$ <?= number_format((float)($workshopResumo['total_liquidado'] ?? 0), 2, ',', '.') ?></div></div></div></div></div>
-    <div class="table-responsive"><table class="table table-sm align-middle"><thead><tr><th>Indicação</th><th>Oficina</th><th>Status</th><th>Cobrança</th><th>Liquidação</th><th>Valores</th><th>Ação</th></tr></thead><tbody>
-    <?php foreach (($workshopFinanceiro ?? []) as $item): ?><tr><td>#<?= (int)$item['id'] ?><br><small>pedido #<?= (int)$item['pedido_id'] ?></small></td><td><?= htmlspecialchars((string)($item['trade_name'] ?: $item['legal_name'])) ?></td><td><?= htmlspecialchars((string)$item['status']) ?></td><td><?= htmlspecialchars((string)($item['charge_status'] ?? '—')) ?><br><small><?= htmlspecialchars((string)($item['payable_status'] ?? '—')) ?></small></td><td><?= htmlspecialchars((string)($item['settlement_status'] ?? '—')) ?></td><td>Bruto R$ <?= number_format((float)($item['gross_amount'] ?? 0), 2, ',', '.') ?><br><small>Líquido R$ <?= number_format((float)($item['settlement_net_amount'] ?? $item['provider_net_amount'] ?? 0), 2, ',', '.') ?></small></td><td><?php if (($item['status'] ?? '') === 'CHECKIN_PENDENTE'): ?><form method="post" action="<?= htmlspecialchars($bp) ?>/admin/oficina/indicacao/revisar" class="d-inline"><input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken) ?>"><input type="hidden" name="id" value="<?= (int)$item['id'] ?>"><input type="hidden" name="veredito" value="APROVAR"><button class="btn btn-sm btn-success">Aprovar</button></form><?php endif; ?><?php if (!empty($item['order_charge_item_id']) && ($item['status'] ?? '') !== 'ESTORNADA'): ?><form method="post" action="<?= htmlspecialchars($bp) ?>/admin/oficina/indicacao/estornar" class="d-inline"><input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken) ?>"><input type="hidden" name="id" value="<?= (int)$item['id'] ?>"><input type="hidden" name="motivo" value="Estorno administrativo"><button class="btn btn-sm btn-outline-danger">Estornar</button></form><?php endif; ?></td></tr><?php endforeach; ?></tbody></table></div>
+    <div class="row g-3 mb-3"><div class="col-md-3"><div class="card"><div class="card-body"><small>Total de indica��es</small><div class="h4 mb-0"><?= (int)($workshopResumo['total_indicacoes'] ?? 0) ?></div></div></div></div><div class="col-md-3"><div class="card"><div class="card-body"><small>Check-ins pendentes</small><div class="h4 mb-0"><?= (int)($workshopResumo['checkins_pendentes'] ?? 0) ?></div></div></div></div><div class="col-md-3"><div class="card"><div class="card-body"><small>Taxas geradas</small><div class="h4 mb-0">R$ <?= number_format((float)($workshopResumo['total_taxas'] ?? 0), 2, ',', '.') ?></div></div></div></div><div class="col-md-3"><div class="card"><div class="card-body"><small>Total liquidado</small><div class="h4 mb-0">R$ <?= number_format((float)($workshopResumo['total_liquidado'] ?? 0), 2, ',', '.') ?></div></div></div></div></div>
+    <div class="table-responsive"><table class="table table-sm align-middle"><thead><tr><th>Indica��o</th><th>Oficina</th><th>Status</th><th>Cobran�a</th><th>Liquida��o</th><th>Valores</th><th>A��o</th></tr></thead><tbody>
+    <?php foreach (($workshopFinanceiro ?? []) as $item): ?><tr><td>#<?= (int)$item['id'] ?><br><small>pedido #<?= (int)$item['pedido_id'] ?></small></td><td><?= htmlspecialchars((string)($item['trade_name'] ?: $item['legal_name'])) ?></td><td><?= htmlspecialchars((string)$item['status']) ?></td><td><?= htmlspecialchars((string)($item['charge_status'] ?? '-')) ?><br><small><?= htmlspecialchars((string)($item['payable_status'] ?? '-')) ?></small></td><td><?= htmlspecialchars((string)($item['settlement_status'] ?? '-')) ?></td><td>Bruto R$ <?= number_format((float)($item['gross_amount'] ?? 0), 2, ',', '.') ?><br><small>L�quido R$ <?= number_format((float)($item['settlement_net_amount'] ?? $item['provider_net_amount'] ?? 0), 2, ',', '.') ?></small></td><td><?php if (($item['status'] ?? '') === 'CHECKIN_PENDENTE'): ?><form method="post" action="<?= htmlspecialchars($bp) ?>/admin/oficina/indicacao/revisar" class="d-inline"><input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken) ?>"><input type="hidden" name="id" value="<?= (int)$item['id'] ?>"><input type="hidden" name="veredito" value="APROVAR"><button class="btn btn-sm btn-success">Aprovar</button></form><?php endif; ?><?php if (!empty($item['order_charge_item_id']) && ($item['status'] ?? '') !== 'ESTORNADA'): ?><form method="post" action="<?= htmlspecialchars($bp) ?>/admin/oficina/indicacao/estornar" class="d-inline"><input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken) ?>"><input type="hidden" name="id" value="<?= (int)$item['id'] ?>"><input type="hidden" name="motivo" value="Estorno administrativo"><button class="btn btn-sm btn-outline-danger">Estornar</button></form><?php endif; ?></td></tr><?php endforeach; ?></tbody></table></div>
 </section>
 </details>
     </main>
 </div>
 </body>
 </html>
+

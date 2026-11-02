@@ -13,7 +13,7 @@ $checklistBlocked = count(array_filter($productionChecklist ?? [], fn($item) => 
 <link rel="stylesheet" href="<?php echo htmlspecialchars($bp); ?>/public/assets/css/pages/admin-health.css">
 <div class="main-wrapper shell admin-shell">
 <?php include __DIR__ . '/../layouts/sidebar_admin.php'; ?>
-<main class="main-content shell-main shell-content">
+<main class="main-content shell-main shell-content"><?php include __DIR__ . '/partials/_panel_topbar_admin.php'; ?>
 
     <div class="ops-topbar">
         <div class="ops-topbar__search"><i class="fas fa-magnifying-glass"></i><input type="search" id="healthBusca" placeholder="Buscar por subsistema" autocomplete="off" aria-label="Buscar subsistemas"></div>

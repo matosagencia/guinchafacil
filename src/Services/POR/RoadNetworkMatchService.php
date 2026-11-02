@@ -7,31 +7,31 @@ require_once __DIR__ . '/PorThresholds.php';
 require_once __DIR__ . '/../DebugMode.php';
 
 /**
- * Aderência real à malha viária (gap identificado em auditoria: o
- * antifraude existente — LocationValidationService — nunca confere se um
- * ponto GPS está de fato sobre uma via, só valida precisão/sequência/tempo/
+ * Ader�ncia real � malha vi�ria (gap identificado em auditoria: o
+ * antifraude existente - LocationValidationService - nunca confere se um
+ * ponto GPS est� de fato sobre uma via, s� valida precis�o/sequ�ncia/tempo/
  * velocidade em linha reta). Usa o endpoint `/nearest` do OSRM (Project OSRM
- * API), que devolve a via roteável mais próxima de uma coordenada.
+ * API), que devolve a via rote�vel mais pr�xima de uma coordenada.
  *
- * Deliberadamente NÃO valida sentido/mão de tráfego ainda — isso exigiria
- * map-matching de uma janela de pontos sequenciais (`/match`, não `/nearest`)
+ * Deliberadamente N�O valida sentido/m�o de tr�fego ainda - isso exigiria
+ * map-matching de uma janela de pontos sequenciais (`/match`, n�o `/nearest`)
  * comparando o rumo (bearing) do trecho percorrido contra a geometria da via
- * casada, o que é bem mais caro computacionalmente e merece decisão própria
- * sobre custo/infra antes de virar parte do caminho crítico de ingestão de
+ * casada, o que � bem mais caro computacionalmente e merece decis�o pr�pria
+ * sobre custo/infra antes de virar parte do caminho cr�tico de ingest�o de
  * todo ponto GPS do sistema. Ver PorThresholds::roadMatchEnabled().
  *
  * Fail-open por design: qualquer erro de rede, timeout ou resposta
- * inesperada devolve null (não sabemos), e o chamador NUNCA deve rejeitar um
- * ponto só por não saber — só rejeita quando SABE que o ponto está longe
- * demais de qualquer via. Isso evita que uma instabilidade do serviço
- * externo derrube a ingestão de GPS de toda a frota.
+ * inesperada devolve null (n�o sabemos), e o chamador NUNCA deve rejeitar um
+ * ponto s� por n�o saber - s� rejeita quando SABE que o ponto est� longe
+ * demais de qualquer via. Isso evita que uma instabilidade do servi�o
+ * externo derrube a ingest�o de GPS de toda a frota.
  */
 class RoadNetworkMatchService
 {
     /**
-     * Distância (m) até a via roteável mais próxima, ou null se não foi
-     * possível determinar (rede fora do ar, timeout, resposta inesperada —
-     * fail-open, nunca lança exceção).
+     * Dist�ncia (m) at� a via rote�vel mais pr�xima, ou null se n�o foi
+     * poss�vel determinar (rede fora do ar, timeout, resposta inesperada -
+     * fail-open, nunca lan�a exce��o).
      */
     public static function distanceToNearestRoadM(float $lat, float $lng): ?float
     {
@@ -74,7 +74,7 @@ class RoadNetworkMatchService
 
             return (float)$waypoint['distance'];
         } catch (Throwable $e) {
-            DebugMode::trace('RoadNetworkMatchService', 'distanceToNearestRoadM', 'por', 'exceção (fail-open)', [
+            DebugMode::trace('RoadNetworkMatchService', 'distanceToNearestRoadM', 'por', 'exce��o (fail-open)', [
                 'erro' => $e->getMessage(),
             ]);
             return null;

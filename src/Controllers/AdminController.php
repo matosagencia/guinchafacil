@@ -11,6 +11,7 @@ require_once __DIR__ . '/../Models/Veiculo.php';
 require_once __DIR__ . '/../Models/Oficina.php';
 require_once __DIR__ . '/../Models/Avaliacao.php';
 require_once __DIR__ . '/../Models/Pagamento.php';
+require_once __DIR__ . '/../Services/Payment/PaymentProviderFactory.php';
 require_once __DIR__ . '/../Models/Catalog/ProviderCapability.php';
 require_once __DIR__ . '/../Models/Configuracao.php';
 require_once __DIR__ . '/../Models/Provider/Provider.php';
@@ -105,18 +106,18 @@ class AdminController extends BaseController
     /**
      * Corrige texto UTF-8 com sinais conhecidos de mojibake.
      *
-     * A conversão só é aplicada quando reduz os marcadores de corrupção;
+     * A convers�o s� � aplicada quando reduz os marcadores de corrup��o;
      * texto UTF-8 normal permanece intacto.
      */
     private static function normalizeUtf8(string $value): string
     {
         $value = trim($value);
-        if ($value === '' || !preg_match('/(?:Ã.|Â.|â€|ï¿½)/u', $value)) {
+        if ($value === '' || !preg_match('/(?:�.|�.|�?|�)/u', $value)) {
             return $value;
         }
 
         $markers = static function (string $text): int {
-            preg_match_all('/(?:Ã.|Â.|â€|ï¿½)/u', $text, $matches);
+            preg_match_all('/(?:�.|�.|�?|�)/u', $text, $matches);
             return count($matches[0]);
         };
 
@@ -159,9 +160,9 @@ class AdminController extends BaseController
         $pedidosAtivosTotal = (int)($operationalSnapshot['aguardando_guincho'] ?? 0) + $dashboardInsights['em_execucao'];
         $etaMedioMin = $this->calcularEtaMedioMinutos();
 
-        // Alertas operacionais reais (evidência falhou, GPS degradado, PIX em
-        // Comentário removido por corrupção de codificação.
-        // separado do checklist técnico do Admin Health (/admin/health).
+        // Alertas operacionais reais (evid�ncia falhou, GPS degradado, PIX em
+        // Coment�rio removido por corrup��o de codifica��o.
+        // separado do checklist t�cnico do Admin Health (/admin/health).
         require_once __DIR__ . '/../Services/AdminAlertService.php';
         $alertasPrioritarios = AdminAlertService::listar(8);
         $alertasAbertos = count($alertasPrioritarios);
@@ -170,9 +171,9 @@ class AdminController extends BaseController
         $financeiroJobs = $this->financeiroEJobs();
         $qaRelease = $this->qaRelease();
 
-        // §CELULAS-NITEROI-01 (04/08/2026): painel de metas por célula
-        // territorial + resumo estratégico (as "7 perguntas" da integração
-        // Comentário removido por corrupção de codificação.
+        // �CELULAS-NITEROI-01 (04/08/2026): painel de metas por c�lula
+        // territorial + resumo estrat�gico (as "7 perguntas" da integra��o
+        // Coment�rio removido por corrup��o de codifica��o.
         // FinancialAttributionReportService::resumo()/porCanal().
         $territorioPainel = TerritorioMetasService::painel();
         $cidadesTerritorio = Cidade::listarAtivas();
@@ -201,9 +202,9 @@ class AdminController extends BaseController
     {
         AuthService::requireAuth('admin');
 
-        // Reaproveita a mesma query já usada em /admin/pedidos, sem filtro de
-        // Comentário removido por corrupção de codificação.
-        // listarPorStatus() só aceita 1 status por chamada, não um array.
+        // Reaproveita a mesma query j� usada em /admin/pedidos, sem filtro de
+        // Coment�rio removido por corrup��o de codifica��o.
+        // listarPorStatus() s� aceita 1 status por chamada, n�o um array.
         $todosRecentes = Pedido::listarPorStatus('', 1, [], 100);
         $statusAtivos = ['aguardando_pagamento', 'aguardando_guincho', 'a_caminho', 'no_local', 'em_reboque', 'teste_final'];
         $pedidosAtivos = array_values(array_filter(
@@ -212,10 +213,10 @@ class AdminController extends BaseController
         ));
 
         // Alertas reais (mesmo AdminAlertService do dashboard) correlacionados
-        // Comentário removido por corrupção de codificação.
-        // AdminAlertService não expõe pedido_id estruturado pra todo tipo de
-        // alerta (ex.: demandas sem pedido vinculado), então a correlação é
-        // por regex em vez de arriscar quebrar o serviço existente.
+        // Coment�rio removido por corrup��o de codifica��o.
+        // AdminAlertService n�o exp�e pedido_id estruturado pra todo tipo de
+        // alerta (ex.: demandas sem pedido vinculado), ent�o a correla��o �
+        // por regex em vez de arriscar quebrar o servi�o existente.
         require_once __DIR__ . '/../Services/AdminAlertService.php';
         $alertasPorPedido = [];
         foreach (AdminAlertService::listar(30) as $alerta) {
@@ -244,9 +245,9 @@ class AdminController extends BaseController
             foreach ($alertasPedido as $a) {
                 if (($a['nivel'] ?? '') === 'erro') { $temAlertaErro = true; break; }
             }
-            // Prioridade real (não estética): erro correlacionado = crítico;
-            // pedido esperando prestador há mais de 15 min = atenção; resto
-            // Comentário removido por corrupção de codificação.
+            // Prioridade real (n�o est�tica): erro correlacionado = cr�tico;
+            // pedido esperando prestador h� mais de 15 min = aten��o; resto
+            // Coment�rio removido por corrup��o de codifica��o.
             // (API do Codex) deve substituir por sinal real de SLA/GPS.
             $prioridade = 'normal';
             if ($temAlertaErro) {
@@ -290,12 +291,12 @@ class AdminController extends BaseController
             'alertas_criticos' => count(array_filter($worklist, static fn($w) => $w['prioridade'] === 'critical')),
         ];
 
-        // Comentário removido por corrupção de codificação.
-        // trazidas pra cá pra que a Central sirva como entrada operacional
-        // única (ver auditoria de navegação: "incorporar métricas do
+        // Coment�rio removido por corrup��o de codifica��o.
+        // trazidas pra c� pra que a Central sirva como entrada operacional
+        // �nica (ver auditoria de navega��o: "incorporar m�tricas do
         // dashboard no topo da Central"). O Dashboard continua existindo
-        // como Resumo Executivo (gráficos + metas por território); o mapa
-        // operacional ao vivo foi movido pra cá em 04/08/2026.
+        // como Resumo Executivo (gr�ficos + metas por territ�rio); o mapa
+        // operacional ao vivo foi movido pra c� em 04/08/2026.
         $totaisDiaResumo = Pedido::totaisDoDia();
         $guinchoOnlineResumo = (int)Guincho::contarDisponiveis();
         $receitaHojeResumo = (float)($totaisDiaResumo['faturamento'] ?? 0);
@@ -303,15 +304,15 @@ class AdminController extends BaseController
 
         // Fase 2: painel de detalhe (mapa/timeline/chat) consome a API real
         // do Codex (src/Api/Admin/OrdersApiController.php) via fetch no
-        // Comentário removido por corrupção de codificação.
+        // Coment�rio removido por corrup��o de codifica��o.
         $csrfToken = AuthService::gerarCsrfToken();
 
         $workshopFinanceiro = AdminWorkshopFinanceService::listarIndicacoes();
         $workshopResumo = AdminWorkshopFinanceService::resumo();
 
         // §CELULAS-NITEROI-01 (04/08/2026): "Mapa operacional ao vivo" (todos
-        // os guinchos disponíveis/em atendimento) movido do Dashboard pra cá
-        // Comentário removido por corrupção de codificação.
+        // os guinchos dispon�veis/em atendimento) movido do Dashboard pra c�
+        // Coment�rio removido por corrup��o de codifica��o.
         require_once __DIR__ . '/../Services/POR/PorThresholds.php';
         $osrmBaseUrl = PorThresholds::routingFrontendBaseUrl();
 
@@ -320,9 +321,9 @@ class AdminController extends BaseController
 
     /**
      * Tela dedicada de Alertas Operacionais (item da sidebar reorganizada,
-     * antes marcado "em breve"). Reaproveita 100% o AdminAlertService já
+     * antes marcado "em breve"). Reaproveita 100% o AdminAlertService j�
       *
-     * categoria (não só o top 8) e permite filtrar por nível.
+     * categoria (n�o s� o top 8) e permite filtrar por n�vel.
      */
     public function alertasOperacionais(): void
     {
@@ -343,9 +344,9 @@ class AdminController extends BaseController
             $alertas[] = $a;
         }
 
-        // A fila operacional deve ser revisada por contexto, não por evento
-        // individual. Agrupa todos os alertas do mesmo pedido e, quando não
-        // há pedido associado, agrupa pelo tipo de evento.
+        // A fila operacional deve ser revisada por contexto, n�o por evento
+        // individual. Agrupa todos os alertas do mesmo pedido e, quando n�o
+        // h� pedido associado, agrupa pelo tipo de evento.
         $alertasAgrupados = [];
         $nivelPeso = ['info' => 1, 'aviso' => 2, 'erro' => 3];
         foreach ($alertas as $a) {
@@ -358,7 +359,7 @@ class AdminController extends BaseController
                     'pedido_id' => $pedidoId > 0 ? $pedidoId : null,
                     'titulo' => $pedidoId > 0 ? 'Pedido #' . $pedidoId : $label,
                     'nivel' => (string)($a['nivel'] ?? 'info'),
-                    'quando' => (string)($a['quando'] ?? '—'),
+                    'quando' => (string)($a['quando'] ?? '-'),
                     'itens' => [],
                 ];
             }
@@ -384,7 +385,7 @@ class AdminController extends BaseController
     /**
       *
      * Ver install/migration_ocorrencias_v1.sql e src/Models/Ocorrencia.php.
-     * Registro estruturado (avaria, atraso, conduta, veículo, segurança),
+     * Registro estruturado (avaria, atraso, conduta, ve�culo, seguran�a),
      * separado dos alertas 100% derivados do AdminAlertService.
      */
     public function ocorrencias(): void
@@ -401,7 +402,7 @@ class AdminController extends BaseController
         require __DIR__ . '/../Views/admin/ocorrencias.php';
     }
 
-    /** Registra uma nova ocorrência para um pedido (via tela de Ocorrências ou detalhe do pedido). */
+    /** Registra uma nova ocorr�ncia para um pedido (via tela de Ocorr�ncias ou detalhe do pedido). */
     public function ocorrenciaCriar(): void
     {
         AuthService::requireAuth('admin');
@@ -420,7 +421,7 @@ class AdminController extends BaseController
         $severidadesValidas = ['baixa', 'media', 'alta', 'critica'];
 
         if (!$pedidoId || $descricao === '' || !in_array($tipo, $tiposValidos, true) || !in_array($severidade, $severidadesValidas, true)) {
-            $_SESSION['_flash'][] = ['message' => 'Preencha pedido, tipo, severidade e descrição da ocorrência.', 'type' => 'error'];
+            $_SESSION['_flash'][] = ['message' => 'Preencha pedido, tipo, severidade e descri��o da ocorr�ncia.', 'type' => 'error'];
             $this->redirect('/admin/ocorrencias');
             return;
         }
@@ -435,11 +436,11 @@ class AdminController extends BaseController
             'descricao' => $descricao,
         ]);
 
-        $_SESSION['_flash'][] = ['message' => 'Ocorrência registrada.', 'type' => 'success'];
+        $_SESSION['_flash'][] = ['message' => 'Ocorr�ncia registrada.', 'type' => 'success'];
         $this->redirect('/admin/ocorrencias');
     }
 
-    /** Muda o status de uma ocorrência (em_analise/resolvida/arquivada), com nota de resolução quando aplicável. */
+    /** Muda o status de uma ocorr�ncia (em_analise/resolvida/arquivada), com nota de resolu��o quando aplic�vel. */
     public function ocorrenciaResolver(): void
     {
         AuthService::requireAuth('admin');
@@ -457,10 +458,10 @@ class AdminController extends BaseController
             Ocorrencia::atualizarStatus($id, $status, (int)($usuario['id'] ?? 0), $resolucao !== '' ? $resolucao : null);
         }
 
-        $_SESSION['_flash'][] = ['message' => 'Ocorrência atualizada.', 'type' => 'success'];
+        $_SESSION['_flash'][] = ['message' => 'Ocorr�ncia atualizada.', 'type' => 'success'];
         // §OCORRENCIAS-SHELL-01: preserva o filtro de status e reabre no
-        // Comentário removido por corrupção de codificação.
-        // mesmo padrão usado em Capacidades/Carteiras.
+        // Coment�rio removido por corrup��o de codifica��o.
+        // mesmo padr�o usado em Capacidades/Carteiras.
         $statusFiltroRetorno = (string)($_POST['retorno_status_filtro'] ?? '');
         $query = [];
         if ($statusFiltroRetorno !== '') $query['status'] = $statusFiltroRetorno;
@@ -468,7 +469,7 @@ class AdminController extends BaseController
         $this->redirect('/admin/ocorrencias' . ($query ? ('?' . http_build_query($query)) : ''));
     }
 
-    /** Pedidos concluídos por hora, últimas 24h (dado real, agrupado por atualizado_em). */
+    /** Pedidos conclu�dos por hora, �ltimas 24h (dado real, agrupado por atualizado_em). */
     private function operacaoPorHora(): array
     {
         $labels = [];
@@ -486,12 +487,12 @@ class AdminController extends BaseController
                 $valores[] = (int)$row['total'];
             }
         } catch (Throwable $e) {
-            // Comentário removido por corrupção de codificação.
+            // Coment�rio removido por corrup��o de codifica��o.
         }
         return ['labels' => $labels, 'valores' => $valores];
     }
 
-    /** Documentação do método. */
+    /** Documenta��o do m�todo. */
     private function financeiroEJobs(): array
     {
         $pdo = getPDO();
@@ -527,7 +528,7 @@ class AdminController extends BaseController
         ];
     }
 
-    /** QA de release: última execução Playwright registrada em simulation_runs/steps. */
+    /** QA de release: �ltima execu��o Playwright registrada em simulation_runs/steps. */
     private function qaRelease(): array
     {
         try {
@@ -560,9 +561,9 @@ class AdminController extends BaseController
     }
 
     /**
-     * ETA médio real (não decorativo): média do tempo estimado dos pedidos
-     * atualmente em andamento, usando a mesma heurística de velocidade
-     * urbana (~28km/h) já usada em GuinchoController::montarOfertasDisponiveis().
+     * ETA m�dio real (n�o decorativo): m�dia do tempo estimado dos pedidos
+     * atualmente em andamento, usando a mesma heur�stica de velocidade
+     * urbana (~28km/h) j� usada em GuinchoController::montarOfertasDisponiveis().
      */
     private function calcularEtaMedioMinutos(): ?int
     {
@@ -603,10 +604,10 @@ class AdminController extends BaseController
         $alertasPrioritarios = AdminAlertService::listar(8);
         $etaMedioMin = $this->calcularEtaMedioMinutos();
 
-        // §CELULAS-NITEROI-01 (04/08/2026): "Metas & Território" precisa ser
-        // Comentário removido por corrupção de codificação.
+        // �CELULAS-NITEROI-01 (04/08/2026): "Metas & Territ�rio" precisa ser
+        // Coment�rio removido por corrup��o de codifica��o.
         // (sem cache), o JS troca window.__territorioPainel e re-renderiza a
-        // célula selecionada no momento (ver admin-territorio-metas.js).
+        // c�lula selecionada no momento (ver admin-territorio-metas.js).
         $territorioPainelJson = TerritorioMetasService::painel();
         require_once __DIR__ . '/../Services/PreQuoteDemandService.php';
         $preQuoteDemandSummary = PreQuoteDemandService::resumoPorServico();
@@ -676,18 +677,18 @@ class AdminController extends BaseController
 
     /**
      * GET /admin/dashboard/mapa-json
-     * Mapa operacional ao vivo: mostra o CLIENTE quando há pedido ativo
-     * (origem do pedido, lat_origem/lng_origem) e o GUINCHO, tanto disponível
+     * Mapa operacional ao vivo: mostra o CLIENTE quando h� pedido ativo
+     * (origem do pedido, lat_origem/lng_origem) e o GUINCHO, tanto dispon�vel
      * (ocioso, aguardando chamado) quanto em atendimento (a_caminho/no_local/
-     * em_reboque), sempre pela posição real mais recente (lat_atual/lng_atual,
+     * em_reboque), sempre pela posi��o real mais recente (lat_atual/lng_atual,
      * atualizada a cada ping de Guincho::atualizarLocalizacao(), inclusive
       *
      *
-     * Achado em QA (2026-07): a query anterior só trazia guinchos com
+     * Achado em QA (2026-07): a query anterior s� trazia guinchos com
       *
       *
-     * mapa, só via guinchos ociosos parados. Corrigido unindo com o pedido
-     * ativo do guincho (se houver) para expor status/pedido_id também.
+     * mapa, s� via guinchos ociosos parados. Corrigido unindo com o pedido
+     * ativo do guincho (se houver) para expor status/pedido_id tamb�m.
      */
     public function dashboardMapaJson(): void
     {
@@ -751,9 +752,9 @@ class AdminController extends BaseController
                 $emAtendimento = !empty($g['pedido_ativo_id']);
                 $rota = null;
                 if ($emAtendimento) {
-                    // Alvo do trajeto: enquanto "a_caminho", o guincho está indo
-                    // buscar o veículo (origem); em "no_local"/"em_reboque", já
-                    // coletou e está indo pro destino.
+                    // Alvo do trajeto: enquanto "a_caminho", o guincho est� indo
+                    // buscar o ve�culo (origem); em "no_local"/"em_reboque", j�
+                    // coletou e est� indo pro destino.
                     $indoPara = $g['pedido_ativo_status'] === 'a_caminho' ? 'origem' : 'destino';
                     $targetLat = $indoPara === 'origem' ? $g['pedido_lat_origem'] : $g['pedido_lat_destino'];
                     $targetLng = $indoPara === 'origem' ? $g['pedido_lng_origem'] : $g['pedido_lng_destino'];
@@ -795,7 +796,7 @@ class AdminController extends BaseController
         exit;
     }
 
-    // Comentário removido por corrupção de codificação.
+    // Coment�rio removido por corrup��o de codifica��o.
     public function usuarios(): void
     {
         AuthService::requireAuth('admin');
@@ -807,10 +808,10 @@ class AdminController extends BaseController
         if (($_GET['ativo'] ?? '') === '0') { $filtros['ativo'] = 0; }
         $usuarios = Usuario::listar($filtros, $pagina);
         $total    = Usuario::contarTotal($filtros);
-        // §PESSOAS-ABAS-01: "abas" da página (Clientes/Prestadores/
-        // Administradores/Suspensos) são só filtros ?tipo=/?ativo= sobre a
-        // Comentário removido por corrupção de codificação.
-        // suportavam ambos os filtros, não precisou de query nova.
+        // �PESSOAS-ABAS-01: "abas" da p�gina (Clientes/Prestadores/
+        // Administradores/Suspensos) s�o s� filtros ?tipo=/?ativo= sobre a
+        // Coment�rio removido por corrup��o de codifica��o.
+        // suportavam ambos os filtros, n�o precisou de query nova.
         $resumoUsuarios = [
             'clientes'  => Usuario::contarTotal(['tipo' => 'cliente']),
             'guinchos'  => Usuario::contarTotal(['tipo' => 'guincho']),
@@ -823,9 +824,9 @@ class AdminController extends BaseController
     }
 
     /**
-     * §USUARIOS-SHELL-01: extraído de usuarioDetalhe() pra ser reaproveitado
-     * também pelo fragmento AJAX do workspace de /admin/usuarios (mesmo
-     * padrão de carregarDetalheGuincho()/guincho_detalhe_workspace.php).
+     * �USUARIOS-SHELL-01: extra�do de usuarioDetalhe() pra ser reaproveitado
+     * tamb�m pelo fragmento AJAX do workspace de /admin/usuarios (mesmo
+     * padr�o de carregarDetalheGuincho()/guincho_detalhe_workspace.php).
      */
     private function carregarDetalheUsuario(int $id): ?array
     {
@@ -866,7 +867,7 @@ class AdminController extends BaseController
         $dados = $this->carregarDetalheUsuario($id);
         if ($dados === null) {
             http_response_code(404);
-            echo json_encode(['ok' => false, 'erro' => 'Usuário não encontrado.']);
+            echo json_encode(['ok' => false, 'erro' => 'Usu�rio n�o encontrado.']);
             exit;
         }
 
@@ -881,7 +882,7 @@ class AdminController extends BaseController
             if (ob_get_level() > 0) ob_clean();
             Logger::exception('AdminController', 'usuarioDetalheFragmento', 'admin_usuarios', $e, ['usuario_id' => $id]);
             http_response_code(500);
-            echo json_encode(['ok' => false, 'erro' => 'Não foi possível carregar os dados deste usuário.'], JSON_UNESCAPED_UNICODE);
+            echo json_encode(['ok' => false, 'erro' => 'N�o foi poss�vel carregar os dados deste usu�rio.'], JSON_UNESCAPED_UNICODE);
         }
         exit;
     }
@@ -896,6 +897,7 @@ class AdminController extends BaseController
     {
         AuthService::requireAuth('admin');
         $csrfToken = AuthService::gerarCsrfToken();
+        $enderecosOficinas = getPDO()->query('SELECT endereco FROM oficinas WHERE ativo = 1')->fetchAll(PDO::FETCH_COLUMN);
         require __DIR__ . '/../Views/admin/usuarioform.php';
     }
 
@@ -935,6 +937,23 @@ class AdminController extends BaseController
         $pdo = getPDO();
         try {
             if (!$pdo->inTransaction()) $pdo->beginTransaction();
+            if ($tipo === 'oficina') {
+                $normalizarEndereco = static function (string $valor): string {
+                    $valor = function_exists('iconv')
+                        ? (string)(iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $valor) ?: $valor)
+                        : $valor;
+                    $valor = strtolower($valor);
+                    return preg_replace('/[^a-z0-9]+/', '', $valor) ?: '';
+                };
+                $novoEnderecoNormalizado = $normalizarEndereco($oficinaEndereco);
+                $enderecos = $pdo->query('SELECT endereco FROM oficinas WHERE ativo = 1')->fetchAll(PDO::FETCH_COLUMN);
+                foreach ($enderecos as $enderecoExistente) {
+                    if ($novoEnderecoNormalizado !== '' && $novoEnderecoNormalizado === $normalizarEndereco((string)$enderecoExistente)) {
+                        $pdo->rollBack();
+                        $this->redirect('/admin/usuario/novo?erro=endereco_oficina_duplicado'); return;
+                    }
+                }
+            }
             $existe = $pdo->prepare("SELECT id FROM usuarios WHERE email = ? OR (cpf = ? AND ? <> '') LIMIT 1");
             $existe->execute([$email, $cpf, $cpf]);
             if ($existe->fetchColumn()) {
@@ -1007,7 +1026,7 @@ class AdminController extends BaseController
         $this->redirect('/admin/usuarios?info=suspensao_via_post');
     }
 
-    // Comentário removido por corrupção de codificação.
+    // Coment�rio removido por corrup��o de codifica��o.
         public function especialistas(): void
     {
         AuthService::requireAuth('admin');
@@ -1038,7 +1057,7 @@ class AdminController extends BaseController
         $modoLabels = [
             'TOWING' => 'Reboque',
             'ON_SITE' => 'No local',
-            'HYBRID' => 'Híbrido',
+            'HYBRID' => 'H�brido',
         ];
         $servicosEspecialista = [];
         foreach (ServiceType::listarAtivos() as $tipo) {
@@ -1124,7 +1143,7 @@ class AdminController extends BaseController
              WHERE e.id=? GROUP BY u.id, e.id");
         $stmt->execute([$id]);
         $especialista = $stmt->fetch(PDO::FETCH_ASSOC);
-        if (!$especialista) { http_response_code(404); echo '<div class="ops-empty-state">Especialista não encontrado.</div>'; return; }
+        if (!$especialista) { http_response_code(404); echo '<div class="ops-empty-state">Especialista n�o encontrado.</div>'; return; }
         $evs = $pdo->prepare("SELECT ev.id, ev.evento, ev.criado_em, ev.metadata_json, i.id AS incidente_id FROM atendimento_eventos ev JOIN atendimentos_especialista a ON a.id=ev.atendimento_id JOIN incidentes i ON i.id=ev.incidente_id WHERE a.especialista_id=? ORDER BY ev.criado_em DESC LIMIT 20");
         $evs->execute([$id]); $especialista['evidencias'] = $evs->fetchAll(PDO::FETCH_ASSOC) ?: [];
         $docs = $pdo->prepare('SELECT id,tipo,numero,arquivo,status,observacao_admin,criado_em FROM especialista_documentos WHERE especialista_id=? ORDER BY criado_em DESC');
@@ -1181,13 +1200,13 @@ class AdminController extends BaseController
 
     /**
      * §GUINCHOS-SHELL-01: carrega tudo que o painel de detalhe de um
-     * guincho precisa (dados do operador/veículo, capacidades, compat.
-     * veicular, últimos atendimentos). Extraído pra método próprio porque
-     * agora tem DOIS consumidores: a antiga página standalone (mantida só
+     * guincho precisa (dados do operador/ve�culo, capacidades, compat.
+     * veicular, �ltimos atendimentos). Extra�do pra m�todo pr�prio porque
+     * agora tem DOIS consumidores: a antiga p�gina standalone (mantida s�
      * como redirect de compatibilidade, ver guinchoDetalhe()) e o endpoint
      * de fragmento HTML consumido via fetch() pelo workspace de
      * /admin/guinchos (guinchoDetalheFragmento()).
-     * @return array|null null se o guincho não existe.
+     * @return array|null null se o guincho n�o existe.
      */
     private function carregarDetalheGuincho(int $id): ?array
     {
@@ -1196,7 +1215,7 @@ class AdminController extends BaseController
         $usuario = Usuario::buscarPorId($guincho['usuario_id']);
         $pedidos = Pedido::listarPorGuincho($id, 1, 15);
 
-        // Serviços prestados (máximo de detalhe): capacidades declaradas +
+        // Servi�os prestados (m�ximo de detalhe): capacidades declaradas +
         // compatibilidade veicular + status de reboque.
         require_once __DIR__ . '/../Models/Catalog/ProviderCapability.php';
         require_once __DIR__ . '/../Models/Dispatch/ProviderServiceVehicleCapability.php';
@@ -1219,8 +1238,8 @@ class AdminController extends BaseController
     }
 
     /**
-     * §GUINCHOS-SHELL-01: /admin/guinchos agora é shell-ops (lista +
-     * workspace, mesmo padrão de Central/Capacidades/Carteiras/Ocorrências).
+     * �GUINCHOS-SHELL-01: /admin/guinchos agora � shell-ops (lista +
+     * workspace, mesmo padr�o de Central/Capacidades/Carteiras/Ocorr�ncias).
      * Esta rota antiga (/admin/guincho/{id}) vira um redirect pra manter
      * links/favoritos antigos funcionando.
      */
@@ -1233,7 +1252,7 @@ class AdminController extends BaseController
     /**
      * Fragmento HTML do painel de detalhe de um guincho, consumido via
       *
-     * essa tela é pesada demais (múltiplas seções/queries) pra pré-renderizar
+     * essa tela � pesada demais (m�ltiplas se��es/queries) pra pr�-renderizar
      * a de TODOS os guinchos aprovados de uma vez.
      */
     public function guinchoDetalheFragmento(int $id): void
@@ -1245,7 +1264,7 @@ class AdminController extends BaseController
         $dados = $this->carregarDetalheGuincho($id);
         if ($dados === null) {
             http_response_code(404);
-            echo json_encode(['ok' => false, 'erro' => 'Guincho não encontrado.']);
+            echo json_encode(['ok' => false, 'erro' => 'Guincho n�o encontrado.']);
             exit;
         }
 
@@ -1292,7 +1311,7 @@ class AdminController extends BaseController
         }
         if ($id === 0) $id = (int)($_POST['id'] ?? 0);
         $motivo = trim($_POST['motivo'] ?? '');
-        // Marca guincho como rejeitado e suspende usuário
+        // Marca guincho como rejeitado e suspende usu�rio
         $pdo = getPDO();
         $g = Guincho::buscarPorId($id);
         if ($g) {
@@ -1302,7 +1321,7 @@ class AdminController extends BaseController
         $this->redirect('/admin/guinchos?msg=rejeitado');
     }
 
-    // Comentário removido por corrupção de codificação.
+    // Coment�rio removido por corrup��o de codifica��o.
     public function pedidos(): void
     {
         AuthService::requireAuth('admin');
@@ -1324,10 +1343,10 @@ class AdminController extends BaseController
 
         // §PEDIDOS-SHELL-01: monta a fila no mesmo formato consumido por
         // AdminOrderWorkspace (public/assets/js/admin-order-workspace.js),
-        // Comentário removido por corrupção de codificação.
-        // de detalhe (mapa/timeline/chat) é o mesmo, consumindo a mesma API
+        // Coment�rio removido por corrup��o de codifica��o.
+        // de detalhe (mapa/timeline/chat) � o mesmo, consumindo a mesma API
         // real /api/admin/orders/{id}. Aqui cobre TODOS os status (incluindo
-        // concluído/cancelado), diferente da Central que só mostra ativos.
+        // conclu�do/cancelado), diferente da Central que s� mostra ativos.
         $statusLabelsWorklist = [
             'aguardando_pagamento' => ['label' => 'Aguardando pagamento', 'css' => 'new'],
             'aguardando_guincho'   => ['label' => 'Buscando prestador',   'css' => 'searching'],
@@ -1405,7 +1424,7 @@ class AdminController extends BaseController
     {
         AuthService::requireAuth('admin');
         $pedido = Pedido::buscarPorId($id);
-        if (!$pedido) { http_response_code(404); echo '<h1>404 — Pedido não encontrado</h1>'; exit; }
+        if (!$pedido) { http_response_code(404); echo '<h1>404 - Pedido n�o encontrado</h1>'; exit; }
         $mensagens = Chat::listarPorPedido($id);
         $csrfToken = AuthService::gerarCsrfToken();
         $paymentJobs = PaymentJobService::listByPedido($id);
@@ -1417,14 +1436,14 @@ class AdminController extends BaseController
         $porSummary = ProofOfRoadService::getSummary($id);
         $porTrail = ProofOfRoadService::getTrail($id, 80);
         $porRejected = PedidoLocalizacao::listarRejeitados($id, 15);
-        // Guinchos disponíveis para atribuição
+        // Guinchos dispon�veis para atribui��o
         $guinchoDisponiveis = [];
         if (empty($pedido['guincho_id'])) {
             $guinchoDisponiveis = Guincho::listarAprovados();
         }
-        // Salvaguarda de conclusão manual: sabe se já existe evidência normal
-        // (GPS) aceita de coleta/entrega para não exigir comprovante manual
-        // duplicado do que já foi validado pelo fluxo padrão.
+        // Salvaguarda de conclus�o manual: sabe se j� existe evid�ncia normal
+        // (GPS) aceita de coleta/entrega para n�o exigir comprovante manual
+        // duplicado do que j� foi validado pelo fluxo padr�o.
         $pdo = getPDO();
         $jaTemEvidencia = ['coleta' => false, 'entrega' => false];
         try {
@@ -1436,19 +1455,19 @@ class AdminController extends BaseController
                 }
             }
         } catch (Throwable $e) {
-            // Comentário removido por corrupção de codificação.
+            // Coment�rio removido por corrup��o de codifica��o.
         }
-        // §EVIDENCIA-LINK-01: as fotos de coleta/entrega saíram de
-        // public/uploads (webroot) pra storage/private/evidencias há tempos
+        // �EVIDENCIA-LINK-01: as fotos de coleta/entrega sa�ram de
+        // public/uploads (webroot) pra storage/private/evidencias h� tempos
         // (ver EvidenceService), mas esta tela ainda linkava direto pra
-        // Comentário removido por corrupção de codificação.
-        // então. Busca a evidência real (com id) pra linkar via rota
-        // autenticada /evidencia/{id}, igual o resto do sistema já faz.
+        // Coment�rio removido por corrup��o de codifica��o.
+        // ent�o. Busca a evid�ncia real (com id) pra linkar via rota
+        // autenticada /evidencia/{id}, igual o resto do sistema j� faz.
         $evidenciaColeta = PedidoEvidencia::buscarUltimaPorTipo($id, 'coleta');
         $evidenciaEntrega = PedidoEvidencia::buscarUltimaPorTipo($id, 'entrega');
-        // Trilha de auditoria funcionário → gerente deste pedido: quem
-        // solicitou cada ação sensível (cancelamento, conclusão manual,
-        // Comentário removido por corrupção de codificação.
+        // Trilha de auditoria funcion�rio ? gerente deste pedido: quem
+        // solicitou cada a��o sens�vel (cancelamento, conclus�o manual,
+        // Coment�rio removido por corrup��o de codifica��o.
         // registro do pedido, sem precisar ir a uma tela separada.
         $demandasDoPedido = Demanda::listarPorPedido($id);
         foreach ($paymentJobs as $paymentJob) {
@@ -1463,7 +1482,7 @@ class AdminController extends BaseController
         $pedido = Pedido::buscarPorId($id);
         if (!$pedido) {
             http_response_code(404);
-            echo '<h1>404 — Pedido não encontrado</h1>';
+            echo '<h1>404 - Pedido n�o encontrado</h1>';
             exit;
         }
 
@@ -1496,8 +1515,8 @@ class AdminController extends BaseController
             'valid_only' => (string)($_GET['valid_only'] ?? ''),
         ];
         $trailLimit = max(20, min(400, (int)($_GET['limit'] ?? 120)));
-        // Comentário removido por corrupção de codificação.
-        // pontos novos; sem o parâmetro, comportamento igual a antes.
+        // Coment�rio removido por corrup��o de codifica��o.
+        // pontos novos; sem o par�metro, comportamento igual a antes.
         $sincePointId = isset($_GET['since_point_id']) && ctype_digit((string)$_GET['since_point_id'])
             ? (int)$_GET['since_point_id']
             : null;
@@ -1532,7 +1551,7 @@ class AdminController extends BaseController
         )->fetchAll(PDO::FETCH_ASSOC);
         $veiculos = [];   // carregados via AJAX ao selecionar cliente
         $cfg      = Configuracao::getAll();
-        // Paridade com o painel do cliente: catálogo de tipos de serviço
+        // Paridade com o painel do cliente: cat�logo de tipos de servi�o
         // (define attendance_mode e alimenta matching/compatibilidade).
         $tiposServico = ServiceType::listarAtivos();
         $csrfToken = AuthService::gerarCsrfToken();
@@ -1544,6 +1563,18 @@ class AdminController extends BaseController
         AuthService::requireAuth('admin');
         if (!AuthService::validarCsrfToken($_POST['csrf_token'] ?? '')) {
             http_response_code(403); exit;
+        }
+
+        // A forma financeira precisa ser definida antes de qualquer chamada
+        // ao motor de criação. Nunca inserir um pedido para decidir isso depois.
+        $destinoPagamentoPost = strtolower(trim((string)($_POST['destino_pagamento'] ?? '')));
+        if (!in_array($destinoPagamentoPost, ['pago_na_chegada', 'online', 'pago_agora'], true)) {
+            $_SESSION['_flash'][] = [
+                'message' => 'Selecione uma forma de pagamento antes de criar o pedido.',
+                'type' => 'error',
+            ];
+            $this->redirect('/admin/pedido/novo/funil');
+            return;
         }
 
         $clienteId   = (int)($_POST['cliente_id']   ?? 0);
@@ -1572,8 +1603,8 @@ $lngDestino = ($_POST['lng_destino'] ?? '') !== '' ? (float)$_POST['lng_destino'
 
         $veiculo = $veiculoId > 0 ? Veiculo::buscarPorId($veiculoId) : null;
 
-        // Modalidade e service_type resolvidos a partir do catálogo, iguais
-        // Comentário removido por corrupção de codificação.
+        // Modalidade e service_type resolvidos a partir do cat�logo, iguais
+        // Coment�rio removido por corrup��o de codifica��o.
         $serviceTypeId = null;
         $serviceTypeIdPost = (int)($_POST['service_type_id'] ?? 0);
         if ($serviceTypeIdPost > 0) {
@@ -1604,7 +1635,7 @@ $lngDestino = ($_POST['lng_destino'] ?? '') !== '' ? (float)$_POST['lng_destino'
                 $lngOrigem
             ));
             $_SESSION['_flash'][] = [
-                'message' => 'Nenhum guincho disponível no raio de atendimento agora. '
+                'message' => 'Nenhum guincho dispon�vel no raio de atendimento agora. '
                            . 'Aguarde alguns minutos ou tente outro destino.',
                 'type' => 'error',
             ];
@@ -1613,8 +1644,8 @@ $lngDestino = ($_POST['lng_destino'] ?? '') !== '' ? (float)$_POST['lng_destino'
         }
         // =============================================================
 
-        // B-011: nenhum preço do navegador governa a criação.
-        // A validação da regra e do preço ocorre em PedidoCoreService::criar().
+        // B-011: nenhum pre�o do navegador governa a cria��o.
+        // A valida��o da regra e do pre�o ocorre em PedidoCoreService::criar().
         $decisaoPost = strtolower(trim((string)($_POST['decisao_atendimento'] ?? '')));
 
         // [B-GUARD-03] Reboque sem destino -> rejeita
@@ -1673,9 +1704,37 @@ $lngDestino = ($_POST['lng_destino'] ?? '') !== '' ? (float)$_POST['lng_destino'
         }
         $actorId = (int)($_SESSION['usuario_id'] ?? 0);
 
-        // §UNIFY-FLOWS: cria pelo motor único, igual ao pre-cotação e ao
+        // O admin usa o mesmo gate de cobertura do cliente antes de criar o
+        // pedido. A checagem generica de raio nao valida o servico escolhido.
+        require_once __DIR__ . '/../Services/CoberturaService.php';
+        $attendanceMode = 'TOWING';
+        if ($serviceTypeId !== null && $serviceTypeId > 0) {
+            $tipoServicoFinal = ServiceType::buscarPorId($serviceTypeId);
+            $attendanceMode = strtoupper(trim((string)($tipoServicoFinal['attendance_mode'] ?? '')));
+            if ($attendanceMode === '') {
+                $attendanceMode = (($modalidadeSocorro ?? null) === 'REBOQUE_PRANCHA') ? 'TOWING' : 'ON_SITE';
+            }
+        }
+        $diagnosticoCobertura = CoberturaService::diagnosticarAtendimento([
+            'attendance_mode' => $attendanceMode,
+            'lat_origem' => $latOrigem,
+            'lng_origem' => $lngOrigem,
+            'service_type_id' => $serviceTypeId,
+        ]);
+        if (($diagnosticoCobertura['pode_cobrar'] ?? true) !== true) {
+            $mensagemCobertura = (string)($diagnosticoCobertura['mensagem'] ?? 'Nao ha cobertura elegivel para este servico nesta localizacao.');
+            $_SESSION['_flash'][] = [
+                'message' => 'Pedido nao criado: ' . $mensagemCobertura,
+                'type' => 'error',
+            ];
+            error_log('[AdminController::pedidoCriar][COVERAGE-GUARD] Rejeitado antes da criacao: service_type_id=' . (int)$serviceTypeId);
+            $this->redirect('/admin/pedido/novo/funil');
+            return;
+        }
+
+        // �UNIFY-FLOWS: cria pelo motor �nico, igual ao pre-cota��o e ao
         // cliente. Isso garante snapshot financeiro (pedido_financial_snapshots),
-        // evento auditável (pedido_eventos) e modalidade coerente.
+        // evento audit�vel (pedido_eventos) e modalidade coerente.
         $pdo = getPDO();
         $pedidoCore = new PedidoCoreService(
             $pdo,
@@ -1709,7 +1768,7 @@ $lngDestino = ($_POST['lng_destino'] ?? '') !== '' ? (float)$_POST['lng_destino'
                 ],
             ]));
 
-            // Campos que PedidoCoreService ainda não conhece (mesmo padrão
+            // Campos que PedidoCoreService ainda n�o conhece (mesmo padr�o
             // usado em ClienteController::pedidoCriar).
             $metadata = [
                 'veiculo_esta_batido'  => $veiculoBatido,
@@ -1732,11 +1791,11 @@ $lngDestino = ($_POST['lng_destino'] ?? '') !== '' ? (float)$_POST['lng_destino'
         } catch (Throwable $e) {
             if ($started && $pdo->inTransaction()) { $pdo->rollBack(); }
             error_log('[AdminController::pedidoCriar] ' . $e->getMessage());
-            $_SESSION['_flash'][] = ['message' => 'Não foi possível criar o pedido: ' . $e->getMessage(), 'type' => 'error'];
+            $_SESSION['_flash'][] = ['message' => 'N�o foi poss�vel criar o pedido: ' . $e->getMessage(), 'type' => 'error'];
             $this->redirect('/admin/pedido/novo');
         }
 
-        // Comentário removido por corrupção de codificação.
+        // Coment�rio removido por corrup��o de codifica��o.
         if ($pedidoId > 0 && is_array($veiculo)) {
             try {
                 require_once __DIR__ . '/../Services/Dispatch/OrderVehicleRequirementService.php';
@@ -1751,16 +1810,19 @@ $lngDestino = ($_POST['lng_destino'] ?? '') !== '' ? (float)$_POST['lng_destino'
             }
         }
 
-        // Se o status inicial do motor único for aguardando_guincho (fluxo
-        // freeflow / sem pagamento obrigatório), define expiração e
-        // Comentário removido por corrupção de codificação.
+        // Se o status inicial do motor �nico for aguardando_guincho (fluxo
+        // freeflow / sem pagamento obrigat�rio), define expira��o e
+        // Coment�rio removido por corrup��o de codifica��o.
         // Fechamento igual ao fluxo do cliente:
         //  (a) freeflow / payment_required=0 -> aguardando_guincho + expiracao + guincho
         //  (b) payment_required=1 -> cria Pagamento pendente + devolve link ao admin
         $pService = new PedidoService();
         $modoOperacao = $pService->modoOperacao();
 
-        if ($pService->podeIniciarAtendimento()) {
+        // No painel administrativo a forma de pagamento escolhida na etapa
+        // 6 precisa ser aplicada antes de liberar o pedido para a fila. O
+        // modo operacional nao pode ignorar a cobranca online.
+        if ($pService->podeIniciarAtendimento() && $destinoPagamentoPost === '') {
             $cfg = Configuracao::getAll();
             $expMin = (int)($cfg['tempo_expiracao_min'] ?? 5);
             $raioInicial = (int)($cfg['raio_inicial_km'] ?? 10);
@@ -1805,11 +1867,21 @@ $lngDestino = ($_POST['lng_destino'] ?? '') !== '' ? (float)$_POST['lng_destino'
             $pedidoCriado = Pedido::buscarPorId($pedidoId) ?: [];
             $valorPedido = (float)($pedidoCriado['custo_estimado'] ?? 0);
 
-            $destinoPag = strtolower(trim((string)($_POST['destino_pagamento'] ?? 'pago_na_chegada')));
-            $provedorOnline = isset($_POST['provedor_online']) ? strtolower(trim((string)$_POST['provedor_online'])) : null;
-            if ($destinoPag !== 'online') {
-                $provedorOnline = null;
+            $destinoPag = strtolower(trim((string)($_POST['destino_pagamento'] ?? '')));
+            if (!in_array($destinoPag, ['pago_na_chegada', 'online', 'pago_agora'], true)) {
+                unset($_SESSION['admin_pedido_ctx']);
+                $_SESSION['_flash'][] = [
+                    'message' => 'Selecione uma forma de pagamento antes de criar o pedido.',
+                    'type' => 'error',
+                ];
+                $this->redirect('/admin/pedido/' . $pedidoId . '?criado=1');
+                return;
             }
+            // O admin escolhe a forma de pagamento; o gateway vem da
+            // configuracao central ativa. Nao dependa de um campo oculto.
+            $provedorOnline = $destinoPag === 'online'
+                ? PaymentProviderFactory::gatewayAtivoRaw()
+                : null;
 
             $resPag = Pagamento::aplicarDestinoPagamento($pedidoId, $destinoPag, $provedorOnline, $actorId);
 
@@ -1822,6 +1894,13 @@ $lngDestino = ($_POST['lng_destino'] ?? '') !== '' ? (float)$_POST['lng_destino'
                     'type' => 'error',
                 ];
                 $this->redirect('/admin/pedido/' . $pedidoId . '?criado=1');
+                return;
+            }
+
+            // Cartao presencial: o atendente cobra imediatamente no Payment
+            // Brick; nenhum link externo e gerado ou enviado ao cliente.
+            if ($destinoPag === 'online') {
+                $this->redirect('/admin/pagamento/checkout/' . $pedidoId);
                 return;
             }
 
@@ -1880,7 +1959,7 @@ $lngDestino = ($_POST['lng_destino'] ?? '') !== '' ? (float)$_POST['lng_destino'
 
         $distancia = (float)($_GET['distancia_km'] ?? 0);
         if ($distancia <= 0) {
-            echo json_encode(['ok' => false, 'erro' => 'Distância inválida'], JSON_UNESCAPED_UNICODE);
+            echo json_encode(['ok' => false, 'erro' => 'Dist�ncia inv�lida'], JSON_UNESCAPED_UNICODE);
             exit;
         }
 
@@ -1894,7 +1973,7 @@ $lngDestino = ($_POST['lng_destino'] ?? '') !== '' ? (float)$_POST['lng_destino'
             $veiculo = Veiculo::buscarPorId($veiculoId);
             if (!$veiculo) {
                 http_response_code(404);
-                echo json_encode(['ok' => false, 'erro' => 'Veículo não encontrado'], JSON_UNESCAPED_UNICODE);
+                echo json_encode(['ok' => false, 'erro' => 'Ve�culo n�o encontrado'], JSON_UNESCAPED_UNICODE);
                 exit;
             }
             if ($categoria === '') {
@@ -1902,13 +1981,13 @@ $lngDestino = ($_POST['lng_destino'] ?? '') !== '' ? (float)$_POST['lng_destino'
             }
         }
 
-        // §UNIFY-FLOWS: cálculo oficial passa a vir do PedidoCoreService,
+        // �UNIFY-FLOWS: c�lculo oficial passa a vir do PedidoCoreService,
         // mesma fonte usada por ClienteController::calcularCusto e pelo
-        // funil /pre-cotacao. Lat/lng são opcionais para retro-compat (form
-        // antigo que só mandava distancia_km); quando ausentes, cai no
-        // centro geográfico padrão (SP) só para preencher a validação do
-        // Comentário removido por corrupção de codificação.
-        // interno do motor único.
+        // funil /pre-cotacao. Lat/lng s�o opcionais para retro-compat (form
+        // antigo que s� mandava distancia_km); quando ausentes, cai no
+        // centro geogr�fico padr�o (SP) s� para preencher a valida��o do
+        // Coment�rio removido por corrup��o de codifica��o.
+        // interno do motor �nico.
         $latOrigem  = isset($_GET['lat_origem'])  && $_GET['lat_origem']  !== '' ? (float)$_GET['lat_origem']  : -23.5505;
         $lngOrigem  = isset($_GET['lng_origem'])  && $_GET['lng_origem']  !== '' ? (float)$_GET['lng_origem']  : -46.6333;
         $latDestino = isset($_GET['lat_destino']) && $_GET['lat_destino'] !== '' ? (float)$_GET['lat_destino'] : null;
@@ -1957,11 +2036,11 @@ $lngDestino = ($_POST['lng_destino'] ?? '') !== '' ? (float)$_POST['lng_destino'
         } catch (Throwable $e) {
             error_log('[AdminController::pedidoCalcularCusto] ' . $e->getMessage());
             http_response_code(500);
-            echo json_encode(['ok' => false, 'erro' => 'Erro ao calcular cotação.'], JSON_UNESCAPED_UNICODE);
+            echo json_encode(['ok' => false, 'erro' => 'Erro ao calcular cota��o.'], JSON_UNESCAPED_UNICODE);
         }
         exit;
     }
-    // Comentário removido por corrupção de codificação.
+    // Coment�rio removido por corrup��o de codifica��o.
     public function financeiro(): void
     {
         AuthService::requireAuth('admin');
@@ -2067,7 +2146,7 @@ $lngDestino = ($_POST['lng_destino'] ?? '') !== '' ? (float)$_POST['lng_destino'
         header('Content-Disposition: attachment; filename="financeiro_' . date('Ymd') . '.csv"');
         $out = fopen('php://output', 'w');
         fprintf($out, chr(0xEF) . chr(0xBB) . chr(0xBF));
-        fputcsv($out, ['ID', 'Pedido', 'Método', 'Valor Total', 'Valor Guincho', 'Comissão', 'Status', 'Data'], ';');
+        fputcsv($out, ['ID', 'Pedido', 'M�todo', 'Valor Total', 'Valor Guincho', 'Comiss�o', 'Status', 'Data'], ';');
         foreach ($pagamentos as $p) {
             fputcsv($out, [
                 self::csvSafeCell($p['id']), self::csvSafeCell($p['pedido_id']), self::csvSafeCell($p['metodo_normalizado'] ?? $p['metodo']),
@@ -2081,7 +2160,7 @@ $lngDestino = ($_POST['lng_destino'] ?? '') !== '' ? (float)$_POST['lng_destino'
         exit;
     }
 
-    // Comentário removido por corrupção de codificação.
+    // Coment�rio removido por corrup��o de codifica��o.
     public function configuracoes(): void
     {
         // Explicitly check for admin role and handle authorization
@@ -2105,8 +2184,8 @@ $lngDestino = ($_POST['lng_destino'] ?? '') !== '' ? (float)$_POST['lng_destino'
         $msg = $_GET['msg'] ?? '';
         $envErrors = array_values(array_filter(array_map('trim', explode('|', (string)($_GET['env_errors'] ?? '')))));
         // §PRECO-POR-CIDADE-01: seletor opcional de cidade-alvo pra editar
-        // Comentário removido por corrupção de codificação.
-        // Comentário removido por corrupção de codificação.
+        // Coment�rio removido por corrup��o de codifica��o.
+        // Coment�rio removido por corrup��o de codifica��o.
         require_once __DIR__ . '/../Models/Cidade.php';
         $cidadesAtivas = Cidade::listarAtivas();
         $cidadeIdConfig = (int)($_GET['cidade_id'] ?? 0);
@@ -2134,7 +2213,7 @@ $lngDestino = ($_POST['lng_destino'] ?? '') !== '' ? (float)$_POST['lng_destino'
         'taxa_prioridade_valor', 'taxa_prioridade',
     ];
 
-    /** Mesma convenção `{chave}__cidade_{id}` de AdminPlanejamentoController::chaveCidade() / TarifaService::chaveCidade(). */
+    /** Mesma conven��o `{chave}__cidade_{id}` de AdminPlanejamentoController::chaveCidade() / TarifaService::chaveCidade(). */
     private function chaveConfigCidade(string $chave, int $cidadeId): string
     {
         return $cidadeId > 0 ? $chave . '__cidade_' . $cidadeId : $chave;
@@ -2203,7 +2282,7 @@ $lngDestino = ($_POST['lng_destino'] ?? '') !== '' ? (float)$_POST['lng_destino'
 
         $cidadeIdConfig = (int)($_POST['cidade_id'] ?? 0);
 
-        // --- CONFIGURAÇÕES DE TARIFAS ---
+        // --- CONFIGURA��ES DE TARIFAS ---
         $campos = [
             "tarifa_por_km", "taxa_fixa", "comissao_plataforma",
             "custo_saida_profissional_padrao", "comissao_assistencia_percentual",
@@ -2211,33 +2290,33 @@ $lngDestino = ($_POST['lng_destino'] ?? '') !== '' ? (float)$_POST['lng_destino'
             "tarifa_noturna_km", "tarifa_noturna_fixa", "taxa_prioridade",
             "turno_noturno_inicio", "turno_noturno_fim",
             "tempo_expiracao_min", "raio_inicial_km", "raio_maximo_km",
-            // Comentário removido por corrupção de codificação.
-            // tem efeito quando PAYMENT_GATEWAY_ACTIVE é um único gateway
-            // (não 'todos'); ver §16 da constituição.
+            // Coment�rio removido por corrup��o de codifica��o.
+            // tem efeito quando PAYMENT_GATEWAY_ACTIVE � um �nico gateway
+            // (n�o 'todos'); ver �16 da constitui��o.
             "gateway_rotacao_limite_diario",
-            // Comentário removido por corrupção de codificação.
-            // por categoria de veículo (antes só existiam as chaves de
-            // popular/base; suv/eletrico/caminhonete não eram configuráveis).
+            // Coment�rio removido por corrup��o de codifica��o.
+            // por categoria de ve�culo (antes s� existiam as chaves de
+            // popular/base; suv/eletrico/caminhonete n�o eram configur�veis).
             "tarifa_feriado_km", "tarifa_feriado_fixa",
             "tarifa_suv_km", "tarifa_suv_fixa",
             "tarifa_caminhonete_km", "tarifa_caminhonete_fixa",
             "tarifa_eletrico_km", "tarifa_eletrico_fixa",
             "tarifa_moto_km", "tarifa_moto_fixa",
-            // Comentário removido por corrupção de codificação.
+            // Coment�rio removido por corrup��o de codifica��o.
             // antes de comissao_plataforma incidir, ver
-            // PedidoTransitionService::approvePayment) e crédito de
-            // conversão pane→reboque (ver ConversionService).
+            // PedidoTransitionService::approvePayment) e cr�dito de
+            // convers�o pane?reboque (ver ConversionService).
             "reserva_gateway_percentual",
             "credito_conversao_percentual", "credito_conversao_maximo",
             "marketing_tracking_enabled", "marketing_google_ads_id",
             "marketing_google_ads_conversion_label", "marketing_ga4_measurement_id",
             "marketing_meta_pixel_id",
         ];
-        // §PRECO-POR-CIDADE-01: quando o admin está editando com uma
-        // cidade-alvo selecionada, os campos de TARIFA vão pra chave
-        // Comentário removido por corrupção de codificação.
-        // (comissão, raio de despacho, expiração, gateway...) continua
-        // sendo sempre global, não faz sentido por cidade.
+        // �PRECO-POR-CIDADE-01: quando o admin est� editando com uma
+        // cidade-alvo selecionada, os campos de TARIFA v�o pra chave
+        // Coment�rio removido por corrup��o de codifica��o.
+        // (comiss�o, raio de despacho, expira��o, gateway...) continua
+        // sendo sempre global, n�o faz sentido por cidade.
         foreach ($campos as $c) {
             if (!isset($_POST[$c])) {
                 continue;
@@ -2248,7 +2327,7 @@ $lngDestino = ($_POST['lng_destino'] ?? '') !== '' ? (float)$_POST['lng_destino'
                 Configuracao::set($c, $_POST[$c]);
             }
         }
-        // --- NOVAS CONFIGURAÇÕES: SYSTEM_MODE e PAYMENT_REQUIRED ---
+        // --- NOVAS CONFIGURA��ES: SYSTEM_MODE e PAYMENT_REQUIRED ---
         // System Mode
         $modesValidos = ['production', 'sandbox', 'freeflow'];
         $systemMode = (string)Configuracao::get('system_mode', 'production');
@@ -2330,7 +2409,7 @@ $lngDestino = ($_POST['lng_destino'] ?? '') !== '' ? (float)$_POST['lng_destino'
         }
 
         Logger::log(Logger::LEVEL_INFO, "AdminController", "configuracoesSalvar", "admin",
-            "Configurações salvas", [
+            "Configura��es salvas", [
                 'env_keys' => array_keys($envUpdates),
                 'system_mode' => $systemMode,
                 'payment_required' => $paymentRequired,
@@ -2338,13 +2417,13 @@ $lngDestino = ($_POST['lng_destino'] ?? '') !== '' ? (float)$_POST['lng_destino'
             ]
         );
         // §PRECO-POR-CIDADE-01: se o admin tinha uma cidade-alvo selecionada
-        // no seletor de tarifas, volta pra mesma cidade selecionada (senão
+        // no seletor de tarifas, volta pra mesma cidade selecionada (sen�o
         // a tela recarrega em branco/global e parece que "sumiu" o que
         // acabou de editar).
         $this->redirect("/admin/configuracoes?salvo=1" . ($cidadeIdConfig > 0 ? '&cidade_id=' . $cidadeIdConfig : ''));
     }
 
-    // Comentário removido por corrupção de codificação.
+    // Coment�rio removido por corrup��o de codifica��o.
     public function logs(): void
     {
         AuthService::requireAuth('admin');
@@ -2502,14 +2581,14 @@ $lngDestino = ($_POST['lng_destino'] ?? '') !== '' ? (float)$_POST['lng_destino'
         require __DIR__ . '/../Views/admin/logs.php';
     }
 
-    // Comentário removido por corrupção de codificação.
+    // Coment�rio removido por corrup��o de codifica��o.
     public function chat(): void
     {
-        // Ponte de compatibilidade para chamadas internas e integrações antigas.
+        // Ponte de compatibilidade para chamadas internas e integra��es antigas.
         (new AdminChatController())->index();
     }
 
-    // Comentário removido por corrupção de codificação.
+    // Coment�rio removido por corrup��o de codifica��o.
     public function pedidoAlterarStatus(): void
     {
         AuthService::requireAuth("admin");
@@ -2588,9 +2667,9 @@ $lngDestino = ($_POST['lng_destino'] ?? '') !== '' ? (float)$_POST['lng_destino'
         $pedidoId  = (int)($_POST["pedido_id"] ?? 0);
         $guinchoId = (int)($_POST["guincho_id"] ?? 0);
         // Tela de Despacho (Pacote L2.3) reaproveita esta mesma action; quando
-        // a atribuição vem de lá, o admin espera voltar pra fila de despacho
-        // (não pro detalhe do pedido) após atribuir. Padrão antigo (redirect
-        // pro detalhe do pedido) permanece intacto quando 'retorno' não vem.
+        // a atribui��o vem de l�, o admin espera voltar pra fila de despacho
+        // (n�o pro detalhe do pedido) ap�s atribuir. Padr�o antigo (redirect
+        // pro detalhe do pedido) permanece intacto quando 'retorno' n�o vem.
         $retorno = (string)($_POST['retorno'] ?? '');
         $destinoOk = $retorno === 'despacho' ? "/admin/despacho?msg=guincho_atribuido" : "/admin/pedido/{$pedidoId}?msg=guincho_atribuido";
         $destinoErro = $retorno === 'despacho' ? "/admin/despacho?pedido_id={$pedidoId}" : "/admin/pedido/{$pedidoId}";
@@ -2608,11 +2687,11 @@ $lngDestino = ($_POST['lng_destino'] ?? '') !== '' ? (float)$_POST['lng_destino'
     /**
       *
      * antes marcado "em breve"). Sem schema novo: reaproveita
-     * Guincho::listarAprovados() (aprovados + disponíveis) e ordena por
-     * distância real (Haversine, GeoService::haversine) até a origem do
-     * pedido selecionado. A ação de atribuir reaproveita 100% a action já
+     * Guincho::listarAprovados() (aprovados + dispon�veis) e ordena por
+     * dist�ncia real (Haversine, GeoService::haversine) at� a origem do
+     * pedido selecionado. A a��o de atribuir reaproveita 100% a action j�
       *
-     * nenhuma regra de negócio de atribuição foi duplicada ou reescrita.
+     * nenhuma regra de neg�cio de atribui��o foi duplicada ou reescrita.
      */
     public function despacho(): void
     {
@@ -2625,7 +2704,7 @@ $lngDestino = ($_POST['lng_destino'] ?? '') !== '' ? (float)$_POST['lng_destino'
         $pedidoSelecionado = null;
         if ($pedidoSelecionadoId) {
             $pedidoSelecionado = Pedido::buscarPorId($pedidoSelecionadoId);
-            // só faz sentido despachar pedidos ainda aguardando prestador
+            // s� faz sentido despachar pedidos ainda aguardando prestador
             if ($pedidoSelecionado && (string)($pedidoSelecionado['status'] ?? '') !== 'aguardando_guincho') {
                 $pedidoSelecionado = null;
             }
@@ -2652,13 +2731,13 @@ $lngDestino = ($_POST['lng_destino'] ?? '') !== '' ? (float)$_POST['lng_destino'
                 if ($latOrigem !== null && $lngOrigem !== null && $latG !== null && $lngG !== null) {
                     $pr['distancia_km'] = round(GeoService::haversine($latOrigem, $lngOrigem, $latG, $lngG), 1);
                 } else {
-                    $pr['distancia_km'] = null; // sem GPS recente; não pode ser ordenado por distância
+                    $pr['distancia_km'] = null; // sem GPS recente; n�o pode ser ordenado por dist�ncia
                 }
             }
             unset($pr);
             usort($prestadores, static function (array $a, array $b): int {
-                // sem GPS vai pro fim da lista, não pro topo (evita sugerir
-                // prestador "mais próximo" sem sinal de posição real)
+                // sem GPS vai pro fim da lista, n�o pro topo (evita sugerir
+                // prestador "mais pr�ximo" sem sinal de posi��o real)
                 if ($a['distancia_km'] === null && $b['distancia_km'] === null) return 0;
                 if ($a['distancia_km'] === null) return 1;
                 if ($b['distancia_km'] === null) return -1;
@@ -2671,10 +2750,10 @@ $lngDestino = ($_POST['lng_destino'] ?? '') !== '' ? (float)$_POST['lng_destino'
         require __DIR__ . '/../Views/admin/despacho.php';
     }
 
-    // Comentário removido por corrupção de codificação.
-    // Salvaguarda para quando o rastreamento do cliente/guincho ou o próprio
-    // Comentário removido por corrupção de codificação.
-    // para sempre (pedidoAlterarStatus() aplica geofence/evidência também
+    // Coment�rio removido por corrup��o de codifica��o.
+    // Salvaguarda para quando o rastreamento do cliente/guincho ou o pr�prio
+    // Coment�rio removido por corrup��o de codifica��o.
+    // para sempre (pedidoAlterarStatus() aplica geofence/evid�ncia tamb�m
     // para admin, sem bypass). Ver migration_conclusao_manual_v1.sql.
     public function pedidoConcluirManual(): void
     {
@@ -2689,7 +2768,7 @@ $lngDestino = ($_POST['lng_destino'] ?? '') !== '' ? (float)$_POST['lng_destino'
         $senha = (string)($_POST['senha'] ?? '');
 
         if (!$pedidoId || $justificativa === '' || $senha === '') {
-            $_SESSION['_flash'][] = ['message' => 'Dados incompletos: justificativa e senha são obrigatórias.', 'type' => 'error'];
+            $_SESSION['_flash'][] = ['message' => 'Dados incompletos: justificativa e senha s�o obrigat�rias.', 'type' => 'error'];
             $this->redirect("/admin/pedido/{$pedidoId}");
         }
 
@@ -2719,8 +2798,8 @@ $lngDestino = ($_POST['lng_destino'] ?? '') !== '' ? (float)$_POST['lng_destino'
         $result = PedidoTransitionService::concludeManuallyByAdmin($pedidoId, (int)$usuario['id'], $justificativa, $comprovantes);
         if ($result->ok) {
             Logger::log(Logger::LEVEL_WARN, 'AdminController', 'pedidoConcluirManual', 'admin',
-                "Pedido #{$pedidoId} concluído MANUALMENTE por admin {$usuario['id']} (GPS/servidor indisponível). Justificativa: {$justificativa}");
-            $_SESSION['_flash'][] = ['message' => 'Pedido concluído manualmente. Fica pendente de revisão de auditoria.', 'type' => 'success'];
+                "Pedido #{$pedidoId} conclu�do MANUALMENTE por admin {$usuario['id']} (GPS/servidor indispon�vel). Justificativa: {$justificativa}");
+            $_SESSION['_flash'][] = ['message' => 'Pedido conclu�do manualmente. Fica pendente de revis�o de auditoria.', 'type' => 'success'];
         } else {
             $_SESSION['_flash'][] = ['message' => (string)$result->error, 'type' => 'error'];
         }
@@ -2743,7 +2822,7 @@ $lngDestino = ($_POST['lng_destino'] ?? '') !== '' ? (float)$_POST['lng_destino'
 
         $result = PedidoTransitionService::revisarConclusaoManual($pedidoId, (int)$usuario['id'], $veredito, $nota);
         $_SESSION['_flash'][] = $result->ok
-            ? ['message' => 'Revisão registrada: ' . $veredito . '.', 'type' => 'success']
+            ? ['message' => 'Revis�o registrada: ' . $veredito . '.', 'type' => 'success']
             : ['message' => (string)$result->error, 'type' => 'error'];
 
         $this->redirect("/admin/pedido/{$pedidoId}");
@@ -2760,8 +2839,8 @@ $lngDestino = ($_POST['lng_destino'] ?? '') !== '' ? (float)$_POST['lng_destino'
         $result = PixService::reprocessar($pedidoId);
         $msg = !empty($result['sucesso']) ? 'pix_reprocessado' : 'pix_falha';
         // Tela de Saques (Pacote L2.3) reaproveita esta mesma action; quando
-        // o reprocessamento vem de lá, volta pra lá em vez do detalhe do
-        // Comentário removido por corrupção de codificação.
+        // o reprocessamento vem de l�, volta pra l� em vez do detalhe do
+        // Coment�rio removido por corrup��o de codifica��o.
         if ((string)($_POST['retorno'] ?? '') === 'saques') {
             $this->redirect("/admin/saques?msg={$msg}");
             return;
@@ -2769,7 +2848,7 @@ $lngDestino = ($_POST['lng_destino'] ?? '') !== '' ? (float)$_POST['lng_destino'
         $this->redirect("/admin/pedido/{$pedidoId}?msg={$msg}");
     }
 
-    // Comentário removido por corrupção de codificação.
+    // Coment�rio removido por corrup��o de codifica��o.
     public function usuarioEditar(int $id): void
     {
         AuthService::requireAuth("admin");
@@ -2784,9 +2863,9 @@ $lngDestino = ($_POST['lng_destino'] ?? '') !== '' ? (float)$_POST['lng_destino'
             $extra = $stmtOficina->fetch(PDO::FETCH_ASSOC) ?: null;
         }
 
-        // Ficha 360°: relações existentes reunidas sem duplicar cadastros.
+        // Ficha 360�: rela��es existentes reunidas sem duplicar cadastros.
         $veiculosAssociados = Veiculo::listarPorUsuario($id);
-        // Oficinas de parceiros (canônica), não oficinas_favoritas do cliente.
+        // Oficinas de parceiros (can�nica), n�o oficinas_favoritas do cliente.
         $stmtOficinasAssoc = getPDO()->prepare('SELECT * FROM oficinas WHERE usuario_id = ? ORDER BY id DESC');
         $stmtOficinasAssoc->execute([$id]);
         $oficinasAssociadas = $stmtOficinasAssoc->fetchAll(PDO::FETCH_ASSOC) ?: [];
@@ -2871,17 +2950,17 @@ $lngDestino = ($_POST['lng_destino'] ?? '') !== '' ? (float)$_POST['lng_destino'
         $this->redirect("/admin/usuario/editar/{$id}?salvo=1");
     }
 
-    // Comentário removido por corrupção de codificação.
+    // Coment�rio removido por corrup��o de codifica��o.
     public function guinchos(): void
     {
         AuthService::requireAuth("admin");
         $pendentes = Guincho::listarPendentes();
 
-        // Comentário removido por corrupção de codificação.
-        // estava "em breve"). Não é uma entidade nova: migration_prestador_tipo_v1.sql
-        // já modela isso via guinchos.oferece_reboque (0 = especialista tipo
-        // chaveiro/elétrica/pneu, sem aprovação de reboque; 1 = guincheiro
-        // tradicional). Reaproveita 100% a mesma listagem/tela, só filtrando.
+        // Coment�rio removido por corrup��o de codifica��o.
+        // estava "em breve"). N�o � uma entidade nova: migration_prestador_tipo_v1.sql
+        // j� modela isso via guinchos.oferece_reboque (0 = especialista tipo
+        // chaveiro/el�trica/pneu, sem aprova��o de reboque; 1 = guincheiro
+        // tradicional). Reaproveita 100% a mesma listagem/tela, s� filtrando.
         $tipoFiltro = (string)($_GET['tipo'] ?? '');
         $whereTipo = '';
         if ($tipoFiltro === 'reboque') {
@@ -2898,11 +2977,11 @@ $lngDestino = ($_POST['lng_destino'] ?? '') !== '' ? (float)$_POST['lng_destino'
             $aprovados = $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (Throwable $e) { $aprovados = []; }
 
-        // §GUINCHOS-SHELL-01: se a página foi aberta com ?guincho_id= (vindo
+        // �GUINCHOS-SHELL-01: se a p�gina foi aberta com ?guincho_id= (vindo
         // do link "Ver Perfil" da fila de pendentes, ou de um favorito
-        // Comentário removido por corrupção de codificação.
+        // Coment�rio removido por corrup��o de codifica��o.
         // aprovados (ex.: ainda pendente, ou filtrado pelo tipo atual),
-        // Comentário removido por corrupção de codificação.
+        // Coment�rio removido por corrup��o de codifica��o.
         // acharia o item pra selecionar.
         $guinchoIdSolicitado = (int)($_GET['guincho_id'] ?? 0);
         if ($guinchoIdSolicitado > 0 && !in_array($guinchoIdSolicitado, array_column($aprovados, 'id'), true)) {
@@ -2919,16 +2998,16 @@ $lngDestino = ($_POST['lng_destino'] ?? '') !== '' ? (float)$_POST['lng_destino'
     }
 
     /**
-     * §PRESTADORES-HUB-01: módulo único "Prestadores" fundindo Guinchos +
+     * �PRESTADORES-HUB-01: m�dulo �nico "Prestadores" fundindo Guinchos +
      * Especialistas + Guinchos pendentes + Documentos em duas abas (o
-     * detalhe de aprovado/pendente já usa o MESMO partial de sempre,
-     * guincho_detalhe_workspace.php, que já sabia renderizar o card de
+     * detalhe de aprovado/pendente j� usa o MESMO partial de sempre,
+     * guincho_detalhe_workspace.php, que j� sabia renderizar o card de
       *
      * worklist). As 4 rotas antigas (/admin/guinchos, /admin/guinchos?tipo=,
      * /admin/guinchospendentes, /admin/documentos) continuam funcionando
-     * exatamente como antes (não foram tocadas), só deixam de aparecer como
+     * exatamente como antes (n�o foram tocadas), s� deixam de aparecer como
       *
-     * mesma lógica aplicada aqui pro bloco Claude.
+     * mesma l�gica aplicada aqui pro bloco Claude.
      */
     public function prestadores(): void
     {
@@ -2956,7 +3035,7 @@ $lngDestino = ($_POST['lng_destino'] ?? '') !== '' ? (float)$_POST['lng_destino'
         // Aba "Prestadores": aprovados (filtrados por tipo, se houver) +
         // pendentes sempre no fim da lista, marcados com _pendente=true pra
         // a view desenhar o badge certo e o filtro "Pendentes" poder isolar
-        // só eles no client-side.
+        // s� eles no client-side.
         $worklistPrestadores = $aprovados;
         foreach ($pendentes as $p) {
             $p['_pendente'] = true;
@@ -2973,8 +3052,8 @@ $lngDestino = ($_POST['lng_destino'] ?? '') !== '' ? (float)$_POST['lng_destino'
             }
         }
 
-        // Aba "Documentos": mesma query/cálculo de cnh_status já usado em
-        // Comentário removido por corrupção de codificação.
+        // Aba "Documentos": mesma query/c�lculo de cnh_status j� usado em
+        // Coment�rio removido por corrup��o de codifica��o.
         // vencimento em dois lugares.
         $statusFiltro = (string)($_GET['status'] ?? '');
         try {
@@ -2987,8 +3066,8 @@ $lngDestino = ($_POST['lng_destino'] ?? '') !== '' ? (float)$_POST['lng_destino'
             $documentos = $stmtDoc->fetchAll(PDO::FETCH_ASSOC);
         } catch (Throwable $e) { $documentos = []; }
 
-        // Comentário removido por corrupção de codificação.
-        // pra manter os dois idênticos, já que documentos() não foi tocado
+        // Coment�rio removido por corrup��o de codifica��o.
+        // pra manter os dois id�nticos, j� que documentos() n�o foi tocado
         // (continua funcionando como rota de compatibilidade independente).
         $hoje = new DateTimeImmutable('today');
         $limite = $hoje->modify('+30 days');
@@ -3105,7 +3184,7 @@ $lngDestino = ($_POST['lng_destino'] ?? '') !== '' ? (float)$_POST['lng_destino'
         $this->redirect("/admin/usuario/editar/{$g["usuario_id"]}?salvo=1");
     }
 
-    // Comentário removido por corrupção de codificação.
+    // Coment�rio removido por corrup��o de codifica��o.
     public function veiculosAjax(): void
     {
         AuthService::requireAuth('admin');
@@ -3118,8 +3197,8 @@ $lngDestino = ($_POST['lng_destino'] ?? '') !== '' ? (float)$_POST['lng_destino'
         exit;
     }
 
-    // GET /admin/usuario/senha - redireciona para lista de usuários
-    // A alteração de senha é feita dentro da tela de edição do usuário via POST
+    // GET /admin/usuario/senha - redireciona para lista de usu�rios
+    // A altera��o de senha � feita dentro da tela de edi��o do usu�rio via POST
     public function clientesAjax(): void
     {
         AuthService::requireAuth('admin');
@@ -3156,7 +3235,7 @@ $lngDestino = ($_POST['lng_destino'] ?? '') !== '' ? (float)$_POST['lng_destino'
         $this->redirect('/admin/usuarios?info=senha_via_editar');
     }
 
-    // Comentário removido por corrupção de codificação.
+    // Coment�rio removido por corrup��o de codifica��o.
 
     public function envGovernanca(): void
     {
@@ -3179,13 +3258,13 @@ $lngDestino = ($_POST['lng_destino'] ?? '') !== '' ? (float)$_POST['lng_destino'
         $sensivel = ['DB_PASS','MP_ACCESS_TOKEN','MP_PUBLIC_KEY','MP_WEBHOOK_SECRET',
                      'PS_TOKEN','SMTP_PASS','GOOGLE_CLIENT_SECRET','ENCRYPTION_KEY','SIMULATION_ADMIN_TOKEN'];
 
-        // Mescla: campos sensíveis em branco = manter atual
+        // Mescla: campos sens�veis em branco = manter atual
         $merged = $envAtual;
         foreach ($novos as $chave => $valor) {
             $chave = preg_replace('/[^A-Z0-9_]/', '', strtoupper((string)$chave));
             if ($chave === '') continue;
             if (in_array($chave, $sensivel, true) && trim((string)$valor) === '') {
-                continue; // mantém valor atual
+                continue; // mant�m valor atual
             }
             $merged[$chave] = trim((string)$valor);
         }
@@ -3195,7 +3274,7 @@ $lngDestino = ($_POST['lng_destino'] ?? '') !== '' ? (float)$_POST['lng_destino'
             $this->redirect('/admin/configuracoes?msg=erro_validacao&env_errors=' . rawurlencode(implode('|', $validation['critical'])) . '#ambiente');
         }
 
-        // Gera conteúdo novo
+        // Gera conte�do novo
         $grupos = [
             'Banco de dados'        => ['DB_HOST','DB_NAME','DB_USER','DB_PASS'],
             'Aplicacao'             => ['APP_NAME','APP_URL','APP_ENV','APP_DEBUG','HTTPS_ONLY','FORCE_BASEPATH'],
@@ -3222,7 +3301,7 @@ $lngDestino = ($_POST['lng_destino'] ?? '') !== '' ? (float)$_POST['lng_destino'
             }
             $linhas[] = '';
         }
-        // Chaves extras não classificadas
+        // Chaves extras n�o classificadas
         foreach ($merged as $c => $v) {
             if (!in_array($c, $todasChavesOrdenadas, true)) {
                 $linhas[] = $c . '=' . ConfigSecurityService::formatManagedEnvValue((string)$v);
@@ -3230,7 +3309,7 @@ $lngDestino = ($_POST['lng_destino'] ?? '') !== '' ? (float)$_POST['lng_destino'
         }
         $conteudo = implode("\n", $linhas) . "\n";
 
-        // Escrita atômica: tmp → rename
+        // Escrita at�mica: tmp ? rename
         $tmpPath = $envPath . '.tmp.' . time();
         if (file_put_contents($tmpPath, $conteudo, LOCK_EX) === false) {
             $this->redirect('/admin/configuracoes?msg=erro_write#ambiente');
@@ -3243,7 +3322,7 @@ $lngDestino = ($_POST['lng_destino'] ?? '') !== '' ? (float)$_POST['lng_destino'
         }
         rename($tmpPath, $envPath);
 
-        // Comentário removido por corrupção de codificação.
+        // Coment�rio removido por corrup��o de codifica��o.
         $pdo = getPDO();
         foreach ($merged as $chave => $valorNovo) {
             $valorAntigo = $envAtual[$chave] ?? null;
@@ -3261,8 +3340,8 @@ $lngDestino = ($_POST['lng_destino'] ?? '') !== '' ? (float)$_POST['lng_destino'
                      VALUES (?, ?, ?, ?, ?, NOW())"
                 )->execute([$adminId, $chave, $mascarado, $acao, $hash]);
             } catch (Throwable $e) {
-                // Auditoria é aditiva: a tabela pode não existir ainda em bancos antigos
-                // Comentário removido por corrupção de codificação.
+                // Auditoria � aditiva: a tabela pode n�o existir ainda em bancos antigos
+                // Coment�rio removido por corrup��o de codifica��o.
                 Logger::exception(__CLASS__, __FUNCTION__, 'env_auditoria_insert', $e, [
                     'chave' => $chave, 'admin_id' => $adminId,
                 ]);
@@ -3427,7 +3506,7 @@ $lngDestino = ($_POST['lng_destino'] ?? '') !== '' ? (float)$_POST['lng_destino'
             'a_caminho' => 'A Caminho',
             'no_local' => 'No Local',
             'em_reboque' => 'Em Reboque',
-            'concluido' => 'Concluído',
+            'concluido' => 'Conclu�do',
             'cancelado' => 'Cancelado',
             default => ucfirst(str_replace('_', ' ', $status)),
         };
@@ -3435,7 +3514,7 @@ $lngDestino = ($_POST['lng_destino'] ?? '') !== '' ? (float)$_POST['lng_destino'
 
     public function envAuditoria(): void
     {
-        // Ponte de compatibilidade para chamadas internas e integrações antigas.
+        // Ponte de compatibilidade para chamadas internas e integra��es antigas.
         (new AdminEnvAuditController())->index();
     }
 
@@ -3458,15 +3537,15 @@ $lngDestino = ($_POST['lng_destino'] ?? '') !== '' ? (float)$_POST['lng_destino'
         return empty($result) ? null : $result;
     }
 
-    // Comentário removido por corrupção de codificação.
+    // Coment�rio removido por corrup��o de codifica��o.
 
     public function health(): void
     {
-        // Ponte de compatibilidade para chamadas internas e integrações antigas.
+        // Ponte de compatibilidade para chamadas internas e integra��es antigas.
         (new AdminHealthController())->health();
     }
 
-    // Comentário removido por corrupção de codificação.
+    // Coment�rio removido por corrup��o de codifica��o.
 
     public function simulador(): void
     {
@@ -3529,7 +3608,7 @@ $lngDestino = ($_POST['lng_destino'] ?? '') !== '' ? (float)$_POST['lng_destino'
 
         try {
             $runId = PlaywrightRunnerService::queue($config, (int)($usuario['id'] ?? 0));
-            Logger::log(Logger::LEVEL_INFO, 'AdminController', 'qaExecutar', 'qa', 'Execução Playwright enfileirada.', [
+            Logger::log(Logger::LEVEL_INFO, 'AdminController', 'qaExecutar', 'qa', 'Execu��o Playwright enfileirada.', [
                 'run_id' => $runId,
                 'suite' => $config['suite'],
                 'browser' => $config['browser'],
@@ -3539,7 +3618,7 @@ $lngDestino = ($_POST['lng_destino'] ?? '') !== '' ? (float)$_POST['lng_destino'
             Logger::log(Logger::LEVEL_ERROR, 'AdminController', 'qaExecutar', 'qa', 'Falha ao enfileirar Playwright.', [
                 'erro' => $e->getMessage(),
             ]);
-            $this->setFlashMessage('Falha ao enfileirar execução Playwright: ' . $e->getMessage(), 'error');
+            $this->setFlashMessage('Falha ao enfileirar execu��o Playwright: ' . $e->getMessage(), 'error');
             $this->redirect('/admin/simulador');
         }
     }
@@ -3560,7 +3639,7 @@ $lngDestino = ($_POST['lng_destino'] ?? '') !== '' ? (float)$_POST['lng_destino'
             $run = SimulationRun::buscarPorRunId($runId);
         } catch (Throwable $e) {
             Logger::log(Logger::LEVEL_ERROR, 'AdminController', 'simuladorResultado', 'qa',
-                'Falha ao carregar execução do simulador.', [
+                'Falha ao carregar execu��o do simulador.', [
                     'run_id' => $runId,
                     'erro' => $e->getMessage(),
                 ]);
@@ -3569,15 +3648,15 @@ $lngDestino = ($_POST['lng_destino'] ?? '') !== '' ? (float)$_POST['lng_destino'
             exit;
         }
 
-        if (!$run) { http_response_code(404); echo '<h1>404 — Simulação não encontrada</h1>'; exit; }
+        if (!$run) { http_response_code(404); echo '<h1>404 - Simula��o n�o encontrada</h1>'; exit; }
 
         try {
             $steps = SimulationStep::listarPorRun($runId);
         } catch (Throwable $e) {
             $steps = [];
-            $runWarnings[] = 'Não foi possível carregar as fases desta execução: ' . $e->getMessage();
+            $runWarnings[] = 'N�o foi poss�vel carregar as fases desta execu��o: ' . $e->getMessage();
             Logger::log(Logger::LEVEL_WARN, 'AdminController', 'simuladorResultado', 'qa',
-                'Falha ao carregar fases da execução.', [
+                'Falha ao carregar fases da execu��o.', [
                     'run_id' => $runId,
                     'erro' => $e->getMessage(),
                 ]);
@@ -3587,9 +3666,9 @@ $lngDestino = ($_POST['lng_destino'] ?? '') !== '' ? (float)$_POST['lng_destino'
             $artifacts = SimulationArtifact::listarPorRun($runId);
         } catch (Throwable $e) {
             $artifacts = [];
-            $runWarnings[] = 'Não foi possível carregar os artefatos desta execução: ' . $e->getMessage();
+            $runWarnings[] = 'N�o foi poss�vel carregar os artefatos desta execu��o: ' . $e->getMessage();
             Logger::log(Logger::LEVEL_WARN, 'AdminController', 'simuladorResultado', 'qa',
-                'Falha ao carregar artefatos da execução.', [
+                'Falha ao carregar artefatos da execu��o.', [
                     'run_id' => $runId,
                     'erro' => $e->getMessage(),
                 ]);
@@ -3636,7 +3715,7 @@ $lngDestino = ($_POST['lng_destino'] ?? '') !== '' ? (float)$_POST['lng_destino'
         }
 
         $ok = PlaywrightRunnerService::cancel($runId);
-        $this->setFlashMessage($ok ? 'Execução cancelada.' : 'Não foi possível cancelar esta execução.', $ok ? 'success' : 'error');
+        $this->setFlashMessage($ok ? 'Execu��o cancelada.' : 'N�o foi poss�vel cancelar esta execu��o.', $ok ? 'success' : 'error');
         $this->redirect('/admin/simulador/' . $runId);
     }
 
@@ -3648,14 +3727,14 @@ $lngDestino = ($_POST['lng_destino'] ?? '') !== '' ? (float)$_POST['lng_destino'
         $artifact = SimulationArtifact::buscarPorId($artifactId);
         if (!$artifact || (string)($artifact['run_id'] ?? '') !== $runId) {
             http_response_code(404);
-            echo '<h1>404 — Artefato não encontrado</h1>';
+            echo '<h1>404 - Artefato n�o encontrado</h1>';
             exit;
         }
 
         $path = (string)($artifact['private_path'] ?? '');
         if ($path === '' || !is_file($path)) {
             http_response_code(404);
-            echo '<h1>404 — Arquivo do artefato não encontrado</h1>';
+            echo '<h1>404 - Arquivo do artefato n�o encontrado</h1>';
             exit;
         }
 
@@ -3668,7 +3747,7 @@ $lngDestino = ($_POST['lng_destino'] ?? '') !== '' ? (float)$_POST['lng_destino'
 
     public function logsV2(): void
     {
-        // Ponte de compatibilidade para chamadas internas e integrações antigas.
+        // Ponte de compatibilidade para chamadas internas e integra��es antigas.
         (new AdminLogsController())->index();
     }
 
@@ -3690,7 +3769,7 @@ $lngDestino = ($_POST['lng_destino'] ?? '') !== '' ? (float)$_POST['lng_destino'
         exit;
     }
 
-    // Comentário removido por corrupção de codificação.
+    // Coment�rio removido por corrup��o de codifica��o.
     private function processarUpload(string $campo): ?string
     {
         if (!isset($_FILES[$campo]) || $_FILES[$campo]['error'] !== UPLOAD_ERR_OK) return null;
@@ -3706,22 +3785,22 @@ $lngDestino = ($_POST['lng_destino'] ?? '') !== '' ? (float)$_POST['lng_destino'
         return null;
     }
 
-    // Comentário removido por corrupção de codificação.
+    // Coment�rio removido por corrup��o de codifica��o.
     /**
       *
      * painel do cliente ("Reboque agora", "Bateria", etc.), agora
-     * administráveis em vez de fixos no código-fonte.
+     * administr�veis em vez de fixos no c�digo-fonte.
      */
     public function servicos(): void
     {
         AuthService::requireAuth('admin');
-        // Comentário removido por corrupção de codificação.
-        // renderizar o catálogo cosmético legado (catalogo_servicos, atalhos
-        // do painel do cliente) e passa a apontar para o catálogo estruturado
-        // real (service_types), fonte única de domínio/tarifa/compatibilidade
+        // Coment�rio removido por corrup��o de codifica��o.
+        // renderizar o cat�logo cosm�tico legado (catalogo_servicos, atalhos
+        // do painel do cliente) e passa a apontar para o cat�logo estruturado
+        // real (service_types), fonte �nica de dom�nio/tarifa/compatibilidade
         // com o reboque protegido. As rotas servico/* legadas seguem existindo
-        // (a tela de "novo pedido" do cliente ainda lê catalogo_servicos), mas
-        // não há mais entrada de admin separada para elas.
+        // (a tela de "novo pedido" do cliente ainda l� catalogo_servicos), mas
+        // n�o h� mais entrada de admin separada para elas.
         $this->redirect('/admin/catalogo-servicos/tipos');
     }
 
@@ -3848,8 +3927,8 @@ $lngDestino = ($_POST['lng_destino'] ?? '') !== '' ? (float)$_POST['lng_destino'
     /**
       *
       *
-     * saldo retido nem fluxo de saque manual (decisão confirmada com o
-     * usuário; ver docblock de CarteiraService). Toda falha de query é
+     * saldo retido nem fluxo de saque manual (decis�o confirmada com o
+     * usu�rio; ver docblock de CarteiraService). Toda falha de query �
      * exposta explicitamente na tela (nunca "R$ 0,00" silencioso).
      */
     public function carteiras(): void
@@ -3869,8 +3948,8 @@ $lngDestino = ($_POST['lng_destino'] ?? '') !== '' ? (float)$_POST['lng_destino'
     }
 
     /**
-     * §CARTEIRAS-SHELL-01: /admin/carteiras agora é uma página só (shell-ops,
-     * lista + workspace, mesmo padrão de /admin/central e
+     * �CARTEIRAS-SHELL-01: /admin/carteiras agora � uma p�gina s� (shell-ops,
+     * lista + workspace, mesmo padr�o de /admin/central e
      * /admin/catalogo-servicos/capacidades). Esta rota antiga
      * (/admin/carteira/{id}) vira um redirect pra manter links/favoritos
       *
@@ -3885,9 +3964,9 @@ $lngDestino = ($_POST['lng_destino'] ?? '') !== '' ? (float)$_POST['lng_destino'
     /**
       *
      * workspace de /admin/carteiras ao selecionar um item na lista. Evita
-     * reintroduzir N+1 (CarteiraService::resumoTodosGuincheiros() já avisa
-     * explicitamente sobre isso): só busca o detalhe do guincheiro que o
-     * admin de fato clicou, não de todos de uma vez.
+     * reintroduzir N+1 (CarteiraService::resumoTodosGuincheiros() j� avisa
+     * explicitamente sobre isso): s� busca o detalhe do guincheiro que o
+     * admin de fato clicou, n�o de todos de uma vez.
      */
     public function carteiraDetalheJson(int $guinchoId): void
     {
@@ -3907,7 +3986,7 @@ $lngDestino = ($_POST['lng_destino'] ?? '') !== '' ? (float)$_POST['lng_destino'
 
         if (!$guincho) {
             http_response_code(404);
-            echo json_encode(['ok' => false, 'erro' => 'Guincheiro não encontrado.']);
+            echo json_encode(['ok' => false, 'erro' => 'Guincheiro n�o encontrado.']);
             exit;
         }
 
@@ -3927,9 +4006,9 @@ $lngDestino = ($_POST['lng_destino'] ?? '') !== '' ? (float)$_POST['lng_destino'
 
     /**
       *
-     * hoje (o repasse Pix já é automático), esta tela é o painel operacional
+     * hoje (o repasse Pix j� � autom�tico), esta tela � o painel operacional
      * real equivalente: repasses pendentes/processando/com falha, com o
-     * botão de reprocessar reaproveitando 100% a action já existente
+     * bot�o de reprocessar reaproveitando 100% a action j� existente
      * (AdminController::pixReprocessar / PixService::reprocessar).
      */
     public function saques(): void
@@ -3948,8 +4027,8 @@ $lngDestino = ($_POST['lng_destino'] ?? '') !== '' ? (float)$_POST['lng_destino'
         require __DIR__ . '/../Views/admin/saques.php';
     }
 
-    // Comentário removido por corrupção de codificação.
-    // adicional de tarifa). Mesmo padrão de servicos()/servicoSalvar() acima.
+    // Coment�rio removido por corrup��o de codifica��o.
+    // adicional de tarifa). Mesmo padr�o de servicos()/servicoSalvar() acima.
     public function feriados(): void
     {
         AuthService::requireAuth('admin');
@@ -4004,9 +4083,9 @@ $lngDestino = ($_POST['lng_destino'] ?? '') !== '' ? (float)$_POST['lng_destino'
         $this->redirect('/admin/feriados?removido=1');
     }
 
-    // Comentário removido por corrupção de codificação.
+    // Coment�rio removido por corrup��o de codifica��o.
     // vinculado a uma cidade no cadastro (AuthService::registroGuincho);
-    // cliente não tem esse vínculo. Mesmo padrão de feriados() acima.
+    // cliente n�o tem esse v�nculo. Mesmo padr�o de feriados() acima.
     public function cidades(): void
     {
         AuthService::requireAuth('admin');
@@ -4053,9 +4132,9 @@ $lngDestino = ($_POST['lng_destino'] ?? '') !== '' ? (float)$_POST['lng_destino'
     }
 
     /**
-     * §PRECO-POR-CIDADE-01: grava o centro geográfico + raio de abrangência
+     * �PRECO-POR-CIDADE-01: grava o centro geogr�fico + raio de abrang�ncia
       *
-     * precificação (Cidade::resolverPorCoordenada(), consumido por
+     * precifica��o (Cidade::resolverPorCoordenada(), consumido por
      * TarifaService e ServicePricingRule). Campos opcionais: deixar em
      * branco remove a geo (a cidade volta a nunca ser resolvida por
       *
@@ -4107,7 +4186,7 @@ $lngDestino = ($_POST['lng_destino'] ?? '') !== '' ? (float)$_POST['lng_destino'
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
 
         if (!$row || !password_verify($senha, (string)($row['senha_hash'] ?? ''))) {
-            Logger::log(Logger::LEVEL_WARN, __CLASS__, __FUNCTION__, 'admin', 'Tentativa de exclusão de cidade com senha inválida', [
+            Logger::log(Logger::LEVEL_WARN, __CLASS__, __FUNCTION__, 'admin', 'Tentativa de exclus�o de cidade com senha inv�lida', [
                 'admin_id' => (int)$usuario['id'],
                 'cidade_id' => $cidadeId,
                 'justificativa' => $justificativa,
@@ -4117,7 +4196,7 @@ $lngDestino = ($_POST['lng_destino'] ?? '') !== '' ? (float)$_POST['lng_destino'
 
         try {
             $resultado = Cidade::removerComDependencias($cidadeId);
-            Logger::log(Logger::LEVEL_WARN, __CLASS__, __FUNCTION__, 'admin', 'Cidade excluída com limpeza de dependências', [
+            Logger::log(Logger::LEVEL_WARN, __CLASS__, __FUNCTION__, 'admin', 'Cidade exclu�da com limpeza de depend�ncias', [
                 'admin_id' => (int)$usuario['id'],
                 'cidade_id' => $cidadeId,
                 'cidade_nome' => (string)($resultado['cidade_nome'] ?? ''),
@@ -4138,8 +4217,8 @@ $lngDestino = ($_POST['lng_destino'] ?? '') !== '' ? (float)$_POST['lng_destino'
         }
     }
     
-        // Comentário removido por corrupção de codificação.
-    /** Documentação do método. */
+        // Coment�rio removido por corrup��o de codifica��o.
+    /** Documenta��o do m�todo. */
     public function pedidoNovoV2(): void
     {
         AuthService::requireAuth('admin');
@@ -4161,7 +4240,7 @@ $lngDestino = ($_POST['lng_destino'] ?? '') !== '' ? (float)$_POST['lng_destino'
         require __DIR__ . '/../Views/admin/pedidonovo_etapa1.php';
     }
 
-    /** Documentação do método. */
+    /** Documenta��o do m�todo. */
     public function pedidoNovoContexto(): void
     {
         AuthService::requireAuth('admin');
@@ -4282,11 +4361,14 @@ $lngDestino = ($_POST['lng_destino'] ?? '') !== '' ? (float)$_POST['lng_destino'
         }
 
         $clienteId = (int)($_POST['cliente_id'] ?? 0);
+        $tipoPost  = strtolower(trim((string)($_POST['tipo_veiculo'] ?? 'carro')));
+        $tipoMapa  = ['carro' => 'carro', 'moto' => 'moto', 'caminhonete' => 'caminhao', 'suv' => 'carro', 'van' => 'van'];
+        $tipo      = $tipoMapa[$tipoPost] ?? 'outro';
         $marca     = trim((string)($_POST['marca']  ?? ''));
         $modelo    = trim((string)($_POST['modelo'] ?? ''));
-        $ano       = (int)($_POST['ano'] ?? 0);
+        $ano       = (int)($_POST['ano'] ?? 0) ?: (int)date('Y');
         $placa     = strtoupper(preg_replace('/[^A-Z0-9]/i', '', (string)($_POST['placa'] ?? '')));
-        $cor       = trim((string)($_POST['cor'] ?? ''));
+        $cor       = trim((string)($_POST['cor'] ?? '')) ?: 'Não informado';
 
         if ($clienteId <= 0 || $marca === '' || $modelo === '') {
             echo json_encode(['ok' => false, 'erro' => 'Cliente, marca e modelo sao obrigatorios.']);
@@ -4301,14 +4383,18 @@ $lngDestino = ($_POST['lng_destino'] ?? '') !== '' ? (float)$_POST['lng_destino'
 
         try {
             $pdo = getPDO();
-            $pdo->prepare('INSERT INTO veiculos (usuario_id, marca, modelo, ano, placa, cor, criado_em) VALUES (?,?,?,?,?,?,NOW())')
+            if ($placa === '') {
+                $placa = 'TEMP' . strtoupper(substr(bin2hex(random_bytes(2)), 0, 4));
+            }
+            $pdo->prepare('INSERT INTO veiculos (usuario_id, marca, modelo, ano, placa, cor, tipo, criado_em) VALUES (?,?,?,?,?,?,?,NOW())')
                 ->execute([
                     $clienteId,
                     $marca,
                     $modelo,
-                    $ano > 0 ? $ano : null,
-                    $placa !== '' ? $placa : null,
-                    $cor !== '' ? $cor : null,
+                    $ano,
+                    $placa,
+                    $cor,
+                    $tipo,
                 ]);
             $veiculoId = (int)$pdo->lastInsertId();
         } catch (Throwable $e) {
@@ -4323,7 +4409,7 @@ $lngDestino = ($_POST['lng_destino'] ?? '') !== '' ? (float)$_POST['lng_destino'
         ], JSON_UNESCAPED_UNICODE);
         exit;
     }
-    /** Documentação do método. */
+    /** Documenta��o do m�todo. */
     public function pedidoNovoFunil(): void
     {
         AuthService::requireAuth('admin');
@@ -4331,7 +4417,7 @@ $lngDestino = ($_POST['lng_destino'] ?? '') !== '' ? (float)$_POST['lng_destino'
         if (!$ctx) {
             $this->redirect('/admin/pedido/novo/v2');
         }
-        // Expira contexto depois de 30min parado (mesma política do cliente)
+        // Expira contexto depois de 30min parado (mesma pol�tica do cliente)
         if (time() - (int)($ctx['criado_em'] ?? 0) > 1800) {
             unset($_SESSION['admin_pedido_ctx']);
             $this->redirect('/admin/pedido/novo/v2?erro=expirado');
@@ -4348,8 +4434,8 @@ $lngDestino = ($_POST['lng_destino'] ?? '') !== '' ? (float)$_POST['lng_destino'
         }
 
         $contexto = [
-            'cliente_nome'   => $cliente['nome'] ?? 'Cliente não identificado',
-            'veiculo_resumo' => $veiculoResumo ?: 'Veículo não informado',
+            'cliente_nome'   => $cliente['nome'] ?? 'Cliente n�o identificado',
+            'veiculo_resumo' => $veiculoResumo ?: 'Ve�culo n�o informado',
             'guincho_nome'   => $guincho['nome_operador'] ?? ($guincho['nome'] ?? null),
         ];
         $csrf_token = AuthService::gerarCsrfToken();
@@ -4560,5 +4646,5 @@ $lngDestino = ($_POST['lng_destino'] ?? '') !== '' ? (float)$_POST['lng_destino'
 }
 
 
-// Método helper: GET /admin/usuario/suspender redireciona com aviso
-// (ação real é POST)
+// M�todo helper: GET /admin/usuario/suspender redireciona com aviso
+// (a��o real � POST)

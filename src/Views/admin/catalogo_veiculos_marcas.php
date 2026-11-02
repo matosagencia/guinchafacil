@@ -11,7 +11,7 @@ $totalModelos = array_sum($contagemModelos);
 ?>
 <div class="main-wrapper shell admin-shell">
 <?php include __DIR__ . '/../layouts/sidebar_admin.php'; ?>
-<main class="main-content shell-main shell-content">
+<main class="main-content shell-main shell-content"><?php include __DIR__ . '/partials/_panel_topbar_admin.php'; ?>
 
     <div class="ops-topbar">
         <div class="ops-topbar__search"><i class="fas fa-magnifying-glass"></i><input type="search" id="marcasBusca" placeholder="Buscar marca" autocomplete="off" aria-label="Buscar marca"></div>

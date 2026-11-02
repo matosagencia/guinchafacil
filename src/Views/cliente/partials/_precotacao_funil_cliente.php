@@ -9,6 +9,15 @@ $veiculo = $veiculo ?? null;
 $triagemServiceType = $triagemServiceType ?? null;
 $veiculoCategoria = $veiculoCategoria ?? 'popular';
 $e = static fn($v) => htmlspecialchars((string)$v, ENT_QUOTES, 'UTF-8');
+
+// Fonte única: o formulário legado aprovado da pré-cotação pública.
+$legacyAction = $bp . '/cliente/pedido/criar';
+$legacyHidden = $veiculo ? [
+    'veiculo_id' => (int)$veiculo['id'],
+    'veiculo_categoria' => (string)$veiculoCategoria,
+] : [];
+require __DIR__ . '/../../public/partials/_precotacao_funil_legado.php';
+return;
 ?>
 <form method="post" action="<?= $e($bp) ?>/cliente/pedido/criar" class="row g-3" data-precotacao-form data-marketing-event="create_order">
     <input type="hidden" name="csrf_token" value="<?= $e($csrf_token) ?>">
@@ -97,6 +106,17 @@ $e = static fn($v) => htmlspecialchars((string)$v, ENT_QUOTES, 'UTF-8');
     </div>
 
     <div class="col-12" id="stage-cotacao" hidden>
+        <div class="card border-success mb-3" id="gfCotacaoResumo" aria-live="polite">
+            <div class="card-body">
+                <p class="text-uppercase small text-success fw-bold mb-1">Cotação disponível</p>
+                <h3 class="mb-2">Seu atendimento</h3>
+                <div class="d-flex justify-content-between align-items-center gap-3">
+                    <span id="gfCotacaoModalidade">Atendimento</span>
+                    <strong class="fs-3 text-success" id="gfCotacaoValor">R$ --</strong>
+                </div>
+                <small class="text-muted" id="gfCotacaoDetalhes">Valor estimado para a localização informada.</small>
+            </div>
+        </div>
         <button type="submit" class="btn-main w-100" id="gfBtnFinal">Confirmar pedido de socorro</button>
     </div>
 

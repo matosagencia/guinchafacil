@@ -5,7 +5,7 @@ include __DIR__ . '/../layouts/header.php';
 <link rel="stylesheet" href="<?php echo htmlspecialchars($bp); ?>/public/assets/css/pages/client-oficinas.css">
 <div class="main-wrapper">
 <?php include __DIR__ . '/../layouts/sidebar_cliente.php'; ?>
-<main class="main-content">
+<main class="main-content"><?php include __DIR__ . '/partials/_panel_topbar_cliente.php'; ?>
 
     <header class="page-head mb-4">
         <div>

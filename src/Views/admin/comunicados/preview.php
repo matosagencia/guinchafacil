@@ -2,7 +2,7 @@
 $bp = defined('BASE_PATH') ? BASE_PATH : '';
 include __DIR__ . '/../../layouts/header.php';
 ?>
-<main class="main-content">
+<main class="main-content"><?php include __DIR__ . '/../partials/_panel_topbar_admin.php'; ?>
     <div class="card p-4">
         <h3 class="mb-3">Preview</h3>
         <?php if (!empty($item)): ?>

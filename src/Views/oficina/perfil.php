@@ -50,13 +50,14 @@ $bancos = [
                 <div class="col-md-4"><label class="form-label small">Telefone</label>
                     <input type="tel" name="telefone" id="inpTel" class="form-control" value="<?= htmlspecialchars((string)($oficina['telefone'] ?? '')) ?>"></div>
                 <div class="col-12"><label class="form-label small">Endereço completo</label>
-                    <input type="text" name="endereco" class="form-control" value="<?= htmlspecialchars((string)$oficina['endereco']) ?>" required></div>
+                    <input type="text" name="endereco" class="form-control" value="<?= htmlspecialchars((string)$oficina['endereco']) ?>" readonly aria-describedby="enderecoAjuda"></div>
+                <div id="enderecoAjuda" class="form-text">O endereço e as coordenadas são definidos no cadastro. Solicite alteração ao administrador.</div>
                 <div class="col-md-4"><label class="form-label small">Latitude</label>
-                    <input type="text" name="latitude" id="latitude" class="form-control" value="<?= htmlspecialchars((string)($oficina['latitude'] ?? '')) ?>"></div>
+                    <input type="text" name="latitude" id="latitude" class="form-control" value="<?= htmlspecialchars((string)($oficina['latitude'] ?? '')) ?>" readonly></div>
                 <div class="col-md-4"><label class="form-label small">Longitude</label>
-                    <input type="text" name="longitude" id="longitude" class="form-control" value="<?= htmlspecialchars((string)($oficina['longitude'] ?? '')) ?>"></div>
+                    <input type="text" name="longitude" id="longitude" class="form-control" value="<?= htmlspecialchars((string)($oficina['longitude'] ?? '')) ?>" readonly></div>
                 <div class="col-md-4 d-flex align-items-end">
-                    <button type="button" id="btnUsarGps" class="btn btn-outline-success w-100"><i class="fas fa-location-crosshairs me-1"></i>Usar GPS</button></div>
+                    <span class="form-text">Coordenadas capturadas no cadastro.</span></div>
                 <div class="col-12">
                     <label class="form-label small">Raio de atendimento: <strong id="raioLabel"><?= (int)($oficina['raio_atendimento_km'] ?? 10) ?> km</strong></label>
                     <input type="range" name="raio_atendimento_km" id="raioRange" class="form-range" min="1" max="100" step="1" value="<?= (int)($oficina['raio_atendimento_km'] ?? 10) ?>">

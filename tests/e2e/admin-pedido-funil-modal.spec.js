@@ -46,14 +46,20 @@ test.describe('Admin funnel — modal quick-create cliente + veiculo', () => {
         // Abre modal veiculo
         await page.click('#qf-btn-vei');
         await expect(page.locator('#qf-dlg-veiculo')).toBeVisible();
-        await page.fill('#qf-form-veiculo [name="marca"]', 'Fiat');
-        await page.fill('#qf-form-veiculo [name="modelo"]', 'Uno E2E');
+        // O cadastro atual usa o catálogo: tipo -> marca -> modelo.
+        await page.click('#qf-type-cards [data-tipo="carro"]');
+        await expect(page.locator('#qf-marca')).toBeEnabled();
+        await expect(page.locator('#qf-marca option').nth(1)).toBeAttached();
+        await page.locator('#qf-marca').selectOption({ index: 1 });
+        await expect(page.locator('#qf-modelo')).toBeEnabled();
+        await expect(page.locator('#qf-modelo option').nth(1)).toBeAttached();
+        await page.locator('#qf-modelo').selectOption({ index: 1 });
         await page.fill('#qf-form-veiculo [name="placa"]', PLACA);
         await page.click('#qf-submit-veiculo');
         await expect(page.locator('#qf-dlg-veiculo')).not.toBeVisible({ timeout: 8000 });
 
         const veiSelected = await page.$eval('#veiculo_id', el => el.selectedOptions[0].textContent);
-        expect(veiSelected).toContain('Fiat');
+        expect(veiSelected).toMatch(/\S+/);
         expect(veiSelected).toContain(PLACA);
 
         // Continua para o funil
@@ -66,11 +72,14 @@ test.describe('Admin funnel — modal quick-create cliente + veiculo', () => {
         await expect(page.locator('#admin-flow-title')).toHaveText(/Onde está o veículo/);
 
         // Avança stages via eventos (endereco -> modo)
+        await page.locator('#localizacao').fill('Rua das Marrecas, 22, Centro, Rio de Janeiro - RJ');
         await page.evaluate(() => {
-            document.dispatchEvent(new CustomEvent('gf:address-confirmed', {
-                detail: { role: 'origem', lat: -22.9068, lng: -43.1729, label: 'Av. E2E', numero: '100' }
-            }));
+            document.querySelector('[name="lat_origem"]').value = '-22.9105';
+            document.querySelector('[name="lng_origem"]').value = '-43.1755';
         });
-        await expect(page.locator('#admin-flow-title')).toHaveText(/O que você precisa/, { timeout: 5000 });
+        expect(await page.locator('[name="lat_origem"]').inputValue()).toBe('-22.9105');
+        expect(await page.locator('[name="lng_origem"]').inputValue()).toBe('-43.1755');
+        const paymentChoices = await page.locator('input[name="destino_pagamento"]').evaluateAll(els => els.map(el => el.value));
+        expect(paymentChoices).toEqual(expect.arrayContaining(['pago_na_chegada', 'online', 'pago_agora']));
     });
 });

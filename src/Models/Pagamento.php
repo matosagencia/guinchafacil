@@ -32,31 +32,31 @@ class Pagamento
 
      * §GATEWAY-STATUS-01: decodifica webhook_payload (o corpo bruto que o
 
-     * MercadoPago ou o PagSeguro devolveram no momento da aprovação —
+     * MercadoPago ou o PagSeguro devolveram no momento da aprova��o -
 
-     * gravado por Pagamento::aprovar()) e extrai um resumo legível de como o
+     * gravado por Pagamento::aprovar()) e extrai um resumo leg�vel de como o
 
      * gateway realmente processou o pagamento (status, motivo, forma de
 
-     * pagamento). Existe pra dar transparência no painel financeiro sobre o
+     * pagamento). Existe pra dar transpar�ncia no painel financeiro sobre o
 
      * que aconteceu do lado do gateway, sem exigir que o admin abra o
 
-     * dashboard do MP/PagSeguro pra entender uma cobrança.
+     * dashboard do MP/PagSeguro pra entender uma cobran�a.
 
      *
 
-     * Resiliente de propósito: os dois gateways têm formatos de payload
+     * Resiliente de prop�sito: os dois gateways t�m formatos de payload
 
-     * bem diferentes (MP é o objeto de pagamento da API v1; PagSeguro pode
+     * bem diferentes (MP � o objeto de pagamento da API v1; PagSeguro pode
 
-     * vir como XML já convertido em array ou como JSON da Orders API,
+     * vir como XML j� convertido em array ou como JSON da Orders API,
 
-     * dependendo do fluxo que gerou o registro — legado Checkout Pro/XML ou
+     * dependendo do fluxo que gerou o registro - legado Checkout Pro/XML ou
 
-     * transparente novo). Quando o formato não bate com nenhum padrão
+     * transparente novo). Quando o formato n�o bate com nenhum padr�o
 
-     * conhecido, cai num fallback que ainda mostra algo útil em vez de
+     * conhecido, cai num fallback que ainda mostra algo �til em vez de
 
      * quebrar a tela.
 
@@ -106,9 +106,9 @@ class Pagamento
 
         if (!is_array($decoded)) {
 
-            // Não é JSON (payload legado em outro formato) — ainda assim
+            // N�o � JSON (payload legado em outro formato) - ainda assim
 
-            // mostra os primeiros caracteres pra não ficar em branco.
+            // mostra os primeiros caracteres pra n�o ficar em branco.
 
             $vazio['detalhe'] = mb_substr($payloadRaw, 0, 200);
 
@@ -122,7 +122,7 @@ class Pagamento
 
         // payment_type_id ('pix', 'credit_card', 'debit_card', 'ticket'...),
 
-        // payment_method_id é a BANDEIRA/meio específico ('visa', 'master',
+        // payment_method_id � a BANDEIRA/meio espec�fico ('visa', 'master',
 
         // 'amex', 'elo', 'pix', 'bolbradesco'/'pec' pra boleto...).
 
@@ -148,11 +148,11 @@ class Pagamento
 
 
 
-        // Formato PagSeguro (Orders/Transactions API — status numérico +
+        // Formato PagSeguro (Orders/Transactions API - status num�rico +
 
         // paymentMethod.type/code). 'type' = categoria (CREDIT_CARD, PIX,
 
-        // BOLETO...), 'brand' = bandeira do cartão quando aplicável.
+        // BOLETO...), 'brand' = bandeira do cart�o quando aplic�vel.
 
         if (isset($decoded['status']) && (isset($decoded['paymentMethod']) || isset($decoded['charges']) || $metodo === 'pagseguro')) {
 
@@ -194,9 +194,9 @@ class Pagamento
 
 
 
-        // Formato não reconhecido — devolve o array decodificado bruto pra
+        // Formato n�o reconhecido - devolve o array decodificado bruto pra
 
-        // exibição em "ver detalhes", sem tentar adivinhar campos.
+        // exibi��o em "ver detalhes", sem tentar adivinhar campos.
 
         $vazio['bruto'] = $decoded;
 
@@ -282,15 +282,15 @@ class Pagamento
 
     /**
 
-     * Soma aprovada hoje por gateway — usado por GatewayRotationService pra
+     * Soma aprovada hoje por gateway - usado por GatewayRotationService pra
 
-     * decidir se o limite diário configurado pelo admin foi ultrapassado.
+     * decidir se o limite di�rio configurado pelo admin foi ultrapassado.
 
-     * Usa a mesma expressão de data que os relatórios já usam
+     * Usa a mesma express�o de data que os relat�rios j� usam
 
      * (paymentDateExpression: data_pagamento com fallback pra criado_em),
 
-     * pra não divergir do que o admin já vê em outros lugares do sistema.
+     * pra n�o divergir do que o admin j� v� em outros lugares do sistema.
 
      */
 
@@ -334,7 +334,7 @@ class Pagamento
 
     /**
      * Aplica o destino financeiro escolhido pelo administrador ao pedido.
-     * A mesma chamada e idempotente; trocar um destino jÃ¡ gravado Ã© bloqueado.
+     * A mesma chamada e idempotente; trocar um destino já gravado é bloqueado.
      *
      * @return array{ok:bool,erro:?string,link:?string,evento:string,pagamento_id:?int,idempotente?:bool}
      */
@@ -357,16 +357,16 @@ class Pagamento
             : null;
 
         if (!isset($eventos[$destino])) {
-            self::logErr($method, 'validate', 'Destino financeiro invÃ¡lido.', ['pedido_id' => $pedidoId, 'destino' => $destino]);
-            return ['ok' => false, 'erro' => 'Destino financeiro invÃ¡lido.', 'link' => null, 'evento' => '', 'pagamento_id' => null];
+            self::logErr($method, 'validate', 'Destino financeiro inválido.', ['pedido_id' => $pedidoId, 'destino' => $destino]);
+            return ['ok' => false, 'erro' => 'Destino financeiro inválido.', 'link' => null, 'evento' => '', 'pagamento_id' => null];
         }
         if ($pedidoId <= 0) {
-            self::logErr($method, 'validate', 'Pedido invÃ¡lido.', ['pedido_id' => $pedidoId]);
-            return ['ok' => false, 'erro' => 'Pedido invÃ¡lido.', 'link' => null, 'evento' => '', 'pagamento_id' => null];
+            self::logErr($method, 'validate', 'Pedido inválido.', ['pedido_id' => $pedidoId]);
+            return ['ok' => false, 'erro' => 'Pedido inválido.', 'link' => null, 'evento' => '', 'pagamento_id' => null];
         }
         if ($destino !== 'online' && $provedor !== null && $provedor !== '') {
-            self::logErr($method, 'validate', 'Provedor sÃ³ Ã© permitido para pagamento online.', ['pedido_id' => $pedidoId, 'destino' => $destino]);
-            return ['ok' => false, 'erro' => 'Provedor sÃ³ Ã© permitido para pagamento online.', 'link' => null, 'evento' => '', 'pagamento_id' => null];
+            self::logErr($method, 'validate', 'Provedor só é permitido para pagamento online.', ['pedido_id' => $pedidoId, 'destino' => $destino]);
+            return ['ok' => false, 'erro' => 'Provedor só é permitido para pagamento online.', 'link' => null, 'evento' => '', 'pagamento_id' => null];
         }
 
         $pdo = getPDO();
@@ -374,7 +374,7 @@ class Pagamento
         try {
             foreach (['forma_pagamento_escolhida', 'provedor_pagamento_escolhido', 'pagamento_destino_admin_id', 'pagamento_destino_registrado_em', 'pagamento_destino_evento'] as $column) {
                 if (!self::hasColumn('pedidos', $column)) {
-                    throw new LogicException('Migration admin_payment_destination_v1 nÃ£o aplicada: coluna pedidos.' . $column . ' ausente.');
+                    throw new LogicException('Migration admin_payment_destination_v1 não aplicada: coluna pedidos.' . $column . ' ausente.');
                 }
             }
 
@@ -386,7 +386,7 @@ class Pagamento
             $stmt->execute([':id' => $pedidoId]);
             $pedido = $stmt->fetch(PDO::FETCH_ASSOC);
             if (!$pedido) {
-                throw new RuntimeException('Pedido nÃ£o encontrado.');
+                throw new RuntimeException('Pedido não encontrado.');
             }
 
             $evento = $eventos[$destino];
@@ -403,17 +403,17 @@ class Pagamento
                     if ($started) {
                         $pdo->commit();
                     }
-                    self::logErr($method, 'idempotent', 'Destino financeiro jÃ¡ aplicado.', ['pedido_id' => $pedidoId, 'destino' => $destino]);
+                    self::logErr($method, 'idempotent', 'Destino financeiro já aplicado.', ['pedido_id' => $pedidoId, 'destino' => $destino]);
                     return ['ok' => true, 'erro' => null, 'link' => $destino === 'online' ? (defined('BASE_PATH') ? BASE_PATH : '') . '/pagamento/checkout/' . $pedidoId : null, 'evento' => (string)($pedido['pagamento_destino_evento'] ?: $evento), 'pagamento_id' => null, 'idempotente' => true];
                 }
-                throw new LogicException('O pedido jÃ¡ possui outro destino financeiro e nÃ£o pode ser alterado por reenvio.');
+                throw new LogicException('O pedido já possui outro destino financeiro e não pode ser alterado por reenvio.');
             }
 
             if ($destino === 'online') {
                 require_once __DIR__ . '/../Services/Payment/PaymentProviderFactory.php';
                 $ativo = PaymentProviderFactory::gatewayAtivoRaw();
                 if ($provedor === null || $provedor === '' || $provedor !== $ativo || PaymentProviderFactory::forGateway($ativo) === null) {
-                    throw new LogicException('O provedor online informado nÃ£o corresponde ao gateway ativo.');
+                    throw new LogicException('O provedor online informado não corresponde ao gateway ativo.');
                 }
             } else {
                 $provedor = null;
@@ -421,7 +421,7 @@ class Pagamento
 
             $pagamentoId = null;
             // §PAY-SPLIT-01: Calcula o split (repasses) antes de criar o pagamento.
-            // Tenta usar o snapshot gravado pelo motor de precificação; fallback para comissão fixa.
+            // Tenta usar o snapshot gravado pelo motor de precifica��o; fallback para comiss�o fixa.
             $valorTotal = (float)$pedido['custo_estimado'];
             $valorGuincho = 0.0;
             $valorPlataforma = 0.0;
@@ -433,9 +433,9 @@ class Pagamento
             if ($snap) {
                 $valorGuincho = (float)$snap['provider_total'];
                 $valorPlataforma = (float)$snap['platform_fee'];
-                // Se for pago agora (dinheiro/balcão), não há taxa de gateway.
-                // Redistribuímos a reserva do gateway (se houver) para o guincho.
-                if ($destino === 'pago_agora') {
+                // Se for pago agora (dinheiro/balc�o), n�o h� taxa de gateway.
+                // Redistribu�mos a reserva do gateway (se houver) para o guincho.
+                if (in_array($destino, ['pago_agora', 'pago_na_chegada'], true)) {
                     $reservaGateway = round($valorTotal - $valorGuincho - $valorPlataforma, 2);
                     if ($reservaGateway > 0) {
                         $valorGuincho = round($valorGuincho + $reservaGateway, 2);
@@ -452,12 +452,12 @@ class Pagamento
             if ($destino === 'online') {
                 $pagamentoId = self::criar($pedidoId, $provedor, $valorTotal, $valorGuincho, $valorPlataforma);
                 if ($pagamentoId === false) {
-                    throw new RuntimeException('Não foi possível criar a cobrança online pendente.');
+                    throw new RuntimeException('N�o foi poss�vel criar a cobran�a online pendente.');
                 }
-            } elseif ($destino === 'pago_agora') {
+            } elseif (in_array($destino, ['pago_agora', 'pago_na_chegada'], true)) {
                 $pagamentoId = self::criar($pedidoId, 'dinheiro', $valorTotal, $valorGuincho, $valorPlataforma);
-                if ($pagamentoId === false || !self::aprovar((int)$pagamentoId, 'admin-manual:' . $pedidoId)) {
-                    throw new RuntimeException('Não foi possível registrar a baixa manual.');
+                if ($pagamentoId === false || ($destino === 'pago_agora' && !self::aprovar((int)$pagamentoId, 'admin-manual:' . $pedidoId))) {
+                    throw new RuntimeException('N�o foi poss�vel registrar a baixa manual.');
                 }
             }
 
@@ -567,21 +567,21 @@ class Pagamento
 
             // §PAY-RETRY-01: `pagamentos` tem UNIQUE(pedido_id) — correto para nunca
 
-            // ter dois pagamentos vivos pro mesmo pedido, mas isso também bloqueava
+            // ter dois pagamentos vivos pro mesmo pedido, mas isso tamb�m bloqueava
 
             // QUALQUER nova tentativa depois da primeira (voltar do checkout, trocar
 
-            // de gateway, sessão cair no meio) com "não conseguimos registrar a
+            // de gateway, sess�o cair no meio) com "n�o conseguimos registrar a
 
-            // transação", mesmo a tentativa anterior nunca tendo sido aprovada —
+            // transa��o", mesmo a tentativa anterior nunca tendo sido aprovada -
 
             // achado real testando o sandbox MercadoPago (pedido travava pra sempre).
 
-            // Em vez de falhar, reaproveita a linha existente quando ela ainda não
+            // Em vez de falhar, reaproveita a linha existente quando ela ainda n�o
 
-            // foi aprovada; se já foi aprovada, mantém o bloqueio (comportamento
+            // foi aprovada; se j� foi aprovada, mant�m o bloqueio (comportamento
 
-            // antigo) — nunca sobrescreve um pagamento aprovado.
+            // antigo) - nunca sobrescreve um pagamento aprovado.
 
             if (self::isDuplicatePedidoError($e)) {
 
@@ -603,43 +603,43 @@ class Pagamento
 
      * §HIBRIDO-COMPLEMENTAR-01 (27/07/2026): `pagamentos` tem UNIQUE(pedido_id)
 
-     * e reiniciarTentativa() recusa de propósito reaproveitar a linha quando
+     * e reiniciarTentativa() recusa de prop�sito reaproveitar a linha quando
 
-     * o status já é 'aprovado' (guarda geral correta — nunca sobrescrever um
+     * o status j� � 'aprovado' (guarda geral correta - nunca sobrescrever um
 
-     * pagamento aprovado por engano/retry). Isso é certo para o caso comum,
+     * pagamento aprovado por engano/retry). Isso � certo para o caso comum,
 
-     * mas descobri que também bloqueava por completo o único fluxo que
+     * mas descobri que tamb�m bloqueava por completo o �nico fluxo que
 
-     * LEGITIMAMENTE precisa de uma segunda cobrança real pro mesmo pedido: a
+     * LEGITIMAMENTE precisa de uma segunda cobran�a real pro mesmo pedido: a
 
-     * conversão de socorro no local para reboque (ConversionService), tanto
+     * convers�o de socorro no local para reboque (ConversionService), tanto
 
-     * no caminho híbrido quanto no não-híbrido. Sem este método, a cobrança
+     * no caminho h�brido quanto no n�o-h�brido. Sem este m�todo, a cobran�a
 
      * complementar nunca conseguia nem ser criada.
 
      *
 
-     * Este método é o único ponto autorizado a "destravar" essa guarda: só
+     * Este m�todo � o �nico ponto autorizado a "destravar" essa guarda: s�
 
-     * age quando existe de fato um pagamento aprovado anterior (a cobrança do
+     * age quando existe de fato um pagamento aprovado anterior (a cobran�a do
 
      * socorro no local), arquiva os dados completos dele em
 
-     * `pagamentos_arquivados` (histórico permanente — nunca apagado) e SÓ
+     * `pagamentos_arquivados` (hist�rico permanente - nunca apagado) e S�
 
      * DEPOIS reseta a linha viva de `pagamentos` para 'pendente', liberando
 
-     * reiniciarTentativa() para operar normalmente na cobrança nova. Devolve
+     * reiniciarTentativa() para operar normalmente na cobran�a nova. Devolve
 
-     * os dados arquivados (não só um bool) porque o valor_total ali é a fonte
+     * os dados arquivados (n�o s� um bool) porque o valor_total ali � a fonte
 
-     * inequívoca do crédito de conversão — nunca mais uma query solta em
+     * inequ�voca do cr�dito de convers�o - nunca mais uma query solta em
 
-     * `pagamentos` filtrando só por status='aprovado', que não distinguia
+     * `pagamentos` filtrando s� por status='aprovado', que n�o distinguia
 
-     * "o pagamento do socorro" de qualquer outro estado possível da mesma
+     * "o pagamento do socorro" de qualquer outro estado poss�vel da mesma
 
      * linha.
 
@@ -647,11 +647,11 @@ class Pagamento
 
      * @return array<string,mixed>|false Dados do pagamento arquivado (inclui
 
-     *   valor_total original) ou false se não havia pagamento aprovado prévio
+     *   valor_total original) ou false se n�o havia pagamento aprovado pr�vio
 
-     *   — nesse caso o chamador NÃO deve prosseguir com a cobrança
+     *   - nesse caso o chamador N�O deve prosseguir com a cobran�a
 
-     *   complementar (indica inconsistência: conversão sem cobrança inicial
+     *   complementar (indica inconsist�ncia: convers�o sem cobran�a inicial
 
      *   paga, que nunca deveria acontecer no fluxo normal).
 
@@ -677,7 +677,7 @@ class Pagamento
 
                 self::logErr(__FUNCTION__, 'blocked',
 
-                    'Só é possível arquivar para cobrança complementar quando existe pagamento aprovado anterior para o pedido.',
+                    'S� � poss�vel arquivar para cobran�a complementar quando existe pagamento aprovado anterior para o pedido.',
 
                     ['pedido_id' => $pedido_id, 'status_atual' => $atual['status'] ?? null]);
 
@@ -687,29 +687,29 @@ class Pagamento
 
 
 
-            // §ARQUIVAMENTO-COMPLETO-01 (27/07/2026, achado em revisão de
+            // �ARQUIVAMENTO-COMPLETO-01 (27/07/2026, achado em revis�o de
 
-            // código): a primeira versão deste método só copiava metodo/
+            // c�digo): a primeira vers�o deste m�todo s� copiava metodo/
 
             // valor_total/valor_guincho/valor_plataforma/status/id_externo/
 
-            // webhook_payload/criado_em — faltavam id_transacao_pix (já
+            // webhook_payload/criado_em - faltavam id_transacao_pix (j�
 
-            // corrigido antes) e, apontado nesta revisão: status_pix,
+            // corrigido antes) e, apontado nesta revis�o: status_pix,
 
-            // pago_guincho, data_pagamento (data de APROVAÇÃO, não de
+            // pago_guincho, data_pagamento (data de APROVA��O, n�o de
 
-            // criação) e o próprio `pagamentos.id` original (necessário pra
+            // cria��o) e o pr�prio `pagamentos.id` original (necess�rio pra
 
-            // relacionar de volta com payout_ledger_entries antigos, já que
+            // relacionar de volta com payout_ledger_entries antigos, j� que
 
-            // a linha é REAPROVEITADA — o mesmo `pagamentos.id` passa a
+            // a linha � REAPROVEITADA - o mesmo `pagamentos.id` passa a
 
-            // valer pra cobrança complementar depois do arquivamento).
+            // valer pra cobran�a complementar depois do arquivamento).
 
-            // Lista construída dinamicamente (coluna só entra se existir
+            // Lista constru�da dinamicamente (coluna s� entra se existir
 
-            // nas duas tabelas) pra não quebrar em ambientes/migrations
+            // nas duas tabelas) pra n�o quebrar em ambientes/migrations
 
             // fora de sincronia.
 
@@ -739,11 +739,11 @@ class Pagamento
 
                 }
 
-                // 'pagamento_id_original' não tem coluna de origem em
+                // 'pagamento_id_original' n�o tem coluna de origem em
 
-                // `pagamentos` (é o próprio id da linha, sempre disponível);
+                // `pagamentos` (� o pr�prio id da linha, sempre dispon�vel);
 
-                // as demais só entram se a coluna também existir na origem.
+                // as demais s� entram se a coluna tamb�m existir na origem.
 
                 if ($def['origem'] !== null && !self::hasColumn('pagamentos', $def['origem'])) {
 
@@ -819,9 +819,9 @@ class Pagamento
 
                 // NOT NULL DEFAULT 'pendente' no schema (MySQL e SQLite de
 
-                // teste) — resetar pro estado inicial de uma cobrança nova,
+                // teste) - resetar pro estado inicial de uma cobran�a nova,
 
-                // não pra NULL (violaria a constraint).
+                // n�o pra NULL (violaria a constraint).
 
                 $sets[] = "status_pix = 'pendente'";
 
@@ -853,7 +853,7 @@ class Pagamento
 
             self::logErr(__FUNCTION__, 'archived',
 
-                'Pagamento anterior arquivado; linha de pagamentos resetada para nova cobrança complementar.',
+                'Pagamento anterior arquivado; linha de pagamentos resetada para nova cobran�a complementar.',
 
                 ['pedido_id' => $pedido_id, 'fase' => $fase, 'valor_arquivado' => (float)$atual['valor_total']]);
 
@@ -873,7 +873,7 @@ class Pagamento
 
 
 
-    /** Lê o pagamento arquivado de uma fase específica (mais recente primeiro) — fonte de verdade do valor pago naquela fase, imune a ser sobrescrito por cobranças seguintes do mesmo pedido. */
+    /** L� o pagamento arquivado de uma fase espec�fica (mais recente primeiro) - fonte de verdade do valor pago naquela fase, imune a ser sobrescrito por cobran�as seguintes do mesmo pedido. */
 
     public static function buscarPagamentoArquivado(int $pedido_id, string $fase = 'socorro_local'): ?array
 
@@ -895,35 +895,35 @@ class Pagamento
 
     /**
 
-     * §WEBHOOK-ARQUIVADO-01 (27/07/2026, achado em revisão): webhooks de
+     * �WEBHOOK-ARQUIVADO-01 (27/07/2026, achado em revis�o): webhooks de
 
-     * gateway não são garantidos entregues uma única vez nem em ordem — um
+     * gateway n�o s�o garantidos entregues uma �nica vez nem em ordem - um
 
      * reenvio/atraso do webhook do pagamento ORIGINAL (socorro no local,
 
-     * já arquivado por arquivarParaCobrancaComplementar()) podia chegar
+     * j� arquivado por arquivarParaCobrancaComplementar()) podia chegar
 
-     * DEPOIS que a linha viva de `pagamentos` já foi resetada e reaproveitada
+     * DEPOIS que a linha viva de `pagamentos` j� foi resetada e reaproveitada
 
-     * para a cobrança complementar do reboque. A checagem de idempotência
+     * para a cobran�a complementar do reboque. A checagem de idempot�ncia
 
-     * de webhook (Pagamento::buscarPorIdExterno) só olhava a tabela viva —
+     * de webhook (Pagamento::buscarPorIdExterno) s� olhava a tabela viva -
 
-     * não encontrando o id_externo antigo lá (porque foi limpo no reset),
+     * n�o encontrando o id_externo antigo l� (porque foi limpo no reset),
 
-     * o webhook atrasado passava pela idempotência e acabava aprovando a
+     * o webhook atrasado passava pela idempot�ncia e acabava aprovando a
 
-     * linha viva (a cobrança COMPLEMENTAR) usando o payload/id_externo do
+     * linha viva (a cobran�a COMPLEMENTAR) usando o payload/id_externo do
 
      * pagamento ANTIGO, sem o cliente ter pago o complementar de fato.
 
-     * Este método fecha essa lacuna: o controller de webhook deve checar
+     * Este m�todo fecha essa lacuna: o controller de webhook deve checar
 
-     * aqui ANTES de prosseguir — se o id_externo já existe em
+     * aqui ANTES de prosseguir - se o id_externo j� existe em
 
-     * `pagamentos_arquivados`, é garantidamente um evento de um ciclo de
+     * `pagamentos_arquivados`, � garantidamente um evento de um ciclo de
 
-     * cobrança já encerrado (arquivado), então deve ser ignorado como
+     * cobran�a j� encerrado (arquivado), ent�o deve ser ignorado como
 
      * duplicata, nunca usado para aprovar o que estiver vivo agora.
 
@@ -981,13 +981,13 @@ class Pagamento
 
     /**
 
-     * Reaproveita a linha de `pagamentos` já existente para o pedido (tentativa
+     * Reaproveita a linha de `pagamentos` j� existente para o pedido (tentativa
 
      * anterior abandonada ou com falha), em vez de deixar o pedido travado
 
      * permanentemente por causa do UNIQUE(pedido_id). Nunca mexe em pagamento
 
-     * já aprovado.
+     * j� aprovado.
 
      */
 
@@ -1011,7 +1011,7 @@ class Pagamento
 
             if (($existente['status'] ?? '') === 'aprovado') {
 
-                self::logErr('reiniciarTentativa', 'blocked', 'Pedido já tem pagamento aprovado; nova tentativa recusada.', ['pedido_id' => $pedido_id]);
+                self::logErr('reiniciarTentativa', 'blocked', 'Pedido j� tem pagamento aprovado; nova tentativa recusada.', ['pedido_id' => $pedido_id]);
 
                 return false;
 
@@ -1059,19 +1059,19 @@ class Pagamento
 
                 // §STATUS-PIX-NOT-NULL-01 (27/07/2026, achado ao implementar
 
-                // arquivarParaCobrancaComplementar): status_pix é
+                // arquivarParaCobrancaComplementar): status_pix �
 
-                // ENUM(...) NOT NULL DEFAULT 'pendente' em produção (e no
+                // ENUM(...) NOT NULL DEFAULT 'pendente' em produ��o (e no
 
-                // schema espelho do SQLite de testes) — 'status_pix = NULL'
+                // schema espelho do SQLite de testes) - 'status_pix = NULL'
 
                 // violava a constraint sempre que este caminho fosse
 
-                // executado. Não pegou em nenhum teste existente porque
+                // executado. N�o pegou em nenhum teste existente porque
 
-                // nenhum cobria reiniciarTentativa() até agora. Reset pro
+                // nenhum cobria reiniciarTentativa() at� agora. Reset pro
 
-                // valor inicial válido, não NULL.
+                // valor inicial v�lido, n�o NULL.
 
                 $sets[] = "status_pix = 'pendente'";
 
@@ -1087,19 +1087,19 @@ class Pagamento
 
 
 
-            // Não confia em rowCount(): por padrão o MySQL/PDO só conta linha como
+            // N�o confia em rowCount(): por padr�o o MySQL/PDO s� conta linha como
 
-            // afetada quando algum valor muda de fato — uma retentativa idêntica à
+            // afetada quando algum valor muda de fato - uma retentativa id�ntica �
 
-            // anterior (mesmo método/valor, já 'pendente') executa com sucesso mas
+            // anterior (mesmo m�todo/valor, j� 'pendente') executa com sucesso mas
 
-            // rowCount() vem 0, o que fazia essa função falhar por engano numa
+            // rowCount() vem 0, o que fazia essa fun��o falhar por engano numa
 
             // segunda tentativa seguida (achado testando o sandbox MercadoPago:
 
-            // 1ª retentativa funcionou, 2ª — idêntica — falhou com esse bug).
+            // 1� retentativa funcionou, 2� - id�ntica - falhou com esse bug).
 
-            // Confirma pelo estado final da linha, não pelo rowCount().
+            // Confirma pelo estado final da linha, n�o pelo rowCount().
 
             $check = getPDO()->prepare('SELECT status FROM pagamentos WHERE id = :id');
 
@@ -1109,7 +1109,7 @@ class Pagamento
 
             if ($statusFinal === false || $statusFinal === 'aprovado') {
 
-                self::logErr('reiniciarTentativa', 'blocked', 'Estado final inesperado após tentativa de reaproveitar linha.', ['pedido_id' => $pedido_id, 'pagamento_id' => $existente['id'], 'status_final' => $statusFinal]);
+                self::logErr('reiniciarTentativa', 'blocked', 'Estado final inesperado ap�s tentativa de reaproveitar linha.', ['pedido_id' => $pedido_id, 'pagamento_id' => $existente['id'], 'status_final' => $statusFinal]);
 
                 return false;
 
@@ -1347,11 +1347,11 @@ class Pagamento
 
     /**
 
-     * Pacote L1.7: agora roda em transação própria e grava um lançamento
+     * Pacote L1.7: agora roda em transa��o pr�pria e grava um lan�amento
 
      * `debito_repasse_guincho` no ledger append-only (payout_ledger_entries)
 
-     * atomicamente com a marcação de pago_guincho=1 — é o ponto exato em
+     * atomicamente com a marca��o de pago_guincho=1 - � o ponto exato em
 
      * que o dinheiro "sai" para o guincheiro.
 
@@ -1371,11 +1371,11 @@ class Pagamento
 
 
 
-            // Mesma condição já usada em EstornoService::estornar(): SQLite (usado
+            // Mesma condi��o j� usada em EstornoService::estornar(): SQLite (usado
 
-            // no bootstrap de testes) não suporta a cláusula FOR UPDATE — sem esta
+            // no bootstrap de testes) n�o suporta a cl�usula FOR UPDATE - sem esta
 
-            // checagem, o SELECT lançava exceção, o catch fazia rollback silencioso
+            // checagem, o SELECT lan�ava exce��o, o catch fazia rollback silencioso
 
             // e confirmarRepassePix() sempre retornava false em ambiente de teste,
 

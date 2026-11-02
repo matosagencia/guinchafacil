@@ -14,6 +14,7 @@ include __DIR__ . '/../layouts/header.php';
 <div class="main-wrapper shell admin-shell gf-manual-reviews">
 <?php include __DIR__ . '/../layouts/sidebar_admin.php'; ?>
 <main class="main-content shell-main shell-content">
+<?php include __DIR__ . '/partials/_panel_topbar_admin.php'; ?>
 <nav class="gf-manual-tabs" aria-label="Qualidade">
   <a href="<?= $esc($bp) ?>/admin/avaliacoes">Avaliações</a>
   <a href="<?= $esc($bp) ?>/admin/proof-of-road">Proof-of-Road</a>

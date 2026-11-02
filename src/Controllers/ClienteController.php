@@ -50,7 +50,7 @@ class ClienteController extends BaseController
         return (int)($u['id'] ?? 0);
     }
 
-    // ─── DASHBOARD ────────────────────────────────────────────────
+    // ??? DASHBOARD ????????????????????????????????????????????????
     public function dashboard(): void
     {
         AuthService::requireAuth('cliente');
@@ -65,7 +65,7 @@ class ClienteController extends BaseController
         }
         $csrfToken = AuthService::gerarCsrfToken();
 
-        // Contagens eficientes via queries diretas ao invés de buscar todos os registros
+        // Contagens eficientes via queries diretas ao inv�s de buscar todos os registros
         $pdo = getPDO();
         $stmtCount = $pdo->prepare(
             "SELECT
@@ -97,7 +97,7 @@ class ClienteController extends BaseController
         }
         $ultimosPedidos = $pedidosRecentes;
         $servicosCatalogo = ServicoCatalogo::listarAtivos();
-        // Jornada canônica: incidentes acompanham o especialista e eventual reboque
+        // Jornada can�nica: incidentes acompanham o especialista e eventual reboque
         // sem retirar o fluxo legado de pedidos da tela.
         $incidentesAtivos = [];
         try {
@@ -115,13 +115,13 @@ class ClienteController extends BaseController
             $stmtInc->execute([$uid]);
             $incidentesAtivos = $stmtInc->fetchAll(PDO::FETCH_ASSOC) ?: [];
         } catch (Throwable $e) {
-            // Bases ainda sem a migration não podem derrubar o dashboard legado.
+            // Bases ainda sem a migration n�o podem derrubar o dashboard legado.
             $incidentesAtivos = [];
         }
         require __DIR__ . '/../Views/cliente/dashboard.php';
     }
 
-    // ─── VEÍCULOS ─────────────────────────────────────────────────
+    // ??? VE�CULOS ?????????????????????????????????????????????????
     public function veiculos(): void
     {
         AuthService::requireAuth('cliente');
@@ -171,9 +171,9 @@ class ClienteController extends BaseController
         $transmissionTypes = ['manual', 'automatico'];
         $electricTypes = ['nao_eletrico', 'hibrido', 'eletrico_puro'];
 
-        // vehicle_type/operational_category derivam do radio "tipo" já existente
-        // (carro/moto/caminhao/van) — evita perguntar o tipo duas vezes no
-        // mesmo formulário.
+        // vehicle_type/operational_category derivam do radio "tipo" j� existente
+        // (carro/moto/caminhao/van) - evita perguntar o tipo duas vezes no
+        // mesmo formul�rio.
         $tipoParaVehicleType = [
             'carro' => 'automovel_passeio',
             'moto' => 'moto',
@@ -189,9 +189,9 @@ class ClienteController extends BaseController
             'uf_placa' => strtoupper(trim((string)($_POST['uf_placa'] ?? ''))),
             'marca'  => trim($_POST['marca']  ?? ''),
             'modelo' => trim($_POST['modelo'] ?? ''),
-            // §CATALOGO-VISUAL-01: preenchidos pelo autocomplete de marca/
-            // modelo quando o texto digitado casa com o catálogo — ficam
-            // vazios/null se o cliente digitou algo fora do catálogo (o
+            // �CATALOGO-VISUAL-01: preenchidos pelo autocomplete de marca/
+            // modelo quando o texto digitado casa com o cat�logo - ficam
+            // vazios/null se o cliente digitou algo fora do cat�logo (o
             // cadastro continua funcionando por texto livre nesse caso).
             'vehicle_brand_id' => !empty($_POST['vehicle_brand_id']) ? (int)$_POST['vehicle_brand_id'] : null,
             'vehicle_model_id' => !empty($_POST['vehicle_model_id']) ? (int)$_POST['vehicle_model_id'] : null,
@@ -213,9 +213,9 @@ class ClienteController extends BaseController
             $this->redirect('/cliente/veiculo/novo?erro=1');
         }
 
-        // Documento (CRLV-e) é opcional — falha no upload não bloqueia o
-        // cadastro, só é ignorada silenciosamente (o cliente pode enviar
-        // depois, editando o veículo).
+        // Documento (CRLV-e) � opcional - falha no upload n�o bloqueia o
+        // cadastro, s� � ignorada silenciosamente (o cliente pode enviar
+        // depois, editando o ve�culo).
         if (!empty($_FILES['documento']['name']) && ($_FILES['documento']['error'] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_OK) {
             $path = $this->armazenarDocumentoVeiculo($_FILES['documento']);
             if ($path !== null) {
@@ -240,10 +240,10 @@ class ClienteController extends BaseController
     }
 
     /**
-     * Salva o documento opcional (CRLV-e) fora do webroot, mesmo padrão
+     * Salva o documento opcional (CRLV-e) fora do webroot, mesmo padr�o
      * de storage privado usado em EvidenceService::privateStorageDir().
      * Sem viewer autenticado ainda (fica para quando o admin precisar
-     * conferir — hoje só eleva verification_status para DOCUMENT_SUBMITTED).
+     * conferir - hoje s� eleva verification_status para DOCUMENT_SUBMITTED).
      */
     private function armazenarDocumentoVeiculo(array $file): ?string
     {
@@ -284,7 +284,7 @@ class ClienteController extends BaseController
         $this->redirect('/cliente/veiculos?deletado=1');
     }
 
-    // ─── OFICINAS ─────────────────────────────────────────────────
+    // ??? OFICINAS ?????????????????????????????????????????????????
     public function oficinas(): void
     {
         AuthService::requireAuth('cliente');
@@ -401,7 +401,7 @@ class ClienteController extends BaseController
                 throw new Exception('Nome deve ter ao menos 3 caracteres.');
             }
             if (strlen($telefone) < 10) {
-                throw new Exception('Telefone inválido.');
+                throw new Exception('Telefone inv�lido.');
             }
 
             if (!empty($_POST['nova_senha'])) {
@@ -411,7 +411,7 @@ class ClienteController extends BaseController
                     throw new Exception('Nova senha deve ter ao menos 8 caracteres.');
                 }
                 if ($novaSenha !== $confirmar) {
-                    throw new Exception('As senhas não conferem.');
+                    throw new Exception('As senhas n�o conferem.');
                 }
 
                 $stmtSenha = $pdo->prepare("SELECT senha_hash FROM usuarios WHERE id = ? LIMIT 1");
@@ -445,7 +445,7 @@ class ClienteController extends BaseController
         $this->redirect('/cliente/perfil');
     }
 
-    // ─── PEDIDOS ──────────────────────────────────────────────────
+    // ??? PEDIDOS ??????????????????????????????????????????????????
     public function historico(): void
     {
         AuthService::requireAuth('cliente');
@@ -472,8 +472,8 @@ class ClienteController extends BaseController
     }
 
     /**
-     * ROADMAP socorro automotivo — Fundamento 3 (triagem). GET mostra a
-     * pergunta 1 + perguntas 2 dinâmicas (JS mostra/esconde por sintoma,
+     * ROADMAP socorro automotivo - Fundamento 3 (triagem). GET mostra a
+     * pergunta 1 + perguntas 2 din�micas (JS mostra/esconde por sintoma,
      * ver triagem.php); POST vai para triagemResponder().
      */
     public function triagem(): void
@@ -532,12 +532,12 @@ class ClienteController extends BaseController
     }
 
     /**
-     * ROADMAP socorro automotivo — UX (22/07): endpoint JSON usado pelo
+     * ROADMAP socorro automotivo - UX (22/07): endpoint JSON usado pelo
      * wizard embutido em /cliente/pedido/novo, para avaliar a triagem SEM
-     * navegar para outra página (padrão "mapa + busca no topo + bottom
-     * sheet" tipo Uber — a triagem acontece no mesmo fluxo do pedido).
-     * Reaproveita o mesmíssimo TriageService/TriageRuleEngine da tela
-     * dedicada /cliente/triagem — mesma fonte de verdade, dois pontos de
+     * navegar para outra p�gina (padr�o "mapa + busca no topo + bottom
+     * sheet" tipo Uber - a triagem acontece no mesmo fluxo do pedido).
+     * Reaproveita o mesm�ssimo TriageService/TriageRuleEngine da tela
+     * dedicada /cliente/triagem - mesma fonte de verdade, dois pontos de
      * entrada de UI.
      */
     public function triagemAvaliarJson(): void
@@ -547,7 +547,7 @@ class ClienteController extends BaseController
 
         if (!AuthService::validarCsrfToken($_POST['csrf_token'] ?? '')) {
             http_response_code(403);
-            echo json_encode(['ok' => false, 'erro' => 'Token inválido.'], JSON_UNESCAPED_UNICODE);
+            echo json_encode(['ok' => false, 'erro' => 'Token inv�lido.'], JSON_UNESCAPED_UNICODE);
             exit;
         }
 
@@ -612,14 +612,10 @@ class ClienteController extends BaseController
         require_once __DIR__ . '/../Services/TarifaService.php';
         $veiculoCategoria = TarifaService::categoriaDeVeiculo($veiculo) ?: 'popular';
 
+        // A escolha do servi�o acontece somente na cesta can�nica do funil.
+        // N�o aceitar atalhos por query string evita que o dashboard bypass a
+        // lista filtrada pelo cat�logo e pelas capacidades aprovadas.
         $triagemServiceType = null;
-        $tsId = (int)($_GET['service_type_id'] ?? 0);
-        if ($tsId > 0) {
-            $candidato = ServiceType::buscarPorId($tsId);
-            if ($candidato && !empty($candidato['active'])) {
-                $triagemServiceType = $candidato;
-            }
-        }
 
         $csrfToken = AuthService::gerarCsrfToken();
         require __DIR__ . '/../Views/cliente/pedidonovo.php';
@@ -630,7 +626,7 @@ class ClienteController extends BaseController
         header('Content-Type: application/json; charset=UTF-8');
         if (!AuthService::validarCsrfToken((string)($_POST['csrf_token'] ?? ''))) {
             http_response_code(403);
-            echo json_encode(['ok' => false, 'erro' => 'Token inválido.'], JSON_UNESCAPED_UNICODE);
+            echo json_encode(['ok' => false, 'erro' => 'Token inv�lido.'], JSON_UNESCAPED_UNICODE);
             exit;
         }
 
@@ -641,9 +637,9 @@ class ClienteController extends BaseController
         );
         $lat = isset($_POST['lat_origem']) ? (float)$_POST['lat_origem'] : 0.0;
         $lng = isset($_POST['lng_origem']) ? (float)$_POST['lng_origem'] : 0.0;
-        // Pacote L1.8 — contrato do plano: 'source' identifica se a origem veio do
-        // GPS do dispositivo ou de digitação/autocomplete; hoje é só telemetria/log,
-        // não muda a validação.
+        // Pacote L1.8 - contrato do plano: 'source' identifica se a origem veio do
+        // GPS do dispositivo ou de digita��o/autocomplete; hoje � s� telemetria/log,
+        // n�o muda a valida��o.
         $source = (string)($_POST['source'] ?? 'autocomplete');
         if (!in_array($source, ['gps', 'autocomplete'], true)) {
             $source = 'autocomplete';
@@ -651,7 +647,7 @@ class ClienteController extends BaseController
 
         if ($endereco === '') {
             http_response_code(422);
-            echo json_encode(['ok' => false, 'erro' => 'Informe a localização do veículo.'], JSON_UNESCAPED_UNICODE);
+            echo json_encode(['ok' => false, 'erro' => 'Informe a localiza��o do ve�culo.'], JSON_UNESCAPED_UNICODE);
             exit;
         }
 
@@ -662,8 +658,8 @@ class ClienteController extends BaseController
         }
 
         // draft_id: identifica este rascunho especificamente, para a tela de pedido
-        // novo confirmar que está usando os dados corretos (e não um rascunho velho
-        // sobrado de sessão) — parte do contrato explícito do plano (seção 4.9).
+        // novo confirmar que est� usando os dados corretos (e n�o um rascunho velho
+        // sobrado de sess�o) - parte do contrato expl�cito do plano (se��o 4.9).
         $draftId = bin2hex(random_bytes(12));
 
         $_SESSION['pedido_rascunho'] = [
@@ -698,8 +694,8 @@ class ClienteController extends BaseController
         $latOrigem = (float)($_POST['lat_origem'] ?? 0);
         $lngOrigem = (float)($_POST['lng_origem'] ?? 0);
         // O resgate direto ocorre no mesmo ponto da avaria. Aceitamos campos
-        // explícitos para clientes futuros, mas mantemos a origem como fonte
-        // compatível enquanto o formulário não possui um segundo marcador.
+        // expl�citos para clientes futuros, mas mantemos a origem como fonte
+        // compat�vel enquanto o formul�rio n�o possui um segundo marcador.
         $localResgateLat = isset($_POST['local_resgate_lat']) && $_POST['local_resgate_lat'] !== ''
             ? (float)$_POST['local_resgate_lat'] : $latOrigem;
         $localResgateLng = isset($_POST['local_resgate_lng']) && $_POST['local_resgate_lng'] !== ''
@@ -724,7 +720,7 @@ class ClienteController extends BaseController
                 }
             }
         }
-        // Validar que veículo pertence ao cliente
+        // Validar que ve�culo pertence ao cliente
         $veiculo = Veiculo::buscarPorId($veiculoId);
         if (!$veiculo || (int)$veiculo['usuario_id'] !== $uid) {
             $this->redirect('/cliente/pedido/novo?erro=veiculo');
@@ -733,14 +729,14 @@ class ClienteController extends BaseController
         $tiposValidos = ['eletrica','pneu','colisao','bateria','combustivel','outro'];
         if (!in_array($tipo, $tiposValidos)) $tipo = 'outro';
 
-        // ROADMAP socorro automotivo — Etapa 2: service_type_id vindo da triagem
-        // (input hidden em pedidonovo.php), sempre revalidado contra o catálogo
-        // ativo. Coluna aditiva/opcional (Etapa 1) — ausência não muda nada.
+        // ROADMAP socorro automotivo - Etapa 2: service_type_id vindo da triagem
+        // (input hidden em pedidonovo.php), sempre revalidado contra o cat�logo
+        // ativo. Coluna aditiva/opcional (Etapa 1) - aus�ncia n�o muda nada.
         $serviceTypeId = null;
         // Default 'TOWING' preserva o comportamento de sempre para pedidos
-        // sem triagem (coluna já nasce assim por DEFAULT no schema) — só
-        // sobrescrevemos quando um tipo de serviço válido foi de fato
-        // escolhido. Isso é o que faz Etapa 4 (matching por capacidade)
+        // sem triagem (coluna j� nasce assim por DEFAULT no schema) - s�
+        // sobrescrevemos quando um tipo de servi�o v�lido foi de fato
+        // escolhido. Isso � o que faz Etapa 4 (matching por capacidade)
         // funcionar corretamente: sem isso, todo pedido ficava marcado como
         // TOWING mesmo sendo partida auxiliar/pneu/chaveiro etc.
         $attendanceMode = 'TOWING';
@@ -753,52 +749,52 @@ class ClienteController extends BaseController
             }
         }
 
-        // §DESLOCAMENTO-01 (26/07/2026, correção de lacuna apontada pelo
-        // usuário): antes desta correção, TODO pedido — inclusive serviços
-        // ON_SITE (partida auxiliar, diagnóstico elétrico, pneu etc.) — era
+        // �DESLOCAMENTO-01 (26/07/2026, corre��o de lacuna apontada pelo
+        // usu�rio): antes desta corre��o, TODO pedido - inclusive servi�os
+        // ON_SITE (partida auxiliar, diagn�stico el�trico, pneu etc.) - era
         // custeado com a tarifa de REBOQUE (TarifaService::calcular),
         // ignorando completamente base_fee/pickup_km_price/labor_fee
         // configurados em /admin/catalogo-servicos/tarifas para o tipo de
-        // serviço real escolhido. Agora: 1) tenta a zona de precificação
-        // (ZonePricingService, Etapa 13) primeiro; 2) se o serviço NÃO for
-        // de reboque, usa a tarifa própria do serviço
+        // servi�o real escolhido. Agora: 1) tenta a zona de precifica��o
+        // (ZonePricingService, Etapa 13) primeiro; 2) se o servi�o N�O for
+        // de reboque, usa a tarifa pr�pria do servi�o
         // (ServicePricingRule::calcularTotal, com deslocamento real
-        // incluído); 3) só cai no cálculo de reboque quando for
-        // efetivamente TOWING ou quando o serviço não tiver tarifa própria
-        // configurada (rede de segurança — nunca trava a criação do pedido).
+        // inclu�do); 3) s� cai no c�lculo de reboque quando for
+        // efetivamente TOWING ou quando o servi�o n�o tiver tarifa pr�pria
+        // configurada (rede de seguran�a - nunca trava a cria��o do pedido).
         require_once __DIR__ . '/../Services/Pricing/ZonePricingService.php';
         require_once __DIR__ . '/../Models/Cidade.php';
 
         // §PRECO-POR-CIDADE-01: resolve a cidade-alvo do pedido pela
         // coordenada de origem (null quando nenhuma cidade tem geo
-        // configurada — comportamento idêntico ao de antes desta
+        // configurada - comportamento id�ntico ao de antes desta
         // funcionalidade). Isso alimenta o FALLBACK global (TarifaService/
-        // ServicePricingRule) com um preço específico da cidade quando
-        // existir; a camada de zona (ZonePricingService) já era
+        // ServicePricingRule) com um pre�o espec�fico da cidade quando
+        // existir; a camada de zona (ZonePricingService) j� era
         // inerentemente por-geografia e continua tendo prioridade.
         $cidadeResolvida = Cidade::resolverPorCoordenada($latOrigem, $lngOrigem);
         $cidadeIdPreco = $cidadeResolvida['id'] ?? null;
 
-        // Regras de zona usam o TIPO cru do veículo (carro/moto/caminhao/...)
-        // como vehicle_category, não a categoria tarifária normalizada do
-        // TarifaService (que funde carro+moto em "popular") — é o que
-        // permite diferenciar preço de pane elétrica/reboque de moto vs
+        // Regras de zona usam o TIPO cru do ve�culo (carro/moto/caminhao/...)
+        // como vehicle_category, n�o a categoria tarif�ria normalizada do
+        // TarifaService (que funde carro+moto em "popular") - � o que
+        // permite diferenciar pre�o de pane el�trica/reboque de moto vs
         // carro, coisa que o TarifaService nunca fez.
-        // Especialistas usam o catálogo comercial próprio (atendimento no
+        // Especialistas usam o cat�logo comercial pr�prio (atendimento no
         // Pricing legado removido deste endpoint: distancia, categoria, cidade,
         // prioridade e modalidade agora sao derivados no PedidoCoreService.
-        // §CELULAS-NITEROI-01 (04/08/2026): marca em qual célula territorial
+        // �CELULAS-NITEROI-01 (04/08/2026): marca em qual c�lula territorial
         // (pricing_zones) o pedido caiu, independente de existir regra de
-        // preço pra essa zona — é só uma tag analítica pro painel de
-        // gates/marcos por célula, não interfere no valor calculado acima.
-        // Fica null enquanto o admin não desenhar o polígono da célula.
+        // pre�o pra essa zona - � s� uma tag anal�tica pro painel de
+        // gates/marcos por c�lula, n�o interfere no valor calculado acima.
+        // Fica null enquanto o admin n�o desenhar o pol�gono da c�lula.
         $pricingZoneId = null;
         $zonaResolvida = ZonePricingService::resolverZonaPorCoordenada($latOrigem, $lngOrigem);
         if ($zonaResolvida !== null) {
             $pricingZoneId = (int)$zonaResolvida['id'];
         }
 
-        // §7: coordenadas obrigatórias e dentro dos limites do Brasil (lat [-34,5], lng [-74,-28])
+        // �7: coordenadas obrigat�rias e dentro dos limites do Brasil (lat [-34,5], lng [-74,-28])
         $latValida = static fn(float $v): bool => $v >= -34 && $v <= 5;
         $lngValida = static fn(float $v): bool => $v >= -74 && $v <= -28;
 
@@ -834,17 +830,17 @@ class ClienteController extends BaseController
             }
         }
 
-        // §COBERTURA-RAIO-01 (05/08/2026): não deixa nem abrir o pedido se
-        // nenhum guincho aprovado (com capacidade pro tipo de serviço,
-        // quando aplicável) alcança essa coordenada dentro do próprio raio
-        // efetivo dele — mesma regra usada na fila real de ofertas
+        // �COBERTURA-RAIO-01 (05/08/2026): n�o deixa nem abrir o pedido se
+        // nenhum guincho aprovado (com capacidade pro tipo de servi�o,
+        // quando aplic�vel) alcan�a essa coordenada dentro do pr�prio raio
+        // efetivo dele - mesma regra usada na fila real de ofertas
         // (GuinchoController::montarOfertasDisponiveis / SseController), pra
-        // nunca prometer cobertura que o guincheiro não vai ver. Não olha
-        // status_expansao da célula (pedra_viva/pedra_morta são agnósticos
-        // aqui) nem exige guincho "disponivel" agora — só que exista alguém
-        // estruturalmente acionável; o cron de expiração em 30 min
+        // nunca prometer cobertura que o guincheiro n�o vai ver. N�o olha
+        // status_expansao da c�lula (pedra_viva/pedra_morta s�o agn�sticos
+        // aqui) nem exige guincho "disponivel" agora - s� que exista algu�m
+        // estruturalmente acion�vel; o cron de expira��o em 30 min
         // (cron_cancelar_pedidos_expirados.php + EstornoService) cobre o
-        // caso de ninguém aceitar a tempo.
+        // caso de ningu�m aceitar a tempo.
         require_once __DIR__ . '/../Services/CoberturaService.php';
         $diagnosticoCobertura = CoberturaService::diagnosticarAtendimento([
             'attendance_mode' => $attendanceMode,
@@ -860,14 +856,14 @@ class ClienteController extends BaseController
             $this->redirect('/cliente/pedido/novo?erro=' . $erroCobertura);
         }
 
-        if (empty($endOrigem)) $endOrigem = 'Localização atual';
+        if (empty($endOrigem)) $endOrigem = 'Localiza��o atual';
         if (empty($endDest))   $endDest   = 'Destino informado';
 
-        // Etapa 14 — perguntas situacionais repetidas a cada pedido (o estado
-        // do veículo muda; não dá pra confiar só no cadastro). Nullable:
-        // ausência de resposta não bloqueia o pedido (checkbox desmarcado no
-        // form não envia nada, então tratamos "não veio" como null, não como
-        // "não").
+        // Etapa 14 - perguntas situacionais repetidas a cada pedido (o estado
+        // do ve�culo muda; n�o d� pra confiar s� no cadastro). Nullable:
+        // aus�ncia de resposta n�o bloqueia o pedido (checkbox desmarcado no
+        // form n�o envia nada, ent�o tratamos "n�o veio" como null, n�o como
+        // "n�o").
         $veiculoBatido = isset($_POST['veiculo_esta_batido']) ? (int)!!$_POST['veiculo_esta_batido'] : null;
         $rodasTravadas = isset($_POST['rodas_travadas']) ? (int)!!$_POST['rodas_travadas'] : null;
         $dificilAcesso = isset($_POST['local_dificil_acesso']) ? (int)!!$_POST['local_dificil_acesso'] : null;
@@ -989,7 +985,7 @@ class ClienteController extends BaseController
                 IndicacaoOficinaService::registrarSelecao($pedidoId, $oficinaParceiraProviderId, $uid);
             } catch (Throwable $indicacaoError) {
                 throw $indicacaoError;
-                error_log('[IndicacaoOficina] seleção não registrada: ' . $indicacaoError->getMessage());
+                error_log('[IndicacaoOficina] sele��o n�o registrada: ' . $indicacaoError->getMessage());
             }
         }
         if ($resgateDiretoConfirmado) {
@@ -1008,12 +1004,12 @@ class ClienteController extends BaseController
             if ($pdo->inTransaction()) {
                 $pdo->rollBack();
             }
-            error_log('[PedidoCriar] falha ao criar pedido/indicação: ' . $pedidoError->getMessage());
-            // DEBUG TEMPORARIO — imprime a excecao real antes do redirect
+            error_log('[PedidoCriar] falha ao criar pedido/indica��o: ' . $pedidoError->getMessage());
+            // DEBUG TEMPORARIO - imprime a excecao real antes do redirect
             if (!headers_sent()) {
                 header('Content-Type: text/plain; charset=UTF-8');
             }
-            echo "=== PEDIDO CRIAR — EXCEPTION ===\n";
+            echo "=== PEDIDO CRIAR - EXCEPTION ===\n";
             echo get_class($pedidoError) . "\n";
             echo $pedidoError->getMessage() . "\n";
             echo "@ " . $pedidoError->getFile() . ":" . $pedidoError->getLine() . "\n";
@@ -1022,10 +1018,10 @@ class ClienteController extends BaseController
             exit;
         }
 
-        // Etapa 15 — congela o cenário veicular/situacional deste pedido. É
-        // este snapshot que a compatibilidade lê no aceite, não o cadastro
-        // atual do veículo (que pode mudar de estado depois). Falha aqui não
-        // bloqueia o pedido — o serviço já existiu antes da Etapa 15.
+        // Etapa 15 - congela o cen�rio veicular/situacional deste pedido. �
+        // este snapshot que a compatibilidade l� no aceite, n�o o cadastro
+        // atual do ve�culo (que pode mudar de estado depois). Falha aqui n�o
+        // bloqueia o pedido - o servi�o j� existiu antes da Etapa 15.
         try {
             OrderVehicleRequirementService::registrar($pedidoId, $veiculo, [
                 'batido' => $veiculoBatido,
@@ -1057,11 +1053,11 @@ class ClienteController extends BaseController
         }
 
 
-    // ─── CANCELAMENTO DE PEDIDO ───────────────────────────────────
+    // ??? CANCELAMENTO DE PEDIDO ???????????????????????????????????
     /**
      * POST /cliente/cancelar/{id}
-     * §3: cliente só pode cancelar em aguardando_pagamento ou aguardando_guincho
-     * §4.4: estorno automático é disparado pelo PedidoService
+     * �3: cliente s� pode cancelar em aguardando_pagamento ou aguardando_guincho
+     * �4.4: estorno autom�tico � disparado pelo PedidoService
      */
 
     public function orcamentoPrevioAprovar(): void
@@ -1070,7 +1066,7 @@ class ClienteController extends BaseController
         header('Content-Type: application/json; charset=UTF-8');
         if (!AuthService::validarCsrfToken((string)($_POST['csrf_token'] ?? ''))) {
             http_response_code(403);
-            echo json_encode(['ok' => false, 'erro' => 'Token inválido.'], JSON_UNESCAPED_UNICODE);
+            echo json_encode(['ok' => false, 'erro' => 'Token inv�lido.'], JSON_UNESCAPED_UNICODE);
             return;
         }
         try {
@@ -1090,7 +1086,7 @@ class ClienteController extends BaseController
 
         if (!AuthService::validarCsrfToken((string)($_POST['csrf_token'] ?? ''))) {
             http_response_code(403);
-            echo json_encode(['ok' => false, 'erro' => 'Token inválido.', 'taxa' => 0, 'estorno' => false], JSON_UNESCAPED_UNICODE);
+            echo json_encode(['ok' => false, 'erro' => 'Token inv�lido.', 'taxa' => 0, 'estorno' => false], JSON_UNESCAPED_UNICODE);
             exit;
         }
 
@@ -1102,7 +1098,7 @@ class ClienteController extends BaseController
             exit;
         }
 
-        // Pacote L1.6: confirmação exige snapshot_id obtido em /cliente/pedido/{id}/cancelamento-preview.
+        // Pacote L1.6: confirma��o exige snapshot_id obtido em /cliente/pedido/{id}/cancelamento-preview.
         $snapshotIdRaw = $_POST['snapshot_id'] ?? null;
         $snapshotId = ($snapshotIdRaw !== null && $snapshotIdRaw !== '') ? (int)$snapshotIdRaw : null;
         if ($snapshotId === null) {
@@ -1136,9 +1132,9 @@ class ClienteController extends BaseController
 
     /**
      * GET /cliente/pedido/{id}/cancelamento-preview
-     * Pacote L1.6 — calcula E persiste o snapshot de cancelamento (versão da
-     * fórmula, fatores, taxa, estorno previsto) que a tela exibe no modal.
-     * O snapshot_id devolvido aqui é obrigatório para confirmar o cancelamento.
+     * Pacote L1.6 - calcula E persiste o snapshot de cancelamento (vers�o da
+     * f�rmula, fatores, taxa, estorno previsto) que a tela exibe no modal.
+     * O snapshot_id devolvido aqui � obrigat�rio para confirmar o cancelamento.
      */
     public function cancelamentoPreview(int $id): void
     {
@@ -1150,7 +1146,7 @@ class ClienteController extends BaseController
         $pedido = Pedido::buscarPorId($id);
         if (!$pedido || (int)$pedido['cliente_id'] !== $uid) {
             http_response_code(404);
-            echo json_encode(['ok' => false, 'erro' => 'Pedido não encontrado.'], JSON_UNESCAPED_UNICODE);
+            echo json_encode(['ok' => false, 'erro' => 'Pedido n�o encontrado.'], JSON_UNESCAPED_UNICODE);
             exit;
         }
 
@@ -1187,8 +1183,8 @@ class ClienteController extends BaseController
             $ev->execute([(int)$pedido['incidente_id']]); $pedido['especialista_atendimentos'] = $ev->fetchAll(PDO::FETCH_ASSOC) ?: [];
         }
 
-        // Após o aceite, o cliente recebe a identificação operacional do
-        // prestador: nome, telefone, especialidades aprovadas e veículo.
+        // Ap�s o aceite, o cliente recebe a identifica��o operacional do
+        // prestador: nome, telefone, especialidades aprovadas e ve�culo.
         $pedido['guincho_especialidades'] = [];
         if (!empty($pedido['guincho_id'])) {
             require_once __DIR__ . '/../Models/Catalog/ProviderCapability.php';
@@ -1201,7 +1197,7 @@ class ClienteController extends BaseController
 
         $flash = $this->getFlashMessage();
 
-        // Etapa 5 — orçamento complementar pendente de decisão do cliente.
+        // Etapa 5 - or�amento complementar pendente de decis�o do cliente.
         $orcamentoPendente = null;
         $conversaoPendente = false;
         $diagnosticoAtual = null;
@@ -1213,7 +1209,7 @@ class ClienteController extends BaseController
             $conversaoPendente = (string)$pedido['status'] === 'conversao_reboque_pendente';
             $diagnosticoAtual = $conversaoPendente ? PedidoDiagnostico::buscarPorPedido($id) : null;
         }
-        // ─── ORÇAMENTO DA OFICINA (fluxo nova oficina parceira) ─────
+        // ??? OR�AMENTO DA OFICINA (fluxo nova oficina parceira) ?????
         require_once __DIR__ . '/../Models/OficinaOrcamento.php';
         $orcamentoOficina = OficinaOrcamento::buscarPendentePorPedido($id);
         require __DIR__ . '/../Views/cliente/pedidostatus.php';
@@ -1221,8 +1217,8 @@ class ClienteController extends BaseController
 
 
     /**
-     * Etapa 5 — cliente aprova ou recusa o orçamento complementar proposto
-     * pelo prestador após o diagnóstico. Só o dono do pedido decide.
+     * Etapa 5 - cliente aprova ou recusa o or�amento complementar proposto
+     * pelo prestador ap�s o diagn�stico. S� o dono do pedido decide.
      */
     public function orcamentoDecidir(int $id): void
     {
@@ -1241,7 +1237,7 @@ class ClienteController extends BaseController
         if (!$result->ok) {
             $this->setFlashMessage((string)$result->error, 'error');
         } else {
-            $this->setFlashMessage($aprovado ? 'Orçamento aprovado — o prestador foi liberado para executar o serviço.' : 'Orçamento recusado.', $aprovado ? 'success' : 'info');
+            $this->setFlashMessage($aprovado ? 'Or�amento aprovado - o prestador foi liberado para executar o servi�o.' : 'Or�amento recusado.', $aprovado ? 'success' : 'info');
         }
         if ($result->ok && $aprovado) {
             require_once __DIR__ . '/../Models/Financial/OrderChargeItem.php';
@@ -1257,8 +1253,8 @@ class ClienteController extends BaseController
     }
 
     /**
-     * Etapa 7 — cliente aprova ou recusa a conversão de socorro local para
-     * reboque, proposta pelo prestador após o diagnóstico.
+     * Etapa 7 - cliente aprova ou recusa a convers�o de socorro local para
+     * reboque, proposta pelo prestador ap�s o diagn�stico.
      */
     public function conversaoDecidir(int $id): void
     {
@@ -1284,19 +1280,19 @@ class ClienteController extends BaseController
         } else {
             $aguardandoPagamento = !empty($result->context['aguardando_pagamento_complementar']);
             if ($aguardandoPagamento) {
-                $this->setFlashMessage('Conversão aprovada — falta pagar o complementar do reboque para acionarmos um guincho.', 'success');
+                $this->setFlashMessage('Convers�o aprovada - falta pagar o complementar do reboque para acionarmos um guincho.', 'success');
                 $this->redirect("/pagamento/checkout/{$id}");
             }
             $this->setFlashMessage(
-                $aprovado ? 'Conversão para reboque aprovada — buscando um guincho disponível.' : 'Conversão recusada.',
+                $aprovado ? 'Convers�o para reboque aprovada - buscando um guincho dispon�vel.' : 'Convers�o recusada.',
                 $aprovado ? 'success' : 'info'
             );
         }
         $this->redirect("/cliente/pedido/{$id}");
     }
 
-    /** B-011: este caminho paralelo não possui snapshot complementar versionado.
-     * É bloqueado até que a conversão com desconto tenha contrato próprio.
+    /** B-011: este caminho paralelo n�o possui snapshot complementar versionado.
+     * � bloqueado at� que a convers�o com desconto tenha contrato pr�prio.
      */
     public function converterReboqueComDesconto(int $id): void
     {
@@ -1306,7 +1302,7 @@ class ClienteController extends BaseController
         echo json_encode([
             'ok' => false,
             'erro' => 'PRICE-CONVERSION-SNAPSHOT-REQUIRED',
-            'mensagem' => 'A conversão com desconto está temporariamente indisponível. Procure o suporte.'
+            'mensagem' => 'A convers�o com desconto est� temporariamente indispon�vel. Procure o suporte.'
         ], JSON_UNESCAPED_UNICODE);
     }
 
@@ -1440,7 +1436,7 @@ class ClienteController extends BaseController
         exit;
     }
 
-    // ─── CHAT ─────────────────────────────────────────────────────
+    // ??? CHAT ?????????????????????????????????????????????????????
     public function chat(int $pedidoId): void
     {
         AuthService::requireAuth('cliente');
@@ -1459,12 +1455,12 @@ class ClienteController extends BaseController
         AuthService::requireAuth('cliente');
         header('Content-Type: application/json');
         if (!AuthService::validarCsrfToken($_POST['csrf_token'] ?? '')) {
-            // L1.9 #47: CSRF expirado deve disparar o fluxo de sessão expirada
-            // no front (apiFetch → SessionManager.handleUnauthorized), não um
-            // 200 com {ok:false} silencioso que o usuário só nota ao reparar
+            // L1.9 #47: CSRF expirado deve disparar o fluxo de sess�o expirada
+            // no front (apiFetch ? SessionManager.handleUnauthorized), n�o um
+            // 200 com {ok:false} silencioso que o usu�rio s� nota ao reparar
             // que a mensagem nunca chegou ao chat.
             http_response_code(401);
-            echo json_encode(['ok' => false, 'erro' => 'Sessão expirada. Faça login novamente.']); exit;
+            echo json_encode(['ok' => false, 'erro' => 'Sess�o expirada. Fa�a login novamente.']); exit;
         }
         if ($pedidoId <= 0) {
             $pedidoId = (int)($_POST['pedido_id'] ?? 0);
@@ -1473,7 +1469,7 @@ class ClienteController extends BaseController
         $pedido   = Pedido::buscarPorId($pedidoId);
         $mensagem = trim($_POST['mensagem'] ?? '');
         if (!$pedido || (int)$pedido['cliente_id'] !== $uid) {
-            echo json_encode(['ok' => false, 'erro' => 'Dados inválidos']); exit;
+            echo json_encode(['ok' => false, 'erro' => 'Dados inv�lidos']); exit;
         }
         require_once __DIR__ . '/../Services/ChatService.php';
         $resultado = (new ChatService())->sendMessage([
@@ -1504,7 +1500,7 @@ class ClienteController extends BaseController
         exit;
     }
 
-    // ─── AVALIAÇÃO ────────────────────────────────────────────────
+    // ??? AVALIA��O ????????????????????????????????????????????????
     public function avaliar(int $pedidoId): void
     {
         AuthService::requireAuth('cliente');
@@ -1546,7 +1542,7 @@ class ClienteController extends BaseController
         if ($guinchoId && !$especialistaId) {
             // Busca o usuario_id do guincho para usar na FK de avaliacoes (references guinchos.id agora)
             Avaliacao::criar($pedidoId, $uid, $guinchoId, $estrelas, $coment);
-            // Recalcula reputação
+            // Recalcula reputa��o
             require_once __DIR__ . '/../Models/Guincho.php';
             Guincho::atualizarReputacao($guinchoId);
         }
@@ -1554,9 +1550,9 @@ class ClienteController extends BaseController
     }
     
         /**
-     * Cliente responde ao orçamento da oficina.
-     * - Aprovar → oficina pode iniciar o serviço
-     * - Recusar → sistema oferece guincho com desconto (usa endpoint já existente
+     * Cliente responde ao or�amento da oficina.
+     * - Aprovar ? oficina pode iniciar o servi�o
+     * - Recusar ? sistema oferece guincho com desconto (usa endpoint j� existente
      *   /cliente/pedido/{id}/converter-reboque-com-desconto)
      */
     public function responderOrcamentoOficina(int $pedidoId): void
@@ -1568,7 +1564,7 @@ class ClienteController extends BaseController
 
         if (!AuthService::validarCsrfToken((string)($_POST['csrf_token'] ?? ''))) {
             http_response_code(403);
-            echo json_encode(['ok' => false, 'erro' => 'Token inválido.'], JSON_UNESCAPED_UNICODE);
+            echo json_encode(['ok' => false, 'erro' => 'Token inv�lido.'], JSON_UNESCAPED_UNICODE);
             exit;
         }
 
@@ -1576,7 +1572,7 @@ class ClienteController extends BaseController
         $pedido = Pedido::buscarPorId($pedidoId);
         if (!$pedido || (int)$pedido['cliente_id'] !== $uid) {
             http_response_code(404);
-            echo json_encode(['ok' => false, 'erro' => 'Pedido não encontrado.'], JSON_UNESCAPED_UNICODE);
+            echo json_encode(['ok' => false, 'erro' => 'Pedido n�o encontrado.'], JSON_UNESCAPED_UNICODE);
             exit;
         }
 
@@ -1587,7 +1583,7 @@ class ClienteController extends BaseController
 
         if (!in_array($decisao, ['aprovar', 'recusar'], true)) {
             http_response_code(422);
-            echo json_encode(['ok' => false, 'erro' => 'Decisão inválida.'], JSON_UNESCAPED_UNICODE);
+            echo json_encode(['ok' => false, 'erro' => 'Decis�o inv�lida.'], JSON_UNESCAPED_UNICODE);
             exit;
         }
 
@@ -1597,7 +1593,7 @@ class ClienteController extends BaseController
             || (int)$orcamento['pedido_id'] !== $pedidoId
             || $orcamento['status'] !== 'pendente') {
             http_response_code(409);
-            echo json_encode(['ok' => false, 'erro' => 'Orçamento não está mais pendente.'], JSON_UNESCAPED_UNICODE);
+            echo json_encode(['ok' => false, 'erro' => 'Or�amento n�o est� mais pendente.'], JSON_UNESCAPED_UNICODE);
             exit;
         }
 
@@ -1607,7 +1603,7 @@ class ClienteController extends BaseController
             if ($decisao === 'aprovar') {
                 $ok = OficinaOrcamento::aprovar($orcamentoId);
                 if (!$ok) {
-                    throw new RuntimeException('Não foi possível aprovar (concorrência).');
+                    throw new RuntimeException('N�o foi poss�vel aprovar (concorr�ncia).');
                 }
                 $pdo->prepare("UPDATE pedidos SET status = 'orcamento_aprovado' WHERE id = ?")
                     ->execute([$pedidoId]);
@@ -1621,19 +1617,19 @@ class ClienteController extends BaseController
                 echo json_encode([
                     'ok' => true,
                     'acao' => 'aprovado',
-                    'mensagem' => 'Orçamento aprovado — a oficina foi liberada para iniciar o serviço.',
+                    'mensagem' => 'Or�amento aprovado - a oficina foi liberada para iniciar o servi�o.',
                 ], JSON_UNESCAPED_UNICODE);
                 exit;
             }
 
-            // ── RECUSAR ─────────────────────────────────────────
+            // ?? RECUSAR ?????????????????????????????????????????
             $ok = OficinaOrcamento::recusar($orcamentoId);
             error_log('[responderOrcamentoOficina][recusar] pedido=' . $pedidoId . ' orcamento=' . $orcamentoId . ' ok=' . ($ok ? '1' : '0'));
             if (!$ok) {
-                throw new RuntimeException('Não foi possível recusar (concorrência).');
+                throw new RuntimeException('N�o foi poss�vel recusar (concorr�ncia).');
             }
 
-            // Status intermediário — o cliente vê a oferta do guincho com desconto
+            // Status intermedi�rio - o cliente v� a oferta do guincho com desconto
             // e precisa confirmar (endpoint /cliente/pedido/{id}/converter-reboque-com-desconto).
             $pdo->prepare("UPDATE pedidos SET status = 'conversao_reboque_pendente' WHERE id = ?")
                 ->execute([$pedidoId]);
@@ -1645,7 +1641,7 @@ class ClienteController extends BaseController
                     'aguardando confirmacao do cliente'
                 );
 
-            // Calcula o valor do guincho com desconto pra já mostrar na tela
+            // Calcula o valor do guincho com desconto pra j� mostrar na tela
             require_once __DIR__ . '/../Services/PricingService.php';
             require_once __DIR__ . '/../Services/GeoService.php';
 
@@ -1675,7 +1671,7 @@ class ClienteController extends BaseController
         } catch (Throwable $e) {
             error_log('[ClienteController][responderOrcamentoOficina] ' . $e->getMessage());
             http_response_code(500);
-            echo json_encode(['ok' => false, 'erro' => 'Erro ao processar decisão.'], JSON_UNESCAPED_UNICODE);
+            echo json_encode(['ok' => false, 'erro' => 'Erro ao processar decis�o.'], JSON_UNESCAPED_UNICODE);
         }
         exit;
     }

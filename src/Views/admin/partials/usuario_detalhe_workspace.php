@@ -1,10 +1,10 @@
 <?php
 /**
- * Fragmento do painel de detalhe de um usuário — conteúdo do workspace de
+ * Fragmento do painel de detalhe de um usuário - conte�do do workspace de
  * /admin/usuarios (shell-ops), devolvido como HTML puro por
  * AdminController::usuarioDetalheFragmento() e injetado via fetch()+innerHTML
- * pelo JS da lista. NÃO inclui header/footer/sidebar — só o miolo.
- * Reaproveita 100% a mesma lógica visual da antiga página standalone
+ * pelo JS da lista. NÃO inclui header/footer/sidebar - s� o miolo.
+ * Reaproveita 100% a mesma l�gica visual da antiga p�gina standalone
  * usuariodetalhe.php.
  *
  * @var array $usuario
@@ -55,11 +55,11 @@ $bp = defined('BASE_PATH') ? BASE_PATH : '';
 <div class="row g-4">
     <div class="col-md-4">
         <div class="card mb-4">
-            <div class="card-header"><i class="fas fa-id-card me-2"></i>Dados do Usuário</div>
+            <div class="card-header"><i class="fas fa-id-card me-2"></i>Dados do Usu�rio</div>
             <div class="card-body">
                 <table class="table table-sm mb-0 ghd-table">
-                    <tr><td class="ghd-label ghd-label--35">Telefone</td><td><?php echo htmlspecialchars($usuario['telefone'] ?? '—'); ?></td></tr>
-                    <tr><td class="ghd-label">CPF</td><td><?php echo htmlspecialchars($usuario['cpf'] ?? '—'); ?></td></tr>
+                    <tr><td class="ghd-label ghd-label--35">Telefone</td><td><?php echo htmlspecialchars($usuario['telefone'] ?? '-'); ?></td></tr>
+                    <tr><td class="ghd-label">CPF</td><td><?php echo htmlspecialchars($usuario['cpf'] ?? '-'); ?></td></tr>
                     <tr><td class="ghd-label">Status</td>
                         <td><span class="badge <?php echo $usuario['ativo'] ? 'badge-concluido' : 'badge-cancelado'; ?>">
                             <?php echo $usuario['ativo'] ? 'Ativo' : 'Suspenso'; ?>
@@ -67,7 +67,7 @@ $bp = defined('BASE_PATH') ? BASE_PATH : '';
                     </tr>
                     <tr><td class="ghd-label">Cadastro</td><td><?php echo date('d/m/Y', strtotime($usuario['criado_em'])); ?></td></tr>
                     <tr><td class="ghd-label">Último Login</td>
-                        <td><?php echo $usuario['ultimo_login'] ? date('d/m/Y H:i', strtotime($usuario['ultimo_login'])) : '—'; ?></td>
+                        <td><?php echo $usuario['ultimo_login'] ? date('d/m/Y H:i', strtotime($usuario['ultimo_login'])) : '-'; ?></td>
                     </tr>
                 </table>
             </div>
@@ -79,11 +79,11 @@ $bp = defined('BASE_PATH') ? BASE_PATH : '';
           <div class="card-body">
             <?php if (!empty($extra)): ?>
               <p><strong>Estabelecimento:</strong> <?php echo htmlspecialchars((string)$extra['nome'], ENT_QUOTES, 'UTF-8'); ?></p>
-              <p><strong>Endereço:</strong> <?php echo htmlspecialchars((string)$extra['endereco'], ENT_QUOTES, 'UTF-8'); ?></p>
+              <p><strong>Endere�o:</strong> <?php echo htmlspecialchars((string)$extra['endereco'], ENT_QUOTES, 'UTF-8'); ?></p>
               <p><strong>Modalidade:</strong> <?php echo htmlspecialchars((string)$extra['tipo'], ENT_QUOTES, 'UTF-8'); ?></p>
               <p><strong>Raio:</strong> <?php echo (int)$extra['raio_atendimento_km']; ?> km</p>
               <p><strong>Disponibilidade:</strong> <?php echo !empty($extra['disponivel']) ? 'Online' : 'Offline'; ?></p>
-            <?php else: ?><p class="text-danger">Conta sem registro correspondente em oficinas. Verifique o vínculo.</p><?php endif; ?>
+            <?php else: ?><p class="text-danger">Conta sem registro correspondente em oficinas. Verifique o v�nculo.</p><?php endif; ?>
           </div>
         </div>
         <?php endif; ?>
@@ -92,21 +92,21 @@ $bp = defined('BASE_PATH') ? BASE_PATH : '';
             <div class="card-header"><i class="fas fa-truck me-2"></i>Dados do Guincho</div>
             <div class="card-body">
                 <table class="table table-sm mb-0 ghd-table">
-                    <tr><td class="ghd-label ghd-label--40">Placa</td><td><?php echo htmlspecialchars($extra['placa_guincho'] ?? '—'); ?></td></tr>
-                    <tr><td class="ghd-label">CNH</td><td><?php echo htmlspecialchars($extra['cnh_numero'] ?? '—'); ?></td></tr>
+                    <tr><td class="ghd-label ghd-label--40">Placa</td><td><?php echo htmlspecialchars($extra['placa_guincho'] ?? '-'); ?></td></tr>
+                    <tr><td class="ghd-label">CNH</td><td><?php echo htmlspecialchars($extra['cnh_numero'] ?? '-'); ?></td></tr>
                     <tr><td class="ghd-label">Aprovado</td>
                         <td><span class="badge <?php echo $extra['aprovado'] ? 'badge-concluido':'badge-aguardando_guincho'; ?>">
                             <?php echo $extra['aprovado'] ? 'Sim' : 'Pendente'; ?>
                         </span></td>
                     </tr>
-                    <tr><td class="ghd-label">Disponível</td>
+                    <tr><td class="ghd-label">Dispon�vel</td>
                         <td><span class="badge <?php echo $extra['disponivel'] ? 'badge-concluido':'badge-cancelado'; ?>">
                             <?php echo $extra['disponivel'] ? 'Online' : 'Offline'; ?>
                         </span></td>
                     </tr>
-                    <tr><td class="ghd-label">Reputação</td><td><?php echo number_format($extra['reputacao'] ?? 0, 1); ?> / 5.0</td></tr>
+                    <tr><td class="ghd-label">Reputa��o</td><td><?php echo number_format($extra['reputacao'] ?? 0, 1); ?> / 5.0</td></tr>
                     <tr><td class="ghd-label">Avaliações</td><td><?php echo (int)($extra['total_avaliacoes'] ?? 0); ?></td></tr>
-                    <tr><td class="ghd-label">Pix</td><td><?php echo htmlspecialchars($extra['chave_pix'] ?? '—'); ?></td></tr>
+                    <tr><td class="ghd-label">Pix</td><td><?php echo htmlspecialchars($extra['chave_pix'] ?? '-'); ?></td></tr>
                 </table>
 
                 <?php if (!$extra['aprovado']): ?>
@@ -176,8 +176,8 @@ $bp = defined('BASE_PATH') ? BASE_PATH : '';
                             <?php foreach ($pedidos as $p): ?>
                             <tr>
                                 <td><?php echo $p['id']; ?></td>
-                                <td><?php echo htmlspecialchars($p['cliente_nome'] ?? $p['guincho_operador'] ?? '—'); ?></td>
-                                <td><?php echo htmlspecialchars(ucfirst($p['tipo_problema'] ?? '—')); ?></td>
+                                <td><?php echo htmlspecialchars($p['cliente_nome'] ?? $p['guincho_operador'] ?? '-'); ?></td>
+                                <td><?php echo htmlspecialchars(ucfirst($p['tipo_problema'] ?? '-')); ?></td>
                                 <td><span class="badge badge-<?php echo $p['status']; ?>"><?php echo str_replace('_',' ',ucfirst($p['status'])); ?></span></td>
                                 <td>R$ <?php echo number_format($p['custo_estimado'] ?? 0, 2, ',', '.'); ?></td>
                                 <td><?php echo date('d/m/Y', strtotime($p['criado_em'])); ?></td>
@@ -197,3 +197,4 @@ $bp = defined('BASE_PATH') ? BASE_PATH : '';
     </div>
 </div>
 </div>
+

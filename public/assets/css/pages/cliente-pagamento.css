@@ -90,4 +90,4 @@ body.cliente .pagamento-pre-detalhe {
   .checkout-recibo {
     position: static;
   }
-}
+}/* Checkout administrativo: apenas o sidebar usa a cor escura do backoffice. */body.admin .main-wrapper.admin-shell,body.admin .main-wrapper.admin-shell .main-content {  background: #f7f9fb !important;  color: #172536 !important;}body.admin .main-wrapper.admin-shell .shell-content {  min-height: 100vh;  padding: 0 28px 36px;}body.admin .main-wrapper.admin-shell .gf-panel-topbar {  margin: 0 -28px 28px;  width: calc(100% + 56px);}body.admin .main-wrapper.admin-shell .page-head,body.admin .main-wrapper.admin-shell .card,body.admin .main-wrapper.admin-shell .alert {  background: #fff;  color: #172536;}body.admin .main-wrapper.admin-shell .card {  border-color: #dce4ec;  box-shadow: 0 8px 24px rgba(23, 37, 54, .06);}body.admin .main-wrapper.admin-shell .card-header {  background: #f3f6f8;  color: #172536;  border-bottom-color: #dce4ec;}body.admin .main-wrapper.admin-shell .text-muted {  color: #64748b !important;}

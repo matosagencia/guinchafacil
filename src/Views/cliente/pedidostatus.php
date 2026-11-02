@@ -39,6 +39,7 @@ include __DIR__ . '/../layouts/header.php';
     <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken, ENT_QUOTES, 'UTF-8') ?>" data-role="pedido-csrf">
 <?php include __DIR__ . '/../layouts/sidebar_cliente.php'; ?>
 <main class="main-content" style="padding:1.5rem">
+    <?php include __DIR__ . '/partials/_panel_topbar_cliente.php'; ?>
 
     <?php if (!empty($flash)): ?>
         <div class="alert alert-<?= $flash['type'] === 'success' ? 'success' : 'danger' ?> mb-3">

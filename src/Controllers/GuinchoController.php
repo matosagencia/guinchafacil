@@ -84,7 +84,7 @@ class GuinchoController extends BaseController
 
     // dentro da MESMA sessÃ£o logada (evita ficar Online por horas/dias com
 
-    // uma posiÃ§Ã£o velha â€” a raiz do bug real de matching do pedido 1539).
+    // uma posiÃ§Ã£o velha - a raiz do bug real de matching do pedido 1539).
 
     private const LOCALIZACAO_MAX_IDADE_SEGUNDOS = 4 * 3600;
 
@@ -198,7 +198,7 @@ class GuinchoController extends BaseController
 
         // (via navigator.geolocation, nÃ£o IP) a cada login e periodicamente
 
-        // â€” ver GuinchoController::localizacaoConfirmadaValida(). Sem isso,
+        // - ver GuinchoController::localizacaoConfirmadaValida(). Sem isso,
 
         // lat_atual/lng_atual podia ficar congelado por dias enquanto o
 
@@ -216,7 +216,7 @@ class GuinchoController extends BaseController
 
         // sessÃ£o, e nÃ£o estÃ¡ no meio de um atendimento (nunca derruba um
 
-        // serviÃ§o em andamento), tira ele de disponÃ­vel AGORA â€” nÃ£o espera
+        // serviÃ§o em andamento), tira ele de disponÃ­vel AGORA - nÃ£o espera
 
         // o clique no modal. Assim, mesmo que o JS do modal falhe por algum
 
@@ -240,7 +240,7 @@ class GuinchoController extends BaseController
 
 
 
-        // Fila de ofertas aguardando (sÃ³ exibe se o guincho nÃ£o tiver corrida ativa) â€”
+        // Fila de ofertas aguardando (sÃ³ exibe se o guincho nÃ£o tiver corrida ativa) -
 
         // reaproveita a mesma lÃ³gica de distÃ¢ncia/score de pedidosDisponiveis(), mas
 
@@ -282,7 +282,7 @@ class GuinchoController extends BaseController
 
         // momento do cadastro) quando a cÃ©lula da base do guincho estÃ¡
 
-        // 'pedra_morta' â€” sem isso, o prestador vÃª "0 chamados" dia apÃ³s
+        // 'pedra_morta' - sem isso, o prestador vÃª "0 chamados" dia apÃ³s
 
         // dia e conclui que o app estÃ¡ com bug, quando na verdade a regiÃ£o
 
@@ -290,7 +290,7 @@ class GuinchoController extends BaseController
 
         // sÃ³ informa. Silencioso (nÃ£o calcula/mostra) se nÃ£o houver
 
-        // lat_operacao/lng_operacao ou nenhuma cÃ©lula mapeada â€” mesma regra
+        // lat_operacao/lng_operacao ou nenhuma cÃ©lula mapeada - mesma regra
 
         // aditiva do gate de cadastro.
 
@@ -302,9 +302,9 @@ class GuinchoController extends BaseController
 
             $zonaDoGuincho = ZonePricingService::resolverZonaPorCoordenada((float)$guincho['lat_operacao'], (float)$guincho['lng_operacao']);
 
-            if ($zonaDoGuincho !== null && ($zonaDoGuincho['status_expansao'] ?? '') === 'pedra_morta') {
+            if (false && $zonaDoGuincho !== null && ($zonaDoGuincho['status_expansao'] ?? '') === 'pedra_morta') {
 
-                $avisoCelulaPedraMorta = 'Sua regiÃ£o ("' . $zonaDoGuincho['name'] . '") ainda estÃ¡ em fase de validaÃ§Ã£o operacional â€” por isso vocÃª ainda nÃ£o recebe chamados de clientes daqui. NÃ£o Ã© um erro do seu cadastro; assim que essa regiÃ£o for ativada pela nossa equipe, os pedidos passam a chegar normalmente.';
+                $avisoCelulaPedraMorta = 'Sua regiÃ£o ("' . $zonaDoGuincho['name'] . '") ainda estÃ¡ em fase de validaÃ§Ã£o operacional - por isso vocÃª ainda nÃ£o recebe chamados de clientes daqui. NÃ£o Ã© um erro do seu cadastro; assim que essa regiÃ£o for ativada pela nossa equipe, os pedidos passam a chegar normalmente.';
 
             }
 
@@ -326,7 +326,7 @@ class GuinchoController extends BaseController
 
      * distÃ¢ncia atÃ© o cliente, ETA estimado, bairro e tempo relativo desde
 
-     * a criaÃ§Ã£o â€” dados reais consumidos pelo card "Nova solicitaÃ§Ã£o" e
+     * a criaÃ§Ã£o - dados reais consumidos pelo card "Nova solicitaÃ§Ã£o" e
 
      * pela lista "Fila de ofertas" do dashboard.
 
@@ -337,7 +337,7 @@ class GuinchoController extends BaseController
     {
         require_once __DIR__ . '/../Services/Finance/BloqueioFinanceiroService.php';
         if (BloqueioFinanceiroService::guinchoEstaBloqueado((int)($guincho['id'] ?? 0))) {
-            error_log('[FIN-BLOCK-MATCH] guincho bloqueado excluído do matching.');
+            error_log('[FIN-BLOCK-MATCH] guincho bloqueado excluï¿½do do matching.');
             return [];
         }
 
@@ -355,7 +355,7 @@ class GuinchoController extends BaseController
 
         // Â§COBERTURA-RAIO-01 (05/08/2026): raio efetivo agora respeita o
 
-        // raio_cobertura_km prÃ³prio do guincho (antes ignorado â€” sÃ³ o teto
+        // raio_cobertura_km prÃ³prio do guincho (antes ignorado - sÃ³ o teto
 
         // global raio_maximo_km filtrava), sem nunca ultrapassar esse teto.
 
@@ -383,7 +383,7 @@ class GuinchoController extends BaseController
 
             // visÃ­veis a qualquer guincho aprovado, exatamente como sempre
 
-            // funcionou â€” nada muda aqui para nÃ£o regredir o Ãºnico fluxo em
+            // funcionou - nada muda aqui para nÃ£o regredir o Ãºnico fluxo em
 
             // produÃ§Ã£o real. SÃ³ os NOVOS tipos de serviÃ§o (ON_SITE/HYBRID:
 
@@ -395,7 +395,7 @@ class GuinchoController extends BaseController
 
             if ($attendanceMode === 'TOWING') {
 
-                // Reboque sÃ³ Ã© ofertado a prestador com reboque APROVADO â€”
+                // Reboque sÃ³ Ã© ofertado a prestador com reboque APROVADO -
 
                 // especialista (chaveiro/elÃ©trica/pneu) nunca recebe reboque.
 
@@ -419,7 +419,7 @@ class GuinchoController extends BaseController
 
 
 
-            // Etapa 15 â€” compatibilidade prestador Ã— veÃ­culo. Esconde pedidos
+            // Etapa 15 - compatibilidade prestador ï¿½- veÃ­culo. Esconde pedidos
 
             // INELIGIBLE; deixa passar ELIGIBLE e REQUIRES_CONFIRMATION (estes
 
@@ -575,9 +575,9 @@ class GuinchoController extends BaseController
 
 
 
-        // Fase corrente: coleta (a_caminho/no_local â†’ indo atÃ© a origem) ou
+        // Fase corrente: coleta (a_caminho/no_local - indo atÃ© a origem) ou
 
-        // entrega (em_reboque â†’ indo atÃ© o destino). Usa o resumo da fase
+        // entrega (em_reboque - indo atÃ© o destino). Usa o resumo da fase
 
         // atual quando existir; combina origem+destino como fallback.
 
@@ -687,7 +687,7 @@ class GuinchoController extends BaseController
 
             // navegador (ex.: geolocation mock/erro do device) morria aqui
 
-            // sem log nenhum â€” o painel do guincheiro simplesmente parava de
+            // sem log nenhum - o painel do guincheiro simplesmente parava de
 
             // avanÃ§ar e nÃ£o havia como saber, olhando o log do admin, que a
 
@@ -723,7 +723,7 @@ class GuinchoController extends BaseController
 
         // (venha do modal de confirmaÃ§Ã£o no login, venha do rastreamento
 
-        // durante atendimento ativo) conta como confirmaÃ§Ã£o fresca â€” reseta
+        // durante atendimento ativo) conta como confirmaÃ§Ã£o fresca - reseta
 
         // o relÃ³gio de validade em GuinchoController::localizacaoConfirmadaValida().
 
@@ -775,11 +775,11 @@ class GuinchoController extends BaseController
 
             // GPS Ã© aceito sÃ³ pra atualizar a posiÃ§Ã£o bruta do guincho, mas
 
-            // NENHUM rastreamento por pedido acontece â€” isso Ã© fÃ¡cil de
+            // NENHUM rastreamento por pedido acontece - isso Ã© fÃ¡cil de
 
             // confundir com "o ponto foi ingerido normalmente" se nÃ£o logado.
 
-            Logger::log(Logger::LEVEL_WARN, __CLASS__, __FUNCTION__, 'POR', 'LocalizaÃ§Ã£o recebida sem pedido_id resolvÃ­vel â€” POR nÃ£o foi ingerido, sÃ³ a posiÃ§Ã£o bruta do guincho foi atualizada', [
+            Logger::log(Logger::LEVEL_WARN, __CLASS__, __FUNCTION__, 'POR', 'LocalizaÃ§Ã£o recebida sem pedido_id resolvÃ­vel - POR nÃ£o foi ingerido, sÃ³ a posiÃ§Ã£o bruta do guincho foi atualizada', [
 
                 'guincho_id' => $guincho['id'] ?? null,
 
@@ -863,7 +863,7 @@ class GuinchoController extends BaseController
 
         // Usa o estado desejado enviado pelo cliente; se nÃ£o vier, inverte o atual
 
-        // IMPORTANTE: (int) antes do cast â€” FormData envia "0"/"1" como string,
+        // IMPORTANTE: (int) antes do cast - FormData envia "0"/"1" como string,
 
         // e em PHP a string "0" Ã© falsy, mas qualquer outra string nÃ£o-vazia Ã© truthy.
 
@@ -893,7 +893,7 @@ class GuinchoController extends BaseController
 
 
 
-        // Â§GPS-CONFIRM-01: reforÃ§o server-side â€” mesmo que alguÃ©m contorne o
+        // Â§GPS-CONFIRM-01: reforÃ§o server-side - mesmo que alguÃ©m contorne o
 
         // modal do dashboard e chame esta rota direto, nÃ£o deixa ficar
 
@@ -1057,7 +1057,7 @@ class GuinchoController extends BaseController
 
 
 
-        // Etapa 4 (matching por capacidade) â€” mesma regra do aceite real
+        // Etapa 4 (matching por capacidade) - mesma regra do aceite real
 
         // (PedidoTransitionService::assignInternal): nÃ£o mostra a tela de
 
@@ -1093,7 +1093,7 @@ class GuinchoController extends BaseController
 
 
 
-        // Etapa 15 â€” na tela de aceite, INELIGIBLE volta pro dashboard;
+        // Etapa 15 - na tela de aceite, INELIGIBLE volta pro dashboard;
 
         // REQUIRES_CONFIRMATION segue para a tela (que mostra os avisos), mas
 
@@ -1303,7 +1303,7 @@ class GuinchoController extends BaseController
 
     /**
 
-     * ROADMAP socorro automotivo Â§3.3: "Quais serviÃ§os vocÃª oferece?" â€”
+     * ROADMAP socorro automotivo Â§3.3: "Quais serviÃ§os vocÃª oferece?" -
 
      * prestador declara capacidades (nascem PENDING, ver ProviderCapability::declarar()).
 
@@ -1393,17 +1393,17 @@ class GuinchoController extends BaseController
 
             }
 
-            // Preço não vem do prestador — quem define é o admin (config/tarifas).
-            // O raio operacional é único e fica em guincho/perfil, não por serviço.
+            // Preï¿½o nï¿½o vem do prestador - quem define ï¿½ o admin (config/tarifas).
+            // O raio operacional ï¿½ ï¿½nico e fica em guincho/perfil, nï¿½o por serviï¿½o.
             ProviderCapability::declarar((int)$guincho['id'], $serviceTypeId);
 
         }
 
 
 
-        // Â§FLASH-FORMATO-01: NÃƒO usar $this->setFlashMessage() (BaseController)
+        // Â§FLASH-FORMATO-01: Nï¿½fO usar $this->setFlashMessage() (BaseController)
 
-        // aqui â€” ela sobrescreve $_SESSION['_flash'] com um item Ãºnico plano
+        // aqui - ela sobrescreve $_SESSION['_flash'] com um item Ãºnico plano
 
         // (['message'=>..,'type'=>..]), formato incompatÃ­vel com o resto deste
 
@@ -1413,7 +1413,7 @@ class GuinchoController extends BaseController
 
         // Bug real encontrado via QA (onboarding-stress.spec.ts): a mensagem de
 
-        // sucesso nunca aparecia â€” acesso a offset invÃ¡lido em string.
+        // sucesso nunca aparecia - acesso a offset invÃ¡lido em string.
 
         $_SESSION['_flash'][] = ['message' => 'Capacidades enviadas para anÃ¡lise. VocÃª serÃ¡ avisado quando forem aprovadas.', 'type' => 'success'];
 
@@ -1565,7 +1565,7 @@ class GuinchoController extends BaseController
 
 
 
-            // â”€â”€ Dados pessoais (tabela usuarios) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+            // ï¿½"?ï¿½"? Dados pessoais (tabela usuarios) ï¿½"?ï¿½"?ï¿½"?ï¿½"?ï¿½"?ï¿½"?ï¿½"?ï¿½"?ï¿½"?ï¿½"?ï¿½"?ï¿½"?ï¿½"?ï¿½"?ï¿½"?ï¿½"?ï¿½"?ï¿½"?ï¿½"?ï¿½"?ï¿½"?
 
             $nome     = trim($_POST['nome'] ?? '');
 
@@ -1629,7 +1629,7 @@ class GuinchoController extends BaseController
 
 
 
-            // â”€â”€ Dados do veÃ­culo / operaÃ§Ã£o (tabela guinchos) â”€â”€â”€â”€â”€â”€â”€â”€â”€
+            // ï¿½"?ï¿½"? Dados do veÃ­culo / operaÃ§Ã£o (tabela guinchos) ï¿½"?ï¿½"?ï¿½"?ï¿½"?ï¿½"?ï¿½"?ï¿½"?ï¿½"?ï¿½"?
 
             $placa        = strtoupper(preg_replace('/[^A-Za-z0-9]/', '', $_POST['placa_guincho'] ?? ''));
 
@@ -1903,7 +1903,7 @@ class GuinchoController extends BaseController
 
         }
 
-        // NÃ£o altera o pedido â€” apenas redireciona. Outro guincho pode aceitar.
+        // NÃ£o altera o pedido - apenas redireciona. Outro guincho pode aceitar.
 
         $this->redirect('/guincho/dashboard');
 
@@ -2057,7 +2057,7 @@ class GuinchoController extends BaseController
 
             // Â§LOG-GC-03 (29/07/2026): esta era a lacuna central do bug
 
-            // "painel do especialista nÃ£o se move" â€” quando o guincheiro
+            // "painel do especialista nÃ£o se move" - quando o guincheiro
 
             // clica pra avanÃ§ar (ex.: a_caminho -> no_local) e
 
@@ -2065,7 +2065,7 @@ class GuinchoController extends BaseController
 
             // o motivo sÃ³ aparecia como texto solto na tela por um instante
 
-            // (data.erro) e sumia â€” nada ficava no app-*.jsonl nem em
+            // (data.erro) e sumia - nada ficava no app-*.jsonl nem em
 
             // app_logs. Espelha o mesmo padrÃ£o jÃ¡ usado em aceitar() acima.
 
@@ -2115,7 +2115,7 @@ class GuinchoController extends BaseController
 
             // FIX (achado via CarteiraService::checarReconciliacaoGlobal(),
 
-            // tela /admin/carteiras â€” divergÃªncia real entre payout_ledger_entries
+            // tela /admin/carteiras - divergÃªncia real entre payout_ledger_entries
 
             // e pagamentos.valor_guincho): o modo freeflow aprovava o
 
@@ -2129,7 +2129,7 @@ class GuinchoController extends BaseController
 
             // esse valor como recebido em pagamentos mas o ledger nunca soube
 
-            // dele. NÃ£o altera nenhum valor jÃ¡ calculado â€” sÃ³ grava o mesmo
+            // dele. NÃ£o altera nenhum valor jÃ¡ calculado - sÃ³ grava o mesmo
 
             // lanÃ§amento que o fluxo normal jÃ¡ grava.
 
@@ -2149,7 +2149,7 @@ class GuinchoController extends BaseController
 
                 Logger::log(Logger::LEVEL_ERROR, __CLASS__, __FUNCTION__, 'financeiro',
 
-                    "Pagamento::criar retornou false pro pedido #{$id} em modo freeflow â€” ledger NÃƒO foi gravado.",
+                    "Pagamento::criar retornou false pro pedido #{$id} em modo freeflow; ledger nao foi gravado.",
 
                     ['pedido_id' => $id]);
 
@@ -2197,7 +2197,7 @@ class GuinchoController extends BaseController
 
      * FIX CRÃTICO (achado via CarteiraService::checarReconciliacaoGlobal(),
 
-     * tela /admin/carteiras â€” divergÃªncia real de R$ ~2.410 entre o ledger
+     * tela /admin/carteiras - divergÃªncia real de R$ ~2.410 entre o ledger
 
      * contÃ¡bil e a soma de pagamentos.valor_guincho): antes deste fix, os
 
@@ -2207,13 +2207,13 @@ class GuinchoController extends BaseController
 
      * com uma fÃ³rmula diferente da usada na aprovaÃ§Ã£o do pagamento
 
-     * (PedidoTransitionService::approvePayment, Â§SPLIT-LIQUIDO-01 â€” desconta
+     * (PedidoTransitionService::approvePayment, Â§SPLIT-LIQUIDO-01 - desconta
 
      * reserva_gateway_percentual ANTES de aplicar a comissÃ£o). A fÃ³rmula
 
      * antiga aqui nÃ£o descontava a reserva, entÃ£o o valor_guincho recalculado
 
-     * era MAIOR que o valor jÃ¡ aprovado e jÃ¡ registrado no ledger â€” e esse
+     * era MAIOR que o valor jÃ¡ aprovado e jÃ¡ registrado no ledger - e esse
 
      * valor maior sobrescrevia pagamentos.valor_guincho (via
 
@@ -2221,7 +2221,7 @@ class GuinchoController extends BaseController
 
      * real. Resultado: o guincheiro recebia a mais do que o ledger sabia, a
 
-     * cada pedido de reboque concluÃ­do â€” a reserva de gateway (4,5% do
+     * cada pedido de reboque concluÃ­do - a reserva de gateway (4,5% do
 
      * valor bruto) estava sendo paga ao guincheiro em vez de retida pela
 
@@ -2229,7 +2229,7 @@ class GuinchoController extends BaseController
 
      * =0.045 (valores reais configurados neste ambiente), isso Ã© R$ 3,60 de
 
-     * diferenÃ§a a cada R$ 100 de pedido â€” dinheiro real, nÃ£o sÃ³ contÃ¡bil.
+     * diferenÃ§a a cada R$ 100 de pedido - dinheiro real, nÃ£o sÃ³ contÃ¡bil.
 
      *
 
@@ -2237,13 +2237,13 @@ class GuinchoController extends BaseController
 
      * calculado e jÃ¡ auditado no ledger na aprovaÃ§Ã£o do pagamento
 
-     * (Pagamento::buscarPorPedido â€” fonte de verdade Ãºnica). SÃ³ cai no
+     * (Pagamento::buscarPorPedido - fonte de verdade Ãºnica). SÃ³ cai no
 
      * fallback (recalcular) quando nÃ£o hÃ¡ pagamento aprovado prÃ©vio
 
      * compatÃ­vel com o valor total atual (ex.: freeflow puro, que nunca
 
-     * passou por approvePayment; ou uma inconsistÃªncia real de dados) â€” e
+     * passou por approvePayment; ou uma inconsistÃªncia real de dados) - e
 
      * nesse caso usa a MESMA fÃ³rmula lÃ­quida da aprovaÃ§Ã£o, nunca a antiga.
 
@@ -2275,7 +2275,7 @@ class GuinchoController extends BaseController
 
             Logger::log(Logger::LEVEL_DEBUG, __CLASS__, __FUNCTION__, 'financeiro',
 
-                "Reaproveitando split jÃ¡ aprovado do pagamento #{$pagamentoAprovado['id']} pro pedido #{$pedidoId} â€” guincho=R$ {$valorGuincho}, plataforma=R$ {$valorPlataforma}.",
+                "Reaproveitando split jÃ¡ aprovado do pagamento #{$pagamentoAprovado['id']} pro pedido #{$pedidoId} - guincho=R$ {$valorGuincho}, plataforma=R$ {$valorPlataforma}.",
 
                 ['pedido_id' => $pedidoId, 'pagamento_id' => $pagamentoAprovado['id'], 'valor_total' => $valorTotal, 'valor_guincho' => $valorGuincho, 'valor_plataforma' => $valorPlataforma]);
 
@@ -2285,7 +2285,7 @@ class GuinchoController extends BaseController
 
 
 
-        // Fallback: sem pagamento aprovado compatÃ­vel â€” recalcula com a
+        // Fallback: sem pagamento aprovado compatÃ­vel - recalcula com a
 
         // MESMA fÃ³rmula lÃ­quida da aprovaÃ§Ã£o (nunca a fÃ³rmula antiga
 
@@ -2311,7 +2311,7 @@ class GuinchoController extends BaseController
 
         Logger::log(Logger::LEVEL_WARN, __CLASS__, __FUNCTION__, 'financeiro',
 
-            "Nenhum pagamento aprovado compatÃ­vel encontrado pro pedido #{$pedidoId} na conclusÃ£o â€” recalculando com a fÃ³rmula lÃ­quida (mesma da aprovaÃ§Ã£o). " .
+            "Nenhum pagamento aprovado compatÃ­vel encontrado pro pedido #{$pedidoId} na conclusÃ£o - recalculando com a fÃ³rmula lÃ­quida (mesma da aprovaÃ§Ã£o). " .
 
             ($pagamentoAprovado ? "Pagamento #{$pagamentoAprovado['id']} encontrado mas status='" . ($pagamentoAprovado['status'] ?? '?') . "' ou valor_total divergente (R$ " . ($pagamentoAprovado['valor_total'] ?? '?') . " vs R$ {$valorTotal})." : 'Nenhum pagamento encontrado para o pedido.'),
 
@@ -2435,13 +2435,13 @@ class GuinchoController extends BaseController
 
 
 
-        // Etapa 5 â€” painel de diagnÃ³stico/orÃ§amento sÃ³ faz sentido para
+        // Etapa 5 - painel de diagnÃ³stico/orÃ§amento sÃ³ faz sentido para
 
         // serviÃ§os que nÃ£o sÃ£o reboque (OnSiteFlowDefinition). Reboque
 
         // (TOWING) segue 100% pelo botÃ£o Ãºnico de atualizarStatus(), sem
 
-        // nada disso â€” atendimento.php decide o que exibir com base nesta flag.
+        // nada disso - atendimento.php decide o que exibir com base nesta flag.
 
         $attendanceMode = (string)($pedido['attendance_mode'] ?? 'TOWING');
 
@@ -2457,13 +2457,13 @@ class GuinchoController extends BaseController
 
         // o formulÃ¡rio de orÃ§amento complementar deixar o guincheiro vincular
 
-        // um item a um produto real (produto_id) em vez de sÃ³ texto livre â€”
+        // um item a um produto real (produto_id) em vez de sÃ³ texto livre -
 
         // sem isso, EstoqueService::baixarPorPedido() nunca tem o que baixar
 
         // (ver DiagnosticoService::decidirOrcamento()). Vazio/erro nÃ£o quebra
 
-        // a tela â€” item sem produto_id continua funcionando como antes (mÃ£o
+        // a tela - item sem produto_id continua funcionando como antes (mÃ£o
 
         // de obra/serviÃ§o que nÃ£o consome estoque fÃ­sico).
 
@@ -2495,15 +2495,15 @@ class GuinchoController extends BaseController
 
     /**
 
-     * Etapa 5 â€” no_local â†’ diagnostico_iniciado. BotÃ£o "Iniciar diagnÃ³stico"
+     * Etapa 5 - no_local - diagnostico_iniciado. BotÃ£o "Iniciar diagnÃ³stico"
 
      * na tela de atendimento, sÃ³ visÃ­vel/aceito para serviÃ§os nÃ£o-reboque.
 
      *
 
-     * Etapa 6 (Proof-of-Service) â€” exige a foto de "antes" aqui, mesmo
+     * Etapa 6 (Proof-of-Service) - exige a foto de "antes" aqui, mesmo
 
-     * padrÃ£o de nonce+geofence jÃ¡ usado no `no_local â†’ em_reboque` do
+     * padrÃ£o de nonce+geofence jÃ¡ usado no `no_local - em_reboque` do
 
      * reboque comum (tipo 'coleta', reaproveitado). Sem isso o checklist
 
@@ -2569,13 +2569,13 @@ class GuinchoController extends BaseController
 
     /**
 
-     * Etapa 5 â€” diagnostico_iniciado â†’ diagnostico_concluido â†’ (em_execucao_servico
+     * Etapa 5 - diagnostico_iniciado - diagnostico_concluido - (em_execucao_servico
 
      * | autorizacao_servico_pendente | conversao_reboque_pendente), conforme o
 
      * resultado escolhido. Itens de orÃ§amento chegam como arrays paralelos
 
-     * (item_descricao[]/item_valor[]) â€” formulÃ¡rio simples, sem JS de tabela dinÃ¢mica.
+     * (item_descricao[]/item_valor[]) - formulÃ¡rio simples, sem JS de tabela dinÃ¢mica.
 
      */
 
@@ -2639,7 +2639,7 @@ class GuinchoController extends BaseController
 
         // Â§COBERTURA-RAIO-01 (06/08/2026): item_produto_id[]/item_quantidade[]
 
-        // sÃ£o novos e OPCIONAIS â€” item sem produto selecionado continua
+        // sÃ£o novos e OPCIONAIS - item sem produto selecionado continua
 
         // funcionando exatamente como antes (mÃ£o de obra/serviÃ§o, nÃ£o baixa
 
@@ -2651,7 +2651,7 @@ class GuinchoController extends BaseController
 
         // mudanÃ§a, produto_id/quantidade nem chegavam a existir em lugar
 
-        // nenhum do formulÃ¡rio â€” a integraÃ§Ã£o era estruturalmente impossÃ­vel).
+        // nenhum do formulÃ¡rio - a integraÃ§Ã£o era estruturalmente impossÃ­vel).
 
         $itens = [];
 
@@ -2707,13 +2707,13 @@ class GuinchoController extends BaseController
 
     /**
 
-     * Etapa 7 â€” preparacao_veiculo â†’ em_reboque. SÃ³ existe quando a
+     * Etapa 7 - preparacao_veiculo - em_reboque. SÃ³ existe quando a
 
-     * conversÃ£o colocou o MESMO prestador (hÃ­brido) para tocar o reboque â€”
+     * conversÃ£o colocou o MESMO prestador (hÃ­brido) para tocar o reboque -
 
      * reaproveita a mesma validaÃ§Ã£o de geofence/evidÃªncia 'coleta' que o
 
-     * fluxo de reboque original jÃ¡ exige em no_local â†’ em_reboque
+     * fluxo de reboque original jÃ¡ exige em no_local - em_reboque
 
      * (PedidoTransitionService::validatePreconditions nÃ£o distingue como
 
@@ -2781,7 +2781,7 @@ class GuinchoController extends BaseController
 
 
 
-    /** Etapa 5 â€” em_execucao_servico â†’ teste_final. */
+    /** Etapa 5 - em_execucao_servico - teste_final. */
 
     public function execucaoConcluir(int $id): void
 
@@ -2817,11 +2817,11 @@ class GuinchoController extends BaseController
 
     /**
 
-     * Etapa 5 â€” teste_final â†’ concluido (resolvido, com evidÃªncia â€” mesmo
+     * Etapa 5 - teste_final - concluido (resolvido, com evidÃªncia - mesmo
 
      * padrÃ£o de nonce+foto jÃ¡ usado em atualizarStatus() para 'concluido')
 
-     * ou â†’ conversao_reboque_pendente (nÃ£o resolveu, Etapa 7 assume dali).
+     * ou - conversao_reboque_pendente (nÃ£o resolveu, Etapa 7 assume dali).
 
      */
 
@@ -2891,13 +2891,13 @@ class GuinchoController extends BaseController
 
 
 
-        // Etapa 6 (Proof-of-Service) â€” fecha o checklist estruturado sÃ³
+        // Etapa 6 (Proof-of-Service) - fecha o checklist estruturado sÃ³
 
         // quando o serviÃ§o de fato terminou resolvido no local. Se virou
 
         // reboque (conversao_reboque_pendente), o Proof-of-Service desse
 
-        // atendimento fica em aberto de propÃ³sito â€” a "prova" de reboque Ã©
+        // atendimento fica em aberto de propÃ³sito - a "prova" de reboque Ã©
 
         // outra (POR/geofence), jÃ¡ existente, tratada em outro lugar.
 
@@ -2913,7 +2913,7 @@ class GuinchoController extends BaseController
 
         // reboque quando o serviÃ§o local termina resolvido (mesma regra de
 
-        // comissÃ£o/Pix â€” Etapa 11/order_charge_items ainda nÃ£o substitui isso).
+        // comissÃ£o/Pix - Etapa 11/order_charge_items ainda nÃ£o substitui isso).
 
         if ($resolvido) {
 
@@ -2935,7 +2935,7 @@ class GuinchoController extends BaseController
 
                 // Mesmo fix do outro branch freeflow (GuinchoController::atualizarStatus)
 
-                // â€” achado via CarteiraService::checarReconciliacaoGlobal() em
+                // - achado via CarteiraService::checarReconciliacaoGlobal() em
 
                 // /admin/carteiras: freeflow nunca gravava o lanÃ§amento contÃ¡bil.
 
@@ -2955,7 +2955,7 @@ class GuinchoController extends BaseController
 
                     Logger::log(Logger::LEVEL_ERROR, __CLASS__, __FUNCTION__, 'financeiro',
 
-                        "Pagamento::criar retornou false pro pedido #{$id} em modo freeflow (Proof-of-Service) â€” ledger NÃƒO foi gravado.",
+                        "Pagamento::criar retornou false pro pedido #{$id} em modo freeflow (Proof-of-Service) - ledger Nï¿½fO foi gravado.",
 
                         ['pedido_id' => $id]);
 
@@ -2985,7 +2985,7 @@ class GuinchoController extends BaseController
 
     /**
 
-     * AJAX: reemite o nonce de evidÃªncia com o ÃšLTIMO ponto GPS vÃ¡lido no
+     * AJAX: reemite o nonce de evidÃªncia com o ï¿½sLTIMO ponto GPS vÃ¡lido no
 
      * momento da chamada.
 
@@ -2999,7 +2999,7 @@ class GuinchoController extends BaseController
 
      * coletar o veÃ­culo (ainda perto da origem), dirige atÃ© o destino sem
 
-     * recarregar a pÃ¡gina, e sÃ³ entÃ£o tira a foto de entrega â€” nesse momento
+     * recarregar a pÃ¡gina, e sÃ³ entÃ£o tira a foto de entrega - nesse momento
 
      * o nonce antigo ainda aponta pro ponto GPS da ORIGEM, entÃ£o
 
@@ -3009,7 +3009,7 @@ class GuinchoController extends BaseController
 
      * exception nÃ£o Ã© capturada localmente, vira um 500 genÃ©rico via
 
-     * set_exception_handler â€” bloqueando a conclusÃ£o de QUALQUER atendimento
+     * set_exception_handler - bloqueando a conclusÃ£o de QUALQUER atendimento
 
      * com distÃ¢ncia real entre origem e destino. Este endpoint permite ao
 
@@ -3109,7 +3109,7 @@ class GuinchoController extends BaseController
 
         if (!AuthService::validarCsrfToken($_POST['csrf_token'] ?? '')) {
 
-            // L1.9 #47: mesmo tratamento do ClienteController â€” 401 para
+            // L1.9 #47: mesmo tratamento do ClienteController - 401 para
 
             // acionar apiFetch/SessionManager.handleUnauthorized() no front,
 
@@ -3463,7 +3463,7 @@ class GuinchoController extends BaseController
 
         $cfg             = Configuracao::getAll();
 
-        $comissaoPercent = (float)($cfg['comissao_plataforma'] ?? 0.08) * 100; // ex: 0.08 â†’ 8
+        $comissaoPercent = (float)($cfg['comissao_plataforma'] ?? 0.08) * 100; // ex: 0.08 - 8
 
         $systemMode      = (string)($cfg['system_mode'] ?? 'production');
 
@@ -3479,7 +3479,7 @@ class GuinchoController extends BaseController
 
      * Â§RECIBO-PIX-01: recibo/comprovante do repasse Pix de um atendimento
 
-     * concluÃ­do, no formato de fatura simples â€” pro guincheiro usar como
+     * concluÃ­do, no formato de fatura simples - pro guincheiro usar como
 
      * documento de apoio na prÃ³pria contabilidade (nÃ£o Ã© nota fiscal; o
 
@@ -3531,7 +3531,7 @@ class GuinchoController extends BaseController
 
 
 
-    // â”€â”€â”€ Etapa 8 â€” meu estoque (produtos por prestador) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ï¿½"?ï¿½"?ï¿½"? Etapa 8 - meu estoque (produtos por prestador) ï¿½"?ï¿½"?ï¿½"?ï¿½"?ï¿½"?ï¿½"?ï¿½"?ï¿½"?ï¿½"?ï¿½"?ï¿½"?ï¿½"?ï¿½"?ï¿½"?ï¿½"?ï¿½"?ï¿½"?ï¿½"?ï¿½"?ï¿½"?ï¿½"?
 
 
 

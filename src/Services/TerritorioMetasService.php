@@ -3,21 +3,21 @@
 declare(strict_types=1);
 
 // File: guinchafacil/src/Services/TerritorioMetasService.php
-// §CELULAS-NITEROI-01 (04/08/2026): painel ao vivo de metas por célula
-// territorial, alimentando o Dashboard. Responde, célula a célula, às
-// perguntas da estratégia de domínio progressivo de Niterói:
+// �CELULAS-NITEROI-01 (04/08/2026): painel ao vivo de metas por c�lula
+// territorial, alimentando o Dashboard. Responde, c�lula a c�lula, �s
+// perguntas da estrat�gia de dom�nio progressivo de Niter�i:
 //   quantos prestadores temos vs meta, quantos pedidos pagos vs meta de
 //   90 dias, quanto entrou, quanto foi repassado, quanto perdemos em
 //   estornos/cancelamentos, e qual a margem operacional real.
-// Deliberadamente NÃO cacheia nada — todo número é calculado ao vivo a
-// partir de pedidos/pagamentos/payout_ledger_entries. A meta (alvo) é o
-// único dado gravado, em pricing_zones (migration v5).
+// Deliberadamente N�O cacheia nada - todo n�mero � calculado ao vivo a
+// partir de pedidos/pagamentos/payout_ledger_entries. A meta (alvo) � o
+// �nico dado gravado, em pricing_zones (migration v5).
 //
-// Limitação conhecida (documentada, não escondida): "prestadores
-// homologados" é hoje uma aproximação por CIDADE (guinchos.cidade_id),
-// não por célula/bairro — guinchos ainda não têm amarração a uma célula
-// específica. Pedidos/receita/repasse/margem, esses sim, já são exatos
-// por célula, porque pedidos.pricing_zone_id é resolvido por
+// Limita��o conhecida (documentada, n�o escondida): "prestadores
+// homologados" � hoje uma aproxima��o por CIDADE (guinchos.cidade_id),
+// n�o por c�lula/bairro - guinchos ainda n�o t�m amarra��o a uma c�lula
+// espec�fica. Pedidos/receita/repasse/margem, esses sim, j� s�o exatos
+// por c�lula, porque pedidos.pricing_zone_id � resolvido por
 // point-in-polygon real (ZonePricingService) desde a migration v4.
 
 require_once __DIR__ . '/../Models/Pricing/PricingZone.php';
@@ -25,46 +25,46 @@ require_once __DIR__ . '/../Models/Pricing/PricingZone.php';
 final class TerritorioMetasService
 {
     /**
-     * §CELULAS-NITEROI-01 (04/08/2026): mapeamento da composição mínima de
+     * �CELULAS-NITEROI-01 (04/08/2026): mapeamento da composi��o m�nima de
      * oferta do piloto ("4 guinchos leves, 4 moto-socorristas/apoio, 2
-     * oficinas parceiras, 2 especialistas bateria/elétrica, 1 pneu, 1
+     * oficinas parceiras, 2 especialistas bateria/el�trica, 1 pneu, 1
      * reserva operacional") para `service_types.code` reais, via
      * `provider_capabilities` (ver migration_service_catalog_v1.sql).
-     * "oficina_parceira" e "reserva_operacional" NÃO têm categoria própria
-     * modelada hoje no cadastro de prestador — ficam marcadas como
-     * `computavel = false` em vez de fingir um número. Um prestador pode
+     * "oficina_parceira" e "reserva_operacional" N�O t�m categoria pr�pria
+     * modelada hoje no cadastro de prestador - ficam marcadas como
+     * `computavel = false` em vez de fingir um n�mero. Um prestador pode
      * aparecer em mais de um grupo (acumula capacidades), exatamente como
-     * a meta do piloto prevê ("não significa necessariamente 15 empresas
+     * a meta do piloto prev� ("n�o significa necessariamente 15 empresas
      * diferentes").
      */
     /**
-     * §COBERTURA-RAIO-01 (05/08/2026): acima desse percentual de pedidos
+     * �COBERTURA-RAIO-01 (05/08/2026): acima desse percentual de pedidos
      * cancelados por timeout de aceite (30 min, ver
-     * tools/cron_cancelar_pedidos_expirados.php), a célula NUNCA é sugerida
-     * como 'pedra_viva' — mesmo que a composição de oferta e a margem
-     * estejam ok no papel. É o sinal mais honesto de que a oferta
-     * declarada no cadastro não está de fato convertendo em atendimento:
-     * prestador existe, mas ninguém aceita a tempo.
+     * tools/cron_cancelar_pedidos_expirados.php), a c�lula NUNCA � sugerida
+     * como 'pedra_viva' - mesmo que a composi��o de oferta e a margem
+     * estejam ok no papel. � o sinal mais honesto de que a oferta
+     * declarada no cadastro n�o est� de fato convertendo em atendimento:
+     * prestador existe, mas ningu�m aceita a tempo.
      */
     private const TAXA_TIMEOUT_MAX_PCT = 20.0;
 
     /** Precisa bater exatamente com a string gravada em cron_cancelar_pedidos_expirados.php. */
-    private const MOTIVO_CANCELAMENTO_TIMEOUT = 'Expiração automática do aceite do guincho.';
+    private const MOTIVO_CANCELAMENTO_TIMEOUT = 'Expira��o autom�tica do aceite do guincho.';
 
     private const COMPOSICAO_OFERTA = [
         'guincho_leve' => ['label' => 'Guinchos leves', 'meta' => 4, 'codes' => ['TOW_CAR']],
         'apoio_moto' => ['label' => 'Moto-socorristas / apoio', 'meta' => 4, 'codes' => ['TOW_MOTORCYCLE', 'MECHANICAL_ASSISTANCE']],
         'oficina_parceira' => ['label' => 'Oficinas parceiras', 'meta' => 2, 'codes' => []],
-        'eletrica' => ['label' => 'Especialistas bateria/elétrica', 'meta' => 2, 'codes' => ['JUMP_START', 'BATTERY_TEST', 'BATTERY_REPLACEMENT', 'ELECTRICAL_DIAGNOSIS']],
+        'eletrica' => ['label' => 'Especialistas bateria/el�trica', 'meta' => 2, 'codes' => ['JUMP_START', 'BATTERY_TEST', 'BATTERY_REPLACEMENT', 'ELECTRICAL_DIAGNOSIS']],
         'pneu' => ['label' => 'Prestador de pneu', 'meta' => 1, 'codes' => ['TIRE_CHANGE', 'TIRE_INFLATION']],
         'reserva_operacional' => ['label' => 'Reserva operacional', 'meta' => 1, 'codes' => []],
     ];
 
     /**
-     * Conta prestadores DISTINTOS (não linhas de capacidade) aprovados e
+     * Conta prestadores DISTINTOS (n�o linhas de capacidade) aprovados e
      * habilitados para qualquer um dos `service_types.code` informados,
-     * dentro da cidade da célula (mesma aproximação por cidade já usada
-     * para `prestadores_homologados` — documentada como limitação
+     * dentro da cidade da c�lula (mesma aproxima��o por cidade j� usada
+     * para `prestadores_homologados` - documentada como limita��o
      * conhecida no topo deste arquivo).
      */
     private static function contarPrestadoresPorCapacidade(\PDO $pdo, int $cidadeId, array $codes): int
@@ -87,10 +87,10 @@ final class TerritorioMetasService
     }
 
     /**
-     * Composição de oferta da célula + classificação SUGERIDA (pedra viva
-     * / pedra morta) com base na meta de 90 dias. É só uma sugestão —
+     * Composi��o de oferta da c�lula + classifica��o SUGERIDA (pedra viva
+     * / pedra morta) com base na meta de 90 dias. � s� uma sugest�o -
      * nunca escreve em `pricing_zones.status_expansao` sozinha; o admin
-     * continua decidindo/auditando a mudança de status via
+     * continua decidindo/auditando a mudan�a de status via
      * `PricingZone::atualizarExpansao()`, igual hoje.
      */
     private static function classificarOferta(\PDO $pdo, ?int $cidadeId, ?int $metaPrestadoresMin, ?int $metaGuinchosMin, ?int $metaEspecialistasMin, int $prestadoresHomologados, int $guinchosHomologados, ?int $especialistasHomologados, float $margemOperacional, ?float $taxaTimeoutPct): array
@@ -126,7 +126,7 @@ final class TerritorioMetasService
             && $especialistasHomologados !== null
             && $especialistasHomologados >= $metaEspecialistasMin;
         if ($metaPrestadoresMin === null || !$metasSeparadasDefinidas) {
-            $classificacao = null; // célula sem meta definida ainda — nada a classificar
+            $classificacao = null; // c�lula sem meta definida ainda - nada a classificar
         } else {
             $ofertaOk = ($prestadoresHomologados >= $metaPrestadoresMin) && $ofertaSeparadaOk && (!$algumComputavel || $todosComputaveisAtingidos);
             $classificacao = ($ofertaOk && $margemOperacional > 0 && !$timeoutAltoDemais) ? 'pedra_viva' : 'pedra_morta';
@@ -143,8 +143,8 @@ final class TerritorioMetasService
     }
 
     /**
-     * @return array<int, array<string, mixed>> uma linha por célula, na
-     *         ordem de expansão (célula 1 primeiro).
+     * @return array<int, array<string, mixed>> uma linha por c�lula, na
+     *         ordem de expans�o (c�lula 1 primeiro).
      */
     public static function painel(): array
     {
@@ -187,10 +187,10 @@ final class TerritorioMetasService
             $s->execute([$zonaId]);
             $pedidosCancelados = (int)$s->fetchColumn();
 
-            // §COBERTURA-RAIO-01 (05/08/2026): pedidos cancelados especificamente
-            // pelo cron de expiração de 30 min (ninguém aceitou a tempo) — sinal
-            // de que a oferta declarada na célula não está convertendo em
-            // atendimento de verdade, independente do que a composição diz.
+            // �COBERTURA-RAIO-01 (05/08/2026): pedidos cancelados especificamente
+            // pelo cron de expira��o de 30 min (ningu�m aceitou a tempo) - sinal
+            // de que a oferta declarada na c�lula n�o est� convertendo em
+            // atendimento de verdade, independente do que a composi��o diz.
             $s = $pdo->prepare(
                 "SELECT COUNT(*) FROM pedidos WHERE pricing_zone_id = ? AND status = 'cancelado' AND motivo_cancelamento = ?"
             );

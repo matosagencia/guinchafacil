@@ -878,6 +878,24 @@ body.admin {
 .bo-context-actions { display: inline-flex; align-items: center; gap: 4px; margin-right: 8px; }
 .bo-header-action-label { margin-left: 6px; font-size: .75rem; font-weight: 700; }
 .bo-header-button { color: inherit; text-decoration: none; }
+/* Ponte para views administrativas legadas que ainda usam header.php. */
+body.admin:has(.gf-legacy-bo-header) > nav.gf-admin-topbar { display: none !important; }
+body.admin .gf-legacy-bo-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  min-height: 64px;
+  padding: 0 24px;
+  background: var(--bo-bg, #0d150f);
+  color: var(--bo-text, #f2fff5);
+  border-bottom: 1px solid var(--bo-border, #223628);
+}
+body.admin .gf-legacy-bo-header .bo-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
 body.admin:has(#cidadesBackofficeRoot) > .ops-topbar,
 body.admin:has(#cidadesBackofficeRoot) > .bo-module-tabs { display: none !important; }
 body.admin:has(#planejamentoShell) .bo-module-tabs,

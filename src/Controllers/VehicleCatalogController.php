@@ -3,13 +3,13 @@
 declare(strict_types=1);
 
 // File: guinchafacil/src/Controllers/VehicleCatalogController.php
-// §CATALOGO-VISUAL-01 (02/08/2026): endpoints JSON PÚBLICOS (sem
-// autenticação) que alimentam o autocomplete de marca/modelo — usado tanto
-// no cadastro de veículo do CLIENTE (autenticado, mas reaproveita o mesmo
-// endpoint) quanto no cadastro de CAMINHÃO do guincheiro, que acontece
-// ANTES do login existir (tela de registro pública). Por isso não pode
-// exigir 'cliente'/'guincho' — é o mesmo catálogo pros dois.
-// Só leitura, só dados já marcados `active`, sem nenhum dado sensível.
+// �CATALOGO-VISUAL-01 (02/08/2026): endpoints JSON P�BLICOS (sem
+// autentica��o) que alimentam o autocomplete de marca/modelo - usado tanto
+// no cadastro de ve�culo do CLIENTE (autenticado, mas reaproveita o mesmo
+// endpoint) quanto no cadastro de CAMINH�O do guincheiro, que acontece
+// ANTES do login existir (tela de registro p�blica). Por isso n�o pode
+// exigir 'cliente'/'guincho' - � o mesmo cat�logo pros dois.
+// S� leitura, s� dados j� marcados `active`, sem nenhum dado sens�vel.
 
 require_once __DIR__ . '/../../config.php';
 require_once __DIR__ . '/../Models/Vehicle/VehicleBrand.php';
@@ -17,7 +17,7 @@ require_once __DIR__ . '/../Models/Vehicle/VehicleModel.php';
 
 class VehicleCatalogController
 {
-    /** GET /veiculo-catalogo/marcas — todas as marcas ativas (id, name, logo_path). */
+    /** GET /veiculo-catalogo/marcas - todas as marcas ativas (id, name, logo_path). */
     public function marcas(): void
     {
         $marcas = VehicleBrand::listarAtivas();
@@ -33,7 +33,7 @@ class VehicleCatalogController
         echo json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
     }
 
-    /** GET /veiculo-catalogo/modelos?marca_id=X — modelos ativos de UMA marca. */
+    /** GET /veiculo-catalogo/modelos?marca_id=X - modelos ativos de UMA marca. */
     public function modelos(): void
     {
         $marcaId = (int)($_GET['marca_id'] ?? 0);

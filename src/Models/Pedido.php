@@ -4,7 +4,7 @@
 
 // Alinhado com schema real: tipo_problema, custo_estimado, expiracao_aceite
 
-// pedidos.guincho_id Ã¢â€ â€™ guinchos.id (FK estÃƒÂ¡ errada no SQL mas usamos guinchos.id)
+// pedidos.guincho_id â�?��?T guinchos.id (FK est�f¡ errada no SQL mas usamos guinchos.id)
 
 
 
@@ -40,8 +40,8 @@ class Pedido {
     }
 
     /**
-     * CONTRATO-PEDIDO-v1: grava o snapshot da decisÃƒÂ£o sem sobrescrever uma
-     * decisÃƒÂ£o jÃƒÂ¡ apresentada ao cliente.
+     * CONTRATO-PEDIDO-v1: grava o snapshot da decis�f£o sem sobrescrever uma
+     * decis�f£o j�f¡ apresentada ao cliente.
      */
     public static function registrarSnapshotDecisao(
         int $pedidoId,
@@ -81,7 +81,7 @@ class Pedido {
             return false;
         }
     }
-    /** Persiste o contexto contratual produzido pela triagem do checkout público. */
+    /** Persiste o contexto contratual produzido pela triagem do checkout p�blico. */
     public static function registrarContextoCheckout(int $pedidoId, array $dados): void
     {
         $pdo = getPDO();
@@ -124,9 +124,9 @@ class Pedido {
                 $tipoProblema = 'outro';
             }
 
-            // DATE_ADD/INTERVAL ÃƒÂ© sintaxe MySQL; sob o SQLite usado pelos testes
+            // DATE_ADD/INTERVAL �f© sintaxe MySQL; sob o SQLite usado pelos testes
 
-            // de integraÃƒÂ§ÃƒÂ£o (tests/bootstrap.php) isso quebrava silenciosamente
+            // de integra�f§�f£o (tests/bootstrap.php) isso quebrava silenciosamente
 
             // (capturado pelo catch abaixo como "Falha ao criar pedido no banco").
 
@@ -171,6 +171,14 @@ $expiracaoExpr = $driver === 'sqlite'
 
             );
 
+            // O schema legado mantém as coordenadas de destino como NOT NULL.
+            // Para assistência local não existe destino real; 0,0 preserva essa
+            // compatibilidade sem inventar uma rota ou alterar a modalidade.
+            $latDestino = array_key_exists('lat_destino', $dados) && $dados['lat_destino'] !== null
+                ? (float)$dados['lat_destino'] : 0.0;
+            $lngDestino = array_key_exists('lng_destino', $dados) && $dados['lng_destino'] !== null
+                ? (float)$dados['lng_destino'] : 0.0;
+
             $stmt->execute([
 
                 ':cliente_id'         => (int)$dados['cliente_id'],
@@ -187,9 +195,9 @@ $expiracaoExpr = $driver === 'sqlite'
 
                 ':endereco_origem'    => trim($dados['endereco_origem']),
 
-                ':lat_destino'        => array_key_exists('lat_destino', $dados) && $dados['lat_destino'] !== null ? (float)$dados['lat_destino'] : null,
+                ':lat_destino'        => $latDestino,
 
-                ':lng_destino'        => array_key_exists('lng_destino', $dados) && $dados['lng_destino'] !== null ? (float)$dados['lng_destino'] : null,
+                ':lng_destino'        => $lngDestino,
 
                 ':endereco_destino'   => trim($dados['endereco_destino'] ?? ''),
 
@@ -506,7 +514,7 @@ $expiracaoExpr = $driver === 'sqlite'
 
 
 
-    /** Lista pedidos aguardando guincho (para exibir aos guinchos disponÃƒÂ­veis) */
+    /** Lista pedidos aguardando guincho (para exibir aos guinchos dispon�f­veis) */
 
     public static function listarAguardandoGuincho(): array
     {
@@ -546,8 +554,8 @@ $expiracaoExpr = $driver === 'sqlite'
     }
 
     /**
-     * OFICINA-FILA-01: fonte ÃƒÂºnica da oferta de atendimento para o painel
-     * da oficina. A controller nÃƒÂ£o consulta pedidos diretamente.
+     * OFICINA-FILA-01: fonte �fºnica da oferta de atendimento para o painel
+     * da oficina. A controller n�f£o consulta pedidos diretamente.
      *
      * @return array<int,array<string,mixed>>
      */
@@ -638,21 +646,21 @@ $expiracaoExpr = $driver === 'sqlite'
 
                 $like       = '%' . $buscaTexto . '%';
 
-                // Busca por nÃƒÂºmero do pedido: aceita tanto o valor puro
+                // Busca por n�fºmero do pedido: aceita tanto o valor puro
 
                 // (ex: "1327") quanto com o prefixo "#" que aparece na UI
 
-                // (ex: "#1327"). Antes sÃƒÂ³ comparava nome/email do cliente e
+                // (ex: "#1327"). Antes s�f³ comparava nome/email do cliente e
 
-                // placa do veÃƒÂ­culo Ã¢â‚¬â€ pedido "1327" nunca era encontrado.
+                // placa do ve�f­culo â�,��?� pedido "1327" nunca era encontrado.
 
-                // O rÃƒÂ³tulo da tela promete busca por "cliente, guincho,
+                // O r�f³tulo da tela promete busca por "cliente, guincho,
 
-                // endereÃƒÂ§o", mas o WHERE sÃƒÂ³ comparava nome/email do cliente e
+                // endere�f§o", mas o WHERE s�f³ comparava nome/email do cliente e
 
-                // placa do veÃƒÂ­culo Ã¢â‚¬â€ nem o operador do guincho nem o
+                // placa do ve�f­culo â�,��?� nem o operador do guincho nem o
 
-                // endereÃƒÂ§o do pedido entravam na busca. Completado abaixo.
+                // endere�f§o do pedido entravam na busca. Completado abaixo.
 
                 $buscaId = ltrim($buscaTexto, '#');
 
@@ -728,21 +736,21 @@ $expiracaoExpr = $driver === 'sqlite'
 
     /**
 
-     * @deprecated Pacote L1.3 Ã¢â‚¬â€ NÃƒÆ’O use em fluxo de produÃƒÂ§ÃƒÂ£o. Este mÃƒÂ©todo
+     * @deprecated Pacote L1.3 â�,��?� N�f�'O use em fluxo de produ�f§�f£o. Este m�f©todo
 
-     * escreve guincho_id diretamente, sem transaÃƒÂ§ÃƒÂ£o, sem lock, sem checar
+     * escreve guincho_id diretamente, sem transa�f§�f£o, sem lock, sem checar
 
-     * status/disponibilidade e sem gerar evento de auditoria Ã¢â‚¬â€ ou seja, sem
+     * status/disponibilidade e sem gerar evento de auditoria â�,��?� ou seja, sem
 
-     * nenhuma das proteÃƒÂ§ÃƒÂµes de PedidoTransitionService::acceptByGuincho()/
+     * nenhuma das prote�f§�fµes de PedidoTransitionService::acceptByGuincho()/
 
-     * assignByAdmin(). Os controllers de produÃƒÂ§ÃƒÂ£o jÃƒÂ¡ migraram para o serviÃƒÂ§o
+     * assignByAdmin(). Os controllers de produ�f§�f£o j�f¡ migraram para o servi�f§o
 
-     * centralizado. Este mÃƒÂ©todo permanece apenas para scripts de seed/QA em
+     * centralizado. Este m�f©todo permanece apenas para scripts de seed/QA em
 
-     * tools/ que montam cenÃƒÂ¡rios de teste fora do fluxo real de negÃƒÂ³cio.
+     * tools/ que montam cen�f¡rios de teste fora do fluxo real de neg�f³cio.
 
-     * ChamÃƒÂ¡-lo fora desse contexto ÃƒÂ© um bypass de seguranÃƒÂ§a conhecido.
+     * Cham�f¡-lo fora desse contexto �f© um bypass de seguran�f§a conhecido.
 
      */
 
@@ -752,7 +760,7 @@ $expiracaoExpr = $driver === 'sqlite'
 
         trigger_error(
 
-            'Pedido::atribuirGuincho() ÃƒÂ© legado/somente-seed. Use PedidoTransitionService::acceptByGuincho() ou assignByAdmin() em qualquer fluxo de produÃƒÂ§ÃƒÂ£o.',
+            'Pedido::atribuirGuincho() �f© legado/somente-seed. Use PedidoTransitionService::acceptByGuincho() ou assignByAdmin() em qualquer fluxo de produ�f§�f£o.',
 
             E_USER_DEPRECATED
 
@@ -1052,9 +1060,9 @@ $expiracaoExpr = $driver === 'sqlite'
 
         try {
 
-            // Antes este mÃƒÂ©todo ignorava 'busca' e 'data' por completo (sÃƒÂ³
+            // Antes este m�f©todo ignorava 'busca' e 'data' por completo (s�f³
 
-            // filtrava por status) Ã¢â‚¬â€ o "Total: N pedidos encontrados" da tela
+            // filtrava por status) â�,��?� o "Total: N pedidos encontrados" da tela
 
             // de admin/pedidos sempre mostrava a contagem SEM filtro nenhum
 
@@ -1062,7 +1070,7 @@ $expiracaoExpr = $driver === 'sqlite'
 
             // (que usa listarPorStatus(), com joins). Replica o mesmo WHERE
 
-            // aqui, incluindo a busca por nÃƒÂºmero do pedido.
+            // aqui, incluindo a busca por n�fºmero do pedido.
 
             $where  = '1=1';
 

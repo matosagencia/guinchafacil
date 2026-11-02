@@ -22,7 +22,7 @@ include __DIR__ . '/../layouts/header.php';
 <!-- /GF-F18F13-USERFORM -->
 <div class="main-wrapper shell admin-shell">
 <?php include __DIR__ . '/../layouts/sidebar_admin.php'; ?>
-<main class="main-content shell-main shell-content">
+<main class="main-content shell-main shell-content"><?php include __DIR__ . '/partials/_panel_topbar_admin.php'; ?>
 
     <header class="page-head mb-4">
         <div>
@@ -194,8 +194,7 @@ include __DIR__ . '/../layouts/header.php';
                 <div class="card-body"><div class="row g-3">
                     <div class="col-md-6"><label class="form-label">Nome do estabelecimento *</label><input type="text" class="form-control" name="oficina_nome" id="oficinaNome" maxlength="255"></div>
                     <div class="col-md-6"><label class="form-label">Modalidade *</label><select class="form-select" name="oficina_tipo" id="oficinaTipo"><option value="assistencia_local">Assistência local</option><option value="guincho">Reboque</option><option value="ambos">Ambos</option></select></div>
-                    <div class="col-md-9"><label class="form-label">Endereço completo *</label><input type="text" class="form-control" name="oficina_endereco" id="oficinaEndereco"></div>
-                    <div class="col-md-3"><label class="form-label">Raio de atendimento (km)</label><input type="number" class="form-control" name="oficina_raio_km" value="10" min="1" max="500"></div>
+                    <div class="col-md-9"><label class="form-label">Endereço completo *</label><input type="text" class="form-control" name="oficina_endereco" id="oficinaEndereco"><div id="oficinaEnderecoAlerta" class="small text-danger mt-1" role="alert" hidden>Já existe uma oficina cadastrada neste endereço.</div></div>                    <div class="col-md-3"><label class="form-label">Raio de atendimento (km)</label><input type="number" class="form-control" name="oficina_raio_km" value="10" min="1" max="500"></div>
                     <div class="col-12"><small class="text-muted">A oficina será criada offline, associada à conta responsável. Ativação de oferta depende dos demais critérios operacionais.</small></div>
                 </div></div>
             </div>
@@ -266,7 +265,7 @@ document.getElementById('telefone').addEventListener('input', function() {
     this.value = v;
 });
 
-// Placa uppercase
+// Placa uppercaseconst enderecosOficinas = <?php echo json_encode(array_values((array)($enderecosOficinas ?? [])), JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP); ?>;const oficinaEndereco = document.getElementById('oficinaEndereco');const oficinaEnderecoAlerta = document.getElementById('oficinaEnderecoAlerta');function normalizarEndereco(v) {    return String(v || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '');}function validarEnderecoOficina() {    if (!oficinaEndereco || !oficinaEnderecoAlerta) return true;    const atual = normalizarEndereco(oficinaEndereco.value);    const duplicado = atual !== '' && enderecosOficinas.some(function (endereco) { return normalizarEndereco(endereco) === atual; });    oficinaEnderecoAlerta.hidden = !duplicado;    if (duplicado) oficinaEndereco.setCustomValidity('Endereco de oficina ja cadastrado.');    else oficinaEndereco.setCustomValidity('');    return !duplicado;}oficinaEndereco?.addEventListener('input', validarEnderecoOficina);document.getElementById('formUsuario')?.addEventListener('submit', function (event) {    if (!validarEnderecoOficina()) event.preventDefault();});
 document.getElementById('placaGuincho').addEventListener('input', function() {
     this.value = this.value.toUpperCase().replace(/[^A-Z0-9]/g,'');
 });

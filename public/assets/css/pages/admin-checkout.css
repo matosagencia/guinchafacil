@@ -1,0 +1,92 @@
+/* Checkout do admin: mesmo shell claro de /admin/central. */
+body.admin .admin-checkout-shell {
+    display: grid !important;
+    grid-template-columns: 220px minmax(0, 1fr) !important;
+    min-height: 100vh !important;
+    margin: 0 !important;
+    background: #f4f6f8 !important;
+}
+
+body.admin .admin-checkout-shell > .admin-shell-sidebar {
+    position: sticky !important;
+    top: 0 !important;
+    align-self: start !important;
+    width: 220px !important;
+    height: 100vh !important;
+    min-height: 100vh !important;
+    overflow-y: auto !important;
+    scrollbar-width: none;
+}
+
+body.admin .admin-checkout-shell > .admin-shell-sidebar::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+}
+
+body.admin .admin-checkout-shell > .main-content {
+    min-width: 0 !important;
+    min-height: 100vh !important;
+    padding: 0 28px 36px !important;
+    background: #f4f6f8 !important;
+    color: #172536 !important;
+}
+
+body.admin .admin-checkout-header {
+    width: calc(100% + 56px) !important;
+    min-height: 72px !important;
+    margin: 0 -28px 28px !important;
+    padding: 0 24px !important;
+    background: #fff !important;
+    color: #172536 !important;
+    border-bottom: 1px solid #dfe6ec !important;
+    box-shadow: none !important;
+}
+
+body.admin .admin-checkout-header .bo-header-actions,
+body.admin .admin-checkout-header .bo-header-button,
+body.admin .admin-checkout-header .bo-breadcrumb,
+body.admin .admin-checkout-header .bo-breadcrumb strong {
+    color: #172536 !important;
+}
+
+body.admin .admin-checkout-shell .page-head,
+body.admin .admin-checkout-shell .card,
+body.admin .admin-checkout-shell .alert {
+    background: #fff !important;
+    color: #172536 !important;
+    border-color: #dfe6ec !important;
+}
+
+body.admin .admin-checkout-shell .card-header {
+    background: #f3f6f8 !important;
+    color: #172536 !important;
+    border-bottom-color: #dfe6ec !important;
+}
+
+body.admin .admin-checkout-shell .form-control,
+body.admin .admin-checkout-shell .form-select {
+    background: #fff !important;
+    color: #172536 !important;
+    border-color: #cbd5e1 !important;
+}
+
+@media (max-width: 800px) {
+    body.admin .admin-checkout-shell {
+        display: block !important;
+    }
+    body.admin .admin-checkout-shell > .admin-shell-sidebar {
+        position: relative !important;
+        width: 100% !important;
+        height: auto !important;
+        min-height: 0 !important;
+    }
+    body.admin .admin-checkout-shell > .main-content {
+        padding: 0 14px 28px !important;
+    }
+    body.admin .admin-checkout-header {
+        width: calc(100% + 28px) !important;
+        margin-left: -14px !important;
+        margin-right: -14px !important;
+        padding: 0 14px !important;
+    }
+}

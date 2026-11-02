@@ -13,7 +13,7 @@ $formatMs = static function (?int $value): string {
 <link rel="stylesheet" href="<?php echo htmlspecialchars($bp); ?>/public/assets/css/pages/admin-logs.css">
 <div class="main-wrapper shell admin-shell">
 <?php include __DIR__ . '/../layouts/sidebar_admin.php'; ?>
-<main class="main-content shell-main shell-content">
+<main class="main-content shell-main shell-content"><?php include __DIR__ . '/partials/_panel_topbar_admin.php'; ?>
 
     <div class="ops-topbar">
         <form method="get" action="<?php echo htmlspecialchars($bp . '/admin/logs'); ?>" class="ops-topbar__search">

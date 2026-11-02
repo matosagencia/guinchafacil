@@ -112,6 +112,7 @@ $debugModeAtivo = DebugMode::jsFlag();
     <?php if ($temaClass === 'admin'): ?>
     <!-- GF-F14-ADMIN-TOPBAR: shell Lovable exclusivo do Admin -->
     <link rel="stylesheet" href="<?php echo htmlspecialchars($bp); ?>/public/assets/css/pages/gf-admin-topbar-crumb-v1.css?v=20261017-14">
+    <link rel="stylesheet" href="<?php echo htmlspecialchars($bp); ?>/public/assets/css/pages/gf-admin-shell-unification.css?v=20261101-1">
     <?php endif; ?>
 </head>
 
@@ -495,8 +496,31 @@ $debugModeAtivo = DebugMode::jsFlag();
 
 <?php if ($temaClass === 'admin'): ?>
 <?php
+$adminPathForLegacyHeader = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/';
+$adminShellRoutes = [
+    '/admin/central', '/admin/dashboard', '/admin/configuracoes',
+    '/admin/catalogo-servicos/tipos', '/admin/catalogo-servicos/capacidades',
+    '/admin/catalogo-servicos/compatibilidade', '/admin/catalogo-servicos/tarifas',
+    '/admin/catalogo-veiculos/marcas', '/admin/catalogo-veiculos/modelos',
+    '/admin/catalogo-veiculos/versoes', '/admin/cidades', '/admin/planejamento',
+    '/admin/pedido/novo', '/admin/pedido/novo/v2', '/admin/pedido/novo/funil',
+];
+if (!in_array($adminPathForLegacyHeader, $adminShellRoutes, true)
+    && !str_starts_with($adminPathForLegacyHeader, '/admin/pagamento/checkout/')):
+?>
+<header class="bo-header gf-legacy-bo-header" role="banner">
+    <div class="bo-header-start">
+        <span class="bo-breadcrumb gf-order-crumb">Backoffice <span aria-hidden="true">›</span> <strong>GuinchaFácil</strong></span>
+    </div>
+    <div class="bo-header-actions gf-f18c-header-actions">
+        <a class="bo-header-button" href="<?php echo htmlspecialchars($bp); ?>/admin/central"><i class="fas fa-gauge-high" aria-hidden="true"></i><span class="bo-header-action-label">Central</span></a>
+        <a class="bo-header-button" href="<?php echo htmlspecialchars($bp); ?>/logout" data-confirm-logout><i class="fas fa-right-from-bracket" aria-hidden="true"></i><span class="bo-header-action-label">Sair</span></a>
+    </div>
+</header>
+<?php endif; ?>
+<?php
 $moduleTabs = [];
-$adminPath = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/';
+$adminPath = $adminPathForLegacyHeader;
 if (str_starts_with($adminPath, '/admin/financeiro') || str_starts_with($adminPath, '/admin/carteira') || str_starts_with($adminPath, '/admin/saques')) {
     $moduleTabs = [
         ['path' => '/admin/financeiro', 'label' => 'Visão geral / Pagamentos', 'icon' => 'fa-chart-line'],

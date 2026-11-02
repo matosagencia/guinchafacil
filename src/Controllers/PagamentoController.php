@@ -418,6 +418,36 @@ class PagamentoController extends BaseController
         require __DIR__ . '/../Views/pagamento/checkout.php';
     }
 
+    /** Checkout presencial: o atendente administra o Payment Brick no telefone. */
+    public function adminCheckout(int $pedidoId): void
+    {
+        AuthService::requireAuth('admin');
+        $pedido = Pedido::buscarPorId($pedidoId);
+        if (!$pedido || ($pedido['status'] ?? '') !== 'aguardando_pagamento') {
+            $this->redirect('/admin/pedido/' . $pedidoId . '?pagamento=indisponivel');
+            return;
+        }
+        try {
+            $valorSnapshot = $this->valorSnapshotOficial($pedidoId, $pedido);
+        } catch (DomainException $e) {
+            $this->setFlashMessage($e->getMessage(), 'error');
+            $this->redirect('/admin/pedido/' . $pedidoId);
+            return;
+        }
+        $clienteEmailCheckout = trim((string)($pedido['cliente_email'] ?? ''));
+        $payerInicial = filter_var($clienteEmailCheckout, FILTER_VALIDATE_EMAIL)
+            ? ['email' => $clienteEmailCheckout]
+            : [];
+        $csrfToken = AuthService::gerarCsrfToken();
+        $gatewayAtivo = $this->gatewayEfetivo();
+        $mostrarMercadoPago = in_array($gatewayAtivo, ['mercadopago', 'todos', 'all'], true)
+            && $this->validarConfigMercadoPago() === null;
+        $mostrarPagSeguro = false;
+        $mpPublicKey = defined('MP_PUBLIC_KEY') ? (string)MP_PUBLIC_KEY : '';
+        $isAdminCheckout = true;
+        require __DIR__ . '/../Views/pagamento/checkout.php';
+    }
+
     public function selecionarForma(int $pedidoId = 0): void
     {
         $usuario = AuthService::requireAuth('cliente');
@@ -535,7 +565,7 @@ class PagamentoController extends BaseController
      * antes de criar a cobrança, só que aqui é compartilhada pelos dois
      * gateways transparentes.
      */
-    private function validarPedidoParaCobrancaTransparente(int $pedidoId): array
+    private function validarPedidoParaCobrancaTransparente(int $pedidoId, bool $admin = false): array
     {
         $usuario = AuthService::getCurrentUser();
         $usuarioId = (int)($usuario['id'] ?? 0);
@@ -544,7 +574,7 @@ class PagamentoController extends BaseController
         if (!$pedido) {
             return [null, 'Pedido não encontrado.'];
         }
-        if ((int)($pedido['cliente_id'] ?? 0) !== $usuarioId) {
+        if (!$admin && (int)($pedido['cliente_id'] ?? 0) !== $usuarioId) {
             return [null, 'Este pedido não pertence ao usuário autenticado.'];
         }
         if ($this->pagamentoFoiIgnorado() || ($pedido['status'] ?? '') !== 'aguardando_pagamento') {
@@ -567,7 +597,8 @@ class PagamentoController extends BaseController
      */
     public function mercadoPagoTransparente(): void
     {
-        AuthService::requireAuth('cliente');
+        $usuario = AuthService::requireAuth(null);
+        $isAdmin = (($usuario['tipo'] ?? '') === 'admin');
         $body = $this->lerJsonBody();
 
         if (!AuthService::validarCsrfToken((string)($body['csrf_token'] ?? ''))) {
@@ -585,14 +616,16 @@ class PagamentoController extends BaseController
             $this->responderJson(['sucesso' => false, 'erro' => 'Muitas tentativas de pagamento. Aguarde alguns minutos e tente novamente.'], 429);
         }
 
-        [$pedido, $erroPedido] = $this->validarPedidoParaCobrancaTransparente($pedidoId);
+        [$pedido, $erroPedido] = $this->validarPedidoParaCobrancaTransparente($pedidoId, $isAdmin);
         if ($pedido === null) {
             $limiter->recordAttempt($rlKey, 8, 300);
             $this->responderJson(['sucesso' => false, 'erro' => $erroPedido], 422);
         }
 
         try {
-            $payerOficial = $this->pagadorPreCotacao();
+            // No atendimento administrativo, o pagador é o cliente do pedido,
+            // nunca o e-mail eventualmente incompleto do usuário administrador.
+            $payerOficial = $isAdmin ? [] : $this->pagadorPreCotacao();
             $valorSnapshot = $this->valorSnapshotOficial($pedidoId, $pedido);
         } catch (DomainException $e) {
             $this->responderJson(['sucesso'=>false,'erro'=>$e->getMessage()], 422);
@@ -630,11 +663,29 @@ class PagamentoController extends BaseController
         // mesmo tendo o e-mail real do cliente disponível. Agora valida de
         // verdade (FILTER_VALIDATE_EMAIL) e só usa o valor do Brick se for
         // um e-mail válido — senão cai pro e-mail cadastrado do cliente.
-        $payerEmailBrick = trim((string)($formData['payer']['email'] ?? ''));
-        if (!empty($payerOficial['email'])) { $payerEmailBrick = $payerOficial['email']; }
-        $payerEmail = filter_var($payerEmailBrick, FILTER_VALIDATE_EMAIL)
-            ? $payerEmailBrick
-            : (string)($pedido['cliente_email'] ?? '');
+        $emailsPayer = $isAdmin
+            ? [
+                trim((string)($pedido['cliente_email'] ?? '')),
+                trim((string)($formData['payer']['email'] ?? '')),
+            ]
+            : [
+                trim((string)($payerOficial['email'] ?? '')),
+                trim((string)($formData['payer']['email'] ?? '')),
+                trim((string)($pedido['cliente_email'] ?? '')),
+            ];
+        $payerEmail = '';
+        foreach ($emailsPayer as $candidateEmail) {
+            if (filter_var($candidateEmail, FILTER_VALIDATE_EMAIL)) {
+                $payerEmail = $candidateEmail;
+                break;
+            }
+        }
+        if ($payerEmail === '') {
+            $this->responderJson([
+                'sucesso' => false,
+                'erro' => 'O cliente precisa ter um e-mail válido para concluir o pagamento online.',
+            ], 422);
+        }
 
         $provider = new MercadoPagoProvider();
         $resultado = $provider->criarPagamento([

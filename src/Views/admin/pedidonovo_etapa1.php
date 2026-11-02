@@ -33,7 +33,7 @@ include __DIR__ . '/../layouts/header.php';
 <header class="bo-header"><div class="gf-f18c-breadcrumb"><span>Backoffice <i class="fas fa-chevron-right" aria-hidden="true"></i> <strong>Novo pedido</strong></span></div><div class="gf-f18c-header-actions"><span class="gf-f18c-user"><?= $e($_SESSION['user']['nome'] ?? 'Administrador') ?></span><a class="gf-f18c-logout" href="<?= $e($bp) ?>/logout" data-confirm-logout><i class="fas fa-right-from-bracket" aria-hidden="true"></i><span>Sair</span></a></div></header>
 <main class="bo-content gf-lovable-admin-flow gf-admin-order-v3">
 
-    <nav class="gf-order-crumb" aria-label="Localização"><a href="<?= $e($bp) ?>/admin/dashboard">Backoffice</a><span aria-hidden="true">›</span><a href="<?= $e($bp) ?>/admin/pedidos">Pedidos</a><span aria-hidden="true">›</span><strong>Novo pedido</strong></nav>
+    <nav class="gf-order-crumb" aria-label="Localização"><a href="<?= $e($bp) ?>/admin/dashboard">Backoffice</a><span aria-hidden="true">></span><a href="<?= $e($bp) ?>/admin/pedidos">Pedidos</a><span aria-hidden="true">></span><strong>Novo pedido</strong></nav>
     <header class="gf-order-intro">
       <div><span class="gf-order-eyebrow">ATENDIMENTO / ABERTURA ASSISTIDA</span>
         <h1>Novo pedido de socorro</h1>
@@ -59,7 +59,7 @@ include __DIR__ . '/../layouts/header.php';
         <?php elseif ($_GET['erro'] === 'expirado'): ?>
             O contexto anterior expirou. Escolha novamente.
         <?php else: ?>
-            Dados inválidos. Confira as escolhas abaixo.
+            Dados inv�lidos. Confira as escolhas abaixo.
         <?php endif; ?>
     </div>
     <?php endif; ?>
@@ -75,20 +75,22 @@ include __DIR__ . '/../layouts/header.php';
 
         <div class="mb-3 gf-order-field">
             <label class="form-label">Cliente <span class="text-danger">*</span></label>
+            <input type="search" class="form-control mb-2" id="cliente_busca" placeholder="Buscar por nome ou e-mail..." autocomplete="off">
             <select class="form-select" name="cliente_id" id="cliente_id" required>
-                <option value="">Selecione um cliente…</option>
+                <option value="">Selecione um cliente.</option>
                 <?php foreach ($clientes as $c): ?>
                 <option value="<?= (int)$c['id'] ?>">
-                    <?= $e($c['nome']) ?><?= !empty($c['email']) ? ' — ' . $e($c['email']) : '' ?>
+                    <?= $e($c['nome']) ?><?= !empty($c['email']) ? ' - ' . $e($c['email']) : '' ?>
                 </option>
                 <?php endforeach; ?>
             </select>
         </div>
 
         <div class="mb-3 gf-order-field">
-            <label class="form-label">Veículo <span class="text-danger">*</span></label>
+            <label class="form-label">Ve�culo <span class="text-danger">*</span></label>
+            <input type="search" class="form-control mb-2" id="veiculo_busca" placeholder="Buscar por marca, modelo ou placa..." autocomplete="off" disabled>
             <select class="form-select" name="veiculo_id" id="veiculo_id" required disabled>
-                <option value="">Selecione primeiro o cliente…</option>
+                <option value="">Selecione primeiro o cliente.</option>
             </select>
             <small class="text-muted d-block mt-1" id="veiculoHint">
                 Os veículos aparecem assim que você escolher o cliente.
@@ -118,17 +120,36 @@ include __DIR__ . '/../layouts/header.php';
     var basePath = <?= json_encode($bp) ?>;
     var selCliente = document.getElementById('cliente_id');
     var selVeiculo = document.getElementById('veiculo_id');
+    var buscaCliente = document.getElementById('cliente_busca');
+    var buscaVeiculo = document.getElementById('veiculo_busca');
     var hint = document.getElementById('veiculoHint');
     if (!selCliente || !selVeiculo) return;
 
+    function filtrarSelect(select, termo) {
+        var needle = String(termo || '').trim().toLocaleLowerCase();
+        Array.prototype.forEach.call(select.options, function (option, index) {
+            if (index === 0) { option.hidden = false; return; }
+            option.hidden = needle !== '' && option.textContent.toLocaleLowerCase().indexOf(needle) === -1;
+        });
+        if (select.selectedOptions.length && select.selectedOptions[0].hidden) select.value = '';
+    }
+
+    if (buscaCliente) buscaCliente.addEventListener('input', function () {
+        filtrarSelect(selCliente, buscaCliente.value);
+    });
+    if (buscaVeiculo) buscaVeiculo.addEventListener('input', function () {
+        filtrarSelect(selVeiculo, buscaVeiculo.value);
+    });
+
     selCliente.addEventListener('change', function () {
         var id = parseInt(selCliente.value, 10) || 0;
-        selVeiculo.innerHTML = '<option value="">Carregando…</option>';
+        if (buscaVeiculo) { buscaVeiculo.value = ''; buscaVeiculo.disabled = true; }
+        selVeiculo.innerHTML = '<option value="">Carregando.</option>';
         selVeiculo.disabled = true;
-        if (hint) hint.textContent = 'Carregando veículos…';
+        if (hint) hint.textContent = 'Carregando veículos.';
 
         if (id <= 0) {
-            selVeiculo.innerHTML = '<option value="">Selecione primeiro o cliente…</option>';
+            selVeiculo.innerHTML = '<option value="">Selecione primeiro o cliente.</option>';
             if (hint) hint.textContent = 'Os veículos aparecem assim que você escolher o cliente.';
             return;
         }
@@ -142,14 +163,15 @@ include __DIR__ . '/../layouts/header.php';
                     if (hint) hint.textContent = 'Cadastre um veículo para este cliente antes.';
                     return;
                 }
-                var html = '<option value="">Selecione…</option>';
+                var html = '<option value="">Selecione.</option>';
                 veiculos.forEach(function (v) {
                     var label = [v.marca, v.modelo].filter(Boolean).join(' ');
-                    if (v.placa) label += ' — ' + v.placa;
+                    if (v.placa) label += ' - ' + v.placa;
                     html += '<option value="' + parseInt(v.id, 10) + '">' + label + '</option>';
                 });
                 selVeiculo.innerHTML = html;
                 selVeiculo.disabled = false;
+                if (buscaVeiculo) buscaVeiculo.disabled = false;
                 if (hint) hint.textContent = veiculos.length + ' veículo(s) encontrado(s).';
             })
             .catch(function () {
@@ -213,13 +235,13 @@ include __DIR__ . '/../layouts/header.php';
             <div class="qf-field">
                 <label>Marca <span class="req">*</span></label>
                 <select name="marca_id" id="qf-marca" required disabled>
-                    <option value="">Escolha o tipo primeiro…</option>
+                    <option value="">Escolha o tipo primeiro.</option>
                 </select>
             </div>
             <div class="qf-field">
                 <label>Modelo <span class="req">*</span></label>
                 <select name="modelo_id" id="qf-modelo" required disabled>
-                    <option value="">Escolha a marca primeiro…</option>
+                    <option value="">Escolha a marca primeiro.</option>
                 </select>
             </div>
         </div>
@@ -376,9 +398,9 @@ include __DIR__ . '/../layouts/header.php';
     }
 
     function loadMarcas(tipo) {
-        selMarca.innerHTML = '<option value="">Carregando…</option>';
+        selMarca.innerHTML = '<option value="">Carregando.</option>';
         selMarca.disabled = true;
-        selModelo.innerHTML = '<option value="">Escolha a marca primeiro…</option>';
+        selModelo.innerHTML = '<option value="">Escolha a marca primeiro.</option>';
         selModelo.disabled = true;
 
         var qs = tipo ? ('?tipo=' + encodeURIComponent(tipo)) : '';
@@ -390,7 +412,7 @@ include __DIR__ . '/../layouts/header.php';
                     selMarca.innerHTML = '<option value="">Nenhuma marca cadastrada</option>';
                     return;
                 }
-                var html = '<option value="">Selecione a marca…</option>';
+                var html = '<option value="">Selecione a marca.</option>';
                 marcas.forEach(function (m) {
                     var id = m.id || m.marca_id;
                     var nome = m.nome || m.name || m.marca || '';
@@ -407,7 +429,7 @@ include __DIR__ . '/../layouts/header.php';
     }
 
     function loadModelos(marcaId) {
-        selModelo.innerHTML = '<option value="">Carregando…</option>';
+        selModelo.innerHTML = '<option value="">Carregando.</option>';
         selModelo.disabled = true;
 
         fetch(bp + '/veiculo-catalogo/modelos?marca_id=' + encodeURIComponent(marcaId), { headers: { 'Accept': 'application/json' } })
@@ -418,7 +440,7 @@ include __DIR__ . '/../layouts/header.php';
                     selModelo.innerHTML = '<option value="">Nenhum modelo cadastrado</option>';
                     return;
                 }
-                var html = '<option value="">Selecione o modelo…</option>';
+                var html = '<option value="">Selecione o modelo.</option>';
                 modelos.forEach(function (m) {
                     var id = m.id || m.modelo_id;
                     var nome = m.nome || m.name || m.modelo || '';
@@ -447,7 +469,7 @@ include __DIR__ . '/../layouts/header.php';
         selMarca.addEventListener('change', function () {
             var id = selMarca.value;
             if (!id) {
-                selModelo.innerHTML = '<option value="">Escolha a marca primeiro…</option>';
+                selModelo.innerHTML = '<option value="">Escolha a marca primeiro.</option>';
                 selModelo.disabled = true;
                 return;
             }
@@ -455,16 +477,16 @@ include __DIR__ . '/../layouts/header.php';
         });
     }
 
-    var btnVei = addInlineBtn('Veículo', 'qf-btn-vei', function () {
+    var btnVei = addInlineBtn('Ve�culo', 'qf-btn-vei', function () {
         if (!selCli.value) { alert('Escolha um cliente primeiro.'); return; }
         errVei.textContent = '';
         formVei.reset();
         // reseta cards e selects
         typeCards.forEach(function (c) { c.classList.remove('is-selected'); });
         if (tipoHidden) tipoHidden.value = '';
-        selMarca.innerHTML = '<option value="">Escolha o tipo primeiro…</option>';
+        selMarca.innerHTML = '<option value="">Escolha o tipo primeiro.</option>';
         selMarca.disabled = true;
-        selModelo.innerHTML = '<option value="">Escolha a marca primeiro…</option>';
+        selModelo.innerHTML = '<option value="">Escolha a marca primeiro.</option>';
         selModelo.disabled = true;
         dlgVei.showModal();
     });
@@ -581,3 +603,4 @@ include __DIR__ . '/../layouts/header.php';
 })();
 </script>
 <?php include __DIR__ . '/../layouts/footer.php'; ?>
+

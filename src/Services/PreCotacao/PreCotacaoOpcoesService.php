@@ -5,15 +5,15 @@ require_once __DIR__ . '/../../Models/Configuracao.php';
 require_once __DIR__ . '/../GuinchoDisponibilidade.php';
 
 /**
- * Monta o payload de opções da pré-cotação v2.
+ * Monta o payload de op��es da pr�-cota��o v2.
  *
  * Modos:
- *   - orientacao  → Cards A (assistência) + B (reboque). Fallback: guincho se tem,
- *                   senão WhatsApp suporte.
- *   - local       → Só Card A (sem comparação com reboque).
- *                   Sem assistência: fallback para guincho se houver reboque apto,
- *                   senão WhatsApp suporte.
- *   - reboque     → Retorna valor do reboque direto (usado no fluxo "levar o carro").
+ *   - orientacao  ? Cards A (assist�ncia) + B (reboque). Fallback: guincho se tem,
+ *                   sen�o WhatsApp suporte.
+ *   - local       ? S� Card A (sem compara��o com reboque).
+ *                   Sem assist�ncia: fallback para guincho se houver reboque apto,
+ *                   sen�o WhatsApp suporte.
+ *   - reboque     ? Retorna valor do reboque direto (usado no fluxo "levar o carro").
  *                   Fallback: SEMPRE WhatsApp suporte.
  */
 final class PreCotacaoOpcoesService
@@ -31,9 +31,9 @@ final class PreCotacaoOpcoesService
 
         // §23: disponibilidade somente; nenhum dinheiro calculado aqui.
 
-        // ─── Modo REBOQUE (levar o carro) ───
-        // Retorno antecipado: este modo NÃO consulta oficinas. A fonte de
-        // verdade é a disponibilidade imediata de prestador de reboque.
+        // ??? Modo REBOQUE (levar o carro) ???
+        // Retorno antecipado: este modo N�O consulta oficinas. A fonte de
+        // verdade � a disponibilidade imediata de prestador de reboque.
         if ($modo === 'reboque') {
             $temGuincho = GuinchoDisponibilidade::existeNoRaio($latOrigem, $lngOrigem);
             if (!$temGuincho) {
@@ -41,7 +41,7 @@ final class PreCotacaoOpcoesService
                     'modo' => 'reboque',
                     'disponivel' => false,
                     'fallback_tipo' => 'suporte',
-                    'mensagem' => 'Nenhum guincho disponível na sua região agora.',
+                    'mensagem' => 'Nenhum guincho dispon�vel na sua regi�o agora.',
                 ];
             }
             return [
@@ -52,11 +52,11 @@ final class PreCotacaoOpcoesService
             ];
         }
 
-        // Só os modos de assistência consultam oficinas/especialistas.
+        // S� os modos de assist�ncia consultam oficinas/especialistas.
         $temGuincho = GuinchoDisponibilidade::existeNoRaio($latOrigem, $lngOrigem);
         $oficinas = self::oficinasParaServico($latOrigem, $lngOrigem, $slugServico);
 
-        // ─── Modo LOCAL (resolver no local) ───
+        // ??? Modo LOCAL (resolver no local) ???
         if ($modo === 'local') {
             if (empty($oficinas)) {
                 return [
@@ -64,7 +64,7 @@ final class PreCotacaoOpcoesService
                     'disponivel' => false,
                     'fallback_tipo' => $temGuincho ? 'guincho' : 'suporte',
                     'servico' => $slugServico,
-                    'mensagem' => 'Nenhuma oficina para ' . $slugServico . ' na sua região.',
+                    'mensagem' => 'Nenhuma oficina para ' . $slugServico . ' na sua regi�o.',
                 ];
             }
             return [
@@ -73,18 +73,18 @@ final class PreCotacaoOpcoesService
                 'oficinas_encontradas' => count($oficinas),
                 'servico' => $slugServico,
                 'fallback_tipo' => null,
-                // SEM taxa_base_reboque: não se compara com reboque nesse modo
+                // SEM taxa_base_reboque: n�o se compara com reboque nesse modo
             ];
         }
 
-        // ─── Modo ORIENTACAO (me orientem) ───
+        // ??? Modo ORIENTACAO (me orientem) ???
         if (empty($oficinas)) {
             return [
                 'modo' => 'orientacao',
                 'disponivel' => false,
                 'fallback_tipo' => $temGuincho ? 'guincho' : 'suporte',
                 'servico' => $slugServico,
-                'mensagem' => 'Nenhuma oficina para ' . $slugServico . ' na sua região.',
+                'mensagem' => 'Nenhuma oficina para ' . $slugServico . ' na sua regi�o.',
             ];
         }
 

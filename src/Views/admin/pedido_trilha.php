@@ -8,7 +8,7 @@ include __DIR__ . '/../layouts/header.php';
 <link rel="stylesheet" href="<?php echo htmlspecialchars($bp, ENT_QUOTES, 'UTF-8'); ?>/public/assets/css/pages/gf-f18e7-geometria-por.css?v=1">
 <div class="main-wrapper shell admin-shell gf-por-detail">
 <?php include __DIR__ . '/../layouts/sidebar_admin.php'; ?>
-<main class="main-content shell-main shell-content">
+<main class="main-content shell-main shell-content"><?php include __DIR__ . '/partials/_panel_topbar_admin.php'; ?>
 
     <header class="page-head mb-4">
         <div>

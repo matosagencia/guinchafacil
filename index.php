@@ -692,6 +692,7 @@ $rotasDinamicas = [
     ['GET',  '/admin/qa/run/artifact/',  'AdminController',   'qaArtifact',       'admin'],
 
     ['GET',  '/pagamento/checkout/',     'PagamentoController','checkout',        'cliente'],
+    ['GET',  '/admin/pagamento/checkout/', 'PagamentoController','adminCheckout',  'admin'],
     ['POST', '/pagamento/checkout/',     'PagamentoController','selecionarForma', 'cliente'],
     ['GET',  '/pagamento/complementar/', 'PagamentoController','complementarCheckout', 'cliente'],
     ['GET',  '/pagamento/sucesso/',      'PagamentoController','sucesso',         'cliente'],

@@ -1,9 +1,9 @@
 <?php
 /**
- * Checklists incompletos — reestruturada pro padrão shell-ops (mesma
+ * Checklists incompletos - reestruturada pro padrão shell-ops (mesma
  * arquitetura de /admin/central, /admin/documentos, /admin/saques...). A
- * lista já vem inteira do servidor (sem paginação nem N+1), por isso o
- * workspace é preenchido via JS a partir de um JSON embutido
+ * lista já vem inteira do servidor (sem pagina��o nem N+1), por isso o
+ * workspace � preenchido via JS a partir de um JSON embutido
  * (window.__checklistsData), sem round-trip extra.
  *
  * @var array $execucoes
@@ -30,8 +30,8 @@ foreach (($execucoes ?? []) as $e) {
     $checklistsPayload[] = [
         'pedido_id' => (int)$e['pedido_id'],
         'pedido_status' => (string)($e['pedido_status'] ?? ''),
-        'cliente_nome' => (string)($e['cliente_nome'] ?? '—'),
-        'prestador_nome' => (string)($e['prestador_nome'] ?? '—'),
+        'cliente_nome' => (string)($e['cliente_nome'] ?? '-'),
+        'prestador_nome' => (string)($e['prestador_nome'] ?? '-'),
         'phase_code' => (string)($e['phase_code'] ?? ''),
         'diagnostico' => ['status' => $diagStatus, 'label' => $diagLabel],
         'foto_antes' => ['status' => $antesStatus, 'label' => $antesLabel],
@@ -48,11 +48,12 @@ foreach (($execucoes ?? []) as $e) {
 <div class="main-wrapper shell admin-shell gf-quality-checklists">
 <?php include __DIR__ . '/../layouts/sidebar_admin.php'; ?>
 <main class="main-content shell-main shell-content">
+<?php include __DIR__ . '/partials/_panel_topbar_admin.php'; ?>
 <?php $gfQualityTab = 'checklists'; ?>
 <nav class="gf-quality-tabs" aria-label="Navegação de qualidade"><a href="<?= htmlspecialchars($bp, ENT_QUOTES, 'UTF-8') ?>/admin/avaliacoes" class="<?= $gfQualityTab === 'avaliacoes' ? 'is-active' : '' ?>">Avaliações</a><a href="<?= htmlspecialchars($bp, ENT_QUOTES, 'UTF-8') ?>/admin/proof-of-road" class="<?= $gfQualityTab === 'proof' ? 'is-active' : '' ?>">Proof-of-Road</a><a href="<?= htmlspecialchars($bp, ENT_QUOTES, 'UTF-8') ?>/admin/checklists-incompletos" class="<?= $gfQualityTab === 'checklists' ? 'is-active' : '' ?>">Checklists incompletos</a><a href="<?= htmlspecialchars($bp, ENT_QUOTES, 'UTF-8') ?>/admin/revisoes-manuais">RevisÃµes manuais</a></nav>
 <div class="ops-topbar" style="padding:10px 24px;border-bottom:1px solid var(--theme-border,#232c35);background:var(--theme-nav,#030405)">
-    <div class="ops-topbar__search"><i class="fas fa-magnifying-glass"></i><input type="search" id="checklistSearchTop" placeholder="Buscar por nº do pedido, cliente ou prestador" autocomplete="off" aria-label="Buscar checklists incompletos"></div>
-    <div class="ops-topbar__meta"><span class="ops-topbar__status"><span class="ops-topbar__status-dot"></span><?php echo $totalIncompletos; ?> pendências</span></div>
+    <div class="ops-topbar__search"><i class="fas fa-magnifying-glass"></i><input type="search" id="checklistSearchTop" placeholder="Buscar por n� do pedido, cliente ou prestador" autocomplete="off" aria-label="Buscar checklists incompletos"></div>
+    <div class="ops-topbar__meta"><span class="ops-topbar__status"><span class="ops-topbar__status-dot"></span><?php echo $totalIncompletos; ?> pend�ncias</span></div>
 </div>
 
 <section class="ops-summary" aria-label="Resumo de checklists incompletos">
@@ -61,7 +62,7 @@ foreach (($execucoes ?? []) as $e) {
         <strong class="ops-metric__value"><?php echo $totalIncompletos; ?></strong>
     </article>
     <article class="ops-metric <?php echo $semDiagnostico > 0 ? 'is-danger' : ''; ?>">
-        <span class="ops-metric__label">Sem diagnóstico</span>
+        <span class="ops-metric__label">Sem diagn�stico</span>
         <strong class="ops-metric__value"><?php echo $semDiagnostico; ?></strong>
     </article>
     <article class="ops-metric <?php echo $semEvidencia > 0 ? 'is-danger' : ''; ?>">
@@ -78,11 +79,11 @@ foreach (($execucoes ?? []) as $e) {
 
 <div class="shell-ops" id="checklistShell">
 
-    <section class="shell-ops-worklist" aria-label="Pendências de prova de serviço">
+    <section class="shell-ops-worklist" aria-label="Pend�ncias de prova de serviço">
         <header class="ops-worklist-header">
             <span class="eyebrow">Qualidade</span>
             <h2>Checklists incompletos</h2>
-            <p><span id="checklistWorklistCount"><?php echo count($checklistsPayload); ?></span> pendência(s)</p>
+            <p><span id="checklistWorklistCount"><?php echo count($checklistsPayload); ?></span> pend�ncia(s)</p>
         </header>
 
         <div class="ops-worklist-search">
@@ -131,7 +132,7 @@ foreach (($execucoes ?? []) as $e) {
         <?php if (empty($checklistsPayload)): ?>
         <div class="ops-empty-state" style="padding:80px 20px">
             <i class="fas fa-inbox"></i>
-            Nenhuma pendência pra exibir.
+            Nenhuma pend�ncia pra exibir.
         </div>
         <?php endif; ?>
     </section>
@@ -175,10 +176,10 @@ var CHK_BP = '<?php echo addslashes($bp); ?>';
         html += '<div class="card"><div class="card-header"><i class="fas fa-clipboard-check me-2"></i>Proof-of-Service</div><div class="card-body">';
         html += '<table class="table table-sm mb-0 ghd-table">';
         html += '<tr><td class="ghd-label ghd-label--40">Status do pedido</td><td>' + escapeHtml(e.pedido_status) + '</td></tr>';
-        html += '<tr><td class="ghd-label">Diagnóstico</td><td>' + (statusBadge[e.diagnostico.status] || escapeHtml(e.diagnostico.label)) + '</td></tr>';
+        html += '<tr><td class="ghd-label">Diagn�stico</td><td>' + (statusBadge[e.diagnostico.status] || escapeHtml(e.diagnostico.label)) + '</td></tr>';
         html += '<tr><td class="ghd-label">Foto antes</td><td>' + (statusBadge[e.foto_antes.status] || escapeHtml(e.foto_antes.label)) + '</td></tr>';
         html += '<tr><td class="ghd-label">Foto depois</td><td>' + (statusBadge[e.foto_depois.status] || escapeHtml(e.foto_depois.label)) + '</td></tr>';
-        html += '<tr><td class="ghd-label">Avaliado em</td><td>' + (e.avaliado_em ? escapeHtml(e.avaliado_em) : '—') + '</td></tr>';
+        html += '<tr><td class="ghd-label">Avaliado em</td><td>' + (e.avaliado_em ? escapeHtml(e.avaliado_em) : '-') + '</td></tr>';
         html += '</table></div></div>';
         html += '</div>
 </main>
@@ -225,9 +226,10 @@ var CHK_BP = '<?php echo addslashes($bp); ?>';
 </script>
 
 <?php
-// Não usa layouts/footer.php: esta página usa .shell-ops (grid próprio),
-// igual à Central Operacional, Documentos, Saques...
+// Não usa layouts/footer.php: esta p�gina usa .shell-ops (grid pr�prio),
+// igual � Central Operacional, Documentos, Saques...
 ?>
 <script<?php echo csp_script_nonce_attr(); ?> src="<?php echo htmlspecialchars($bp); ?>/public/assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
+

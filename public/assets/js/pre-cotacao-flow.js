@@ -3,12 +3,20 @@
    v20261016-6 — fix B-011-B2 §1: tipo_problema=reboque no modo levar_carro/reboque. */
 
 (function () {
+    // Compatibilidade entre o markup legado do cliente e o publico: a escolha
+    // do servico precisa sempre chegar ao POST como tipo_problema.
+    document.addEventListener('click', function (ev) {
+        var service = ev.target.closest && ev.target.closest('#gfSintomas [data-sintoma], #triagem-servicos [data-sintoma]');
+        var hidden = document.getElementById('tipo_problema');
+        if (service && hidden) hidden.value = service.getAttribute('data-sintoma') || 'outro';
+    }, true);
     'use strict';
 
     var form = document.getElementById('gfPreqForm');
     if (!form) return;
+    var fixedVehicle = form.getAttribute('data-fixed-vehicle') === '1';
 
-    // ─── Debug ────────────────────────────────────────────────
+    // ??? Debug ????????????????????????????????????????????????
     var DEBUG = /[?&]debug=1\b/.test(location.search) || localStorage.getItem('gf_debug') === '1';
     var dbgEl = null;
     function dbg(kind, msg, data) {
@@ -38,7 +46,7 @@
         console.log('[flow][' + kind + ']', msg, data !== undefined ? data : '');
     }
 
-    // ─── Desembrulha {ok, data} e outros formatos ─────────────
+    // ??? Desembrulha {ok, data} e outros formatos ?????????????
     function unwrap(d) {
         if (d && typeof d === 'object' && !Array.isArray(d) && 'data' in d && ('ok' in d || 'success' in d)) {
             return d.data;
@@ -46,7 +54,7 @@
         return d;
     }
 
-    // ─── State ────────────────────────────────────────────────
+    // ??? State ????????????????????????????????????????????????
     var state = {
         step: 1,
         hasOficina: null,
@@ -59,6 +67,17 @@
         comparativo: null,
         escolha: null,
     };
+    state.categoria = (document.getElementById('categoria') || {}).value || '';
+
+    function advanceAfterVehicle() {
+        var precisaDestino = state.modo === 'levar_carro' || state.modo === 'reboque' || state.hasOficina === false;
+        if (precisaDestino) {
+            showStep(5);
+        } else {
+            computeComparison();
+            showStep(6);
+        }
+    }
 
     var els = {
         lat:   document.getElementById('lat_origem'),
@@ -110,7 +129,7 @@
         });
     });
 
-    // ─── Autocomplete ─────────────────────────────────────────
+    // ??? Autocomplete ?????????????????????????????????????????
     function attachAutocomplete(input, onPick) {
         if (!input) return;
         var list = document.createElement('div');
@@ -215,7 +234,7 @@
         updateSummary('destino');
     });
 
-    // ─── Etapa 1 ──────────────────────────────────────────────
+    // ??? Etapa 1 ??????????????????????????????????????????????
     function validateStep1() {
         var loc = (els.loc.value || '').trim();
         var hasLat = parseFloat(els.lat.value) !== 0 && els.lat.value !== '';
@@ -272,12 +291,12 @@
                 state.hasOficina = true;
                 state.hasGuincho = true;
             })
-            .then(function () { applyBranch(); showStep(2); });
+            .then(function () { applyBranch(); renderServicosPorOficina(); showStep(2); });
     }
 
     // §23 §1 (B-011-B2): quando o fluxo é reboque direto (escolha "Levar o carro"
     // ou ausência de oficina), tipo_problema precisa sair como "reboque" para
-    // o motor mapear via ServiceTypeResolver → TOW_CAR.
+    // o motor mapear via ServiceTypeResolver ? TOW_CAR.
     function syncTipoProblemaForModo() {
         if (!els.tipo) return;
         var ehReboque = state.modo === 'levar_carro' || state.modo === 'reboque' || state.hasOficina === false;
@@ -308,7 +327,27 @@
         }
     }
 
-    // ─── Etapa 2 ──────────────────────────────────────────────
+    // ??? Etapa 2 ??????????????????????????????????????????????
+    function renderServicosPorOficina() {
+        var container = document.getElementById('gfSintomas');
+        var oficinas = state.cobertura && Array.isArray(state.cobertura.oficinas) ? state.cobertura.oficinas : [];
+        if (!container || !oficinas.length) return;
+        var servicosPorSlug = {};
+        oficinas.forEach(function (oficina) {
+            var servicos = Array.isArray(oficina.servicos) ? oficina.servicos : [];
+            servicos.forEach(function (servico) {
+                var slug = String(servico.slug || '').trim().toLowerCase();
+                if (!slug || servicosPorSlug[slug]) return;
+                servicosPorSlug[slug] = servico;
+            });
+        });
+        var servicos = Object.keys(servicosPorSlug).map(function (slug) { return servicosPorSlug[slug]; });
+        var html = servicos.length ? '<section class="gf-service-group"><div class="gf-service-group__head"><strong>Serviços disponíveis na região</strong><small>' + String(oficinas.length) + (oficinas.length === 1 ? ' oficina elegível' : ' oficinas elegíveis') + '</small></div><div class="gf-service-group__items">' + servicos.map(function (servico) {
+            return '<button type="button" class="gf-service" data-sintoma="' + String(servico.slug || '') + '"><i class="fas fa-wrench"></i><span class="gf-service__txt"><strong>' + String(servico.nome || servico.slug || '') + '</strong><small>' + String(servico.descricao || '') + '</small></span></button>';
+        }).join('') + '</div></section>' : '';
+        if (html) container.innerHTML = html;
+    }
+
     document.querySelectorAll('#gfModes .gf-mode').forEach(function (btn) {
         btn.addEventListener('click', function () {
             document.querySelectorAll('#gfModes .gf-mode').forEach(function (b) { b.classList.remove('is-selected'); });
@@ -319,24 +358,42 @@
             updateSummary('modo');
             dbg('ok', 'modo escolhido', { modo: state.modo, tipo_problema: els.tipo ? els.tipo.value : null });
             var skipSintoma = state.modo === 'levar_carro' || state.modo === 'reboque' || state.hasOficina === false;
-            showStep(skipSintoma ? 4 : 3);
+            if (fixedVehicle && skipSintoma) {
+                advanceAfterVehicle();
+            } else {
+                showStep(skipSintoma ? 4 : 3);
+            }
         });
     });
 
-    // ─── Etapa 3 ──────────────────────────────────────────────
-    document.querySelectorAll('#gfSintomas [data-sintoma]').forEach(function (btn) {
+    // ??? Etapa 3 ??????????????????????????????????????????????
+    document.querySelectorAll('#gfSintomas [data-sintoma], #triagem-servicos [data-sintoma]').forEach(function (btn) {
         btn.addEventListener('click', function () {
-            document.querySelectorAll('#gfSintomas [data-sintoma]').forEach(function (b) { b.classList.remove('is-selected'); });
+            document.querySelectorAll('#gfSintomas [data-sintoma], #triagem-servicos [data-sintoma]').forEach(function (b) { b.classList.remove('is-selected'); });
             btn.classList.add('is-selected');
             state.sintoma = btn.getAttribute('data-sintoma');
             if (els.tipo) els.tipo.value = state.sintoma;
             updateSummary('sintoma');
             dbg('ok', 'sintoma escolhido', { sintoma: state.sintoma, tipo_problema: els.tipo ? els.tipo.value : null });
-            setTimeout(function () { showStep(4); }, 120);
+            setTimeout(function () { fixedVehicle ? advanceAfterVehicle() : showStep(4); }, 120);
         });
     });
 
-    // ─── Etapa 4 ──────────────────────────────────────────────
+    // ??? Etapa 4 ??????????????????????????????????????????????
+    document.addEventListener('click', function (ev) {
+        var btn = ev.target.closest && ev.target.closest('#gfSintomas [data-sintoma], #triagem-servicos [data-sintoma]');
+        if (!btn) return;
+        document.querySelectorAll('#gfSintomas [data-sintoma], #triagem-servicos [data-sintoma]').forEach(function (b) { b.classList.remove('is-selected'); });
+        btn.classList.add('is-selected');
+        state.sintoma = btn.getAttribute('data-sintoma') || '';
+        if (els.tipo) els.tipo.value = state.sintoma;
+        var oficina = document.getElementById('oficina_id');
+        if (!oficina) { oficina = document.createElement('input'); oficina.type = 'hidden'; oficina.name = 'oficina_id'; oficina.id = 'oficina_id'; form.appendChild(oficina); }
+        oficina.value = btn.getAttribute('data-oficina-id') || '';
+        updateSummary('sintoma');
+        setTimeout(function () { fixedVehicle ? advanceAfterVehicle() : showStep(4); }, 120);
+    });
+
     document.querySelectorAll('#gfVeiculos [data-categoria]').forEach(function (btn) {
         btn.addEventListener('click', function () {
             document.querySelectorAll('#gfVeiculos [data-categoria]').forEach(function (b) { b.classList.remove('is-selected'); });
@@ -355,7 +412,7 @@
         });
     });
 
-    // ─── Etapa 5 ──────────────────────────────────────────────
+    // ??? Etapa 5 ??????????????????????????????????????????????
     function validateStep5() {
         var dest = (els.dest.value || '').trim();
         if (!dest) { els.dest.classList.add('gf-invalid'); els.dest.focus(); return false; }
@@ -381,9 +438,12 @@
         return true;
     }
 
-    // ─── Etapa 6: comparativo ─────────────────────────────────
+    // ??? Etapa 6: comparativo ?????????????????????????????????
     function computeComparison() {
         // Garante tipo_problema correto antes de enviar
+        var selectedService = document.querySelector('#gfSintomas [data-sintoma].is-selected, #triagem-servicos [data-sintoma].is-selected');
+        if (selectedService) state.sintoma = selectedService.getAttribute('data-sintoma') || state.sintoma;
+        if (els.tipo && state.sintoma) els.tipo.value = state.sintoma;
         syncTipoProblemaForModo();
 
         var body = new URLSearchParams();
@@ -437,8 +497,8 @@
 
         // §23 / B-011-B4: o endpoint /api/pre-cotacao/decisao é OPERACIONAL.
         // Ele diz o que está disponível e o que a plataforma recomenda, mas
-        // NÃO é a autoridade de preço. O preço definitivo vem só de
-        // POST /pre-cotacao (AuthController → PrecificacaoService::calcular).
+        // N�O � a autoridade de pre�o. O pre�o definitivo vem s� de
+        // POST /pre-cotacao (AuthController ? PrecificacaoService::calcular).
         // Por isso os cards não mostram valor aqui — mostram "calculado ao
         // confirmar".
         var temAssist = assist.disponivel === true;
@@ -485,11 +545,11 @@
         var btnSubmit = document.getElementById('btnSubmit');
         if (btnSubmit) btnSubmit.disabled = !(showAssist || showReb);
         updateSummary('comparativo', d);
-        // NÃO chama updateSummary('comparativo', d) aqui — o total no
+        // N�O chama updateSummary('comparativo', d) aqui - o total no
         // aside fica como "Calculado ao confirmar" até o POST final.
     }
 	
-    // ─── Preenche hidden valor_cotado ao escolher no comparativo ─
+    // ??? Preenche hidden valor_cotado ao escolher no comparativo ?
     function selectDecision(dec, preco) {
         state.escolha = dec;
         if (els.dec) els.dec.value = dec;
@@ -517,7 +577,7 @@
         });
     });
 
-    // ─── Summary ──────────────────────────────────────────────
+    // ??? Summary ??????????????????????????????????????????????
     function setMapLabel(text) {
         var el = document.getElementById('mapLabel');
         if (el) el.textContent = text;
@@ -551,7 +611,7 @@
         }
     }
 
-    // ─── GPS ──────────────────────────────────────────────────
+    // ??? GPS ??????????????????????????????????????????????????
     var btnGps = document.getElementById('btnGps');
     if (btnGps) {
         btnGps.addEventListener('click', function () {
@@ -571,19 +631,25 @@
         });
     }
 
-    // ─── Sync summary no blur ─────────────────────────────────
+    // ??? Sync summary no blur ?????????????????????????????????
     if (els.loc) els.loc.addEventListener('blur', function () { if (els.loc.value) updateSummary('origem'); });
     if (els.dest) els.dest.addEventListener('blur', function () { if (els.dest.value) updateSummary('destino'); });
 
-    form.addEventListener('submit', function () {
-        // Garante tipo_problema correto mesmo se o usuário voltou e trocou modo
+    form.addEventListener('submit', function (event) {
+        if (String(form.getAttribute('action') || '').indexOf('/admin/') !== -1
+            && !form.querySelector('input[name="destino_pagamento"]:checked')) {
+            event.preventDefault();
+            window.alert('Selecione a forma de pagamento antes de criar o pedido.');
+            return;
+        }
+        // Garante tipo_problema correto mesmo se o usu�rio voltou e trocou modo
         syncTipoProblemaForModo();
 
         if (!state.escolha && state.comparativo && state.comparativo.opcao_reboque) {
             selectDecision('reboque', 0);
         }
         var b = document.getElementById('btnSubmit');
-        if (b) { b.disabled = true; b.textContent = 'Calculando…'; }
+        if (b) { b.disabled = true; b.textContent = 'Calculando.'; }
         dbg('ok', 'SUBMIT', {
             valor_cotado: els.valor ? els.valor.value : '(sem input)',
             decisao: els.dec ? els.dec.value : '',

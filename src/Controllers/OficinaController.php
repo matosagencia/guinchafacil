@@ -418,7 +418,7 @@ class OficinaController extends BaseController
 
         // Fonte canonica unica: /admin/catalogo-servicos/tipos -> service_types.
         $stmt = getPDO()->query("SELECT id, code, name, description, attendance_mode
-                                  FROM service_types WHERE active = 1
+                                  FROM service_types WHERE active = 1 AND attendance_mode = 'ON_SITE'
                                   ORDER BY category_id, id");
         $servicosDisponiveis = $stmt->fetchAll(PDO::FETCH_ASSOC);
         $stmt = getPDO()->prepare("SELECT service_type_id FROM oficina_service_types
@@ -440,9 +440,11 @@ class OficinaController extends BaseController
         $dados = [
             'nome'                => trim((string)($_POST['nome'] ?? '')),
             'telefone'            => preg_replace('/\D/', '', (string)($_POST['telefone'] ?? '')),
-            'endereco'            => trim((string)($_POST['endereco'] ?? '')),
-            'latitude'            => ($_POST['latitude'] ?? '') !== '' ? (float)$_POST['latitude'] : null,
-            'longitude'           => ($_POST['longitude'] ?? '') !== '' ? (float)$_POST['longitude'] : null,
+            // Endereço e coordenadas são definidos no cadastro e não podem
+            // ser alterados pelo painel operacional da oficina.
+            'endereco'            => (string)($oficina['endereco'] ?? ''),
+            'latitude'            => $oficina['latitude'] !== null ? (float)$oficina['latitude'] : null,
+            'longitude'           => $oficina['longitude'] !== null ? (float)$oficina['longitude'] : null,
             'raio_atendimento_km' => max(1, min(200, (int)($_POST['raio_atendimento_km'] ?? 10))),
             'pix_chave'           => trim((string)($_POST['pix_chave'] ?? '')) ?: null,
             'pix_tipo'            => in_array($_POST['pix_tipo'] ?? '', ['cpf','cnpj','email','telefone','aleatoria'], true) ? $_POST['pix_tipo'] : null,
@@ -533,7 +535,7 @@ class OficinaController extends BaseController
             $pdo = getPDO();
             $pdo->beginTransaction();
             // Sem vinculo nao ha concessao de elegibilidade operacional.
-            $stmt = $pdo->query('SELECT id FROM service_types WHERE active=1');
+            $stmt = $pdo->query("SELECT id FROM service_types WHERE active=1 AND attendance_mode='ON_SITE'");
             $permitidos = array_fill_keys(array_map('intval', $stmt->fetchAll(PDO::FETCH_COLUMN)), true);
             if (array_diff_key($ids, $permitidos)) {
                 throw new InvalidArgumentException('Servico inexistente ou inativo no catalogo');

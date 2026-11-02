@@ -103,12 +103,20 @@ final class DecisaoAtendimentoService
 
     private function oficinasNoRaio(float $lat, float $lng, string $tipoProblema = ''): array
     {
-        $rows = $this->buscarProvidersNoRaio($lat, $lng);
-        if (!empty($rows)) return $rows;
-        return $this->buscarOficinasNoRaio($lat, $lng, $tipoProblema);
+        // O cadastro atual usa providers/provider_workshop_settings, mas ainda
+        // existem oficinas legadas ativas sem vínculo explícito. A presença de
+        // um provider não pode esconder essas oficinas do funil.
+        $rows = array_merge(
+            $this->buscarProvidersNoRaio($lat, $lng, $tipoProblema),
+            $this->buscarOficinasNoRaio($lat, $lng, $tipoProblema)
+        );
+        usort($rows, static fn(array $a, array $b): int =>
+            ((float)($a['distancia_km'] ?? 0)) <=> ((float)($b['distancia_km'] ?? 0))
+        );
+        return $rows;
     }
 
-    private function buscarProvidersNoRaio(float $lat, float $lng): array
+    private function buscarProvidersNoRaio(float $lat, float $lng, string $tipoProblema = ''): array
     {
         $rows = [];
         foreach (PartnerLocationService::listarWorkshopsOperacionais() as $row) {
@@ -118,7 +126,23 @@ final class DecisaoAtendimentoService
             }
             $dist = GeoService::haversine($lat, $lng, (float)$row['latitude'], (float)$row['longitude']);
             if ($dist <= (float)$row['raio_resgate_direto_km']) {
+                if ($tipoProblema !== '' && $tipoProblema !== 'reboque') {
+                    $tipoServico = match ($tipoProblema) {
+                        'pane_eletrica' => 'eletrica',
+                        'pane_mecanica' => 'mecanica',
+                        'pane_seca' => 'combustivel',
+                        default => $tipoProblema,
+                    };
+                    $slugs = array_map(
+                        static fn(array $service): string => strtolower(trim((string)($service['slug'] ?? ''))),
+                        $this->servicosDaOficina((int)$row['provider_id'], 'provider')
+                    );
+                    if (!in_array($tipoServico, $slugs, true)) {
+                        continue;
+                    }
+                }
                 $row['distancia_km'] = round($dist, 2);
+                $row['location_source'] = 'provider';
                 $rows[] = $row;
             }
         }
@@ -147,17 +171,51 @@ final class DecisaoAtendimentoService
                            COALESCE(o.raio_atendimento_km, 10) AS raio_resgate_direto_km,
                            0 AS taxa_resgate_direto
                       FROM oficinas o
+                      LEFT JOIN oficina_provider_links opl ON opl.oficina_id = o.id
                      WHERE o.ativo = 1
                        AND o.disponivel = 1
+                       AND opl.provider_id IS NULL
                        AND o.latitude IS NOT NULL
                        AND o.longitude IS NOT NULL";
             if ($servicoTipo !== null) {
-                $sql .= " AND EXISTS (SELECT 1 FROM oficina_servicos os
-                                       WHERE os.oficina_id = o.id
-                                         AND os.tipo = :servico AND os.ativo = 1)";
+                $catalogCodes = match ($servicoTipo) {
+                    'bateria' => ['JUMP_START', 'BATTERY_TEST', 'BATTERY_REPLACEMENT'],
+                    'pneu', 'borracharia' => ['TIRE_CHANGE', 'TIRE_INFLATION'],
+                    'combustivel' => ['FUEL_DELIVERY'],
+                    'mecanica' => ['MECHANICAL_ASSISTANCE'],
+                    'eletrica' => ['ELECTRICAL_DIAGNOSIS'],
+                    'chaveiro' => ['AUTOMOTIVE_LOCKSMITH'],
+                    default => [],
+                };
+                $codePlaceholders = [];
+                foreach ($catalogCodes as $index => $code) {
+                    $codePlaceholders[] = ':service_code_' . $index;
+                }
+                $catalogCondition = "EXISTS (SELECT 1
+                    FROM oficina_service_types ost
+                    INNER JOIN service_types st ON st.id = ost.service_type_id
+                    WHERE ost.oficina_id = o.id
+                      AND ost.active = 1
+                      AND st.active = 1
+                      AND (LOWER(COALESCE(st.public_slug, '')) = :service_slug";
+                if ($codePlaceholders) {
+                    $catalogCondition .= ' OR st.code IN (' . implode(',', $codePlaceholders) . ')';
+                }
+                $catalogCondition .= "))";
+                $legacyCondition = "EXISTS (SELECT 1 FROM oficina_servicos os
+                    WHERE os.oficina_id = o.id
+                      AND os.tipo = :legacy_service
+                      AND os.ativo = 1)";
+                $sql .= ' AND (' . $catalogCondition . ' OR ' . $legacyCondition . ')';
             }
             $stmt = getPDO()->prepare($sql);
-            if ($servicoTipo !== null) $stmt->bindValue(':servico', $servicoTipo);
+            if ($servicoTipo !== null) {
+                $stmt->bindValue(':service_slug', $servicoTipo);
+                $stmt->bindValue(':legacy_service', $servicoTipo);
+                foreach ($catalogCodes as $index => $code) {
+                    $stmt->bindValue(':service_code_' . $index, $code);
+                }
+            }
             $stmt->execute();
 
             $rows = [];
@@ -165,6 +223,7 @@ final class DecisaoAtendimentoService
                 $dist = GeoService::haversine($lat, $lng, (float)$row['latitude'], (float)$row['longitude']);
                 if ($dist <= (float)$row['raio_resgate_direto_km']) {
                     $row['distancia_km'] = round($dist, 2);
+                    $row['location_source'] = 'legacy';
                     $rows[] = $row;
                 }
             }
@@ -203,6 +262,7 @@ final class DecisaoAtendimentoService
             'id' => (int)($o['provider_id'] ?? 0),
             'nome' => (string)($o['nome'] ?? ''),
             'distancia_km' => round((float)($o['distancia_km'] ?? 0), 2),
+            'servicos' => $this->servicosDaOficina((int)($o['provider_id'] ?? 0), (string)($o['location_source'] ?? '')),
             'taxa_saida' => null, // preço somente pela autoridade oficial
         ], $oficinas);
     }
@@ -211,6 +271,68 @@ final class DecisaoAtendimentoService
      * v22: conta guinchos aprovados, disponíveis e dentro do raio de cobertura.
      * Retorna 1 em caso de erro (não bloqueia o fluxo por falha de schema).
      */
+    private function servicosDaOficina(int $providerId, string $source = ''): array
+    {
+        if ($providerId <= 0) return [];
+        $services = [];
+        $stmt = getPDO()->prepare("SELECT st.id, st.code, st.public_slug, st.name, st.description FROM provider_capabilities pc JOIN service_types st ON st.id = pc.service_type_id WHERE pc.provider_id = ? AND pc.enabled = 1 AND pc.approval_status = 'APPROVED' AND st.active = 1 AND st.attendance_mode = 'ON_SITE' ORDER BY st.name ASC");
+        $stmt->execute([$providerId]);
+        foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $s) {
+            $slug = strtolower(trim((string)($s['public_slug'] ?: $s['code'])));
+            if ($slug === '') continue;
+            $services[$slug] = [
+                'id' => (int)$s['id'],
+                'slug' => $slug,
+                'nome' => (string)$s['name'],
+                'descricao' => (string)($s['description'] ?? ''),
+            ];
+        }
+        if ($source === 'legacy') {
+            $legacy = getPDO()->prepare("SELECT st.id, st.code, st.public_slug, st.name, st.description
+                FROM oficina_service_types ost
+                JOIN service_types st ON st.id = ost.service_type_id
+                WHERE ost.oficina_id = ? AND ost.active = 1 AND st.active = 1
+                  AND st.attendance_mode = 'ON_SITE'
+                ORDER BY st.name");
+            $legacy->execute([$providerId]);
+            foreach ($legacy->fetchAll(PDO::FETCH_ASSOC) as $s) {
+                $slug = strtolower(trim((string)($s['public_slug'] ?: $s['code'])));
+                if ($slug === '' || isset($services[$slug])) continue;
+                $services[$slug] = [
+                    'id' => (int)$s['id'],
+                    'slug' => $slug,
+                    'nome' => (string)$s['name'],
+                    'descricao' => (string)($s['description'] ?? ''),
+                ];
+            }
+            // Compatibilidade com os registros antigos ainda existentes.
+            $legacyOld = getPDO()->prepare('SELECT tipo FROM oficina_servicos WHERE oficina_id = ? AND ativo = 1 ORDER BY tipo');
+            $legacyOld->execute([$providerId]);
+            foreach ($legacyOld->fetchAll(PDO::FETCH_COLUMN) as $tipo) {
+                $slug = strtolower(trim((string)$tipo));
+                if ($slug === '' || isset($services[$slug])) continue;
+                $services[$slug] = ['id' => 0, 'slug' => $slug, 'nome' => ucfirst($slug), 'descricao' => ''];
+            }
+            uasort($services, static fn(array $a, array $b): int => strcasecmp($a['nome'], $b['nome']));
+            return array_values($services);
+        } else {
+            $legacy = getPDO()->prepare("SELECT os.tipo FROM oficina_provider_links opl JOIN oficina_servicos os ON os.oficina_id = opl.oficina_id WHERE opl.provider_id = ? AND os.ativo = 1 ORDER BY os.tipo");
+            $legacy->execute([$providerId]);
+        }
+        foreach ($legacy->fetchAll(PDO::FETCH_COLUMN) as $tipo) {
+            $slug = strtolower(trim((string)$tipo));
+            if ($slug === '' || isset($services[$slug])) continue;
+            $services[$slug] = [
+                'id' => 0,
+                'slug' => $slug,
+                'nome' => ucfirst($slug),
+                'descricao' => '',
+            ];
+        }
+        uasort($services, static fn(array $a, array $b): int => strcasecmp($a['nome'], $b['nome']));
+        return array_values($services);
+    }
+
     private function reboquesOnlineNoRaio(float $lat, float $lng): int
     {
         try {

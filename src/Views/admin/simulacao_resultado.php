@@ -17,7 +17,7 @@ foreach (($artifacts ?? []) as $artifactRow) {
 ?>
 <div class="main-wrapper shell admin-shell">
 <?php include __DIR__ . '/../layouts/sidebar_admin.php'; ?>
-<main class="main-content shell-main shell-content">
+<main class="main-content shell-main shell-content"><?php include __DIR__ . '/partials/_panel_topbar_admin.php'; ?>
 
     <header class="page-head mb-4">
         <div>

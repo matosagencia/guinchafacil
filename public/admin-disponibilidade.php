@@ -41,7 +41,7 @@ if (($destLat === null) !== ($destLng === null)) {
     echo json_encode(['ok'=>false,'erro'=>'DESTINO_INVALIDO']);
     exit;
 }
-$raioKm = 20.0; // raio de exibição de oficinas; NÃO é garantia de atendimento.
+$raioKm = 20.0; // raio de exibi��o de oficinas; N�O � garantia de atendimento.
 try {
     $ids = [];
     $aneis = GuinchoDisponibilidade::candidatosPorAnel($lat, $lng);

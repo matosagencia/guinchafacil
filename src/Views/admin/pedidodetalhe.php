@@ -18,10 +18,10 @@ echo '<link rel="stylesheet" href="' . htmlspecialchars($bp, ENT_QUOTES, 'UTF-8'
 ?>
 <link rel="stylesheet" href="<?php echo htmlspecialchars($bp); ?>/public/assets/css/pages/admin-pedidodetalhe.css">
 <link rel="stylesheet" href="<?php echo htmlspecialchars($bp, ENT_QUOTES, 'UTF-8'); ?>/public/assets/css/pages/gf-f18e6-ficha-lovable.css?v=1">
-<link rel="stylesheet" href="<?php echo htmlspecialchars($bp, ENT_QUOTES, 'UTF-8'); ?>/public/assets/css/pages/gf-f18e7-geometria-por.css?v=1">
-<div class="main-wrapper shell admin-shell gf-order-detail">
+<link rel="stylesheet" href="<?php echo htmlspecialchars($bp, ENT_QUOTES, 'UTF-8'); ?>/public/assets/css/pages/gf-f18e7-geometria-por.css?v=1"><link rel="stylesheet" href="<?php echo htmlspecialchars($bp, ENT_QUOTES, 'UTF-8'); ?>/public/assets/css/pages/gf-f18c-shell.css?v=20261017-18c1">
+<div class="bo bo-operator gf-f18c-root main-wrapper shell admin-shell gf-order-detail">
 <?php include __DIR__ . '/../layouts/sidebar_admin.php'; ?>
-<main class="main-content shell-main shell-content">
+<main class="main-content shell-main shell-content">    <header class="bo-header">        <div class="gf-f18c-breadcrumb"><span>Backoffice <i class="fas fa-chevron-right" aria-hidden="true"></i> <strong>Pedido #<?php echo (int)($pedido['id'] ?? 0); ?></strong></span></div>        <div class="gf-f18c-header-actions"><span><?php echo htmlspecialchars((string)($_SESSION['user']['nome'] ?? 'Administrador'), ENT_QUOTES, 'UTF-8'); ?></span><a href="<?php echo htmlspecialchars($bp, ENT_QUOTES, 'UTF-8'); ?>/logout" data-confirm-logout><i class="fas fa-right-from-bracket" aria-hidden="true"></i> Sair</a></div>    </header>
 
     <?php foreach ($flashMessages as $flash): ?>
     <div class="alert alert-<?php echo ($flash['type'] ?? '') === 'success' ? 'success' : 'danger'; ?> mb-3"><i class="fas fa-<?php echo ($flash['type'] ?? '') === 'success' ? 'check-circle' : 'triangle-exclamation'; ?> me-2"></i><?php echo htmlspecialchars((string)($flash['message'] ?? '')); ?></div>

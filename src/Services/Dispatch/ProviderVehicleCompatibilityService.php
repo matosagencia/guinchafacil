@@ -3,18 +3,18 @@
 declare(strict_types=1);
 
 // File: guinchafacil/src/Services/Dispatch/ProviderVehicleCompatibilityService.php
-// ROADMAP socorro automotivo — Etapa 15 (compatibilidade prestador × veículo).
+// ROADMAP socorro automotivo - Etapa 15 (compatibilidade prestador � ve�culo).
 //
 // Dois pontos de uso:
-//   1. filtro da fila (conveniência) — GuinchoController / SseController;
-//   2. revalidação no aceite (segurança) — PedidoTransitionService, dentro
-//      da MESMA transação que trava o pedido. A fila pode estar velha; o
-//      aceite não confia nela.
+//   1. filtro da fila (conveni�ncia) - GuinchoController / SseController;
+//   2. revalida��o no aceite (seguran�a) - PedidoTransitionService, dentro
+//      da MESMA transa��o que trava o pedido. A fila pode estar velha; o
+//      aceite n�o confia nela.
 //
-// FALLBACK CONSERVADOR: se o prestador não tem NENHUMA linha de capacidade
-// veicular para este serviço (tabela nasce vazia), decide() devolve ELIGIBLE.
-// Assim o reboque em produção não muda em nada enquanto o admin não
-// configurar compatibilidades — a Etapa 15 é aditiva, não um gate novo que
+// FALLBACK CONSERVADOR: se o prestador n�o tem NENHUMA linha de capacidade
+// veicular para este servi�o (tabela nasce vazia), decide() devolve ELIGIBLE.
+// Assim o reboque em produ��o n�o muda em nada enquanto o admin n�o
+// configurar compatibilidades - a Etapa 15 � aditiva, n�o um gate novo que
 // derruba o fluxo atual.
 
 require_once __DIR__ . '/CompatibilityRequest.php';
@@ -54,8 +54,8 @@ class ProviderVehicleCompatibilityService
     }
 
     /**
-     * MOTOR DE DECISÃO PURO — sem banco, sem I/O. Todo o teste unitário
-     * bate aqui. Ordem: filtros eliminatórios antes de qualquer "confirmação".
+     * MOTOR DE DECIS�O PURO - sem banco, sem I/O. Todo o teste unit�rio
+     * bate aqui. Ordem: filtros eliminat�rios antes de qualquer "confirma��o".
      *
      * @param array{has_vehicle_config:bool, capability:?array, requirements:?array, snapshot:array} $ctx
      */
@@ -73,21 +73,21 @@ class ProviderVehicleCompatibilityService
             return CompatibilityResult::eligible(['DSP-CMP-020']);
         }
 
-        // Categoria desconhecida (pedido sem snapshot, ex.: anterior à Etapa 15)
-        // com prestador que TEM config: não dá pra afirmar incompatibilidade —
-        // aparece na fila como "revisar", nunca é escondido por falta de dado.
+        // Categoria desconhecida (pedido sem snapshot, ex.: anterior � Etapa 15)
+        // com prestador que TEM config: n�o d� pra afirmar incompatibilidade -
+        // aparece na fila como "revisar", nunca � escondido por falta de dado.
         if (!$categoriaConhecida) {
             return CompatibilityResult::requiresConfirmation(
                 ['DSP-CMP-018'],
-                ['Categoria do veículo não informada — confirme antes de aceitar.']
+                ['Categoria do ve�culo n�o informada - confirme antes de aceitar.']
             );
         }
 
-        // 5/7) Config existe mas não há linha para a categoria deste veículo.
+        // 5/7) Config existe mas n�o h� linha para a categoria deste ve�culo.
         if ($cap === null) {
             return CompatibilityResult::ineligible(
                 ['DSP-CMP-005'],
-                ['Prestador não atende a categoria declarada do veículo.']
+                ['Prestador n�o atende a categoria declarada do ve�culo.']
             );
         }
 
@@ -96,7 +96,7 @@ class ProviderVehicleCompatibilityService
         if ((int)($cap['enabled'] ?? 0) !== 1 || $status !== 'APPROVED') {
             return CompatibilityResult::ineligible(
                 ['DSP-CMP-004'],
-                ['Capacidade do prestador não está homologada para este serviço/veículo.']
+                ['Capacidade do prestador n�o est� homologada para este servi�o/ve�culo.']
             );
         }
 
@@ -107,50 +107,50 @@ class ProviderVehicleCompatibilityService
         $subsolo  = array_key_exists('underground_location', $snap) ? $snap['underground_location'] : null;
         $verif    = (string)($snap['verification_status'] ?? '');
 
-        // 11/12) Elétrico/híbrido não suportado.
+        // 11/12) El�trico/h�brido n�o suportado.
         if ($eletrico && (int)($cap['supports_electric'] ?? 0) !== 1) {
-            return CompatibilityResult::ineligible(['DSP-CMP-011'], ['Prestador não atende veículo elétrico.']);
+            return CompatibilityResult::ineligible(['DSP-CMP-011'], ['Prestador n�o atende ve�culo el�trico.']);
         }
         if ($hibrido && (int)($cap['supports_hybrid'] ?? 0) !== 1) {
-            return CompatibilityResult::ineligible(['DSP-CMP-012'], ['Prestador não atende veículo híbrido.']);
+            return CompatibilityResult::ineligible(['DSP-CMP-012'], ['Prestador n�o atende ve�culo h�brido.']);
         }
 
-        // 12/condições) Rodas travadas / veículo batido não suportados.
+        // 12/condi��es) Rodas travadas / ve�culo batido n�o suportados.
         if ((int)$rodas === 1 && (int)($cap['supports_locked_wheels'] ?? 0) !== 1) {
-            return CompatibilityResult::ineligible(['DSP-CMP-013'], ['Prestador não atende veículo com rodas travadas.']);
+            return CompatibilityResult::ineligible(['DSP-CMP-013'], ['Prestador n�o atende ve�culo com rodas travadas.']);
         }
         if ((int)$batido === 1 && (int)($cap['supports_damaged_vehicle'] ?? 0) !== 1) {
-            return CompatibilityResult::ineligible(['DSP-CMP-014'], ['Prestador não atende veículo batido.']);
+            return CompatibilityResult::ineligible(['DSP-CMP-014'], ['Prestador n�o atende ve�culo batido.']);
         }
-        // Subsolo com prestador que não suporta acesso a subsolo = incompatível.
+        // Subsolo com prestador que n�o suporta acesso a subsolo = incompat�vel.
         if ((int)$subsolo === 1 && (int)($cap['supports_subsoil_access'] ?? 0) !== 1) {
-            return CompatibilityResult::ineligible(['DSP-CMP-015'], ['Prestador não atende acesso em garagem/subsolo.']);
+            return CompatibilityResult::ineligible(['DSP-CMP-015'], ['Prestador n�o atende acesso em garagem/subsolo.']);
         }
 
-        // --- A partir daqui, é compatível. Falta ver se precisa CONFIRMAR. ---
+        // --- A partir daqui, � compat�vel. Falta ver se precisa CONFIRMAR. ---
         $warnings = [];
         $codes = [];
 
         if ((int)($cap['requires_manual_confirmation'] ?? 0) === 1) {
             $codes[] = 'DSP-CMP-019';
-            $warnings[] = 'Este atendimento exige confirmação manual do prestador antes do aceite.';
+            $warnings[] = 'Este atendimento exige confirma��o manual do prestador antes do aceite.';
         }
 
-        // Dados incompletos: veículo apenas declarado + condição relevante
+        // Dados incompletos: ve�culo apenas declarado + condi��o relevante
         // desconhecida (rodas/subsolo/batido nulos), ou subsolo confirmado
-        // (altura de acesso não é capturada no MVP -> revisar).
+        // (altura de acesso n�o � capturada no MVP -> revisar).
         $condicaoDesconhecida = ($rodas === null) || ($subsolo === null) || ($batido === null);
         if ($verif === 'DECLARED' && $condicaoDesconhecida) {
             $codes[] = 'DSP-CMP-018';
-            $warnings[] = 'Dados do veículo/ocorrência incompletos — confirme antes de aceitar.';
+            $warnings[] = 'Dados do ve�culo/ocorr�ncia incompletos - confirme antes de aceitar.';
         }
         if ((int)$subsolo === 1) {
             $codes[] = 'DSP-CMP-018';
-            $warnings[] = 'Acesso em garagem/subsolo — confirme altura e condições no local.';
+            $warnings[] = 'Acesso em garagem/subsolo - confirme altura e condi��es no local.';
         }
         if ((int)($snap['manual_review_required'] ?? 0) === 1) {
             $codes[] = 'DSP-CMP-019';
-            $warnings[] = 'Pedido marcado para revisão manual.';
+            $warnings[] = 'Pedido marcado para revis�o manual.';
         }
 
         if (!empty($codes)) {

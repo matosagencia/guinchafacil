@@ -3,27 +3,27 @@
 declare(strict_types=1);
 
 // File: guinchafacil/src/Services/Financial/ChargePolicyService.php
-// ROADMAP socorro automotivo — Etapa 11 (financeiro de duas fases).
+// ROADMAP socorro automotivo - Etapa 11 (financeiro de duas fases).
 //
-// Política pura (mesmo espírito de TriageRuleEngine — Etapa 2): recebe uma
-// situação estruturada e devolve QUAIS itens de cobrança deveriam existir
+// Pol�tica pura (mesmo esp�rito de TriageRuleEngine - Etapa 2): recebe uma
+// situa��o estruturada e devolve QUAIS itens de cobran�a deveriam existir
 // para o primeiro-respondente (motoqueiro), sem calcular valores em R$ e
 // sem gravar nada no banco. Quem chama esta classe decide os valores
 // (via ServicePricingRule/TarifaService) e grava via OrderChargeItem.
 //
-// PROPOSITALMENTE NÃO É CHAMADA POR NENHUM CONTROLLER/SERVICE DE PRODUÇÃO
-// AINDA. Gerar itens de cobrança automaticamente depende de evidência
-// (Etapa 6 — Proof-of-Service), que ainda não existe. Ligar o gatilho
-// automático antes disso seria pagar (ou bloquear) com base em nada.
+// PROPOSITALMENTE N�O � CHAMADA POR NENHUM CONTROLLER/SERVICE DE PRODU��O
+// AINDA. Gerar itens de cobran�a automaticamente depende de evid�ncia
+// (Etapa 6 - Proof-of-Service), que ainda n�o existe. Ligar o gatilho
+// autom�tico antes disso seria pagar (ou bloquear) com base em nada.
 //
-// Tabela situação → pagamento definida explicitamente pelo usuário em
-// 22/07/2026 — não alterar sem reconfirmar.
+// Tabela situa��o ? pagamento definida explicitamente pelo usu�rio em
+// 22/07/2026 - n�o alterar sem reconfirmar.
 //
-// Princípio central (citação literal do usuário, não editar):
-// "O motoqueiro não deve ser pago por 'resolver o carro'. Ele deve ser
+// Princ�pio central (cita��o literal do usu�rio, n�o editar):
+// "O motoqueiro n�o deve ser pago por 'resolver o carro'. Ele deve ser
 // pago por: comparecer, diagnosticar corretamente e executar o protocolo
-// contratado. Resolver é um possível resultado. Identificar corretamente
-// que o veículo precisa ser rebocado também é um resultado válido e
+// contratado. Resolver � um poss�vel resultado. Identificar corretamente
+// que o ve�culo precisa ser rebocado tamb�m � um resultado v�lido e
 // valioso."
 
 require_once __DIR__ . '/../../Models/Financial/ChargeCodes.php';
@@ -84,11 +84,11 @@ final class ChargePolicyService
 
     /**
      * @param string $situationCode Um dos ChargeCodes::SITUATION_*.
-     * @param array  $context       Flags estruturais que desambiguam a situação:
-     *   - diagnostico_concluido (bool): diagnóstico já tinha sido efetivamente
-     *     realizado quando a situação ocorreu (relevante p/ CANCELLED_DURING_SERVICE
+     * @param array  $context       Flags estruturais que desambiguam a situa��o:
+     *   - diagnostico_concluido (bool): diagn�stico j� tinha sido efetivamente
+     *     realizado quando a situa��o ocorreu (relevante p/ CANCELLED_DURING_SERVICE
      *     e SAFETY_RISK_INTERRUPTION).
-     *   - pecas_autorizadas (bool): houve peças autorizadas pelo cliente
+     *   - pecas_autorizadas (bool): houve pe�as autorizadas pelo cliente
      *     (relevante p/ RESOLVED_ON_SITE).
      *   - servico_executado_ate_falha (array<string>): lista de charge_types
      *     efetivamente executados antes de uma falha de plataforma
@@ -96,15 +96,15 @@ final class ChargePolicyService
      *
      * @return array<int, array{phase_code:string, charge_type:string, payable_status:string, evidence_required:bool, block_reason_code:?string}>
      *   Lista estrutural de itens a criar para o PRIMEIRO-RESPONDENTE
-     *   (motoqueiro). Itens de reboque (fase TOWING, outro prestador) não
-     *   são decididos aqui — pertencem ao fluxo/prestador de reboque, que
-     *   já existe separadamente (TarifaService) e é acionado quando a
-     *   situação permite conversão (ver OTHER_PROVIDER_EXECUTES_TOWING).
+     *   (motoqueiro). Itens de reboque (fase TOWING, outro prestador) n�o
+     *   s�o decididos aqui - pertencem ao fluxo/prestador de reboque, que
+     *   j� existe separadamente (TarifaService) e � acionado quando a
+     *   situa��o permite convers�o (ver OTHER_PROVIDER_EXECUTES_TOWING).
      */
     public static function resolverItensPrimeiroRespondente(string $situationCode, array $context = []): array
     {
         if (!in_array($situationCode, ChargeCodes::SITUATIONS, true)) {
-            throw new \InvalidArgumentException("Situação financeira desconhecida: {$situationCode}");
+            throw new \InvalidArgumentException("Situa��o financeira desconhecida: {$situationCode}");
         }
 
         $diagnosticoConcluido = !empty($context['diagnostico_concluido']);
@@ -112,7 +112,7 @@ final class ChargePolicyService
 
         switch ($situationCode) {
             case ChargeCodes::SITUATION_RESOLVED_ON_SITE:
-                // Deslocamento + diagnóstico + serviço executado + peças, quando houver.
+                // Deslocamento + diagn�stico + servi�o executado + pe�as, quando houver.
                 $itens = [
                     self::item(ChargeCodes::PHASE_INITIAL_ASSISTANCE, ChargeCodes::TYPE_DISPATCH_FEE),
                     self::item(ChargeCodes::PHASE_ON_SITE_DIAGNOSIS, ChargeCodes::TYPE_DIAGNOSIS_FEE),
@@ -125,16 +125,16 @@ final class ChargePolicyService
 
             case ChargeCodes::SITUATION_TOWING_RECOMMENDED_ACCEPTED:
             case ChargeCodes::SITUATION_TOWING_RECOMMENDED_REFUSED:
-                // Deslocamento + diagnóstico integral (não há LABOR_FEE — não consertou,
-                // mas identificar corretamente a necessidade de reboque é um resultado
-                // válido e remunerado igual nos dois casos: aceito ou recusado pelo cliente).
+                // Deslocamento + diagn�stico integral (n�o h� LABOR_FEE - n�o consertou,
+                // mas identificar corretamente a necessidade de reboque � um resultado
+                // v�lido e remunerado igual nos dois casos: aceito ou recusado pelo cliente).
                 return [
                     self::item(ChargeCodes::PHASE_INITIAL_ASSISTANCE, ChargeCodes::TYPE_DISPATCH_FEE),
                     self::item(ChargeCodes::PHASE_ON_SITE_DIAGNOSIS, ChargeCodes::TYPE_DIAGNOSIS_FEE),
                 ];
 
             case ChargeCodes::SITUATION_CANCELLED_DURING_SERVICE:
-                // Deslocamento + taxa de comparecimento sempre; diagnóstico só se já
+                // Deslocamento + taxa de comparecimento sempre; diagn�stico s� se j�
                 // tiver sido efetivamente realizado antes do cancelamento.
                 $itens = [
                     self::item(ChargeCodes::PHASE_CANCELLATION, ChargeCodes::TYPE_DISPATCH_FEE),
@@ -151,17 +151,17 @@ final class ChargePolicyService
 
             case ChargeCodes::SITUATION_MISSING_REQUIRED_EVIDENCE:
                 // Itens existem (o trabalho foi declarado), mas o repasse fica
-                // bloqueado para revisão — não pago automaticamente, não negado
+                // bloqueado para revis�o - n�o pago automaticamente, n�o negado
                 // de cara. Reaproveita o mesmo desenho de RESOLVED_ON_SITE porque
-                // a ausência de evidência normalmente aparece depois do serviço
-                // já ter sido declarado como executado.
+                // a aus�ncia de evid�ncia normalmente aparece depois do servi�o
+                // j� ter sido declarado como executado.
                 return array_map(
                     fn (array $item) => self::bloquear($item, 'EVIDENCE_MISSING'),
                     self::resolverItensPrimeiroRespondente(ChargeCodes::SITUATION_RESOLVED_ON_SITE, $context)
                 );
 
             case ChargeCodes::SITUATION_INCONSISTENT_DIAGNOSIS:
-                // Retido para auditoria — não é bloqueio definitivo nem pagamento.
+                // Retido para auditoria - n�o � bloqueio definitivo nem pagamento.
                 return array_map(
                     fn (array $item) => self::revisar($item, 'DIAGNOSIS_UNDER_AUDIT'),
                     self::resolverItensPrimeiroRespondente(ChargeCodes::SITUATION_RESOLVED_ON_SITE, $context)
@@ -169,26 +169,26 @@ final class ChargePolicyService
 
             case ChargeCodes::SITUATION_CONFIRMED_FRAUD:
                 // Pagamento recusado/estornado, com penalidade ao prestador. A
-                // penalidade em si (ex.: suspensão de capacidade) é tratada fora
-                // desta política, via ProviderCapability::suspender() + Demanda.
+                // penalidade em si (ex.: suspens�o de capacidade) � tratada fora
+                // desta pol�tica, via ProviderCapability::suspender() + Demanda.
                 return array_map(
                     fn (array $item) => self::rejeitarPorFraude($item),
                     self::resolverItensPrimeiroRespondente(ChargeCodes::SITUATION_RESOLVED_ON_SITE, $context)
                 );
 
             case ChargeCodes::SITUATION_CUSTOMER_ABSENT_AFTER_ARRIVAL:
-                // Deslocamento + taxa de comparecimento, conforme política de
-                // tolerância (a política de tolerância em si — tempo mínimo de
-                // espera etc. — é operacional, não financeira, e fica fora desta
-                // classe; aqui só garantimos que o item existe).
+                // Deslocamento + taxa de comparecimento, conforme pol�tica de
+                // toler�ncia (a pol�tica de toler�ncia em si - tempo m�nimo de
+                // espera etc. - � operacional, n�o financeira, e fica fora desta
+                // classe; aqui s� garantimos que o item existe).
                 return [
                     self::item(ChargeCodes::PHASE_NO_SHOW, ChargeCodes::TYPE_DISPATCH_FEE),
                     self::item(ChargeCodes::PHASE_NO_SHOW, ChargeCodes::TYPE_ATTENDANCE_FEE),
                 ];
 
             case ChargeCodes::SITUATION_SAFETY_RISK_INTERRUPTION:
-                // Deslocamento + comparecimento + diagnóstico executado, conforme
-                // evidências (não presume diagnóstico completo — depende do contexto).
+                // Deslocamento + comparecimento + diagn�stico executado, conforme
+                // evid�ncias (n�o presume diagn�stico completo - depende do contexto).
                 $itens = [
                     self::item(ChargeCodes::PHASE_INITIAL_ASSISTANCE, ChargeCodes::TYPE_DISPATCH_FEE),
                     self::item(ChargeCodes::PHASE_CANCELLATION, ChargeCodes::TYPE_ATTENDANCE_FEE),
@@ -199,9 +199,9 @@ final class ChargePolicyService
                 return $itens;
 
             case ChargeCodes::SITUATION_PLATFORM_FAILURE_AFTER_ARRIVAL:
-                // Pagamento garantido da etapa comprovadamente executada — a culpa
-                // é da plataforma, então o que já foi feito (conforme evidências/
-                // contexto) é elegível diretamente, sem passar por revisão.
+                // Pagamento garantido da etapa comprovadamente executada - a culpa
+                // � da plataforma, ent�o o que j� foi feito (conforme evid�ncias/
+                // contexto) � eleg�vel diretamente, sem passar por revis�o.
                 $executados = $context['servico_executado_ate_falha'] ?? [ChargeCodes::TYPE_DISPATCH_FEE];
                 return array_map(
                     fn (string $chargeType) => self::item(
@@ -213,33 +213,33 @@ final class ChargePolicyService
                 );
 
             case ChargeCodes::SITUATION_OTHER_PROVIDER_EXECUTES_TOWING:
-                // Informativo: não gera itens próprios. O motoqueiro recebe pela
-                // situação que efetivamente ocorreu na fase dele (normalmente
+                // Informativo: n�o gera itens pr�prios. O motoqueiro recebe pela
+                // situa��o que efetivamente ocorreu na fase dele (normalmente
                 // TOWING_RECOMMENDED_ACCEPTED); o guincheiro recebe a etapa de
-                // reboque separadamente. Chamar esta situação diretamente é erro
-                // de uso — sinaliza para o chamador resolver a situação real do
+                // reboque separadamente. Chamar esta situa��o diretamente � erro
+                // de uso - sinaliza para o chamador resolver a situa��o real do
                 // motoqueiro primeiro.
                 throw new \LogicException(
-                    'OTHER_PROVIDER_EXECUTES_TOWING não gera itens diretamente — resolva a situação real ' .
+                    'OTHER_PROVIDER_EXECUTES_TOWING n�o gera itens diretamente - resolva a situa��o real ' .
                     'do primeiro-respondente (ex.: TOWING_RECOMMENDED_ACCEPTED) e trate o reboque como pedido/fase separada.'
                 );
 
             default:
-                // Inalcançável — guard-clause no topo já validou contra ChargeCodes::SITUATIONS.
-                throw new \LogicException("Situação sem regra implementada: {$situationCode}");
+                // Inalcan��vel - guard-clause no topo j� validou contra ChargeCodes::SITUATIONS.
+                throw new \LogicException("Situa��o sem regra implementada: {$situationCode}");
         }
     }
 
     public static function itemIndicacaoOficina(float $feeAmount, array $snapshot = []): array
     {
         if ($feeAmount < 0) {
-            throw new \InvalidArgumentException('A taxa de indicação não pode ser negativa.');
+            throw new \InvalidArgumentException('A taxa de indica��o n�o pode ser negativa.');
         }
 
         return [
             'phase_code' => ChargeCodes::PHASE_WORKSHOP_REFERRAL,
             'charge_type' => ChargeCodes::TYPE_REFERRAL_FEE,
-            'description' => 'Taxa por indicação de oficina parceira',
+            'description' => 'Taxa por indica��o de oficina parceira',
             'quantity' => 1.0,
             'unit_amount' => round($feeAmount, 2),
             'gross_amount' => round($feeAmount, 2),
@@ -274,12 +274,12 @@ final class ChargePolicyService
     public static function itemResgateDireto(float $feeAmount, array $snapshot = []): array
     {
         if ($feeAmount < 0) {
-            throw new \InvalidArgumentException('A taxa de resgate direto não pode ser negativa.');
+            throw new \InvalidArgumentException('A taxa de resgate direto n�o pode ser negativa.');
         }
         return [
             'phase_code' => ChargeCodes::PHASE_DIRECT_RESCUE,
             'charge_type' => ChargeCodes::TYPE_DIRECT_RESCUE_FEE,
-            'description' => 'Intermediação de resgate direto por oficina',
+            'description' => 'Intermedia��o de resgate direto por oficina',
             'quantity' => 1,
             'unit_amount' => $feeAmount,
             'gross_amount' => $feeAmount,

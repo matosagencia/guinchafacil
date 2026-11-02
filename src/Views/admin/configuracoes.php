@@ -155,7 +155,7 @@ function maskEnvValue(string $value): string {
 
             <?php if ($cidadeIdConfig > 0): ?>
 
-            <span class="text-muted small"><i class="fas fa-circle-info me-1"></i>SÃ³ os valores de <strong>Tarifas e OperaÃ§Ã£o</strong> (seÃ§Ã£o abaixo) sÃ£o especÃ­ficos desta cidade â€” comissÃ£o, gateway e demais configuraÃ§Ãµes continuam globais.</span>
+            <span class="text-muted small"><i class="fas fa-circle-info me-1"></i>SÃ³ os valores de <strong>Tarifas e OperaÃ§Ã£o</strong> (seÃ§Ã£o abaixo) sÃ£o especÃ­ficos desta cidade �?" comissÃ£o, gateway e demais configuraÃ§Ãµes continuam globais.</span>
 
             <?php endif; ?>
 
@@ -278,7 +278,7 @@ function maskEnvValue(string $value): string {
 
                         <div class="mb-3">
 
-                            <label class="form-label">ComissÃ£o Plataforma (decimal 0 a 1) â€” incide sobre o valor JÃ LÃQUIDO, depois da reserva de gateway abaixo</label>
+                            <label class="form-label">ComissÃ£o Plataforma (decimal 0 a 1) �?" incide sobre o valor JÃ LÃQUIDO, depois da reserva de gateway abaixo</label>
 
                             <input type="number" step="0.01" class="form-control" min="0.01" max="0.99" name="comissao_plataforma"
 
@@ -288,7 +288,7 @@ function maskEnvValue(string $value): string {
 
                         <div class="mb-3">
 
-                            <label class="form-label">Custo Saída Profissional Padrão (R$)</label>
+                            <label class="form-label">Custo Sa�da Profissional Padr�o (R$)</label>
 
                             <input type="number" step="0.01" class="form-control" name="custo_saida_profissional_padrao"
 
@@ -298,7 +298,7 @@ function maskEnvValue(string $value): string {
 
                         <div class="mb-3">
 
-                            <label class="form-label">Comissão Assistência (decimal 0 a 1)</label>
+                            <label class="form-label">Comissão Assist�ncia (decimal 0 a 1)</label>
 
                             <input type="number" step="0.01" class="form-control" min="0.01" max="0.99" name="comissao_assistencia_percentual"
 
@@ -308,20 +308,20 @@ function maskEnvValue(string $value): string {
 
                         <div class="mb-3">
 
-                            <label class="form-label">Habilitar comparativo assistência vs reboque</label>
+                            <label class="form-label">Habilitar comparativo assist�ncia vs reboque</label>
 
                             <select class="form-select" name="habilitar_comparativo_assistencia">
                                 <?php $flagComparativo = (string)($config['habilitar_comparativo_assistencia'] ?? '1'); ?>
-                                <option value="1" <?php echo $flagComparativo === '1' ? 'selected' : ''; ?>>Sim — mostrar comparativo quando houver oficina no raio</option>
-                                <option value="0" <?php echo $flagComparativo === '0' ? 'selected' : ''; ?>>Não — seguir apenas com reboque</option>
+                                <option value="1" <?php echo $flagComparativo === '1' ? 'selected' : ''; ?>>Sim - mostrar comparativo quando houver oficina no raio</option>
+                                <option value="0" <?php echo $flagComparativo === '0' ? 'selected' : ''; ?>>Não - seguir apenas com reboque</option>
                             </select>
-                            <small class="text-muted d-block">Desliga o fluxo Diego de assistência no local na pré-cotação.</small>
+                            <small class="text-muted d-block">Desliga o fluxo Diego de assist�ncia no local na pré-cotação.</small>
 
                         </div>
 
                         <div class="mb-3">
 
-                            <label class="form-label">Reserva de gateway (decimal 0 a 1) — média conservadora descontada do bruto antes de calcular comissão/repasse</label>
+                            <label class="form-label">Reserva de gateway (decimal 0 a 1) - média conservadora descontada do bruto antes de calcular comissão/repasse</label>
 
                             <input type="number" step="0.001" class="form-control" min="0" max="0.5" name="reserva_gateway_percentual"
 
@@ -331,7 +331,7 @@ function maskEnvValue(string $value): string {
 
                                 Ex.: 0.045 = 4,5%. ComissÃ£o + repasse ao prestador somam 100% do valor JÃ DESCONTADO
 
-                                dessa reserva â€” evita que comissÃ£o+repasse+taxa do gateway ultrapassem o valor recebido.
+                                dessa reserva �?" evita que comissÃ£o+repasse+taxa do gateway ultrapassem o valor recebido.
 
                             </small>
 
@@ -339,7 +339,7 @@ function maskEnvValue(string $value): string {
 
                         <div class="mb-3">
 
-                            <label class="form-label">CrÃ©dito de conversÃ£o paneâ†’reboque (decimal 0 a 1)</label>
+                            <label class="form-label">CrÃ©dito de conversÃ£o pane�?'reboque (decimal 0 a 1)</label>
 
                             <input type="number" step="0.01" class="form-control" min="0" max="1" name="credito_conversao_percentual"
 
@@ -349,7 +349,7 @@ function maskEnvValue(string $value): string {
 
                         <div class="mb-3">
 
-                            <label class="form-label">CrÃ©dito de conversÃ£o â€” limite mÃ¡ximo (R$)</label>
+                            <label class="form-label">CrÃ©dito de conversÃ£o �?" limite mÃ¡ximo (R$)</label>
 
                             <input type="number" step="0.01" class="form-control" min="0" name="credito_conversao_maximo"
 
@@ -496,7 +496,7 @@ function maskEnvValue(string $value): string {
 
 
 
-                        <!-- MODO DE OPERAÃ‡ÃƒO -->
+                        <!-- MODO DE OPERA�?�fO -->
 
                         <h6 class="mb-3 text-muted"><i class="fas fa-server me-2"></i>Modo de OperaÃ§Ã£o</h6>
 
@@ -566,7 +566,7 @@ function maskEnvValue(string $value): string {
 
                                 <i class="fas fa-info-circle"></i> 
 
-                                <span class="d-block mb-1">Selecione uma opÃ§Ã£o e clique em <strong>Salvar ConfiguraÃ§Ãµes</strong>. O System Mode controla o fluxo da plataforma; o ambiente do Mercado Pago Ã© ajustado separadamente em <strong>Gateway de Pagamento â†’ MP_ENV</strong>.</span>
+                                <span class="d-block mb-1">Selecione uma opÃ§Ã£o e clique em <strong>Salvar ConfiguraÃ§Ãµes</strong>. O System Mode controla o fluxo da plataforma; o ambiente do Mercado Pago Ã© ajustado separadamente em <strong>Gateway de Pagamento �?' MP_ENV</strong>.</span>
 
                                 <strong>ProduÃ§Ã£o:</strong> Pagamentos reais via gateway<br>
 
@@ -584,7 +584,7 @@ function maskEnvValue(string $value): string {
 
 
 
-                        <!-- PAGAMENTO OBRIGATÃ“RIO -->
+                        <!-- PAGAMENTO OBRIGAT�"RIO -->
 
                         <h6 class="mb-3 text-muted"><i class="fas fa-lock me-2"></i>SeguranÃ§a</h6>
 
@@ -630,7 +630,7 @@ function maskEnvValue(string $value): string {
 
                                     <strong>Modo de debug global</strong>
 
-                                    <small class="d-block text-muted">Liga logs verbosos em todo o sistema (backend e frontend): sistema, classe, funÃ§Ã£o e localizaÃ§Ã£o exata de cada evento/erro â€” nos logs do servidor e no console do navegador. Recomendado sÃ³ durante diagnÃ³stico, nÃ£o em produÃ§Ã£o normal.</small>
+                                    <small class="d-block text-muted">Liga logs verbosos em todo o sistema (backend e frontend): sistema, classe, funÃ§Ã£o e localizaÃ§Ã£o exata de cada evento/erro �?" nos logs do servidor e no console do navegador. Recomendado sÃ³ durante diagnÃ³stico, nÃ£o em produÃ§Ã£o normal.</small>
 
                                 </label>
 
@@ -973,7 +973,7 @@ function maskEnvValue(string $value): string {
 
                     <hr class="config-hr">
 
-                    <small class="config-info-small">Ãšltima alteraÃ§Ã£o: <?php echo date('d/m/Y H:i'); ?></small>
+                    <small class="config-info-small">�sltima alteraÃ§Ã£o: <?php echo date('d/m/Y H:i'); ?></small>
 
                 </div>
 
@@ -1019,5 +1019,6 @@ function maskEnvValue(string $value): string {
 </script><script<?php echo csp_script_nonce_attr(); ?> defer src="<?php echo htmlspecialchars($bp); ?>/public/assets/js/admin-configuracoes.js?v=20260813-2"></script>
 
 <?php include __DIR__ . '/../layouts/footer.php'; ?>
+
 
 

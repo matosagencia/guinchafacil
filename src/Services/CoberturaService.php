@@ -4,7 +4,7 @@
 require_once __DIR__ . '/GeoService.php';
 require_once __DIR__ . '/../Models/Catalog/ProviderCapability.php';
 require_once __DIR__ . '/../Services/EspecialistaDispatchService.php';
-
+require_once __DIR__ . '/DecisaoAtendimentoService.php';
 /**
  * §COBERTURA-RAIO-01 (05/08/2026)
  *
@@ -58,7 +58,7 @@ class CoberturaService
      */
     public static function existeGuinchoAlcancavel(float $lat, float $lng, string $attendanceMode, ?int $serviceTypeId): bool
     {
-        $pdo = getPDO();
+        // Reboque pertence ao guincho. Assistencia local pertence a oficinas;        // nao devemos exigir uma capacidade de guincho para chaveiro,        // eletrica, mecanica, bateria ou borracharia.        if (strtoupper(trim($attendanceMode)) !== 'TOWING') {            if (!$serviceTypeId || $serviceTypeId <= 0) {                return false;            }            $stmt = getPDO()->prepare('SELECT public_slug, code FROM service_types WHERE id = ? AND active = 1 LIMIT 1');            $stmt->execute([$serviceTypeId]);            $service = $stmt->fetch(PDO::FETCH_ASSOC) ?: [];            $tipo = strtolower(trim((string)($service['public_slug'] ?? '')));            $code = strtoupper(trim((string)($service['code'] ?? '')));            $tipo = $tipo !== '' ? $tipo : match ($code) {                'BATTERY_TEST', 'BATTERY_REPLACEMENT' => 'bateria',                'TIRE_INFLATION', 'TIRE_CHANGE' => 'pneu',                'FUEL_DELIVERY' => 'combustivel',                'MECHANICAL_ASSISTANCE' => 'mecanica',                'ELECTRICAL_DIAGNOSIS' => 'eletrica',                'AUTOMOTIVE_LOCKSMITH' => 'chaveiro',                default => '',            };            if ($tipo === '') {                return false;            }            $decisao = new DecisaoAtendimentoService();            return count($decisao->oficinasProximasPublico($lat, $lng, $tipo)) > 0;        }        $pdo = getPDO();
         require_once __DIR__ . '/../Models/Configuracao.php';
         $cfg = Configuracao::getAll();
         $raioMaximoGlobal = (float)($cfg['raio_maximo_km'] ?? 50);

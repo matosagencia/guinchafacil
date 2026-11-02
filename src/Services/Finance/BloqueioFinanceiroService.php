@@ -8,9 +8,9 @@ declare(strict_types=1);
  * parceiro_id = :id e status = 'bloqueada' em faturas_parceiro.
  *
  * Parceiro bloqueado:
- *   - não aparece no anel de candidatos (§7)
- *   - não recebe oferta
- *   - NÃO recebe notificação de bloqueio até quitar (decisão de produto)
+ *   - n�o aparece no anel de candidatos (�7)
+ *   - n�o recebe oferta
+ *   - N�O recebe notifica��o de bloqueio at� quitar (decis�o de produto)
  *   - POST direto em /guincho/aceitar recebe mensagem neutra, sem revelar motivo
  */
 final class BloqueioFinanceiroService
@@ -48,7 +48,7 @@ final class BloqueioFinanceiroService
     }
 
     /**
-     * Versão batch — evita N+1 em candidatosPorAnel (Fase D.2).
+     * Vers�o batch - evita N+1 em candidatosPorAnel (Fase D.2).
      *
      * @return int[]
      */
@@ -66,8 +66,8 @@ final class BloqueioFinanceiroService
     }
 
     /**
-     * Detalhe para o painel admin / debug — devolve a fatura mais antiga
-     * em aberto vencida ou bloqueada, ou null se não há bloqueio.
+     * Detalhe para o painel admin / debug - devolve a fatura mais antiga
+     * em aberto vencida ou bloqueada, ou null se n�o h� bloqueio.
      */
     public static function motivo(int $guinchoId): ?array
     {
@@ -87,7 +87,7 @@ final class BloqueioFinanceiroService
         return $row ?: null;
     }
 
-    /** Limpa o cache — usado em testes. */
+    /** Limpa o cache - usado em testes. */
     public static function limparCache(): void
     {
         self::$cache = [];

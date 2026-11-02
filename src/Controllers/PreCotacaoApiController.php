@@ -224,6 +224,7 @@ final class PreCotacaoApiController extends BaseController
                         'id' => (int)($oficina['provider_id'] ?? $oficina['id'] ?? 0),
                         'nome' => (string)($oficina['nome'] ?? 'Oficina parceira'),
                         'distancia_km' => (float)($oficina['distancia_km'] ?? 0),
+                        'servicos' => array_values((array)($oficina['servicos'] ?? [])),
                     ];
                 }, $oficinas),
             ],
@@ -240,8 +241,18 @@ final class PreCotacaoApiController extends BaseController
         $servicos = [];
         try {
             require_once __DIR__ . '/../Models/Catalog/ServiceType.php';
+            // A cesta pública só deve oferecer serviços que tenham pelo menos
+            // um prestador com capacidade aprovada e habilitada. O catálogo
+            // administrativo continua sendo a fonte dos nomes e regras; esta
+            // existência impede que o cliente escolha uma opção sem oferta.
             foreach (\ServiceType::listarAtivos() as $tipo) {
                 $modo = (string)($tipo['attendance_mode'] ?? '');
+                // Os serviços nativos de reboque são escolhidos pela decisão
+                // de atendimento, não como problema na Etapa 03/06. Eles
+                // continuam ativos no catálogo e no motor operacional.
+                if (strtoupper($modo) === 'TOWING') {
+                    continue;
+                }
                 // O catálogo antigo nem sempre possui public_slug. Nesses
                 // casos, o code ativo é o identificador público estável e é
                 // resolvido pelo mesmo fallback do ServiceType.

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 /**
  * Consultas da fila operacional do admin.
- * Somente leitura: nenhuma regra de transição ou POR é executada aqui.
+ * Somente leitura: nenhuma regra de transi��o ou POR � executada aqui.
  */
 final class OrderWorklistService
 {
@@ -15,22 +15,22 @@ final class OrderWorklistService
         'no_local' => ['label' => 'No local', 'css' => 'route'],
         'em_reboque' => ['label' => 'Em atendimento', 'css' => 'service'],
         'teste_final' => ['label' => 'Teste final', 'css' => 'service'],
-        'concluido' => ['label' => 'Concluído', 'css' => 'done'],
+        'concluido' => ['label' => 'Conclu�do', 'css' => 'done'],
         'cancelado' => ['label' => 'Cancelado', 'css' => 'cancelled'],
     ];
 
     private const SERVICE_LABELS = [
-        'mecanico' => 'Mecânico', 'eletrico' => 'Elétrico', 'pneu' => 'Pneu',
-        'bateria' => 'Bateria', 'combustivel' => 'Combustível',
-        'acidente' => 'Acidente', 'colisao' => 'Colisão', 'outro' => 'Outro',
+        'mecanico' => 'Mec�nico', 'eletrico' => 'El�trico', 'pneu' => 'Pneu',
+        'bateria' => 'Bateria', 'combustivel' => 'Combust�vel',
+        'acidente' => 'Acidente', 'colisao' => 'Colis�o', 'outro' => 'Outro',
     ];
 
     /**
-     * Acima deste número de linhas (após aplicar todos os filtros SQL, antes
-     * do filtro de prioridade), a paginação por priority[] deixa de ser
-     * exata — ver nota em list() abaixo. Na prática a fila operacional real
-     * (pedidos ativos + filtros de status/serviço/região/data) fica muito
-     * abaixo disso; o cap existe só como salvaguarda de memória/tempo.
+     * Acima deste n�mero de linhas (ap�s aplicar todos os filtros SQL, antes
+     * do filtro de prioridade), a pagina��o por priority[] deixa de ser
+     * exata - ver nota em list() abaixo. Na pr�tica a fila operacional real
+     * (pedidos ativos + filtros de status/servi�o/regi�o/data) fica muito
+     * abaixo disso; o cap existe s� como salvaguarda de mem�ria/tempo.
      */
     private const PRIORITY_FILTER_SCAN_CAP = 2000;
 
@@ -69,7 +69,7 @@ final class OrderWorklistService
 
         if (empty($priorityValues)) {
             // Caminho normal (sem filtro de prioridade): COUNT + LIMIT/OFFSET
-            // direto no SQL, como antes — paginação exata.
+            // direto no SQL, como antes - pagina��o exata.
             $countStmt = $pdo->prepare(
                 "SELECT COUNT(*)
                    FROM pedidos p
@@ -100,15 +100,15 @@ final class OrderWorklistService
             ];
         }
 
-        // priority[] é derivado em PHP (GPS/tempo de espera — ver alert()),
-        // não existe como coluna no banco. Não dá pra fazer WHERE nem
-        // LIMIT/OFFSET corretos em SQL sem duplicar essa lógica de negócio
-        // como expressão SQL (frágil, dessincroniza fácil de alert()).
-        // Solução: escaneia até PRIORITY_FILTER_SCAN_CAP linhas já filtradas
-        // pelos demais critérios (status/serviço/região/data/etc.), calcula
-        // a prioridade real de cada uma, filtra, e só DEPOIS pagina em PHP —
+        // priority[] � derivado em PHP (GPS/tempo de espera - ver alert()),
+        // n�o existe como coluna no banco. N�o d� pra fazer WHERE nem
+        // LIMIT/OFFSET corretos em SQL sem duplicar essa l�gica de neg�cio
+        // como express�o SQL (fr�gil, dessincroniza f�cil de alert()).
+        // Solu��o: escaneia at� PRIORITY_FILTER_SCAN_CAP linhas j� filtradas
+        // pelos demais crit�rios (status/servi�o/regi�o/data/etc.), calcula
+        // a prioridade real de cada uma, filtra, e s� DEPOIS pagina em PHP -
         // total/total_pages passam a refletir o filtro de prioridade de
-        // verdade, ao custo de não ser 100% exato se houver mais linhas que
+        // verdade, ao custo de n�o ser 100% exato se houver mais linhas que
         // o cap batendo nos outros filtros (caso raro nesta tela).
         $stmt = $pdo->prepare($baseSelect . " ORDER BY {$order} LIMIT " . self::PRIORITY_FILTER_SCAN_CAP);
         self::bind($stmt, $params);
@@ -256,7 +256,7 @@ final class OrderWorklistService
         }
         $exists = getPDO()->prepare('SELECT id FROM pedidos WHERE id = ? LIMIT 1');
         $exists->execute([$id]);
-        if (!$exists->fetchColumn()) throw new RuntimeException('Pedido não encontrado.');
+        if (!$exists->fetchColumn()) throw new RuntimeException('Pedido n�o encontrado.');
         require_once __DIR__ . '/../../Models/Chat.php';
         $msgId = Chat::enviar($id, $userId, $message, $idempotencyKey);
         return ['message_id' => (int)$msgId, 'message' => $message];
@@ -273,8 +273,8 @@ final class OrderWorklistService
             $params = array_merge($params, [$like, $like, $like]);
             if (!ctype_digit($id)) $params = array_merge($params, [$like, $like]);
         }
-        // priority[] NÃO entra aqui: é derivado em PHP (ver alert()/list()),
-        // não existe como coluna no banco — filtrado separadamente em list().
+        // priority[] N�O entra aqui: � derivado em PHP (ver alert()/list()),
+        // n�o existe como coluna no banco - filtrado separadamente em list().
         $statusValues = self::arrayParam($filters['status'] ?? []);
         if ($statusValues) {
             $where[] = 'p.status IN (' . implode(',', array_fill(0, count($statusValues), '?')) . ')';
@@ -325,9 +325,9 @@ final class OrderWorklistService
     {
         $active = in_array((string)$row['status'], ['a_caminho', 'no_local', 'em_reboque'], true);
         $gpsAge = $row['last_gps_at'] ? max(0, time() - strtotime((string)$row['last_gps_at'])) : null;
-        if ($active && ($gpsAge === null || $gpsAge >= 1200)) return ['priority' => 'critical', 'priority_label' => 'Crítica', 'summary' => 'Sem GPS há ' . ($gpsAge === null ? 'tempo indeterminado' : (int)floor($gpsAge / 60) . ' min')];
-        if ($active && (($gpsAge !== null && $gpsAge >= 600) || (float)($row['last_accuracy_m'] ?? 0) > 75)) return ['priority' => 'warning', 'priority_label' => 'Atenção', 'summary' => $gpsAge !== null ? 'Sem GPS há ' . (int)floor($gpsAge / 60) . ' min' : 'GPS degradado'];
-        if ((string)$row['status'] === 'aguardando_guincho' && !$row['guincho_id'] && $elapsed >= 900) return ['priority' => 'warning', 'priority_label' => 'Atenção', 'summary' => 'Sem prestador há ' . (int)floor($elapsed / 60) . ' min'];
+        if ($active && ($gpsAge === null || $gpsAge >= 1200)) return ['priority' => 'critical', 'priority_label' => 'Cr�tica', 'summary' => 'Sem GPS h� ' . ($gpsAge === null ? 'tempo indeterminado' : (int)floor($gpsAge / 60) . ' min')];
+        if ($active && (($gpsAge !== null && $gpsAge >= 600) || (float)($row['last_accuracy_m'] ?? 0) > 75)) return ['priority' => 'warning', 'priority_label' => 'Aten��o', 'summary' => $gpsAge !== null ? 'Sem GPS h� ' . (int)floor($gpsAge / 60) . ' min' : 'GPS degradado'];
+        if ((string)$row['status'] === 'aguardando_guincho' && !$row['guincho_id'] && $elapsed >= 900) return ['priority' => 'warning', 'priority_label' => 'Aten��o', 'summary' => 'Sem prestador h� ' . (int)floor($elapsed / 60) . ' min'];
         return ['priority' => 'normal', 'priority_label' => 'Normal', 'summary' => ''];
     }
 

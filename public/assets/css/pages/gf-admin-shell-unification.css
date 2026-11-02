@@ -1,0 +1,81 @@
+/* Unifica os módulos administrativos legados com o shell de /admin/central. */
+body.admin:has(.shell-ops) {
+    background: #f4f6f8 !important;
+    color: #0f172a;
+}
+
+body.admin:has(.shell-ops) > nav.gf-admin-topbar {
+    display: none !important;
+}
+
+body.admin .shell-ops {
+    display: grid !important;
+    grid-template-columns: 220px minmax(0, 1fr) !important;
+    width: 100% !important;
+    min-height: 100vh !important;
+    margin: 0 !important;
+    background: #f4f6f8 !important;
+    color: #0f172a !important;
+}
+
+body.admin .shell-ops > .shell-ops-sidebar,
+body.admin .shell-ops > .gf-finance-v3-sidebar {
+    position: sticky !important;
+    top: 0 !important;
+    align-self: start !important;
+    width: 220px !important;
+    height: 100vh !important;
+    min-height: 100vh !important;
+    overflow-y: auto !important;
+    scrollbar-width: none;
+    background: #101417 !important;
+    border-right: 1px solid #222b28 !important;
+    box-shadow: none !important;
+}
+
+body.admin .shell-ops > .shell-ops-sidebar::-webkit-scrollbar,
+body.admin .shell-ops > .gf-finance-v3-sidebar::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+}
+
+body.admin .shell-ops > :is(.shell-ops-worklist, .shell-ops-workspace, .shell-ops-main, .gf-orders-main, .gf-finance-v3-main) {
+    min-width: 0 !important;
+    background: #f4f6f8 !important;
+    color: #0f172a !important;
+}
+
+body.admin .shell-ops :is(.ops-topbar, .gf-orders-breadcrumb, .gf-finance-v3-breadcrumb) {
+    background: #fff !important;
+    color: #64748b !important;
+    border-bottom: 1px solid #dfe6ec !important;
+    box-shadow: none !important;
+}
+
+body.admin .shell-ops :is(.ops-worklist-header, .gf-orders-head, .page-head) {
+    background: transparent !important;
+    color: #0f172a !important;
+}
+
+body.admin .shell-ops :is(h1, h2, h3, h4, strong, label, p, span, small) {
+    color: inherit;
+}
+
+body.admin .shell-ops :is(.card, .app-panel, .ops-workspace-panel, .gf-finance-page, .gf-orders-list) {
+    background: #fff !important;
+    color: #172536 !important;
+    border-color: #dfe6ec !important;
+}
+
+@media (max-width: 800px) {
+    body.admin .shell-ops {
+        display: block !important;
+    }
+    body.admin .shell-ops > .shell-ops-sidebar,
+    body.admin .shell-ops > .gf-finance-v3-sidebar {
+        position: relative !important;
+        width: 100% !important;
+        height: auto !important;
+        min-height: 0 !important;
+    }
+}

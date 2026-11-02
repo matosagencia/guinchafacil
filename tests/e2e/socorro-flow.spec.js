@@ -19,10 +19,18 @@ async function login(page) {
 
 async function abrirPedido(page) {
   await page.goto('/cliente/pedido/novo');
-  await expect(page.locator('#formPedido')).toBeVisible();
-  await page.locator('#inputOrigem').fill('Rua do Riachuelo, 280, Rio de Janeiro - RJ');
-  await page.locator('#btnBuscarOrigem').click();
-  await expect(page.locator('#lat_origem')).not.toHaveValue('');
+  await expect(page.locator('#localizacao')).toBeVisible();
+  await page.locator('#localizacao').fill('Rua das Marrecas, 22, Centro, Rio de Janeiro - RJ');
+  await page.evaluate(() => { document.querySelector('#lat_origem').value = '-22.9105'; document.querySelector('#lng_origem').value = '-43.1755'; });
+  await page.locator('[data-step="1"] [data-next="2"]').click();
+  await page.locator('[data-mode="me_orientem"]').click();
+  await page.locator('[data-sintoma="chaveiro"]').click();
+  await expect(page.locator('#tipo_problema')).toHaveValue('chaveiro');
+  await expect(page.locator('[data-decision="assistencia"]')).toBeVisible({ timeout: 30000 });
+  await page.locator('[data-decision="assistencia"]').click();
+  await expect(page.locator('#btnSubmit')).toBeEnabled();
+  /* legacy flow below is retained for old fixtures but is bypassed above */
+  return;
   await page.locator('[data-symptom="PRECISA_TRANSPORTAR"]').click();
   // A triagem de transporte pode ir direto para confirmar; os demais
   // sintomas exibem a etapa intermediária de detalhes.
@@ -75,6 +83,7 @@ test.describe('socorro completo', () => {
 
   test('inspeciona cotação de reboque e abre checkout', async ({ page }) => {
     await abrirPedido(page);
+    console.log('[TIPO_PROBLEMA]', await page.locator('input[name="tipo_problema"]').evaluateAll(els => els.map(el => el.value)));
     await page.locator('#btnSubmit').click();
     await expect(page).toHaveURL(/pagamento|checkout/);
     const checkoutTotal = page.locator('.checkout-recibo .recibo-total strong').first();

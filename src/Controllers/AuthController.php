@@ -5,7 +5,7 @@ require_once __DIR__ . '/../Services/EnderecoFormatter.php';
 require_once __DIR__ . '/../Models/Pricing/PricingZone.php';
 require_once __DIR__ . '/../Services/TriageSessionService.php';
 // File: guinchafacil/src/Controllers/AuthController.php
-// Refatorado com transações seguras e validações aprimoradas
+// Refatorado com transa��es seguras e valida��es aprimoradas
 
 class AuthController extends BaseController
 {
@@ -23,7 +23,7 @@ class AuthController extends BaseController
         parent::__construct();
     }
 
-    // ─── LOGIN ────────────────────────────────────────────────────
+    // ??? LOGIN ????????????????????????????????????????????????????
 
     public function landing(): void
     {
@@ -35,7 +35,7 @@ class AuthController extends BaseController
         require __DIR__ . '/../Views/public/landing.php';
     }
 
-    /** Cidades públicas que já possuem pelo menos uma zona pedra_viva. */
+    /** Cidades p�blicas que j� possuem pelo menos uma zona pedra_viva. */
     private function cidadesComCoberturaSeo(): array
     {
         $resultado = [];
@@ -117,28 +117,28 @@ class AuthController extends BaseController
         }
     }
 
-    /** Página SEO local gerada a partir de cidade + zonas ativas. */
+    /** P�gina SEO local gerada a partir de cidade + zonas ativas. */
     public function cidadePublica(string $slug): void
     {
         $slug = strtolower(trim($slug));
 
         if (!preg_match('/^[a-z0-9]+(?:-[a-z0-9]+)*$/', $slug)) {
             http_response_code(404);
-            echo 'Página não encontrada.';
+            echo 'P�gina n�o encontrada.';
             return;
         }
 
         $cidade = Cidade::buscarPorSlug($slug);
         if (!$cidade || (int)($cidade['ativo'] ?? 0) !== 1) {
             http_response_code(404);
-            echo 'Página não encontrada.';
+            echo 'P�gina n�o encontrada.';
             return;
         }
 
         $zonas = PricingZone::listarPorOrdemExpansao((int)$cidade['id'], true);
         if (!$zonas) {
             http_response_code(404);
-            echo 'Atendimento ainda não disponível nesta cidade.';
+            echo 'Atendimento ainda n�o dispon�vel nesta cidade.';
             return;
         }
 
@@ -164,7 +164,7 @@ class AuthController extends BaseController
         require __DIR__ . '/../Views/public/cidade.php';
     }
 
-    /** Sitemap público derivado das cidades que têm cobertura ativa. */
+    /** Sitemap p�blico derivado das cidades que t�m cobertura ativa. */
     public function sitemap(): void
     {
         header('Content-Type: application/xml; charset=UTF-8');
@@ -270,14 +270,14 @@ class AuthController extends BaseController
             return;
         }
 
-        // [B-011-B2] §23 §1 — resolução dinâmica via service_types.public_slug.
-        // Nada hardcoded: a tabela é a única fonte de verdade. Fail-closed se o
-        // slug não existir ou o serviço estiver inativo.
+        // [B-011-B2] �23 �1 - resolu��o din�mica via service_types.public_slug.
+        // Nada hardcoded: a tabela � a �nica fonte de verdade. Fail-closed se o
+        // slug n�o existir ou o servi�o estiver inativo.
         require_once __DIR__ . '/../Models/Catalog/ServiceType.php';
         $serviceType = ServiceType::buscarPorSlugPublico($tipo);
         if (!$serviceType) {
             error_log('[B-011-B2][PRICE-SERVICE-INVALID] tipo_problema=' . $tipo);
-            $this->setFlashMessage('Tipo de atendimento não reconhecido. Escolha novamente.', 'error');
+            $this->setFlashMessage('Tipo de atendimento n�o reconhecido. Escolha novamente.', 'error');
             $this->redirect('/pre-cotacao');
             return;
         }
@@ -300,7 +300,7 @@ class AuthController extends BaseController
             return;
         }
 
-        // O serviço da A será a única autoridade de rota/zona/preço.
+        // O servi�o da A ser� a �nica autoridade de rota/zona/pre�o.
         if (!in_array($categoria, $categorias, true)) $categoria = 'popular';
 
         require_once __DIR__ . '/../Services/CoberturaService.php';
@@ -312,7 +312,7 @@ class AuthController extends BaseController
             'service_type_id' => $serviceTypeId,
             'tipo_problema' => $tipo,
             'categoria' => $categoria,
-        ]) : ['status' => 'sem_servico', 'pode_cobrar' => false, 'mensagem' => 'Não conseguimos identificar o tipo de atendimento para validar a cobertura.'];
+        ]) : ['status' => 'sem_servico', 'pode_cobrar' => false, 'mensagem' => 'N�o conseguimos identificar o tipo de atendimento para validar a cobertura.'];
         $_SESSION['pre_cotacao_sem_cobertura'] = null;
         if (($diagnosticoCobertura['pode_cobrar'] ?? true) !== true) {
             PreQuoteDemandService::registrar([
@@ -334,8 +334,8 @@ class AuthController extends BaseController
             ];
         }
 
-        // [B-011-B1] O valor_cotado do navegador NUNCA determina o preço oficial (§23).
-        // Aceito apenas para diagnóstico; se presente, gera log.
+        // [B-011-B1] O valor_cotado do navegador NUNCA determina o pre�o oficial (�23).
+        // Aceito apenas para diagn�stico; se presente, gera log.
         $valorCotadoFrontDiag = filter_var($_POST['valor_cotado'] ?? null, FILTER_VALIDATE_FLOAT);
         if ($valorCotadoFrontDiag !== false && $valorCotadoFrontDiag > 0) {
             error_log(sprintf(
@@ -344,7 +344,7 @@ class AuthController extends BaseController
             ));
         }
 
-        // [B-011] A Faixa B não calcula nem reinterpreta o preço.
+        // [B-011] A Faixa B n�o calcula nem reinterpreta o pre�o.
         require_once __DIR__ . '/../Services/Pricing/CotacaoUnificadaService.php';
         $resultado = CotacaoUnificadaService::calcular([
             'lat_origem' => (float)$lat,
@@ -356,7 +356,7 @@ class AuthController extends BaseController
         ]);
         if (!($resultado['ok'] ?? false)) {
             error_log('[B011][PRICE-FAIL] ' . (string)($resultado['erro'] ?? 'PRICE-INTERNAL'));
-            $this->setFlashMessage('Cotação indisponível: ' . (string)($resultado['erro'] ?? 'PRICE-INTERNAL'), 'error');
+            $this->setFlashMessage('Cota��o indispon�vel: ' . (string)($resultado['erro'] ?? 'PRICE-INTERNAL'), 'error');
             $this->redirect('/pre-cotacao');
             return;
         }
@@ -433,11 +433,11 @@ class AuthController extends BaseController
             ? $formaPagamento
             : 'online';
 
-        // Converte a pré-cotação aceita em uma sessão de triagem antes do
-        // cadastro. Assim o contexto atravessa cadastro, veículo e checkout.
+        // Converte a pr�-cota��o aceita em uma sess�o de triagem antes do
+        // cadastro. Assim o contexto atravessa cadastro, ve�culo e checkout.
         try {
-            // Compatibilidade com sessões criadas antes da triagem exigir o
-            // nome explícito do custo estimado.
+            // Compatibilidade com sess�es criadas antes da triagem exigir o
+            // nome expl�cito do custo estimado.
             if (!isset($_SESSION['pre_cotacao']['custo_estimado'])) {
                 $_SESSION['pre_cotacao']['custo_estimado'] = (float)($_SESSION['pre_cotacao']['valor'] ?? 0);
             }
@@ -449,12 +449,12 @@ class AuthController extends BaseController
         } catch (Throwable $e) {
             error_log('[AuthController][aceitarPreCotacao] falha ao criar triagem: ' . $e->getMessage());
             $_SESSION['pre_cotacao']['status'] = 'pendente';
-            $this->setFlashMessage('NÃ£o foi possÃ­vel continuar agora. Revise a cotaÃ§Ã£o e tente novamente.', 'error');
+            $this->setFlashMessage('Não foi possível continuar agora. Revise a cotação e tente novamente.', 'error');
             $this->redirect('/pre-cotacao?resultado=1');
             return;
         }
 
-        // §23 B-UNIFIC-23: pré-cotação aceita → registro em 2 etapas.
+        // �23 B-UNIFIC-23: pr�-cota��o aceita ? registro em 2 etapas.
         $this->redirect('/registro/funil');
     }
 
@@ -490,7 +490,7 @@ class AuthController extends BaseController
             exit;
         } catch (Throwable $e) {
             error_log('[GoogleAuth] redirect: ' . $e->getMessage());
-            $this->setFlashMessage('O cadastro com Google ainda não está disponível.', 'error');
+            $this->setFlashMessage('O cadastro com Google ainda n�o est� dispon�vel.', 'error');
             $this->redirect('/login');
         }
     }
@@ -500,7 +500,7 @@ class AuthController extends BaseController
         require_once __DIR__ . '/../Services/GoogleOAuthService.php';
         $returnPath = GoogleOAuthService::consumeState((string)($_GET['state'] ?? ''));
         if ($returnPath === null || isset($_GET['error'])) {
-            $this->setFlashMessage('Não foi possível validar o acesso pelo Google. Tente novamente.', 'error');
+            $this->setFlashMessage('N�o foi poss�vel validar o acesso pelo Google. Tente novamente.', 'error');
             $this->redirect('/login');
             return;
         }
@@ -511,7 +511,7 @@ class AuthController extends BaseController
             $stmt = $pdo->prepare('SELECT * FROM usuarios WHERE google_subject = ? OR email = ? LIMIT 1 FOR UPDATE');
             $stmt->execute([$identity['subject'], $identity['email']]);
             $user = $stmt->fetch(PDO::FETCH_ASSOC);
-            if ($user && (int)$user['ativo'] !== 1) throw new DomainException('Esta conta está desativada.');
+            if ($user && (int)$user['ativo'] !== 1) throw new DomainException('Esta conta est� desativada.');
             if ($user) {
                 $pdo->prepare('UPDATE usuarios SET google_subject = ?, ultimo_login = NOW() WHERE id = ?')
                     ->execute([$identity['subject'], (int)$user['id']]);
@@ -531,7 +531,7 @@ class AuthController extends BaseController
         } catch (Throwable $e) {
             if (isset($pdo) && $pdo instanceof PDO && $pdo->inTransaction()) $pdo->rollBack();
             error_log('[GoogleAuth] callback: ' . $e->getMessage());
-            $this->setFlashMessage('Não foi possível concluir o cadastro pelo Google.', 'error');
+            $this->setFlashMessage('N�o foi poss�vel concluir o cadastro pelo Google.', 'error');
             $this->redirect('/login');
         }
     }
@@ -562,7 +562,7 @@ class AuthController extends BaseController
     public function googleProfileSave(): void
     {
         if (!$this->isAuthenticated() || !$this->validateCSRFToken($_POST['csrf_token'] ?? '')) {
-            $this->setFlashMessage('Sua sessão expirou. Entre novamente.', 'error');
+            $this->setFlashMessage('Sua sess�o expirou. Entre novamente.', 'error');
             $this->redirect('/login');
             return;
         }
@@ -570,14 +570,14 @@ class AuthController extends BaseController
         $role = strtoupper(trim((string)($_POST['perfil'] ?? '')));
         $allowed = ['CLIENTE', 'GUINCHO', 'OFICINA', 'PRESTADOR_MOVEL'];
         if (!$user || !in_array($role, $allowed, true)) {
-            $this->setFlashMessage('Escolha uma opção válida para continuar.', 'error');
+            $this->setFlashMessage('Escolha uma op��o v�lida para continuar.', 'error');
             $this->redirect('/perfil/completar');
             return;
         }
         $telefone = preg_replace('/\D+/', '', (string)($_POST['telefone'] ?? ''));
         $cpf = preg_replace('/\D+/', '', (string)($_POST['cpf'] ?? ''));
         if (strlen($telefone) < 10 || strlen($cpf) !== 11) {
-            $this->setFlashMessage('Informe um telefone e CPF válidos para concluir o perfil.', 'error');
+            $this->setFlashMessage('Informe um telefone e CPF v�lidos para concluir o perfil.', 'error');
             $this->redirect('/perfil/completar');
             return;
         }
@@ -586,23 +586,23 @@ class AuthController extends BaseController
             $pdo->beginTransaction();
             $dup = $pdo->prepare('SELECT id FROM usuarios WHERE cpf = ? AND id <> ? LIMIT 1 FOR UPDATE');
             $dup->execute([$cpf, (int)$user['id']]);
-            if ($dup->fetch()) throw new DomainException('Este CPF já está cadastrado em outra conta.');
+            if ($dup->fetch()) throw new DomainException('Este CPF j� est� cadastrado em outra conta.');
 
             $status = $role === 'CLIENTE' ? 'COMPLETO' : 'PENDENTE_APROVACAO';
             $pdo->prepare('UPDATE usuarios SET telefone = ?, cpf = ?, perfil_status = ?, perfil_tipo_solicitado = ?, atualizado_em = NOW() WHERE id = ?')
                 ->execute([$telefone, $cpf, $status, $role, (int)$user['id']]);
             $pdo->commit();
             if ($role === 'CLIENTE') {
-                $this->setFlashMessage('Perfil concluído. Bem-vindo ao GuinchaFácil!', 'success');
+                $this->setFlashMessage('Perfil conclu�do. Bem-vindo ao GuinchaF�cil!', 'success');
                 $this->redirect('/cliente/dashboard');
                 return;
             }
-            $this->setFlashMessage('Solicitação recebida. Nossa equipe vai revisar seu cadastro antes de liberar o painel profissional.', 'success');
+            $this->setFlashMessage('Solicita��o recebida. Nossa equipe vai revisar seu cadastro antes de liberar o painel profissional.', 'success');
             $this->redirect('/perfil/completar');
         } catch (Throwable $e) {
             if (isset($pdo) && $pdo instanceof PDO && $pdo->inTransaction()) $pdo->rollBack();
             error_log('[GoogleProfile] ' . $e->getMessage());
-            $this->setFlashMessage($e instanceof DomainException ? $e->getMessage() : 'Não foi possível salvar seu perfil agora.', 'error');
+            $this->setFlashMessage($e instanceof DomainException ? $e->getMessage() : 'N�o foi poss�vel salvar seu perfil agora.', 'error');
             $this->redirect('/perfil/completar');
         }
     }
@@ -654,7 +654,7 @@ class AuthController extends BaseController
     public function login(): void
     {
         if (!$this->validateCSRFToken($_POST['csrf_token'] ?? '')) {
-            $this->setFlashMessage('Token inválido. Tente novamente.', 'error');
+            $this->setFlashMessage('Token inv�lido. Tente novamente.', 'error');
             $this->redirect('/login');
             return;
         }
@@ -663,7 +663,7 @@ class AuthController extends BaseController
         $senha = $_POST['senha'] ?? $_POST['password'] ?? '';
 
         if (!$email || empty($senha)) {
-            $this->setFlashMessage('Email e senha são obrigatórios.', 'error');
+            $this->setFlashMessage('Email e senha s�o obrigat�rios.', 'error');
             $this->redirect('/login');
             return;
         }
@@ -712,7 +712,7 @@ class AuthController extends BaseController
         }
     }
 
-    // ─── LOGOUT ───────────────────────────────────────────────────
+    // ??? LOGOUT ???????????????????????????????????????????????????
 
     public function logout(): void
     {
@@ -728,7 +728,7 @@ class AuthController extends BaseController
         exit;
     }
 
-    // ─── REGISTRO CLIENTE ─────────────────────────────────────────
+    // ??? REGISTRO CLIENTE ?????????????????????????????????????????
 
     public function registroClienteForm(): void
     {
@@ -746,7 +746,7 @@ class AuthController extends BaseController
     public function registroCliente(): void
     {
         if (!$this->validateCSRFToken($_POST['csrf_token'] ?? '')) {
-            $this->setFlashMessage('Token inválido.', 'error');
+            $this->setFlashMessage('Token inv�lido.', 'error');
             $this->redirect('/registro/cliente');
             return;
         }
@@ -768,7 +768,7 @@ class AuthController extends BaseController
             $dup = $pdo->prepare("SELECT id FROM usuarios WHERE email = ? OR cpf = ? FOR UPDATE");
             $dup->execute([$dados['email'], $dados['cpf']]);
             if ($dup->fetch()) {
-                throw new Exception('Email ou CPF já cadastrado.');
+                throw new Exception('Email ou CPF j� cadastrado.');
             }
 
             $userId = $this->criarUsuario($pdo, $dados, 'cliente');
@@ -799,7 +799,7 @@ class AuthController extends BaseController
         }
     }
 
-    // ─── REGISTRO ESPECIALISTA ─────────────────────────────────────────
+    // ??? REGISTRO ESPECIALISTA ?????????????????????????????????????????
 
     public function registroEspecialistaForm(): void
     {
@@ -821,7 +821,7 @@ class AuthController extends BaseController
         $modoLabels = [
             'TOWING' => 'Reboque',
             'ON_SITE' => 'No local',
-            'HYBRID' => 'Híbrido',
+            'HYBRID' => 'H�brido',
         ];
 
         $servicos = [];
@@ -850,7 +850,7 @@ class AuthController extends BaseController
     public function registroEspecialista(): void
     {
         if (!$this->validateCSRFToken($_POST['csrf_token'] ?? '')) {
-            $this->setFlashMessage('Token inválido.', 'error');
+            $this->setFlashMessage('Token inv�lido.', 'error');
             $this->redirect('/registro/especialista');
             return;
         }
@@ -901,17 +901,17 @@ class AuthController extends BaseController
             foreach (['documento_arquivo' => 'documento_identidade', 'selfie_arquivo' => 'selfie'] as $campo => $tipoDocumento) {
                 $arquivo = $_FILES[$campo] ?? null;
                 if (!$arquivo || ($arquivo['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) {
-                    throw new DomainException('Envie os dois documentos obrigatórios para homologação.');
+                    throw new DomainException('Envie os dois documentos obrigat�rios para homologa��o.');
                 }
                 if (($arquivo['size'] ?? 0) <= 0 || ($arquivo['size'] ?? 0) > (defined('MAX_UPLOAD_SIZE') ? MAX_UPLOAD_SIZE : 5242880)) {
-                    throw new DomainException('Cada documento deve ter no máximo 5 MB.');
+                    throw new DomainException('Cada documento deve ter no m�ximo 5 MB.');
                 }
                 $mime = (new finfo(FILEINFO_MIME_TYPE))->file((string)$arquivo['tmp_name']);
                 $ext = ['image/jpeg'=>'jpg','image/png'=>'png','image/webp'=>'webp'][$mime] ?? null;
                 if (!$ext) throw new DomainException('Documentos devem ser imagens JPEG, PNG ou WEBP.');
                 $base = defined('UPLOAD_PATH_DOCS') ? UPLOAD_PATH_DOCS : (dirname(__DIR__, 2) . '/storage/private/uploads');
                 $dir = rtrim($base, '/\\') . DIRECTORY_SEPARATOR . 'especialistas';
-                if (!is_dir($dir) && !@mkdir($dir, 0770, true)) throw new RuntimeException('Não foi possível preparar o armazenamento.');
+                if (!is_dir($dir) && !@mkdir($dir, 0770, true)) throw new RuntimeException('N�o foi poss�vel preparar o armazenamento.');
                 $nome = $tipoDocumento . '_' . $especialistaId . '_' . bin2hex(random_bytes(8)) . '.' . $ext;
                 $destino = $dir . DIRECTORY_SEPARATOR . $nome;
                 $ok = is_uploaded_file((string)$arquivo['tmp_name']) ? move_uploaded_file((string)$arquivo['tmp_name'], $destino) : rename((string)$arquivo['tmp_name'], $destino);
@@ -949,7 +949,7 @@ class AuthController extends BaseController
     public function registroGuincho(): void
     {
         if (!$this->validateCSRFToken($_POST['csrf_token'] ?? '')) {
-            $this->setFlashMessage('Token inválido.', 'error');
+            $this->setFlashMessage('Token inv�lido.', 'error');
             $this->redirect('/registro/guincho');
             return;
         }
@@ -971,14 +971,14 @@ class AuthController extends BaseController
             $dup = $pdo->prepare("SELECT id FROM usuarios WHERE email = ? OR cpf = ? FOR UPDATE");
             $dup->execute([$dados['email'], $dados['cpf']]);
             if ($dup->fetch()) {
-                throw new Exception('Email ou CPF já cadastrado.');
+                throw new Exception('Email ou CPF j� cadastrado.');
             }
 
             if (!empty($dados['oferece_reboque']) && $dados['placa_guincho'] !== '') {
                 $dupPlaca = $pdo->prepare("SELECT id FROM guinchos WHERE placa_guincho = ? FOR UPDATE");
                 $dupPlaca->execute([$dados['placa_guincho']]);
                 if ($dupPlaca->fetch()) {
-                    throw new Exception('Placa já cadastrada no sistema.');
+                    throw new Exception('Placa j� cadastrada no sistema.');
                 }
             }
 
@@ -1029,21 +1029,21 @@ class AuthController extends BaseController
                     "UPDATE guinchos SET oferece_reboque = ?, reboque_aprovado = 0 WHERE id = ?"
                 )->execute([(int)($dados['oferece_reboque'] ?? 1), (int)$guinchoId]);
             } catch (\Throwable $e) {
-                error_log('[registroGuincho] oferece_reboque não gravado (rode migrate?): ' . $e->getMessage());
+                error_log('[registroGuincho] oferece_reboque n�o gravado (rode migrate?): ' . $e->getMessage());
             }
 
             $this->declararCapacidadesDoRegistro($pdo, (int)$guinchoId, (array)($dados['servicos'] ?? []));
 
             $pdo->commit();
 
-            $mensagemSucesso = 'Cadastro enviado! Aguarde a aprovação do administrador.';
+            $mensagemSucesso = 'Cadastro enviado! Aguarde a aprova��o do administrador.';
             $latOperacaoCadastro = $dados['lat_operacao'] ?? null;
             $lngOperacaoCadastro = $dados['lng_operacao'] ?? null;
-            if ($latOperacaoCadastro !== null && $lngOperacaoCadastro !== null) {
+            if (false && $latOperacaoCadastro !== null && $lngOperacaoCadastro !== null) {
                 require_once __DIR__ . '/../Services/Pricing/ZonePricingService.php';
                 $zonaDoCadastro = ZonePricingService::resolverZonaPorCoordenada((float)$latOperacaoCadastro, (float)$lngOperacaoCadastro);
                 if ($zonaDoCadastro !== null && ($zonaDoCadastro['status_expansao'] ?? '') === 'pedra_morta') {
-                    $mensagemSucesso = 'Cadastro enviado! Sua documentação será analisada normalmente, mas atenção: a região "' . $zonaDoCadastro['name'] . '" ainda está em fase de validação e ainda não recebe chamados de clientes — isso não é um erro do seu cadastro, é assim até essa região ser ativada pela nossa equipe.';
+                    $mensagemSucesso = 'Cadastro enviado! Sua documenta��o ser� analisada normalmente, mas aten��o: a regi�o "' . $zonaDoCadastro['name'] . '" ainda est� em fase de valida��o e ainda n�o recebe chamados de clientes - isso n�o � um erro do seu cadastro, � assim at� essa regi�o ser ativada pela nossa equipe.';
                 }
             }
 
@@ -1089,7 +1089,7 @@ class AuthController extends BaseController
                 )->execute([$guinchoId, (int)$stId]);
             }
         } catch (\Throwable $e) {
-            error_log('[registroGuincho] capacidades do cadastro não declaradas: ' . $e->getMessage());
+            error_log('[registroGuincho] capacidades do cadastro n�o declaradas: ' . $e->getMessage());
         }
     }
 
@@ -1296,7 +1296,7 @@ class AuthController extends BaseController
         }
     }
 
-    // ─── ESQUECEU SENHA ──────────────────────────────────────────
+    // ??? ESQUECEU SENHA ??????????????????????????????????????????
 
     public function esqueceuSenhaForm(): void
     {
@@ -1337,15 +1337,15 @@ class AuthController extends BaseController
 
                     $link = (defined('APP_URL') ? APP_URL : '') . '/senha/redefinir/' . $token;
 
-                    $corpo = "<p>Olá, <b>" . htmlspecialchars($user['nome']) . "</b>!</p>
-                             <p>Recebemos uma solicitação para redefinir sua senha.</p>
+                    $corpo = "<p>Ol�, <b>" . htmlspecialchars($user['nome']) . "</b>!</p>
+                             <p>Recebemos uma solicita��o para redefinir sua senha.</p>
                              <p><a href='$link'>Clique aqui para redefinir sua senha</a></p>
-                             <p>Este link é válido por 1 hora.</p>
-                             <p>Se não foi você quem solicitou, ignore este email.</p>";
+                             <p>Este link � v�lido por 1 hora.</p>
+                             <p>Se n�o foi voc� quem solicitou, ignore este email.</p>";
 
                     $emailEnviado = $this->enviarEmail(
                         $email,
-                        'Redefinição de senha — GuinchaFácil',
+                        'Redefini��o de senha - GuinchaF�cil',
                         $corpo
                     );
                 }
@@ -1355,9 +1355,9 @@ class AuthController extends BaseController
         }
 
         if ($email && isset($user) && !$emailEnviado) {
-            $this->setFlashMessage('Não foi possível enviar o email agora. Verifique a configuração SMTP ou tente novamente mais tarde.', 'error');
+            $this->setFlashMessage('N�o foi poss�vel enviar o email agora. Verifique a configura��o SMTP ou tente novamente mais tarde.', 'error');
         } else {
-            $this->setFlashMessage('Se esse email existir, enviaremos um link de redefinição.', 'success');
+            $this->setFlashMessage('Se esse email existir, enviaremos um link de redefini��o.', 'success');
         }
         $this->redirect('/login');
     }
@@ -1374,7 +1374,7 @@ class AuthController extends BaseController
             $stmt->execute([$token]);
 
             if (!$stmt->fetch()) {
-                $this->setFlashMessage('Link inválido ou expirado.', 'error');
+                $this->setFlashMessage('Link inv�lido ou expirado.', 'error');
                 $this->redirect('/senha/esqueceu');
                 return;
             }
@@ -1401,7 +1401,7 @@ class AuthController extends BaseController
         $confirma = $_POST['confirmacao'] ?? '';
 
         if (!preg_match('/\A[a-f0-9]{64}\z/', $token) || strlen($senha) < 8 || $senha !== $confirma) {
-            $this->setFlashMessage('Senha inválida ou as senhas não conferem (mínimo 8 caracteres).', 'error');
+            $this->setFlashMessage('Senha inv�lida ou as senhas n�o conferem (m�nimo 8 caracteres).', 'error');
             $this->redirect('/senha/redefinir/' . $token);
             return;
         }
@@ -1418,7 +1418,7 @@ class AuthController extends BaseController
             $reset = $stmt->fetch(PDO::FETCH_ASSOC);
 
             if (!$reset) {
-                $this->setFlashMessage('Link inválido ou expirado.', 'error');
+                $this->setFlashMessage('Link inv�lido ou expirado.', 'error');
                 $this->redirect('/senha/esqueceu');
                 return;
             }
@@ -1443,7 +1443,7 @@ class AuthController extends BaseController
         }
     }
 
-    // ─── MÉTODOS PRIVADOS DE NEGÓCIO ─────────────────────────────
+    // ??? M�TODOS PRIVADOS DE NEG�CIO ?????????????????????????????
 
     private function criarUsuario(PDO $pdo, array $dados, string $tipo): int
     {
@@ -1553,14 +1553,14 @@ class AuthController extends BaseController
         $headers = [
             'MIME-Version: 1.0',
             'Content-type: text/html; charset=utf-8',
-            'From: GuinchaFácil <noreply@guinchafacil.com.br>',
+            'From: GuinchaF�cil <noreply@guinchafacil.com.br>',
             'Reply-To: suporte@guinchafacil.com.br',
             'X-Mailer: PHP/' . phpversion()
         ];
         return NotificacaoService::enviarEmail($para, $assunto, $corpo);
     }
 
-    // ─── MÉTODOS DE SANITIZAÇÃO ──────────────────────────────────
+    // ??? M�TODOS DE SANITIZA��O ??????????????????????????????????
 
     private function sanitizarDadosCliente(array $post): array
     {
@@ -1631,7 +1631,7 @@ class AuthController extends BaseController
         return in_array($tipo, $tiposPermitidos, true) ? $tipo : 'cpf';
     }
 
-    // ─── MÉTODOS DE VALIDAÇÃO ────────────────────────────────────
+    // ??? M�TODOS DE VALIDA��O ????????????????????????????????????
 
     private function validarDadosCliente(array $dados): array
     {
@@ -1641,26 +1641,26 @@ class AuthController extends BaseController
             $erros[] = 'Nome deve ter pelo menos 3 caracteres.';
         }
         if (!filter_var($dados['email'], FILTER_VALIDATE_EMAIL)) {
-            $erros[] = 'Email inválido.';
+            $erros[] = 'Email inv�lido.';
         }
         if (!$this->validarTelefoneBr($dados['telefone'])) {
-            $erros[] = 'Telefone inválido (DDD + número).';
+            $erros[] = 'Telefone inv�lido (DDD + n�mero).';
         }
         if (!$this->validarDocumentoBr($dados['cpf'])) {
-            $erros[] = 'CPF ou CNPJ inválido.';
+            $erros[] = 'CPF ou CNPJ inv�lido.';
         }
         if (strlen($dados['senha']) < 8) {
             $erros[] = 'Senha deve ter pelo menos 8 caracteres.';
         }
         if ($dados['senha'] !== $dados['confirmar_senha']) {
-            $erros[] = 'As senhas não conferem.';
+            $erros[] = 'As senhas n�o conferem.';
         }
         if (strlen($dados['cep']) !== 8) {
-            $erros[] = 'CEP inválido (deve conter 8 dígitos).';
+            $erros[] = 'CEP inv�lido (deve conter 8 d�gitos).';
         }
         if (empty($dados['logradouro']) || empty($dados['numero']) ||
             empty($dados['bairro']) || empty($dados['cidade']) || empty($dados['estado'])) {
-            $erros[] = 'Preencha todos os campos de endereço.';
+            $erros[] = 'Preencha todos os campos de endere�o.';
         }
         if (strlen($dados['estado']) !== 2) {
             $erros[] = 'UF deve ter 2 caracteres.';
@@ -1676,7 +1676,7 @@ class AuthController extends BaseController
         require_once __DIR__ . '/../Models/Cidade.php';
         $cidadeId = (int)($dados['cidade_id'] ?? 0);
         if ($cidadeId <= 0 || !Cidade::buscarPorId($cidadeId) || empty(Cidade::buscarPorId($cidadeId)['ativo'])) {
-            $erros[] = 'Selecione uma cidade-alvo de atuação válida.';
+            $erros[] = 'Selecione uma cidade-alvo de atua��o v�lida.';
         }
 
         $latOperacao = $dados['lat_operacao'] ?? null;
@@ -1684,16 +1684,17 @@ class AuthController extends BaseController
         if ($latOperacao !== null && $lngOperacao !== null) {
             require_once __DIR__ . '/../Models/Pricing/PricingZone.php';
             require_once __DIR__ . '/../Services/Pricing/ZonePricingService.php';
-            $existeCelulaComPoligono = (bool)array_filter(
+            // O status territorial é estratégico; não é gate de cadastro.
+            $existeCelulaComPoligono = false && (bool)array_filter(
                 PricingZone::listarAtivas(),
                 static fn(array $z): bool => !empty($z['polygon_geojson'])
             );
             if ($existeCelulaComPoligono) {
                 $zonaResolvida = ZonePricingService::resolverZonaPorCoordenada((float)$latOperacao, (float)$lngOperacao);
                 if ($zonaResolvida === null) {
-                    $erros[] = 'Sua localização de base fica fora de todas as regiões mapeadas pelo GuinchaFácil até o momento — ainda não é possível cadastrar prestadores fora dessas áreas.';
+                    $erros[] = 'Sua localiza��o de base fica fora de todas as regi�es mapeadas pelo GuinchaF�cil at� o momento - ainda n�o � poss�vel cadastrar prestadores fora dessas �reas.';
                 } elseif (($zonaResolvida['status_expansao'] ?? 'nao_ativada') === 'nao_ativada') {
-                    $erros[] = 'A região "' . $zonaResolvida['name'] . '" ainda não está ativada para cadastro de novos parceiros no momento.';
+                    $erros[] = 'A regi�o "' . $zonaResolvida['name'] . '" ainda n�o est� ativada para cadastro de novos parceiros no momento.';
                 }
             }
         }
@@ -1703,53 +1704,53 @@ class AuthController extends BaseController
         }
 
         if (false && empty($dados['cnh_numero'])) {
-            $erros[] = 'Número da CNH é obrigatório.';
+            $erros[] = 'N�mero da CNH � obrigat�rio.';
         } elseif (false && strlen($dados['cnh_numero']) < 9) {
-            $erros[] = 'Número da CNH inválido.';
+            $erros[] = 'N�mero da CNH inv�lido.';
         }
 
         if (false && empty($dados['cnh_validade'])) {
-            $erros[] = 'Data de validade da CNH é obrigatória.';
+            $erros[] = 'Data de validade da CNH � obrigat�ria.';
         } else {
             $validade = DateTime::createFromFormat('Y-m-d', $dados['cnh_validade']);
             $hoje = new DateTime();
             $hoje->setTime(0, 0, 0);
 
             if (!$validade) {
-                $erros[] = 'Formato de data da CNH inválido. Use AAAA-MM-DD.';
+                $erros[] = 'Formato de data da CNH inv�lido. Use AAAA-MM-DD.';
             } elseif ($validade <= $hoje) {
                 $erros[] = 'CNH deve ter validade futura.';
             }
         }
 
         if ($dados['placa_guincho'] !== '' && strlen($dados['placa_guincho']) < 7) {
-            $erros[] = 'Placa do guincho inválida (mínimo 7 caracteres).';
+            $erros[] = 'Placa do guincho inv�lida (m�nimo 7 caracteres).';
         } elseif ($dados['placa_guincho'] !== '' && !preg_match('/^[A-Z0-9]{7}$/', $dados['placa_guincho'])) {
-            $erros[] = 'Placa deve conter 7 caracteres alfanuméricos.';
+            $erros[] = 'Placa deve conter 7 caracteres alfanum�ricos.';
         }
         if ($dados['cidade_placa'] !== '' && mb_strlen($dados['cidade_placa']) < 2) {
-            $erros[] = 'Cidade do emplacamento inválida.';
+            $erros[] = 'Cidade do emplacamento inv�lida.';
         }
         if ($dados['uf_placa'] !== '' && !preg_match('/^[A-Z]{2}$/', $dados['uf_placa'])) {
-            $erros[] = 'UF da placa inválida.';
+            $erros[] = 'UF da placa inv�lida.';
         }
 
         if ($dados['capacidade_ton'] < 0) {
             $erros[] = 'Capacidade em toneladas deve ser maior que zero.';
         } elseif ($dados['capacidade_ton'] > 100) {
-            $erros[] = 'Capacidade máxima é 100 toneladas.';
+            $erros[] = 'Capacidade m�xima � 100 toneladas.';
         }
 
         if (false && $dados['chave_pix'] !== '') {
-            $erros[] = 'Chave PIX é obrigatória.';
+            $erros[] = 'Chave PIX � obrigat�ria.';
         } elseif ($dados['chave_pix'] !== '' && !$this->validarChavePix($dados['chave_pix'], $dados['chave_pix_tipo'])) {
-            $erros[] = 'Chave PIX inválida para o tipo selecionado.';
+            $erros[] = 'Chave PIX inv�lida para o tipo selecionado.';
         }
 
         $camposObrigatorios = ['doc_cnh_frente', 'doc_cnh_verso'];
         foreach ($camposObrigatorios as $campo) {
             if (false && (!isset($files[$campo]) || $files[$campo]['error'] === UPLOAD_ERR_NO_FILE)) {
-                $erros[] = 'Documento da CNH (frente e verso) é obrigatório.';
+                $erros[] = 'Documento da CNH (frente e verso) � obrigat�rio.';
                 break;
             }
         }
@@ -1812,7 +1813,7 @@ class AuthController extends BaseController
         return true;
     }
 
-    /** Aceita CPF ou CNPJ, sempre após normalização para dígitos. */
+    /** Aceita CPF ou CNPJ, sempre ap�s normaliza��o para d�gitos. */
     private function validarDocumentoBr(string $documento): bool
     {
         $digitos = preg_replace('/\D/', '', $documento);
@@ -1842,7 +1843,7 @@ class AuthController extends BaseController
         return true;
     }
 
-    // ─── MÉTODOS DE UPLOAD ───────────────────────────────────────
+    // ??? M�TODOS DE UPLOAD ???????????????????????????????????????
 
     private function processarUploads(array $files): array
     {
@@ -1866,13 +1867,13 @@ class AuthController extends BaseController
     private function processarUpload(string $campo): string
     {
         if (!isset($_FILES[$campo]) || $_FILES[$campo]['error'] !== UPLOAD_ERR_OK) {
-            throw new Exception("Arquivo não enviado corretamente");
+            throw new Exception("Arquivo n�o enviado corretamente");
         }
 
         $file = $_FILES[$campo];
 
         if ($file['size'] > self::UPLOAD_MAX_SIZE) {
-            throw new Exception("Arquivo muito grande (máximo 5MB)");
+            throw new Exception("Arquivo muito grande (m�ximo 5MB)");
         }
 
         $finfo = finfo_open(FILEINFO_MIME_TYPE);
@@ -1882,10 +1883,10 @@ class AuthController extends BaseController
         $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
 
         if (!isset(self::ALLOWED_MIME_TYPES[$ext])) {
-            throw new Exception("Extensão de arquivo não permitida");
+            throw new Exception("Extens�o de arquivo n�o permitida");
         }
         if (self::ALLOWED_MIME_TYPES[$ext] !== $mimeType) {
-            throw new Exception("Tipo de arquivo inválido");
+            throw new Exception("Tipo de arquivo inv�lido");
         }
 
         $destDir = $this->getUploadDir();
@@ -1914,12 +1915,12 @@ class AuthController extends BaseController
 
         if (!is_dir($destDir)) {
             if (!mkdir($destDir, 0755, true)) {
-                throw new Exception("Não foi possível criar diretório de uploads");
+                throw new Exception("N�o foi poss�vel criar diret�rio de uploads");
             }
         }
 
         if (!is_writable($destDir)) {
-            throw new Exception("Diretório de uploads sem permissão de escrita");
+            throw new Exception("Diret�rio de uploads sem permiss�o de escrita");
         }
 
         return $destDir;
@@ -1939,7 +1940,7 @@ class AuthController extends BaseController
         }
     }
 
-    // ─── HELPERS ─────────────────────────────────────────────────
+    // ??? HELPERS ?????????????????????????????????????????????????
 
     private function checkoutPathFromActiveTriage(): ?string
     {
@@ -1955,8 +1956,8 @@ class AuthController extends BaseController
 
         if ($triageSessionId === '') {
             if (!is_array($cotacao)) return null;
-            // Compatibilidade para cotações antigas aceitas antes da criação
-            // da triagem: materializa o contexto agora, sem perder a cotação.
+            // Compatibilidade para cota��es antigas aceitas antes da cria��o
+            // da triagem: materializa o contexto agora, sem perder a cota��o.
             $triagem = TriageSessionService::finalizar($cotacao);
             $_SESSION['pre_cotacao']['triage_session_id'] = $triagem['id'];
             $triageSessionId = $triagem['id'];
@@ -1982,7 +1983,7 @@ class AuthController extends BaseController
                     return;
                 }
             } catch (Throwable $e) {
-                // Bases anteriores à migration seguem o fluxo legado.
+                // Bases anteriores � migration seguem o fluxo legado.
             }
         }
 
@@ -2003,7 +2004,7 @@ class AuthController extends BaseController
     protected function isAuthenticated(): bool
     {
         return isset($_SESSION['user']) && isset($_SESSION['auth_at']) &&
-               (time() - $_SESSION['auth_at']) < 3600; // 1 hora de sessão
+               (time() - $_SESSION['auth_at']) < 3600; // 1 hora de sess�o
     }
 
     protected function generateCSRFToken(): string
@@ -2075,9 +2076,9 @@ class AuthController extends BaseController
     }
 
     // ─── REGISTRO EM 2 ETAPAS (§23 B-UNIFIC-23) ──────────────────────
-    // Fluxo público pré-cotação → registro → checkout.
-    // Complementa registroSimples() (3 campos) com CPF + CEP + endereço +
-    // categoria de veículo, tudo em uma única transação.
+    // Fluxo p�blico pr�-cota��o ? registro ? checkout.
+    // Complementa registroSimples() (3 campos) com CPF + CEP + endere�o +
+    // categoria de ve�culo, tudo em uma �nica transa��o.
     // Grava $_SESSION['pre_cotacao']['pagador'] para a Faixa A injetar no Brick MP.
 
     public function registroFunilForm(): void
@@ -2088,14 +2089,14 @@ class AuthController extends BaseController
         }
         $csrf_token = $this->generateCSRFToken();
         $flash = $this->pullFlash();
-        // Draft é lido pela view direto de $_SESSION['pre_cotacao_draft'].
+        // Draft � lido pela view direto de $_SESSION['pre_cotacao_draft'].
         require __DIR__ . '/../Views/public/registro_funil_etapas.php';
     }
 
     public function registroFunil(): void
     {
         if (!$this->validateCSRFToken($_POST['csrf_token'] ?? '')) {
-            $this->setFlashMessage('Sessão expirada. Tente novamente.', 'error');
+            $this->setFlashMessage('Sess�o expirada. Tente novamente.', 'error');
             $this->redirect('/registro/funil');
             return;
         }
@@ -2118,19 +2119,19 @@ class AuthController extends BaseController
             $erros[] = 'Informe seu nome completo.';
         }
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            $erros[] = 'E-mail inválido.';
+            $erros[] = 'E-mail inv�lido.';
         }
         if (!$this->validarTelefoneBr($telefone)) {
-            $erros[] = 'WhatsApp inválido (DDD + número).';
+            $erros[] = 'WhatsApp inv�lido (DDD + n�mero).';
         }
         if (!$this->validarCPF($cpf)) {
-            $erros[] = 'CPF inválido.';
+            $erros[] = 'CPF inv�lido.';
         }
         if (strlen($cep) !== 8) {
-            $erros[] = 'CEP inválido.';
+            $erros[] = 'CEP inv�lido.';
         }
         if (mb_strlen($endereco) < 5) {
-            $erros[] = 'Endereço incompleto.';
+            $erros[] = 'Endere�o incompleto.';
         }
 
         $_SESSION['pre_cotacao_draft'] = [
@@ -2157,7 +2158,7 @@ class AuthController extends BaseController
             $dup->execute([$email, $cpf]);
             if ($dup->fetch()) {
                 $pdo->rollBack();
-                $this->setFlashMessage('Este e-mail ou CPF já tem conta. Faça login.', 'error');
+                $this->setFlashMessage('Este e-mail ou CPF j� tem conta. Fa�a login.', 'error');
                 $this->redirect('/login?retorno=' . rawurlencode('/checkout/veiculo'));
                 return;
             }
@@ -2217,7 +2218,7 @@ class AuthController extends BaseController
                 $pdo->rollBack();
             }
             error_log('[registroFunil] ' . $e->getMessage());
-            $this->setFlashMessage('Não foi possível criar sua conta agora.', 'error');
+            $this->setFlashMessage('N�o foi poss�vel criar sua conta agora.', 'error');
             $this->redirect('/registro/funil');
         }
     }
