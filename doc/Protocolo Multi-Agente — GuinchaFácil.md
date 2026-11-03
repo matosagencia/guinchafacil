@@ -1,5 +1,7 @@
 # Protocolo Multi-Agente — GuinchaFácil
 
+> Implementacao atual: as Faixas A, B e C sao agentes logicos executados no Codex. As responsabilidades permanecem separadas; as referencias historicas a ChatGPT, DeepSeek ou Gemini sao apenas nomenclatura antiga. Consulte `doc/AGENTES-CODEX.md` para o procedimento vigente.
+
 **Objetivo:** ChatGPT, DeepSeek e Gemini trabalham em faixas (lanes) separadas, com contratos escritos, testes cruzados e checkpoints no Git. Assim nenhuma IA reinvestiga o projeto inteiro e nenhuma desfaz o trabalho da outra.
 ---
 
