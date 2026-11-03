@@ -126,6 +126,22 @@ final class PreCotacaoApiController extends BaseController
             }
             require_once $serviceFile;
             $items = (new AddressAutocompleteService())->suggest($q, null, null, $limit);
+            if (!$items) {
+                // O provedor de sugestoes pode nao retornar ruas com numero.
+                // Reaproveita o geocoder oficial para manter a coordenada no item.
+                require_once __DIR__ . '/../Services/GeocodingService.php';
+                $geocodificado = (new GeocodingService())->geocode($q);
+                if (is_array($geocodificado) && !empty($geocodificado['lat']) && !empty($geocodificado['lng'])) {
+                    $items = [[
+                        'principal' => (string)($geocodificado['display_name'] ?? $q),
+                        'secundario' => '',
+                        'display_name' => (string)($geocodificado['display_name'] ?? $q),
+                        'lat' => (float)$geocodificado['lat'],
+                        'lng' => (float)$geocodificado['lng'],
+                        'numero' => $geocodificado['house_number'] ?? null,
+                    ]];
+                }
+            }
             echo json_encode(['ok' => true, 'data' => ['items' => array_values($items)]], JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE);
         } catch (Throwable $e) {
             Logger::exception('PreCotacaoApiController', 'sugestoes', 'geocoding', $e, [

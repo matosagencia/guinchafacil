@@ -40,7 +40,8 @@ final class RoutingApiController extends BaseController
             $body = curl_exec($ch);
             $httpCode = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE);
             $curlErr = curl_error($ch);
-            curl_close($ch);
+            // PHP 8.5 deprecated curl_close(); the handle is released automatically.
+            unset($ch);
         } else {
             $context = stream_context_create(['http' => [
                 'method' => 'GET', 'timeout' => 6,
