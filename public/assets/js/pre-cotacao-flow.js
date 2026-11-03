@@ -234,6 +234,14 @@
         updateSummary('destino');
     });
 
+    // Se o texto do destino mudar depois de uma escolha anterior, as
+    // coordenadas antigas deixam de ser confiaveis e precisam ser recalculadas.
+    if (els.dest) els.dest.addEventListener('input', function () {
+        els.latD.value = '';
+        els.lngD.value = '';
+        if (typeof window.__gfMapClearDest === 'function') window.__gfMapClearDest();
+    });
+
     // ??? Etapa 1 ??????????????????????????????????????????????
     function validateStep1() {
         var loc = (els.loc.value || '').trim();
@@ -421,7 +429,8 @@
         if (numVis && els.numD) els.numD.value = (numVis.value || '').trim();
         if (!els.latD.value && dest.length >= 3) {
             dbg('info', 'geocode destino', dest);
-            fetch('/geocode/public?q=' + encodeURIComponent(dest), { credentials: 'same-origin' })
+            var consulta = dest + (els.numD && els.numD.value ? ', ' + els.numD.value : '');
+            fetch('/geocode/public?q=' + encodeURIComponent(consulta), { credentials: 'same-origin' })
                 .then(function (r) { return r.ok ? r.json() : null; })
                 .then(function (raw) {
                     var data = unwrap(raw);
@@ -431,11 +440,21 @@
                         els.latD.value = item.lat;
                         els.lngD.value = item.lng;
                         if (typeof window.__gfMapSetDest === 'function') window.__gfMapSetDest(parseFloat(item.lat), parseFloat(item.lng));
+                        computeComparison();
+                        showStep(6);
+                    } else {
+                        els.dest.classList.add('gf-invalid');
+                        dbg('err', 'destino sem coordenadas', raw);
                     }
                 })
-                .catch(function () {});
+                .catch(function (e) {
+                    els.dest.classList.add('gf-invalid');
+                    dbg('err', 'geocodificacao destino falhou', String(e));
+                });
+            // A Etapa 06 só pode ser exibida depois de obter as coordenadas.
+            return false;
         }
-        return true;
+        return Boolean(els.latD.value && els.lngD.value);
     }
 
     // ??? Etapa 6: comparativo ?????????????????????????????????
