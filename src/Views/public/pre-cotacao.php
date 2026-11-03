@@ -23,6 +23,14 @@ require __DIR__ . '/_header-public.php';
 
     <?php if (!$resultado): ?>
 
+        <?php if (!empty($fallbackWhatsApp)): ?>
+            <section class="gf-alert gf-alert--info" role="status">
+                <strong>Vamos tentar encontrar uma equipe para voce.</strong>
+                <p>Nao ha oficina ou guincho ativo disponivel para esta solicitacao neste momento.</p>
+                <a class="gf-btn gf-btn--primary" href="<?= $e((string)$fallbackWhatsApp) ?>" target="_blank" rel="noopener">Falar pelo WhatsApp</a>
+            </section>
+        <?php endif; ?>
+
         <div class="gf-preq__intro">
             <div>
                 <h1>Seu socorro, sem complicação<em>.</em></h1>

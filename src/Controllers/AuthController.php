@@ -222,6 +222,8 @@ class AuthController extends BaseController
         }
         $cidadesSeo = $this->cidadesComCoberturaSeo();
         $flash = $this->pullFlash();
+        $fallbackWhatsApp = $_SESSION['pre_cotacao_fallback_whatsapp'] ?? null;
+        unset($_SESSION['pre_cotacao_fallback_whatsapp']);
         require __DIR__ . '/../Views/public/pre-cotacao.php';
     }
 
@@ -326,6 +328,7 @@ class AuthController extends BaseController
         ]) : ['status' => 'sem_servico', 'pode_cobrar' => false, 'mensagem' => 'N�o conseguimos identificar o tipo de atendimento para validar a cobertura.'];
         $_SESSION['pre_cotacao_sem_cobertura'] = null;
         if (($diagnosticoCobertura['pode_cobrar'] ?? true) !== true) {
+            require_once __DIR__ . '/../Services/PreCotacao/WhatsAppCotacaoService.php';
             PreQuoteDemandService::registrar([
                 'lat_origem' => (float)$lat,
                 'lng_origem' => (float)$lng,
@@ -343,6 +346,21 @@ class AuthController extends BaseController
                 'mensagem' => (string)($diagnosticoCobertura['mensagem'] ?? ''),
                 'timestamp' => time(),
             ];
+            $_SESSION['pre_cotacao_fallback_whatsapp'] = WhatsAppCotacaoService::gerarLink([
+                'modo' => $decisaoAtendimento !== '' ? $decisaoAtendimento : ($attendanceMode === 'TOWING' ? 'levar_carro' : 'local'),
+                'servico' => $tipo,
+                'veiculo' => $categoria,
+                'origem_texto' => $localizacao,
+                'origem_lat' => $lat,
+                'origem_lng' => $lng,
+                'destino_texto' => $destino,
+            ]);
+            $this->setFlashMessage(
+                (string)($diagnosticoCobertura['mensagem'] ?? 'Nao encontramos uma equipe disponivel agora.') . ' Fale conosco pelo WhatsApp para tentarmos um atendimento manual.',
+                'info'
+            );
+            $this->redirect('/pre-cotacao');
+            return;
         }
 
         // [B-011-B1] O valor_cotado do navegador NUNCA determina o pre�o oficial (�23).
