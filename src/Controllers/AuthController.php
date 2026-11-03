@@ -185,6 +185,17 @@ class AuthController extends BaseController
         echo '</urlset>';
     }
 
+    public function mapaDoSite(): void
+    {
+        $meta_title = 'Mapa do site | GuinchaFácil';
+        $meta_description = 'Encontre as principais páginas e caminhos do GuinchaFácil.';
+        $body_class = 'gf-landing';
+        $nav_atual = '';
+        $utility_cidade = 'Niterói, RJ';
+        $utility_cidade_url = (defined('BASE_PATH') ? BASE_PATH : '') . '/guincho/niteroi-rj';
+        require __DIR__ . '/../Views/public/mapa-do-site.php';
+    }
+
     /**
      * Pre-cotacao publica: entrega valor antes do cadastro, sem criar pedido
      * ou pagamento. O pedido autenticado continua sendo o unico caminho de

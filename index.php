@@ -226,6 +226,7 @@ $rotas = [
         '/parceiros/oficinas' => ['SeoPartnerController', 'oficinas', null],
         '/parceiros/interesse' => ['AuthController', 'parceirosInteresse', null],
         '/sitemap.xml'      => ['AuthController', 'sitemap', null],
+        '/mapa-do-site'     => ['AuthController', 'mapaDoSite', null],
         '/login'            => ['AuthController', 'loginForm', null],
 
         '/pre-cotacao'      => ['AuthController', 'preCotacaoForm', null],

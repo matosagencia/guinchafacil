@@ -10,7 +10,7 @@ $bp = defined('BASE_PATH') ? BASE_PATH : '';
         <div class="gf-footer-top">
             <div>
                 <a class="gf-brand" href="<?php echo htmlspecialchars($bp, ENT_QUOTES, 'UTF-8'); ?>">
-                    <img src="<?php echo htmlspecialchars($bp, ENT_QUOTES, 'UTF-8'); ?>/public/assets/img/logo.svg" alt="GuinchaFácil" width="36" height="36">
+                    <img class="gf-brand__mark" src="<?php echo htmlspecialchars($bp, ENT_QUOTES, 'UTF-8'); ?>/public/assets/img/logo-512.png" alt="" width="36" height="36">
                     <span>Guincha<span>Facil</span>.</span>
                 </a>
                 <p>Seu caminho continua aqui.</p>

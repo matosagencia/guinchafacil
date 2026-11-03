@@ -73,6 +73,11 @@
   text-decoration: none;
 }
 
+.gf-brand__mark {
+  object-fit: cover;
+  object-position: center top;
+}
+
 .gf-brand span {
   color: var(--gf-verde);
 }

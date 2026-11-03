@@ -101,7 +101,7 @@ $nonceAttr = function_exists('csp_script_nonce_attr') ? csp_script_nonce_attr() 
 <header class="gf-site-header">
     <div class="gf-container">
         <a class="gf-brand" href="<?php echo htmlspecialchars($bp); ?>/">
-            <img src="<?php echo htmlspecialchars($bp); ?>/public/assets/img/logo.svg" alt="GuinchaFácil" width="40" height="40">
+            <img class="gf-brand__mark" src="<?php echo htmlspecialchars($bp); ?>/public/assets/img/logo-512.png" alt="" width="40" height="40">
             <span>Guincha<span>Facil</span>.</span>
         </a>
         <nav class="gf-nav" aria-label="Navegacao principal">

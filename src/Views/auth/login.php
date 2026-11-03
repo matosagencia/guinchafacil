@@ -27,7 +27,7 @@ body{margin:0;min-height:100vh;font-family:system-ui,-apple-system,"Segoe UI",Ro
 .reg-hero:before{content:"";position:absolute;inset:0;background:radial-gradient(ellipse at 20% 85%,rgba(255,255,255,.08),transparent 60%),radial-gradient(ellipse at 85% 15%,rgba(255,255,255,.06),transparent 55%);pointer-events:none}
 .hero-content{position:relative;z-index:1;max-width:560px}
 .hero-logo{display:flex;align-items:center;gap:.75rem;margin-bottom:2rem}
-.hero-logo img{width:48px;height:48px;border-radius:12px}
+.hero-logo img{width:48px;height:48px;border-radius:12px;object-fit:cover;object-position:center top}
 .hero-logo .brand{font-size:1.4rem;font-weight:800}
 .hero-logo .brand span{color:var(--acc2)}
 .hero-badge{display:inline-flex;align-items:center;gap:.5rem;padding:.4rem .9rem;border-radius:20px;background:var(--badge-bg);border:1px solid var(--badge-bd);color:var(--badge-fg);font-size:.76rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;margin-bottom:1.1rem}
@@ -73,7 +73,7 @@ body{margin:0;min-height:100vh;font-family:system-ui,-apple-system,"Segoe UI",Ro
   <section class="reg-hero" aria-label="Vantagens">
     <div class="hero-content">
       <div class="hero-logo">
-        <img src="<?php echo htmlspecialchars($bp); ?>/public/assets/img/logo.svg" alt="GuinchaFácil">
+        <img src="<?php echo htmlspecialchars($bp); ?>/public/assets/img/logo-512.png" alt="GuinchaFácil">
         <div class="brand">Guincha<span>Fácil</span></div>
       </div>
       <div class="hero-badge"><i class="fas fa-bolt"></i> Bem-vindo de volta</div>
