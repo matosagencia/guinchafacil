@@ -3,7 +3,6 @@
 
 require_once __DIR__ . '/GeoService.php';
 require_once __DIR__ . '/../Models/Catalog/ProviderCapability.php';
-require_once __DIR__ . '/../Services/EspecialistaDispatchService.php';
 require_once __DIR__ . '/DecisaoAtendimentoService.php';
 /**
  * §COBERTURA-RAIO-01 (05/08/2026)
@@ -131,20 +130,13 @@ class CoberturaService
             ];
         }
 
-        $serviceCode = self::resolverServiceCode($serviceTypeId);
-        $especialistas = $serviceCode !== ''
-            ? EspecialistaDispatchService::candidatosPorCoordenada($lat, $lng, $serviceCode)
-            : [];
-
-        if (!empty($especialistas)) {
-            return [
+        $serviceCode = self::resolverServiceCode($serviceTypeId);        $tipoOficina = self::tipoOficinaPorCodigo($serviceCode);        $decisaoOficinas = $tipoOficina !== ''            ? (new DecisaoAtendimentoService())->decidirOficinas($lat, $lng, $tipoOficina)            : ['candidatos' => []];        $oficinas = $decisaoOficinas['candidatos'] ?? [];
+        if (!empty($oficinas)) {            return [
                 'status' => 'ok',
                 'pode_cobrar' => true,
-                'pode_especialista' => true,
-                'pode_reboque' => true,
+                // Chave mantida para consumidores antigos; a entidade                // operacional agora é sempre a oficina.                'pode_especialista' => true,                'pode_oficina' => true,                'pode_reboque' => true,
                 'mensagem' => null,
-                'especialistas_encontrados' => count($especialistas),
-                'service_code' => $serviceCode,
+                'oficinas_encontradas' => count($oficinas),                'service_code' => $serviceCode,
             ];
         }
 
@@ -186,4 +178,4 @@ class CoberturaService
             return $cache[$serviceTypeId] = '';
         }
     }
-}
+    /** @return string slug operacional usado pelo catálogo de oficinas */    private static function tipoOficinaPorCodigo(string $serviceCode): string    {        return match (strtoupper(trim($serviceCode))) {            'BATTERY_DIAG', 'BATTERY_TEST', 'BATTERY_REPLACE', 'BATTERY_REPLACEMENT', 'ELECTRICAL_DIAG', 'ELECTRICAL_DIAGNOSIS' => 'eletrica',            'BATTERY_JUMP', 'JUMP_START' => 'bateria',            'TIRE_CHANGE', 'TIRE_INFLATION' => 'pneu',            'FUEL_DELIVERY' => 'combustivel',            'MECHANICAL_ASSISTANCE' => 'mecanica',            'LOCKOUT', 'AUTOMOTIVE_LOCKSMITH' => 'chaveiro',            default => strtolower(trim($serviceCode)),        };    }}

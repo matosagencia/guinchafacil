@@ -22,7 +22,6 @@ require_once __DIR__ . '/../GeoService.php';
 require_once __DIR__ . '/../../Models/Catalog/ProviderCapability.php';
 require_once __DIR__ . '/../Dispatch/ProviderVehicleCompatibilityService.php';
 require_once __DIR__ . '/../IncidenteService.php';
-require_once __DIR__ . '/../EspecialistaDispatchService.php';
 require_once __DIR__ . '/../EspecialistaPricingService.php';
 require_once __DIR__ . '/../IncidenteFinanceiroService.php';
 require_once __DIR__ . '/../ComissaoService.php';
@@ -33,7 +32,6 @@ final class PedidoTransitionService
     {
         $pdo = getPDO();
         $incidenteCriado = 0;
-        $codigoServicoEspecialista = '';
         try {
             $pdo->beginTransaction();
             $stmt = $pdo->prepare("SELECT * FROM pedidos WHERE id = ?" . self::lockClause($pdo));
@@ -107,13 +105,11 @@ final class PedidoTransitionService
 
             if ((string)($pedido['attendance_mode'] ?? '') === 'ON_SITE' && empty($pedido['incidente_id'])) {
                 $svc = (int)($pedido['service_type_id'] ?? 0);
-                $st = $svc > 0 ? $pdo->prepare('SELECT code FROM service_types WHERE id=? LIMIT 1') : null;
-                if ($st) { $st->execute([$svc]); $codigoServicoEspecialista = (string)($st->fetchColumn() ?: ''); }
                 $incidenteCriado = Incidente::criar([
                     'cliente_id' => (int)$pedido['cliente_id'], 'veiculo_id' => (int)$pedido['veiculo_id'],
                     'tipo_problema' => (string)$pedido['tipo_problema'], 'descricao_problema' => (string)$pedido['descricao_problema'],
                     'lat_origem' => (float)$pedido['lat_origem'], 'lng_origem' => (float)$pedido['lng_origem'],
-                    'endereco_origem' => (string)$pedido['endereco_origem'], 'status' => 'procurando_especialista'
+                    'endereco_origem' => (string)$pedido['endereco_origem'], 'status' => 'procurando_oficina'
                 ], $pdo);
                 $pdo->prepare('UPDATE pedidos SET incidente_id=? WHERE id=?')->execute([$incidenteCriado, $pedidoId]);
             }
@@ -132,7 +128,9 @@ final class PedidoTransitionService
             // reboque nesse meio-tempo - nesse caso faz DOWNGRADE auditado
             // para a fila comum em vez de travar o pedido ou seguir com um
             // prestador inv�lido.
-            $statusNovo = 'aguardando_guincho';
+            $statusNovo = ((string)($pedido['attendance_mode'] ?? '') === 'ON_SITE')
+                ? 'aguardando_oficina'
+                : 'aguardando_guincho';
             $eventoCode = 'ORD-PAY-001';
             $guinchoHibridoId = (int)($pedido['guincho_id'] ?? 0);
             $downgradeHibrido = false;
@@ -200,7 +198,7 @@ final class PedidoTransitionService
 
             $pdo->commit();
 
-            if ($incidenteCriado > 0 && $codigoServicoEspecialista !== '') {
+            if (false) {
                 try {
                     // O repasse � sempre recalculado sobre o valor efetivamente
                     // pago pelo cliente (incluindo dist�ncia e adicional noturno).

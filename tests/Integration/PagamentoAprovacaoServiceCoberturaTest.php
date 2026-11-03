@@ -81,6 +81,9 @@ final class PagamentoAprovacaoServiceCoberturaTest extends TestCase
             'servicos_especialista',
             'especialista_servicos',
             'especialistas',
+            'provider_workshop_capabilities',
+            'provider_workshop_settings',
+            'providers',
             'service_types',
             'configuracoes',
         ] as $table) {
@@ -139,10 +142,10 @@ final class PagamentoAprovacaoServiceCoberturaTest extends TestCase
         $this->assertSame('pendente', (string)($pagamento['status'] ?? ''));
     }
 
-    public function testAprovaQuandoHaEspecialistaDisponivel(): void
+    public function testAprovaQuandoHaOficinaDisponivel(): void
     {
         $this->trace('scenario: cobertura_ok');
-        $especialistaId = $this->seedEspecialistaDisponivel();
+        $oficinaId = $this->seedOficinaDisponivel();
         $pedidoId = $this->criarPedido('Seed cobertura ok', -22.999800, -43.364800);
         $result = $this->aprovarComDebug($pedidoId, 'mp-test-cobertura-ok', 'scenario cobertura ok');
 
@@ -152,10 +155,32 @@ final class PagamentoAprovacaoServiceCoberturaTest extends TestCase
         $pedido = getPDO()->query("SELECT status, incidente_id FROM pedidos WHERE id = {$pedidoId}")->fetch(PDO::FETCH_ASSOC);
         $pagamento = getPDO()->query("SELECT status, id_externo FROM pagamentos WHERE pedido_id = {$pedidoId}")->fetch(PDO::FETCH_ASSOC);
 
-        $this->trace('scenario: cobertura_ok especialista=' . $especialistaId . ' result=' . json_encode($result, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+        $this->trace('scenario: cobertura_ok oficina=' . $oficinaId . ' result=' . json_encode($result, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
         $this->assertSame('aguardando_guincho', (string)($pedido['status'] ?? ''));
         $this->assertSame('aprovado', (string)($pagamento['status'] ?? ''));
         $this->assertSame('mp-test-cobertura-ok', (string)($pagamento['id_externo'] ?? ''));
+    }
+
+    private function seedOficinaDisponivel(): int
+    {
+        $pdo = getPDO();
+        $name = 'QA Oficina Cobertura ' . bin2hex(random_bytes(3));
+        $pdo->prepare("INSERT INTO providers
+            (provider_type, legal_name, trade_name, approval_status, active, created_at, updated_at)
+            VALUES ('WORKSHOP', ?, ?, 'APPROVED', 1, NOW(), NOW())")
+            ->execute([$name . ' LTDA', $name]);
+        $providerId = (int)$pdo->lastInsertId();
+        $pdo->prepare("INSERT INTO provider_workshop_settings
+            (provider_id, taxa_indicacao_fixa, taxa_resgate_direto, permite_resgate_direto,
+             recebe_veiculo_patio, faz_resgate_direto, regra_versao, status_parceria,
+             raio_checkin_m, raio_resgate_direto_km, latitude, longitude, created_at, updated_at)
+            VALUES (?, 30, 20, 1, 1, 1, 'qa', 'ATIVO', 150, 30, -22.999800, -43.364800, NOW(), NOW())")
+            ->execute([$providerId]);
+        $pdo->prepare("INSERT INTO provider_workshop_capabilities
+            (provider_id, service_type_id, enabled, approval_status, created_at, updated_at)
+            VALUES (?, ?, 1, 'APPROVED', NOW(), NOW())")
+            ->execute([$providerId, self::SERVICE_TYPE_ID]);
+        return $providerId;
     }
 
     public function testIncidenteIdPulaOGateDeCobertura(): void
