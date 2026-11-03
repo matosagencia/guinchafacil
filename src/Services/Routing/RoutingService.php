@@ -194,6 +194,27 @@ final class RoutingService
         unset($ch);
 
         if ($curlErr !== '' || $body === false || $httpCode >= 400) {
+            $context = stream_context_create(['http' => [
+                'method' => 'GET',
+                'timeout' => self::TIMEOUT_MS / 1000,
+                'header' => "Accept: application/json\r\nUser-Agent: GuinchaFacil-Routing/2.0\r\n",
+                'ignore_errors' => true,
+            ]]);
+            $streamBody = @file_get_contents($url, false, $context);
+            if ($streamBody !== false) {
+                $body = $streamBody;
+                $curlErr = '';
+                $httpCode = 200;
+                foreach (($http_response_header ?? []) as $header) {
+                    if (preg_match('/^HTTP\/\\S+\\s+(\\d+)/', $header, $m)) {
+                        $httpCode = (int)$m[1];
+                        break;
+                    }
+                }
+            }
+        }
+
+        if ($curlErr !== '' || $body === false || $httpCode >= 400) {
             return null;
         }
 
