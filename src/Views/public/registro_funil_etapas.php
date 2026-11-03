@@ -63,6 +63,9 @@ label.field > span { display:block; font-size:.82rem; font-weight:600; color:#4b
 .btn-primary { background:linear-gradient(135deg,var(--gf-green),var(--gf-green-dark)); color:#fff; box-shadow:0 6px 20px rgba(47,179,74,.3); }
 .btn-secondary { background:#fff; border:1.5px solid #dce4ef; color:#334155; }
 .alerta { background:#fff5f5; border:1px solid #fed7d7; color:#c53030; border-radius:10px; padding:10px 14px; font-size:.88rem; margin-bottom:16px; }
+.registro-login-prompt { display:flex; align-items:center; justify-content:space-between; gap:12px; margin:0 0 18px; padding:11px 13px; border:1px solid #dcebe0; border-radius:10px; background:#f7fcf8; color:#4b5f52; font-size:.84rem; }
+.registro-login-prompt a { color:var(--gf-green-dark); font-weight:800; text-decoration:none; white-space:nowrap; }
+.registro-login-prompt a:hover, .registro-login-prompt a:focus { text-decoration:underline; }
 .form-control.is-invalid { border-color:#dc3545; background:#fff8f8; }
 .form-control.is-invalid:focus { border-color:#dc3545; box-shadow:0 0 0 3px rgba(220,53,69,.15); }
 .gf-preq-body .wrap { width:min(1200px,100% - 40px); max-width:none; padding:24px 0 76px; }
@@ -89,6 +92,11 @@ label.field > span { display:block; font-size:.82rem; font-weight:600; color:#4b
     <div class="card">
         <div class="eyebrow">Falta pouco</div>
         <h1 id="titulo">Como podemos te chamar?</h1>
+
+        <div class="registro-login-prompt" role="note">
+            <span>Já tem cadastro?</span>
+            <a href="<?= $e($bp) ?>/login">Entrar agora</a>
+        </div>
 
         <div class="steps" aria-hidden="true">
             <div class="step is-active" data-step-indicator="1"></div>
