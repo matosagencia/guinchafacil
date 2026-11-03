@@ -775,3 +775,26 @@ body.gf-preq-body > .gf-site-footer {
 .gf-admin-payment-choice > label:nth-of-type(3)::before { content:"\f058"; }
 .gf-admin-payment-choice > label input { flex:0 0 auto; }
 .gf-admin-payment-choice > label small { display:block; margin-top:2px; color:var(--gf-muted,#64748b); }
+
+/* Mobile: the six-step progress must stay inside the viewport. */
+@media (max-width: 600px) {
+    .gf-steps { width: 100%; overflow: hidden; padding-bottom: 16px; }
+    #gfStepsList {
+        width: 100%;
+        max-width: none;
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 10px 8px;
+    }
+    #gfStepsList li {
+        min-width: 0;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 10px;
+        line-height: 1.2;
+        overflow-wrap: anywhere;
+    }
+    #gfStepsList li:not(:last-child)::after { display: none; }
+    #gfStepsList li > span { width: 26px; height: 26px; font-size: 9px; }
+}

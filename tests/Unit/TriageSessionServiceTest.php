@@ -74,4 +74,19 @@ final class TriageSessionServiceTest extends TestCase
         self::assertSame('eletrica', $triagem['dados']['tipo_problema']);
         self::assertNull($triagem['dados']['lat_destino']);
     }
+
+    /** @dataProvider formasDePagamento */
+    public function testFormaDePagamentoPermaneceNaTriagem(string $forma): void
+    {
+        $dados = $this->cotacaoValida();
+        $dados['forma_pagamento'] = $forma;
+        $triagem = TriageSessionService::finalizar($dados);
+
+        self::assertSame($forma, $triagem['dados']['forma_pagamento']);
+    }
+
+    public static function formasDePagamento(): array
+    {
+        return [['online'], ['pago_na_chegada']];
+    }
 }

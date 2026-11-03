@@ -102,7 +102,9 @@ final class TriageSessionService
             $camposObrigatorios = array_merge($camposObrigatorios, ['lat_destino', 'lng_destino']);
         }
         foreach ($camposObrigatorios as $campo) {
-            throw new InvalidArgumentException('Sessao de triagem invalida.');
+            if ($dados[$campo] === null || $dados[$campo] === '') {
+                throw new InvalidArgumentException('Sessao de triagem invalida.');
+            }
         }
         if ($dados['endereco_origem'] === '' || ($requiresDestination && $dados['endereco_destino'] === '') || $dados['distancia_km'] < 0 || $dados['custo_estimado'] < 0) {
             throw new InvalidArgumentException('Sessao de triagem invalida.');
