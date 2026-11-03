@@ -408,7 +408,8 @@ class GeocodingService
         $response = curl_exec($ch);
         $httpCode = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE);
         $error = curl_error($ch);
-        curl_close($ch);
+        // PHP 8.5 deprecated curl_close(); the handle is released automatically.
+        unset($ch);
 
         if ($response === false || $error !== '' || $httpCode < 200 || $httpCode >= 300) {
             error_log("[GeocodingService] Falha HTTP {$httpCode}: {$error}");
