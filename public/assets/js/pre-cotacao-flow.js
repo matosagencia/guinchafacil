@@ -474,6 +474,9 @@
                     if (!data) return;
                     var item = (data.results && data.results[0]) || data[0] || data;
                     if (item && item.lat && item.lng) {
+                        if (item.display_name && !els.dest.value.includes(item.display_name)) {
+                            els.dest.value = item.display_name;
+                        }
                         els.latD.value = item.lat;
                         els.lngD.value = item.lng;
                         if (typeof window.__gfMapSetDest === 'function') window.__gfMapSetDest(parseFloat(item.lat), parseFloat(item.lng));

@@ -88,7 +88,8 @@
     };
 
     // ─── Rota via proxy OSRM local ─────────────────────────────
-    // Fallback: linha reta (polyline simples) se o proxy falhar.
+    // A rota exibida deve ser viaria; nao desenhar linha reta quando o
+    // provedor nao responder, pois isso induz o cliente a erro.
     function redesenharRota() {
         if (!destinoMarker) return;
         var o = origemMarker.getLatLng();
@@ -110,14 +111,19 @@
                         coordsOut = g.coordinates.map(function (c) { return [c[1], c[0]]; });
                     }
                 }
-                desenharRota(coordsOut, o, d);
+                if (coordsOut) {
+                    desenharRota(coordsOut, o, d);
+                } else {
+                    removerRota();
+                }
             })
-            .catch(function () { desenharRota(null, o, d); });
+            .catch(function () { removerRota(); });
     }
 
     function desenharRota(pontos, o, d) {
         // Se OSRM retornou geometria real, usa; senão, linha reta entre os 2 pins
-        var latlngs = pontos || [[o.lat, o.lng], [d.lat, d.lng]];
+        if (!pontos || pontos.length < 2) return;
+        var latlngs = pontos;
 
         if (rotaLine) {
             rotaLine.setLatLngs(latlngs);
@@ -130,9 +136,13 @@
         }
     }
 
+    function removerRota() {
+        if (rotaLine) { map.removeLayer(rotaLine); rotaLine = null; }
+    }
+
     window.__gfMapClearDest = function () {
         if (destinoMarker) { map.removeLayer(destinoMarker); destinoMarker = null; }
-        if (rotaLine) { map.removeLayer(rotaLine); rotaLine = null; }
+        removerRota();
     };
 
     setTimeout(function () { map.invalidateSize(); }, 250);
