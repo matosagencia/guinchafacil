@@ -467,8 +467,18 @@
         if (!els.latD.value && dest.length >= 3) {
             dbg('info', 'geocode destino', dest);
             var consulta = dest + (els.numD && els.numD.value ? ', ' + els.numD.value : '');
-            fetch('/geocode/public?q=' + encodeURIComponent(consulta), { credentials: 'same-origin' })
-                .then(function (r) { return r.ok ? r.json() : null; })
+            var geocodeUrl = '/geocode/public?q=' + encodeURIComponent(consulta);
+            function consultarDestino(tentativa) {
+                return fetch(geocodeUrl, { credentials: 'same-origin' }).then(function (r) {
+                    if (r.status === 429 && tentativa === 0) {
+                        return new Promise(function (resolve) {
+                            setTimeout(function () { resolve(consultarDestino(1)); }, 450);
+                        });
+                    }
+                    return r.ok ? r.json() : null;
+                });
+            }
+            consultarDestino(0)
                 .then(function (raw) {
                     var data = unwrap(raw);
                     if (!data) return;
