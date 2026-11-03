@@ -797,4 +797,14 @@ body.gf-preq-body > .gf-site-footer {
     }
     #gfStepsList li:not(:last-child)::after { display: none; }
     #gfStepsList li > span { width: 26px; height: 26px; font-size: 9px; }
+
+    /* Keep the map immediately below the progress steps on mobile only. */
+    .gf-preq__grid { display: grid; grid-template-columns: minmax(0, 1fr); }
+    .gf-preq__grid > .gf-aside { display: contents; }
+    .gf-preq__grid > form,
+    .gf-preq__grid > .gf-preq__legacy-form { order: 2; }
+    .gf-preq__grid > .gf-aside > .gf-map-wrap { order: 0; width: 100%; }
+    .gf-preq__grid > .gf-aside > .gf-map-label { order: 1; width: 100%; }
+    .gf-preq__grid > .gf-aside > .gf-summary { order: 3; width: 100%; }
+    .gf-preq__grid > .gf-aside > .gf-assurance { order: 4; width: 100%; }
 }
