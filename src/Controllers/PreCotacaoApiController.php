@@ -220,10 +220,12 @@ final class PreCotacaoApiController extends BaseController
         }
 
         $temGuincho = false;
+        $decisaoGuincho = ['candidatos_elegiveis' => 0, 'motivo' => 'NAO_AVALIADO', 'anel_escolhido' => null];
         $oficinas = [];
         try {
             require_once __DIR__ . '/../Services/GuinchoDisponibilidade.php';
-            $temGuincho = GuinchoDisponibilidade::temCandidatoElegivel($lat, $lng);
+            $decisaoGuincho = GuinchoDisponibilidade::decidir($lat, $lng);
+            $temGuincho = (bool)($decisaoGuincho['disponivel'] ?? false);
             require_once __DIR__ . '/../Services/DecisaoAtendimentoService.php';
             $oficinas = (new DecisaoAtendimentoService())->oficinasProximasPublico($lat, $lng);
         } catch (Throwable $e) {
@@ -234,6 +236,9 @@ final class PreCotacaoApiController extends BaseController
             'ok' => true,
             'data' => [
                 'tem_guincho' => $temGuincho,
+                'qtd_guinchos_elegiveis' => (int)($decisaoGuincho['candidatos_elegiveis'] ?? 0),
+                'motivo_guincho' => (string)($decisaoGuincho['motivo'] ?? ($temGuincho ? 'ELEGIVEL' : 'SEM_GUINCHO_ELEGIVEL')),
+                'anel_guincho' => $decisaoGuincho['anel_escolhido'] ?? null,
                 'tem_oficina' => count($oficinas) > 0,
                 'qtd_oficinas' => count($oficinas),
                 'oficinas' => array_map(static function (array $oficina): array {
