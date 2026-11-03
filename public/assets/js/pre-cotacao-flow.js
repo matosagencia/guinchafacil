@@ -130,6 +130,7 @@
         body.append('origem_texto', els.loc ? els.loc.value : '');
         body.append('origem_lat', els.lat ? els.lat.value : '');
         body.append('origem_lng', els.lng ? els.lng.value : '');
+        body.append('destino_texto', els.dest ? els.dest.value : '');
         fetch((window.__gfBasePath || '') + '/api/pre-cotacao/whatsapp', {
             method: 'POST', credentials: 'same-origin',
             headers: {'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'},
@@ -621,6 +622,10 @@
             } else {
                 rec.hidden = true;
             }
+        }
+        if (!showAssist && !showReb) {
+            renderWhatsAppFallback();
+            return;
         }
         var btnSubmit = document.getElementById('btnSubmit');
         if (btnSubmit) btnSubmit.disabled = !(showAssist || showReb);
