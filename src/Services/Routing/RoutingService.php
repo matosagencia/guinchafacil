@@ -171,6 +171,11 @@ final class RoutingService
         }
 
         $base = rtrim(PorThresholds::roadMatchBaseUrl(), '/');
+        // Production pricing uses the same application proxy as the map.
+        // This keeps TLS, CA and upstream configuration identical on cPanel.
+        if (defined('APP_ENV') && APP_ENV === 'production' && defined('APP_URL') && APP_URL !== '') {
+            $base = rtrim((string)APP_URL, '/') . '/api/routing/osrm';
+        }
         $coords = sprintf('%.6F,%.6F;%.6F,%.6F', $lngO, $latO, $lngD, $latD);
         $url = $base . '/route/v1/driving/' . $coords . '?overview=false&alternatives=false&steps=false';
 
