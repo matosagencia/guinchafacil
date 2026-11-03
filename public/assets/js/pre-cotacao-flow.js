@@ -352,8 +352,10 @@
         if (!els.tipo) return;
         var ehReboque = state.modo === 'levar_carro' || state.modo === 'reboque' || state.hasOficina === false;
         if (ehReboque) {
-            els.tipo.value = 'reboque';
-            dbg('info', 'tipo_problema sincronizado', { valor: 'reboque', modo: state.modo, hasOficina: state.hasOficina });
+            var selectedService = document.querySelector('#gfSintomas [data-sintoma].is-selected, #triagem-servicos [data-sintoma].is-selected');
+            var towingSlug = selectedService && selectedService.getAttribute('data-sintoma');
+            els.tipo.value = towingSlug || state.sintoma || 'tow_car';
+            dbg('info', 'tipo_problema sincronizado', { valor: els.tipo.value, modo: state.modo, hasOficina: state.hasOficina });
         }
         // Para me_orientem/resolver_local, o valor é definido pela etapa 3 (sintoma)
     }

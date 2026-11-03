@@ -33,7 +33,12 @@ final class PedidoController
             // Catálogo dinâmico também governa a decisão pública.
             require_once __DIR__ . '/../Models/Catalog/ServiceType.php';
             $slug = strtolower(trim((string)($draft['tipo_problema'] ?? $draft['tipo'] ?? '')));
-            if (!ServiceType::buscarPorSlugPublico($slug)) {
+            $service = ServiceType::buscarPorSlugPublico($slug);
+            if (!$service && in_array($slug, ['reboque', 'levar_carro'], true)) {
+                $service = ServiceType::buscarPorCodigoAtivo('TOW_CAR');
+                $slug = $service ? strtolower((string)($service['public_slug'] ?? 'tow_car')) : $slug;
+            }
+            if (!$service) {
                 throw new InvalidArgumentException('PRICE-SERVICE-INACTIVE');
             }
             $service = new DecisaoAtendimentoService();

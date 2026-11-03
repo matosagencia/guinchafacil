@@ -288,6 +288,12 @@ class AuthController extends BaseController
         // slug n�o existir ou o servi�o estiver inativo.
         require_once __DIR__ . '/../Models/Catalog/ServiceType.php';
         $serviceType = ServiceType::buscarPorSlugPublico($tipo);
+        if (!$serviceType && in_array($tipo, ['reboque', 'levar_carro'], true)) {
+            $serviceType = ServiceType::buscarPorCodigoAtivo('TOW_CAR');
+            if ($serviceType) {
+                $tipo = strtolower((string)($serviceType['public_slug'] ?? 'tow_car'));
+            }
+        }
         if (!$serviceType) {
             error_log('[B-011-B2][PRICE-SERVICE-INVALID] tipo_problema=' . $tipo);
             $this->setFlashMessage('Tipo de atendimento n�o reconhecido. Escolha novamente.', 'error');
