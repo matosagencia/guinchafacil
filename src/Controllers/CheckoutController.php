@@ -95,7 +95,7 @@ final class CheckoutController extends BaseController
                     http_response_code(500); echo 'N�o foi poss�vel registrar a forma de pagamento escolhida.'; exit;
                 }
                 unset($_SESSION['pre_cotacao']['forma_pagamento']);
-                $this->redirect('/cliente/dashboard?msg=pedido_criado');
+                $this->redirect('/cliente/pedido/' . $pedidoId . '?msg=pedido_criado');
             }
         } else {
             // O navegador pode perder a sess�o curta da pr�-cota��o depois do
@@ -124,7 +124,7 @@ final class CheckoutController extends BaseController
                     echo 'N�o foi poss�vel registrar a forma de pagamento escolhida.';
                     exit;
                 }
-                $this->redirect('/cliente/dashboard?msg=pedido_criado');
+                $this->redirect('/cliente/pedido/' . $pedidoId . '?msg=pedido_criado');
             }
         }
         Logger::log(Logger::LEVEL_INFO, 'CheckoutController', 'pagar', 'checkout', '[CHECKOUT-TRIAGE-ORDER-OK] Pedido reconstruído para pagamento.', ['triage_session_id' => $id, 'pedido_id' => $pedidoId]);

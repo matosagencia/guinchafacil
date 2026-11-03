@@ -4,6 +4,7 @@ require_once __DIR__ . '/../Services/NotificacaoService.php';
 require_once __DIR__ . '/../Services/EnderecoFormatter.php';
 require_once __DIR__ . '/../Models/Pricing/PricingZone.php';
 require_once __DIR__ . '/../Services/TriageSessionService.php';
+require_once __DIR__ . '/../Models/Veiculo.php';
 // File: guinchafacil/src/Controllers/AuthController.php
 // Refatorado com transa��es seguras e valida��es aprimoradas
 
@@ -733,9 +734,9 @@ class AuthController extends BaseController
             }
             // §GF-CHECKOUT-FLOW: se existe pre-cotacao ativa na sessao, o destino
             // obrigatorio e /checkout/veiculo.
-            $checkoutComTriagem = $this->checkoutPathFromActiveTriage();
-            if ($checkoutComTriagem !== null) {
-                $this->redirect($checkoutComTriagem);
+            $continuidade = $this->activeTriageContinuationPath();
+            if ($continuidade !== null) {
+                $this->redirect($continuidade);
                 return;
             }
 
@@ -817,9 +818,9 @@ class AuthController extends BaseController
             $pdo->commit();
 
             $this->setFlashMessage('Cadastro realizado! Faca login para continuar.', 'success');
-            $checkoutComTriagem = $this->checkoutPathFromActiveTriage();
-            if ($checkoutComTriagem !== null) {
-                $this->redirect('/login?retorno=' . rawurlencode($checkoutComTriagem));
+            $continuidade = $this->activeTriageContinuationPath();
+            if ($continuidade !== null) {
+                $this->redirect('/login?retorno=' . rawurlencode($continuidade));
                 return;
             }
 
@@ -2006,6 +2007,30 @@ class AuthController extends BaseController
         return '/checkout/veiculo?triage_session_id=' . rawurlencode($triageSessionId);
     }
 
+    /**
+     * Keeps triage across authentication and requires a vehicle before checkout.
+     */
+    private function activeTriageContinuationPath(): ?string
+    {
+        $checkoutPath = $this->checkoutPathFromActiveTriage();
+        if ($checkoutPath === null) {
+            return null;
+        }
+
+        $usuarioId = (int)($_SESSION['user']['id'] ?? 0);
+        if ($usuarioId <= 0) {
+            return $checkoutPath;
+        }
+
+        $veiculos = Veiculo::listarPorUsuario($usuarioId);
+        if (empty($veiculos)) {
+            $query = parse_url($checkoutPath, PHP_URL_QUERY) ?: '';
+            return '/cliente/veiculo/novo' . ($query !== '' ? '?' . $query : '');
+        }
+
+        return $checkoutPath;
+    }
+
     private function redirectByProfile(?string $tipo = null): void
     {
         $tipo = $tipo ?? ($_SESSION['user']['tipo'] ?? null);
@@ -2241,9 +2266,9 @@ class AuthController extends BaseController
                 'ativo' => true,
             ]);
 
-            $checkoutComTriagem = $this->checkoutPathFromActiveTriage();
-            if ($checkoutComTriagem !== null) {
-                $this->redirect($checkoutComTriagem);
+            $continuidade = $this->activeTriageContinuationPath();
+            if ($continuidade !== null) {
+                $this->redirect($continuidade);
                 return;
             }
             $this->redirect('/cliente/dashboard');

@@ -1130,6 +1130,10 @@ class PagamentoController extends BaseController
     {
         AuthService::requireAuth('cliente');
         $pedido = $this->pedidoContexto($pedidoId);
+        if (!empty($pedido['id'])) {
+            $this->redirect('/cliente/pedido/' . (int)$pedido['id'] . '?msg=pagamento_aprovado');
+            return;
+        }
         require __DIR__ . '/../Views/pagamento/sucesso.php';
     }
 
@@ -1169,6 +1173,10 @@ class PagamentoController extends BaseController
     {
         AuthService::requireAuth('cliente');
         $pedido = $this->pedidoContexto($pedidoId);
+        if (!empty($pedido['id'])) {
+            $this->redirect('/cliente/pedido/' . (int)$pedido['id'] . '?msg=pagamento_pendente');
+            return;
+        }
         require __DIR__ . '/../Views/pagamento/pendente.php';
     }
     
