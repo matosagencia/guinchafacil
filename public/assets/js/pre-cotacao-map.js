@@ -29,12 +29,43 @@
     var destinoMarker = null;
     var rotaLine = null;
 
+    function destinoEmEdicao() {
+        var etapa = document.querySelector('#gfPreqForm .gf-step[data-step="5"]');
+        return !!(etapa && etapa.classList.contains('is-active'));
+    }
+
+    function atualizarDestinoPorMapa(latValue, lngValue) {
+        var latDestino = document.getElementById('lat_destino');
+        var lngDestino = document.getElementById('lng_destino');
+        if (latDestino) latDestino.value = Number(latValue).toFixed(7);
+        if (lngDestino) lngDestino.value = Number(lngValue).toFixed(7);
+        fetch('/geocode/public/reverse?lat=' + encodeURIComponent(latValue) + '&lng=' + encodeURIComponent(lngValue), { credentials: 'same-origin' })
+            .then(function (r) { return r.ok ? r.json() : null; })
+            .then(function (raw) {
+                var data = raw && raw.data ? raw.data : raw;
+                var label = data && (data.display_name || data.label || data.endereco);
+                var destino = document.getElementById('destino');
+                if (label && destino) {
+                    destino.value = label;
+                    destino.dispatchEvent(new Event('change', { bubbles: true }));
+                }
+            })
+            .catch(function () {});
+        redesenharRota();
+    }
+
     origemMarker.on('dragend', function () {
         var p = origemMarker.getLatLng();
         if (latInput) latInput.value = p.lat.toFixed(7);
         if (lngInput) lngInput.value = p.lng.toFixed(7);
         reverseGeocode(p.lat, p.lng);
         if (destinoMarker) redesenharRota();
+    });
+
+    map.on('click', function (event) {
+        if (!destinoEmEdicao()) return;
+        window.__gfMapSetDest(event.latlng.lat, event.latlng.lng, true);
+        atualizarDestinoPorMapa(event.latlng.lat, event.latlng.lng);
     });
 
     function reverseGeocode(la, ln) {
@@ -65,7 +96,7 @@
         setTimeout(function () { map.invalidateSize(); }, 100);
     };
 
-    window.__gfMapSetDest = function (la, ln) {
+    window.__gfMapSetDest = function (la, ln, fromMap) {
         var destinoLatLng = [la, ln];
 
         if (destinoMarker) {
@@ -77,7 +108,16 @@
                 iconSize: [20, 20],
                 iconAnchor: [10, 10],
             });
-            destinoMarker = L.marker(destinoLatLng, { icon: redIcon }).addTo(map);
+            destinoMarker = L.marker(destinoLatLng, { icon: redIcon, draggable: true }).addTo(map);
+            destinoMarker.on('dragend', function () {
+                var p = destinoMarker.getLatLng();
+                atualizarDestinoPorMapa(p.lat, p.lng);
+            });
+        }
+
+        if (fromMap) {
+            var destino = document.getElementById('destino');
+            if (destino) destino.focus();
         }
 
         redesenharRota();

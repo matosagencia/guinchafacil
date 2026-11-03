@@ -75,5 +75,5 @@ class GeocodeController extends BaseController
 
         echo json_encode(['ok' => true, 'result' => $result]);
         exit;
-    }
+    }    public function reversePublic(): void    {        header('Content-Type: application/json; charset=UTF-8');        $lat = filter_var($_GET['lat'] ?? null, FILTER_VALIDATE_FLOAT);        $lng = filter_var($_GET['lng'] ?? null, FILTER_VALIDATE_FLOAT);        if ($lat === false || $lng === false || $lat < -34 || $lat > 5 || $lng < -74 || $lng > -28) {            http_response_code(422);            echo json_encode(['ok' => false, 'erro' => 'coordenadas_invalidas']);            return;        }        $result = (new GeocodingService())->reverseGeocode((float)$lat, (float)$lng);        echo json_encode($result            ? ['ok' => true, 'result' => $result]            : ['ok' => false, 'erro' => 'nao_encontrado'], JSON_UNESCAPED_UNICODE);    }
 }

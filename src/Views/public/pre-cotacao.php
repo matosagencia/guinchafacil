@@ -363,6 +363,6 @@ require __DIR__ . '/_header-public.php';
     </div>
 </main>
 <script<?= $nonce ?> src="<?= $e($bp) ?>/public/assets/js/pre-cotacao-flow.js?v=20261102-5"></script>
-<script<?= $nonce ?> src="<?= $e($bp) ?>/public/assets/js/pre-cotacao-map.js?v=20261030-6"></script>
+<script<?= $nonce ?> src="<?= $e($bp) ?>/public/assets/js/pre-cotacao-map.js?v=20261102-7"></script>
 <?php require __DIR__ . '/_footer-public.php'; ?>
 
