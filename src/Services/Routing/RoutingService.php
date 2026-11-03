@@ -128,7 +128,8 @@ final class RoutingService
         $resposta = curl_exec($ch);
         $httpCode = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE);
         $curlErr = curl_error($ch);
-        curl_close($ch);
+        // PHP 8.5 deprecated curl_close(); the handle is released automatically.
+        unset($ch);
 
         if ($curlErr !== '' || $resposta === false || $httpCode >= 400) {
             Logger::event([
@@ -189,7 +190,8 @@ final class RoutingService
         $body = curl_exec($ch);
         $httpCode = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE);
         $curlErr = curl_error($ch);
-        curl_close($ch);
+        // PHP 8.5 deprecated curl_close(); the handle is released automatically.
+        unset($ch);
 
         if ($curlErr !== '' || $body === false || $httpCode >= 400) {
             return null;
