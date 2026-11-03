@@ -100,7 +100,10 @@ $nonceAttr = function_exists('csp_script_nonce_attr') ? csp_script_nonce_attr() 
 
 <header class="gf-site-header">
     <div class="gf-container">
-        <a class="gf-brand" href="<?php echo htmlspecialchars($bp); ?>/">Guincha<span>Facil</span>.</a>
+        <a class="gf-brand" href="<?php echo htmlspecialchars($bp); ?>/">
+            <img src="<?php echo htmlspecialchars($bp); ?>/public/assets/img/logo.svg" alt="GuinchaFácil" width="40" height="40">
+            <span>Guincha<span>Facil</span>.</span>
+        </a>
         <nav class="gf-nav" aria-label="Navegacao principal">
             <a href="<?php echo htmlspecialchars($bp); ?>/"<?php echo $nav_atual === 'inicio' ? ' class="is-active"' : ''; ?>>Inicio</a>
             <a href="<?php echo htmlspecialchars($bp); ?>/pre-cotacao"<?php echo $nav_atual === 'pre-cotacao' ? ' class="is-active"' : ''; ?>>Como funciona</a>

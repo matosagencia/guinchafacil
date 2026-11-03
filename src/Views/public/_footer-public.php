@@ -9,7 +9,10 @@ $bp = defined('BASE_PATH') ? BASE_PATH : '';
     <div class="gf-container">
         <div class="gf-footer-top">
             <div>
-                <a class="gf-brand" href="<?php echo htmlspecialchars($bp, ENT_QUOTES, 'UTF-8'); ?>">Guincha<span>Facil</span>.</a>
+                <a class="gf-brand" href="<?php echo htmlspecialchars($bp, ENT_QUOTES, 'UTF-8'); ?>">
+                    <img src="<?php echo htmlspecialchars($bp, ENT_QUOTES, 'UTF-8'); ?>/public/assets/img/logo.svg" alt="GuinchaFácil" width="36" height="36">
+                    <span>Guincha<span>Facil</span>.</span>
+                </a>
                 <p>Seu caminho continua aqui.</p>
                 <span class="gf-status-inline">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
@@ -34,6 +37,7 @@ $bp = defined('BASE_PATH') ? BASE_PATH : '';
                 <h3>GuinchaFacil</h3>
                 <a href="<?php echo htmlspecialchars($bp, ENT_QUOTES, 'UTF-8'); ?>/mapa-do-site">Mapa do site &nearr;</a>
                 <a href="<?php echo htmlspecialchars($bp, ENT_QUOTES, 'UTF-8'); ?>/pre-cotacao">Faca uma cotacao &rarr;</a>
+                <a href="<?php echo htmlspecialchars($bp, ENT_QUOTES, 'UTF-8'); ?>/login">Entrar na conta</a>
             </div>
         </div>
 
