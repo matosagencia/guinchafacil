@@ -98,6 +98,7 @@ final class EspecialistaDispatchFailureBaselineTest extends TestCase
             criado_em TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
         )');
 
+        $pdo->exec('DELETE FROM atendimentos_especialista WHERE especialista_id = ' . self::SPECIALIST_ID);
         $pdo->exec('DELETE FROM atendimentos_especialista WHERE incidente_id IN (SELECT incidente_id FROM pedidos WHERE id IN (601, 602))');
         $pdo->exec('DELETE FROM financeiro_lancamentos WHERE incidente_id IN (SELECT incidente_id FROM pedidos WHERE id IN (601, 602, 603))');
         $pdo->exec('UPDATE pedidos SET incidente_id = NULL WHERE id IN (601, 602, 603)');
@@ -155,7 +156,7 @@ final class EspecialistaDispatchFailureBaselineTest extends TestCase
         $this->assertSame('aprovado', $pdo->query('SELECT status FROM pagamentos WHERE pedido_id = 601')->fetchColumn());
         $incidentStatus = $pdo->query('SELECT i.status FROM incidentes i JOIN pedidos p ON p.incidente_id=i.id WHERE p.id=601')->fetchColumn();
         $this->assertSame('procurando_especialista', $incidentStatus);
-        $this->assertSame(0, (int)$pdo->query('SELECT COUNT(*) FROM atendimentos_especialista')->fetchColumn());
+        $this->assertSame(0, (int)$pdo->query('SELECT COUNT(*) FROM atendimentos_especialista WHERE incidente_id = (SELECT incidente_id FROM pedidos WHERE id = 601)')->fetchColumn());
     }
 
     public function testBaselineExcecaoMantemPagamentoAprovadoEIncidentePreso(): void
@@ -180,7 +181,7 @@ final class EspecialistaDispatchFailureBaselineTest extends TestCase
         $this->assertSame('aprovado', $pdo->query('SELECT status FROM pagamentos WHERE pedido_id = 602')->fetchColumn());
         $incidentStatus = $pdo->query('SELECT i.status FROM incidentes i JOIN pedidos p ON p.incidente_id=i.id WHERE p.id=602')->fetchColumn();
         $this->assertSame('procurando_especialista', $incidentStatus);
-        $this->assertSame(0, (int)$pdo->query('SELECT COUNT(*) FROM atendimentos_especialista')->fetchColumn());
+        $this->assertSame(0, (int)$pdo->query('SELECT COUNT(*) FROM atendimentos_especialista WHERE incidente_id = (SELECT incidente_id FROM pedidos WHERE id = 602)')->fetchColumn());
     }
 
     public function testBaselineFalhaFinanceiraMantemIncidenteDesignadoSemRepasse(): void

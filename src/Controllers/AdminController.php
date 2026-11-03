@@ -1622,7 +1622,7 @@ $lngDestino = ($_POST['lng_destino'] ?? '') !== '' ? (float)$_POST['lng_destino'
 
         // =============================================================
         // [B-GUARD-01] Impede criar pedido de reboque sem guincho no raio.
-        if (!GuinchoDisponibilidade::existeNoRaio(
+        if (!GuinchoDisponibilidade::temCandidatoElegivel(
             $latOrigem,
             $lngOrigem,
             null,

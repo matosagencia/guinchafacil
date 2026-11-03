@@ -23,10 +23,11 @@ final class ConversionServiceHibridoTest extends TestCase
     protected function setUp(): void
     {
         $pdo = getPDO();
+        $pdo->exec('SET FOREIGN_KEY_CHECKS=0');
         foreach ([
             'order_conversion_price_snapshots', 'pedido_idempotency', 'pagamentos_arquivados', 'pagamentos', 'payout_ledger_entries',
             'pedido_cancelamentos', 'pedidos', 'veiculos', 'usuarios', 'guinchos',
-            'provider_capabilities', 'service_types', 'configuracoes',
+            'provider_capabilities', 'provider_workshop_capabilities', 'service_types', 'configuracoes',
         ] as $table) {
             try {
                 $pdo->exec("DELETE FROM {$table}");
@@ -81,6 +82,7 @@ final class ConversionServiceHibridoTest extends TestCase
         $pdo->exec("INSERT INTO provider_capabilities
                         (provider_id, service_type_id, enabled, approval_status, created_at, updated_at)
                      VALUES (10, 1, 1, 'APPROVED', NOW(), NOW())");
+        $pdo->exec('SET FOREIGN_KEY_CHECKS=1');
     }
 
     private function criarPedidoOnSiteHibrido(int $id, int $guinchoId, float $valorPagoOnSite): void

@@ -8,6 +8,7 @@ require_once __DIR__ . '/GeoService.php';
 require_once __DIR__ . '/Logger.php';
 require_once __DIR__ . '/TarifaService.php';
 require_once __DIR__ . '/PartnerLocationService.php';
+require_once __DIR__ . '/GuinchoDisponibilidade.php';
 
 final class DecisaoAtendimentoService
 {
@@ -18,9 +19,11 @@ final class DecisaoAtendimentoService
     {
         // Esta classe não escreve pedido vindo do endpoint público; pedidoId ignorado.
         $tipo = self::normalizarTipo($tipoProblema);
-        $oficinas = $this->oficinasNoRaio($lat, $lng, $tipo);
-        $online = $this->reboquesOnlineNoRaio($lat, $lng);
-        $reboque = $online > 0;
+        $decisaoOficinas = $this->decidirOficinas($lat, $lng, $tipo);
+        $oficinas = $decisaoOficinas['candidatos'];
+        $decisaoGuincho = GuinchoDisponibilidade::decidir($lat, $lng);
+        $online = (int)($decisaoGuincho['candidatos_elegiveis'] ?? 0);
+        $reboque = (bool)($decisaoGuincho['disponivel'] ?? false);
         $assistencia = $this->comparativoHabilitado()
             && $tipo !== 'reboque' && count($oficinas) > 0;
         $necessitaReboque = $tipo === 'reboque' || !$assistencia;
@@ -93,6 +96,34 @@ final class DecisaoAtendimentoService
             'colisao' => 'colisao',
             default => $tipo,
         };
+    }
+
+    /**
+     * Fonte única da decisão de oficinas para o funil.
+     *
+     * A expansão ocorre naturalmente pela lista completa de candidatos: cada
+     * oficina é avaliada pelo próprio raio declarado, e a lista é ordenada por
+     * distância. Assim, uma oficina mais distante pode ser usada quando não há
+     * uma mais próxima, sem ultrapassar o limite operacional dela.
+     */
+    public function decidirOficinas(float $lat, float $lng, string $tipoProblema = ''): array
+    {
+        if ($lat < -90 || $lat > 90 || $lng < -180 || $lng > 180 || ($lat === 0.0 && $lng === 0.0)) {
+            return [
+                'disponivel' => false,
+                'candidatos' => [],
+                'escolhido' => null,
+                'motivo' => 'COORDENADA_INVALIDA',
+            ];
+        }
+
+        $candidatos = $this->oficinasNoRaio($lat, $lng, self::normalizarTipo($tipoProblema));
+        return [
+            'disponivel' => $candidatos !== [],
+            'candidatos' => $candidatos,
+            'escolhido' => $candidatos[0] ?? null,
+            'motivo' => $candidatos === [] ? 'SEM_OFICINA_ELEGIVEL' : null,
+        ];
     }
 
     private function comparativoHabilitado(): bool
@@ -254,10 +285,27 @@ final class DecisaoAtendimentoService
         return rtrim(rtrim(number_format($this->descontoPercentual() * 100, 2, ',', '.'), '0'), ',') . '%';
     }
 
+    private function normalizarSlugCatalogo(array $service): string
+    {
+        $slug = strtolower(trim((string)($service['public_slug'] ?? '')));
+        if ($slug !== '') {
+            return $slug;
+        }
+        return match (strtoupper(trim((string)($service['code'] ?? '')))) {
+            'BATTERY_TEST', 'BATTERY_REPLACEMENT', 'JUMP_START' => 'bateria',
+            'TIRE_INFLATION', 'TIRE_CHANGE' => 'pneu',
+            'FUEL_DELIVERY' => 'combustivel',
+            'MECHANICAL_ASSISTANCE' => 'mecanica',
+            'ELECTRICAL_DIAGNOSIS', 'ELECTRICAL_DIAG' => 'eletrica',
+            'AUTOMOTIVE_LOCKSMITH' => 'chaveiro',
+            default => strtolower(trim((string)($service['code'] ?? ''))),
+        };
+    }
+
     /** Retorna lista pública de oficinas no raio (para a camada de confirmação). */
     public function oficinasProximasPublico(float $lat, float $lng, string $tipoProblema = ''): array
     {
-        $oficinas = $this->oficinasNoRaio($lat, $lng, $tipoProblema);
+        $oficinas = $this->decidirOficinas($lat, $lng, $tipoProblema)['candidatos'];
         return array_map(fn($o) => [
             'id' => (int)($o['provider_id'] ?? 0),
             'nome' => (string)($o['nome'] ?? ''),
@@ -275,10 +323,18 @@ final class DecisaoAtendimentoService
     {
         if ($providerId <= 0) return [];
         $services = [];
-        $stmt = getPDO()->prepare("SELECT st.id, st.code, st.public_slug, st.name, st.description FROM provider_capabilities pc JOIN service_types st ON st.id = pc.service_type_id WHERE pc.provider_id = ? AND pc.enabled = 1 AND pc.approval_status = 'APPROVED' AND st.active = 1 AND st.attendance_mode = 'ON_SITE' ORDER BY st.name ASC");
+        $capabilityTable = $source === 'provider'
+            ? 'provider_workshop_capabilities'
+            : 'provider_capabilities';
+        $stmt = getPDO()->prepare("SELECT st.id, st.code, st.public_slug, st.name, st.description
+            FROM {$capabilityTable} pc
+            JOIN service_types st ON st.id = pc.service_type_id
+            WHERE pc.provider_id = ? AND pc.enabled = 1 AND pc.approval_status = 'APPROVED'
+              AND st.active = 1 AND st.attendance_mode = 'ON_SITE'
+            ORDER BY st.name ASC");
         $stmt->execute([$providerId]);
         foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $s) {
-            $slug = strtolower(trim((string)($s['public_slug'] ?: $s['code'])));
+            $slug = $this->normalizarSlugCatalogo($s);
             if ($slug === '') continue;
             $services[$slug] = [
                 'id' => (int)$s['id'],
@@ -296,7 +352,7 @@ final class DecisaoAtendimentoService
                 ORDER BY st.name");
             $legacy->execute([$providerId]);
             foreach ($legacy->fetchAll(PDO::FETCH_ASSOC) as $s) {
-                $slug = strtolower(trim((string)($s['public_slug'] ?: $s['code'])));
+                $slug = $this->normalizarSlugCatalogo($s);
                 if ($slug === '' || isset($services[$slug])) continue;
                 $services[$slug] = [
                     'id' => (int)$s['id'],
@@ -333,26 +389,4 @@ final class DecisaoAtendimentoService
         return array_values($services);
     }
 
-    private function reboquesOnlineNoRaio(float $lat, float $lng): int
-    {
-        try {
-            $stmt = getPDO()->query(
-                "SELECT id, lat_atual, lng_atual, COALESCE(raio_cobertura_km, 50) AS raio
-                   FROM guinchos
-                  WHERE aprovado = 1
-                    AND disponivel = 1
-                    AND lat_atual IS NOT NULL
-                    AND lng_atual IS NOT NULL"
-            );
-            $count = 0;
-            foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $g) {
-                $dist = GeoService::haversine($lat, $lng, (float)$g['lat_atual'], (float)$g['lng_atual']);
-                if ($dist <= (float)$g['raio']) $count++;
-            }
-            return $count;
-        } catch (Throwable $e) {
-            error_log('[reboquesOnlineNoRaio] ' . $e->getMessage());
-            return 1; // erro de schema → não bloqueia
-        }
-    }
 }

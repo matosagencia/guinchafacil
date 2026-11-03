@@ -206,7 +206,7 @@ final class PreCotacaoApiController extends BaseController
         $oficinas = [];
         try {
             require_once __DIR__ . '/../Services/GuinchoDisponibilidade.php';
-            $temGuincho = (bool)GuinchoDisponibilidade::existeNoRaio($lat, $lng);
+            $temGuincho = GuinchoDisponibilidade::temCandidatoElegivel($lat, $lng);
             require_once __DIR__ . '/../Services/DecisaoAtendimentoService.php';
             $oficinas = (new DecisaoAtendimentoService())->oficinasProximasPublico($lat, $lng);
         } catch (Throwable $e) {

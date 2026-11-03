@@ -35,7 +35,7 @@ final class PreCotacaoOpcoesService
         // Retorno antecipado: este modo N�O consulta oficinas. A fonte de
         // verdade � a disponibilidade imediata de prestador de reboque.
         if ($modo === 'reboque') {
-            $temGuincho = GuinchoDisponibilidade::existeNoRaio($latOrigem, $lngOrigem);
+            $temGuincho = GuinchoDisponibilidade::temCandidatoElegivel($latOrigem, $lngOrigem);
             if (!$temGuincho) {
                 return [
                     'modo' => 'reboque',
@@ -53,7 +53,7 @@ final class PreCotacaoOpcoesService
         }
 
         // S� os modos de assist�ncia consultam oficinas/especialistas.
-        $temGuincho = GuinchoDisponibilidade::existeNoRaio($latOrigem, $lngOrigem);
+        $temGuincho = GuinchoDisponibilidade::temCandidatoElegivel($latOrigem, $lngOrigem);
         $oficinas = self::oficinasParaServico($latOrigem, $lngOrigem, $slugServico);
 
         // ??? Modo LOCAL (resolver no local) ???

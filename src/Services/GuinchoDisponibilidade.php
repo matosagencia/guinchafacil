@@ -182,6 +182,60 @@ final class GuinchoDisponibilidade
     }
 
     /**
+     * Decisão única de disponibilidade para reboque.
+     * A decisão usada pelo funil, pelo gate de criação e pela precificação
+     * precisa ser a mesma: candidatos elegíveis, anel e deadhead.
+     */
+    public static function decidir(float $lat, float $lng, ?int $serviceTypeId = null): array
+    {
+        $aneis = self::candidatosPorAnel($lat, $lng, $serviceTypeId);
+        try {
+            $cfg = Configuracao::getAll();
+            $minimo = max(1, (int)($cfg['guincho_anel_min_candidatos'] ?? self::MIN_CANDIDATOS_PADRAO));
+        } catch (Throwable) {
+            return [
+                'disponivel' => false,
+                'aneis' => $aneis,
+                'anel_escolhido' => null,
+                'deadhead_ref' => 0.0,
+                'motivo' => 'FALHA_CONFIGURACAO',
+                'min_candidatos' => self::MIN_CANDIDATOS_PADRAO,
+            ];
+        }
+        $anel = self::escolherAnel($aneis, $minimo);
+        if ($anel === null) {
+            // Disponibilidade operacional exige apenas um candidato. O mínimo
+            // de candidatos define o anel preferido para cotação/dispatch,
+            // mas não pode transformar um guincho elegível em indisponibilidade.
+            foreach ($aneis as $anelFallback) {
+                if (($anelFallback['elegiveis'] ?? 0) > 0) {
+                    $anel = $anelFallback;
+                    break;
+                }
+            }
+        }
+        $totalElegiveis = array_sum(array_map(
+            static fn(array $item): int => (int)($item['elegiveis'] ?? 0),
+            $aneis
+        ));
+
+        return [
+            'disponivel' => $anel !== null,
+            'aneis' => $aneis,
+            'candidatos_elegiveis' => $totalElegiveis,
+            'anel_escolhido' => $anel,
+            'deadhead_ref' => $anel === null ? 0.0 : (float)($anel['centro_km'] ?? 0.0),
+            'motivo' => $anel === null ? 'SEM_GUINCHO_ELEGIVEL' : null,
+            'min_candidatos' => $minimo,
+        ];
+    }
+
+    public static function temCandidatoElegivel(float $lat, float $lng, ?int $serviceTypeId = null): bool
+    {
+        return (bool)self::decidir($lat, $lng, $serviceTypeId)['disponivel'];
+    }
+
+    /**
      * Compatibilidade com chamadores legados. Devolve true se existe
      * ao menos 1 eleg�vel em qualquer anel. N�o distingue densidade.
      *
@@ -193,13 +247,9 @@ final class GuinchoDisponibilidade
         ?string $categoria = null,
         ?float $raioKm = null
     ): bool {
-        $aneis = self::candidatosPorAnel($lat, $lng);
-        foreach ($aneis as $anel) {
-            if (($anel['elegiveis'] ?? 0) > 0) {
-                return true;
-            }
-        }
-        return false;
+        // Compatibilidade semântica: todo chamador antigo passa a obedecer
+        // exatamente à decisão central (anel mínimo + bloqueios + ocupação).
+        return self::temCandidatoElegivel($lat, $lng);
     }
 
     /**

@@ -20,7 +20,11 @@ final class EspecialistaDispatchService
 
     public static function disparar(int $incidenteId, string $servicoCodigo, float $providerAmount, float $customerAmount, float $platformAmount): ?int
     {
-        $candidatos = self::candidatos($incidenteId, $servicoCodigo);
+        $incidente = Incidente::buscarPorId($incidenteId);
+        $decisao = $incidente
+            ? self::decidirPorCoordenada((float)$incidente['lat_origem'], (float)$incidente['lng_origem'], $servicoCodigo)
+            : ['candidatos' => []];
+        $candidatos = $decisao['candidatos'];
         if (!$candidatos) return null;
         $codes = self::SERVICE_MAP[strtoupper($servicoCodigo)] ?? [strtoupper($servicoCodigo)];
         $marks = implode(',', array_fill(0, count($codes), '?'));
@@ -43,7 +47,29 @@ final class EspecialistaDispatchService
     {
         $incidente = Incidente::buscarPorId($incidenteId);
         if (!$incidente) return [];
-        return self::candidatosPorCoordenada((float)$incidente['lat_origem'], (float)$incidente['lng_origem'], $servicoCodigo);
+        return self::decidirPorCoordenada((float)$incidente['lat_origem'], (float)$incidente['lng_origem'], $servicoCodigo)['candidatos'];
+    }
+
+    /** Decisão única de matching para especialistas: cobertura, catálogo e escolha. */
+    public static function decidirPorCoordenada(float $latOrigem, float $lngOrigem, string $servicoCodigo): array
+    {
+        if ($latOrigem < -90 || $latOrigem > 90 || $lngOrigem < -180 || $lngOrigem > 180
+            || ($latOrigem === 0.0 && $lngOrigem === 0.0)) {
+            return [
+                'disponivel' => false,
+                'candidatos' => [],
+                'escolhido' => null,
+                'motivo' => 'COORDENADA_INVALIDA',
+            ];
+        }
+
+        $candidatos = self::candidatosPorCoordenada($latOrigem, $lngOrigem, $servicoCodigo);
+        return [
+            'disponivel' => $candidatos !== [],
+            'candidatos' => $candidatos,
+            'escolhido' => $candidatos[0] ?? null,
+            'motivo' => $candidatos === [] ? 'SEM_ESPECIALISTA_ELEGIVEL' : null,
+        ];
     }
 
     public static function candidatosPorCoordenada(float $latOrigem, float $lngOrigem, string $servicoCodigo): array
