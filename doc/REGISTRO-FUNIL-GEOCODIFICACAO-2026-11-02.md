@@ -23,6 +23,6 @@ Resultado esperado: destino geocodificado, rota viaria desenhada, etapa 6 sem ca
 
 ## Evidencia e pendencia remota
 
-O endpoint remoto `/api/pre-cotacao/decisao` apresentou `ORDER_CORE_ERROR` por coluna `public_slug` ausente no banco remoto. Esse drift de schema deve ser tratado pela migration correspondente no cPanel; o frontend agora falha fechado para WhatsApp quando a resposta vier vazia ou com erro e nao deve deixar a etapa 6 sem orientacao.
+O endpoint remoto `/api/pre-cotacao/decisao` apresentou `ORDER_CORE_ERROR` por coluna `public_slug` ausente no banco remoto. Foi criada a migration idempotente `install/migration_service_types_public_slug_v1.sql`; ela deve ser aplicada no cPanel antes da homologacao definitiva. O frontend agora falha fechado para WhatsApp quando a resposta vier vazia ou com erro e nao deve deixar a etapa 6 sem orientacao.
 
 Commits relacionados: `943b0ef`, `ce729cf`, `677d956`, `70ad9c2`.
