@@ -467,22 +467,33 @@
         if (!els.latD.value && dest.length >= 3) {
             dbg('info', 'geocode destino', dest);
             var consulta = dest + (els.numD && els.numD.value ? ', ' + els.numD.value : '');
+            var sugestoesUrl = '/api/pre-cotacao/endereco/sugestoes?q=' + encodeURIComponent(consulta) + '&limit=1';
             var geocodeUrl = '/geocode/public?q=' + encodeURIComponent(consulta);
-            function consultarDestino(tentativa) {
+            function primeiroResultado(raw) {
+                var data = unwrap(raw);
+                if (!data) return null;
+                var items = data.items || data.results || data.sugestoes;
+                if (Array.isArray(items)) return items[0] || null;
+                return (data.results && data.results[0]) || data[0] || data;
+            }
+            function consultarGeocode(tentativa) {
                 return fetch(geocodeUrl, { credentials: 'same-origin' }).then(function (r) {
                     if (r.status === 429 && tentativa === 0) {
                         return new Promise(function (resolve) {
-                            setTimeout(function () { resolve(consultarDestino(1)); }, 450);
+                            setTimeout(function () { resolve(consultarGeocode(1)); }, 450);
                         });
                     }
                     return r.ok ? r.json() : null;
                 });
             }
-            consultarDestino(0)
+            fetch(sugestoesUrl, { credentials: 'same-origin' })
+                .then(function (r) { return r.ok ? r.json() : null; })
                 .then(function (raw) {
-                    var data = unwrap(raw);
-                    if (!data) return;
-                    var item = (data.results && data.results[0]) || data[0] || data;
+                    var item = primeiroResultado(raw);
+                    return item && item.lat && item.lng ? item : consultarGeocode(0).then(primeiroResultado);
+                })
+                .then(function (raw) {
+                    var item = raw;
                     if (item && item.lat && item.lng) {
                         if (item.display_name && !els.dest.value.includes(item.display_name)) {
                             els.dest.value = item.display_name;
