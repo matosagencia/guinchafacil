@@ -103,7 +103,7 @@ final class MigrationRuntime
         return $results;
     }
 
-    public static function applyPendingSqlMigrations(PDO $pdo, string $installDir, string $appliedBy = null): array
+    public static function applyPendingSqlMigrations(PDO $pdo, string $installDir, ?string $appliedBy = null): array
     {
         $results = [];
         $appliedBy = $appliedBy ?? (PHP_SAPI === 'cli' ? 'cli' : 'web');

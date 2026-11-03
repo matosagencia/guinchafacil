@@ -7,7 +7,7 @@ $mk = static function (string $chave) use ($cur): string {
 $nomeOficina = $oficina['nome'] ?? ($_SESSION['user']['nome'] ?? 'Oficina');
 ?>
 <aside class="bo-sidebar sidebar gf-unified-sidebar gf-profile-sidebar gf-f18c-sidebar" aria-label="Navegação da oficina">
-    <a class="gf-profile-brand" href="<?= $bp ?>/oficina/dashboard"><img src="<?= $bp ?>/public/assets/img/logo-48.png" alt="GuinchaFácil" width="30" height="30"><span>Guincha<strong>Fácil</strong></span></a>
+    <a class="gf-profile-brand" href="<?= $bp ?>/oficina/dashboard"><img src="<?= $bp ?>/public/assets/img/logo.svg" alt="GuinchaFácil" width="30" height="30"><span>Guincha<strong>Fácil</strong></span></a>
     <div class="gf-profile-workspace"><span class="gf-profile-avatar"><i class="fas fa-screwdriver-wrench" aria-hidden="true"></i></span><span><strong>Área da oficina</strong><small>Workspace operacional</small></span></div>
     <div class="sidebar-title">Operação</div>
 

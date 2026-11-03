@@ -2226,10 +2226,15 @@ $lngDestino = ($_POST['lng_destino'] ?? '') !== '' ? (float)$_POST['lng_destino'
     public function atualizarBancoPeloPainel(): void
     {
         AuthService::requireAuth('admin');
+        $outputBufferLevel = ob_get_level();
+        ob_start();
         header('Content-Type: application/json; charset=utf-8');
 
         if (!AuthService::validarCsrfToken($_POST['csrf_token'] ?? '')) {
             http_response_code(403);
+            while (ob_get_level() > $outputBufferLevel) {
+                ob_end_clean();
+            }
             echo json_encode(['success' => false, 'message' => 'Token CSRF invalido.'], JSON_UNESCAPED_UNICODE);
             return;
         }
@@ -2252,6 +2257,9 @@ $lngDestino = ($_POST['lng_destino'] ?? '') !== '' ? (float)$_POST['lng_destino'
                 return !in_array((string)($result['status'] ?? ''), ['success', 'skipped'], true);
             }));
 
+            while (ob_get_level() > $outputBufferLevel) {
+                ob_end_clean();
+            }
             echo json_encode([
                 'success' => $failed === [],
                 'message' => $failed === [] ? 'Banco de dados atualizado ou ja estava atualizado.' : 'A atualizacao terminou com pendencias. Consulte os detalhes.',
@@ -2259,6 +2267,9 @@ $lngDestino = ($_POST['lng_destino'] ?? '') !== '' ? (float)$_POST['lng_destino'
             ], JSON_UNESCAPED_UNICODE);
         } catch (Throwable $e) {
             http_response_code(500);
+            while (ob_get_level() > $outputBufferLevel) {
+                ob_end_clean();
+            }
             echo json_encode([
                 'success' => false,
                 'message' => 'Nao foi possivel atualizar o banco: ' . $e->getMessage(),

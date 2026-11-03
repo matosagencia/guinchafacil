@@ -201,7 +201,7 @@ $debugModeAtivo = DebugMode::jsFlag();
 
         <a class="navbar-brand" href="<?php echo htmlspecialchars($bp); ?>/">
 
-            <img src="<?php echo htmlspecialchars($bp); ?>/public/assets/img/logo-48.png"
+            <img src="<?php echo htmlspecialchars($bp); ?>/public/assets/img/logo.svg"
 
                  alt="GuinchaFácil" width="30" height="30" style="border-radius:8px">
 
