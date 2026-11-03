@@ -114,6 +114,11 @@
     }
 
     function renderWhatsAppFallback() {
+        // Never replace an operationally eligible towing option with WhatsApp.
+        if (state.hasGuincho === true) {
+            dbg('info', 'fallback WhatsApp bloqueado: guincho elegivel', state.cobertura || {});
+            return;
+        }
         var recommendation = document.getElementById('gfRecommendation');
         var compare = document.getElementById('gfCompare');
         var submit = document.getElementById('btnSubmit');
