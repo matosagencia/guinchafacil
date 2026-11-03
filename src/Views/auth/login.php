@@ -73,7 +73,7 @@ body{margin:0;min-height:100vh;font-family:system-ui,-apple-system,"Segoe UI",Ro
   <section class="reg-hero" aria-label="Vantagens">
     <div class="hero-content">
       <div class="hero-logo">
-        <img src="<?php echo htmlspecialchars($bp); ?>/public/assets/img/logo-48.png" alt="GuinchaFácil">
+        <img src="<?php echo htmlspecialchars($bp); ?>/public/assets/img/logo.svg" alt="GuinchaFácil">
         <div class="brand">Guincha<span>Fácil</span></div>
       </div>
       <div class="hero-badge"><i class="fas fa-bolt"></i> Bem-vindo de volta</div>
