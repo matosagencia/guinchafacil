@@ -5,6 +5,7 @@ require_once __DIR__ . '/BaseController.php';
 require_once __DIR__ . '/../Services/TriageSessionService.php';
 require_once __DIR__ . '/../Services/GeocodingService.php';
 require_once __DIR__ . '/../Services/PreCotacao/PreCotacaoOpcoesService.php';
+require_once __DIR__ . '/../Services/PreCotacao/WhatsAppCotacaoService.php';
 
 final class PreCotacaoApiController extends BaseController
 {
@@ -344,6 +345,28 @@ final class PreCotacaoApiController extends BaseController
             http_response_code(500);
             echo json_encode(['ok' => false, 'erro' => 'Falha ao calcular opções.'], JSON_UNESCAPED_UNICODE);
         }
+    }
+
+    /** POST /api/pre-cotacao/whatsapp — fallback sem cobertura operacional. */
+    public function whatsapp(): void
+    {
+        header('Content-Type: application/json; charset=UTF-8');
+        header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+        $ctx = [
+            'modo' => trim((string)($_POST['modo'] ?? '')),
+            'servico' => trim((string)($_POST['servico'] ?? '')),
+            'veiculo' => trim((string)($_POST['veiculo'] ?? '')),
+            'origem_texto' => trim((string)($_POST['origem_texto'] ?? '')),
+            'origem_lat' => $_POST['origem_lat'] ?? '',
+            'origem_lng' => $_POST['origem_lng'] ?? '',
+            'destino_texto' => trim((string)($_POST['destino_texto'] ?? '')),
+        ];
+        $link = WhatsAppCotacaoService::gerarLink($ctx);
+        echo json_encode([
+            'ok' => $link !== '',
+            'data' => ['link' => $link],
+            'erro' => $link === '' ? 'WHATSAPP_NAO_CONFIGURADO' : null,
+        ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
     }
 
     private static function coordenadaValida($valor, float $minimo, float $maximo): ?float

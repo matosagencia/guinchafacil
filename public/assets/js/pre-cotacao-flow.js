@@ -113,6 +113,37 @@
         window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
     }
 
+    function renderWhatsAppFallback() {
+        var recommendation = document.getElementById('gfRecommendation');
+        var compare = document.getElementById('gfCompare');
+        var submit = document.getElementById('btnSubmit');
+        if (compare) compare.hidden = true;
+        if (submit) submit.disabled = true;
+        showStep(6);
+        if (!recommendation) return;
+        recommendation.hidden = false;
+        recommendation.innerHTML = '<p>Nao encontramos oficina ou reboque ativo nesta regiao agora.</p><p>Vamos continuar o atendimento pelo WhatsApp.</p><span>Gerando link...</span>';
+        var body = new URLSearchParams();
+        body.append('modo', state.modo || 'reboque');
+        body.append('servico', state.sintoma || 'reboque');
+        body.append('veiculo', state.categoria || '');
+        body.append('origem_texto', els.loc ? els.loc.value : '');
+        body.append('origem_lat', els.lat ? els.lat.value : '');
+        body.append('origem_lng', els.lng ? els.lng.value : '');
+        fetch((window.__gfBasePath || '') + '/api/pre-cotacao/whatsapp', {
+            method: 'POST', credentials: 'same-origin',
+            headers: {'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'},
+            body: body.toString()
+        }).then(function (r) { return r.json(); }).then(function (j) {
+            var link = j && j.ok && j.data && j.data.link;
+            recommendation.innerHTML = link
+                ? '<p>Nao encontramos oficina ou reboque ativo nesta regiao agora.</p><p>Vamos continuar o atendimento pelo WhatsApp.</p><a class="gf-btn gf-btn--primary" target="_blank" rel="noopener" href="' + link.replace(/"/g, '&quot;') + '">Abrir WhatsApp</a>'
+                : '<p>Fale com a central pelo WhatsApp para verificarmos alternativas.</p>';
+        }).catch(function () {
+            recommendation.innerHTML = '<p>Fale com a central pelo WhatsApp para verificarmos alternativas.</p>';
+        });
+    }
+
     form.querySelectorAll('[data-next]').forEach(function (b) {
         b.addEventListener('click', function () {
             var next = parseInt(b.getAttribute('data-next'), 10);
@@ -299,7 +330,13 @@
                 state.hasOficina = true;
                 state.hasGuincho = true;
             })
-            .then(function () { applyBranch(); renderServicosPorOficina(); showStep(2); });
+            .then(function () {
+                if (!state.hasOficina && !state.hasGuincho) {
+                    renderWhatsAppFallback();
+                    return;
+                }
+                applyBranch(); renderServicosPorOficina(); showStep(2);
+            });
     }
 
     // §23 §1 (B-011-B2): quando o fluxo é reboque direto (escolha "Levar o carro"
