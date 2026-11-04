@@ -744,8 +744,34 @@ $serpApiMask = $serpApiKey !== ''
                         $regiao = $item['regiao'] ?? [];
 
                         $convite = $item['convite'] ?? [];
+                        $avaliacao = $item['avaliacao'] ?? [];
+
+                        $scoreProspeccao = (float)($avaliacao['total'] ?? $lead['score_go'] ?? 0);
+                        $motivoFit = (string)($avaliacao['motivo_fit'] ?? '');
+                        $canalSugerido = (string)($avaliacao['canal_sugerido'] ?? 'pesquisa');
 
                         ?>
+
+                        <div class="alert alert-light border small mb-3">
+                            <strong>Fit priorizado:</strong> <?= $e((string)$scoreProspeccao) ?>/100
+                            · canal sugerido: <?= $e($canalSugerido) ?>
+                            <?php if ($motivoFit !== ''): ?><br><?= $e($utf8fix($motivoFit)) ?><?php endif; ?>
+                            <?php if (!empty($item['mensagem_personalizada'])): ?>
+                                <textarea class="form-control form-control-sm mt-2" rows="3" readonly><?= $e($utf8fix($item['mensagem_personalizada'])) ?></textarea>
+                            <?php endif; ?>
+                            <?php if (!empty($lead['id'])): ?>
+                                <form method="post" action="<?= $e($bp) ?>/admin/marketing/prospeccao/fila/status/<?= (int)$lead['id'] ?>" class="d-flex gap-2 mt-2 align-items-center flex-wrap">
+                                    <input type="hidden" name="csrf_token" value="<?= $e($csrfToken ?? '') ?>">
+                                    <label class="small" for="pros-status-<?= (int)$lead['id'] ?>">Revisao:</label>
+                                    <select id="pros-status-<?= (int)$lead['id'] ?>" name="status" class="form-select form-select-sm" style="max-width:180px">
+                                        <?php foreach (['descoberto','validado','contatado','respondeu','homologado','recusado'] as $statusFila): ?>
+                                            <option value="<?= $e($statusFila) ?>"><?= $e($statusFila) ?></option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                    <button class="btn btn-outline-primary btn-sm" type="submit">Salvar revisão</button>
+                                </form>
+                            <?php endif; ?>
+                        </div>
 
                         <div class="border rounded p-3 mb-3">
 

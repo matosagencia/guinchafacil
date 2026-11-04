@@ -13,9 +13,11 @@ final class SimulationFlowTest extends TestCase
     protected function setUp(): void
     {
         $pdo = getPDO();
+        $pdo->exec('SET FOREIGN_KEY_CHECKS=0');
         foreach (['simulation_steps','simulation_runs','chat_mensagens','avaliacoes','pagamentos','pedidos','provider_capabilities','service_types','veiculos','guinchos','usuarios','logs_webhook','app_logs'] as $t) {
             try { $pdo->exec("DELETE FROM {$t}"); } catch (Throwable) {}
         }
+        $pdo->exec('SET FOREIGN_KEY_CHECKS=1');
         $pdo->exec("DELETE FROM configuracoes");
         $pdo->exec("INSERT INTO configuracoes (chave, valor) VALUES ('comissao_plataforma','0.15')");
         $pdo->exec("INSERT INTO configuracoes (chave, valor) VALUES ('tempo_expiracao_min','5')");

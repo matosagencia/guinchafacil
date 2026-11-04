@@ -1,0 +1,26 @@
+-- Fila auditavel de prospeccao. Nenhum envio e automatico por esta tabela.
+CREATE TABLE IF NOT EXISTS marketing_partner_prospect_queue (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    prospect_id BIGINT UNSIGNED NULL,
+    empresa VARCHAR(180) NOT NULL,
+    categoria VARCHAR(80) NOT NULL,
+    cidade VARCHAR(120) NULL,
+    uf CHAR(2) NULL,
+    fonte_publica VARCHAR(255) NULL,
+    contato_profissional VARCHAR(80) NULL,
+    canal_sugerido ENUM('whatsapp_manual','email_manual','telefone_manual','pesquisa') NOT NULL DEFAULT 'pesquisa',
+    score_total DECIMAL(6,2) NOT NULL DEFAULT 0,
+    score_demanda_sem_oferta DECIMAL(6,2) NOT NULL DEFAULT 0,
+    score_compatibilidade DECIMAL(6,2) NOT NULL DEFAULT 0,
+    score_capacidade DECIMAL(6,2) NOT NULL DEFAULT 0,
+    score_reputacao DECIMAL(6,2) NOT NULL DEFAULT 0,
+    score_indicacao DECIMAL(6,2) NOT NULL DEFAULT 0,
+    motivo_fit TEXT NULL,
+    mensagem_personalizada TEXT NULL,
+    status ENUM('descoberto','validado','contatado','respondeu','homologado','recusado') NOT NULL DEFAULT 'descoberto',
+    revisado_por INT NULL,
+    revisado_em DATETIME NULL,
+    criado_em DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    atualizado_em DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (id), UNIQUE KEY uq_partner_queue_prospect (prospect_id), KEY idx_partner_queue_status_score (status, score_total), KEY idx_partner_queue_city (cidade, uf)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

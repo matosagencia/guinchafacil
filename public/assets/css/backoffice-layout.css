@@ -943,3 +943,43 @@ body.admin .gf-fin2-root svg {
   flex: 0 0 auto;
 }
 
+/* Parceiro de indicação: mesma anatomia do backoffice, com paleta própria. */
+body.parceiro .gf-profile-sidebar { position:sticky; top:0; align-self:start; height:100vh; min-height:100vh; width:230px; min-width:0; padding:18px 8px; overflow-y:auto; background:#f0fbfa; color:#12313c; border-right:1px solid #bfe5df; scrollbar-width:none; }
+body.parceiro .gf-profile-sidebar::-webkit-scrollbar { width:0; height:0; display:none; }
+body.parceiro .gf-profile-brand { display:flex; align-items:center; gap:8px; margin:6px 12px 22px; color:#12313c; font-size:18px; font-weight:800; text-decoration:none; }
+body.parceiro .gf-profile-brand img { width:30px; height:30px; object-fit:contain; border-radius:8px; }
+body.parceiro .gf-profile-brand strong { color:#0f9f91; }
+body.parceiro .gf-profile-workspace { display:flex; align-items:center; gap:9px; padding:10px 12px 23px; color:#12313c; font-size:12px; }
+body.parceiro .gf-profile-workspace small { display:block; color:#51737a; font-size:10px; }
+body.parceiro .gf-profile-avatar { display:grid; place-items:center; flex:none; width:32px; height:32px; border-radius:7px; background:#0f9f91; color:#fff; }
+body.parceiro .gf-profile-sidebar .sidebar-title { margin:14px 6px 5px; padding:0 6px; color:#51737a; font-size:.61rem; letter-spacing:.12em; text-transform:uppercase; }
+body.parceiro .gf-profile-sidebar .sidebar-link { display:flex; align-items:center; gap:9px; min-height:36px; margin:0; padding:9px 12px; border-radius:6px; color:#3c626b; font-size:.78rem; text-decoration:none; }
+body.parceiro .gf-profile-sidebar .sidebar-link:hover, body.parceiro .gf-profile-sidebar .sidebar-link.active { color:#08766d; background:rgba(15,159,145,.14); }
+body.parceiro .gf-profile-sidebar .sidebar-link.active { font-weight:700; }
+body.parceiro .gf-profile-sidebar .sidebar-link i { width:16px; color:inherit; }
+body.parceiro .gf-profile-sidebar-footer { margin-top:auto; padding:20px 12px; font-size:12px; }
+body.parceiro .gf-profile-sidebar-footer a { color:#3c626b; text-decoration:none; }
+body.parceiro .main-content { background:#f7fffe; }
+body.parceiro .main-content > .gf-panel-topbar { background:#fff; }
+body.parceiro .gf-panel-topbar,
+body[data-role="parceiro"] .gf-panel-topbar { background:#fff!important; color:#12313c!important; border-bottom:1px solid #bfe5df!important; }
+body.parceiro .gf-panel-topbar .gf-panel-breadcrumb,
+body[data-role="parceiro"] .gf-panel-topbar .gf-panel-breadcrumb { color:#51737a!important; }
+body.parceiro .gf-panel-topbar .gf-panel-breadcrumb strong,
+body.parceiro .gf-panel-topbar .gf-panel-actions,
+body.parceiro .gf-panel-topbar .gf-panel-actions a,
+body[data-role="parceiro"] .gf-panel-topbar .gf-panel-breadcrumb strong,
+body[data-role="parceiro"] .gf-panel-topbar .gf-panel-actions,
+body[data-role="parceiro"] .gf-panel-topbar .gf-panel-actions a { color:#12313c!important; }
+body.parceiro > nav.navbar, body.parceiro > nav.gf-unified-topbar { display:none!important; height:0!important; min-height:0!important; overflow:hidden!important; }
+body.parceiro .gf-unified-shell { min-height:100vh; margin-top:0!important; }
+body.parceiro, body[data-role="parceiro"] { margin:0!important; padding-top:0!important; }
+body.parceiro > .gf-unified-topbar, body[data-role="parceiro"] > .gf-unified-topbar { position:absolute!important; top:0!important; height:0!important; min-height:0!important; }
+body.parceiro .main-wrapper.gf-unified-shell, body[data-role="parceiro"] .main-wrapper.gf-unified-shell { margin-top:0!important; top:0!important; transform:none!important; }
+body[data-role="parceiro"] > nav.navbar,
+body[data-role="parceiro"] > nav.gf-unified-topbar,
+body.parceiro > nav.navbar,
+body.parceiro > nav.gf-unified-topbar { display:none!important; visibility:hidden!important; height:0!important; min-height:0!important; max-height:0!important; margin:0!important; padding:0!important; overflow:hidden!important; }
+body[data-role="parceiro"] .gf-unified-shell,
+body.parceiro .gf-unified-shell { margin-top:0!important; padding-top:0!important; }
+

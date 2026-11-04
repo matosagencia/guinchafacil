@@ -20,6 +20,9 @@ require_once __DIR__ . '/../../src/Models/Pagamento.php';
  */
 final class SplitRepasseConclusaoTest extends TestCase
 {
+    private int $clienteId;
+    private int $veiculoId;
+
     protected function setUp(): void
     {
         $pdo = getPDO();
@@ -31,15 +34,18 @@ final class SplitRepasseConclusaoTest extends TestCase
         }
         $pdo->exec("INSERT INTO configuracoes (chave, valor) VALUES ('comissao_plataforma', '0.20')");
         $pdo->exec("INSERT INTO configuracoes (chave, valor) VALUES ('reserva_gateway_percentual', '0.045')");
+        $suffix = bin2hex(random_bytes(4));
 
         $pdo->exec("
-            INSERT INTO usuarios (id, nome, email, senha_hash, telefone, cpf, tipo) VALUES
-            (931, 'Cliente Split', 'cliente.split@example.com', 'hash', '11999994001', '93111111111', 'cliente')
+            INSERT INTO usuarios (nome, email, senha_hash, telefone, cpf, tipo) VALUES
+            ('Cliente Split', 'cliente.split.{$suffix}@example.com', 'hash', '11999994001', '{$suffix}111111', 'cliente')
         ");
+        $this->clienteId = (int)$pdo->lastInsertId();
         $pdo->exec("
-            INSERT INTO veiculos (id, usuario_id, placa, marca, modelo, ano, cor, tipo) VALUES
-            (931, 931, 'SPL1A23', 'Marca', 'Modelo', 2020, 'Prata', 'carro')
+            INSERT INTO veiculos (usuario_id, placa, marca, modelo, ano, cor, tipo) VALUES
+            ({$this->clienteId}, 'SPL{$suffix}', 'Marca', 'Modelo', 2020, 'Prata', 'carro')
         ");
+        $this->veiculoId = (int)$pdo->lastInsertId();
     }
 
     private function invoke(int $pedidoId, float $valorTotal, array $cfg): array
@@ -54,17 +60,18 @@ final class SplitRepasseConclusaoTest extends TestCase
     {
         $pdo = getPDO();
         $pdo->exec("
-            INSERT INTO pedidos (id, status, custo_estimado, custo_final, cliente_id, veiculo_id, lat_origem, lng_origem, endereco_origem, lat_destino, lng_destino, endereco_destino)
-            VALUES (931, 'em_reboque', 100.00, 100.00, 931, 931, -23.55, -46.63, 'Origem', -23.56, -46.64, 'Destino')
+            INSERT INTO pedidos (status, custo_estimado, custo_final, cliente_id, veiculo_id, lat_origem, lng_origem, endereco_origem, lat_destino, lng_destino, endereco_destino)
+            VALUES ('em_reboque', 100.00, 100.00, {$this->clienteId}, {$this->veiculoId}, -23.55, -46.63, 'Origem', -23.56, -46.64, 'Destino')
         ");
+        $pedidoId = (int)$pdo->lastInsertId();
         // Split já aprovado com a fórmula líquida correta (§SPLIT-LIQUIDO-01):
         // líquido pós-gateway = 100 * 0.955 = 95.5; comissão 20% = 19.10; guincho = 76.40.
         $pdo->exec("
             INSERT INTO pagamentos (pedido_id, metodo, status, valor_total, valor_guincho, valor_plataforma)
-            VALUES (931, 'mercadopago', 'aprovado', 100.00, 76.40, 19.10)
+            VALUES ({$pedidoId}, 'mercadopago', 'aprovado', 100.00, 76.40, 19.10)
         ");
 
-        [$valorGuincho, $valorPlataforma] = $this->invoke(931, 100.00, ['comissao_plataforma' => '0.20', 'reserva_gateway_percentual' => '0.045']);
+        [$valorGuincho, $valorPlataforma] = $this->invoke($pedidoId, 100.00, ['comissao_plataforma' => '0.20', 'reserva_gateway_percentual' => '0.045']);
 
         // O valor tem que ser EXATAMENTE o já aprovado (76.40), não o que a
         // fórmula antiga (sem reserva) geraria (80.00 — comissão 20% direto
@@ -78,12 +85,13 @@ final class SplitRepasseConclusaoTest extends TestCase
     {
         $pdo = getPDO();
         $pdo->exec("
-            INSERT INTO pedidos (id, status, custo_estimado, custo_final, cliente_id, veiculo_id, lat_origem, lng_origem, endereco_origem, lat_destino, lng_destino, endereco_destino)
-            VALUES (932, 'em_reboque', 100.00, 100.00, 931, 931, -23.55, -46.63, 'Origem', -23.56, -46.64, 'Destino')
+            INSERT INTO pedidos (status, custo_estimado, custo_final, cliente_id, veiculo_id, lat_origem, lng_origem, endereco_origem, lat_destino, lng_destino, endereco_destino)
+            VALUES ('em_reboque', 100.00, 100.00, {$this->clienteId}, {$this->veiculoId}, -23.55, -46.63, 'Origem', -23.56, -46.64, 'Destino')
         ");
+        $pedidoId = (int)$pdo->lastInsertId();
         // Nenhum pagamento aprovado para este pedido (cenário freeflow puro).
 
-        [$valorGuincho, $valorPlataforma] = $this->invoke(932, 100.00, ['comissao_plataforma' => '0.20', 'reserva_gateway_percentual' => '0.045']);
+        [$valorGuincho, $valorPlataforma] = $this->invoke($pedidoId, 100.00, ['comissao_plataforma' => '0.20', 'reserva_gateway_percentual' => '0.045']);
 
         // Fallback deve usar a MESMA fórmula líquida da aprovação (com
         // reserva de gateway descontada), não a fórmula antiga.
@@ -95,18 +103,19 @@ final class SplitRepasseConclusaoTest extends TestCase
     {
         $pdo = getPDO();
         $pdo->exec("
-            INSERT INTO pedidos (id, status, custo_estimado, custo_final, cliente_id, veiculo_id, lat_origem, lng_origem, endereco_origem, lat_destino, lng_destino, endereco_destino)
-            VALUES (933, 'em_reboque', 100.00, 250.00, 931, 931, -23.55, -46.63, 'Origem', -23.56, -46.64, 'Destino')
+            INSERT INTO pedidos (status, custo_estimado, custo_final, cliente_id, veiculo_id, lat_origem, lng_origem, endereco_origem, lat_destino, lng_destino, endereco_destino)
+            VALUES ('em_reboque', 100.00, 250.00, {$this->clienteId}, {$this->veiculoId}, -23.55, -46.63, 'Origem', -23.56, -46.64, 'Destino')
         ");
+        $pedidoId = (int)$pdo->lastInsertId();
         // Pagamento aprovado com valor_total ANTIGO (100), mas o pedido já
         // tem custo_final maior (250) — não deve reaproveitar cegamente o
         // split de 100 pra um total de 250.
         $pdo->exec("
             INSERT INTO pagamentos (pedido_id, metodo, status, valor_total, valor_guincho, valor_plataforma)
-            VALUES (933, 'mercadopago', 'aprovado', 100.00, 76.40, 19.10)
+            VALUES ({$pedidoId}, 'mercadopago', 'aprovado', 100.00, 76.40, 19.10)
         ");
 
-        [$valorGuincho, ] = $this->invoke(933, 250.00, ['comissao_plataforma' => '0.20', 'reserva_gateway_percentual' => '0.045']);
+        [$valorGuincho, ] = $this->invoke($pedidoId, 250.00, ['comissao_plataforma' => '0.20', 'reserva_gateway_percentual' => '0.045']);
 
         $this->assertNotEqualsWithDelta(76.40, $valorGuincho, 0.01, 'Não deve reaproveitar um split calculado para um valor_total diferente do atual.');
         // Fallback com fórmula líquida sobre 250: 250*0.955=238.75; comissão 20%=47.75; guincho=191.00

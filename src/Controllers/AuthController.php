@@ -42,7 +42,7 @@ class AuthController extends BaseController
         $resultado = [];
         foreach (Cidade::listarAtivas() as $cidade) {
             foreach (PricingZone::listarPorOrdemExpansao((int)$cidade['id'], true) as $zona) {
-                if (($zona['status_expansao'] ?? '') === 'pedra_viva' && !empty($cidade['slug'])) {
+                if (!empty($zona['polygon_geojson']) && !empty($cidade['slug'])) {
                     $resultado[] = $cidade;
                     break;
                 }
@@ -69,10 +69,10 @@ class AuthController extends BaseController
     {
         // 1. Tipo (define o redirect de volta)
         $tipo = (string)($_POST['tipo_parceiro'] ?? '');
-        if ($tipo !== 'guincho' && $tipo !== 'oficina') {
+        if ($tipo !== 'guincho' && $tipo !== 'oficina' && $tipo !== 'distribuicao') {
             $tipo = 'oficina';
         }
-        $redirectBase = '/parceiros/' . ($tipo === 'guincho' ? 'guinchos' : 'oficinas');
+        $redirectBase = $tipo === 'guincho' ? '/parceiros/guinchos' : ($tipo === 'oficina' ? '/parceiros/oficinas' : '/parceiros/indicacao');
 
         // 2. CSRF
         if (!$this->validateCSRFToken((string)($_POST['csrf_token'] ?? ''))) {
@@ -130,13 +130,21 @@ class AuthController extends BaseController
         }
 
         $cidade = Cidade::buscarPorSlug($slug);
+        // Landing SEO pode existir antes da ativacao territorial no banco.
+        // Nao cria cobertura nem regra de preco: a disponibilidade vem da cotacao.
+        if (!$cidade && $slug === 'rio-de-janeiro-rj') {
+            $cidade = ['id' => 0, 'nome' => 'Rio de Janeiro', 'uf' => 'RJ', 'slug' => $slug, 'ativo' => 1];
+        }
         if (!$cidade || (int)($cidade['ativo'] ?? 0) !== 1) {
             http_response_code(404);
             echo 'P�gina n�o encontrada.';
             return;
         }
 
-        $zonas = PricingZone::listarPorOrdemExpansao((int)$cidade['id'], true);
+        $zonas = (int)$cidade['id'] > 0 ? PricingZone::listarPorOrdemExpansao((int)$cidade['id'], true) : [[
+            'id' => 0, 'name' => 'Rio de Janeiro', 'ordem_expansao' => null,
+            'bairros_referencia' => 'Área metropolitana em qualificação', 'polygon_geojson' => null,
+        ]];
         if (!$zonas) {
             http_response_code(404);
             echo 'Atendimento ainda n�o dispon�vel nesta cidade.';
@@ -145,7 +153,7 @@ class AuthController extends BaseController
 
         $indexavel = false;
         foreach ($zonas as $zona) {
-            if (($zona['status_expansao'] ?? '') === 'pedra_viva') {
+            if (!empty($zona['polygon_geojson'])) {
                 $indexavel = true;
                 break;
             }
@@ -157,12 +165,13 @@ class AuthController extends BaseController
         require_once __DIR__ . '/../Models/Catalog/ServiceType.php';
         require_once __DIR__ . '/../Models/Guincho.php';
         $servicosCatalogo = ServiceType::listarAtivos();
-        $zonasVivas = array_values(array_filter($zonas, static fn(array $zona): bool => ($zona['status_expansao'] ?? '') === 'pedra_viva'));
+        $zonasVivas = array_values(array_filter($zonas, static fn(array $zona): bool => !empty($zona['polygon_geojson'])));
+        $zonasExibidas = $zonasVivas;
         $guinchosAtivosCidade = Guincho::disponibilidadePorZonasCache(
             array_map(static fn(array $zona): int => (int)$zona['id'], $zonasVivas)
         );
 
-        require __DIR__ . '/../Views/public/cidade.php';
+        require __DIR__ . '/../Views/public/cidade_moderno.php';
     }
 
     /** Sitemap p�blico derivado das cidades que t�m cobertura ativa. */
@@ -172,6 +181,16 @@ class AuthController extends BaseController
         $urls = [
             ['loc' => 'https://guinchafacil.com.br/', 'freq' => 'weekly', 'priority' => '1.0'],
             ['loc' => 'https://guinchafacil.com.br/pre-cotacao', 'freq' => 'weekly', 'priority' => '0.9'],
+            ['loc' => 'https://guinchafacil.com.br/parceiros', 'freq' => 'monthly', 'priority' => '0.7'],
+            ['loc' => 'https://guinchafacil.com.br/parceiros/seguradoras', 'freq' => 'monthly', 'priority' => '0.6'],
+            ['loc' => 'https://guinchafacil.com.br/parceiros/frotas', 'freq' => 'monthly', 'priority' => '0.6'],
+            ['loc' => 'https://guinchafacil.com.br/parceiros/indicacao', 'freq' => 'monthly', 'priority' => '0.6'],
+            ['loc' => 'https://guinchafacil.com.br/guincho/rio-de-janeiro-rj', 'freq' => 'weekly', 'priority' => '0.8'],
+            ['loc' => 'https://guinchafacil.com.br/servicos/guincho-carro', 'freq' => 'weekly', 'priority' => '0.8'],
+            ['loc' => 'https://guinchafacil.com.br/servicos/guincho-moto', 'freq' => 'weekly', 'priority' => '0.7'],
+            ['loc' => 'https://guinchafacil.com.br/servicos/reboque-para-oficina', 'freq' => 'weekly', 'priority' => '0.8'],
+            ['loc' => 'https://guinchafacil.com.br/servicos/bateria', 'freq' => 'monthly', 'priority' => '0.6'],
+            ['loc' => 'https://guinchafacil.com.br/servicos/pneu', 'freq' => 'monthly', 'priority' => '0.6'],
         ];
 
         foreach ($this->cidadesComCoberturaSeo() as $cidade) {
@@ -404,6 +423,8 @@ class AuthController extends BaseController
             'detalhamento' => (array)$resultado['detalhamento'],
             'fonte_km' => $fonteKm,
             'zona_id' => $zonaId,
+            'cobertura_status' => 'Cobertura operacional encontrada',
+            'status_busca' => 'Pronto para confirmar',
         ];
         $origemTarifa = 'precificacao_oficial';
         $regraId = (int)$resultado['regra_id'];
@@ -1143,7 +1164,7 @@ class AuthController extends BaseController
     public function registroSimplesForm(string $tipo): void
     {
         if ($this->isAuthenticated()) { $this->redirectByProfile(); return; }
-        if (!in_array($tipo, ['cliente','guincho','oficina'], true)) {
+        if (!in_array($tipo, ['cliente','guincho','oficina','parceiro'], true)) {
             $this->setFlashMessage('Tipo de cadastro invalido.', 'error');
             $this->redirect('/registro/cliente');
             return;
@@ -1156,7 +1177,7 @@ class AuthController extends BaseController
 
     public function registroSimples(string $tipo): void
     {
-        $tipo = in_array($tipo, ['cliente','guincho','oficina'], true) ? $tipo : 'cliente';
+        $tipo = in_array($tipo, ['cliente','guincho','oficina','parceiro'], true) ? $tipo : 'cliente';
         if (!$this->validateCSRFToken($_POST['csrf_token'] ?? '')) {
             $this->setFlashMessage('Sessao expirada. Tente novamente.', 'error');
             $this->redirect('/registro/simples/' . $tipo);
@@ -1224,15 +1245,21 @@ class AuthController extends BaseController
         $stmt = $pdo->prepare('SELECT id, nome, email, telefone, cpf, tipo, perfil_status FROM usuarios WHERE id = ? LIMIT 1');
         $stmt->execute([(int)$user['id']]);
         $u = $stmt->fetch(PDO::FETCH_ASSOC) ?: [];
-        if (($u['perfil_status'] ?? '') === 'COMPLETO') { $this->redirectByProfile((string)$u['tipo']); return; }
-
-        $tipo = in_array((string)($u['tipo'] ?? 'cliente'), ['cliente','guincho','oficina','especialista'], true) ? (string)$u['tipo'] : 'cliente';
+        $tipo = in_array((string)($u['tipo'] ?? 'cliente'), ['cliente','guincho','oficina','especialista','parceiro'], true) ? (string)$u['tipo'] : 'cliente';
         $salvo = [
             'nome' => $u['nome'] ?? '',
             'telefone' => $u['telefone'] ?? '',
             'cpf' => $u['cpf'] ?? '',
             'estado' => '',
         ];
+        if ($tipo === 'parceiro') {
+            $end = $pdo->prepare('SELECT cep, logradouro, numero, complemento, bairro, cidade, estado FROM enderecos WHERE usuario_id = ? AND principal = 1 LIMIT 1');
+            $end->execute([(int)$user['id']]);
+            $salvo = array_merge($salvo, $end->fetch(PDO::FETCH_ASSOC) ?: []);
+            $partner = PartnerProfileService::find((int)$user['id']);
+            $salvo['chave_pix'] = $partner['chave_pix'] ?? '';
+            $salvo['chave_pix_tipo'] = $partner['chave_pix_tipo'] ?? 'aleatoria';
+        }
         $pendenteAprovacao = (($u['perfil_status'] ?? '') === 'PENDENTE_APROVACAO');
         $csrf_token = $this->generateCSRFToken();
         $flash = $this->pullFlash();
@@ -1260,16 +1287,23 @@ class AuthController extends BaseController
         $bairro = trim((string)($_POST['bairro'] ?? ''));
         $cidade = trim((string)($_POST['cidade'] ?? ''));
         $estado = strtoupper(trim((string)($_POST['estado'] ?? '')));
+        $chavePix = trim((string)($_POST['chave_pix'] ?? ''));
+        $tipoPix = trim((string)($_POST['chave_pix_tipo'] ?? ''));
 
         $erros = [];
         if (mb_strlen($nome) < 3) $erros[] = 'Nome invalido.';
         if (!$this->validarDocumentoBr($cpf)) $erros[] = 'CPF ou CNPJ invalido.';
         if (!$this->validarTelefoneBr($telefone)) $erros[] = 'Telefone invalido.';
-        if (strlen($senha) < 8) $erros[] = 'Senha deve ter 8+ caracteres.';
-        if ($senha !== $conf) $erros[] = 'Senhas nao conferem.';
+        if ($senha !== '' && strlen($senha) < 8) $erros[] = 'A nova senha deve ter 8+ caracteres.';
+        if ($senha !== '' && $senha !== $conf) $erros[] = 'Senhas nao conferem.';
         if (strlen($cep) !== 8) $erros[] = 'CEP invalido.';
         if ($logradouro === '' || $numero === '' || $bairro === '' || $cidade === '') $erros[] = 'Endereco incompleto.';
         if (!preg_match('/^[A-Z]{2}$/', $estado)) $erros[] = 'UF invalida.';
+        $tipoAtual = (string)($_SESSION['user']['tipo'] ?? 'cliente');
+        if ($tipoAtual === 'parceiro') {
+            if ($chavePix === '') $erros[] = 'Chave PIX obrigatoria para liberar o painel.';
+            if (!in_array($tipoPix, ['cpf','cnpj','email','telefone','aleatoria'], true)) $erros[] = 'Tipo de chave PIX invalido.';
+        }
 
         if ($erros) {
             $this->setFlashMessage(implode(' ', $erros), 'error');
@@ -1290,11 +1324,15 @@ class AuthController extends BaseController
                 return;
             }
 
-            $tipoAtual = (string)($_SESSION['user']['tipo'] ?? 'cliente');
-            $novoStatus = ($tipoAtual === 'cliente') ? 'COMPLETO' : 'PENDENTE_APROVACAO';
+            $novoStatus = in_array($tipoAtual, ['cliente','parceiro'], true) ? 'COMPLETO' : 'PENDENTE_APROVACAO';
 
-            $pdo->prepare('UPDATE usuarios SET nome = ?, cpf = ?, telefone = ?, senha_hash = ?, perfil_status = ?, atualizado_em = NOW() WHERE id = ?')
-                ->execute([$nome, $cpf, $telefone, password_hash($senha, PASSWORD_BCRYPT), $novoStatus, (int)$user['id']]);
+            if ($senha !== '') {
+                $pdo->prepare('UPDATE usuarios SET nome = ?, cpf = ?, telefone = ?, senha_hash = ?, perfil_status = ?, atualizado_em = NOW() WHERE id = ?')
+                    ->execute([$nome, $cpf, $telefone, password_hash($senha, PASSWORD_BCRYPT), $novoStatus, (int)$user['id']]);
+            } else {
+                $pdo->prepare('UPDATE usuarios SET nome = ?, cpf = ?, telefone = ?, perfil_status = ?, atualizado_em = NOW() WHERE id = ?')
+                    ->execute([$nome, $cpf, $telefone, $novoStatus, (int)$user['id']]);
+            }
 
             $temEnd = $pdo->prepare('SELECT id FROM enderecos WHERE usuario_id = ? LIMIT 1');
             $temEnd->execute([(int)$user['id']]);
@@ -1304,6 +1342,10 @@ class AuthController extends BaseController
             } else {
                 $pdo->prepare('INSERT INTO enderecos (usuario_id, cep, logradouro, numero, complemento, bairro, cidade, estado, principal) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1)')
                     ->execute([(int)$user['id'], $cep, $logradouro, $numero, trim((string)($_POST['complemento'] ?? '')) ?: null, $bairro, $cidade, $estado]);
+            }
+
+            if ($tipoAtual === 'parceiro') {
+                PartnerProfileService::savePix((int)$user['id'], $chavePix, $tipoPix);
             }
 
             $_SESSION['user']['nome'] = $nome;
@@ -2055,6 +2097,7 @@ class AuthController extends BaseController
             'gerente'     => '/gerente/dashboard',
             'especialista'=> '/especialista/dashboard',
             'oficina'      => '/oficina/dashboard',
+            'parceiro'     => '/parceiro/dashboard',
             default        => '/logout',
         };
 

@@ -106,8 +106,8 @@ final class ProspeccaoParceirosService
         $stmt = $this->pdo->prepare(
             "SELECT * FROM prospeccao_leads
              WHERE status = 'novo' AND regiao_id IN ({$placeholders})
-             ORDER BY score_go DESC, id DESC
-             LIMIT " . (int)$limite
+             ORDER BY id DESC
+             LIMIT 500"
         );
         $stmt->execute($idsRegioes);
         $leads = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -119,14 +119,78 @@ final class ProspeccaoParceirosService
                 continue;
             }
             $convite = $this->mensagemService->gerarConvite($lead, $regiao);
+            $avaliacao = PartnerProspectingScoreService::avaliar($lead, $regiao);
+            $mensagemPersonalizada = PartnerProspectingScoreService::mensagem($lead, $regiao);
+            $this->registrarFilaParceiro($lead, $regiao, $avaliacao, $mensagemPersonalizada);
             $fila[] = [
                 'lead' => $lead,
                 'regiao' => $regiao,
                 'convite' => $convite,
+                'avaliacao' => $avaliacao,
+                'mensagem_personalizada' => $mensagemPersonalizada,
             ];
         }
 
-        return $fila;
+        usort($fila, static function (array $a, array $b): int {
+            return ((float)($b['avaliacao']['total'] ?? 0) <=> (float)($a['avaliacao']['total'] ?? 0));
+        });
+
+        return array_slice($fila, 0, max(1, $limite));
+    }
+
+    private function registrarFilaParceiro(array $lead, array $regiao, array $avaliacao, string $mensagem): void
+    {
+        try {
+            $exists = $this->pdo->query("SELECT 1 FROM information_schema.TABLES WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'marketing_partner_prospect_queue' LIMIT 1");
+            if (!$exists || !$exists->fetchColumn()) {
+                return;
+            }
+            $sql = "INSERT INTO marketing_partner_prospect_queue
+                (prospect_id, empresa, categoria, cidade, uf, fonte_publica, contato_profissional, canal_sugerido,
+                 score_total, score_demanda_sem_oferta, score_compatibilidade, score_capacidade, score_reputacao,
+                 score_indicacao, motivo_fit, mensagem_personalizada)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ON DUPLICATE KEY UPDATE atualizado_em = CURRENT_TIMESTAMP";
+            $this->pdo->prepare($sql)->execute([
+                (int)($lead['id'] ?? 0),
+                (string)($lead['nome_negocio'] ?? ''),
+                (string)($lead['categoria'] ?? ''),
+                (string)($regiao['cidade'] ?? $lead['cidade'] ?? ''),
+                (string)($regiao['uf'] ?? $lead['uf'] ?? ''),
+                (string)($lead['fonte'] ?? $lead['website'] ?? ''),
+                (string)($lead['telefone'] ?? $lead['email'] ?? ''),
+                (string)($avaliacao['canal_sugerido'] ?? 'pesquisa'),
+                (float)($avaliacao['total'] ?? 0),
+                (float)($avaliacao['scores']['demanda_sem_oferta'] ?? 0),
+                (float)($avaliacao['scores']['compatibilidade'] ?? 0),
+                (float)($avaliacao['scores']['capacidade'] ?? 0),
+                (float)($avaliacao['scores']['reputacao'] ?? 0),
+                (float)($avaliacao['scores']['indicacao'] ?? 0),
+                (string)($avaliacao['motivo_fit'] ?? ''),
+                $mensagem,
+            ]);
+        } catch (Throwable $e) {
+            Logger::log(Logger::LEVEL_WARNING, __CLASS__, __FUNCTION__, 'marketing', 'Fila de prospeccao nao persistida', ['erro' => $e->getMessage()]);
+        }
+    }
+
+    public function atualizarStatusFila(int $prospectId, string $status, int $usuarioId): void
+    {
+        $permitidos = ['descoberto', 'validado', 'contatado', 'respondeu', 'homologado', 'recusado'];
+        if ($prospectId <= 0 || !in_array($status, $permitidos, true)) {
+            throw new InvalidArgumentException('Status ou prospecto invalido.');
+        }
+        $stmt = $this->pdo->prepare("UPDATE marketing_partner_prospect_queue
+            SET status = ?, revisado_por = ?, revisado_em = NOW()
+            WHERE prospect_id = ?");
+        $stmt->execute([$status, $usuarioId > 0 ? $usuarioId : null, $prospectId]);
+        if ($stmt->rowCount() < 1) {
+            throw new RuntimeException('Prospecto nao encontrado na fila auditavel.');
+        }
+        $this->registrarAtividade('operacao', 'prospeccao_status_atualizado', [
+            'titulo' => 'Status de prospeccao atualizado',
+            'detalhes' => ['prospect_id' => $prospectId, 'status' => $status, 'usuario_id' => $usuarioId],
+        ]);
     }
 
     public function marcarComoEnviado(int $leadId, string $mensagemTexto, ?string $waLink, int $usuarioId): void

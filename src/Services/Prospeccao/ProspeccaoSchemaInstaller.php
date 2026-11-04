@@ -34,6 +34,11 @@ final class ProspeccaoSchemaInstaller
         return self::tablesExist($pdo, $requiredTables);
     }
 
+    public static function ensureQueue(PDO $pdo, string $sqlFile): bool
+    {
+        return self::ensureAdditional($pdo, $sqlFile, ['marketing_partner_prospect_queue']);
+    }
+
     private static function schemaExists(PDO $pdo): bool
     {
         return self::tablesExist($pdo, ['prospeccao_regioes', 'prospeccao_leads', 'prospeccao_convites']);

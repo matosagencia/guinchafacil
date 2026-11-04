@@ -9,6 +9,8 @@ require_once __DIR__ . '/../Services/Prospeccao/SerpApiMapsClient.php';
 require_once __DIR__ . '/../Services/Prospeccao/RegiaoQuotaService.php';
 require_once __DIR__ . '/../Services/Prospeccao/MensagemPersuasaoService.php';
 require_once __DIR__ . '/../Services/Prospeccao/ProspeccaoParceirosService.php';
+require_once __DIR__ . '/../Services/PartnerReferralCommissionService.php';
+require_once __DIR__ . '/../Services/MarketingEventService.php';
 
 final class SeoPartnerController extends BaseController
 {
@@ -16,12 +18,14 @@ final class SeoPartnerController extends BaseController
     public function index(): void
     {
         $csrf_token = $this->generateCSRFToken();
+        MarketingEventService::recordFunnel('partner_page_view', ['slug' => 'hub'], 'hub');
         require __DIR__ . '/../Views/public/parceiros/index.php';
     }
 
     /** Página de captação de empresas de guincho. Não depende de cidade. */
     public function guinchos(): void
     {
+        $comissao_parceiro_percentual = PartnerReferralCommissionService::currentPercent('guincho');
         $csrf_token = $this->generateCSRFToken();
         $enviado = (($_GET['enviado'] ?? '') === '1');
         $erro = (string)($_GET['erro'] ?? '');
@@ -31,6 +35,7 @@ final class SeoPartnerController extends BaseController
     /** Página genérica de captação de oficinas. Não depende de cidade. */
     public function oficinas(): void
     {
+        $comissao_parceiro_percentual = PartnerReferralCommissionService::currentPercent('oficina');
         $csrf_token = $this->generateCSRFToken();
         $enviado = (($_GET['enviado'] ?? '') === '1');
         $erro = (string)($_GET['erro'] ?? '');

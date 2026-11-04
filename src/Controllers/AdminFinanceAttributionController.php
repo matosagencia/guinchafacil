@@ -11,7 +11,7 @@ require_once __DIR__ . '/../Services/Prospeccao/SerpApiMapsClient.php';
 require_once __DIR__ . '/../Services/Prospeccao/RegiaoQuotaService.php';
 require_once __DIR__ . '/../Services/Prospeccao/MensagemPersuasaoService.php';
 require_once __DIR__ . '/../Services/Prospeccao/ProspeccaoParceirosService.php';
-require_once __DIR__ . '/../Services/Prospeccao/ProspeccaoSchemaInstaller.php';
+require_once __DIR__ . '/../Services/Prospeccao/ProspeccaoSchemaInstaller.php';require_once __DIR__ . '/../Services/Prospeccao/PartnerProspectingScoreService.php';
 require_once __DIR__ . '/../Models/Pricing/PricingZone.php';
 require_once __DIR__ . '/../Models/Cidade.php';
 
@@ -110,7 +110,7 @@ final class AdminFinanceAttributionController extends BaseController
             $_SESSION['flash_success'] = 'Cadastro confirmado e quota atualizada.';
         });
         $this->redirect('/admin/marketing#prospeccao');
-    }
+    }    public function prospeccaoFilaStatus(int $prospectId): void    {        $this->executarProspecaoAction(function (ProspeccaoParceirosService $service) use ($prospectId): void {            $status = trim((string)($_POST['status'] ?? ''));            $usuarioId = (int)($_SESSION['user']['id'] ?? $_SESSION['user_id'] ?? 0);            $service->atualizarStatusFila($prospectId, $status, $usuarioId);            $_SESSION['flash_success'] = 'Status da prospeccao atualizado para ' . $status . '.';        });        $this->redirect('/admin/marketing#prospeccao');    }
 
     public function prospeccaoSincronizarZonas(): void
     {
@@ -121,7 +121,7 @@ final class AdminFinanceAttributionController extends BaseController
         }
 
         try {
-            $this->ensureProspecaoSchema();
+            $this->ensureProspecaoSchema();            ProspeccaoSchemaInstaller::ensureQueue(                getPDO(),                __DIR__ . '/../../../install/migration_marketing_partner_prospect_queue_v1.sql'            );
             $regiaoService = $this->prospeccaoRegiaoService();
             $prospeccaoService = $this->prospeccaoService($regiaoService);
             $zonas = $this->carregarZonasTerritoriaisProspecao();

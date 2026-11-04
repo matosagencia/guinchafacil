@@ -88,7 +88,7 @@ require __DIR__ . '/../_header-public.php';
         <div class="gf-container">
             <div class="gf-eyebrow">SIMULADOR DE GANHOS</div>
             <h2 class="gf-section-title">Veja o potencial da sua operacao.</h2>
-            <p class="gf-section-description">Uma projecao ilustrativa, sem promessa de renda ou volume de chamados.</p>
+            <p class="gf-section-description">Uma projecao ilustrativa, sem promessa de renda ou volume de chamados. Comissao configurada para este perfil: <strong><?= $e(number_format((float)$comissao_parceiro_percentual, 2, ',', '.')) ?>%</strong>.</p>
 
             <div class="gf-simulator">
                 <label class="gf-simulator__field">
@@ -115,27 +115,7 @@ require __DIR__ . '/../_header-public.php';
                 <h2 class="gf-section-title">Crie sua conta em 30 segundos.</h2>
                 <p class="gf-section-description">Informe nome, WhatsApp e e-mail. Depois voce completa os dados do veiculo e documentos no painel.</p>
 
-                <form method="POST" action="<?php echo $e($bp); ?>/registro/simples/guincho" class="gf-fields-stack">
-                    <input type="hidden" name="csrf_token" value="<?php echo $e($csrf_token_view); ?>">
-                    <input type="hidden" name="tipo" value="guincho">
-
-                    <div class="gf-field">
-                        <label class="gf-field-label" for="g_nome">Seu nome completo *</label>
-                        <input class="gf-field-control" type="text" id="g_nome" name="nome" required minlength="3" maxlength="120" autocomplete="name" placeholder="Como podemos te chamar?">
-                    </div>
-                    <div class="gf-field">
-                        <label class="gf-field-label" for="g_tel">WhatsApp *</label>
-                        <input class="gf-field-control" type="tel" id="g_tel" name="telefone" required inputmode="tel" autocomplete="tel" placeholder="(21) 99999-9999">
-                    </div>
-                    <div class="gf-field">
-                        <label class="gf-field-label" for="g_email">E-mail *</label>
-                        <input class="gf-field-control" type="email" id="g_email" name="email" required autocomplete="email" placeholder="voce@email.com">
-                    </div>
-
-                    <button class="gf-btn gf-btn--primary gf-btn--lg" type="submit" style="width:100%">
-                        Criar minha conta gratis &rarr;
-                    </button>
-                </form>
+                <div class="gf-funnel-cta"><p class="gf-section-description">Comece pelo cadastro e continue pelo funil seguro. Depois do login, completaremos os dados obrigatórios do guincheiro.</p><a class="gf-btn gf-btn--primary gf-btn--lg" style="width:100%" href="<?php echo $e($bp); ?>/registro/simples/guincho">Criar minha conta de guincheiro &rarr;</a><p class="gf-form-note" style="justify-content:center;margin-top:16px">Já tem conta? <a href="<?php echo $e($bp); ?>/login?retorno=/perfil/completar">Fazer login e continuar</a>.</p></div>
 
                 <div class="gf-form-divider"><span>ou</span></div>
 
@@ -175,6 +155,7 @@ require __DIR__ . '/../_header-public.php';
     var lAt = document.getElementById('sim-atend');
     var lDi = document.getElementById('sim-dias');
     var lTo = document.getElementById('sim-total');
+    var commission = <?= json_encode((float)$comissao_parceiro_percentual) ?> / 100;
     if (!rAt || !rDi || !lTo) return;
     function fmtBR(n){ return n.toLocaleString('pt-BR', { minimumFractionDigits: 0, maximumFractionDigits: 0 }); }
     function recalc(){
@@ -182,7 +163,7 @@ require __DIR__ . '/../_header-public.php';
         var d = parseInt(rDi.value, 10) || 1;
         lAt.textContent = String(a);
         lDi.textContent = String(d);
-        lTo.textContent = 'R$ ' + fmtBR(a * d * 180);
+        lTo.textContent = 'R$ ' + fmtBR(a * d * 180 * (1 - commission));
     }
     rAt.addEventListener('input', recalc);
     rDi.addEventListener('input', recalc);

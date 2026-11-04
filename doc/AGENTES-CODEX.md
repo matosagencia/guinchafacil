@@ -13,6 +13,10 @@ Antes de agir, cada agente deve:
 5. Preservar alteracoes existentes e nunca adicionar arquivos em massa.
 6. Registrar evidencias, limites e bloqueios em Markdown.
 
+### Precedencia e conflito
+
+Antes de editar, ler `doc/INDICE-AUTORIDADE-DOCUMENTAL.md`. `CONTRATOS.md` e `DECISOES.md` vencem qualquer rascunho, backup, conversa ou instrução de módulo. Se outro agente tiver alterado o mesmo arquivo ou contrato, parar, registrar o conflito e passar a decisão ao agente C/dono; é proibido sobrescrever silenciosamente.
+
 ## Agente A - Motor e Integracoes
 
 Responsavel por regras de negocio, cobertura, expansao de raio, catalogo, precificacao, pedidos, pagamentos, webhooks e migrations necessarias ao contrato.

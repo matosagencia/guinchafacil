@@ -202,6 +202,7 @@ if ($metodo === 'HEAD') {
 $rotas = [
 
     'GET' => [
+        '/parceiro/dashboard' => ['PartnerController', 'dashboard', 'parceiro'],
         // === OFICINA ===
         '/oficina/pedido/{id}/status'    => ['OficinaController', 'statusJson',          'oficina'],
         '/oficina/pedido/{id}'           => ['OficinaController', 'atendimento',         'oficina'],
@@ -224,6 +225,16 @@ $rotas = [
         '/parceiros'          => ['SeoPartnerController', 'index',    null],
         '/parceiros/guinchos' => ['SeoPartnerController', 'guinchos', null],
         '/parceiros/oficinas' => ['SeoPartnerController', 'oficinas', null],
+        '/parceiros/seguradoras' => ['SeoMarketingController', 'parceiro', null, ['seguradoras']],
+        '/parceiros/frotas' => ['SeoMarketingController', 'parceiro', null, ['frotas']],
+        '/parceiros/postos-estacionamentos' => ['SeoMarketingController', 'parceiro', null, ['postos-estacionamentos']],
+        '/parceiros/concessionarias-rastreadores' => ['SeoMarketingController', 'parceiro', null, ['concessionarias-rastreadores']],
+        '/parceiros/indicacao' => ['SeoMarketingController', 'parceiro', null, ['indicacao']],
+        '/servicos/guincho-carro' => ['SeoMarketingController', 'servico', null, ['guincho-carro']],
+        '/servicos/guincho-moto' => ['SeoMarketingController', 'servico', null, ['guincho-moto']],
+        '/servicos/reboque-para-oficina' => ['SeoMarketingController', 'servico', null, ['reboque-para-oficina']],
+        '/servicos/bateria' => ['SeoMarketingController', 'servico', null, ['bateria']],
+        '/servicos/pneu' => ['SeoMarketingController', 'servico', null, ['pneu']],
         '/parceiros/interesse' => ['AuthController', 'parceirosInteresse', null],
         '/sitemap.xml'      => ['AuthController', 'sitemap', null],
         '/mapa-do-site'     => ['AuthController', 'mapaDoSite', null],
@@ -243,6 +254,7 @@ $rotas = [
         '/registro/simples/cliente' => ['AuthController', 'registroSimplesForm', null, ['cliente']],
         '/registro/simples/guincho' => ['AuthController', 'registroSimplesForm', null, ['guincho']],
         '/registro/simples/oficina' => ['AuthController', 'registroSimplesForm', null, ['oficina']],
+        '/registro/simples/parceiro' => ['AuthController', 'registroSimplesForm', null, ['parceiro']],
         '/perfil/completar'         => ['AuthController', 'perfilCompletarForm',   null],
 
         '/registro/cliente'      => ['AuthController', 'registroClienteForm', null],
@@ -359,6 +371,9 @@ $rotas = [
         '/admin/financeiro/csv'      => ['AdminController', 'exportarCsv', 'admin'],
         '/admin/financeiro/visao-unificada' => ['AdminFinanceAttributionController', 'visaoUnificada', 'admin'],
         '/admin/marketing' => ['AdminFinanceAttributionController', 'marketingCentral', 'admin'],
+        '/admin/marketing/eventos' => ['AdminMarketingEventsController', 'index', 'admin'],
+        '/admin/marketing/referrals' => ['AdminMarketingReferralController', 'index', 'admin'],
+        '/admin/marketing/comissoes-indicacao' => ['AdminMarketingReferralController', 'commissions', 'admin'],
         '/admin/marketing/campanha/salvar' => ['AdminFinanceAttributionController', 'campanhaSalvar', 'admin'],
         '/admin/marketing/prospeccao/buscar' => ['AdminFinanceAttributionController', 'prospeccaoBuscar', 'admin'],
         '/admin/marketing/prospeccao/regioes/salvar' => ['AdminFinanceAttributionController', 'prospeccaoRegiaoSalvar', 'admin'],
@@ -452,6 +467,7 @@ $rotas = [
         '/api/pre-cotacao/finalizar' => ['PreCotacaoApiController', 'finalizar', null],
         '/api/pre-cotacao/endereco/sugestoes' => ['PreCotacaoApiController', 'sugestoes', null],
         '/api/pre-cotacao/endereco/reverso'   => ['PreCotacaoApiController', 'reverso', null],
+        '/api/marketing/event' => ['MarketingEventController', 'store', null],
         '/pre-cotacao/finalizar' => ['PreCotacaoApiController', 'finalizar', null],
         '/pedido/cotar' => ['PedidoController', 'cotar', null],
         '/pedido/criar' => ['PedidoController', 'criar', null],
@@ -464,6 +480,7 @@ $rotas = [
         '/registro/simples/cliente' => ['AuthController', 'registroSimples',     null, ['cliente']],
         '/registro/simples/guincho' => ['AuthController', 'registroSimples',     null, ['guincho']],
         '/registro/simples/oficina' => ['AuthController', 'registroSimples',     null, ['oficina']],
+        '/registro/simples/parceiro' => ['AuthController', 'registroSimples',     null, ['parceiro']],
         '/perfil/completar'         => ['AuthController', 'perfilCompletarSave', null],
 
         '/registro/cliente'       => ['AuthController', 'registroClienteSimplesSave', null],
@@ -616,9 +633,12 @@ $rotasDinamicas = [
     ['GET',  '/gerente/demanda/',        'GerenteController', 'demandaDetalhe', 'gerente'],
     ['GET',  '/admin/especialista-fragmento/', 'AdminController', 'especialistaDetalheFragmento', 'admin'],
     ['POST', '/admin/marketing/prospeccao/sincronizar-zonas', 'AdminFinanceAttributionController', 'prospeccaoSincronizarZonas', 'admin'],
+    ['POST', '/admin/marketing/referrals/salvar', 'AdminMarketingReferralController', 'store', 'admin'],
+    ['POST', '/admin/marketing/comissoes-indicacao/salvar', 'AdminMarketingReferralController', 'storeCommission', 'admin'],
     ['POST', '/admin/prospeccao/sincronizar-zonas', 'AdminFinanceAttributionController', 'prospeccaoSincronizarZonas', 'admin'],
     ['POST', '/admin/marketing/prospeccao/lead/enviado/', 'AdminFinanceAttributionController', 'prospeccaoMarcarEnviado', 'admin'],
     ['POST', '/admin/marketing/prospeccao/lead/cadastrado/', 'AdminFinanceAttributionController', 'prospeccaoConfirmarCadastro', 'admin'],
+    ['POST', '/admin/marketing/prospeccao/fila/status/', 'AdminFinanceAttributionController', 'prospeccaoFilaStatus', 'admin'],
     ['POST', '/admin/prospeccao/lead/enviado/', 'AdminFinanceAttributionController', 'prospeccaoMarcarEnviado', 'admin'],
     ['POST', '/admin/prospeccao/lead/cadastrado/', 'AdminFinanceAttributionController', 'prospeccaoConfirmarCadastro', 'admin'],
 
@@ -849,7 +869,8 @@ if (!$controller) {
     ]);
 
     http_response_code(404);
-    echo '<h1>404 â€” PÃ¡gina nÃ£o encontrada</h1>';
+    $isAdmin404 = str_starts_with($uri, '/admin');
+    require __DIR__ . ($isAdmin404 ? '/src/Views/errors/404-backoffice.php' : '/src/Views/errors/404-public.php');
     exit;
 }
 

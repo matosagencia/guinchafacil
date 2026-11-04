@@ -105,27 +105,7 @@ require __DIR__ . '/../_header-public.php';
                 <h2 class="gf-section-title">Crie sua conta em 30 segundos.</h2>
                 <p class="gf-section-description">Informe nome, WhatsApp e e-mail. Depois voce completa CNPJ, razao social e endereco no painel.</p>
 
-                <form method="POST" action="<?php echo $e($bp); ?>/registro/simples/oficina" class="gf-fields-stack">
-                    <input type="hidden" name="csrf_token" value="<?php echo $e($csrf_token_view); ?>">
-                    <input type="hidden" name="tipo" value="oficina">
-
-                    <div class="gf-field">
-                        <label class="gf-field-label" for="o_nome">Seu nome completo *</label>
-                        <input class="gf-field-control" type="text" id="o_nome" name="nome" required minlength="3" maxlength="120" autocomplete="name" placeholder="Como podemos te chamar?">
-                    </div>
-                    <div class="gf-field">
-                        <label class="gf-field-label" for="o_tel">WhatsApp *</label>
-                        <input class="gf-field-control" type="tel" id="o_tel" name="telefone" required inputmode="tel" autocomplete="tel" placeholder="(21) 99999-9999">
-                    </div>
-                    <div class="gf-field">
-                        <label class="gf-field-label" for="o_email">E-mail *</label>
-                        <input class="gf-field-control" type="email" id="o_email" name="email" required autocomplete="email" placeholder="voce@oficina.com.br">
-                    </div>
-
-                    <button class="gf-btn gf-btn--primary gf-btn--lg" type="submit" style="width:100%">
-                        Criar minha conta gratis &rarr;
-                    </button>
-                </form>
+                <div class="gf-funnel-cta"><p class="gf-section-description">Comece pelo cadastro e continue pelo funil seguro. Depois do login, completaremos os dados obrigatórios do oficina.</p><a class="gf-btn gf-btn--primary gf-btn--lg" style="width:100%" href="<?php echo $e($bp); ?>/registro/simples/oficina">Criar minha conta de oficina &rarr;</a><p class="gf-form-note" style="justify-content:center;margin-top:16px">Já tem conta? <a href="<?php echo $e($bp); ?>/login?retorno=/perfil/completar">Fazer login e continuar</a>.</p></div>
 
                 <div class="gf-form-divider"><span>ou</span></div>
 
@@ -163,6 +143,17 @@ require __DIR__ . '/../_header-public.php';
             </div>
         </div>
     </section>
+
+    <section class="gf-section" id="simulador">
+        <div class="gf-container">
+            <div class="gf-eyebrow">SIMULADOR DE GANHOS</div>
+            <h2 class="gf-section-title">Projete uma referência para sua oficina.</h2>
+            <p class="gf-section-description">Simulação ilustrativa. Comissão configurada para oficinas: <strong><?= $e(number_format((float)$comissao_parceiro_percentual, 2, ',', '.')) ?>%</strong>. Não é promessa de demanda ou renda.</p>
+            <div class="gf-simulator" data-commission="<?= $e((string)$comissao_parceiro_percentual) ?>"><label class="gf-simulator__field"><span class="gf-field-label">Atendimentos por dia: <strong id="of-sim-atend">2</strong></span><input type="range" id="of-sim-atend-range" min="1" max="10" value="2" class="gf-simulator__range"></label><label class="gf-simulator__field"><span class="gf-field-label">Dias de trabalho por mês: <strong id="of-sim-dias">22</strong></span><input type="range" id="of-sim-dias-range" min="1" max="30" value="22" class="gf-simulator__range"></label><div class="gf-price-result"><span class="gf-price-result__eyebrow">Receita líquida mensal simulada</span><strong class="gf-price-result__value" id="of-sim-total">R$ 0</strong><p class="gf-form-note">Referência fictícia de R$ 500 por atendimento, antes de custos e impostos.</p></div></div>
+        </div>
+    </section>
+
+    <script>(function(){var a=document.getElementById('of-sim-atend-range'),d=document.getElementById('of-sim-dias-range'),la=document.getElementById('of-sim-atend'),ld=document.getElementById('of-sim-dias'),t=document.getElementById('of-sim-total'),c=<?= json_encode((float)$comissao_parceiro_percentual) ?>/100;if(!a||!d||!t)return;function f(){la.textContent=a.value;ld.textContent=d.value;t.textContent='R$ '+Number(Number(a.value)*Number(d.value)*500*(1-c)).toLocaleString('pt-BR',{maximumFractionDigits:0});}a.addEventListener('input',f);d.addEventListener('input',f);f();}());</script>
 
     <section class="gf-section" id="faq">
         <div class="gf-container">

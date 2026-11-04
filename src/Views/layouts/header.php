@@ -30,6 +30,7 @@ $roleThemeMap = [
     'oficina'      => 'workshop',
     'guincho'      => 'driver',
     'especialista' => 'driver',
+    'parceiro'    => 'dispatch',
 ];
 $dataRole  = $temaClass !== '' ? $temaClass : '';
 $dataTheme = $roleThemeMap[$temaClass] ?? '';

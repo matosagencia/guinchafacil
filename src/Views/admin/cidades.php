@@ -123,10 +123,6 @@ foreach (($cidades ?? []) as $c) {
 
 <div class="shell-ops" id="cidadesShell">
 
-    <aside class="shell-ops-sidebar" id="cidadesSidebar">
-        <?php include __DIR__ . '/../components/admin_nav_operacional.php'; ?>
-    </aside>
-
     <section class="shell-ops-worklist" aria-label="Cidades cadastradas">
         <header class="ops-worklist-header">
             <span class="eyebrow">Território</span>

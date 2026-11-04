@@ -23,7 +23,10 @@ final class MapaCoberturaService
             }
         }
         $zonas = [];
-        $stmt = $pdo->query("SELECT id, name, status_expansao, polygon_geojson FROM pricing_zones WHERE active = 1 AND status_expansao IN ('pedra_viva', 'pedra_morta') AND polygon_geojson IS NOT NULL ORDER BY id LIMIT 200");
+        // Poligonos sao apenas referencia cartografica. A cobertura vem dos
+        // parceiros elegiveis abaixo; status_expansao permanece somente como
+        // metadado estrategico para consumidores administrativos.
+        $stmt = $pdo->query("SELECT id, name, status_expansao, polygon_geojson FROM pricing_zones WHERE active = 1 AND polygon_geojson IS NOT NULL ORDER BY id LIMIT 200");
         foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $z) {
             $geo = json_decode((string)$z['polygon_geojson'], true);
             if (!is_array($geo) || ($geo['type'] ?? '') !== 'Polygon' || !is_array($geo['coordinates'][0] ?? null)) {

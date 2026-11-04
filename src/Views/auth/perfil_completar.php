@@ -1,10 +1,11 @@
 <?php
 $bp = defined('BASE_PATH') ? BASE_PATH : '';
-$tipo = in_array(($tipo ?? ''), ['cliente','guincho','oficina','especialista'], true) ? $tipo : 'cliente';
+$tipo = in_array(($tipo ?? ''), ['cliente','guincho','oficina','especialista','parceiro'], true) ? $tipo : 'cliente';
 $isCliente    = $tipo === 'cliente';
 $isGuincho    = $tipo === 'guincho';
 $isOficina    = $tipo === 'oficina';
 $isEspecialista = $tipo === 'especialista';
+$isParceiro = $tipo === 'parceiro';
 
 $accent   = $isOficina ? '#f0a83b' : ($isCliente ? 'var(--gf-verde)' : 'var(--gf-verde)');
 $accent2  = $isOficina ? '#b9670c' : ($isCliente ? 'var(--gf-verde-dark)' : 'var(--gf-verde-dark)');
@@ -14,13 +15,27 @@ $labelTipo = [
     'guincho'      => 'Guincho',
     'oficina'      => 'Oficina',
     'especialista' => 'Especialista',
+    'parceiro'     => 'Parceiro de indicação',
 ][$tipo];
 
 $salvo = $salvo ?? [];
 $val = function(string $k, string $default = '') use ($salvo): string {
     return htmlspecialchars((string)($salvo[$k] ?? $default), ENT_QUOTES, 'UTF-8');
 };
+
+if ($isParceiro) {
+    include __DIR__ . '/../layouts/header.php';
+    echo '<link rel="stylesheet" href="' . htmlspecialchars($bp) . '/public/assets/css/perfil-completar.css?v=20261103-1">';
+    echo '<link rel="stylesheet" href="' . htmlspecialchars($bp) . '/public/assets/css/components/dashboard.css">';
+    echo '<link rel="stylesheet" href="' . htmlspecialchars($bp) . '/public/assets/css/pages/tow-dashboard.css">';
+    echo '<style>body.parceiro .pc-wrap{max-width:900px;margin:0;padding:0 0 32px}body.parceiro .pc-head{display:none}body.parceiro .pc-card{box-shadow:0 8px 24px rgba(18,49,60,.08)}body.parceiro .pc-card,.pc-card{color:#12313c}body.parceiro .pc-h1{color:#12313c}body.parceiro .pc-sub{color:#51737a}.pc-cep-btn{margin-top:4px;padding:8px 10px;border:1px solid #bfe5df;border-radius:8px;background:#f0fbfa;color:#08766d;font-weight:700;cursor:pointer}.pc-cep-btn:hover{background:#dff5f1}</style>';
+    echo '<script>document.body.classList.add("gf-unified-dashboard","parceiro");</script>';
+    echo '<div class="main-wrapper gf-unified-shell">';
+    include __DIR__ . '/../layouts/sidebar_parceiro.php';
+    echo '<main class="main-content gf-unified-main"><header class="gf-panel-topbar"><div class="gf-panel-breadcrumb"><span>Painel <i class="fas fa-chevron-right" aria-hidden="true"></i> <strong>Completar perfil</strong></span></div><div class="gf-panel-actions"><span>' . htmlspecialchars((string)($_SESSION['user']['nome'] ?? 'Parceiro'), ENT_QUOTES, 'UTF-8') . '</span><a href="' . htmlspecialchars($bp) . '/logout" data-confirm-logout><i class="fas fa-right-from-bracket"></i> Sair</a></div></header>';
+}
 ?>
+<?php if (!$isParceiro): ?>
 <!doctype html><html lang="pt-BR"><head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <link href="<?php echo htmlspecialchars($bp); ?>/public/assets/css/tokens.css" rel="stylesheet"><link href="<?php echo htmlspecialchars($bp); ?>/public/assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
@@ -56,6 +71,9 @@ body{margin:0;min-height:100vh;background:#f4f8f5;color:#14201a;font-family:syst
 .pc-hint{font-size:.78rem;color:#8a978f;margin-top:4px}
 </style>
 </head><body>
+<?php else: ?>
+<div class="app-dashboard">
+<?php endif; ?>
 <div class="pc-wrap">
   <div class="pc-head">
     <a class="pc-brand" href="<?php echo htmlspecialchars($bp); ?>/"><img src="<?php echo htmlspecialchars($bp); ?>/public/assets/img/logo-48.png" alt="GuinchaFácil"><div>Guincha<span>Fácil</span></div></a>
@@ -83,20 +101,20 @@ body{margin:0;min-height:100vh;background:#f4f8f5;color:#14201a;font-family:syst
 
       <div class="pc-section"><i class="fas fa-lock"></i>Senha de acesso</div>
       <div class="pc-row">
-        <div class="pc-field"><label>Senha *</label><input type="password" name="senha" minlength="8" required><div class="pc-hint">Mínimo 8 caracteres.</div></div>
-        <div class="pc-field"><label>Confirmar senha *</label><input type="password" name="confirmar_senha" minlength="8" required></div>
+        <div class="pc-field"><label for="pc_senha">Nova senha (opcional)</label><input type="password" name="senha" id="pc_senha" minlength="8" autocomplete="new-password" style="display:block!important;visibility:visible!important;opacity:1!important"><div class="pc-password-meter" aria-hidden="true"><span id="pc_senha_bar"></span></div><div class="pc-password-status" id="pc_senha_status">Preencha somente se quiser trocar a senha.</div></div>
+        <div class="pc-field"><label>Confirmar nova senha</label><input type="password" name="confirmar_senha" minlength="8"></div>
       </div>
 
       <div class="pc-section"><i class="fas fa-map-marker-alt"></i>Endereço</div>
       <div class="pc-row">
-        <div class="pc-field"><label>CEP *</label><input name="cep" id="pc_cep" required maxlength="9" inputmode="numeric" placeholder="00000-000" value="<?php echo $val('cep'); ?>"></div>
-        <div class="pc-field"><label>Logradouro *</label><input name="logradouro" required value="<?php echo $val('logradouro'); ?>"></div>
+        <div class="pc-field"><label for="pc_cep">CEP *</label><input name="cep" id="pc_cep" required maxlength="9" inputmode="numeric" placeholder="00000-000" value="<?php echo $val('cep'); ?>"><button type="button" class="pc-cep-btn" id="pc_buscar_cep">Preencher endereço pelo CEP</button><div class="pc-hint" id="pc_cep_status">Digite o CEP e aguarde ou clique para buscar.</div></div>
+        <div class="pc-field"><label>Logradouro *</label><input name="logradouro" id="pc_logradouro" required value="<?php echo $val('logradouro'); ?>"></div>
         <div class="pc-field"><label>Número *</label><input name="numero" required value="<?php echo $val('numero'); ?>"></div>
         <div class="pc-field"><label>Complemento</label><input name="complemento" value="<?php echo $val('complemento'); ?>"></div>
-        <div class="pc-field"><label>Bairro *</label><input name="bairro" required value="<?php echo $val('bairro'); ?>"></div>
-        <div class="pc-field"><label>Cidade *</label><input name="cidade" required value="<?php echo $val('cidade'); ?>"></div>
+        <div class="pc-field"><label>Bairro *</label><input name="bairro" id="pc_bairro" required value="<?php echo $val('bairro'); ?>"></div>
+        <div class="pc-field"><label>Cidade *</label><input name="cidade" id="pc_cidade" required value="<?php echo $val('cidade'); ?>"></div>
         <div class="pc-field"><label>Estado (UF) *</label>
-          <select name="estado" required>
+          <select name="estado" id="pc_estado" required>
             <option value="">Selecione</option>
             <?php foreach (['AC','AL','AP','AM','BA','CE','DF','ES','GO','MA','MT','MS','MG','PA','PB','PR','PE','PI','RJ','RN','RS','RO','RR','SC','SP','SE','TO'] as $uf): ?>
             <option value="<?php echo $uf; ?>" <?php echo (($salvo['estado'] ?? '') === $uf) ? 'selected' : ''; ?>><?php echo $uf; ?></option>
@@ -105,7 +123,7 @@ body{margin:0;min-height:100vh;background:#f4f8f5;color:#14201a;font-family:syst
         </div>
       </div>
 
-      <?php if ($isGuincho || $isOficina): ?>
+      <?php if ($isGuincho || $isOficina || $isParceiro): ?>
       <div class="pc-section"><i class="fas fa-wallet"></i>Repasse</div>
       <div class="pc-row">
         <div class="pc-field"><label>Chave PIX *</label><input name="chave_pix" required value="<?php echo $val('chave_pix'); ?>"></div>
@@ -144,14 +162,22 @@ body{margin:0;min-height:100vh;background:#f4f8f5;color:#14201a;font-family:syst
     </form>
   </div>
 </div>
+<?php if ($isParceiro): ?></div></main></div><?php endif; ?>
 <script<?php echo csp_script_nonce_attr(); ?>>
 (function(){
   function maskCpf(el){ el.addEventListener('input', function(){ var v = el.value.replace(/\D/g,'').slice(0,11); el.value = v.replace(/(\d{3})(\d{3})(\d{3})(\d{0,2})/, function(_,a,b,c,d){ return a+'.'+b+'.'+c+(d?'-'+d:''); }); }); }
-  function maskCep(el){ el.addEventListener('input', function(){ var v = el.value.replace(/\D/g,'').slice(0,8); el.value = v.replace(/(\d{5})(\d{0,3})/, function(_,a,b){ return b? a+'-'+b : a; }); }); }
+  function maskCep(el){ el.addEventListener('input', function(){ var v = el.value.replace(/\D/g,'').slice(0,8); el.value = v.replace(/(\d{5})(\d{0,3})/, function(_,a,b){ return b? a+'-'+b : a; }); if(v.length === 8) buscarCep(v); }); }
   function maskTel(el){ el.addEventListener('input', function(){ var d = el.value.replace(/\D/g,'').slice(0,11); el.value = d.length<=10 ? d.replace(/^(\d{2})(\d{0,4})(\d{0,4}).*$/,function(_,a,b,c){return '('+a+')'+(b?' '+b:'')+(c?'-'+c:'');}) : d.replace(/^(\d{2})(\d{5})(\d{0,4}).*$/,function(_,a,b,c){return '('+a+') '+b+(c?'-'+c:'');}); }); }
+  function buscarCep(cep){ fetch('https://viacep.com.br/ws/' + cep + '/json/', {headers:{Accept:'application/json'}}).then(function(r){return r.ok?r.json():null;}).then(function(d){ if(!d || d.erro) return; var set=function(id,v){var e=document.getElementById(id); if(e && !e.value) e.value=v||'';}; set('pc_logradouro',d.logradouro); set('pc_bairro',d.bairro); set('pc_cidade',d.localidade); set('pc_estado',d.uf); var n=document.getElementById('pc_numero'); if(n) n.focus(); }).catch(function(){}); }
+  function validarCpf(v){ var d=String(v||'').replace(/\D/g,''); if(d.length!==11 || /^(\d)\1+$/.test(d)) return false; var calc=function(len){var sum=0; for(var i=0;i<len;i++) sum+=Number(d[i])*(len+1-i); var r=(sum*10)%11; return r===10?0:r;}; return calc(9)===Number(d[9]) && calc(10)===Number(d[10]); }
+  var cpfInput=document.getElementById('pc_cpf'); if(cpfInput){ cpfInput.addEventListener('blur',function(){cpfInput.setCustomValidity(validarCpf(cpfInput.value)?'':'Informe um CPF válido.');}); }
+  var form=document.querySelector('form'); if(form) form.addEventListener('submit',function(){if(cpfInput) cpfInput.setCustomValidity(validarCpf(cpfInput.value)?'':'Informe um CPF válido.');});
   var cpf = document.getElementById('pc_cpf'); if(cpf) maskCpf(cpf);
   var tel = document.getElementById('pc_tel'); if(tel) maskTel(tel);
   var cep = document.getElementById('pc_cep'); if(cep) maskCep(cep);
+  var buscar=document.getElementById('pc_buscar_cep'); if(buscar) buscar.addEventListener('click',function(){var v=(cep?cep.value:'').replace(/\D/g,'');if(v.length===8) buscarCep(v);else{var st=document.getElementById('pc_cep_status');if(st)st.textContent='Informe um CEP válido com 8 dígitos.';}});
+  var senha=document.getElementById('pc_senha'), barra=document.getElementById('pc_senha_bar'), status=document.getElementById('pc_senha_status');
+  if(senha && barra && status) senha.addEventListener('input',function(){var v=senha.value,score=0;if(v.length>=8)score++;if(/[a-z]/.test(v)&&/[A-Z]/.test(v))score++;if(/\d/.test(v))score++;if(/[^A-Za-z0-9]/.test(v))score++;var labels=['Preencha somente se quiser trocar a senha.','Senha fraca','Senha razoável','Senha boa','Senha forte'];var colors=['#d9e2dc','#d64545','#e08a24','#2f9e5b','#17803d'];barra.style.width=(score*25)+'%';barra.style.background=colors[score];status.textContent=v===''?labels[0]:labels[score];});
 })();
 </script>
-</body></html>
+<?php if (!$isParceiro): ?></body></html><?php endif; ?>

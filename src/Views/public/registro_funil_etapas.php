@@ -10,6 +10,13 @@ $e   = static fn($v): string => htmlspecialchars((string)$v, ENT_QUOTES, 'UTF-8'
 $draft = is_array($_SESSION['pre_cotacao_draft'] ?? null) ? $_SESSION['pre_cotacao_draft'] : [];
 $flash = $flash ?? null;
 $cotacao = is_array($_SESSION['pre_cotacao'] ?? null) ? $_SESSION['pre_cotacao'] : [];
+$meta_title = 'Criar sua conta';
+$meta_description = 'Finalize seu cadastro e continue seu atendimento no GuinchaFácil.';
+$body_class = 'gf-preq-body gf-registration-funnel';
+$nav_atual = 'pre-cotacao';
+$show_utility_cidade = false;
+$extra_css = ['/public/assets/css/pages/pre-cotacao.css?v=20261103-2', '/public/assets/css/registro-funil.css?v=20261103-1'];
+require __DIR__ . '/_header-public.php';
 
 // Pré-seleção de veículo vinda do draft (só leitura — quem escreve é o controller)
 $veiculoDraft = (string)($draft['categoria'] ?? 'popular');
@@ -20,7 +27,7 @@ $veiculoOpcoes = [
     'utilitario'  => ['Utilitário', 'Van, picape ou caminhonete.'],
 ];
 ?>
-<!doctype html>
+<?php if (false): ?><!doctype html>
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
@@ -82,7 +89,8 @@ label.field > span { display:block; font-size:.82rem; font-weight:600; color:#4b
 <body class="gf-preq-body">
 <div class="gf-utility-bar"><div class="gf-container"><span><span class="gf-status-dot"></span> Socorro 24h. Todos os dias. Em qualquer imprevisto.</span><a href="<?= $e($bp) ?>/guincho/niteroi-rj">Niterói, RJ</a></div></div>
 <header class="gf-site-header"><div class="gf-container"><a class="gf-brand" href="<?= $e($bp) ?>/">Guincha<span>Fácil</span>.</a><nav class="gf-nav" aria-label="Navegação principal"><a href="<?= $e($bp) ?>/pre-cotacao">Como funciona</a><a href="<?= $e($bp) ?>/guincho/niteroi-rj">Onde atendemos</a><a href="<?= $e($bp) ?>/parceiros">Seja um parceiro</a></nav><a class="gf-btn gf-btn--primary gf-btn--sm" href="<?= $e($bp) ?>/pre-cotacao">Pedir guincho</a></div></header>
-<div class="wrap">
+<?php endif; ?>
+<main class="gf-registration-funnel-main"><div class="wrap">
     <a class="brand" href="<?= $e($bp) ?>/">
         <img src="<?= $e($bp) ?>/public/assets/img/logo-48.png" alt="" width="34" height="34">
         Guincha<span>Fácil</span>
@@ -198,7 +206,7 @@ label.field > span { display:block; font-size:.82rem; font-weight:600; color:#4b
     </aside>
     </div>
 </div>
-<footer class="gf-site-footer"><div class="gf-container"><div class="gf-footer-bottom"><span>&copy; <?= date('Y') ?> GuinchaFácil. Todos os direitos reservados.</span><span>Assistência 24 horas · Niterói, RJ</span></div></div></footer>
+<?php if (false): ?><footer class="gf-site-footer"><div class="gf-container"><div class="gf-footer-bottom"><span>&copy; <?= date('Y') ?> GuinchaFácil. Todos os direitos reservados.</span><span>Assistência 24 horas · Niterói, RJ</span></div></div></footer><?php endif; ?>
 
 <script<?= function_exists('csp_script_nonce_attr') ? csp_script_nonce_attr() : '' ?>>
 (function () {
@@ -324,5 +332,5 @@ label.field > span { display:block; font-size:.82rem; font-weight:600; color:#4b
     });
 })();
 </script>
-</body>
-</html>
+</main>
+<?php require __DIR__ . '/_footer-public.php'; ?>

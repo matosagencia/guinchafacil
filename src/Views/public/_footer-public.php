@@ -26,12 +26,17 @@ $bp = defined('BASE_PATH') ? BASE_PATH : '';
                 <h3>Para voce</h3>
                 <a href="<?php echo htmlspecialchars($bp, ENT_QUOTES, 'UTF-8'); ?>/pre-cotacao">Pedir guincho</a>
                 <a href="<?php echo htmlspecialchars($bp, ENT_QUOTES, 'UTF-8'); ?>/guincho/niteroi-rj">Guincho em Niteroi</a>
+                <a href="<?php echo htmlspecialchars($bp, ENT_QUOTES, 'UTF-8'); ?>/guincho/rio-de-janeiro-rj">Guincho no Rio de Janeiro</a>
+                <a href="<?php echo htmlspecialchars($bp, ENT_QUOTES, 'UTF-8'); ?>/servicos/guincho-carro">Guincho para carro</a>
+                <a href="<?php echo htmlspecialchars($bp, ENT_QUOTES, 'UTF-8'); ?>/servicos/reboque-para-oficina">Reboque para oficina</a>
             </div>
             <div>
                 <h3>Para parceiros</h3>
                 <a href="<?php echo htmlspecialchars($bp, ENT_QUOTES, 'UTF-8'); ?>/parceiros">Rede de parceiros</a>
                 <a href="<?php echo htmlspecialchars($bp, ENT_QUOTES, 'UTF-8'); ?>/parceiros/guinchos">Sou guincheiro</a>
                 <a href="<?php echo htmlspecialchars($bp, ENT_QUOTES, 'UTF-8'); ?>/parceiros/oficinas">Tenho uma oficina</a>
+                <a href="<?php echo htmlspecialchars($bp, ENT_QUOTES, 'UTF-8'); ?>/parceiros/seguradoras">Sou seguradora ou corretor</a>
+                <a href="<?php echo htmlspecialchars($bp, ENT_QUOTES, 'UTF-8'); ?>/parceiros/frotas">Tenho uma frota</a>
             </div>
             <div>
                 <h3>GuinchaFacil</h3>
@@ -50,7 +55,7 @@ $bp = defined('BASE_PATH') ? BASE_PATH : '';
 
         <div class="gf-footer-bottom">
             <span>&copy; <?php echo date('Y'); ?> GuinchaFacil. Todos os direitos reservados.</span>
-            <span>Assistencia 24 horas &middot; Niteroi, RJ</span>
+            <span>Assistencia veicular 24 horas</span>
         </div>
     </div>
 </footer>

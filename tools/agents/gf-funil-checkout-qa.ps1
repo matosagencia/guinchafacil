@@ -19,7 +19,7 @@ try {
         $scanner = @'
 <?php
 $found=[];
-foreach(array_slice($argv,1) as $file){$raw=@file_get_contents($file);if($raw===false)continue;foreach(["\xC3\x83","\xC3\x82","\xE2\x80\x9A","\xC3\xAF\xC2\xBF\xC2\xBD","\xEF\xBF\xBD"] as $needle){if(strpos($raw,$needle)!==false){$found[]=$file;break;}}}
+foreach(array_slice($argv,1) as $file){$raw=@file_get_contents($file);if($raw===false)continue;foreach(["\xC3\x83\xC2","\xC3\x82\xC2","\xE2\x80\x9A","\xC3\xAF\xC2\xBF\xC2\xBD","\xEF\xBF\xBD"] as $needle){if(strpos($raw,$needle)!==false){$found[]=$file;break;}}}
 echo implode(PHP_EOL,array_unique($found));
 '@
         $tmp = Join-Path $env:TEMP ('gf-mojibake-' + [guid]::NewGuid().ToString('N') + '.php')
@@ -29,7 +29,34 @@ echo implode(PHP_EOL,array_unique($found));
                 $paths=@($files | ForEach-Object FullName)
                 $hits=& $php $tmp @paths
             } else {
-                $hits=@(git diff --unified=0 --diff-filter=ACM -- '*.php' '*.js' | Where-Object { $_ -match '^\+[^+]' -and ($_ -like ('*' + [char]0xFFFD + '*') -or $_ -like '*Ã*' -or $_ -like '*Â*') })
+                # Nao consumir a saida UTF-8 do git pelo pipeline do Windows PowerShell:
+                # a conversao de encoding transforma acentos validos em falsos Ã/Â.
+                # O scanner PHP le os bytes originais do diff e examina somente adicoes.
+                $diffFile = Join-Path $env:TEMP ('gf-mojibake-diff-' + [guid]::NewGuid().ToString('N') + '.diff')
+                try {
+                    & git diff --unified=0 --diff-filter=ACM --output=$diffFile -- '*.php' '*.js'
+                    $diffScanner = @'
+<?php
+$raw=@file_get_contents($argv[1]);
+$found=[];
+if($raw!==false){
+    foreach(preg_split("/\r?\n/",$raw) as $line){
+        if($line!=='' && $line[0]==='+' && !str_starts_with($line,'+++') &&
+            (strpos($line,"\xEF\xBF\xBD")!==false || strpos($line,"\xC3\x83\xC2")!==false || strpos($line,"\xC3\x82\xC2")!==false || strpos($line,"\xE2\x80\x9A")!==false || strpos($line,"\xC3\xAF\xC2\xBF\xC2\xBD")!==false)){
+            $found[]=$line;
+        }
+    }
+}
+echo implode(PHP_EOL,$found);
+'@
+                    Set-Content -LiteralPath $tmp -Value $scanner -Encoding ASCII
+                    $diffScannerPath = Join-Path $env:TEMP ('gf-mojibake-diff-scanner-' + [guid]::NewGuid().ToString('N') + '.php')
+                    Set-Content -LiteralPath $diffScannerPath -Value $diffScanner -Encoding ASCII
+                    $hits = @( & $php $diffScannerPath $diffFile )
+                } finally {
+                    Remove-Item -LiteralPath $diffFile -Force -ErrorAction SilentlyContinue
+                    Remove-Item -LiteralPath $diffScannerPath -Force -ErrorAction SilentlyContinue
+                }
             }
             if($hits){throw (($hits | Select-Object -First 20) -join "`n")}
         } finally { Remove-Item -LiteralPath $tmp -Force -ErrorAction SilentlyContinue }

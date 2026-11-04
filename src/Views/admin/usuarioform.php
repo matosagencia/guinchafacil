@@ -1,7 +1,7 @@
 <?php
 $bp = defined('BASE_PATH') ? BASE_PATH : '';
 $gfF18f18Preset = (string)($_GET['tipo'] ?? 'cliente');
-if (!in_array($gfF18f18Preset, ['cliente', 'guincho', 'oficina'], true)) { $gfF18f18Preset = 'cliente'; }
+if (!in_array($gfF18f18Preset, ['cliente', 'guincho', 'oficina', 'parceiro'], true)) { $gfF18f18Preset = 'cliente'; }
 include __DIR__ . '/../layouts/header.php';
 ?>
 
@@ -56,7 +56,7 @@ include __DIR__ . '/../layouts/header.php';
                         'funcionario' => ['fa-headset','Funcionário','Atendimento financeiro/operacional — só cria demandas, nunca executa direto'],
                         'gerente'     => ['fa-user-tie','Gerente','Aprova ou rejeita as demandas criadas por funcionários'],
                         'admin'       => ['fa-shield-halved','Administrador','Gerencia toda a plataforma (inclusive configuração técnica)'],
-                        'oficina'     => ['fa-screwdriver-wrench','Oficina','Estabelecimento parceiro de reparos e assistência'],
+                        'oficina'     => ['fa-screwdriver-wrench','Oficina','Estabelecimento parceiro de reparos e assistência'],                        'parceiro'    => ['fa-handshake','Parceiro de indicação','Empresa que indica o GuinchaFácil a seus clientes ou usuários'],
                     ] as $tipo => [$icon, $label, $desc]): ?>
                     <div class="col-md-4 col-lg-2">
                         <label class="d-flex gap-3 p-3 rounded border h-100 usuarioform-type-label"

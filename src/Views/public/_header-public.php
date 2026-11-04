@@ -29,6 +29,8 @@ $body_class         = $body_class         ?? 'gf-landing';
 $utility_cidade     = $utility_cidade     ?? 'Niteroi, RJ';
 $utility_cidade_url = $utility_cidade_url ?? ($bp . '/guincho/niteroi-rj');
 $nav_atual          = $nav_atual          ?? '';
+$nav_onde_url       = $nav_onde_url       ?? ($bp . '/mapa-do-site');
+$show_utility_cidade = $show_utility_cidade ?? false;
 
 // Helper local: nao depende de csp_script_nonce_attr() estar carregada no fluxo publico.
 $nonceAttr = function_exists('csp_script_nonce_attr') ? csp_script_nonce_attr() : '';
@@ -87,7 +89,7 @@ $nonceAttr = function_exists('csp_script_nonce_attr') ? csp_script_nonce_attr() 
 </head>
 <body class="<?php echo htmlspecialchars($body_class, ENT_QUOTES, 'UTF-8'); ?>" data-base-path="<?php echo htmlspecialchars($bp); ?>">
 
-<div class="gf-utility-bar">
+<?php if ($show_utility_cidade): ?><div class="gf-utility-bar">
     <div class="gf-container">
         <span><span class="gf-status-dot"></span> Socorro 24h. Todos os dias. Em qualquer imprevisto.</span>
         <a href="<?php echo htmlspecialchars($utility_cidade_url, ENT_QUOTES, 'UTF-8'); ?>">
@@ -97,6 +99,7 @@ $nonceAttr = function_exists('csp_script_nonce_attr') ? csp_script_nonce_attr() 
         </a>
     </div>
 </div>
+<?php endif; ?>
 
 <header class="gf-site-header">
     <div class="gf-container">
@@ -107,7 +110,7 @@ $nonceAttr = function_exists('csp_script_nonce_attr') ? csp_script_nonce_attr() 
         <nav class="gf-nav" aria-label="Navegacao principal">
             <a href="<?php echo htmlspecialchars($bp); ?>/"<?php echo $nav_atual === 'inicio' ? ' class="is-active"' : ''; ?>>Inicio</a>
             <a href="<?php echo htmlspecialchars($bp); ?>/pre-cotacao"<?php echo $nav_atual === 'pre-cotacao' ? ' class="is-active"' : ''; ?>>Como funciona</a>
-            <a href="<?php echo htmlspecialchars($bp); ?>/guincho/niteroi-rj"<?php echo $nav_atual === 'onde' ? ' class="is-active"' : ''; ?>>Onde atendemos</a>
+            <a href="<?php echo htmlspecialchars($nav_onde_url, ENT_QUOTES, 'UTF-8'); ?>"<?php echo $nav_atual === 'onde' ? ' class="is-active"' : ''; ?>>Onde atendemos</a>
             <a href="<?php echo htmlspecialchars($bp); ?>/parceiros"<?php echo $nav_atual === 'parceiros' ? ' class="is-active"' : ''; ?>>Seja um parceiro &nearr;</a>
         </nav>
         <a class="gf-btn gf-btn--primary gf-btn--sm" href="<?php echo htmlspecialchars($bp); ?>/pre-cotacao">Pedir guincho &nearr;</a>

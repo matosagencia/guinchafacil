@@ -7,7 +7,8 @@ $hubs = [
  ['pessoas','Pessoas e Parceiros','fa-users','/admin/usuarios',['/admin/usuarios','/admin/usuario','/admin/guincho','/admin/prestador','/admin/oficina','/admin/especialistas','/admin/documentos']],
  ['financeiro','Financeiro','fa-wallet','/admin/financeiro',['/admin/financeiro','/admin/faturas','/admin/fatura/','/admin/carteira','/admin/saques']],
  ['catalogo','Catálogo e Preços','fa-toolbox','/admin/catalogo-servicos/tipos',['/admin/catalogo','/admin/precificacao','/admin/produtos','/admin/servicos','/admin/feriados']],
- ['territorio','Território e Crescimento','fa-map-location-dot','/admin/cidades',['/admin/cidades','/admin/demanda','/admin/marketing','/admin/prospeccao','/admin/planejamento','/admin/comunicados']],
+ ['territorio','Território e Crescimento','fa-map-location-dot','/admin/cidades',['/admin/cidades','/admin/demanda','/admin/planejamento','/admin/comunicados']],
+ ['marketing','Marketing','fa-bullhorn','/admin/marketing',['/admin/marketing','/admin/prospeccao']],
  ['qualidade','Qualidade','fa-shield-halved','/admin/avaliacoes',['/admin/avaliacoes','/admin/proof-of-road','/admin/checklists']],
  ['sistema','Sistema','fa-gear','/admin/configuracoes',['/admin/configuracoes','/admin/env','/admin/logs','/admin/health','/admin/simulador','/admin/testes']],
 ];

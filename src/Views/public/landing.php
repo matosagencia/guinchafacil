@@ -20,6 +20,7 @@ $body_class = 'gf-landing';
 $nav_atual = 'inicio';
 $utility_cidade = 'Niteroi, RJ';
 $utility_cidade_url = $bp . '/guincho/niteroi-rj';
+$show_utility_cidade = false;
 
 $schemaBusiness = [
     '@context' => 'https://schema.org',
@@ -34,7 +35,21 @@ $schemaBusiness = [
     'serviceType' => ['Guincho', 'Mecanica 24h', 'Autoeletrica', 'Troca de bateria', 'Troca de pneu', 'Pane seca'],
 ];
 
-$meta_json_ld = [$schemaBusiness];
+$faq = [
+    ['q' => 'Como pedir assistencia veicular?', 'a' => 'Informe sua localizacao, conte o que aconteceu e veja as opcoes disponiveis antes de confirmar o atendimento.'],
+    ['q' => 'O valor aparece antes do atendimento?', 'a' => 'O sistema calcula uma estimativa com base no servico, localizacao, destino e regras de precificacao aplicaveis.'],
+    ['q' => 'Posso pagar na chegada?', 'a' => 'Quando essa opcao estiver disponivel para o atendimento, voce pode escolher pagar na chegada ou seguir pelo pagamento online.'],
+    ['q' => 'E se nao houver parceiro perto de mim?', 'a' => 'O sistema amplia a busca conforme as regras de cobertura e pode encaminhar voce para atendimento alternativo quando a rede nao estiver disponivel.'],
+];
+$schemaFaq = [
+    '@context' => 'https://schema.org',
+    '@type' => 'FAQPage',
+    'mainEntity' => array_map(static fn(array $item): array => [
+        '@type' => 'Question', 'name' => $item['q'],
+        'acceptedAnswer' => ['@type' => 'Answer', 'text' => $item['a']],
+    ], $faq),
+];
+$meta_json_ld = [$schemaBusiness, $schemaFaq];
 
 require __DIR__ . '/_header-public.php';
 ?>
@@ -130,6 +145,32 @@ require __DIR__ . '/_header-public.php';
         </div>
     </section>
 
+    <section class="gf-section" aria-labelledby="price-title">
+        <div class="gf-container">
+            <div class="gf-eyebrow">COMO O PREÇO É CALCULADO</div>
+            <h2 class="gf-section-title" id="price-title">Você entende a estimativa antes de confirmar.</h2>
+            <p class="gf-section-description">A cotação considera o tipo de atendimento, sua localização, o destino quando necessário, a rota e a disponibilidade da rede. O valor é apresentado antes da confirmação.</p>
+            <div class="gf-feature-grid" style="margin-top:32px">
+                <article class="gf-feature-item"><div class="gf-icon-tile"><i class="fas fa-location-dot"></i></div><h3>Localização</h3><p>Encontramos a região de atendimento e os parceiros elegíveis.</p></article>
+                <article class="gf-feature-item"><div class="gf-icon-tile"><i class="fas fa-route"></i></div><h3>Rota e destino</h3><p>Quando houver reboque, o destino entra no cálculo da rota e da estimativa.</p></article>
+                <article class="gf-feature-item"><div class="gf-icon-tile"><i class="fas fa-scale-balanced"></i></div><h3>Disponibilidade real</h3><p>A busca considera cobertura e alternativas, sem prometer atendimento inexistente.</p></article>
+            </div>
+        </div>
+    </section>
+
+    <section class="gf-section gf-section--alt" aria-labelledby="cities-title">
+        <div class="gf-container">
+            <div class="gf-eyebrow">CIDADES ATENDIDAS</div>
+            <h2 class="gf-section-title" id="cities-title">Começamos pela sua região.</h2>
+            <p class="gf-section-description">Consulte a cobertura local e inicie uma cotação para verificar as opções disponíveis no momento.</p>
+            <div class="gf-feature-grid" style="margin-top:28px">
+                <a class="gf-feature-item" href="<?php echo $e($bp); ?>/guincho/niteroi-rj"><h3>Niterói - RJ</h3><p>Veja a página local e peça uma cotação.</p></a>
+                <a class="gf-feature-item" href="<?php echo $e($bp); ?>/mapa-do-site"><h3>Mapa do site</h3><p>Explore serviços, cidades e páginas da rede.</p></a>
+                <a class="gf-feature-item" href="<?php echo $e($bp); ?>/pre-cotacao"><h3>Consultar agora</h3><p>Informe o local para verificar as opções disponíveis.</p></a>
+            </div>
+        </div>
+    </section>
+
     <section class="gf-section gf-section--alt" aria-labelledby="network-title">
         <div class="gf-container">
             <div class="gf-eyebrow">PARA ALEM DO GUINCHO</div>
@@ -138,30 +179,6 @@ require __DIR__ . '/_header-public.php';
             <div class="gf-feature-grid" style="margin-top:32px">
                 <article class="gf-feature-item"><div class="gf-icon-tile"><i class="fas fa-people-group" aria-hidden="true"></i></div><h3>Para guinchos e oficinas</h3><p>Receba oportunidades compativeis com sua regiao, capacidade e especialidade.</p><a href="<?php echo $e($bp); ?>/parceiros" data-marketing-event="partner_interest" data-marketing-label="operational_partner">Conhecer a rede &rarr;</a></article>
                 <article class="gf-feature-item"><div class="gf-icon-tile"><i class="fas fa-building" aria-hidden="true"></i></div><h3>Para empresas parceiras</h3><p>Ofereca uma rota de assistencia aos seus clientes, colaboradores ou motoristas.</p><a href="<?php echo $e($bp); ?>/parceiros" data-marketing-event="partner_interest" data-marketing-label="distribution_partner">Falar sobre parceria &rarr;</a></article>
-            </div>
-        </div>
-    </section>
-
-    <section class="gf-section gf-section--alt">
-        <div class="gf-container">
-            <div class="gf-eyebrow">MAIS DO QUE UM GUINCHO</div>
-            <h2 class="gf-section-title">Tranquilidade em cada quilometro.</h2>
-            <div class="gf-feature-grid" style="margin-top:32px">
-                <article class="gf-feature-item">
-                    <div class="gf-icon-tile"><i class="fas fa-bolt"></i></div>
-                    <h3>Socorro sem enrolacao</h3>
-                    <p>Do pedido ao atendimento, um caminho simples para resolver seu imprevisto.</p>
-                </article>
-                <article class="gf-feature-item">
-                    <div class="gf-icon-tile"><i class="fas fa-shield-halved"></i></div>
-                    <h3>Voce no controle</h3>
-                    <p>Uma estimativa clara antes de decidir. Nada de surpresas no meio do caminho.</p>
-                </article>
-                <article class="gf-feature-item">
-                    <div class="gf-icon-tile"><i class="fas fa-location-arrow"></i></div>
-                    <h3>Gente da sua regiao</h3>
-                    <p>Uma rede local de prestadores que conhece os caminhos e cuida do seu veiculo.</p>
-                </article>
             </div>
         </div>
     </section>
@@ -178,6 +195,26 @@ require __DIR__ . '/_header-public.php';
             </a>
         </div>
     </section>
+
+    <section class="gf-section" aria-labelledby="faq-title">
+        <div class="gf-container">
+            <div class="gf-eyebrow">DUVIDAS FREQUENTES</div>
+            <h2 class="gf-section-title" id="faq-title">Antes de pedir ajuda.</h2>
+            <div class="gf-feature-grid" style="margin-top:28px">
+                <?php foreach ($faq as $item): ?>
+                    <article class="gf-feature-item">
+                        <h3><?= $e($item['q']) ?></h3>
+                        <p><?= $e($item['a']) ?></p>
+                    </article>
+                <?php endforeach; ?>
+            </div>
+        </div>
+    </section>
+
+    <section class="gf-partner-band gf-home-final-cta" aria-label="Começar atendimento">
+        <div class="gf-container"><div><div class="gf-eyebrow" style="color:var(--gf-verde)">PRONTO PARA COMEÇAR?</div><h2>Seu carro parou? Calcule o atendimento.</h2><p>Informe o local, veja as opções e acompanhe o caminho até a solução.</p></div><a class="gf-btn gf-btn--primary gf-btn--lg" href="<?php echo $e($bp); ?>/pre-cotacao" data-marketing-event="begin_quote" data-marketing-label="home_final_cta"><i class="fas fa-truck"></i> Calcular atendimento &nearr;</a></div>
+    </section>
 </main>
 
+<script src="<?php echo $e($bp); ?>/public/assets/js/first-party-marketing.js?v=20261103-1" defer></script>
 <?php require __DIR__ . '/_footer-public.php'; ?>

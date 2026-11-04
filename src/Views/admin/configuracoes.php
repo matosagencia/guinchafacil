@@ -6,7 +6,7 @@ include __DIR__ . '/../layouts/header.php';
 
 $sensivelEnv = ['DB_PASS', 'SMTP_PASS', 'GOOGLE_CLIENT_SECRET', 'ENCRYPTION_KEY', 'SIMULATION_ADMIN_TOKEN'];
 $gruposEnv = [
-    'AplicaÃ§Ã£o' => ['APP_NAME', 'APP_URL', 'APP_ENV', 'APP_DEBUG', 'HTTPS_ONLY', 'FORCE_BASEPATH'],
+    'Aplicação' => ['APP_NAME', 'APP_URL', 'APP_ENV', 'APP_DEBUG', 'HTTPS_ONLY', 'FORCE_BASEPATH'],
     'Banco de Dados' => ['DB_HOST', 'DB_NAME', 'DB_USER', 'DB_PASS'],
     'Institucional' => ['COMPANY_ADDRESS', 'ADMIN_EMAIL'],
     'SMTP / Email' => ['SMTP_HOST', 'SMTP_PORT', 'SMTP_USER', 'SMTP_PASS', 'SMTP_FROM_EMAIL', 'SMTP_FROM_NAME'],
@@ -18,7 +18,7 @@ $gruposEnv = [
 
 function maskEnvValue(string $value): string {
     if ($value === '') {
-        return 'nÃ£o definido';
+        return 'não definido';
     }
     $len = strlen($value);
     if ($len <= 6) {
@@ -32,9 +32,9 @@ function maskEnvValue(string $value): string {
 
 <div class="bo bo-operator gf-f18c-root gf-admin-config-root" id="gfAdminConfigRoot">
 
-<aside class="bo-sidebar gf-f18c-sidebar" aria-label="NavegaÃ§Ã£o do administrador">
-    <a class="gf-f18c-brand" href="<?php echo htmlspecialchars($bp); ?>/admin/central">Guincha<span>FÃ¡cil</span><i>.</i></a>
-    <div class="gf-f18c-workspace"><span class="gf-f18c-avatar"><i class="fas fa-shield-halved" aria-hidden="true"></i></span><span><strong>Central GuinchaFÃ¡cil</strong><small>Workspace operacional</small></span></div>
+<aside class="bo-sidebar gf-f18c-sidebar" aria-label="Navegação do administrador">
+    <a class="gf-f18c-brand" href="<?php echo htmlspecialchars($bp); ?>/admin/central">Guincha<span>Fácil</span><i>.</i></a>
+    <div class="gf-f18c-workspace"><span class="gf-f18c-avatar"><i class="fas fa-shield-halved" aria-hidden="true"></i></span><span><strong>Central GuinchaFácil</strong><small>Workspace operacional</small></span></div>
     <?php include __DIR__ . '/../components/admin_nav_operacional.php'; ?>
     <div class="gf-f18c-sidebar-footer"><a href="<?php echo htmlspecialchars($bp); ?>/">Voltar ao site</a></div>
 </aside>
@@ -45,6 +45,14 @@ function maskEnvValue(string $value): string {
 </header>
 <main class="bo-content gf-admin-config-content">
 
+    <nav class="gf-config-index" aria-label="Seções de configuração">
+        <a href="#config-resumo"><i class="fas fa-eye"></i><span>Resumo efetivo</span></a>
+        <a href="#config-marketing"><i class="fas fa-chart-line"></i><span>Marketing</span></a>
+        <a href="#config-prospeccao"><i class="fas fa-user-plus"></i><span>Prospecção</span></a>
+        <a href="#config-tarifas"><i class="fas fa-sliders"></i><span>Tarifas e operação</span></a>
+        <a href="#config-ambiente"><i class="fas fa-server"></i><span>Ambiente</span></a>
+    </nav>
+
 
 
 
@@ -52,11 +60,11 @@ function maskEnvValue(string $value): string {
 
         <div>
 
-            <span class="eyebrow">GestÃ£o</span>
+            <span class="eyebrow">Gestão</span>
 
-            <h1><i class="fas fa-gear me-2 text-primary-custom"></i>ConfiguraÃ§Ãµes do Sistema</h1>
+            <h1><i class="fas fa-gear me-2 text-primary-custom"></i>Configurações do Sistema</h1>
 
-            <p>ParÃ¢metros de tarifas, comissÃµes e modo de operaÃ§Ã£o</p>
+            <p>Parâmetros de tarifas, comissões e modo de operação</p>
 
         </div>
 
@@ -66,28 +74,28 @@ function maskEnvValue(string $value): string {
 
     <?php if ((isset($_GET['salvo']) && $_GET['salvo']) || (($msg ?? '') === 'salvo')): ?>
         <div class="alert alert-success alert-dismissible fade show" role="alert">
-            <i class="fas fa-check-circle me-2"></i>ConfiguraÃ§Ãµes salvas com sucesso!
+            <i class="fas fa-check-circle me-2"></i>Configurações salvas com sucesso!
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
     <?php endif; ?>
 
     <?php if (((isset($_GET['erro']) && $_GET['erro'] === 'env_write') || (($msg ?? '') === 'erro_write'))): ?>
         <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            <i class="fas fa-exclamation-circle me-2"></i>Erro ao salvar arquivo .env. Verifique as permissÃµes.
+            <i class="fas fa-exclamation-circle me-2"></i>Erro ao salvar arquivo .env. Verifique as permissões.
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
     <?php endif; ?>
 
     <?php if (($msg ?? '') === 'erro_parse'): ?>
         <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            <i class="fas fa-exclamation-circle me-2"></i>Erro de validaÃ§Ã£o: arquivo .env invÃ¡lido. AlteraÃ§Ãµes revertidas.
+            <i class="fas fa-exclamation-circle me-2"></i>Erro de validação: arquivo .env inválido. Alterações revertidas.
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
     <?php endif; ?>
 
     <?php if (($msg ?? '') === 'erro_validacao'): ?>
         <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            <i class="fas fa-exclamation-circle me-2"></i>Ambiente rejeitado por validaÃ§Ã£o de seguranÃ§a.
+            <i class="fas fa-exclamation-circle me-2"></i>Ambiente rejeitado por validação de segurança.
             <?php if (!empty($envErrors)): ?>
                 <div class="small mt-2"><?php echo htmlspecialchars(implode('; ', $envErrors)); ?></div>
             <?php endif; ?>
@@ -107,15 +115,15 @@ function maskEnvValue(string $value): string {
         $serpApiKeyAtual = trim((string)($envAtual['SERPAPI_KEY'] ?? ''));
         $serpApiMask = $serpApiKeyAtual !== ''
             ? substr($serpApiKeyAtual, 0, 4) . str_repeat('*', max(4, strlen($serpApiKeyAtual) - 8)) . substr($serpApiKeyAtual, -4)
-            : 'nÃ£o configurada';
+            : 'não configurada';
     ?>
-    <div class="card mb-4 config-effective-card">
+    <div class="card mb-4 config-effective-card" id="config-resumo">
 
-        <div class="card-header"><i class="fas fa-eye me-2"></i>ConfiguraÃ§Ã£o efetiva carregada</div>
+        <div class="card-header"><i class="fas fa-eye me-2"></i>Configuração efetiva carregada</div>
 
         <div class="card-body">
 
-            <p class="config-info-text mb-3">Valores abaixo sÃ£o somente leitura e mostram o que o sistema encontrou no arquivo <code><?php echo htmlspecialchars($envArquivoAtivo ?? '.env'); ?></code> e no banco de dados.</p>
+            <p class="config-info-text mb-3">Valores abaixo são somente leitura e mostram o que o sistema encontrou no arquivo <code><?php echo htmlspecialchars($envArquivoAtivo ?? '.env'); ?></code> e no banco de dados.</p>
 
             <div class="row g-2 config-effective-grid">
 
@@ -126,10 +134,10 @@ function maskEnvValue(string $value): string {
                 <div class="col-md-4"><span class="config-effective-label">Gateway ativo <small>(arquivo/banco)</small></span><strong><?php echo htmlspecialchars($gatewayAtual); ?></strong></div>
                 <div class="col-md-4"><span class="config-effective-label">Mercado Pago <small>(arquivo)</small></span><strong><?php echo htmlspecialchars($mpEnvAtual); ?></strong></div>
                 <div class="col-md-4"><span class="config-effective-label">PagSeguro <small>(arquivo)</small></span><strong><?php echo htmlspecialchars($psEnvAtual); ?></strong></div>
-                <div class="col-md-4"><span class="config-effective-label">SMTP <small>(arquivo)</small></span><strong><?php echo htmlspecialchars((string)($envAtual['SMTP_HOST'] ?? 'nÃ£o configurado')); ?>:<?php echo htmlspecialchars((string)($envAtual['SMTP_PORT'] ?? '')); ?></strong></div>
-                <div class="col-md-4"><span class="config-effective-label">WhatsApp empresa <small>(arquivo)</small></span><strong><?php echo htmlspecialchars((string)($envAtual['COMPANY_WHATSAPP'] ?? 'nÃ£o configurado')); ?></strong></div>
+                <div class="col-md-4"><span class="config-effective-label">SMTP <small>(arquivo)</small></span><strong><?php echo htmlspecialchars((string)($envAtual['SMTP_HOST'] ?? 'não configurado')); ?>:<?php echo htmlspecialchars((string)($envAtual['SMTP_PORT'] ?? '')); ?></strong></div>
+                <div class="col-md-4"><span class="config-effective-label">WhatsApp empresa <small>(arquivo)</small></span><strong><?php echo htmlspecialchars((string)($envAtual['COMPANY_WHATSAPP'] ?? 'não configurado')); ?></strong></div>
                 <div class="col-md-4"><span class="config-effective-label">SerpApi <small>(arquivo)</small></span><strong><?php echo htmlspecialchars($serpApiMask); ?></strong></div>
-                <div class="col-md-4"><span class="config-effective-label">PrÃ©-cadastro <small>(arquivo)</small></span><strong><?php echo htmlspecialchars((string)($envAtual['PROSPECCAO_URL_PRE_CADASTRO'] ?? '')); ?></strong></div>
+                <div class="col-md-4"><span class="config-effective-label">Pré-cadastro <small>(arquivo)</small></span><strong><?php echo htmlspecialchars((string)($envAtual['PROSPECCAO_URL_PRE_CADASTRO'] ?? '')); ?></strong></div>
             </div>
         </div>
     </div>
@@ -143,7 +151,7 @@ function maskEnvValue(string $value): string {
 
             <select class="form-select w-auto" id="configCidadeSeletor" onchange="window.location.href = <?php echo json_encode($bp . '/admin/configuracoes'); ?> + (this.value ? '?cidade_id=' + this.value : '');">
 
-                <option value="">Global (padrÃ£o de todas as cidades)</option>
+                <option value="">Global (padrão de todas as cidades)</option>
 
                 <?php foreach ($cidadesAtivas as $c): ?>
 
@@ -155,7 +163,7 @@ function maskEnvValue(string $value): string {
 
             <?php if ($cidadeIdConfig > 0): ?>
 
-            <span class="text-muted small"><i class="fas fa-circle-info me-1"></i>SÃ³ os valores de <strong>Tarifas e OperaÃ§Ã£o</strong> (seÃ§Ã£o abaixo) sÃ£o especÃ­ficos desta cidade �?" comissÃ£o, gateway e demais configuraÃ§Ãµes continuam globais.</span>
+            <span class="text-muted small"><i class="fas fa-circle-info me-1"></i>Só os valores de <strong>Tarifas e Operação</strong> (seção abaixo) são específicos desta cidade — comissão, gateway e demais configurações continuam globais.</span>
 
             <?php endif; ?>
 
@@ -169,23 +177,23 @@ function maskEnvValue(string $value): string {
 
     <div class="row g-4">
         <div class="col-12">
-            <div class="card border-success"><div class="card-header"><i class="fas fa-chart-line me-2"></i>Marketing e conversÃµes</div><div class="card-body">
-                <p class="text-muted small">As tags sÃ³ carregam quando ativadas e apÃ³s o visitante aceitar cookies de marketing. NÃ£o coloque tokens secretos aqui.</p>
+            <div class="card border-success" id="config-marketing"><div class="card-header"><i class="fas fa-chart-line me-2"></i>Marketing e conversões</div><div class="card-body">
+                <p class="text-muted small">As tags só carregam quando ativadas e após o visitante aceitar cookies de marketing. Não coloque tokens secretos aqui.</p>
                 <form method="POST" action="<?php echo $bp; ?>/admin/configuracoes" class="row g-3"><input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($csrfToken ?? ''); ?>">
                     <div class="col-md-3"><label class="form-label">Rastreamento</label><select class="form-select" name="marketing_tracking_enabled"><option value="0" <?php echo ($config['marketing_tracking_enabled'] ?? '0') !== '1' ? 'selected' : ''; ?>>Desativado</option><option value="1" <?php echo ($config['marketing_tracking_enabled'] ?? '0') === '1' ? 'selected' : ''; ?>>Ativado</option></select></div>
                     <div class="col-md-3"><label class="form-label">Google Ads ID</label><input class="form-control" name="marketing_google_ads_id" placeholder="AW-123456789" value="<?php echo htmlspecialchars($config['marketing_google_ads_id'] ?? 'AW-18387802162'); ?>"></div>
-                    <div class="col-md-3"><label class="form-label">Label de conversÃ£o</label><input class="form-control" name="marketing_google_ads_conversion_label" value="<?php echo htmlspecialchars($config['marketing_google_ads_conversion_label'] ?? ''); ?>"></div>
+                    <div class="col-md-3"><label class="form-label">Label de conversão</label><input class="form-control" name="marketing_google_ads_conversion_label" value="<?php echo htmlspecialchars($config['marketing_google_ads_conversion_label'] ?? ''); ?>"></div>
                     <div class="col-md-3"><label class="form-label">GA4 Measurement ID</label><input class="form-control" name="marketing_ga4_measurement_id" placeholder="G-XXXXXXXXXX" value="<?php echo htmlspecialchars($config['marketing_ga4_measurement_id'] ?? 'G-0FFGZ5G576'); ?>"></div>
-                    <div class="col-md-3"><label class="form-label">Meta Pixel ID</label><input class="form-control" name="marketing_meta_pixel_id" placeholder="Somente nÃºmeros" value="<?php echo htmlspecialchars($config['marketing_meta_pixel_id'] ?? ''); ?>"></div>
+                    <div class="col-md-3"><label class="form-label">Meta Pixel ID</label><input class="form-control" name="marketing_meta_pixel_id" placeholder="Somente números" value="<?php echo htmlspecialchars($config['marketing_meta_pixel_id'] ?? ''); ?>"></div>
                     <div class="col-12"><button class="btn btn-success"><i class="fas fa-save me-1"></i>Salvar marketing</button></div>
                 </form>
             </div></div>
         </div>
         <div class="col-12">
-            <div class="card border-primary">
-                <div class="card-header"><i class="fas fa-user-plus me-2"></i>ProspecÃ§Ã£o de parceiros</div>
+            <div class="card border-primary" id="config-prospeccao">
+                <div class="card-header"><i class="fas fa-user-plus me-2"></i>Prospecção de parceiros</div>
                 <div class="card-body">
-                    <p class="text-muted small">Esses campos alimentam a central de marketing e a busca de leads via SerpApi. A chave fica no .env e Ã© gravada pelo prÃ³prio painel.</p>
+                    <p class="text-muted small">Esses campos alimentam a central de marketing e a busca de leads via SerpApi. A chave fica no .env e é gravada pelo próprio painel.</p>
                     <form method="POST" action="<?php echo $bp; ?>/admin/configuracoes" class="row g-3">
                         <?php if (!empty($csrfToken)): ?>
                         <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($csrfToken); ?>">
@@ -212,7 +220,7 @@ function maskEnvValue(string $value): string {
                             <input type="text" class="form-control font-monospace" name="PROSPECCAO_CATEGORIAS_ALVO" value="<?php echo htmlspecialchars($envAtual['PROSPECCAO_CATEGORIAS_ALVO'] ?? (defined('PROSPECCAO_CATEGORIAS_ALVO') ? PROSPECCAO_CATEGORIAS_ALVO : '')); ?>">
                         </div>
                         <div class="col-md-2">
-                            <label class="form-label">Quota padrÃ£o</label>
+                            <label class="form-label">Quota padrão</label>
                             <input type="number" class="form-control" name="PROSPECCAO_QUOTA_ALVO_PADRAO" value="<?php echo htmlspecialchars($envAtual['PROSPECCAO_QUOTA_ALVO_PADRAO'] ?? (string)(defined('PROSPECCAO_QUOTA_ALVO_PADRAO') ? PROSPECCAO_QUOTA_ALVO_PADRAO : 5)); ?>">
                         </div>
                         <div class="col-md-2">
@@ -220,20 +228,20 @@ function maskEnvValue(string $value): string {
                             <input type="number" class="form-control" name="PROSPECCAO_PRIORIDADE_FUSEKI_PADRAO" value="<?php echo htmlspecialchars($envAtual['PROSPECCAO_PRIORIDADE_FUSEKI_PADRAO'] ?? (string)(defined('PROSPECCAO_PRIORIDADE_FUSEKI_PADRAO') ? PROSPECCAO_PRIORIDADE_FUSEKI_PADRAO : 100)); ?>">
                         </div>
                         <div class="col-md-2">
-                            <label class="form-label">Raio padrÃ£o (km)</label>
+                            <label class="form-label">Raio padrão (km)</label>
                             <input type="number" class="form-control" name="PROSPECCAO_RAIO_PADRAO_KM" value="<?php echo htmlspecialchars($envAtual['PROSPECCAO_RAIO_PADRAO_KM'] ?? (string)(defined('PROSPECCAO_RAIO_PADRAO_KM') ? PROSPECCAO_RAIO_PADRAO_KM : 15)); ?>">
                         </div>
                         <div class="col-12">
-                            <button class="btn btn-primary"><i class="fas fa-save me-1"></i>Salvar prospecÃ§Ã£o</button>
+                            <button class="btn btn-primary"><i class="fas fa-save me-1"></i>Salvar prospecção</button>
                         </div>
                     </form>
                 </div>
             </div>
         </div>
-        <!-- COLUNA ESQUERDA: Tarifas e Modo de OperaÃ§Ã£o -->
+        <!-- COLUNA ESQUERDA: Tarifas e Modo de Operação -->
         <div class="col-12">
-            <div class="card">
-                <div class="card-header"><i class="fas fa-sliders me-2"></i>Tarifas e OperaÃ§Ã£o</div>
+            <div class="card" id="config-tarifas">
+                <div class="card-header"><i class="fas fa-sliders me-2"></i>Tarifas e Operação</div>
 
                 <div class="card-body">
 
@@ -278,7 +286,7 @@ function maskEnvValue(string $value): string {
 
                         <div class="mb-3">
 
-                            <label class="form-label">ComissÃ£o Plataforma (decimal 0 a 1) �?" incide sobre o valor JÃ LÃQUIDO, depois da reserva de gateway abaixo</label>
+                            <label class="form-label">Comissão da plataforma (decimal 0 a 1) — incide sobre o valor já líquido, depois da reserva de gateway abaixo</label>
 
                             <input type="number" step="0.01" class="form-control" min="0.01" max="0.99" name="comissao_plataforma"
 
@@ -288,7 +296,7 @@ function maskEnvValue(string $value): string {
 
                         <div class="mb-3">
 
-                            <label class="form-label">Custo Sa�da Profissional Padr�o (R$)</label>
+                            <label class="form-label">Custo Sada Profissional Padro (R$)</label>
 
                             <input type="number" step="0.01" class="form-control" name="custo_saida_profissional_padrao"
 
@@ -298,7 +306,7 @@ function maskEnvValue(string $value): string {
 
                         <div class="mb-3">
 
-                            <label class="form-label">Comissão Assist�ncia (decimal 0 a 1)</label>
+                            <label class="form-label">Comisso Assistncia (decimal 0 a 1)</label>
 
                             <input type="number" step="0.01" class="form-control" min="0.01" max="0.99" name="comissao_assistencia_percentual"
 
@@ -308,14 +316,14 @@ function maskEnvValue(string $value): string {
 
                         <div class="mb-3">
 
-                            <label class="form-label">Habilitar comparativo assist�ncia vs reboque</label>
+                            <label class="form-label">Habilitar comparativo assistncia vs reboque</label>
 
                             <select class="form-select" name="habilitar_comparativo_assistencia">
                                 <?php $flagComparativo = (string)($config['habilitar_comparativo_assistencia'] ?? '1'); ?>
                                 <option value="1" <?php echo $flagComparativo === '1' ? 'selected' : ''; ?>>Sim - mostrar comparativo quando houver oficina no raio</option>
                                 <option value="0" <?php echo $flagComparativo === '0' ? 'selected' : ''; ?>>Não - seguir apenas com reboque</option>
                             </select>
-                            <small class="text-muted d-block">Desliga o fluxo Diego de assist�ncia no local na pré-cotação.</small>
+                            <small class="text-muted d-block">Desliga o fluxo Diego de assistncia no local na pr-cotao.</small>
 
                         </div>
 
@@ -329,9 +337,9 @@ function maskEnvValue(string $value): string {
 
                             <small class="text-muted d-block">
 
-                                Ex.: 0.045 = 4,5%. ComissÃ£o + repasse ao prestador somam 100% do valor JÃ DESCONTADO
+                                Ex.: 0.045 = 4,5%. Comissão + repasse ao prestador somam 100% do valor já descontado.
 
-                                dessa reserva �?" evita que comissÃ£o+repasse+taxa do gateway ultrapassem o valor recebido.
+                                dessa reserva — evita que comissão, repasse e taxa do gateway ultrapassem o valor recebido.
 
                             </small>
 
@@ -339,7 +347,7 @@ function maskEnvValue(string $value): string {
 
                         <div class="mb-3">
 
-                            <label class="form-label">CrÃ©dito de conversÃ£o pane�?'reboque (decimal 0 a 1)</label>
+                            <label class="form-label">Crédito de conversão pane → reboque (decimal 0 a 1)</label>
 
                             <input type="number" step="0.01" class="form-control" min="0" max="1" name="credito_conversao_percentual"
 
@@ -349,7 +357,7 @@ function maskEnvValue(string $value): string {
 
                         <div class="mb-3">
 
-                            <label class="form-label">CrÃ©dito de conversÃ£o �?" limite mÃ¡ximo (R$)</label>
+                            <label class="form-label">Crédito de conversão — limite máximo (R$)</label>
 
                             <input type="number" step="0.01" class="form-control" min="0" name="credito_conversao_maximo"
 
@@ -359,7 +367,7 @@ function maskEnvValue(string $value): string {
 
                         <div class="mb-3">
 
-                            <label class="form-label">Limite diÃ¡rio por gateway antes de rotacionar (R$)</label>
+                            <label class="form-label">Limite diário por gateway antes de rotacionar (R$)</label>
 
                             <input type="number" step="0.01" class="form-control" min="0" name="gateway_rotacao_limite_diario"
 
@@ -371,7 +379,7 @@ function maskEnvValue(string $value): string {
 
                                 receber mais que este valor no dia, novos checkouts passam automaticamente para o outro gateway
 
-                                configurado. SÃ³ se aplica quando PAYMENT_GATEWAY_ACTIVE Ã© um Ãºnico gateway (nÃ£o "todos").
+                                configurado. Só se aplica quando PAYMENT_GATEWAY_ACTIVE é um único gateway (não "todos").
 
                             </small>
 
@@ -412,7 +420,7 @@ function maskEnvValue(string $value): string {
                             </div>
 
                             <div class="col-12 mb-3">
-                                <label class="form-label">InÃ­cio Turno Noturno (HH:MM)</label>
+                                <label class="form-label">Início Turno Noturno (HH:MM)</label>
                                 <input type="time" class="form-control" name="turno_noturno_inicio"
                                        value="<?php echo htmlspecialchars($config['turno_noturno_inicio'] ?? '20:00'); ?>">
                             </div>
@@ -440,11 +448,11 @@ function maskEnvValue(string $value): string {
 
 
 
-                        <!-- TARIFA POR CATEGORIA DE VEÃCULO -->
+                        <!-- TARIFA POR CATEGORIA DE VECULO -->
 
-                        <h6 class="mb-3 text-muted"><i class="fas fa-car-side me-2"></i>Tarifa por Categoria de VeÃ­culo</h6>
+                        <h6 class="mb-3 text-muted"><i class="fas fa-car-side me-2"></i>Tarifa por Categoria de Veículo</h6>
 
-                        <p class="text-muted small">Valor base (Taxa por Km / Taxa Fixa, acima) vale para a categoria "Popular". As demais categorias usam os valores prÃ³prios abaixo.</p>
+                        <p class="text-muted small">Valor base (Taxa por Km / Taxa Fixa, acima) vale para a categoria "Popular". As demais categorias usam os valores próprios abaixo.</p>
 
                         <div class="row">
 
@@ -459,22 +467,22 @@ function maskEnvValue(string $value): string {
                                        value="<?php echo htmlspecialchars($config['tarifa_suv_fixa'] ?? '12.00'); ?>">
                             </div>
                             <div class="col-12 mb-3">
-                                <label class="form-label">Caminhonete/UtilitÃ¡rio (R$/KM)</label>
+                                <label class="form-label">Caminhonete/Utilitário (R$/KM)</label>
                                 <input type="number" step="0.01" class="form-control" name="tarifa_caminhonete_km"
                                        value="<?php echo htmlspecialchars($config['tarifa_caminhonete_km'] ?? '4.80'); ?>">
                             </div>
                             <div class="col-12 mb-3">
-                                <label class="form-label">Caminhonete/UtilitÃ¡rio (Taxa Fixa R$)</label>
+                                <label class="form-label">Caminhonete/Utilitário (Taxa Fixa R$)</label>
                                 <input type="number" step="0.01" class="form-control" name="tarifa_caminhonete_fixa"
                                        value="<?php echo htmlspecialchars($config['tarifa_caminhonete_fixa'] ?? '14.00'); ?>">
                             </div>
                             <div class="col-12 mb-3">
-                                <label class="form-label">ElÃ©trico (R$/KM)</label>
+                                <label class="form-label">Elétrico (R$/KM)</label>
                                 <input type="number" step="0.01" class="form-control" name="tarifa_eletrico_km"
                                        value="<?php echo htmlspecialchars($config['tarifa_eletrico_km'] ?? '3.50'); ?>">
                             </div>
                             <div class="col-12 mb-3">
-                                <label class="form-label">ElÃ©trico (Taxa Fixa R$)</label>
+                                <label class="form-label">Elétrico (Taxa Fixa R$)</label>
                                 <input type="number" step="0.01" class="form-control" name="tarifa_eletrico_fixa"
                                        value="<?php echo htmlspecialchars($config['tarifa_eletrico_fixa'] ?? '10.00'); ?>">
                             </div>
@@ -496,9 +504,9 @@ function maskEnvValue(string $value): string {
 
 
 
-                        <!-- MODO DE OPERA�?�fO -->
+                        <!-- MODO DE OPERA?fO -->
 
-                        <h6 class="mb-3 text-muted"><i class="fas fa-server me-2"></i>Modo de OperaÃ§Ã£o</h6>
+                        <h6 class="mb-3 text-muted"><i class="fas fa-server me-2"></i>Modo de Operação</h6>
 
                         <div class="mb-3">
 
@@ -520,7 +528,7 @@ function maskEnvValue(string $value): string {
 
                                     <label class="form-check-label" for="mode_production">
 
-                                        <span class="badge bg-success">ProduÃ§Ã£o</span>
+                                        <span class="badge bg-success">Produção</span>
 
                                         <small class="text-muted d-block">Ambiente real com pagamentos processados</small>
 
@@ -554,7 +562,7 @@ function maskEnvValue(string $value): string {
 
                                         <span class="badge bg-info text-dark">Fluxo Livre</span>
 
-                                        <small class="text-muted d-block">Sem validaÃ§Ãµes de pagamento, fluxo contÃ­nuo</small>
+                                        <small class="text-muted d-block">Sem validações de pagamento, fluxo contínuo</small>
 
                                     </label>
 
@@ -566,13 +574,13 @@ function maskEnvValue(string $value): string {
 
                                 <i class="fas fa-info-circle"></i> 
 
-                                <span class="d-block mb-1">Selecione uma opÃ§Ã£o e clique em <strong>Salvar ConfiguraÃ§Ãµes</strong>. O System Mode controla o fluxo da plataforma; o ambiente do Mercado Pago Ã© ajustado separadamente em <strong>Gateway de Pagamento �?' MP_ENV</strong>.</span>
+                                <span class="d-block mb-1">Selecione uma opção e clique em <strong>Salvar Configurações</strong>. O System Mode controla o fluxo da plataforma; o ambiente do Mercado Pago é ajustado separadamente em <strong>Gateway de Pagamento — MP_ENV</strong>.</span>
 
-                                <strong>ProduÃ§Ã£o:</strong> Pagamentos reais via gateway<br>
+                                <strong>Produção:</strong> Pagamentos reais via gateway<br>
 
-                                <strong>Sandbox:</strong> Testes com cartÃµes e PIX simulados<br>
+                                <strong>Sandbox:</strong> Testes com cartões e PIX simulados<br>
 
-                                <strong>Fluxo Livre:</strong> Sem exigÃªncia de pagamento antecipado
+                                <strong>Fluxo Livre:</strong> Sem exigência de pagamento antecipado
 
                             </div>
 
@@ -584,9 +592,9 @@ function maskEnvValue(string $value): string {
 
 
 
-                        <!-- PAGAMENTO OBRIGAT�"RIO -->
+                        <!-- PAGAMENTO OBRIGAT"RIO -->
 
-                        <h6 class="mb-3 text-muted"><i class="fas fa-lock me-2"></i>SeguranÃ§a</h6>
+                        <h6 class="mb-3 text-muted"><i class="fas fa-lock me-2"></i>Segurança</h6>
 
                         <div class="mb-3">
 
@@ -600,7 +608,7 @@ function maskEnvValue(string $value): string {
 
                                     <strong>Exigir pagamento antecipado</strong>
 
-                                    <small class="d-block text-muted">Se desativado, clientes podem solicitar serviÃ§o sem pagamento prÃ©vio</small>
+                                    <small class="d-block text-muted">Se desativado, clientes podem solicitar serviço sem pagamento prévio</small>
 
                                 </label>
 
@@ -630,7 +638,7 @@ function maskEnvValue(string $value): string {
 
                                     <strong>Modo de debug global</strong>
 
-                                    <small class="d-block text-muted">Liga logs verbosos em todo o sistema (backend e frontend): sistema, classe, funÃ§Ã£o e localizaÃ§Ã£o exata de cada evento/erro �?" nos logs do servidor e no console do navegador. Recomendado sÃ³ durante diagnÃ³stico, nÃ£o em produÃ§Ã£o normal.</small>
+                                    <small class="d-block text-muted">Liga logs verbosos em todo o sistema (backend e frontend): sistema, classe, função e localização exata de cada evento/erro — nos logs do servidor e no console do navegador. Recomendado só durante diagnóstico, não em produção normal.</small>
 
                                 </label>
 
@@ -642,7 +650,7 @@ function maskEnvValue(string $value): string {
 
                         <button type="submit" class="btn btn-primary w-100 mt-3">
 
-                            <i class="fas fa-save me-2"></i>Salvar ConfiguraÃ§Ãµes
+                            <i class="fas fa-save me-2"></i>Salvar Configurações
 
                         </button>
 
@@ -656,7 +664,7 @@ function maskEnvValue(string $value): string {
 
 
 
-        <!-- COLUNA DIREITA: Gateway e InformaÃ§Ãµes -->
+        <!-- COLUNA DIREITA: Gateway e Informações -->
 
         <div class="col-12">
             <div class="card mb-4">
@@ -680,7 +688,7 @@ function maskEnvValue(string $value): string {
 
                             </select>
 
-                            <div class="form-text">Define qual gateway serÃ¡ oferecido na tela de checkout.</div>
+                            <div class="form-text">Define qual gateway será oferecido na tela de checkout.</div>
 
                         </div>
 
@@ -765,12 +773,12 @@ function maskEnvValue(string $value): string {
             </div>
 
             <div class="card mb-4">
-                <div class="card-header"><i class="fas fa-bell me-2"></i>NotificaÃ§Ãµes</div>
+                <div class="card-header"><i class="fas fa-bell me-2"></i>Notificações</div>
                 <div class="card-body">
-                    <p class="text-muted small">Centralize aqui as chaves de alerta do navegador e os canais de fallback. O campo principal Ã© <code>PUSH_VAPID_PUBLIC_KEY</code>, que precisa receber a chave pÃºblica gerada para o Web Push.</p>
-                    <p class="text-muted small mb-3">Se <code>WHATSAPP_FALLBACK_TO</code> e <code>WHATSAPP_DEFAULT_TO</code> estiverem vazios, o sistema usa <code>COMPANY_WHATSAPP</code> como telefone padrÃ£o.</p>
+                    <p class="text-muted small">Centralize aqui as chaves de alerta do navegador e os canais de fallback. O campo principal é <code>PUSH_VAPID_PUBLIC_KEY</code>, que precisa receber a chave pública gerada para o Web Push.</p>
+                    <p class="text-muted small mb-3">Se <code>WHATSAPP_FALLBACK_TO</code> e <code>WHATSAPP_DEFAULT_TO</code> estiverem vazios, o sistema usa <code>COMPANY_WHATSAPP</code> como telefone padrão.</p>
                     <div class="alert alert-info small py-2 mb-3">
-                        <strong>Como configurar:</strong> gere o par VAPID, cole a chave pÃºblica em <code>PUSH_VAPID_PUBLIC_KEY</code>, a chave privada em <code>PUSH_VAPID_PRIVATE_KEY</code> e mantenha o <code>PUSH_VAPID_SUBJECT</code> apontando para a URL do sistema.
+                        <strong>Como configurar:</strong> gere o par VAPID, cole a chave pública em <code>PUSH_VAPID_PUBLIC_KEY</code>, a chave privada em <code>PUSH_VAPID_PRIVATE_KEY</code> e mantenha o <code>PUSH_VAPID_SUBJECT</code> apontando para a URL do sistema.
                     </div>
                     <form method="POST" action="<?php echo $bp; ?>/admin/configuracoes">
                         <?php if (!empty($csrfToken)): ?>
@@ -805,7 +813,7 @@ function maskEnvValue(string $value): string {
                             <div class="col-12"><h6 class="mt-2 mb-0">WhatsApp fallback</h6></div>
                             <div class="col-12">
                                 <div class="alert alert-secondary small py-2 mb-0">
-                                    No WAHA, use a URL da instÃ¢ncia ou diretamente <code>/api/sendText</code>. O token Ã© o <code>WAHA_API_KEY</code> da sua instÃ¢ncia.
+                                    No WAHA, use a URL da instância ou diretamente <code>/api/sendText</code>. O token é o <code>WAHA_API_KEY</code> da sua instância.
                                 </div>
                             </div>
                             <div class="col-12">
@@ -834,13 +842,13 @@ function maskEnvValue(string $value): string {
                             </div>
                         </div>
                         <button type="submit" class="btn btn-primary w-100 mt-3">
-                            <i class="fas fa-save me-2"></i>Salvar NotificaÃ§Ãµes
+                            <i class="fas fa-save me-2"></i>Salvar Notificações
                         </button>
                     </form>
                 </div>
             </div>
 
-            <div class="card mb-4" id="ambiente">
+            <div class="card mb-4" id="config-ambiente">
                 <div class="card-header d-flex flex-wrap align-items-center justify-content-between gap-2">
                     <span><i class="fas fa-shield-halved me-2"></i>Ambiente (.env)</span>
                     <a href="<?php echo htmlspecialchars($bp); ?>/admin/env/auditoria" class="btn btn-outline-secondary btn-sm">
@@ -849,12 +857,12 @@ function maskEnvValue(string $value): string {
                 </div>
                 <div class="card-body">
                     <p class="text-muted small mb-3">
-                        Este bloco concentra o restante das variÃ¡veis do arquivo <code><?php echo htmlspecialchars($envArquivoAtivo ?? '.env'); ?></code>.
-                        As Ã¡reas de gateway, prospecÃ§Ã£o e notificaÃ§Ãµes jÃ¡ ficam nesta mesma tela, nos cards acima.
+                        Este bloco concentra o restante das variáveis do arquivo <code><?php echo htmlspecialchars($envArquivoAtivo ?? '.env'); ?></code>.
+                        As áreas de gateway, prospecção e notificações já ficam nesta mesma tela, nos cards acima.
                     </p>
                     <?php if (!empty($runtimeAudit['critical'] ?? [])): ?>
                         <div class="alert alert-warning small">
-                            <strong>VerificaÃ§Ã£o atual:</strong> hÃ¡ pontos crÃ­ticos de ambiente que devem ser corrigidos antes de publicar.
+                            <strong>Verificação atual:</strong> há pontos críticos de ambiente que devem ser corrigidos antes de publicar.
                         </div>
                     <?php endif; ?>
                     <form method="POST" action="<?php echo $bp; ?>/admin/env/salvar" class="row g-3">
@@ -923,15 +931,15 @@ function maskEnvValue(string $value): string {
                 </div>
             </div>
 <div class="card">
-                <div class="card-header"><i class="fas fa-info-circle me-2"></i>InformaÃ§Ãµes</div>
+                <div class="card-header"><i class="fas fa-info-circle me-2"></i>Informações</div>
                 <div class="card-body">
                     <p class="config-info-text">
 
                         <i class="fas fa-check-circle text-success me-1"></i> 
 
-                        AlteraÃ§Ãµes nas configuraÃ§Ãµes de tarifa serÃ£o aplicadas em todos os novos pedidos imediatamente.
+                        Alterações nas configurações de tarifa serão aplicadas em todos os novos pedidos imediatamente.
 
-                        Pedidos jÃ¡ criados nÃ£o serÃ£o afetados.
+                        Pedidos já criados não serão afetados.
 
                     </p>
 
@@ -961,11 +969,11 @@ function maskEnvValue(string $value): string {
 
                         <i class="fas fa-lock me-1"></i>
 
-                        <strong>Pagamento obrigatÃ³rio:</strong> 
+                        <strong>Pagamento obrigatório:</strong> 
 
                         <span class="badge <?php echo (($config['payment_required'] ?? '1') == '1') ? 'bg-danger' : 'bg-secondary'; ?>">
 
-                            <?php echo (($config['payment_required'] ?? '1') == '1') ? 'Sim' : 'NÃ£o'; ?>
+                            <?php echo (($config['payment_required'] ?? '1') == '1') ? 'Sim' : 'Não'; ?>
 
                         </span>
 
@@ -973,7 +981,7 @@ function maskEnvValue(string $value): string {
 
                     <hr class="config-hr">
 
-                    <small class="config-info-small">�sltima alteraÃ§Ã£o: <?php echo date('d/m/Y H:i'); ?></small>
+                    <small class="config-info-small">Última alteração: <?php echo date('d/m/Y H:i'); ?></small>
 
                 </div>
 

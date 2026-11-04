@@ -106,6 +106,19 @@ final class RoutingService
             ],
         ], JSON_UNESCAPED_SLASHES);
 
+        if (!function_exists('curl_init')) {
+            [$resposta, $httpCode] = self::requisicaoStream($url, 'POST', (string)$body, [
+                'Accept: application/json',
+                'Content-Type: application/json',
+                'Authorization: ' . $apiKey,
+                'User-Agent: GuinchaFacil-Routing/2.0',
+            ]);
+            if ($resposta === null || $httpCode >= 400) return null;
+            $decoded = json_decode($resposta, true);
+            $dist = is_array($decoded) ? ($decoded['routes'][0]['summary']['distance'] ?? null) : null;
+            return is_numeric($dist) ? (float)$dist : null;
+        }
+
         $ch = curl_init($url);
         curl_setopt_array($ch, [
             CURLOPT_RETURNTRANSFER => true,
@@ -179,6 +192,18 @@ final class RoutingService
         $coords = sprintf('%.6F,%.6F;%.6F,%.6F', $lngO, $latO, $lngD, $latD);
         $url = $base . '/route/v1/driving/' . $coords . '?overview=false&alternatives=false&steps=false';
 
+        if (!function_exists('curl_init')) {
+            [$body, $httpCode] = self::requisicaoStream($url, 'GET', null, [
+                'Accept: application/json',
+                'User-Agent: GuinchaFacil-Routing/2.0',
+            ]);
+            if ($body === null || $httpCode >= 400) return null;
+            $decoded = json_decode($body, true);
+            if (!is_array($decoded) || ($decoded['code'] ?? '') !== 'Ok') return null;
+            $dist = $decoded['routes'][0]['distance'] ?? null;
+            return is_numeric($dist) ? (float)$dist : null;
+        }
+
         $ch = curl_init($url);
         curl_setopt_array($ch, [
             CURLOPT_RETURNTRANSFER => true,
@@ -234,6 +259,27 @@ final class RoutingService
     private static function chaveCache(float $a, float $b, float $c, float $d): string
     {
         return sprintf('%.4F,%.4F;%.4F,%.4F', $a, $b, $c, $d);
+    }
+
+    /** @return array{0:?string,1:int} */
+    private static function requisicaoStream(string $url, string $method, ?string $body, array $headers): array
+    {
+        $opts = ['http' => [
+            'method' => $method,
+            'timeout' => self::TIMEOUT_MS / 1000,
+            'ignore_errors' => true,
+            'header' => implode("\r\n", $headers) . "\r\n",
+        ]];
+        if ($body !== null) $opts['http']['content'] = $body;
+        $context = stream_context_create($opts);
+        $response = @file_get_contents($url, false, $context);
+        $status = 0;
+        foreach (($http_response_header ?? []) as $header) {
+            if (preg_match('/^HTTP\/\S+\s+(\d+)/', $header, $m)) {
+                $status = (int)$m[1];
+            }
+        }
+        return [$response === false ? null : $response, $status];
     }
 
     private static function coordsValidas(float $lat, float $lng): bool

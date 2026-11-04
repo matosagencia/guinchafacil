@@ -5,6 +5,12 @@ $bp = defined('BASE_PATH') ? BASE_PATH : '';
 $e = static fn(string $v): string => htmlspecialchars($v, ENT_QUOTES, 'UTF-8');
 $flash = $flash ?? null;
 $resultado = ($_GET['resultado'] ?? '') === '1' && !empty($cotacao) && (int)($cotacao['expira_em'] ?? 0) > time();
+$cotacaoExpiraEm = (int)($cotacao['expira_em'] ?? 0);
+$cotacaoMinutosRestantes = $cotacaoExpiraEm > time() ? max(1, (int)ceil(($cotacaoExpiraEm - time()) / 60)) : 0;
+$cotacaoServico = (string)($cotacao['service_code'] ?? $cotacao['tipo_problema'] ?? 'TOW_CAR');
+$cotacaoServicoLabel = in_array(strtolower($cotacaoServico), ['tow_car', 'reboque', 'guincho'], true) ? 'Guincho / reboque' : ucwords(str_replace(['_', '-'], ' ', $cotacaoServico));
+$cotacaoDisponibilidade = !empty($cotacao['cobertura_status']) ? (string)$cotacao['cobertura_status'] : 'Cobertura operacional encontrada';
+$cotacaoStatusBusca = !empty($cotacao['status_busca']) ? (string)$cotacao['status_busca'] : 'Pronto para confirmar';
 $nonce = function_exists('csp_script_nonce_attr') ? csp_script_nonce_attr() : '';
 $prefillLat = $prefillLat ?? '';
 $prefillLng = $prefillLng ?? '';
@@ -13,7 +19,8 @@ $meta_description = 'Informe sua localizacao e receba uma cotacao de guincho ou 
 $body_class = 'gf-preq-body';
 $nav_atual = 'pre-cotacao';
 $utility_cidade = 'Niteroi, RJ';
-$extra_css = ['/public/assets/vendor/leaflet/leaflet.css','/public/assets/css/pages/pre-cotacao.css?v=20261101-4'];
+$show_utility_cidade = false;
+$extra_css = ['/public/assets/vendor/leaflet/leaflet.css','/public/assets/css/pages/pre-cotacao.css?v=20261103-1'];
 require __DIR__ . '/_header-public.php';
 ?>
 <script src="<?php echo $e($bp); ?>/public/assets/vendor/leaflet/leaflet.js"></script>
@@ -306,12 +313,23 @@ require __DIR__ . '/_header-public.php';
         <section class="gf-result-form">
         <div class="gf-summary gf-summary--result-form">
             <div class="gf-summary__title">
-                <h3><?= $e((string)($cotacao['service_code'] ?? 'TOW_CAR')) ?></h3>
+                <h3><?= $e($cotacaoServicoLabel) ?></h3>
                 <span><?= number_format((float)$cotacao['distancia_km'], 1, ',', '.') ?> km</span>
             </div>
+            <p class="gf-result-status gf-result-status--ok"><i class="fas fa-circle-check"></i> <?= $e($cotacaoDisponibilidade) ?></p>
+            <dl class="gf-result-details">
+                <div><dt>Servico recomendado</dt><dd><?= $e($cotacaoServicoLabel) ?></dd></div>
+                <div><dt>Distancia calculada</dt><dd><?= number_format((float)$cotacao['distancia_km'], 1, ',', '.') ?> km</dd></div>
+                <div><dt>Destino</dt><dd><?= $e((string)($cotacao['endereco_destino'] ?? 'Destino informado')) ?></dd></div>
+                <div><dt>Status da busca</dt><dd><?= $e($cotacaoStatusBusca) ?></dd></div>
+            </dl>
             <div class="gf-summary__total">
                         <span>Total<small>Válida por 15 minutos</small></span>
                 <strong>R$ <?= number_format((float)$cotacao['valor'], 2, ',', '.') ?></strong>
+            </div>
+            <div class="gf-result-alternatives">
+                <strong>Se o parceiro recusar</strong>
+                <p>Buscaremos a proxima opcao elegivel na regiao. Se nao houver cobertura operacional, mostraremos o atendimento manual pelo WhatsApp.</p>
             </div>
             <form method="post" action="<?= $e($bp) ?>/pre-cotacao/aceitar" style="margin-top:22px;">
 			    

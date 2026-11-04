@@ -816,6 +816,7 @@ class AdminController extends BaseController
             'clientes'  => Usuario::contarTotal(['tipo' => 'cliente']),
             'guinchos'  => Usuario::contarTotal(['tipo' => 'guincho']),
             'oficinas' => Usuario::contarTotal(['tipo' => 'oficina']),
+            'parceiros' => Usuario::contarTotal(['tipo' => 'parceiro']),
             'admins'    => Usuario::contarTotal(['tipo' => 'admin']),
             'suspensos' => Usuario::contarTotal(['ativo' => 0]),
         ];
@@ -910,7 +911,7 @@ class AdminController extends BaseController
         }
 
         $tipo = (string)($_POST['tipo'] ?? '');
-        $permitidos = ['admin', 'cliente', 'guincho', 'funcionario', 'gerente', 'oficina'];
+        $permitidos = ['admin', 'cliente', 'guincho', 'funcionario', 'gerente', 'oficina', 'parceiro'];
         if (!in_array($tipo, $permitidos, true)) {
             error_log('[GF-18F16][REJECT][AdminController::usuarioSalvar][ROLE] perfil invalido');
             $this->redirect('/admin/usuario/novo?erro=tipo_invalido'); return;

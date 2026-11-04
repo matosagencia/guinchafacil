@@ -1,0 +1,26 @@
+-- First-party marketing events. Safe to apply more than once.
+CREATE TABLE IF NOT EXISTS marketing_events (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    event_name VARCHAR(80) NOT NULL,
+    event_label VARCHAR(120) NULL,
+    page_path VARCHAR(500) NULL,
+    destination VARCHAR(500) NULL,
+    user_type VARCHAR(30) NOT NULL DEFAULT 'visitante',
+    consent_status VARCHAR(10) NOT NULL DEFAULT 'unknown',
+    session_hash CHAR(64) NULL,
+    user_id INT NULL,
+    utm_source VARCHAR(180) NULL,
+    utm_medium VARCHAR(180) NULL,
+    utm_campaign VARCHAR(180) NULL,
+    utm_content VARCHAR(180) NULL,
+    utm_term VARCHAR(180) NULL,
+    canal_aquisicao VARCHAR(80) NULL,
+    metadata_json JSON NULL,
+    criado_em DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    KEY idx_marketing_events_name_date (event_name, criado_em),
+    KEY idx_marketing_events_campaign_date (utm_campaign, criado_em),
+    KEY idx_marketing_events_label_date (event_label, criado_em),
+    KEY idx_marketing_events_user_date (user_id, criado_em),
+    CONSTRAINT fk_marketing_events_user FOREIGN KEY (user_id) REFERENCES usuarios(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
