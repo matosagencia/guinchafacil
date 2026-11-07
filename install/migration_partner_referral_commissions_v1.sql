@@ -17,18 +17,3 @@ CREATE TABLE IF NOT EXISTS partner_referral_commission_rules (
     KEY idx_partner_referral_profile_period (partner_profile, status, effective_from),
     CONSTRAINT fk_partner_referral_commission_admin FOREIGN KEY (created_by_admin_id) REFERENCES usuarios(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- Regra inicial do programa de indicação: o parceiro recebe 5% da comissão
--- da GuinchaFácil, e não 5% do valor total do pedido. Não duplica uma regra
--- ativa já configurada pelo administrador.
-INSERT INTO partner_referral_commission_rules
-    (partner_profile, commission_percent, discount_percent, status, effective_from)
-SELECT 'distribuicao', 5.00, 0.00, 'ativo', NOW()
-WHERE NOT EXISTS (
-    SELECT 1
-    FROM partner_referral_commission_rules
-    WHERE partner_profile = 'distribuicao'
-      AND status = 'ativo'
-      AND effective_from <= NOW()
-      AND (effective_until IS NULL OR effective_until > NOW())
-);
