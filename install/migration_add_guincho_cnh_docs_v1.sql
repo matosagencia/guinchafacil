@@ -1,0 +1,10 @@
+-- GuinchaFácil: documentos de CNH usados pelo cadastro de guincho.
+SET @sql = (SELECT IF(EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'guinchos' AND COLUMN_NAME = 'doc_cnh_frente'), 'SELECT 1', 'ALTER TABLE guinchos ADD COLUMN doc_cnh_frente TEXT NULL'));
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+SET @sql = (SELECT IF(EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'guinchos' AND COLUMN_NAME = 'doc_cnh_verso'), 'SELECT 1', 'ALTER TABLE guinchos ADD COLUMN doc_cnh_verso TEXT NULL'));
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
