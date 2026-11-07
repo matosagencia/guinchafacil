@@ -82,7 +82,7 @@ $nonceAttr = function_exists('csp_script_nonce_attr') ? csp_script_nonce_attr() 
     <link href="<?php echo htmlspecialchars($bp); ?>/public/assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
     <link href="<?php echo htmlspecialchars($bp); ?>/public/assets/vendor/fontawesome/css/all.min.css" rel="stylesheet">
     <link href="<?php echo htmlspecialchars($bp); ?>/public/assets/css/tokens.css" rel="stylesheet">
-    <link href="<?php echo htmlspecialchars($bp); ?>/public/assets/css/gf-layout.css" rel="stylesheet">
+    <link href="<?php echo htmlspecialchars($bp); ?>/public/assets/css/gf-layout.css?v=20261106-2" rel="stylesheet">
     <link href="<?php echo htmlspecialchars($bp); ?>/public/assets/css/components/gf-footer-payments.css" rel="stylesheet">
     <link href="<?php echo htmlspecialchars($bp); ?>/public/assets/css/public-shell-fix.css?v=20261101-1" rel="stylesheet">
 <?php if (!empty($extra_css)) foreach ((array)$extra_css as $_x) { echo '    <link rel="stylesheet" href="' . htmlspecialchars($bp . $_x, ENT_QUOTES, 'UTF-8') . '">' . PHP_EOL; } ?>
@@ -104,15 +104,16 @@ $nonceAttr = function_exists('csp_script_nonce_attr') ? csp_script_nonce_attr() 
 <header class="gf-site-header">
     <div class="gf-container">
         <a class="gf-brand" href="<?php echo htmlspecialchars($bp); ?>/">
-            <img class="gf-brand__mark" src="<?php echo htmlspecialchars($bp); ?>/public/assets/img/logo-512.png" alt="" width="40" height="40">
-            <span>Guincha<span>Facil</span>.</span>
+            <img class="gf-brand__mark" src="<?php echo htmlspecialchars($bp); ?>/public/assets/img/logo-512.png" alt="GuinchaFácil" width="40" height="40">
         </a>
-        <nav class="gf-nav" aria-label="Navegacao principal">
+        <nav class="gf-nav" id="gfPublicNav" aria-label="Navegacao principal">
             <a href="<?php echo htmlspecialchars($bp); ?>/"<?php echo $nav_atual === 'inicio' ? ' class="is-active"' : ''; ?>>Inicio</a>
             <a href="<?php echo htmlspecialchars($bp); ?>/pre-cotacao"<?php echo $nav_atual === 'pre-cotacao' ? ' class="is-active"' : ''; ?>>Como funciona</a>
             <a href="<?php echo htmlspecialchars($nav_onde_url, ENT_QUOTES, 'UTF-8'); ?>"<?php echo $nav_atual === 'onde' ? ' class="is-active"' : ''; ?>>Onde atendemos</a>
             <a href="<?php echo htmlspecialchars($bp); ?>/parceiros"<?php echo $nav_atual === 'parceiros' ? ' class="is-active"' : ''; ?>>Seja um parceiro &nearr;</a>
         </nav>
-        <a class="gf-btn gf-btn--primary gf-btn--sm" href="<?php echo htmlspecialchars($bp); ?>/pre-cotacao">Pedir guincho &nearr;</a>
+        <a class="gf-btn gf-btn--primary gf-btn--sm gf-header-help" href="<?php echo htmlspecialchars($bp); ?>/pre-cotacao" aria-label="Pedir socorro"><i class="fas fa-triangle-exclamation" aria-hidden="true"></i><span>Pedir guincho</span></a>
+        <button class="gf-mobile-menu" type="button" aria-label="Abrir menu" aria-controls="gfPublicNav" aria-expanded="false"><i class="fas fa-bars" aria-hidden="true"></i></button>
     </div>
 </header>
+<script<?php echo function_exists('csp_script_nonce_attr') ? csp_script_nonce_attr() : ''; ?>>(function(){var b=document.querySelector('.gf-mobile-menu'),n=document.getElementById('gfPublicNav');if(!b||!n)return;b.addEventListener('click',function(){var open=b.getAttribute('aria-expanded')==='true';b.setAttribute('aria-expanded',String(!open));b.setAttribute('aria-label',open?'Abrir menu':'Fechar menu');n.classList.toggle('is-open',!open);});}());</script>

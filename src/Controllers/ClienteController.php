@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/../Services/TriageSessionService.php';
 // File: guinchafacil/src/Controllers/ClienteController.php
 require_once __DIR__ . '/../../config.php';
 require_once __DIR__ . '/../Services/AuthService.php';
@@ -134,7 +135,11 @@ class ClienteController extends BaseController
     public function veiculoForm(): void
     {
         AuthService::requireAuth('cliente');
-        $triageSessionId = trim((string)($_GET['triage_session_id'] ?? ''));
+        $triageSessionId = trim((string)(
+            $_GET['triage_session_id']
+                ?? $_SESSION[TriageSessionService::SESSION_ID_KEY]
+                ?? (is_array($_SESSION['pre_cotacao'] ?? null) ? ($_SESSION['pre_cotacao']['triage_session_id'] ?? '') : '')
+        ));
         $uid      = $this->usuarioId();
         $veiculo  = null;
         $vid      = (int)($_GET['id'] ?? 0);
@@ -231,7 +236,11 @@ class ClienteController extends BaseController
         } else {
             Veiculo::criar($uid, $dados);
         }
-        $triageSessionId = trim((string)($_POST['triage_session_id'] ?? ''));
+        $triageSessionId = trim((string)(
+            $_POST['triage_session_id']
+                ?? $_SESSION[TriageSessionService::SESSION_ID_KEY]
+                ?? (is_array($_SESSION['pre_cotacao'] ?? null) ? ($_SESSION['pre_cotacao']['triage_session_id'] ?? '') : '')
+        ));
         if ($triageSessionId !== '') {
             $this->redirect('/checkout/veiculo?triage_session_id=' . rawurlencode($triageSessionId));
             return;

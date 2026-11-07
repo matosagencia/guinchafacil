@@ -710,16 +710,34 @@
             if (!navigator.geolocation) return;
             btnGps.disabled = true;
             navigator.geolocation.getCurrentPosition(function (pos) {
-                els.lat.value = pos.coords.latitude.toFixed(7);
-                els.lng.value = pos.coords.longitude.toFixed(7);
+                var latitude = pos.coords.latitude.toFixed(7);
+                var longitude = pos.coords.longitude.toFixed(7);
+                els.lat.value = latitude;
+                els.lng.value = longitude;
                 if (typeof window.__gfMapSet === 'function') {
-                    window.__gfMapSet(parseFloat(els.lat.value), parseFloat(els.lng.value));
+                    window.__gfMapSet(parseFloat(latitude), parseFloat(longitude));
                 }
                 setMapLabel('Localização capturada');
-                btnGps.disabled = false;
+                fetch('/geocode/public/reverse?lat=' + encodeURIComponent(latitude) + '&lng=' + encodeURIComponent(longitude), { credentials: 'same-origin', headers: { Accept: 'application/json' } })
+                    .then(function (response) { return response.ok ? response.json() : null; })
+                    .then(function (payload) {
+                        var result = payload && (payload.result || payload.data || payload);
+                        var label = result && (result.display_name || result.label || result.address);
+                        if (label && els.loc) {
+                            els.loc.value = String(label).split(',').slice(0, 3).join(',').trim();
+                            els.loc.dispatchEvent(new Event('input', { bubbles: true }));
+                            updateSummary('origem');
+                            setMapLabel('Localizacao capturada');
+                        } else {
+                            setMapLabel('Localizacao capturada; confirme o endereco');
+                        }
+                    })
+                    .catch(function () { setMapLabel('Localizacao capturada; confirme o endereco'); })
+                    .then(function () { btnGps.disabled = false; });
             }, function () {
                 btnGps.disabled = false;
-            }, { enableHighAccuracy: true, timeout: 8000 });
+                setMapLabel('Nao foi possivel obter sua localizacao');
+            }, { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 });
         });
     }
 

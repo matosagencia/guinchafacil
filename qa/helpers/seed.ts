@@ -60,7 +60,13 @@ function runSeedScript<T = any>(scriptRelativePath: string, args: string[] = [])
     );
   }
 
-  const jsonLine = stdout.trim();
+  // Seeds legados podem emitir avisos PHP antes do JSON. O contrato do
+  // helper continua sendo o último objeto JSON emitido pelo script.
+  const inicioJson = stdout.indexOf('{');
+  const fimJson = stdout.lastIndexOf('}');
+  const jsonLine = inicioJson >= 0 && fimJson > inicioJson
+    ? stdout.slice(inicioJson, fimJson + 1)
+    : stdout.trim();
   try {
     return JSON.parse(jsonLine) as T;
   } catch {

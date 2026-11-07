@@ -5,6 +5,8 @@ require_once __DIR__ . '/../Services/EnderecoFormatter.php';
 require_once __DIR__ . '/../Models/Pricing/PricingZone.php';
 require_once __DIR__ . '/../Services/TriageSessionService.php';
 require_once __DIR__ . '/../Models/Veiculo.php';
+require_once __DIR__ . '/../Models/Provider/Provider.php';
+require_once __DIR__ . '/../Models/Provider/ProviderMember.php';
 // File: guinchafacil/src/Controllers/AuthController.php
 // Refatorado com transa��es seguras e valida��es aprimoradas
 
@@ -224,6 +226,13 @@ class AuthController extends BaseController
     public function preCotacaoForm(): void
     {
         if ($this->isAuthenticated()) {
+            // Se o cliente acabou de entrar pela pré-cotação, preserve a
+            // jornada ativa e leve-o ao veículo/checkout, não ao dashboard.
+            $continuidade = $this->activeTriageContinuationPath();
+            if ($continuidade !== null) {
+                $this->redirect($continuidade);
+                return;
+            }
             $this->redirectByProfile();
             return;
         }
@@ -439,7 +448,7 @@ class AuthController extends BaseController
         $_SESSION['pre_cotacao'] = [
             'token_hash' => hash('sha256', $token),
             'criado_em' => date('c'),
-            'expira_em' => $agora + 900,
+            'expira_em' => $agora + (defined('PRE_COTACAO_TTL_SECONDS') ? PRE_COTACAO_TTL_SECONDS : 3600),
             'lat_origem' => round((float)$lat, 7),
             'lng_origem' => round((float)$lng, 7),
             'lat_destino' => $latDestino !== null ? round((float)$latDestino, 7) : null,
@@ -1289,17 +1298,24 @@ class AuthController extends BaseController
         $estado = strtoupper(trim((string)($_POST['estado'] ?? '')));
         $chavePix = trim((string)($_POST['chave_pix'] ?? ''));
         $tipoPix = trim((string)($_POST['chave_pix_tipo'] ?? ''));
+        $cnpj = preg_replace('/\D/', '', (string)($_POST['cnpj'] ?? ''));
+        $razaoSocial = trim((string)($_POST['razao_social'] ?? ''));
+        $tipoAtual = (string)($_SESSION['user']['tipo'] ?? 'cliente');
 
         $erros = [];
         if (mb_strlen($nome) < 3) $erros[] = 'Nome invalido.';
-        if (!$this->validarDocumentoBr($cpf)) $erros[] = 'CPF ou CNPJ invalido.';
+        if ($tipoAtual === 'oficina') {
+            if (!$this->validarCNPJ($cnpj)) $erros[] = 'CNPJ invalido.';
+            if ($razaoSocial === '') $erros[] = 'Razao social obrigatoria.';
+        } elseif (!$this->validarDocumentoBr($cpf)) {
+            $erros[] = 'CPF ou CNPJ invalido.';
+        }
         if (!$this->validarTelefoneBr($telefone)) $erros[] = 'Telefone invalido.';
         if ($senha !== '' && strlen($senha) < 8) $erros[] = 'A nova senha deve ter 8+ caracteres.';
         if ($senha !== '' && $senha !== $conf) $erros[] = 'Senhas nao conferem.';
         if (strlen($cep) !== 8) $erros[] = 'CEP invalido.';
         if ($logradouro === '' || $numero === '' || $bairro === '' || $cidade === '') $erros[] = 'Endereco incompleto.';
         if (!preg_match('/^[A-Z]{2}$/', $estado)) $erros[] = 'UF invalida.';
-        $tipoAtual = (string)($_SESSION['user']['tipo'] ?? 'cliente');
         if ($tipoAtual === 'parceiro') {
             if ($chavePix === '') $erros[] = 'Chave PIX obrigatoria para liberar o painel.';
             if (!in_array($tipoPix, ['cpf','cnpj','email','telefone','aleatoria'], true)) $erros[] = 'Tipo de chave PIX invalido.';
@@ -1342,6 +1358,79 @@ class AuthController extends BaseController
             } else {
                 $pdo->prepare('INSERT INTO enderecos (usuario_id, cep, logradouro, numero, complemento, bairro, cidade, estado, principal) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1)')
                     ->execute([(int)$user['id'], $cep, $logradouro, $numero, trim((string)($_POST['complemento'] ?? '')) ?: null, $bairro, $cidade, $estado]);
+            }
+
+            // O cadastro simples cria a conta primeiro; ao concluir o perfil de
+            // guincho, materializa também o registro operacional do prestador.
+            if ($tipoAtual === 'guincho') {
+                $temGuincho = $pdo->prepare('SELECT id FROM guinchos WHERE usuario_id = ? LIMIT 1');
+                $temGuincho->execute([(int)$user['id']]);
+                if (!$temGuincho->fetch()) {
+                    $uploads = $this->processarUploads($_FILES);
+                    $cidadeGuinchoId = (int)($_POST['cidade_id'] ?? 0);
+                    if ($cidadeGuinchoId <= 0) {
+                        $cidadeStmt = $pdo->prepare('SELECT id FROM cidades WHERE nome = ? AND uf = ? AND ativo = 1 LIMIT 1');
+                        $cidadeStmt->execute([$cidade, $estado]);
+                        $cidadeGuinchoId = (int)($cidadeStmt->fetchColumn() ?: 0);
+                    }
+                    $guinchoDados = [
+                        'usuario_id' => (int)$user['id'],
+                        'cidade_id' => $cidadeGuinchoId > 0 ? $cidadeGuinchoId : null,
+                        'cnh_numero' => preg_replace('/\D/', '', (string)($_POST['cnh_numero'] ?? '')),
+                        'cnh_validade' => trim((string)($_POST['cnh_validade'] ?? '')) ?: null,
+                        'placa_guincho' => strtoupper(preg_replace('/[^A-Za-z0-9]/', '', (string)($_POST['placa_guincho'] ?? ''))),
+                        'cidade_placa' => trim((string)($_POST['cidade_placa'] ?? '')),
+                        'uf_placa' => strtoupper(trim((string)($_POST['uf_placa'] ?? ''))),
+                        'capacidade_ton' => (float)($_POST['capacidade_ton'] ?? 0),
+                        'raio_cobertura_km' => (int)($_POST['raio_cobertura_km'] ?? 20),
+                        'chave_pix' => $chavePix,
+                        'chave_pix_tipo' => $tipoPix ?: 'cpf',
+                        'lat_operacao' => null,
+                        'lng_operacao' => null,
+                        'foto_veiculo' => $uploads['foto_veiculo'] ?? null,
+                        'doc_cnh_frente' => $uploads['doc_cnh_frente'] ?? null,
+                        'doc_cnh_verso' => $uploads['doc_cnh_verso'] ?? null,
+                        'aprovado' => 0,
+                        'disponivel' => 0,
+                        'lat_atual' => null,
+                        'lng_atual' => null,
+                    ];
+                    if (!$this->criarGuincho($pdo, $guinchoDados)) {
+                        throw new RuntimeException('Falha ao criar registro operacional do guincho.');
+                    }
+                }
+            }
+
+            if ($tipoAtual === 'oficina') {
+                $providerStmt = $pdo->prepare(
+                    'SELECT p.id FROM providers p JOIN provider_members pm ON pm.provider_id = p.id
+                     WHERE pm.user_id = ? AND p.provider_type = ? LIMIT 1'
+                );
+                $providerStmt->execute([(int)$user['id'], Provider::TYPE_WORKSHOP]);
+                if (!$providerStmt->fetchColumn()) {
+                    $providerId = Provider::criar([
+                        'provider_type' => Provider::TYPE_WORKSHOP,
+                        'legal_name' => $razaoSocial,
+                        'trade_name' => $nome,
+                        'document_type' => 'CNPJ',
+                        'document_number' => $cnpj,
+                        'payment_recipient_type' => 'WORKSHOP',
+                        'pix_key' => $chavePix ?: null,
+                    ]);
+                    $pdo->prepare(
+                        'INSERT INTO provider_workshop_settings
+                         (provider_id, taxa_indicacao_fixa, taxa_resgate_direto, permite_resgate_direto,
+                          recebe_veiculo_patio, faz_resgate_direto, regra_versao, status_parceria,
+                          raio_checkin_m, address, created_at, updated_at)
+                         VALUES (?, 30.00, 20.00, 1, 1, 1, ?, \'ATIVO\', 150, ?, NOW(), NOW())'
+                    )->execute([$providerId, 'v1', $logradouro . ', ' . $numero . ' - ' . $cidade . '/' . $estado]);
+                    $pdo->prepare(
+                        "INSERT INTO provider_quote_rules
+                         (provider_id, service_code, estimativa_minima, estimativa_maxima, taxa_diagnostico_local, regra_versao, active, created_at, updated_at)
+                         VALUES (?, 'DEFAULT', 0.00, 5000.00, 0.00, 'quote-v1', 1, NOW(), NOW())"
+                    )->execute([$providerId]);
+                    ProviderMember::adicionar($providerId, (int)$user['id']);
+                }
             }
 
             if ($tipoAtual === 'parceiro') {

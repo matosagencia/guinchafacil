@@ -104,10 +104,19 @@
   font-weight: var(--gf-font-weight-bold);
 }
 
+.gf-mobile-menu { display:none; border:0; background:transparent; color:var(--gf-preto); font-size:1.35rem; padding:8px; cursor:pointer; }
+
 @media (max-width: 991.98px) {
   .gf-nav {
     display: none;
   }
+  .gf-site-header .gf-container { position:relative; display:flex; align-items:center; justify-content:space-between; gap:0; }
+  .gf-site-header .gf-brand { position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); display:flex; align-items:center; justify-content:center; width:42px; height:42px; line-height:0; }
+  .gf-site-header .gf-brand__mark { display:block; }
+  .gf-site-header .gf-header-help { order:3; margin:0 0 0 auto; transform:none; }
+  .gf-mobile-menu { order:1; display:inline-flex; align-items:center; justify-content:center; position:static; width:42px; height:42px; padding:8px; line-height:1; }
+  .gf-nav.is-open { display:flex; position:absolute; top:100%; left:0; right:0; z-index:20; flex-direction:column; align-items:stretch; gap:0; padding:10px 18px 14px; background:var(--gf-branco); border-bottom:1px solid var(--gf-borda-light); box-shadow:0 12px 24px rgba(18,49,60,.12); }
+  .gf-nav.is-open a { display:block; padding:10px 0; }
 }
 
 .gf-btn {
@@ -138,8 +147,8 @@
 
 .gf-btn--outline {
   background: transparent;
-  border-color: var(--gf-borda-light);
-  color: var(--gf-preto);
+  border-color: #c8d9ce;
+  color: #587063;
 }
 
 .gf-btn--outline:hover {

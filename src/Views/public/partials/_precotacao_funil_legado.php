@@ -35,16 +35,11 @@ $fixedVehicleCategory = (string)($legacyHidden['veiculo_categoria'] ?? 'popular'
                         <p>Digite o endereço ou use sua localização atual.</p>
                     </div>
 
-                    <div class="gf-field gf-field--icon">
+                    <div class="gf-field gf-field--icon gf-field--location">
                         <label for="localizacao">Endereço de retirada</label>
-                        <i class="fas fa-map-pin gf-field__icon" aria-hidden="true"></i>
+                        <button type="button" class="gf-field__gps" id="btnGps" aria-label="Usar minha localização" title="Usar minha localização"><i class="fas fa-location-crosshairs" aria-hidden="true"></i></button>
                         <input type="text" id="localizacao" name="localizacao" maxlength="220"
                                placeholder="Rua, bairro e cidade" autocomplete="street-address" required>
-                    </div>
-
-                    <div class="gf-location-row">
-                        <button type="button" id="btnGps"><i class="fas fa-location-crosshairs"></i> Usar minha localização</button>
-                        <span id="mapLabelHint">Niterói, RJ</span>
                     </div>
 
                     <div class="gf-form__footer">
@@ -162,7 +157,6 @@ $fixedVehicleCategory = (string)($legacyHidden['veiculo_categoria'] ?? 'popular'
                     </div>
                     <div class="gf-field gf-field--icon">
                         <label for="destino">Endereço de destino</label>
-                        <i class="fas fa-map-pin gf-field__icon" aria-hidden="true"></i>
                         <input type="text" id="destino" name="destino" maxlength="220"
                                placeholder="Oficina ou endereço completo" autocomplete="street-address">
                     </div>

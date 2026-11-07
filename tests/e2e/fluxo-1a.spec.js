@@ -8,6 +8,7 @@ const T = { short: 5000, med: 15000, long: 30000 };
 
 // ─── Helpers ───
 async function preencherOrigem(page, endereco = 'Praça Mauá, 1') {
+  if (!page.__skipCoverage) await mockCoverage(page);
   await page.goto(BASE + '/pre-cotacao');
   const input = page.locator('#localizacao');
   await input.fill(endereco);
@@ -17,7 +18,11 @@ async function preencherOrigem(page, endereco = 'Praça Mauá, 1') {
     document.querySelector('#lng_origem').value = '-43.1755';
   });
   await page.locator('[data-step="1"] [data-next="2"]').click();
-  await expect(page.locator('[data-step="2"]')).toHaveClass(/is-active/);
+  if (page.__fallback) {
+    await page.locator('#gfRecommendation').waitFor({ state: 'visible', timeout: T.med });
+    return;
+  }
+  await page.locator('[data-step="2"]').waitFor({ state: 'visible', timeout: T.med });
   // Confirma
 }
 
@@ -26,6 +31,13 @@ async function escolherModo(page, modo = 'me_orientem') {
   await card.waitFor({ state: 'visible', timeout: T.med });
   await card.click();
   await page.waitForTimeout(600);
+}
+
+async function mockCoverage(page, data = { qtd_oficinas: 1, tem_oficina: true, tem_guincho: true }) {
+  await page.route('**/api/pre-cotacao/cobertura**', async (route) => route.fulfill({
+    status: 200, contentType: 'application/json',
+    body: JSON.stringify({ ok: true, data, error: null }),
+  }));
 }
 
 async function escolherVeiculo(page, cat = 'popular') {
@@ -79,38 +91,34 @@ test.describe('Fluxo 1a — v2', () => {
   test('1a.2 — Levar o carro pula cards e vai pro destino', async ({ page }) => {
     await check(page, 'preencher origem', async () => { await preencherOrigem(page); });
     await check(page, 'escolher Levar o carro', async () => { await escolherModo(page, 'levar_carro'); });
-    await check(page, 'escolher sintoma Pneu', async () => { await escolherServico(page, 'pneu'); });
     await check(page, 'escolher Carro', async () => { await escolherVeiculo(page, 'popular'); });
     await check(page, 'destino aparece (sem cards)', async () => {
       const destino = page.locator('[data-step="5"]');
       await destino.waitFor({ state: 'visible', timeout: T.med });
-      const cards = await page.locator('[data-decision="assistencia"]').count();
+      const cards = await page.locator('[data-decision="assistencia"]:visible').count();
       expect(cards).toBe(0);
       return 'destino direto';
     });
   });
 
-  test('1a.3 - Fallback WhatsApp (mock sem oficina)', async ({ page }) => {
-    await page.route('**/api/pre-cotacao/opcoes**', async (route) => {
-      const url = route.request().url();
-      if (url.includes('modo=orientacao')) {
-        return route.fulfill({
-          status: 200, contentType: 'application/json',
-          body: JSON.stringify({ ok: true, data: {
-            modo: 'orientacao', disponivel: false, fallback_tipo: 'suporte',
-            servico: 'pneu', mensagem: 'Sem oficina para pneu.',
-          }, error: null }),
-        });
-      }
-      return route.continue();
-    });
+  test('1a.3 - Fallback WhatsApp (sem cobertura)', async ({ page }) => {
+    page.__skipCoverage = true;
+    page.__fallback = true;
+    await page.route('**/api/pre-cotacao/cobertura**', async (route) => route.fulfill({
+      status: 200, contentType: 'application/json',
+      body: JSON.stringify({ ok: true, data: {
+        qtd_oficinas: 0, tem_oficina: false, tem_guincho: false,
+      }, error: null }),
+    }));
+    await page.route('**/api/pre-cotacao/whatsapp**', async (route) => route.fulfill({
+      status: 200, contentType: 'application/json',
+      body: JSON.stringify({ ok: true, data: {
+        link: 'https://wa.me/5521999999999',
+      }, error: null }),
+    }));
 
     await check(page, 'preencher origem', async () => { await preencherOrigem(page); });
-    await check(page, 'escolher Me orientem', async () => { await escolherModo(page, 'me_orientem'); });
-    await check(page, 'escolher sintoma Pneu', async () => { await escolherServico(page, 'pneu'); });
-    await check(page, 'escolher Carro', async () => { await escolherVeiculo(page, 'popular'); });
-    await check(page, 'sintoma Pneu cai no WhatsApp', async () => {
-      await escolherServico(page, 'pneu');
+    await check(page, 'sem cobertura cai no WhatsApp', async () => {
       const wa = page.locator('a[href*="wa.me"]').first();
       const aviso = page.locator('.alert-warning').first();
       await Promise.race([

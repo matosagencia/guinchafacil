@@ -88,7 +88,7 @@ label.field > span { display:block; font-size:.82rem; font-weight:600; color:#4b
 </head>
 <body class="gf-preq-body">
 <div class="gf-utility-bar"><div class="gf-container"><span><span class="gf-status-dot"></span> Socorro 24h. Todos os dias. Em qualquer imprevisto.</span><a href="<?= $e($bp) ?>/guincho/niteroi-rj">Niterói, RJ</a></div></div>
-<header class="gf-site-header"><div class="gf-container"><a class="gf-brand" href="<?= $e($bp) ?>/">Guincha<span>Fácil</span>.</a><nav class="gf-nav" aria-label="Navegação principal"><a href="<?= $e($bp) ?>/pre-cotacao">Como funciona</a><a href="<?= $e($bp) ?>/guincho/niteroi-rj">Onde atendemos</a><a href="<?= $e($bp) ?>/parceiros">Seja um parceiro</a></nav><a class="gf-btn gf-btn--primary gf-btn--sm" href="<?= $e($bp) ?>/pre-cotacao">Pedir guincho</a></div></header>
+<header class="gf-site-header"><div class="gf-container"><a class="gf-brand" href="<?= $e($bp) ?>/"><img class="gf-brand__mark" src="<?= $e($bp) ?>/public/assets/img/logo-512.png" alt="GuinchaFácil" width="40" height="40"></a><nav class="gf-nav" aria-label="Navegação principal"><a href="<?= $e($bp) ?>/pre-cotacao">Como funciona</a><a href="<?= $e($bp) ?>/guincho/niteroi-rj">Onde atendemos</a><a href="<?= $e($bp) ?>/parceiros">Seja um parceiro</a></nav><a class="gf-btn gf-btn--primary gf-btn--sm gf-header-help" href="<?= $e($bp) ?>/pre-cotacao" aria-label="Pedir socorro"><i class="fas fa-brake-warning" aria-hidden="true"></i><span>Pedir guincho</span></a></div></header>
 <?php endif; ?>
 <main class="gf-registration-funnel-main"><div class="wrap">
     <a class="brand" href="<?= $e($bp) ?>/">

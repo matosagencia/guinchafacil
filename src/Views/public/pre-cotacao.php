@@ -20,12 +20,12 @@ $body_class = 'gf-preq-body';
 $nav_atual = 'pre-cotacao';
 $utility_cidade = 'Niteroi, RJ';
 $show_utility_cidade = false;
-$extra_css = ['/public/assets/vendor/leaflet/leaflet.css','/public/assets/css/pages/pre-cotacao.css?v=20261103-1'];
+$extra_css = ['/public/assets/vendor/leaflet/leaflet.css','/public/assets/css/pages/pre-cotacao.css?v=20261107-8'];
 require __DIR__ . '/_header-public.php';
 ?>
-<script src="<?php echo $e($bp); ?>/public/assets/vendor/leaflet/leaflet.js"></script>
+<script<?= $nonce ?> src="<?php echo $e($bp); ?>/public/assets/vendor/leaflet/leaflet.js"></script>
 
-<main class="gf-preq">
+<main class="gf-preq gf-preq--map-hero">
     <div class="gf-container">
 
     <?php if (!$resultado): ?>
@@ -80,16 +80,11 @@ require __DIR__ . '/_header-public.php';
                         <p>Digite o endereço ou use sua localização atual.</p>
                     </div>
 
-                    <div class="gf-field gf-field--icon">
+                    <div class="gf-field gf-field--icon gf-field--location">
                         <label for="localizacao">Endereço de retirada</label>
-                        <i class="fas fa-map-pin gf-field__icon" aria-hidden="true"></i>
+                        <button type="button" class="gf-field__gps" id="btnGps" aria-label="Usar minha localização" title="Usar minha localização"><i class="fas fa-location-crosshairs" aria-hidden="true"></i></button>
                         <input type="text" id="localizacao" name="localizacao" maxlength="220"
                                placeholder="Rua, bairro e cidade" autocomplete="street-address" required>
-                    </div>
-
-                    <div class="gf-location-row">
-                        <button type="button" id="btnGps"><i class="fas fa-location-crosshairs"></i> Usar minha localização</button>
-                        <span id="mapLabelHint">Niterói, RJ</span>
                     </div>
 
                     <div class="gf-form__footer">
@@ -207,7 +202,6 @@ require __DIR__ . '/_header-public.php';
                     </div>
                     <div class="gf-field gf-field--icon">
                         <label for="destino">Endereço de destino</label>
-                        <i class="fas fa-map-pin gf-field__icon" aria-hidden="true"></i>
                         <input type="text" id="destino" name="destino" maxlength="220"
                                placeholder="Oficina ou endere�o completo" autocomplete="street-address">
                     </div>
@@ -324,7 +318,7 @@ require __DIR__ . '/_header-public.php';
                 <div><dt>Status da busca</dt><dd><?= $e($cotacaoStatusBusca) ?></dd></div>
             </dl>
             <div class="gf-summary__total">
-                        <span>Total<small>Válida por 15 minutos</small></span>
+                        <span>Total<small>Válida por 60 minutos</small></span>
                 <strong>R$ <?= number_format((float)$cotacao['valor'], 2, ',', '.') ?></strong>
             </div>
             <div class="gf-result-alternatives">

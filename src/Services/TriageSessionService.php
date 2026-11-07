@@ -10,7 +10,7 @@ final class TriageSessionService
     public const SESSION_ID_KEY = 'triage_session_id';
     private const SESSIONS_KEY = 'triage_sessions';
     private const CHECKOUT_KEY = 'checkout_triagem';
-    private const TTL_SECONDS = 1800;
+    private const TTL_SECONDS = 3600;
 
     public static function finalizar(array $dadosCotacao): array
     {

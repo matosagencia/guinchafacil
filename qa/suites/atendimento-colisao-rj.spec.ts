@@ -99,7 +99,7 @@ async function pagarComBrickReal(page: Page, testInfo: TestInfo, registro: Regis
     const { clickFirstAvailable } = await import('../helpers/auth');
     await clickFirstAvailable(page, ['button:has-text("Pagar")', 'button[type="submit"]:has-text("Pagar")']);
     return Promise.race([
-      page.waitForURL(/\/pagamento\/sucesso\//, { timeout: 60000 }).then(() => ({ sucesso: true, status: 'aprovado' } as any)),
+      page.waitForURL(/\/(?:pagamento\/sucesso|cliente\/pedido)\//, { timeout: 60000 }).then(() => ({ sucesso: true, status: 'aprovado' } as any)),
       page.waitForFunction(() => {
         const r = (window as any).__qaUltimaRespostaPagamento;
         return !!r && r.sucesso === false;
@@ -111,7 +111,7 @@ async function pagarComBrickReal(page: Page, testInfo: TestInfo, registro: Regis
     throw new Error(`[${rotulo}] Pagamento não foi aprovado: ${JSON.stringify(respostaPagamento)}`);
   }
   await registro.passo(`[${rotulo}] Aguardar redirecionamento para /pagamento/sucesso/`, async () => {
-    await page.waitForURL(/\/pagamento\/sucesso\//, { timeout: 15000 });
+    await page.waitForURL(/\/(?:pagamento\/sucesso|cliente\/pedido)\//, { timeout: 15000 });
   });
 }
 

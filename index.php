@@ -34,7 +34,7 @@ if (!function_exists('csp_script_nonce_attr')) {
 // Â§PAY-CSP-01..04: form-action/frame/script/connect para MercadoPago Brick + PagSeguro.
 $cspPolicy = "default-src 'self' data: blob:; base-uri 'self'; object-src 'none'; form-action 'self' https://www.mercadopago.com.br https://www.mercadopago.com https://sandbox.mercadopago.com.br https://sandbox.mercadopago.com https://pagseguro.uol.com.br https://sandbox.pagseguro.uol.com.br; frame-ancestors 'self'; frame-src 'self' https://www.mercadopago.com.br https://www.mercadopago.com https://sandbox.mercadopago.com.br https://sandbox.mercadopago.com https://http2.mlstatic.com https://www.mercadolibre.com https://www.mercadolivre.com https://api-static.mercadopago.com https://secure-fields.mercadopago.com; script-src 'self' 'nonce-" . CSP_SCRIPT_NONCE . "' 'strict-dynamic' https://unpkg.com https://cdn.jsdelivr.net https://sdk.mercadopago.com https://http2.mlstatic.com https://api-static.mercadopago.com https://secure-fields.mercadopago.com https://stc.pagseguro.uol.com.br https://stc.sandbox.pagseguro.uol.com.br https://www.googletagmanager.com https://connect.facebook.net; script-src-attr 'none'; style-src 'self' 'unsafe-inline' https://unpkg.com; font-src 'self' data:; img-src 'self' data: blob: https://tile.openstreetmap.org https://*.tile.openstreetmap.org https://http2.mlstatic.com https://www.mercadolibre.com https://www.mercadolivre.com https://www.mercadopago.com https://www.mercadopago.com.br https://sandbox.mercadopago.com https://sandbox.mercadopago.com.br https://api-static.mercadopago.com https://secure-fields.mercadopago.com https://www.facebook.com https://www.googletagmanager.com https://www.google.com https://www.google.com.br; connect-src 'self' https://viacep.com.br https://nominatim.openstreetmap.org https://router.project-osrm.org https://api.mercadopago.com https://sdk.mercadopago.com https://events.mercadopago.com https://api.mercadolibre.com https://www.mercadolibre.com https://www.mercadolivre.com https://api-static.mercadopago.com https://secure-fields.mercadopago.com https://http2.mlstatic.com https://ws.pagseguro.uol.com.br https://ws.sandbox.pagseguro.uol.com.br https://stc.pagseguro.uol.com.br https://stc.sandbox.pagseguro.uol.com.br https://www.google-analytics.com https://region1.google-analytics.com https://www.facebook.com https://www.google.com https://analytics.google.com https://ad.doubleclick.net;";
 if (!headers_sent()) {
-header("Content-Security-Policy: style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;");
+    header('Content-Security-Policy: ' . $cspPolicy);
     header('X-Request-ID: ' . REQUEST_ID);
 }
 
@@ -188,7 +188,7 @@ if ($uri === '/index.php') {
 
 $uri = rtrim($uri, '/') ?: '/';
 
-$metodo = $_SERVER['REQUEST_METHOD'] ?? 'GET';$metodo = $_SERVER['REQUEST_METHOD'] ?? 'GET';
+$metodo = $_SERVER['REQUEST_METHOD'] ?? 'GET';
 
 // §HEAD-GET-01 (D2): o router só despacha GET/POST. HEAD cai em 404 falso,
 // o que já gerou o alarme "todas as rotas 404" (D2/R7). Mapeia HEAD → GET

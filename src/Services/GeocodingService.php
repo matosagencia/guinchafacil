@@ -260,13 +260,31 @@ class GeocodingService
             return null;
         }
 
-        self::$cepCache[$cep] = [
+        $resultado = [
             'cep' => $data['cep'] ?? $cep,
             'logradouro' => $data['logradouro'] ?? '',
             'bairro' => $data['bairro'] ?? '',
             'localidade' => $data['localidade'] ?? '',
             'uf' => $data['uf'] ?? '',
         ];
+
+        // ViaCEP fornece o endereço textual, mas não coordenadas. O contrato
+        // do autocomplete exige lat/lng para posicionar o mapa e confirmar a
+        // origem; geocodifica o endereço retornado antes de armazenar o cache.
+        $endereco = trim(implode(', ', array_filter([
+            $resultado['logradouro'],
+            $resultado['bairro'],
+            $resultado['localidade'],
+            $resultado['uf'],
+            'Brasil',
+        ])));
+        $coordenadas = $endereco !== '' ? $this->geocode($endereco) : null;
+        if (is_array($coordenadas) && isset($coordenadas['lat'], $coordenadas['lng'])) {
+            $resultado['lat'] = (float)$coordenadas['lat'];
+            $resultado['lng'] = (float)$coordenadas['lng'];
+        }
+
+        self::$cepCache[$cep] = $resultado;
 
         self::writeCepCache($cacheKey, $cep, self::$cepCache[$cep]);
         return self::$cepCache[$cep];

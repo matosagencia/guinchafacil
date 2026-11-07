@@ -1,6 +1,6 @@
 <?php
 $bp = defined('BASE_PATH') ? BASE_PATH : '';
-$tipo = in_array(($tipo ?? ''), ['cliente','guincho','oficina'], true) ? $tipo : 'cliente';
+$tipo = in_array(($tipo ?? ''), ['cliente','guincho','oficina','parceiro'], true) ? $tipo : 'cliente';
 
 $cfg = [
     'cliente' => [
@@ -66,9 +66,30 @@ $cfg = [
             ['Sua agenda, seu ritmo', 'Aceite chamados só quando puder atender.'],
         ],
     ],
+    'parceiro' => [
+        'eyebrow'     => 'Para parceiros de indicação',
+        'title'       => 'Indique e acompanhe oportunidades',
+        'subtitle'    => 'Crie sua conta para acompanhar indicações e regras de participação aprovadas.',
+        'acc'         => 'var(--gf-verde)',
+        'acc2'        => 'var(--gf-verde-dark)',
+        'acc_ring'    => 'rgba(47,179,74,.22)',
+        'acc_shadow'  => 'rgba(47,179,74,.30)',
+        'hero_bg'     => 'linear-gradient(135deg,#102a43 0%,#164e63 50%,var(--gf-verde) 100%)',
+        'hero_text'   => '#ffffff',
+        'hero_muted'  => 'rgba(255,255,255,.78)',
+        'back_href'   => '/parceiros/indicacao',
+        'back_txt'    => 'Programa de indicação',
+        'adv' => [
+            ['Link de indicação', 'Compartilhe oportunidades elegíveis com seu público.'],
+            ['Acompanhamento', 'Veja o andamento das indicações no painel.'],
+            ['Regra clara', 'A participação segue o percentual aprovado pelo administrador.'],
+            ['Sem mensalidade', 'O cadastro não cria cobrança recorrente.'],
+            ['Dados protegidos', 'Informações financeiras só são solicitadas quando necessárias.'],
+        ],
+    ],
 ];
 $c = $cfg[$tipo];
-$action = $bp . '/registro/' . $tipo;
+$action = $bp . ($tipo === 'parceiro' ? '/registro/simples/parceiro' : '/registro/' . $tipo);
 $styleVars = '--acc:' . $c['acc'] . ';--acc2:' . $c['acc2'] . ';--acc-ring:' . $c['acc_ring'] . ';--acc-shadow:' . $c['acc_shadow'] . ';--hero-bg:' . $c['hero_bg'] . ';--hero-text:' . $c['hero_text'] . ';--hero-muted:' . $c['hero_muted'];
 ?>
 <!doctype html><html lang="pt-BR"><head>
