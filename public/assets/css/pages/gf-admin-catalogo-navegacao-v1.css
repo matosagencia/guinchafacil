@@ -1,0 +1,9 @@
+/* Navegação contextual do catálogo: ações fora do breadcrumb e dentro do resumo. */
+body.admin .gf-f18c-root .ops-summary { display:grid; grid-template-columns:minmax(280px,1.8fr) repeat(3,minmax(120px,1fr)); gap:12px; align-items:stretch; margin:16px 24px!important; }
+body.admin .gf-f18c-root .ops-summary__actions { display:contents; }
+body.admin .gf-f18c-root .ops-summary__action { display:flex; align-items:center; justify-content:center; gap:8px; min-height:74px; padding:12px 14px; border:1px solid #dce4ec; border-radius:10px; background:#fff; color:#172536; font-weight:800; text-decoration:none; box-shadow:0 4px 14px rgba(15,23,42,.04); }
+body.admin .gf-f18c-root .ops-summary__action:hover, body.admin .gf-f18c-root .ops-summary__action:focus-visible { border-color:#168441; color:#168441; outline:2px solid rgba(22,132,65,.2); outline-offset:2px; }
+body.admin .gf-f18c-root .ops-summary__action--primary { background:#168441; border-color:#168441; color:#fff; }
+body.admin .gf-f18c-root .ops-summary__action--primary:hover, body.admin .gf-f18c-root .ops-summary__action--primary:focus-visible { color:#fff; }
+@media(max-width:920px){body.admin .gf-f18c-root .ops-summary{grid-template-columns:repeat(2,minmax(0,1fr));}}
+@media(max-width:560px){body.admin .gf-f18c-root .ops-summary{grid-template-columns:1fr;margin-inline:12px!important;}}
