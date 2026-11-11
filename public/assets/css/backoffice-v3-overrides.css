@@ -56,6 +56,13 @@ body:has(.bo) .bo-content .pagination .page-item.disabled .page-link { backgroun
 body:has(.bo) .bo-content :is(.ops-btn,.ops-btn-primary,.ops-btn-secondary) { display: inline-flex !important; align-items: center !important; justify-content: center !important; min-height: 36px !important; padding: 8px 13px !important; border: 1px solid #64748b !important; border-radius: 6px !important; background: #fff !important; color: #172033 !important; font-weight: 700 !important; text-decoration: none !important; cursor: pointer !important; }
 body:has(.bo) .bo-content :is(.ops-btn-primary,.ops-btn--primary,.ops-btn.is-primary) { background: #1a7f37 !important; border-color: #1a7f37 !important; color: #fff !important; }
 body:has(.bo) .bo-content :is(.ops-btn-danger,.ops-btn--danger,.ops-btn.is-danger) { background: #fff !important; border-color: #b42318 !important; color: #9f1d16 !important; }
+body:has(.bo) .bo-content :is(.ops-badge,.badge) { display: inline-flex !important; align-items: center !important; gap: 4px; min-height: 24px !important; padding: 3px 8px !important; border: 1px solid transparent !important; border-radius: 999px !important; font-size: 11px !important; font-weight: 700 !important; line-height: 1.2 !important; white-space: nowrap; }
+body:has(.bo) .bo-content .ops-badge--new { background: #e2e8f0 !important; border-color: #94a3b8 !important; color: #172033 !important; }
+body:has(.bo) .bo-content .ops-badge--service { background: #dcfce7 !important; border-color: #86efac !important; color: #166534 !important; }
+body:has(.bo) .bo-content .ops-badge--searching { background: #dbeafe !important; border-color: #93c5fd !important; color: #1e40af !important; }
+body:has(.bo) .bo-content .ops-badge--route { background: #fef3c7 !important; border-color: #fbbf24 !important; color: #92400e !important; }
+body:has(.bo) .bo-content .ops-badge--critical { background: #fee2e2 !important; border-color: #fca5a5 !important; color: #991b1b !important; }
+body:has(.bo) .bo-content .ops-badge--audit { background: #f1f5f9 !important; border-color: #cbd5e1 !important; color: #334155 !important; }
 .bo-content :is(.btn-primary,.btn-success,.btn-danger) { background: #1a7f37 !important; border-color: #1a7f37 !important; color: #fff !important; }
 .bo-content :is(.btn,.btn-sm) { display: inline-flex; align-items: center; justify-content: center; min-height: 36px; padding: 0 12px; border-radius: 6px; font: 600 12px/1.2 inherit; text-decoration: none; cursor: pointer; }
 .bo-content :is(.btn-outline-secondary,.btn-outline-primary,.btn-light) { background: #fff !important; border: 1px solid #94a3b8 !important; color: #172033 !important; box-shadow: 0 1px 2px rgba(15,23,42,.08); }
