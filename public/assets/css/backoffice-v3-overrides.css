@@ -24,7 +24,14 @@
 .bo-content :is(.text-muted,.muted,.bo-muted,.ops-worklist-header p,.ops-worklist-item__meta) { color: #52657b !important; }
 .bo-content :is(input,select,textarea,.form-control,.form-select) { background: #fff; color: #172033; border-color: #cbd5e1; }
 .bo-content :is(.table,.table-responsive table) { color: #172033; background: #fff; }
-.bo-content :is(.table thead th,.table th) { background: #eef2f6; color: #334155; }
+.bo-content :is(.table thead th,.table th) { background: #e8eef5 !important; color: #172033 !important; border-color: #cbd5e1 !important; font-weight: 700; }
+.bo-content :is(.table tbody td,.table tbody th) { background: #fff !important; color: #172033 !important; border-color: #d9e1ea !important; }
+.bo-content :is(.table tbody tr:nth-child(even) td) { background: #f8fafc !important; }
+.bo-content :is(.table a,.table button,.table .btn) { color: #14532d; }
+.bo-content :is(.table a:hover,.table button:hover,.table .btn:hover) { color: #0f3d22; }
+.bo-content :is(.badge,.status-badge) { color: #172033; border: 1px solid #cbd5e1; }
+.bo-content :is(.btn-primary,.btn-success,.btn-danger) { color: #fff !important; }
+.bo-content :is(.btn-outline-secondary,.btn-outline-primary,.btn-light) { color: #172033 !important; background: #fff !important; }
 .bo-content :is(.btn-primary,.btn-success,.btn-danger) { background: #1a7f37 !important; border-color: #1a7f37 !important; color: #fff !important; }
 .bo-content :is(.btn,.btn-sm) { display: inline-flex; align-items: center; justify-content: center; min-height: 36px; padding: 0 12px; border-radius: 6px; font: 600 12px/1.2 inherit; text-decoration: none; cursor: pointer; }
 .bo-content :is(.btn-outline-secondary,.btn-outline-primary,.btn-light) { background: #fff !important; border: 1px solid #94a3b8 !important; color: #172033 !important; box-shadow: 0 1px 2px rgba(15,23,42,.08); }
