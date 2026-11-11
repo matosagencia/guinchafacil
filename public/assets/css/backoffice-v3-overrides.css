@@ -26,7 +26,8 @@
 .bo-content :is(.table,.table-responsive table) { color: #172033; background: #fff; }
 .bo-content :is(.table thead th,.table th) { background: #eef2f6; color: #334155; }
 .bo-content :is(.btn-primary,.btn-success,.btn-danger) { background: #1a7f37 !important; border-color: #1a7f37 !important; color: #fff !important; }
-.bo-content :is(.btn-outline-secondary,.btn-outline-primary,.btn-light) { background: #fff !important; border: 1px solid #94a3b8 !important; color: #172033 !important; }
+.bo-content :is(.btn,.btn-sm) { display: inline-flex; align-items: center; justify-content: center; min-height: 36px; padding: 0 12px; border-radius: 6px; font: 600 12px/1.2 inherit; text-decoration: none; cursor: pointer; }
+.bo-content :is(.btn-outline-secondary,.btn-outline-primary,.btn-light) { background: #fff !important; border: 1px solid #94a3b8 !important; color: #172033 !important; box-shadow: 0 1px 2px rgba(15,23,42,.08); }
 .bo-content :is(.btn-primary,.btn-success,.btn-danger,.btn-outline-secondary,.btn-outline-primary,.btn-light):hover { filter: brightness(.94); }
 .bo-content :is(.shell-ops-worklist,.shell-ops-workspace) { min-width: 0; max-width: 100%; overflow: hidden; }
 .bo-content .table-responsive { max-width: 100%; overflow-x: auto; }
@@ -34,7 +35,11 @@ body:has(.bo) .bo-content .gf-orders-v1 { width: 100%; max-width: 100%; margin: 
 body:has(.bo) .bo-content .gf-orders-v1 > .shell-ops-sidebar { display: none !important; }
 body:has(.bo) .bo-content .gf-orders-v1 > .gf-orders-main { grid-column: 1 / -1 !important; width: 100%; padding: 0 !important; }
 body:has(.bo) .bo-content .gf-orders-v1 { grid-template-columns: 1fr !important; min-height: 0; }
+body:has(.bo) .bo-content #usuariosShell { display: grid !important; grid-template-columns: minmax(300px, 380px) minmax(0, 1fr) !important; gap: 18px !important; width: 100%; min-height: 0; }
+body:has(.bo) .bo-content #usuariosShell > .shell-ops-worklist,
+body:has(.bo) .bo-content #usuariosShell > .shell-ops-workspace { min-width: 0; width: auto; }
+body:has(.bo) .bo-sidebar { min-height: 100vh !important; height: 100vh !important; position: sticky; top: 0; }
 body:has(.bo) .bo-content .gf-orders-v1 .gf-orders-head h1,
 body:has(.bo) .bo-content .gf-orders-v1 .gf-orders-head p,
 body:has(.bo) .bo-content .gf-orders-v1 .gf-orders-breadcrumb { color: #172033 !important; }
-@media (max-width: 900px) { .bo-content { padding: 18px 12px !important; } }
+@media (max-width: 900px) { .bo-content { padding: 18px 12px !important; } body:has(.bo) .bo-content #usuariosShell { grid-template-columns: 1fr !important; } }
