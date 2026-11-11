@@ -17,7 +17,7 @@
 .bo-content { isolation: isolate; }
 body:has(.bo) { margin: 0 !important; padding: 0 !important; min-width: 0; }
 body:has(.bo) .bo { min-height: 100vh !important; width: 100%; }
-body:has(.bo) .bo-sidebar { position: sticky !important; top: 0 !important; align-self: flex-start !important; height: 100vh !important; min-height: 100vh !important; max-height: 100vh !important; overflow-y: auto !important; overflow-x: hidden !important; }
+body:has(.bo) .bo-sidebar { position: sticky !important; top: 0 !important; align-self: flex-start !important; height: auto !important; min-height: 100vh !important; max-height: none !important; overflow: visible !important; }
 body:has(.bo) .bo-sidebar { scrollbar-width: none !important; -ms-overflow-style: none !important; }
 body:has(.bo) .bo-sidebar::-webkit-scrollbar { width: 0 !important; height: 0 !important; display: none !important; }
 .bo-content :is(.shell-ops,.bo-page,.bo-operation-grid,.gf-finance-page,.gf-orders-main) { color: #172033; }
@@ -81,7 +81,7 @@ body:has(.bo) .bo-content .gf-orders-v1 { grid-template-columns: 1fr !important;
 body:has(.bo) .bo-content #usuariosShell { display: grid !important; grid-template-columns: minmax(300px, 380px) minmax(0, 1fr) !important; gap: 18px !important; width: 100%; min-height: 0; }
 body:has(.bo) .bo-content #usuariosShell > .shell-ops-worklist,
 body:has(.bo) .bo-content #usuariosShell > .shell-ops-workspace { min-width: 0; width: auto; }
-body:has(.bo) .bo-sidebar { min-height: 100vh !important; height: 100vh !important; position: sticky; top: 0; }
+body:has(.bo) .bo-sidebar { min-height: 100vh !important; height: auto !important; position: sticky; top: 0; }
 body:has(.bo) .bo-content .gf-orders-v1 .gf-orders-head h1,
 body:has(.bo) .bo-content .gf-orders-v1 .gf-orders-head p,
 body:has(.bo) .bo-content .gf-orders-v1 .gf-orders-breadcrumb { color: #172033 !important; }
@@ -92,4 +92,4 @@ body:has(#pedShell) .bo-content #pedShell .bo-toolbar { background: #fff !import
 body:has(#pedShell) .bo-content #pedShell .bo-toolbar input { background: #f8fafc !important; color: #172033 !important; border-color: #cbd5e1 !important; }
 body:has(#pedShell) .bo-content #pedShell :is(.ops-worklist-item,.ops-worklist-results,.ops-worklist-search,.ops-order-header,.ops-order-facts,.ops-order-fact,.card,.table) { color: #172033 !important; background-color: #fff !important; }
 body:has(#pedShell) .bo-content #pedShell :is(.ops-worklist-item__footer,.ops-worklist-item__vehicle,.ops-worklist-item__customer,.ops-order-fact__label,.text-muted) { color: #475569 !important; }
-@media (max-width: 900px) { .bo-content { padding: 18px 12px !important; } body:has(.bo) .bo-content #usuariosShell { grid-template-columns: 1fr !important; } body:has(.bo) .bo-sidebar { position: fixed !important; height: 100dvh !important; min-height: 100dvh !important; max-height: 100dvh !important; } }
+@media (max-width: 900px) { .bo-content { padding: 18px 12px !important; } body:has(.bo) .bo-content #usuariosShell { grid-template-columns: 1fr !important; } body:has(.bo) .bo-sidebar { position: relative !important; height: auto !important; min-height: 100dvh !important; max-height: none !important; overflow: visible !important; } }
