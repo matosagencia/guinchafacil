@@ -25,7 +25,7 @@ $osrmBaseUrl = PorThresholds::routingFrontendBaseUrl();
 
 $bp = defined('BASE_PATH') ? BASE_PATH : '';
 
-include __DIR__ . '/../layouts/header.php';
+ob_start();
 
 $statusLabels = [
     'aguardando_pagamento' => 'Aguard. Pagamento',
@@ -112,7 +112,7 @@ $getOrigemFunilBadge = static function ($origem): string {
       <nav class="gf-orders-breadcrumb" aria-label="Localiza��o">Backoffice <span aria-hidden="true">></span> <strong>Pedidos</strong></nav>
       <div class="gf-orders-head"><div><small>OPERA��O / PEDIDOS</small><h1>Gestáo de pedidos</h1><p>Acompanhe cada chamado e aja com rapidez.</p></div></div>
 <div
-    class="ops-topbar"
+    class="bo-toolbar"
     style="padding:10px 24px;border-bottom:1px solid var(--theme-border,#232c35);background:var(--theme-nav,#030405)"
 >
     <form
@@ -122,7 +122,7 @@ $getOrigemFunilBadge = static function ($origem): string {
             ENT_QUOTES,
             'UTF-8'
         ); ?>/admin/pedidos"
-        class="ops-topbar__search"
+        class="bo-search"
     >
         <i class="fas fa-magnifying-glass"></i>
 
@@ -163,9 +163,9 @@ $getOrigemFunilBadge = static function ($origem): string {
         <?php endif; ?>
     </form>
 
-    <div class="ops-topbar__meta">
-        <span class="ops-topbar__status">
-            <span class="ops-topbar__status-dot"></span>
+    <div class="bo-toolbar-meta">
+        <span class="bo-toolbar-status">
+            <span class="bo-toolbar-status-dot"></span>
 
             <?php echo (int)($total ?? 0); ?> pedidos
 
@@ -672,15 +672,6 @@ AdminOrderWorkspace.init({
  */
 ?>
 
-<script<?php echo csp_script_nonce_attr(); ?>
-    src="<?php echo htmlspecialchars(
-        $bp,
-        ENT_QUOTES,
-        'UTF-8'
-    ); ?>/public/assets/vendor/bootstrap/js/bootstrap.bundle.min.js"
-></script>
-
-
 <dialog id="modal-link-pagamento" class="gf-dlg" aria-labelledby="gf-dlg-title">
     <form method="dialog">
         <h3 id="gf-dlg-title">Link de pagamento</h3>
@@ -762,6 +753,6 @@ dialog.gf-dlg h3{margin:0;font-size:1.15rem}
     <?php endif; ?>
 })();
 </script>
-</body>
-</html>
 
+
+<?php $conteudo_pagina=ob_get_clean(); $perfil='admin'; $titulo_pagina="Pedidos"; $breadcrumb=["Operação","Pedidos"]; $assets_css=['/public/assets/css/pages/bo-admin-operacao.css']; require __DIR__ . '/../layouts/backoffice_shell.php';

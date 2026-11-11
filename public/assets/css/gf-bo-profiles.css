@@ -1,0 +1,15 @@
+/* Diretriz Template Backoffice Lovable v3: somente tokens e contraste. */
+.bo{--primary-ink:var(--primary);--primary-strong:var(--primary);--bo-touch:36px;--bo-danger-ink:#b42318;--bo-warning-ink:#8a5a00;--bo-info-ink:#0369a1;}
+.bo.bo-p-admin{--bo-nav:#090d0b;--bo-nav-fg:#aeb5bd;--bo-nav-bright:#f8f8f8;--primary:#2fb34a;--primary-foreground:#fff;--primary-strong:#1a7f37;--primary-ink:#1f7a34;--accent:#e8f7ec;}
+.bo.bo-p-funcionario{--bo-nav:#111418;--bo-nav-fg:#c9d0d7;--bo-nav-bright:#fff;--primary:#0284c7;--primary-foreground:#fff;--primary-strong:#0369a1;--primary-ink:#0369a1;--accent:#e1f2ff;}
+.bo.bo-p-gerente{--bo-nav:#111418;--bo-nav-fg:#c9d0d7;--bo-nav-bright:#fff;--primary:#6366f1;--primary-foreground:#fff;--primary-strong:#4f46e5;--primary-ink:#4f46e5;--accent:#ebefff;}
+.bo.bo-p-guincho,.bo.bo-p-especialista{--bo-nav:#0a1f11;--bo-nav-fg:#c8e6d0;--bo-nav-bright:#fff;--background:#0a1f11;--card:#122c1b;--foreground:#f4fff6;--muted:#1a3322;--muted-foreground:#c3d9ca;--border:#315843;--input:#315843;--primary:#22c55e;--primary-foreground:#0a1f11;--primary-strong:#22c55e;--primary-ink:#86efac;--accent:#1b4228;--accent-foreground:#d1fae5;--bo-touch:52px;}
+.bo.bo-p-oficina{--bo-nav:#0f141c;--bo-nav-fg:#c9ced6;--bo-nav-bright:#fff7ed;--background:#0f141c;--card:#1c2430;--foreground:#fff7ed;--muted:#242d38;--muted-foreground:#e2c8b6;--border:#34404a;--input:#465363;--primary:#f97316;--primary-foreground:#1c1008;--primary-strong:#f97316;--primary-ink:#fdba74;--accent:#382821;--accent-foreground:#ffedd5;--bo-touch:40px;}
+.bo.bo-p-cliente{--background:#f8fafc;--bo-nav:#fff;--bo-nav-fg:#294536;--bo-nav-bright:#112820;--primary:#2fb34a;--primary-foreground:#fff;--primary-strong:#1a7f37;--primary-ink:#176c30;--accent:#e8f7ec;--bo-touch:44px;}
+.bo.bo-p-parceiro{--primary:#2fb34a;--primary-foreground:#fff;--primary-strong:#1a7f37;--primary-ink:#1f7a34;--accent:#e8f7ec;}
+.bo .bo-brand{color:var(--bo-nav-bright)}.bo .bo-brand span,.bo .bo-brand .brand-period{color:var(--primary)}.bo.bo-p-cliente .bo-brand span,.bo.bo-p-cliente .bo-brand .brand-period{color:var(--primary-ink)}
+.bo .bo-status,.bo .bo-eyebrow,.bo .bo-eta,.bo .bo-net strong,.bo .bo-segments .active,.bo .bo-tabs>button.active,.bo .bo-tabs>a.active,.bo .bo-inline-status,.bo .bo-toast,.bo .bo-icon-block,.bo .bo-avatar{color:var(--primary-ink)}
+.bo .bo-nav.active,.bo .bo-nav[aria-current="page"]{background:var(--primary-strong);color:var(--primary-foreground)}
+.bo .bo-status.danger{color:var(--bo-danger-ink)}.bo .bo-status.warning{color:var(--bo-warning-ink)}.bo .bo-status.info{color:var(--bo-info-ink)}
+.bo.bo-p-cliente .bo-sidebar{border-right:1px solid var(--border)}.bo.bo-p-cliente .bo-nav.active,.bo.bo-p-cliente .bo-nav[aria-current="page"]{background:var(--accent);color:var(--primary-ink)}
+.bo .bo-btn,.bo .bo-input,.bo .bo-select,.bo .bo-textarea{min-height:var(--bo-touch)}

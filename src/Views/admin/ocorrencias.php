@@ -25,66 +25,40 @@
  */
 
 $bp = defined('BASE_PATH') ? BASE_PATH : '';
+ob_start();
 
-include __DIR__ . '/../layouts/header.php';
+
 
 
 
 $statusLabels = ['aberta' => 'Aberta', 'em_analise' => 'Em análise', 'resolvida' => 'Resolvida', 'arquivada' => 'Arquivada'];
 
-$statusBadgeOps = ['aberta' => 'ops-badge--critical', 'em_analise' => 'ops-badge--route', 'resolvida' => 'ops-badge--service', 'arquivada' => 'ops-badge--new'];
+$statusBadgeOps = ['aberta' => 'bo-status--critical', 'em_analise' => 'bo-status--route', 'resolvida' => 'bo-status--service', 'arquivada' => 'bo-status--new'];
 
-$severidadeBadgeOps = ['critica' => 'ops-badge--critical', 'alta' => 'ops-badge--route', 'media' => 'ops-badge--audit', 'baixa' => 'ops-badge--new'];
+$severidadeBadgeOps = ['critica' => 'bo-status--critical', 'alta' => 'bo-status--route', 'media' => 'bo-status--audit', 'baixa' => 'bo-status--new'];
 
 $tipoLabels = ['avaria' => 'Avaria', 'atraso' => 'Atraso', 'conduta' => 'Conduta', 'veiculo' => 'Veículo', 'seguranca' => 'Segurança', 'outro' => 'Outro'];
 
 ?>
 
-<link rel="stylesheet" href="<?php echo htmlspecialchars($bp); ?>/public/assets/css/pages/admin-central-operacional.css">
 
 
 
-<div class="ops-topbar" style="padding:10px 24px;border-bottom:1px solid var(--theme-border,#232c35);background:var(--theme-nav,#030405)">
-
-    <div class="ops-topbar__search">
-
-        <i class="fas fa-magnifying-glass"></i>
-
-        <input type="search" id="ocWorklistSearchTop" placeholder="Buscar por pedido, cliente ou descrição" autocomplete="off">
-
-    </div>
-
-    <div class="ops-topbar__meta">
-
-        <button type="button" class="ops-btn" data-bs-toggle="modal" data-bs-target="#modalNovaOcorrencia" style="height:32px">
-
-            <i class="fas fa-plus"></i> Registrar
-
-        </button>
-
-        <a href="<?php echo htmlspecialchars($bp); ?>/admin/central" style="color:var(--brand);text-decoration:none;">
-
-            <i class="fas fa-tower-broadcast me-1"></i>Central Operacional
-
-        </a>
-
-    </div>
-
-</div>
 
 
 
-<section class="ops-summary" aria-label="Resumo de ocorrências">
+
+<section class="bo-metrics" aria-label="Resumo de ocorrências">
 
     <?php foreach (['aberta', 'em_analise', 'resolvida', 'arquivada'] as $st): ?>
 
-    <a href="<?php echo htmlspecialchars($bp); ?>/admin/ocorrencias?status=<?php echo $st; ?>" style="text-decoration:none;">
+    <a href="<?php echo htmlspecialchars($bp); ?>/admin/ocorrencias?status=<?php echo $st; ?>">
 
-        <article class="ops-metric <?php echo $st === 'aberta' && ($contagemPorStatus[$st] ?? 0) > 0 ? 'is-danger' : ($statusFiltro === $st ? 'is-warning' : ''); ?>">
+        <article class="bo-metric <?php echo $st === 'aberta' && ($contagemPorStatus[$st] ?? 0) > 0 ? 'is-danger' : ($statusFiltro === $st ? 'is-warning' : ''); ?>">
 
-            <span class="ops-metric__label"><?php echo $statusLabels[$st]; ?><?php echo $statusFiltro === $st ? ' · filtrando' : ''; ?></span>
+            <span class="bo-metric__label"><?php echo $statusLabels[$st]; ?><?php echo $statusFiltro === $st ? ' · filtrando' : ''; ?></span>
 
-            <strong class="ops-metric__value"><?php echo (int)($contagemPorStatus[$st] ?? 0); ?></strong>
+            <strong class="bo-metric__value"><?php echo (int)($contagemPorStatus[$st] ?? 0); ?></strong>
 
         </article>
 
@@ -98,11 +72,11 @@ $tipoLabels = ['avaria' => 'Avaria', 'atraso' => 'Atraso', 'conduta' => 'Conduta
 
 <?php if ($statusFiltro !== ''): ?>
 
-<div style="margin:0 24px;">
+<div>
 
-    <a href="<?php echo htmlspecialchars($bp); ?>/admin/ocorrencias" class="small" style="color:var(--theme-muted);">
+    <a href="<?php echo htmlspecialchars($bp); ?>/admin/ocorrencias" class="small">
 
-        <i class="fas fa-xmark me-1"></i>Limpar filtro de status
+        Limpar filtro de status
 
     </a>
 
@@ -113,25 +87,18 @@ $tipoLabels = ['avaria' => 'Avaria', 'atraso' => 'Atraso', 'conduta' => 'Conduta
 
 
 <?php /* Fase 18E: navegação por abas sobre rotas existentes */ ?>
-<link rel="stylesheet" href="<?= htmlspecialchars($bp, ENT_QUOTES, 'UTF-8') ?>/public/assets/css/pages/gf-f18e-operacao-tabs.css">
-<link rel="stylesheet" href="<?= htmlspecialchars($bp, ENT_QUOTES, 'UTF-8') ?>/public/assets/css/pages/gf-f18e2-shell-operacao.css?v=20261017-2">
-<link rel="stylesheet" href="<?= htmlspecialchars($bp, ENT_QUOTES, 'UTF-8') ?>/public/assets/css/pages/gf-f18e3-operacao-fix.css?v=20261017-3">
-<div class="gf18e-tabs-host"><?php include __DIR__ . '/../components/admin_operacao_tabs.php'; ?></div>
-<div class="shell-ops" id="ocShell">
+
+<div class="bo-operation-grid" id="ocShell">
 
 
 
-    <aside class="shell-ops-sidebar" id="ocSidebar">
-
-        <?php include __DIR__ . '/../components/admin_nav_operacional.php'; ?>
-
-    </aside>
+    
 
 
 
     <section class="shell-ops-worklist" aria-label="Ocorrências registradas">
 
-        <header class="ops-worklist-header">
+        <header class="bo-panel-heading">
 
             <span class="eyebrow">Operação</span>
 
@@ -143,9 +110,9 @@ $tipoLabels = ['avaria' => 'Avaria', 'atraso' => 'Atraso', 'conduta' => 'Conduta
 
 
 
-        <div class="ops-worklist-search">
+        <div class="bo-search">
 
-            <i class="fas fa-magnifying-glass"></i>
+            
 
             <input type="search" id="ocWorklistSearch" placeholder="Filtrar nesta lista" autocomplete="off">
 
@@ -153,13 +120,13 @@ $tipoLabels = ['avaria' => 'Avaria', 'atraso' => 'Atraso', 'conduta' => 'Conduta
 
 
 
-        <div class="ops-worklist-results" id="ocWorklistResults">
+        <div class="bo-orders__list" id="ocWorklistResults">
 
             <?php if (empty($ocorrencias)): ?>
 
-                <div class="ops-empty-state">
+                <div class="bo-empty">
 
-                    <i class="fas fa-circle-check"></i>
+                    
 
                     Nenhuma ocorrência <?php echo $statusFiltro !== '' ? 'neste status' : 'registrada'; ?>.
 
@@ -175,7 +142,7 @@ $tipoLabels = ['avaria' => 'Avaria', 'atraso' => 'Atraso', 'conduta' => 'Conduta
 
                 <button type="button"
 
-                    class="ops-worklist-item <?php echo $critico ? 'is-critical' : ($o['status'] === 'aberta' ? 'is-warning' : ''); ?>"
+                    class="bo-order <?php echo $critico ? 'is-critical' : ($o['status'] === 'aberta' ? 'is-warning' : ''); ?>"
 
                     data-ocorrencia-id="<?php echo (int)$o['id']; ?>"
 
@@ -185,23 +152,23 @@ $tipoLabels = ['avaria' => 'Avaria', 'atraso' => 'Atraso', 'conduta' => 'Conduta
 
                 >
 
-                    <span class="ops-worklist-item__priority" aria-hidden="true"></span>
+                    <span class="bo-order__priority" aria-hidden="true"></span>
 
-                    <span class="ops-worklist-item__content">
+                    <span class="bo-order__content">
 
-                        <span class="ops-worklist-item__top">
+                        <span class="bo-order__top">
 
                             <strong>Pedido #<?php echo (int)$o['pedido_id']; ?></strong>
 
-                            <span class="ops-badge <?php echo $statusBadgeOps[$o['status']] ?? 'ops-badge--audit'; ?>"><?php echo htmlspecialchars($statusLabels[$o['status']] ?? $o['status']); ?></span>
+                            <span class="bo-status <?php echo $statusBadgeOps[$o['status']] ?? 'bo-status--audit'; ?>"><?php echo htmlspecialchars($statusLabels[$o['status']] ?? $o['status']); ?></span>
 
                         </span>
 
-                        <span class="ops-worklist-item__customer"><?php echo htmlspecialchars($tipoLabels[$o['tipo']] ?? $o['tipo']); ?> · <?php echo htmlspecialchars(ucfirst((string)$o['severidade'])); ?></span>
+                        <span class="bo-order__customer"><?php echo htmlspecialchars($tipoLabels[$o['tipo']] ?? $o['tipo']); ?> · <?php echo htmlspecialchars(ucfirst((string)$o['severidade'])); ?></span>
 
-                        <span class="ops-worklist-item__vehicle"><?php echo htmlspecialchars(mb_strimwidth((string)$o['descricao'], 0, 70, '…')); ?></span>
+                        <span class="bo-order__vehicle"><?php echo htmlspecialchars(mb_strimwidth((string)$o['descricao'], 0, 70, '…')); ?></span>
 
-                        <span class="ops-worklist-item__footer">
+                        <span class="bo-order__footer">
 
                             <span><?php echo htmlspecialchars((string)($o['cliente_nome'] ?? '')); ?></span>
 
@@ -211,11 +178,11 @@ $tipoLabels = ['avaria' => 'Avaria', 'atraso' => 'Atraso', 'conduta' => 'Conduta
 
                     </span>
 
-                    <span class="ops-worklist-item__signals">
+                    <span class="bo-order__signals">
 
                         <?php if ($critico): ?>
 
-                        <span class="ops-signal is-danger" title="Severidade alta/crítica em aberto"><i class="fas fa-triangle-exclamation"></i></span>
+                        <span class="ops-signal is-danger" title="Severidade alta/crítica em aberto"></span>
 
                         <?php endif; ?>
 
@@ -235,9 +202,9 @@ $tipoLabels = ['avaria' => 'Avaria', 'atraso' => 'Atraso', 'conduta' => 'Conduta
 
         <?php if (empty($ocorrencias)): ?>
 
-        <div class="ops-empty-state" style="padding:80px 20px">
+        <div class="bo-empty">
 
-            <i class="fas fa-inbox"></i>
+            
 
             Nenhuma ocorrência pra exibir.
 
@@ -245,9 +212,9 @@ $tipoLabels = ['avaria' => 'Avaria', 'atraso' => 'Atraso', 'conduta' => 'Conduta
 
         <?php else: ?>
 
-        <div class="ops-empty-state" id="ocWorkspaceEmpty" style="padding:80px 20px">
+        <div class="bo-empty" id="ocWorkspaceEmpty">
 
-            <i class="fas fa-hand-pointer"></i>
+            
 
             Selecione uma ocorrência na lista ao lado para ver os detalhes.
 
@@ -255,15 +222,15 @@ $tipoLabels = ['avaria' => 'Avaria', 'atraso' => 'Atraso', 'conduta' => 'Conduta
 
         <?php foreach ($ocorrencias as $o): ?>
 
-        <div class="oc-detail-panel" id="oc-panel-<?php echo (int)$o['id']; ?>" data-ocorrencia-id="<?php echo (int)$o['id']; ?>" style="display:none">
+        <div class="oc-detail-panel" id="oc-panel-<?php echo (int)$o['id']; ?>" data-ocorrencia-id="<?php echo (int)$o['id']; ?>">
 
-            <header class="ops-order-header">
+            <header class="bo-panel-heading">
 
                 <div>
 
                     <button type="button" class="ops-back-link" data-action="oc-clear-selection">
 
-                        <i class="fas fa-arrow-left"></i> Todas as ocorrências
+                         Todas as ocorrências
 
                     </button>
 
@@ -273,37 +240,37 @@ $tipoLabels = ['avaria' => 'Avaria', 'atraso' => 'Atraso', 'conduta' => 'Conduta
 
                 </div>
 
-                <span class="ops-badge <?php echo $statusBadgeOps[$o['status']] ?? 'ops-badge--audit'; ?>"><?php echo htmlspecialchars($statusLabels[$o['status']] ?? $o['status']); ?></span>
+                <span class="bo-status <?php echo $statusBadgeOps[$o['status']] ?? 'bo-status--audit'; ?>"><?php echo htmlspecialchars($statusLabels[$o['status']] ?? $o['status']); ?></span>
 
             </header>
 
 
 
-            <div class="ops-order-facts">
+            <div class="bo-grid">
 
-                <div class="ops-order-fact"><span class="ops-order-fact__label">Severidade</span><span class="ops-order-fact__value"><?php echo htmlspecialchars(ucfirst((string)$o['severidade'])); ?></span></div>
+                <div class="bo-panel"><span class="bo-panel__label">Severidade</span><span class="bo-panel__value"><?php echo htmlspecialchars(ucfirst((string)$o['severidade'])); ?></span></div>
 
-                <div class="ops-order-fact"><span class="ops-order-fact__label">Tipo</span><span class="ops-order-fact__value"><?php echo htmlspecialchars($tipoLabels[$o['tipo']] ?? $o['tipo']); ?></span></div>
+                <div class="bo-panel"><span class="bo-panel__label">Tipo</span><span class="bo-panel__value"><?php echo htmlspecialchars($tipoLabels[$o['tipo']] ?? $o['tipo']); ?></span></div>
 
-                <div class="ops-order-fact"><span class="ops-order-fact__label">Pedido</span><span class="ops-order-fact__value"><a href="<?php echo htmlspecialchars($bp); ?>/admin/pedido/<?php echo (int)$o['pedido_id']; ?>">Ver pedido #<?php echo (int)$o['pedido_id']; ?></a></span></div>
+                <div class="bo-panel"><span class="bo-panel__label">Pedido</span><span class="bo-panel__value"><a href="<?php echo htmlspecialchars($bp); ?>/admin/pedido/<?php echo (int)$o['pedido_id']; ?>">Ver pedido #<?php echo (int)$o['pedido_id']; ?></a></span></div>
 
-                <div class="ops-order-fact"><span class="ops-order-fact__label">Relator</span><span class="ops-order-fact__value"><?php echo htmlspecialchars(ucfirst((string)($o['relator_tipo'] ?? '—'))); ?></span></div>
+                <div class="bo-panel"><span class="bo-panel__label">Relator</span><span class="bo-panel__value"><?php echo htmlspecialchars(ucfirst((string)($o['relator_tipo'] ?? '—'))); ?></span></div>
 
             </div>
 
 
 
-            <div style="padding:18px 24px 0">
+            <div>
 
                 <span class="eyebrow">Descrição completa</span>
 
-                <p style="margin-top:8px; color:var(--theme-text); white-space:pre-wrap;"><?php echo htmlspecialchars((string)$o['descricao']); ?></p>
+                <p><?php echo htmlspecialchars((string)$o['descricao']); ?></p>
 
                 <?php if (!empty($o['resolucao'])): ?>
 
                 <span class="eyebrow">Resolução</span>
 
-                <p style="margin-top:8px; color:var(--theme-text); white-space:pre-wrap;"><?php echo htmlspecialchars((string)$o['resolucao']); ?></p>
+                <p><?php echo htmlspecialchars((string)$o['resolucao']); ?></p>
 
                 <?php endif; ?>
 
@@ -313,11 +280,11 @@ $tipoLabels = ['avaria' => 'Avaria', 'atraso' => 'Atraso', 'conduta' => 'Conduta
 
             <?php if (in_array($o['status'], ['aberta', 'em_analise'], true)): ?>
 
-            <div style="padding:20px 24px 32px">
+            <div>
 
                 <span class="eyebrow">Atualizar status</span>
 
-                <form method="post" action="<?php echo htmlspecialchars($bp); ?>/admin/ocorrencia/resolver" style="margin-top:10px; max-width:480px;">
+                <form method="post" action="<?php echo htmlspecialchars($bp); ?>/admin/ocorrencia/resolver">
 
                     <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($csrfToken); ?>">
 
@@ -589,9 +556,5 @@ $tipoLabels = ['avaria' => 'Avaria', 'atraso' => 'Atraso', 'conduta' => 'Conduta
 
 ?>
 
-<script<?php echo csp_script_nonce_attr(); ?> src="<?php echo htmlspecialchars($bp); ?>/public/assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
 
-</body>
-
-</html>
-
+<?php $conteudo_pagina=ob_get_clean(); $perfil='admin'; $titulo_pagina='Ocorrências'; $breadcrumb=['Operação','Ocorrências']; $assets_css=['/public/assets/css/pages/bo-admin-operacao.css']; require __DIR__ . '/../layouts/backoffice_shell.php';

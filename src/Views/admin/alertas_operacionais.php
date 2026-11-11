@@ -25,8 +25,9 @@
  */
 
 $bp = defined('BASE_PATH') ? BASE_PATH : '';
+ob_start();
 
-include __DIR__ . '/../layouts/header.php';
+
 
 
 
@@ -36,39 +37,20 @@ $nivelBadgeCss = ['erro' => 'critical', 'aviso' => 'new', 'info' => 'audit'];
 
 ?>
 
-<link rel="stylesheet" href="<?php echo htmlspecialchars($bp); ?>/public/assets/css/pages/admin-central-operacional.css">
 
 
 
-<div class="ops-topbar" style="padding:10px 24px;border-bottom:1px solid var(--theme-border,#232c35);background:var(--theme-nav,#030405)">
-
-    <div class="ops-topbar__search"><i class="fas fa-magnifying-glass"></i><input type="search" id="alertasSearchTop" placeholder="Buscar por pedido, evento ou detalhe" autocomplete="off" aria-label="Buscar alertas"></div>
-
-    <div class="ops-topbar__meta">
-
-        <span class="ops-topbar__status"><span class="ops-topbar__status-dot"></span><?php echo count($alertas); ?> ocorrências<?php echo $nivelFiltro !== '' ? ' · filtradas' : ''; ?></span>
-
-        <?php if ($nivelFiltro !== ''): ?><a href="<?php echo htmlspecialchars($bp); ?>/admin/alertas" class="ops-dashboard-link"><i class="fas fa-xmark me-1"></i>Limpar filtro</a><?php endif; ?>
-
-        <a href="<?php echo htmlspecialchars($bp); ?>/admin/central" class="ops-dashboard-link"><i class="fas fa-tower-broadcast me-1"></i>Central Operacional</a>
-
-    </div>
-
-</div>
-
-
-
-<section class="ops-summary" aria-label="Resumo de alertas por nível">
+<section class="bo-metrics" aria-label="Resumo de alertas por nível">
 
     <?php foreach (['erro' => ['circle-exclamation', 'is-danger', 'Críticos'], 'aviso' => ['triangle-exclamation', 'is-warning', 'Atenção'], 'info' => ['circle-info', '', 'Informativos']] as $nivel => $meta): ?>
 
-    <a href="<?php echo htmlspecialchars($bp); ?>/admin/alertas?nivel=<?php echo $nivel; ?>" style="text-decoration:none;">
+    <a href="<?php echo htmlspecialchars($bp); ?>/admin/alertas?nivel=<?php echo $nivel; ?>">
 
-        <article class="ops-metric <?php echo $nivelFiltro === $nivel ? $meta[1] : (($contagemPorNivel[$nivel] ?? 0) > 0 ? $meta[1] : ''); ?>">
+        <article class="bo-metric <?php echo $nivelFiltro === $nivel ? $meta[1] : (($contagemPorNivel[$nivel] ?? 0) > 0 ? $meta[1] : ''); ?>">
 
-            <span class="ops-metric__label"><i class="fas fa-<?php echo $meta[0]; ?> me-1"></i><?php echo $meta[2]; ?><?php echo $nivelFiltro === $nivel ? ' · filtrando' : ''; ?></span>
+            <span class="bo-metric__label"><?php echo $meta[2]; ?><?php echo $nivelFiltro === $nivel ? ' · filtrando' : ''; ?></span>
 
-            <strong class="ops-metric__value"><?php echo (int)($contagemPorNivel[$nivel] ?? 0); ?></strong>
+            <strong class="bo-metric__value"><?php echo (int)($contagemPorNivel[$nivel] ?? 0); ?></strong>
 
         </article>
 
@@ -81,11 +63,8 @@ $nivelBadgeCss = ['erro' => 'critical', 'aviso' => 'new', 'info' => 'audit'];
 
 
 <?php /* Fase 18E: navegação por abas sobre rotas existentes */ ?>
-<link rel="stylesheet" href="<?= htmlspecialchars($bp, ENT_QUOTES, 'UTF-8') ?>/public/assets/css/pages/gf-f18e-operacao-tabs.css">
-<link rel="stylesheet" href="<?= htmlspecialchars($bp, ENT_QUOTES, 'UTF-8') ?>/public/assets/css/pages/gf-f18e2-shell-operacao.css?v=20261017-2">
-<link rel="stylesheet" href="<?= htmlspecialchars($bp, ENT_QUOTES, 'UTF-8') ?>/public/assets/css/pages/gf-f18e3-operacao-fix.css?v=20261017-3">
-<div class="gf18e-tabs-host"><?php include __DIR__ . '/../components/admin_operacao_tabs.php'; ?></div>
-<div class="shell-ops" id="alertasShell">
+
+<div class="bo-operation-grid" id="alertasShell">
 
 
 
@@ -99,7 +78,7 @@ $nivelBadgeCss = ['erro' => 'critical', 'aviso' => 'new', 'info' => 'audit'];
 
     <section class="shell-ops-worklist" aria-label="Grupos de alerta">
 
-        <header class="ops-worklist-header">
+        <header class="bo-panel-heading">
 
             <span class="eyebrow">Operação</span>
 
@@ -111,9 +90,9 @@ $nivelBadgeCss = ['erro' => 'critical', 'aviso' => 'new', 'info' => 'audit'];
 
 
 
-        <div class="ops-worklist-search">
+        <div class="bo-search">
 
-            <i class="fas fa-magnifying-glass"></i>
+            
 
             <input type="search" id="alertasWorklistSearch" placeholder="Filtrar nesta lista" autocomplete="off">
 
@@ -121,13 +100,13 @@ $nivelBadgeCss = ['erro' => 'critical', 'aviso' => 'new', 'info' => 'audit'];
 
 
 
-        <div class="ops-worklist-results" id="alertasWorklistResults">
+        <div class="bo-orders__list" id="alertasWorklistResults">
 
             <?php if (empty($alertasAgrupados)): ?>
 
-                <div class="ops-empty-state">
+                <div class="bo-empty">
 
-                    <i class="fas fa-circle-check"></i>
+                    
 
                     Nenhum alerta no momento. Operação normal.
 
@@ -141,7 +120,7 @@ $nivelBadgeCss = ['erro' => 'critical', 'aviso' => 'new', 'info' => 'audit'];
 
                 <button type="button"
 
-                    class="ops-worklist-item <?php echo $grupo['nivel'] === 'erro' ? 'is-critical' : ($grupo['nivel'] === 'aviso' ? 'is-warning' : ''); ?>"
+                    class="bo-order <?php echo $grupo['nivel'] === 'erro' ? 'is-critical' : ($grupo['nivel'] === 'aviso' ? 'is-warning' : ''); ?>"
 
                     data-group-id="<?php echo (int)$i; ?>"
 
@@ -151,21 +130,21 @@ $nivelBadgeCss = ['erro' => 'critical', 'aviso' => 'new', 'info' => 'audit'];
 
                 >
 
-                    <span class="ops-worklist-item__priority" aria-hidden="true"></span>
+                    <span class="bo-order__priority" aria-hidden="true"></span>
 
-                    <span class="ops-worklist-item__content">
+                    <span class="bo-order__content">
 
-                        <span class="ops-worklist-item__top">
+                        <span class="bo-order__top">
 
                             <strong><?php echo htmlspecialchars($grupo['titulo']); ?></strong>
 
-                            <span class="ops-badge ops-badge--<?php echo $nivelBadgeCss[$grupo['nivel']] ?? 'audit'; ?>"><?php echo htmlspecialchars($nivelLabels[$grupo['nivel']] ?? ucfirst((string)$grupo['nivel'])); ?></span>
+                            <span class="bo-status bo-status--<?php echo $nivelBadgeCss[$grupo['nivel']] ?? 'audit'; ?>"><?php echo htmlspecialchars($nivelLabels[$grupo['nivel']] ?? ucfirst((string)$grupo['nivel'])); ?></span>
 
                         </span>
 
-                        <span class="ops-worklist-item__customer"><?php echo count($grupo['itens']); ?> ocorrência(s)</span>
+                        <span class="bo-order__customer"><?php echo count($grupo['itens']); ?> ocorrência(s)</span>
 
-                        <span class="ops-worklist-item__footer">
+                        <span class="bo-order__footer">
 
                             <span><?php echo htmlspecialchars($grupo['quando']); ?></span>
 
@@ -173,11 +152,11 @@ $nivelBadgeCss = ['erro' => 'critical', 'aviso' => 'new', 'info' => 'audit'];
 
                     </span>
 
-                    <span class="ops-worklist-item__signals">
+                    <span class="bo-order__signals">
 
                         <?php if ($grupo['nivel'] === 'erro'): ?>
 
-                        <span class="ops-signal is-danger" title="Crítico"><i class="fas fa-triangle-exclamation"></i></span>
+                        <span class="ops-signal is-danger" title="Crítico"></span>
 
                         <?php endif; ?>
 
@@ -197,9 +176,9 @@ $nivelBadgeCss = ['erro' => 'critical', 'aviso' => 'new', 'info' => 'audit'];
 
         <?php if (empty($alertasAgrupados)): ?>
 
-        <div class="ops-empty-state" style="padding:80px 20px">
+        <div class="bo-empty">
 
-            <i class="fas fa-inbox"></i>
+            
 
             Nenhum grupo pra exibir.
 
@@ -267,13 +246,13 @@ var ALERT_BP = '<?php echo addslashes($bp); ?>';
 
 
 
-        var html = '<header class="ops-order-header">' +
+        var html = '<header class="bo-panel-heading">' +
 
             '<div><h1>' + escapeHtml(grupo.titulo) + '</h1>' +
 
             '<p>' + grupo.itens.length + ' ocorrência(s) · ' + escapeHtml(grupo.quando) + '</p></div>' +
 
-            '<span class="ops-badge ops-badge--' + badgeCss + '">' + escapeHtml(badgeLabel) + '</span>' +
+            '<span class="bo-status bo-status--' + badgeCss + '">' + escapeHtml(badgeLabel) + '</span>' +
 
             '</header>';
 
@@ -281,17 +260,17 @@ var ALERT_BP = '<?php echo addslashes($bp); ?>';
 
         if (grupo.pedido_id) {
 
-            html += '<div style="padding:0 24px 12px"><a class="ops-btn" href="' + ALERT_BP + '/admin/pedido/' + grupo.pedido_id + '"><i class="fas fa-eye"></i> Ver pedido #' + grupo.pedido_id + '</a></div>';
+            html += '<div><a class="bo-btn" href="' + ALERT_BP + '/admin/pedido/' + grupo.pedido_id + '"> Ver pedido #' + grupo.pedido_id + '</a></div>';
 
         }
 
 
 
-        html += '<div style="padding:0 24px 32px">';
+        html += '<div>';
 
         if (!grupo.itens.length) {
 
-            html += '<div class="ops-empty-state"><i class="fas fa-circle-check"></i>Sem ocorrências detalhadas.</div>';
+            html += '<div class="bo-empty">Sem ocorrências detalhadas.</div>';
 
         } else {
 
@@ -393,9 +372,5 @@ var ALERT_BP = '<?php echo addslashes($bp); ?>';
 
 ?>
 
-<script<?php echo csp_script_nonce_attr(); ?> src="<?php echo htmlspecialchars($bp); ?>/public/assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
 
-</body>
-
-</html>
-
+<?php $conteudo_pagina=ob_get_clean(); $perfil='admin'; $titulo_pagina='Alertas operacionais'; $breadcrumb=['Operação','Alertas']; $assets_css=['/public/assets/css/pages/bo-admin-operacao.css']; require __DIR__ . '/../layouts/backoffice_shell.php';

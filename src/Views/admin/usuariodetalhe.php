@@ -1,11 +1,10 @@
 <?php
 $bp = defined('BASE_PATH') ? BASE_PATH : '';
-include __DIR__ . '/../layouts/header.php';
+ob_start();
 ?>
-<link rel="stylesheet" href="<?php echo htmlspecialchars($bp); ?>/public/assets/css/pages/admin-usuariodetalhe.css">
-<div class="main-wrapper shell admin-shell">
-<?php include __DIR__ . '/../layouts/sidebar_admin.php'; ?>
-<main class="main-content shell-main shell-content"><?php include __DIR__ . '/partials/_panel_topbar_admin.php'; ?>
+<link rel="stylesheet" href="<?php echo htmlspecialchars($bp); ?>/public/assets/css/pages/admin-usuariodetalhe.css"><link rel="stylesheet" href="<?= htmlspecialchars($bp, ENT_QUOTES, 'UTF-8') ?>/public/assets/css/pages/gf-f18f19-shell-unificado.css?v=20261110-usuarios">
+<script<?php echo csp_script_nonce_attr(); ?>>document.body.classList.add("gf-f18f19");</script>
+
 
     <?php
     $flash = $_SESSION['_flash'] ?? null;
@@ -79,7 +78,7 @@ include __DIR__ . '/../layouts/header.php';
                             </span></td>
                         </tr>
                         <tr><td class="usuariodetalhe-label">Cadastro</td><td><?php echo date('d/m/Y', strtotime($usuario['criado_em'])); ?></td></tr>
-                        <tr><td class="usuariodetalhe-label">Último Login</td>
+                        <tr><td class="usuariodetalhe-label">Ãšltimo Login</td>
                             <td><?php echo $usuario['ultimo_login'] ? date('d/m/Y H:i', strtotime($usuario['ultimo_login'])) : '—'; ?></td>
                         </tr>
                     </table>
@@ -129,7 +128,7 @@ include __DIR__ . '/../layouts/header.php';
                     <div class="mt-3">
                         <div class="usuariodetalhe-doc-label">Documentos</div>
                         <div class="d-flex gap-2 flex-wrap">
-                            <?php // §SEC-UPL-02: link autenticado via ArquivoController::servir() em vez de caminho direto de /uploads. ?>
+                            <?php // Â§SEC-UPL-02: link autenticado via ArquivoController::servir() em vez de caminho direto de /uploads. ?>
                             <a href="<?php echo $bp; ?>/arquivo/<?php echo (int)$extra['id']; ?>?tipo=doc_cnh_frente" target="_blank" class="btn btn-sm btn-outline-primary">
                                 <i class="fas fa-file me-1"></i>CNH Frente
                             </a>
@@ -200,3 +199,5 @@ include __DIR__ . '/../layouts/header.php';
 
 </main>
 <?php include __DIR__ . '/../layouts/footer.php'; ?>
+
+<?php $conteudo_pagina=ob_get_clean(); $perfil='admin'; $titulo_pagina="Detalhe do usuário"; $breadcrumb=["Pessoas e parceiros","Usuário"]; $assets_css=["/public/assets/css/pages/bo-admin-cadastros.css"]; require __DIR__ . '/../layouts/backoffice_shell.php';

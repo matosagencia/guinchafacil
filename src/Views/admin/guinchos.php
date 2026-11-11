@@ -32,7 +32,7 @@
 
 $bp = defined('BASE_PATH') ? BASE_PATH : '';
 
-include __DIR__ . '/../layouts/header.php';
+ob_start();
 
 
 
@@ -49,8 +49,8 @@ function guinchoStatusBadge(array $g): string {
 ?>
 
 
-<link rel="stylesheet" href="<?= htmlspecialchars($bp, ENT_QUOTES, 'UTF-8') ?>/public/assets/css/pages/gf-f18f19-shell-unificado.css?v=20261018-2">
-<script>document.body.classList.add("gf-f18f19");</script>
+<link rel="stylesheet" href="<?= htmlspecialchars($bp, ENT_QUOTES, 'UTF-8') ?>/public/assets/css/pages/gf-f18f19-shell-unificado.css?v=20261110-guinchos">
+<script<?php echo csp_script_nonce_attr(); ?>>document.body.classList.add("gf-f18f19");</script>
 <link rel="stylesheet" href="<?php echo htmlspecialchars($bp); ?>/public/assets/css/pages/admin-central-operacional.css">
 <!-- GF-F18F15-REPAIRED -->
 <link rel="stylesheet" href="<?php echo htmlspecialchars($bp, ENT_QUOTES, 'UTF-8'); ?>/public/assets/css/pages/gf-f18f14b-acabamento.css?v=20261018-f15">
@@ -63,7 +63,7 @@ function guinchoStatusBadge(array $g): string {
 <!-- /GF-F18F14-ASSET -->
 <!-- /GF-F18F12-ASSET -->
 <!-- GF-F18F12-SCOPE -->
-<script>document.body.classList.add("gf-f18f12");</script>
+<script<?php echo csp_script_nonce_attr(); ?>>document.body.classList.add("gf-f18f12");</script>
 <!-- /GF-F18F12-SCOPE -->
 
 
@@ -106,23 +106,11 @@ $totalSuspensos = count(array_filter($aprovados ?? [], static fn($g) => empty($g
 
 
 <link rel="stylesheet" href="<?php echo htmlspecialchars($bp, ENT_QUOTES, 'UTF-8'); ?>/public/assets/css/pages/gf-f18f18-sidebar-cadastros.css?v=20261018-1">
-<script>document.body.classList.add("gf-f18f18");</script>
+
 <!-- GF-F18F1-NAV -->
 <!-- /GF-F18F1-NAV -->
 <div class="shell-ops" id="guinchosShell">
-
-
-
-    <aside class="shell-ops-sidebar gf-f18f18-sidebar" id="guinchosSidebar">
-
-        <div class="gf-f18f18-brand"><strong>Guincha<span>Fácil.</span></strong><small>Central GuinchaFácil</small></div>
-        <?php include __DIR__ . '/../components/admin_nav_operacional.php'; ?>
-
-    </aside>
-
-
-
-    <section class="shell-ops-worklist" aria-label="Guinchos aprovados">
+<section class="shell-ops-worklist" aria-label="Guinchos aprovados">
 
         
 <?php $gfF18f1Tab = 'guinchos'; include __DIR__ . '/../components/gf_f18f1_pessoas_tabs.php'; ?>
@@ -464,17 +452,8 @@ $totalSuspensos = count(array_filter($aprovados ?? [], static fn($g) => empty($g
 
 
 
-<?php
 
-// Não usa layouts/footer.php: esta página usa .shell-ops (grid próprio),
 
-// igual à Central Operacional, Ocorrências, Carteiras e Guinchos Pendentes.
 
-?>
 
-<script<?php echo csp_script_nonce_attr(); ?> src="<?php echo htmlspecialchars($bp); ?>/public/assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
-
-</body>
-
-</html>
-
+<?php $conteudo_pagina=ob_get_clean(); $perfil='admin'; $titulo_pagina="Guinchos"; $breadcrumb=["Pessoas e parceiros","Guinchos"]; $assets_css=['/public/assets/css/pages/bo-admin-cadastros.css']; require __DIR__ . '/../layouts/backoffice_shell.php';

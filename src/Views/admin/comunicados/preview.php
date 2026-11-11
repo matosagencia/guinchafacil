@@ -1,8 +1,8 @@
 <?php
 $bp = defined('BASE_PATH') ? BASE_PATH : '';
-include __DIR__ . '/../../layouts/header.php';
+ob_start();
 ?>
-<main class="main-content"><?php include __DIR__ . '/../partials/_panel_topbar_admin.php'; ?>
+
     <div class="card p-4">
         <h3 class="mb-3">Preview</h3>
         <?php if (!empty($item)): ?>
@@ -15,5 +15,6 @@ include __DIR__ . '/../../layouts/header.php';
             <p class="text-muted mb-0">Comunicado não encontrado ou tabela ainda não criada.</p>
         <?php endif; ?>
     </div>
-</main>
-<?php include __DIR__ . '/../../layouts/footer.php'; ?>
+
+
+<?php $conteudo_pagina=ob_get_clean(); $perfil='admin'; $titulo_pagina='Preview de comunicado'; $breadcrumb=['Sistema','Comunicados','Preview']; $assets_css=['/public/assets/css/pages/bo-admin-operacao.css']; require __DIR__ . '/../../layouts/backoffice_shell.php';

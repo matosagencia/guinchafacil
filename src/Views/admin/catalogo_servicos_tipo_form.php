@@ -4,7 +4,7 @@
 // tipo de serviço ANTES do include para não perder o array.
 $servicoTipo = $tipo ?? null;
 $bp = defined('BASE_PATH') ? BASE_PATH : '';
-include __DIR__ . '/../layouts/header.php';
+ob_start();
 $v = function (string $campo, $default = '') use ($servicoTipo) {
     return htmlspecialchars((string)($servicoTipo[$campo] ?? $default), ENT_QUOTES, 'UTF-8');
 };
@@ -12,9 +12,7 @@ $checked = function (string $campo) use ($servicoTipo) {
     return !empty($servicoTipo[$campo]) ? 'checked' : '';
 };
 ?>
-<div class="main-wrapper shell admin-shell">
-<?php include __DIR__ . '/../layouts/sidebar_admin.php'; ?>
-<main class="main-content shell-main shell-content"><?php include __DIR__ . '/partials/_panel_topbar_admin.php'; ?>
+
 
     <header class="page-head mb-4">
         <div>
@@ -112,6 +110,6 @@ $checked = function (string $campo) use ($servicoTipo) {
         </div>
     </form>
 
-</main>
-</div>
-<?php include __DIR__ . '/../layouts/footer.php'; ?>
+
+
+<?php $conteudo_pagina=ob_get_clean(); $perfil='admin'; $titulo_pagina="Novo tipo de serviço"; $breadcrumb=["Catálogo e preços","Novo tipo de serviço"]; $assets_css=["/public/assets/css/pages/bo-admin-catalogo.css"]; require __DIR__ . '/../layouts/backoffice_shell.php';

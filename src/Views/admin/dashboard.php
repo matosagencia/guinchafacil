@@ -8,7 +8,7 @@
 
 $bp = defined('BASE_PATH') ? BASE_PATH : '';
 
-include __DIR__ . '/../layouts/header.php';
+ob_start();
 
 ?>
 
@@ -82,27 +82,15 @@ function admin_tempo_relativo(string $quando): string
 
 <link rel="stylesheet" href="<?php echo htmlspecialchars($bp, ENT_QUOTES, 'UTF-8'); ?>/public/assets/css/pages/gf-f18e5-dashboard.css?v=20261017">
 <link rel="stylesheet" href="<?php echo htmlspecialchars($bp, ENT_QUOTES, 'UTF-8'); ?>/public/assets/css/pages/gf-f18c-shell.css?v=20261101-4">
-<div class="bo bo-operator gf-f18c-root gf18e5-dashboard" id="dashboardShell">
-  <aside class="bo-sidebar gf-f18c-sidebar" id="dashboardSidebar" aria-label="Navegação do administrador">
-    <a class="gf-f18c-brand" href="<?php echo htmlspecialchars($bp, ENT_QUOTES, 'UTF-8'); ?>/admin/central">Guincha<span>Fácil</span><i>.</i></a>
-    <div class="gf-f18c-workspace"><span class="gf-f18c-avatar"><i class="fas fa-shield-halved" aria-hidden="true"></i></span><span><strong>Central GuinchaFácil</strong><small>Workspace operacional</small></span></div>
-    <?php include __DIR__ . '/../components/admin_nav_operacional.php'; ?>
-    <div class="gf-f18c-sidebar-footer"><a href="<?php echo htmlspecialchars($bp, ENT_QUOTES, 'UTF-8'); ?>/">Voltar ao site</a></div>
-  </aside>
-  <section class="shell-ops-workspace" id="dashboardWorkspace" aria-label="Visão em tempo real da plataforma">
-    <header class="bo-header">
-      <div class="gf-f18c-breadcrumb"><span>Backoffice <i class="fas fa-chevron-right" aria-hidden="true"></i> <strong>Dashboard</strong></span></div>
-      <div class="gf-f18c-header-actions"><a href="<?php echo htmlspecialchars($bp); ?>/admin/alertas" aria-label="Abrir alertas operacionais"><i class="far fa-bell" aria-hidden="true"></i></a><span class="gf-f18c-user"><?php echo htmlspecialchars((string)($_SESSION['user']['nome'] ?? 'Administrador'), ENT_QUOTES, 'UTF-8'); ?></span><a class="gf-f18c-logout" href="<?php echo htmlspecialchars($bp); ?>/logout" data-confirm-logout><i class="fas fa-right-from-bracket" aria-hidden="true"></i><span>Sair</span></a></div>
-    </header>
-    <main class="bo-content" id="dashboardContent">
+
     <?php include __DIR__ . '/../components/admin_operacao_tabs.php'; ?>
-<div class="ops-topbar admin-dashboard-topbar">
+<div class="bo-toolbar admin-dashboard-topbar">
 
-    <div class="ops-topbar__search"><i class="fas fa-magnifying-glass"></i><input type="search" placeholder="Buscar por pedido, cliente, placa ou telefone" aria-label="Buscar no painel"></div>
+    <div class="bo-search"><i class="fas fa-magnifying-glass"></i><input type="search" placeholder="Buscar por pedido, cliente, placa ou telefone" aria-label="Buscar no painel"></div>
 
-    <div class="ops-topbar__meta">
+    <div class="bo-toolbar-meta">
 
-        <span class="ops-topbar__status"><span class="ops-topbar__status-dot"></span>Opera&ccedil;&atilde;o normal</span>
+        <span class="bo-toolbar-status"><span class="bo-toolbar-status-dot"></span>Opera&ccedil;&atilde;o normal</span>
 
         <a href="<?php echo htmlspecialchars($bp); ?>/admin/central" class="ops-dashboard-link">Abrir Central</a>
 
@@ -775,16 +763,6 @@ window.__basePath = <?php echo json_encode($bp, JSON_UNESCAPED_UNICODE | JSON_UN
         </div>
 
     </div>
-
-
-
-    </main>
-    </section>
-
-
-
-</div>
-
 <footer class="bo-footer gf-admin-dashboard-footer">
     <div class="bo-footer__meta">
         <span><span class="status-dot" aria-hidden="true"></span> Dados operacionais do GuinchaFácil</span>
@@ -1354,9 +1332,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
 <script<?php echo csp_script_nonce_attr(); ?> src="<?php echo htmlspecialchars($bp); ?>/public/assets/js/admin-territorio-metas.js"></script>
 
-<script<?php echo csp_script_nonce_attr(); ?> src="<?php echo htmlspecialchars($bp); ?>/public/assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
 
-</body>
 
-</html>
 
+
+<?php $conteudo_pagina=ob_get_clean(); $perfil='admin'; $titulo_pagina='Dashboard'; $breadcrumb=['Operação','Dashboard']; $assets_css=['/public/assets/css/pages/bo-admin-operacao.css']; require __DIR__ . '/../layouts/backoffice_shell.php';

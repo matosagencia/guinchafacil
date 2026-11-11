@@ -1,0 +1,1385 @@
+{
+  "generatedAt": "2026-11-11T02:17:38.001Z",
+  "routes": [
+    {
+      "route": "/admin/alertas",
+      "controller": "AdminController",
+      "action": "alertasOperacionais",
+      "profile": "admin",
+      "kind": "html",
+      "controllerFile": "C:\\xampp\\htdocs\\guinchafacil\\src\\Controllers\\AdminController.php",
+      "view": "/../Views/admin/alertas_operacionais.php",
+      "viewCandidates": [
+        "/../Views/admin/alertas_operacionais.php"
+      ]
+    },
+    {
+      "route": "/admin/avaliacoes",
+      "controller": "AdminController",
+      "action": "avaliacoes",
+      "profile": "admin",
+      "kind": "html",
+      "controllerFile": "C:\\xampp\\htdocs\\guinchafacil\\src\\Controllers\\AdminController.php",
+      "view": "/../Views/admin/avaliacoes.php",
+      "viewCandidates": [
+        "/../Views/admin/avaliacoes.php"
+      ]
+    },
+    {
+      "route": "/admin/carteiras",
+      "controller": "AdminController",
+      "action": "carteiras",
+      "profile": "admin",
+      "kind": "html",
+      "controllerFile": "C:\\xampp\\htdocs\\guinchafacil\\src\\Controllers\\AdminController.php",
+      "view": "/../Views/admin/carteiras.php",
+      "viewCandidates": [
+        "/../Views/admin/carteiras.php"
+      ]
+    },
+    {
+      "route": "/admin/catalogo-servicos/capacidades",
+      "controller": "AdminServiceCatalogController",
+      "action": "capacidades",
+      "profile": "admin",
+      "kind": "html",
+      "controllerFile": "C:\\xampp\\htdocs\\guinchafacil\\src\\Controllers\\AdminServiceCatalogController.php",
+      "view": "/../Views/admin/catalogo_servicos_capacidades.php",
+      "viewCandidates": [
+        "/../Views/admin/catalogo_servicos_capacidades.php"
+      ]
+    },
+    {
+      "route": "/admin/catalogo-servicos/compatibilidade",
+      "controller": "AdminServiceCatalogController",
+      "action": "compatibilidade",
+      "profile": "admin",
+      "kind": "html",
+      "controllerFile": "C:\\xampp\\htdocs\\guinchafacil\\src\\Controllers\\AdminServiceCatalogController.php",
+      "view": "/../Views/admin/catalogo_servicos_compatibilidade.php",
+      "viewCandidates": [
+        "/../Views/admin/catalogo_servicos_compatibilidade.php"
+      ]
+    },
+    {
+      "route": "/admin/catalogo-servicos/tarifas",
+      "controller": "AdminServiceCatalogController",
+      "action": "tarifas",
+      "profile": "admin",
+      "kind": "html",
+      "controllerFile": "C:\\xampp\\htdocs\\guinchafacil\\src\\Controllers\\AdminServiceCatalogController.php",
+      "view": "/../Views/admin/catalogo_servicos_tarifas.php",
+      "viewCandidates": [
+        "/../Views/admin/catalogo_servicos_tarifas.php"
+      ]
+    },
+    {
+      "route": "/admin/catalogo-servicos/tipo/novo",
+      "controller": "AdminServiceCatalogController",
+      "action": "tipoForm",
+      "profile": "admin",
+      "kind": "html",
+      "controllerFile": "C:\\xampp\\htdocs\\guinchafacil\\src\\Controllers\\AdminServiceCatalogController.php",
+      "view": "/../Views/admin/catalogo_servicos_tipo_form.php",
+      "viewCandidates": [
+        "/../Views/admin/catalogo_servicos_tipo_form.php"
+      ]
+    },
+    {
+      "route": "/admin/catalogo-servicos/tipos",
+      "controller": "AdminServiceCatalogController",
+      "action": "tipos",
+      "profile": "admin",
+      "kind": "html",
+      "controllerFile": "C:\\xampp\\htdocs\\guinchafacil\\src\\Controllers\\AdminServiceCatalogController.php",
+      "view": "/../Views/admin/catalogo_servicos_tipos.php",
+      "viewCandidates": [
+        "/../Views/admin/catalogo_servicos_tipos.php"
+      ]
+    },
+    {
+      "route": "/admin/catalogo-veiculos",
+      "controller": "AdminVehicleCatalogController",
+      "action": "marcas",
+      "profile": "admin",
+      "kind": "html",
+      "controllerFile": "C:\\xampp\\htdocs\\guinchafacil\\src\\Controllers\\AdminVehicleCatalogController.php",
+      "view": "/../Views/admin/catalogo_veiculos_marcas.php",
+      "viewCandidates": [
+        "/../Views/admin/catalogo_veiculos_marcas.php"
+      ]
+    },
+    {
+      "route": "/admin/catalogo-veiculos/marca/novo",
+      "controller": "AdminVehicleCatalogController",
+      "action": "marcaForm",
+      "profile": "admin",
+      "kind": "html",
+      "controllerFile": "C:\\xampp\\htdocs\\guinchafacil\\src\\Controllers\\AdminVehicleCatalogController.php",
+      "view": "/../Views/admin/catalogo_veiculos_marca_form.php",
+      "viewCandidates": [
+        "/../Views/admin/catalogo_veiculos_marca_form.php"
+      ]
+    },
+    {
+      "route": "/admin/catalogo-veiculos/modelo/novo",
+      "controller": "AdminVehicleCatalogController",
+      "action": "modeloForm",
+      "profile": "admin",
+      "kind": "html",
+      "controllerFile": "C:\\xampp\\htdocs\\guinchafacil\\src\\Controllers\\AdminVehicleCatalogController.php",
+      "view": "/../Views/admin/catalogo_veiculos_modelo_form.php",
+      "viewCandidates": [
+        "/../Views/admin/catalogo_veiculos_modelo_form.php"
+      ]
+    },
+    {
+      "route": "/admin/catalogo-veiculos/versao/novo",
+      "controller": "AdminVehicleCatalogController",
+      "action": "versaoForm",
+      "profile": "admin",
+      "kind": "html",
+      "controllerFile": "C:\\xampp\\htdocs\\guinchafacil\\src\\Controllers\\AdminVehicleCatalogController.php",
+      "view": "/../Views/admin/catalogo_veiculos_versao_form.php",
+      "viewCandidates": [
+        "/../Views/admin/catalogo_veiculos_versao_form.php"
+      ]
+    },
+    {
+      "route": "/admin/central",
+      "controller": "AdminController",
+      "action": "centralOperacional",
+      "profile": "admin",
+      "kind": "html",
+      "controllerFile": "C:\\xampp\\htdocs\\guinchafacil\\src\\Controllers\\AdminController.php",
+      "view": "/../Views/admin/central_operacional.php",
+      "viewCandidates": [
+        "/../Views/admin/central_operacional.php"
+      ]
+    },
+    {
+      "route": "/admin/chat",
+      "controller": "AdminChatController",
+      "action": "index",
+      "profile": "admin",
+      "kind": "html",
+      "controllerFile": "C:\\xampp\\htdocs\\guinchafacil\\src\\Controllers\\AdminChatController.php",
+      "view": "/../Views/admin/pedidodetalhe.php",
+      "viewCandidates": [
+        "/../Views/admin/pedidodetalhe.php"
+      ]
+    },
+    {
+      "route": "/admin/checklists-incompletos",
+      "controller": "AdminProofOfServiceController",
+      "action": "checklistsIncompletos",
+      "profile": "admin",
+      "kind": "html",
+      "controllerFile": "C:\\xampp\\htdocs\\guinchafacil\\src\\Controllers\\AdminProofOfServiceController.php",
+      "view": "/../Views/admin/proof_of_service_incompletos.php",
+      "viewCandidates": [
+        "/../Views/admin/proof_of_service_incompletos.php"
+      ]
+    },
+    {
+      "route": "/admin/cidade/excluir",
+      "controller": "AdminController",
+      "action": "cidadeExcluir",
+      "profile": "admin",
+      "kind": "html",
+      "controllerFile": "C:\\xampp\\htdocs\\guinchafacil\\src\\Controllers\\AdminController.php",
+      "view": null,
+      "viewCandidates": []
+    },
+    {
+      "route": "/admin/cidades",
+      "controller": "AdminController",
+      "action": "cidades",
+      "profile": "admin",
+      "kind": "html",
+      "controllerFile": "C:\\xampp\\htdocs\\guinchafacil\\src\\Controllers\\AdminController.php",
+      "view": "/../Views/admin/cidades.php",
+      "viewCandidates": [
+        "/../Views/admin/cidades.php"
+      ]
+    },
+    {
+      "route": "/admin/comunicado/novo",
+      "controller": "AdminComunicadoController",
+      "action": "form",
+      "profile": "admin",
+      "kind": "html",
+      "controllerFile": "C:\\xampp\\htdocs\\guinchafacil\\src\\Controllers\\AdminComunicadoController.php",
+      "view": "/../Views/admin/comunicados/form.php",
+      "viewCandidates": [
+        "/../Views/admin/comunicados/form.php"
+      ]
+    },
+    {
+      "route": "/admin/comunicados",
+      "controller": "AdminComunicadoController",
+      "action": "index",
+      "profile": "admin",
+      "kind": "html",
+      "controllerFile": "C:\\xampp\\htdocs\\guinchafacil\\src\\Controllers\\AdminComunicadoController.php",
+      "view": "/../Views/admin/comunicados/index.php",
+      "viewCandidates": [
+        "/../Views/admin/comunicados/index.php"
+      ]
+    },
+    {
+      "route": "/admin/configuracoes",
+      "controller": "AdminController",
+      "action": "configuracoes",
+      "profile": "admin",
+      "kind": "html",
+      "controllerFile": "C:\\xampp\\htdocs\\guinchafacil\\src\\Controllers\\AdminController.php",
+      "view": "/../Views/admin/configuracoes.php",
+      "viewCandidates": [
+        "/../Views/admin/configuracoes.php"
+      ]
+    },
+    {
+      "route": "/admin/dashboard",
+      "controller": "AdminController",
+      "action": "dashboard",
+      "profile": "admin",
+      "kind": "html",
+      "controllerFile": "C:\\xampp\\htdocs\\guinchafacil\\src\\Controllers\\AdminController.php",
+      "view": "/../Views/admin/dashboard.php",
+      "viewCandidates": [
+        "/../Views/admin/dashboard.php"
+      ]
+    },
+    {
+      "route": "/admin/demanda-territorial",
+      "controller": "AdminPricingZoneController",
+      "action": "demandaTerritorial",
+      "profile": "admin",
+      "kind": "html",
+      "controllerFile": "C:\\xampp\\htdocs\\guinchafacil\\src\\Controllers\\AdminPricingZoneController.php",
+      "view": "/../Views/admin/demanda_territorial.php",
+      "viewCandidates": [
+        "/../Views/admin/demanda_territorial.php"
+      ]
+    },
+    {
+      "route": "/admin/despacho",
+      "controller": "AdminController",
+      "action": "despacho",
+      "profile": "admin",
+      "kind": "html",
+      "controllerFile": "C:\\xampp\\htdocs\\guinchafacil\\src\\Controllers\\AdminController.php",
+      "view": "/../Views/admin/despacho.php",
+      "viewCandidates": [
+        "/../Views/admin/despacho.php"
+      ]
+    },
+    {
+      "route": "/admin/documentos",
+      "controller": "AdminController",
+      "action": "documentos",
+      "profile": "admin",
+      "kind": "html",
+      "controllerFile": "C:\\xampp\\htdocs\\guinchafacil\\src\\Controllers\\AdminController.php",
+      "view": "/../Views/admin/documentos.php",
+      "viewCandidates": [
+        "/../Views/admin/documentos.php"
+      ]
+    },
+    {
+      "route": "/admin/env",
+      "controller": "AdminController",
+      "action": "configuracoes",
+      "profile": "admin",
+      "kind": "html",
+      "controllerFile": "C:\\xampp\\htdocs\\guinchafacil\\src\\Controllers\\AdminController.php",
+      "view": "/../Views/admin/configuracoes.php",
+      "viewCandidates": [
+        "/../Views/admin/configuracoes.php"
+      ]
+    },
+    {
+      "route": "/admin/env/auditoria",
+      "controller": "AdminEnvAuditController",
+      "action": "index",
+      "profile": "admin",
+      "kind": "html",
+      "controllerFile": "C:\\xampp\\htdocs\\guinchafacil\\src\\Controllers\\AdminEnvAuditController.php",
+      "view": "/../Views/admin/env_auditoria.php",
+      "viewCandidates": [
+        "/../Views/admin/env_auditoria.php"
+      ]
+    },
+    {
+      "route": "/admin/especialista/documento-status",
+      "controller": "AdminController",
+      "action": "especialistaDocumentoStatus",
+      "profile": "admin",
+      "kind": "html",
+      "controllerFile": "C:\\xampp\\htdocs\\guinchafacil\\src\\Controllers\\AdminController.php",
+      "view": null,
+      "viewCandidates": []
+    },
+    {
+      "route": "/admin/especialistas",
+      "controller": "AdminController",
+      "action": "especialistas",
+      "profile": "admin",
+      "kind": "html",
+      "controllerFile": "C:\\xampp\\htdocs\\guinchafacil\\src\\Controllers\\AdminController.php",
+      "view": "/../Views/admin/especialistas.php",
+      "viewCandidates": [
+        "/../Views/admin/especialistas.php"
+      ]
+    },
+    {
+      "route": "/admin/especialistas/cadastrar",
+      "controller": "AdminController",
+      "action": "especialistaCadastroForm",
+      "profile": "admin",
+      "kind": "html",
+      "controllerFile": "C:\\xampp\\htdocs\\guinchafacil\\src\\Controllers\\AdminController.php",
+      "view": "/../Views/admin/especialista_form.php",
+      "viewCandidates": [
+        "/../Views/admin/especialista_form.php"
+      ]
+    },
+    {
+      "route": "/admin/faturas",
+      "controller": "AdminController",
+      "action": "faturas",
+      "profile": "admin",
+      "kind": "html",
+      "controllerFile": "C:\\xampp\\htdocs\\guinchafacil\\src\\Controllers\\AdminController.php",
+      "view": "/../Views/admin/faturas.php",
+      "viewCandidates": [
+        "/../Views/admin/faturas.php"
+      ]
+    },
+    {
+      "route": "/admin/feriados",
+      "controller": "AdminController",
+      "action": "feriados",
+      "profile": "admin",
+      "kind": "html",
+      "controllerFile": "C:\\xampp\\htdocs\\guinchafacil\\src\\Controllers\\AdminController.php",
+      "view": "/../Views/admin/feriados.php",
+      "viewCandidates": [
+        "/../Views/admin/feriados.php"
+      ]
+    },
+    {
+      "route": "/admin/financeiro",
+      "controller": "AdminController",
+      "action": "financeiro",
+      "profile": "admin",
+      "kind": "html",
+      "controllerFile": "C:\\xampp\\htdocs\\guinchafacil\\src\\Controllers\\AdminController.php",
+      "view": "/../Views/admin/financeiro.php",
+      "viewCandidates": [
+        "/../Views/admin/financeiro.php"
+      ]
+    },
+    {
+      "route": "/admin/financeiro/bypass-alertas",
+      "controller": "OficinaParceriaController",
+      "action": "bypassCasos",
+      "profile": "admin",
+      "kind": "json-or-mixed",
+      "controllerFile": "C:\\xampp\\htdocs\\guinchafacil\\src\\Controllers\\OficinaParceriaController.php",
+      "view": null,
+      "viewCandidates": []
+    },
+    {
+      "route": "/admin/financeiro/bypass-alertas/decidir",
+      "controller": "OficinaParceriaController",
+      "action": "bypassDecidir",
+      "profile": "admin",
+      "kind": "json-or-mixed",
+      "controllerFile": "C:\\xampp\\htdocs\\guinchafacil\\src\\Controllers\\OficinaParceriaController.php",
+      "view": null,
+      "viewCandidates": []
+    },
+    {
+      "route": "/admin/financeiro/compensacao",
+      "controller": "Fin2ApuracaoController",
+      "action": "index",
+      "profile": "admin",
+      "kind": "json-or-mixed",
+      "controllerFile": "C:\\xampp\\htdocs\\guinchafacil\\src\\Controllers\\Fin2ApuracaoController.php",
+      "view": null,
+      "viewCandidates": []
+    },
+    {
+      "route": "/admin/financeiro/marketing/excluir",
+      "controller": "AdminFinanceAttributionController",
+      "action": "gastoExcluir",
+      "profile": "admin",
+      "kind": "html",
+      "controllerFile": "C:\\xampp\\htdocs\\guinchafacil\\src\\Controllers\\AdminFinanceAttributionController.php",
+      "view": null,
+      "viewCandidates": []
+    },
+    {
+      "route": "/admin/financeiro/marketing/gasto",
+      "controller": "AdminFinanceAttributionController",
+      "action": "gastoSalvar",
+      "profile": "admin",
+      "kind": "html",
+      "controllerFile": "C:\\xampp\\htdocs\\guinchafacil\\src\\Controllers\\AdminFinanceAttributionController.php",
+      "view": null,
+      "viewCandidates": []
+    },
+    {
+      "route": "/admin/financeiro/marketing/importar",
+      "controller": "AdminFinanceAttributionController",
+      "action": "gastoImportar",
+      "profile": "admin",
+      "kind": "html",
+      "controllerFile": "C:\\xampp\\htdocs\\guinchafacil\\src\\Controllers\\AdminFinanceAttributionController.php",
+      "view": null,
+      "viewCandidates": []
+    },
+    {
+      "route": "/admin/financeiro/visao-unificada",
+      "controller": "AdminFinanceAttributionController",
+      "action": "visaoUnificada",
+      "profile": "admin",
+      "kind": "html",
+      "controllerFile": "C:\\xampp\\htdocs\\guinchafacil\\src\\Controllers\\AdminFinanceAttributionController.php",
+      "view": "/../Views/admin/financeiro_atribuicao.php",
+      "viewCandidates": [
+        "/../Views/admin/financeiro_atribuicao.php"
+      ]
+    },
+    {
+      "route": "/admin/guincho/novo",
+      "controller": "AdminController",
+      "action": "guinchoNovoForm",
+      "profile": "admin",
+      "kind": "html",
+      "controllerFile": "C:\\xampp\\htdocs\\guinchafacil\\src\\Controllers\\AdminController.php",
+      "view": "/../Views/admin/guinchoform.php",
+      "viewCandidates": [
+        "/../Views/admin/guinchoform.php"
+      ]
+    },
+    {
+      "route": "/admin/guinchos",
+      "controller": "AdminController",
+      "action": "guinchos",
+      "profile": "admin",
+      "kind": "html",
+      "controllerFile": "C:\\xampp\\htdocs\\guinchafacil\\src\\Controllers\\AdminController.php",
+      "view": "/../Views/admin/guinchos.php",
+      "viewCandidates": [
+        "/../Views/admin/guinchos.php"
+      ]
+    },
+    {
+      "route": "/admin/guinchospendentes",
+      "controller": "AdminController",
+      "action": "guinchosPendentes",
+      "profile": "admin",
+      "kind": "html",
+      "controllerFile": "C:\\xampp\\htdocs\\guinchafacil\\src\\Controllers\\AdminController.php",
+      "view": "/../Views/admin/guinchospendentes.php",
+      "viewCandidates": [
+        "/../Views/admin/guinchospendentes.php"
+      ]
+    },
+    {
+      "route": "/admin/health",
+      "controller": "AdminHealthController",
+      "action": "health",
+      "profile": "admin",
+      "kind": "html",
+      "controllerFile": "C:\\xampp\\htdocs\\guinchafacil\\src\\Controllers\\AdminHealthController.php",
+      "view": "/../Views/admin/health.php",
+      "viewCandidates": [
+        "/../Views/admin/health.php"
+      ]
+    },
+    {
+      "route": "/admin/logs",
+      "controller": "AdminLogsController",
+      "action": "index",
+      "profile": "admin",
+      "kind": "html",
+      "controllerFile": "C:\\xampp\\htdocs\\guinchafacil\\src\\Controllers\\AdminLogsController.php",
+      "view": "/../Views/admin/logs_v2.php",
+      "viewCandidates": [
+        "/../Views/admin/logs_v2.php"
+      ]
+    },
+    {
+      "route": "/admin/logs/export",
+      "controller": "AdminController",
+      "action": "logsExport",
+      "profile": "admin",
+      "kind": "download",
+      "controllerFile": "C:\\xampp\\htdocs\\guinchafacil\\src\\Controllers\\AdminController.php",
+      "view": null,
+      "viewCandidates": []
+    },
+    {
+      "route": "/admin/marketing",
+      "controller": "AdminFinanceAttributionController",
+      "action": "marketingCentral",
+      "profile": "admin",
+      "kind": "html",
+      "controllerFile": "C:\\xampp\\htdocs\\guinchafacil\\src\\Controllers\\AdminFinanceAttributionController.php",
+      "view": "/../Views/admin/marketing_central.php",
+      "viewCandidates": [
+        "/../Views/admin/marketing_central.php"
+      ]
+    },
+    {
+      "route": "/admin/marketing/campanha/salvar",
+      "controller": "AdminFinanceAttributionController",
+      "action": "campanhaSalvar",
+      "profile": "admin",
+      "kind": "html",
+      "controllerFile": "C:\\xampp\\htdocs\\guinchafacil\\src\\Controllers\\AdminFinanceAttributionController.php",
+      "view": null,
+      "viewCandidates": []
+    },
+    {
+      "route": "/admin/marketing/comissoes-indicacao",
+      "controller": "AdminMarketingReferralController",
+      "action": "commissions",
+      "profile": "admin",
+      "kind": "html",
+      "controllerFile": "C:\\xampp\\htdocs\\guinchafacil\\src\\Controllers\\AdminMarketingReferralController.php",
+      "view": "/../Views/admin/marketing_comissoes_indicacao.php",
+      "viewCandidates": [
+        "/../Views/admin/marketing_comissoes_indicacao.php"
+      ]
+    },
+    {
+      "route": "/admin/marketing/eventos",
+      "controller": "AdminMarketingEventsController",
+      "action": "index",
+      "profile": "admin",
+      "kind": "html",
+      "controllerFile": "C:\\xampp\\htdocs\\guinchafacil\\src\\Controllers\\AdminMarketingEventsController.php",
+      "view": "/../Views/admin/marketing_eventos.php",
+      "viewCandidates": [
+        "/../Views/admin/marketing_eventos.php"
+      ]
+    },
+    {
+      "route": "/admin/marketing/prospeccao/buscar",
+      "controller": "AdminFinanceAttributionController",
+      "action": "prospeccaoBuscar",
+      "profile": "admin",
+      "kind": "html",
+      "controllerFile": "C:\\xampp\\htdocs\\guinchafacil\\src\\Controllers\\AdminFinanceAttributionController.php",
+      "view": null,
+      "viewCandidates": []
+    },
+    {
+      "route": "/admin/marketing/prospeccao/regioes/salvar",
+      "controller": "AdminFinanceAttributionController",
+      "action": "prospeccaoRegiaoSalvar",
+      "profile": "admin",
+      "kind": "html",
+      "controllerFile": "C:\\xampp\\htdocs\\guinchafacil\\src\\Controllers\\AdminFinanceAttributionController.php",
+      "view": null,
+      "viewCandidates": []
+    },
+    {
+      "route": "/admin/marketing/prospeccao/sincronizar-zonas",
+      "controller": "AdminFinanceAttributionController",
+      "action": "prospeccaoSincronizarZonas",
+      "profile": "admin",
+      "kind": "html",
+      "controllerFile": "C:\\xampp\\htdocs\\guinchafacil\\src\\Controllers\\AdminFinanceAttributionController.php",
+      "view": null,
+      "viewCandidates": []
+    },
+    {
+      "route": "/admin/marketing/referrals",
+      "controller": "AdminMarketingReferralController",
+      "action": "index",
+      "profile": "admin",
+      "kind": "html",
+      "controllerFile": "C:\\xampp\\htdocs\\guinchafacil\\src\\Controllers\\AdminMarketingReferralController.php",
+      "view": "/../Views/admin/marketing_referrals.php",
+      "viewCandidates": [
+        "/../Views/admin/marketing_referrals.php"
+      ]
+    },
+    {
+      "route": "/admin/ocorrencia/criar",
+      "controller": "AdminController",
+      "action": "ocorrenciaCriar",
+      "profile": "admin",
+      "kind": "html",
+      "controllerFile": "C:\\xampp\\htdocs\\guinchafacil\\src\\Controllers\\AdminController.php",
+      "view": null,
+      "viewCandidates": []
+    },
+    {
+      "route": "/admin/ocorrencia/resolver",
+      "controller": "AdminController",
+      "action": "ocorrenciaResolver",
+      "profile": "admin",
+      "kind": "html",
+      "controllerFile": "C:\\xampp\\htdocs\\guinchafacil\\src\\Controllers\\AdminController.php",
+      "view": null,
+      "viewCandidates": []
+    },
+    {
+      "route": "/admin/ocorrencias",
+      "controller": "AdminController",
+      "action": "ocorrencias",
+      "profile": "admin",
+      "kind": "html",
+      "controllerFile": "C:\\xampp\\htdocs\\guinchafacil\\src\\Controllers\\AdminController.php",
+      "view": "/../Views/admin/ocorrencias.php",
+      "viewCandidates": [
+        "/../Views/admin/ocorrencias.php"
+      ]
+    },
+    {
+      "route": "/admin/oficinas-parceiras",
+      "controller": "OficinaParceriaController",
+      "action": "admin",
+      "profile": "admin",
+      "kind": "html",
+      "controllerFile": "C:\\xampp\\htdocs\\guinchafacil\\src\\Controllers\\OficinaParceriaController.php",
+      "view": "/../Views/admin/oficinas_parceiras.php",
+      "viewCandidates": [
+        "/../Views/admin/oficinas_parceiras.php"
+      ]
+    },
+    {
+      "route": "/admin/pedido/criar",
+      "controller": "AdminController",
+      "action": "pedidoCriar",
+      "profile": "admin",
+      "kind": "html",
+      "controllerFile": "C:\\xampp\\htdocs\\guinchafacil\\src\\Controllers\\AdminController.php",
+      "view": null,
+      "viewCandidates": []
+    },
+    {
+      "route": "/admin/pedido/custo",
+      "controller": "AdminController",
+      "action": "pedidoCalcularCusto",
+      "profile": "admin",
+      "kind": "json-or-mixed",
+      "controllerFile": "C:\\xampp\\htdocs\\guinchafacil\\src\\Controllers\\AdminController.php",
+      "view": null,
+      "viewCandidates": []
+    },
+    {
+      "route": "/admin/pedido/novo",
+      "controller": "AdminController",
+      "action": "pedidoNovoV2",
+      "profile": "admin",
+      "kind": "html",
+      "controllerFile": "C:\\xampp\\htdocs\\guinchafacil\\src\\Controllers\\AdminController.php",
+      "view": "/../Views/admin/pedidonovo_etapa1.php",
+      "viewCandidates": [
+        "/../Views/admin/pedidonovo_etapa1.php"
+      ]
+    },
+    {
+      "route": "/admin/pedido/novo/funil",
+      "controller": "AdminController",
+      "action": "pedidoNovoFunil",
+      "profile": "admin",
+      "kind": "html",
+      "controllerFile": "C:\\xampp\\htdocs\\guinchafacil\\src\\Controllers\\AdminController.php",
+      "view": "/../Views/admin/pedidonovo_funil.php",
+      "viewCandidates": [
+        "/../Views/admin/pedidonovo_funil.php"
+      ]
+    },
+    {
+      "route": "/admin/pedido/novo/v2",
+      "controller": "AdminController",
+      "action": "pedidoNovoV2",
+      "profile": "admin",
+      "kind": "html",
+      "controllerFile": "C:\\xampp\\htdocs\\guinchafacil\\src\\Controllers\\AdminController.php",
+      "view": "/../Views/admin/pedidonovo_etapa1.php",
+      "viewCandidates": [
+        "/../Views/admin/pedidonovo_etapa1.php"
+      ]
+    },
+    {
+      "route": "/admin/pedidos",
+      "controller": "AdminController",
+      "action": "pedidos",
+      "profile": "admin",
+      "kind": "html",
+      "controllerFile": "C:\\xampp\\htdocs\\guinchafacil\\src\\Controllers\\AdminController.php",
+      "view": "/../Views/admin/pedidos.php",
+      "viewCandidates": [
+        "/../Views/admin/pedidos.php"
+      ]
+    },
+    {
+      "route": "/admin/planejamento",
+      "controller": "AdminPlanejamentoController",
+      "action": "index",
+      "profile": "admin",
+      "kind": "html",
+      "controllerFile": "C:\\xampp\\htdocs\\guinchafacil\\src\\Controllers\\AdminPlanejamentoController.php",
+      "view": "/../Views/admin/planejamento.php",
+      "viewCandidates": [
+        "/../Views/admin/planejamento.php"
+      ]
+    },
+    {
+      "route": "/admin/precificacao/zonas",
+      "controller": "AdminPricingZoneController",
+      "action": "zonas",
+      "profile": "admin",
+      "kind": "html",
+      "controllerFile": "C:\\xampp\\htdocs\\guinchafacil\\src\\Controllers\\AdminPricingZoneController.php",
+      "view": "/../Views/admin/precificacao_zonas.php",
+      "viewCandidates": [
+        "/../Views/admin/precificacao_zonas.php"
+      ]
+    },
+    {
+      "route": "/admin/prestadores",
+      "controller": "AdminController",
+      "action": "prestadores",
+      "profile": "admin",
+      "kind": "html",
+      "controllerFile": "C:\\xampp\\htdocs\\guinchafacil\\src\\Controllers\\AdminController.php",
+      "view": "/../Views/admin/prestadores.php",
+      "viewCandidates": [
+        "/../Views/admin/prestadores.php"
+      ]
+    },
+    {
+      "route": "/admin/prestadores-moveis",
+      "controller": "AdminController",
+      "action": "prestadoresMoveis",
+      "profile": "admin",
+      "kind": "html",
+      "controllerFile": "C:\\xampp\\htdocs\\guinchafacil\\src\\Controllers\\AdminController.php",
+      "view": "/../Views/admin/prestadores_moveis.php",
+      "viewCandidates": [
+        "/../Views/admin/prestadores_moveis.php"
+      ]
+    },
+    {
+      "route": "/admin/produto/novo",
+      "controller": "AdminProdutoController",
+      "action": "form",
+      "profile": "admin",
+      "kind": "html",
+      "controllerFile": "C:\\xampp\\htdocs\\guinchafacil\\src\\Controllers\\AdminProdutoController.php",
+      "view": "/../Views/admin/produtoform.php",
+      "viewCandidates": [
+        "/../Views/admin/produtoform.php"
+      ]
+    },
+    {
+      "route": "/admin/produtos",
+      "controller": "AdminProdutoController",
+      "action": "index",
+      "profile": "admin",
+      "kind": "html",
+      "controllerFile": "C:\\xampp\\htdocs\\guinchafacil\\src\\Controllers\\AdminProdutoController.php",
+      "view": "/../Views/admin/produtos.php",
+      "viewCandidates": [
+        "/../Views/admin/produtos.php"
+      ]
+    },
+    {
+      "route": "/admin/proof-of-road",
+      "controller": "AdminController",
+      "action": "proofOfRoad",
+      "profile": "admin",
+      "kind": "html",
+      "controllerFile": "C:\\xampp\\htdocs\\guinchafacil\\src\\Controllers\\AdminController.php",
+      "view": "/../Views/admin/proof_of_road.php",
+      "viewCandidates": [
+        "/../Views/admin/proof_of_road.php"
+      ]
+    },
+    {
+      "route": "/admin/prospeccao",
+      "controller": "AdminFinanceAttributionController",
+      "action": "marketingCentral",
+      "profile": "admin",
+      "kind": "html",
+      "controllerFile": "C:\\xampp\\htdocs\\guinchafacil\\src\\Controllers\\AdminFinanceAttributionController.php",
+      "view": "/../Views/admin/marketing_central.php",
+      "viewCandidates": [
+        "/../Views/admin/marketing_central.php"
+      ]
+    },
+    {
+      "route": "/admin/prospeccao/buscar",
+      "controller": "AdminFinanceAttributionController",
+      "action": "prospeccaoBuscar",
+      "profile": "admin",
+      "kind": "html",
+      "controllerFile": "C:\\xampp\\htdocs\\guinchafacil\\src\\Controllers\\AdminFinanceAttributionController.php",
+      "view": null,
+      "viewCandidates": []
+    },
+    {
+      "route": "/admin/prospeccao/regioes",
+      "controller": "AdminFinanceAttributionController",
+      "action": "marketingCentral",
+      "profile": "admin",
+      "kind": "html",
+      "controllerFile": "C:\\xampp\\htdocs\\guinchafacil\\src\\Controllers\\AdminFinanceAttributionController.php",
+      "view": "/../Views/admin/marketing_central.php",
+      "viewCandidates": [
+        "/../Views/admin/marketing_central.php"
+      ]
+    },
+    {
+      "route": "/admin/prospeccao/regioes/salvar",
+      "controller": "AdminFinanceAttributionController",
+      "action": "prospeccaoRegiaoSalvar",
+      "profile": "admin",
+      "kind": "html",
+      "controllerFile": "C:\\xampp\\htdocs\\guinchafacil\\src\\Controllers\\AdminFinanceAttributionController.php",
+      "view": null,
+      "viewCandidates": []
+    },
+    {
+      "route": "/admin/prospeccao/sincronizar-zonas",
+      "controller": "AdminFinanceAttributionController",
+      "action": "prospeccaoSincronizarZonas",
+      "profile": "admin",
+      "kind": "html",
+      "controllerFile": "C:\\xampp\\htdocs\\guinchafacil\\src\\Controllers\\AdminFinanceAttributionController.php",
+      "view": null,
+      "viewCandidates": []
+    },
+    {
+      "route": "/admin/repasses/demanda",
+      "controller": "GFPayoutDecisionController",
+      "action": "form",
+      "profile": "gerente",
+      "kind": "html",
+      "controllerFile": "C:\\xampp\\htdocs\\guinchafacil\\src\\Controllers\\GFPayoutDecisionController.php",
+      "view": null,
+      "viewCandidates": []
+    },
+    {
+      "route": "/admin/repasses/demandas",
+      "controller": "GFPayoutDecisionController",
+      "action": "listing",
+      "profile": "gerente",
+      "kind": "html",
+      "controllerFile": "C:\\xampp\\htdocs\\guinchafacil\\src\\Controllers\\GFPayoutDecisionController.php",
+      "view": null,
+      "viewCandidates": []
+    },
+    {
+      "route": "/admin/repasses/recuperacao",
+      "controller": "GFPayoutRecoveryController",
+      "action": "form",
+      "profile": "admin",
+      "kind": "html",
+      "controllerFile": "C:\\xampp\\htdocs\\guinchafacil\\src\\Controllers\\GFPayoutRecoveryController.php",
+      "view": "/../Views/admin/fin3_recuperacao_repasse.php",
+      "viewCandidates": [
+        "/../Views/admin/fin3_recuperacao_repasse.php"
+      ]
+    },
+    {
+      "route": "/admin/repasses/triagem",
+      "controller": "GFPayoutReviewController",
+      "action": "form",
+      "profile": "admin",
+      "kind": "html",
+      "controllerFile": "C:\\xampp\\htdocs\\guinchafacil\\src\\Controllers\\GFPayoutReviewController.php",
+      "view": "/../Views/admin/fin3_triagem_repasse.php",
+      "viewCandidates": [
+        "/../Views/admin/fin3_triagem_repasse.php"
+      ]
+    },
+    {
+      "route": "/admin/revisoes-manuais",
+      "controller": "AdminManualReviewsController",
+      "action": "index",
+      "profile": "admin",
+      "kind": "html",
+      "controllerFile": "C:\\xampp\\htdocs\\guinchafacil\\src\\Controllers\\AdminManualReviewsController.php",
+      "view": "/../Views/admin/revisoes_manuais.php",
+      "viewCandidates": [
+        "/../Views/admin/revisoes_manuais.php"
+      ]
+    },
+    {
+      "route": "/admin/saques",
+      "controller": "AdminController",
+      "action": "saques",
+      "profile": "admin",
+      "kind": "html",
+      "controllerFile": "C:\\xampp\\htdocs\\guinchafacil\\src\\Controllers\\AdminController.php",
+      "view": "/../Views/admin/saques.php",
+      "viewCandidates": [
+        "/../Views/admin/saques.php"
+      ]
+    },
+    {
+      "route": "/admin/servico/novo",
+      "controller": "AdminController",
+      "action": "servicoForm",
+      "profile": "admin",
+      "kind": "html",
+      "controllerFile": "C:\\xampp\\htdocs\\guinchafacil\\src\\Controllers\\AdminController.php",
+      "view": "/../Views/admin/servicoform.php",
+      "viewCandidates": [
+        "/../Views/admin/servicoform.php"
+      ]
+    },
+    {
+      "route": "/admin/servicos",
+      "controller": "AdminController",
+      "action": "servicos",
+      "profile": "admin",
+      "kind": "html",
+      "controllerFile": "C:\\xampp\\htdocs\\guinchafacil\\src\\Controllers\\AdminController.php",
+      "view": null,
+      "viewCandidates": []
+    },
+    {
+      "route": "/admin/simulador",
+      "controller": "AdminController",
+      "action": "simulador",
+      "profile": "admin",
+      "kind": "html",
+      "controllerFile": "C:\\xampp\\htdocs\\guinchafacil\\src\\Controllers\\AdminController.php",
+      "view": "/../Views/admin/simulacao.php",
+      "viewCandidates": [
+        "/../Views/admin/simulacao.php"
+      ]
+    },
+    {
+      "route": "/admin/usuario/novo",
+      "controller": "AdminController",
+      "action": "usuarioForm",
+      "profile": "admin",
+      "kind": "html",
+      "controllerFile": "C:\\xampp\\htdocs\\guinchafacil\\src\\Controllers\\AdminController.php",
+      "view": "/../Views/admin/usuarioform.php",
+      "viewCandidates": [
+        "/../Views/admin/usuarioform.php"
+      ]
+    },
+    {
+      "route": "/admin/usuario/suspender",
+      "controller": "AdminController",
+      "action": "usuariosSuspenderGet",
+      "profile": "admin",
+      "kind": "html",
+      "controllerFile": "C:\\xampp\\htdocs\\guinchafacil\\src\\Controllers\\AdminController.php",
+      "view": null,
+      "viewCandidates": []
+    },
+    {
+      "route": "/admin/usuarios",
+      "controller": "AdminController",
+      "action": "usuarios",
+      "profile": "admin",
+      "kind": "html",
+      "controllerFile": "C:\\xampp\\htdocs\\guinchafacil\\src\\Controllers\\AdminController.php",
+      "view": "/../Views/admin/usuarios.php",
+      "viewCandidates": [
+        "/../Views/admin/usuarios.php"
+      ]
+    },
+    {
+      "route": "/cliente/dashboard",
+      "controller": "ClienteController",
+      "action": "dashboard",
+      "profile": "cliente",
+      "kind": "html",
+      "controllerFile": "C:\\xampp\\htdocs\\guinchafacil\\src\\Controllers\\ClienteController.php",
+      "view": "/../Views/cliente/dashboard.php",
+      "viewCandidates": [
+        "/../Views/cliente/dashboard.php"
+      ]
+    },
+    {
+      "route": "/cliente/financeiro",
+      "controller": "ClienteController",
+      "action": "financeiro",
+      "profile": "cliente",
+      "kind": "html",
+      "controllerFile": "C:\\xampp\\htdocs\\guinchafacil\\src\\Controllers\\ClienteController.php",
+      "view": "/../Views/cliente/financeiro.php",
+      "viewCandidates": [
+        "/../Views/cliente/financeiro.php"
+      ]
+    },
+    {
+      "route": "/cliente/historico",
+      "controller": "ClienteController",
+      "action": "historico",
+      "profile": "cliente",
+      "kind": "html",
+      "controllerFile": "C:\\xampp\\htdocs\\guinchafacil\\src\\Controllers\\ClienteController.php",
+      "view": "/../Views/cliente/historico.php",
+      "viewCandidates": [
+        "/../Views/cliente/historico.php"
+      ]
+    },
+    {
+      "route": "/cliente/oficina/nova",
+      "controller": "ClienteController",
+      "action": "oficinaForm",
+      "profile": "cliente",
+      "kind": "html",
+      "controllerFile": "C:\\xampp\\htdocs\\guinchafacil\\src\\Controllers\\ClienteController.php",
+      "view": "/../Views/cliente/oficinaform.php",
+      "viewCandidates": [
+        "/../Views/cliente/oficinaform.php"
+      ]
+    },
+    {
+      "route": "/cliente/oficinas",
+      "controller": "ClienteController",
+      "action": "oficinas",
+      "profile": "cliente",
+      "kind": "html",
+      "controllerFile": "C:\\xampp\\htdocs\\guinchafacil\\src\\Controllers\\ClienteController.php",
+      "view": "/../Views/cliente/oficinas.php",
+      "viewCandidates": [
+        "/../Views/cliente/oficinas.php"
+      ]
+    },
+    {
+      "route": "/cliente/oficinas-parceiras",
+      "controller": "OficinaParceriaController",
+      "action": "clienteOficinas",
+      "profile": "cliente",
+      "kind": "json-or-mixed",
+      "controllerFile": "C:\\xampp\\htdocs\\guinchafacil\\src\\Controllers\\OficinaParceriaController.php",
+      "view": null,
+      "viewCandidates": []
+    },
+    {
+      "route": "/cliente/oficinas/nova",
+      "controller": "ClienteController",
+      "action": "oficinaForm",
+      "profile": "cliente",
+      "kind": "html",
+      "controllerFile": "C:\\xampp\\htdocs\\guinchafacil\\src\\Controllers\\ClienteController.php",
+      "view": "/../Views/cliente/oficinaform.php",
+      "viewCandidates": [
+        "/../Views/cliente/oficinaform.php"
+      ]
+    },
+    {
+      "route": "/cliente/pedido/custo",
+      "controller": "ClienteController",
+      "action": "calcularCusto",
+      "profile": "cliente",
+      "kind": "json-or-mixed",
+      "controllerFile": "C:\\xampp\\htdocs\\guinchafacil\\src\\Controllers\\ClienteController.php",
+      "view": null,
+      "viewCandidates": []
+    },
+    {
+      "route": "/cliente/pedido/novo",
+      "controller": "ClienteController",
+      "action": "pedidoNovo",
+      "profile": "cliente",
+      "kind": "html",
+      "controllerFile": "C:\\xampp\\htdocs\\guinchafacil\\src\\Controllers\\ClienteController.php",
+      "view": "/../Views/cliente/pedidonovo.php",
+      "viewCandidates": [
+        "/../Views/cliente/pedidonovo.php"
+      ]
+    },
+    {
+      "route": "/cliente/pedido/rascunho",
+      "controller": "ClienteController",
+      "action": "pedidoRascunho",
+      "profile": "cliente",
+      "kind": "json-or-mixed",
+      "controllerFile": "C:\\xampp\\htdocs\\guinchafacil\\src\\Controllers\\ClienteController.php",
+      "view": null,
+      "viewCandidates": []
+    },
+    {
+      "route": "/cliente/perfil",
+      "controller": "ClienteController",
+      "action": "perfilForm",
+      "profile": "cliente",
+      "kind": "html",
+      "controllerFile": "C:\\xampp\\htdocs\\guinchafacil\\src\\Controllers\\ClienteController.php",
+      "view": "/../Views/cliente/perfil.php",
+      "viewCandidates": [
+        "/../Views/cliente/perfil.php"
+      ]
+    },
+    {
+      "route": "/cliente/triagem",
+      "controller": "ClienteController",
+      "action": "triagem",
+      "profile": "cliente",
+      "kind": "html",
+      "controllerFile": "C:\\xampp\\htdocs\\guinchafacil\\src\\Controllers\\ClienteController.php",
+      "view": "/../Views/cliente/triagem.php",
+      "viewCandidates": [
+        "/../Views/cliente/triagem.php"
+      ]
+    },
+    {
+      "route": "/cliente/triagem/resultado",
+      "controller": "ClienteController",
+      "action": "triagemResultado",
+      "profile": "cliente",
+      "kind": "html",
+      "controllerFile": "C:\\xampp\\htdocs\\guinchafacil\\src\\Controllers\\ClienteController.php",
+      "view": "/../Views/cliente/triagem_resultado.php",
+      "viewCandidates": [
+        "/../Views/cliente/triagem_resultado.php"
+      ]
+    },
+    {
+      "route": "/cliente/veiculo/novo",
+      "controller": "ClienteController",
+      "action": "veiculoForm",
+      "profile": "cliente",
+      "kind": "html",
+      "controllerFile": "C:\\xampp\\htdocs\\guinchafacil\\src\\Controllers\\ClienteController.php",
+      "view": "/../Views/cliente/veiculoform.php",
+      "viewCandidates": [
+        "/../Views/cliente/veiculoform.php"
+      ]
+    },
+    {
+      "route": "/cliente/veiculos",
+      "controller": "ClienteController",
+      "action": "veiculos",
+      "profile": "cliente",
+      "kind": "html",
+      "controllerFile": "C:\\xampp\\htdocs\\guinchafacil\\src\\Controllers\\ClienteController.php",
+      "view": "/../Views/cliente/veiculos.php",
+      "viewCandidates": [
+        "/../Views/cliente/veiculos.php"
+      ]
+    },
+    {
+      "route": "/cliente/veiculos/novo",
+      "controller": "ClienteController",
+      "action": "veiculoForm",
+      "profile": "cliente",
+      "kind": "html",
+      "controllerFile": "C:\\xampp\\htdocs\\guinchafacil\\src\\Controllers\\ClienteController.php",
+      "view": "/../Views/cliente/veiculoform.php",
+      "viewCandidates": [
+        "/../Views/cliente/veiculoform.php"
+      ]
+    },
+    {
+      "route": "/guincho/bancario",
+      "controller": "GuinchoController",
+      "action": "perfilBancarioForm",
+      "profile": "guincho",
+      "kind": "html",
+      "controllerFile": "C:\\xampp\\htdocs\\guinchafacil\\src\\Controllers\\GuinchoController.php",
+      "view": "/../Views/guincho/perfil_bancario.php",
+      "viewCandidates": [
+        "/../Views/guincho/perfil_bancario.php"
+      ]
+    },
+    {
+      "route": "/guincho/capacidades",
+      "controller": "GuinchoController",
+      "action": "capacidades",
+      "profile": "guincho",
+      "kind": "html",
+      "controllerFile": "C:\\xampp\\htdocs\\guinchafacil\\src\\Controllers\\GuinchoController.php",
+      "view": "/../Views/guincho/capacidades.php",
+      "viewCandidates": [
+        "/../Views/guincho/capacidades.php"
+      ]
+    },
+    {
+      "route": "/guincho/dashboard",
+      "controller": "GuinchoController",
+      "action": "dashboard",
+      "profile": "guincho",
+      "kind": "html",
+      "controllerFile": "C:\\xampp\\htdocs\\guinchafacil\\src\\Controllers\\GuinchoController.php",
+      "view": "/../Views/guincho/dashboard.php",
+      "viewCandidates": [
+        "/../Views/guincho/dashboard.php"
+      ]
+    },
+    {
+      "route": "/guincho/estoque",
+      "controller": "GuinchoController",
+      "action": "estoque",
+      "profile": "guincho",
+      "kind": "html",
+      "controllerFile": "C:\\xampp\\htdocs\\guinchafacil\\src\\Controllers\\GuinchoController.php",
+      "view": "/../Views/guincho/estoque.php",
+      "viewCandidates": [
+        "/../Views/guincho/estoque.php"
+      ]
+    },
+    {
+      "route": "/guincho/financeiro",
+      "controller": "GuinchoController",
+      "action": "financeiro",
+      "profile": "guincho",
+      "kind": "html",
+      "controllerFile": "C:\\xampp\\htdocs\\guinchafacil\\src\\Controllers\\GuinchoController.php",
+      "view": "/../Views/guincho/financeiro.php",
+      "viewCandidates": [
+        "/../Views/guincho/financeiro.php"
+      ]
+    },
+    {
+      "route": "/guincho/historico",
+      "controller": "GuinchoController",
+      "action": "historico",
+      "profile": "guincho",
+      "kind": "html",
+      "controllerFile": "C:\\xampp\\htdocs\\guinchafacil\\src\\Controllers\\GuinchoController.php",
+      "view": "/../Views/guincho/historico.php",
+      "viewCandidates": [
+        "/../Views/guincho/historico.php"
+      ]
+    },
+    {
+      "route": "/guincho/operacao",
+      "controller": "GuinchoController",
+      "action": "perfilOperacaoForm",
+      "profile": "guincho",
+      "kind": "html",
+      "controllerFile": "C:\\xampp\\htdocs\\guinchafacil\\src\\Controllers\\GuinchoController.php",
+      "view": "/../Views/guincho/perfil_operacao.php",
+      "viewCandidates": [
+        "/../Views/guincho/perfil_operacao.php"
+      ]
+    },
+    {
+      "route": "/guincho/pedidos",
+      "controller": "GuinchoController",
+      "action": "pedidosDisponiveis",
+      "profile": "guincho",
+      "kind": "json-or-mixed",
+      "controllerFile": "C:\\xampp\\htdocs\\guinchafacil\\src\\Controllers\\GuinchoController.php",
+      "view": null,
+      "viewCandidates": []
+    },
+    {
+      "route": "/guincho/pedidos-disponiveis",
+      "controller": "GuinchoController",
+      "action": "pedidosDisponiveis",
+      "profile": "guincho",
+      "kind": "json-or-mixed",
+      "controllerFile": "C:\\xampp\\htdocs\\guinchafacil\\src\\Controllers\\GuinchoController.php",
+      "view": null,
+      "viewCandidates": []
+    },
+    {
+      "route": "/guincho/perfil",
+      "controller": "GuinchoController",
+      "action": "perfilForm",
+      "profile": "guincho",
+      "kind": "html",
+      "controllerFile": "C:\\xampp\\htdocs\\guinchafacil\\src\\Controllers\\GuinchoController.php",
+      "view": "/../Views/guincho/perfil.php",
+      "viewCandidates": [
+        "/../Views/guincho/perfil.php"
+      ]
+    },
+    {
+      "route": "/guincho/tornar-se-guincho",
+      "controller": "GuinchoController",
+      "action": "tornarSeGuincho",
+      "profile": "guincho",
+      "kind": "html",
+      "controllerFile": "C:\\xampp\\htdocs\\guinchafacil\\src\\Controllers\\GuinchoController.php",
+      "view": "/../Views/guincho/tornarse_guincho.php",
+      "viewCandidates": [
+        "/../Views/guincho/tornarse_guincho.php"
+      ]
+    },
+    {
+      "route": "/oficina/dashboard",
+      "controller": "OficinaController",
+      "action": "dashboard",
+      "profile": "oficina",
+      "kind": "html",
+      "controllerFile": "C:\\xampp\\htdocs\\guinchafacil\\src\\Controllers\\OficinaController.php",
+      "view": "/../Views/oficina/dashboard.php",
+      "viewCandidates": [
+        "/../Views/oficina/dashboard.php"
+      ]
+    },
+    {
+      "route": "/oficina/financeiro",
+      "controller": "OficinaController",
+      "action": "financeiro",
+      "profile": "oficina",
+      "kind": "html",
+      "controllerFile": "C:\\xampp\\htdocs\\guinchafacil\\src\\Controllers\\OficinaController.php",
+      "view": "/../Views/oficina/financeiro.php",
+      "viewCandidates": [
+        "/../Views/oficina/financeiro.php"
+      ]
+    },
+    {
+      "route": "/oficina/historico",
+      "controller": "OficinaController",
+      "action": "historico",
+      "profile": "oficina",
+      "kind": "html",
+      "controllerFile": "C:\\xampp\\htdocs\\guinchafacil\\src\\Controllers\\OficinaController.php",
+      "view": "/../Views/oficina/historico.php",
+      "viewCandidates": [
+        "/../Views/oficina/historico.php"
+      ]
+    },
+    {
+      "route": "/oficina/pedidos",
+      "controller": "OficinaController",
+      "action": "pedidosPage",
+      "profile": "oficina",
+      "kind": "html",
+      "controllerFile": "C:\\xampp\\htdocs\\guinchafacil\\src\\Controllers\\OficinaController.php",
+      "view": "/../Views/oficina/pedidos.php",
+      "viewCandidates": [
+        "/../Views/oficina/pedidos.php"
+      ]
+    },
+    {
+      "route": "/oficina/pedidos-disponiveis",
+      "controller": "OficinaController",
+      "action": "pedidosDisponiveis",
+      "profile": "oficina",
+      "kind": "json-or-mixed",
+      "controllerFile": "C:\\xampp\\htdocs\\guinchafacil\\src\\Controllers\\OficinaController.php",
+      "view": null,
+      "viewCandidates": []
+    },
+    {
+      "route": "/oficina/perfil",
+      "controller": "OficinaController",
+      "action": "perfilForm",
+      "profile": "oficina",
+      "kind": "html",
+      "controllerFile": "C:\\xampp\\htdocs\\guinchafacil\\src\\Controllers\\OficinaController.php",
+      "view": "/../Views/oficina/perfil.php",
+      "viewCandidates": [
+        "/../Views/oficina/perfil.php"
+      ]
+    }
+  ]
+}

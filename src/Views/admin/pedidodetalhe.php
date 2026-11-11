@@ -5,7 +5,7 @@ $osrmBaseUrl = PorThresholds::routingFrontendBaseUrl();
 $flashMessages = $_SESSION['_flash'] ?? [];
 if (isset($flashMessages['message'])) $flashMessages = [$flashMessages];
 unset($_SESSION['_flash']);
-include __DIR__ . '/../layouts/header.php';
+ob_start();
 echo '<link rel="stylesheet" href="' . htmlspecialchars($bp, ENT_QUOTES, 'UTF-8') . '/public/assets/css/pages/gf-f18e5-modais-lovable.css?v=2">';require_once __DIR__ . '/../../Services/POR/PorThresholds.php';$statusLabels = [
     'aguardando_pagamento' => 'Aguardando Pagamento',
     'aguardando_guincho'   => 'Aguardando Guincho',
@@ -19,9 +19,7 @@ echo '<link rel="stylesheet" href="' . htmlspecialchars($bp, ENT_QUOTES, 'UTF-8'
 <link rel="stylesheet" href="<?php echo htmlspecialchars($bp); ?>/public/assets/css/pages/admin-pedidodetalhe.css">
 <link rel="stylesheet" href="<?php echo htmlspecialchars($bp, ENT_QUOTES, 'UTF-8'); ?>/public/assets/css/pages/gf-f18e6-ficha-lovable.css?v=1">
 <link rel="stylesheet" href="<?php echo htmlspecialchars($bp, ENT_QUOTES, 'UTF-8'); ?>/public/assets/css/pages/gf-f18e7-geometria-por.css?v=1"><link rel="stylesheet" href="<?php echo htmlspecialchars($bp, ENT_QUOTES, 'UTF-8'); ?>/public/assets/css/pages/gf-f18c-shell.css?v=20261017-18c1">
-<div class="bo bo-operator gf-f18c-root main-wrapper shell admin-shell gf-order-detail">
-<?php include __DIR__ . '/../layouts/sidebar_admin.php'; ?>
-<main class="main-content shell-main shell-content">    <header class="bo-header">        <div class="gf-f18c-breadcrumb"><span>Backoffice <i class="fas fa-chevron-right" aria-hidden="true"></i> <strong>Pedido #<?php echo (int)($pedido['id'] ?? 0); ?></strong></span></div>        <div class="gf-f18c-header-actions"><span><?php echo htmlspecialchars((string)($_SESSION['user']['nome'] ?? 'Administrador'), ENT_QUOTES, 'UTF-8'); ?></span><a href="<?php echo htmlspecialchars($bp, ENT_QUOTES, 'UTF-8'); ?>/logout" data-confirm-logout><i class="fas fa-right-from-bracket" aria-hidden="true"></i> Sair</a></div>    </header>
+
 
     <?php foreach ($flashMessages as $flash): ?>
     <div class="alert alert-<?php echo ($flash['type'] ?? '') === 'success' ? 'success' : 'danger'; ?> mb-3"><i class="fas fa-<?php echo ($flash['type'] ?? '') === 'success' ? 'check-circle' : 'triangle-exclamation'; ?> me-2"></i><?php echo htmlspecialchars((string)($flash['message'] ?? '')); ?></div>
@@ -750,8 +748,7 @@ echo '<link rel="stylesheet" href="' . htmlspecialchars($bp, ENT_QUOTES, 'UTF-8'
         </div>
     </div>
 
-</main>
-<?php include __DIR__ . '/../layouts/footer.php'; ?>
+
 <link rel="stylesheet" href="<?php echo htmlspecialchars($bp); ?>/public/assets/vendor/leaflet/leaflet.css">
 <link rel="stylesheet" href="<?php echo htmlspecialchars($bp); ?>/public/assets/vendor/leaflet-routing-machine/leaflet-routing-machine.css">
 <script<?php echo csp_script_nonce_attr(); ?> src="<?php echo htmlspecialchars($bp); ?>/public/assets/vendor/leaflet/leaflet.js"></script>
@@ -1205,3 +1202,5 @@ document.addEventListener('DOMContentLoaded', function() {
     fetchRealtimeData();
 });
 </script>
+
+<?php $conteudo_pagina=ob_get_clean(); $perfil='admin'; $titulo_pagina="Detalhe do pedido"; $breadcrumb=["Operação","Pedidos"]; $assets_css=['/public/assets/css/pages/bo-admin-operacao.css']; require __DIR__ . '/../layouts/backoffice_shell.php';

@@ -216,7 +216,7 @@ return;
                 <label class="pag-destino-opt">
                     <input type="radio" name="destino_pagamento" value="pago_agora" required>
                     <span>
-                        <strong><i class="fas fa-hand-holding-dollar me-1"></i>JÃ¡ pago - faturar parceiro</strong>
+                        <strong><i class="fas fa-hand-holding-dollar me-1"></i>Já pago - faturar parceiro</strong>
                         <small>Use somente quando o cliente já tiver pago. O pedido segue sem checkout.</small>
                     </span>
                 </label>
@@ -224,7 +224,7 @@ return;
                 <label class="pag-destino-opt">
                     <input type="radio" name="destino_pagamento" value="online" required>
                     <span>
-                        <strong><i class="fas fa-credit-card me-1"></i>CartÃ£o - Payment Brick (<?= $e($provedorHabilitado) ?>)</strong>
+                        <strong><i class="fas fa-credit-card me-1"></i>Cartão - Payment Brick (<?= $e($provedorHabilitado) ?>)</strong>
                         <small>Gera checkout do provedor e devolve o link para o admin enviar ao cliente.</small>
                     </span>
                 </label>

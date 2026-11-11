@@ -15,7 +15,7 @@ body.admin {
   --bo-warning: #f59e0b;
 }
 
-/* Substitui o container Bootstrap legado do cabeçalho móvel do admin. */
+/* Substitui o container Bootstrap legado do cabeÃƒÂ§alho mÃƒÂ³vel do admin. */
 body.admin .bo-global-nav__inner {
   width: 100%;
   max-width: 1600px;
@@ -26,9 +26,9 @@ body.admin .bo-global-nav__inner {
   min-height: var(--topbar-height, 64px);
 }
 
-/* Os módulos admin com shell próprio não usam a barra global legada. O
- * próprio shell fornece navegação/contexto; manter as duas barras criava a
- * faixa preta duplicada no topo das subpáginas. */
+/* Os mÃƒÂ³dulos admin com shell prÃƒÂ³prio nÃƒÂ£o usam a barra global legada. O
+ * prÃƒÂ³prio shell fornece navegaÃƒÂ§ÃƒÂ£o/contexto; manter as duas barras criava a
+ * faixa preta duplicada no topo das subpÃƒÂ¡ginas. */
 body.admin:has(.main-wrapper.admin-shell) > nav.gf-admin-topbar {
   display: none !important;
 }
@@ -42,9 +42,9 @@ body.admin:has(.main-wrapper.admin-shell) .main-wrapper.admin-shell > .main-cont
   padding: 24px;
 }
 
-/* Alias estrutural para os módulos que ainda fecham pelo layout legado.
- * O conteúdo interno permanece intacto, mas o shell passa a compartilhar os
- * mesmos contratos de sidebar/conteúdo usados pelo backoffice novo. */
+/* Alias estrutural para os mÃƒÂ³dulos que ainda fecham pelo layout legado.
+ * O conteÃƒÂºdo interno permanece intacto, mas o shell passa a compartilhar os
+ * mesmos contratos de sidebar/conteÃƒÂºdo usados pelo backoffice novo. */
 body.admin:has(.main-wrapper.admin-shell) .admin-shell-sidebar.bo-sidebar {
   grid-column: 1;
   width: 220px;
@@ -150,8 +150,8 @@ body.admin:has(.main-wrapper.admin-shell) .admin-shell > .main-content {
   min-width: 0;
 }
 
-/* Conteúdo comum de todas as telas legadas: mesmo ritmo visual dos hubs
- * Financeiro/Central/Usuários, mantendo os componentes Bootstrap existentes. */
+/* ConteÃƒÂºdo comum de todas as telas legadas: mesmo ritmo visual dos hubs
+ * Financeiro/Central/UsuÃƒÂ¡rios, mantendo os componentes Bootstrap existentes. */
 body.admin:has(.main-wrapper.admin-shell) .shell-content > .page-head,
 body.admin:has(.main-wrapper.admin-shell) .shell-content > header.page-head {
   max-width: 1440px;
@@ -256,7 +256,7 @@ body.admin:has(.main-wrapper.admin-shell) .shell-content small {
   }
 }
 
-/* O funil de criação tem design claro próprio e não deve herdar os tokens
+/* O funil de criaÃƒÂ§ÃƒÂ£o tem design claro prÃƒÂ³prio e nÃƒÂ£o deve herdar os tokens
  * escuros das telas admin legadas. */
 body.admin:has(.gf-admin-order-v3) > nav.gf-admin-topbar {
   display: none !important;
@@ -299,8 +299,8 @@ body.admin:has(.gf-admin-order-v3) .gf-admin-order-v3 legend {
   }
 }
 
-/* Configurações agora usa o shell do Central também no workspace: superfície
- * clara, cartões brancos e campos legíveis, sem perder os grupos existentes. */
+/* ConfiguraÃƒÂ§ÃƒÂµes agora usa o shell do Central tambÃƒÂ©m no workspace: superfÃƒÂ­cie
+ * clara, cartÃƒÂµes brancos e campos legÃƒÂ­veis, sem perder os grupos existentes. */
 body.admin:has(#gfAdminConfigRoot) #gfAdminConfigRoot .gf-admin-config-content {
   padding: 24px 20px 40px;
   background: #f4f6f8;
@@ -350,7 +350,7 @@ body.admin .gf-f18c-header-actions .gf-f18c-logout:hover {
 }
 
 /* Shell legado compatibilizado com o grid operacional: todos os perfis
- * autenticados mantêm a mesma geometria; somente os tokens de cor mudam. */
+ * autenticados mantÃƒÂªm a mesma geometria; somente os tokens de cor mudam. */
 body.cliente .navbar > .bo-global-nav__inner,
 body.guincho .navbar > .bo-global-nav__inner,
 body.oficina .navbar > .bo-global-nav__inner {
@@ -364,7 +364,7 @@ body.oficina .navbar > .bo-global-nav__inner {
   gap: 12px;
 }
 
-/* Contrato semântico compartilhado pelos dashboards migrados. */
+/* Contrato semÃƒÂ¢ntico compartilhado pelos dashboards migrados. */
 .gf-unified-shell { display: grid; grid-template-columns: 230px minmax(0, 1fr); }
 .gf-unified-shell .gf-unified-sidebar { width: auto; min-width: 0; }
 .gf-unified-main { min-width: 0; }
@@ -384,7 +384,7 @@ body.oficina .navbar {
 }
 
 /* Dashboards de perfil usam a mesma faixa contextual do Central. A navbar
- * pública/legada fica apenas no mobile, onde continua sendo o menu principal. */
+ * pÃƒÂºblica/legada fica apenas no mobile, onde continua sendo o menu principal. */
 @media (min-width: 992px) {
   body.cliente:not(.gf-unified-dashboard) { margin-top: -64px !important; }
   body.cliente .main-wrapper,
@@ -436,9 +436,9 @@ body.oficina .navbar {
   border-bottom: 1px solid var(--theme-border, #dfe6ec);
 }
 
-/* O conteúdo do painel é uma superfície contínua. O cabeçalho contextual
- * atravessa toda a largura útil do main, enquanto cada perfil recebe o tom
- * mais claro disponível dentro da própria paleta. */
+/* O conteÃƒÂºdo do painel ÃƒÂ© uma superfÃƒÂ­cie contÃƒÂ­nua. O cabeÃƒÂ§alho contextual
+ * atravessa toda a largura ÃƒÂºtil do main, enquanto cada perfil recebe o tom
+ * mais claro disponÃƒÂ­vel dentro da prÃƒÂ³pria paleta. */
 body.cliente .main-content,
 body.guincho .main-content,
 body.oficina .main-content { background: #ffffff; }
@@ -541,7 +541,7 @@ body.guincho .gf-profile-sidebar-footer a, body.oficina .gf-profile-sidebar-foot
   .gf-panel-actions span { display: none; }
 }
 
-/* Topbar compartilhada: mesma altura, marca e área de conta do shell admin;
+/* Topbar compartilhada: mesma altura, marca e ÃƒÂ¡rea de conta do shell admin;
  * as cores continuam sendo definidas pelo tema de cada perfil. */
 body.cliente .gf-unified-topbar .bo-global-nav__inner,
 body.guincho .gf-unified-topbar .bo-global-nav__inner,
@@ -612,8 +612,8 @@ body.oficina .gf-unified-topbar #navbarMain > ul:last-child .text-danger {
   color: #fca5a5 !important;
 }
 
-/* O cliente conserva o perfil claro definido na diretriz; a estrutura é a
- * mesma, apenas os tokens de superfície e texto mudam. */
+/* O cliente conserva o perfil claro definido na diretriz; a estrutura ÃƒÂ© a
+ * mesma, apenas os tokens de superfÃƒÂ­cie e texto mudam. */
 body.cliente .gf-unified-topbar {
   background: #fff !important;
   border-bottom-color: #dbe7df;
@@ -714,7 +714,7 @@ body.oficina .navbar #navbarMain + .navbar-nav {
   body.admin .bo-global-nav__inner { padding: 0 12px; }
 }
 
-/* Compatibilidade visual para as telas legadas que ainda usam o shell clássico. */
+/* Compatibilidade visual para as telas legadas que ainda usam o shell clÃƒÂ¡ssico. */
 body.admin .main-wrapper.admin-shell {
   min-height: 100vh;
   background: var(--bo-bg, #090d0b);
@@ -781,7 +781,7 @@ body.admin .catalogo-subpage .ops-topbar {
 
 body.admin .catalogo-subpage .page-head { margin-bottom: 18px; }
 
-/* Catálogo: tabelas claras e densas como as referências do backoffice. */
+/* CatÃƒÂ¡logo: tabelas claras e densas como as referÃƒÂªncias do backoffice. */
 body.admin :is(#tiposShell,#capShell,#produtosShell,#zonasShell,.catalogo-subpage) .table {
   --bs-table-bg: #ffffff;
   --bs-table-color: #172536;
@@ -840,7 +840,7 @@ body.admin {
   border-bottom: 1px solid var(--bo-border, #223628);
 }
 
-/* As páginas-hub seguem o mesmo alinhamento horizontal do shell operacional. */
+/* As pÃƒÂ¡ginas-hub seguem o mesmo alinhamento horizontal do shell operacional. */
 #cidadesShell,
 #planejamentoShell {
   min-height: calc(100vh - 150px);
@@ -976,7 +976,7 @@ body.admin .gf-fin2-root svg {
   flex: 0 0 auto;
 }
 
-/* Parceiro de indicação: mesma anatomia do backoffice, com paleta própria. */
+/* Parceiro de indicaÃƒÂ§ÃƒÂ£o: mesma anatomia do backoffice, com paleta prÃƒÂ³pria. */
 body.parceiro .gf-profile-sidebar { position:sticky; top:0; align-self:start; height:100vh; min-height:100vh; width:230px; min-width:0; padding:18px 8px; overflow-y:auto; background:#f0fbfa; color:#12313c; border-right:1px solid #bfe5df; scrollbar-width:none; }
 body.parceiro .gf-profile-sidebar::-webkit-scrollbar { width:0; height:0; display:none; }
 body.parceiro .gf-profile-brand { display:flex; align-items:center; gap:8px; margin:6px 12px 22px; color:#12313c; font-size:18px; font-weight:800; text-decoration:none; }
@@ -1016,3 +1016,63 @@ body.parceiro > nav.gf-unified-topbar { display:none!important; visibility:hidde
 body[data-role="parceiro"] .gf-unified-shell,
 body.parceiro .gf-unified-shell { margin-top:0!important; padding-top:0!important; }
 
+
+/* Contrato global de contraste para tabelas em workspaces claros. */
+body.admin .shell-content .table,
+body.admin .shell-ops-workspace .table,
+body.admin .gf-quality-tabs ~ .card .table {
+  --bs-table-bg:#ffffff!important;
+  --bs-table-color:#172033!important;
+  --bs-table-border-color:#d8e0e8!important;
+  color:#172033!important;
+  background:#ffffff!important;
+}
+body.admin .shell-content .table thead th,
+body.admin .shell-ops-workspace .table thead th,
+body.admin .gf-quality-tabs ~ .card .table thead th {
+  color:#243244!important;
+  background:#eef2f6!important;
+  border-color:#d8e0e8!important;
+  font-weight:800;
+}
+body.admin .shell-content .table tbody td,
+body.admin .shell-ops-workspace .table tbody td,
+body.admin .gf-quality-tabs ~ .card .table tbody td { color:#172033!important; border-color:#d8e0e8!important; }
+body.admin .shell-content .table a,
+body.admin .shell-ops-workspace .table a,
+body.admin .gf-quality-tabs ~ .card .table a { color:#0759a6!important; }
+body.admin .shell-content .table tbody tr:hover > *,
+body.admin .shell-ops-workspace .table tbody tr:hover > *,
+body.admin .gf-quality-tabs ~ .card .table tbody tr:hover > * { background:#eaf7ee!important; color:#172033!important; }
+body.admin:has(.main-wrapper.admin-shell) .gf-legacy-bo-header { display:none!important; height:0!important; min-height:0!important; overflow:hidden!important; }
+body.admin .shell-content .table .text-muted,
+body.admin .shell-ops-workspace .table .text-muted,
+body.admin .gf-quality-tabs ~ .card .table .text-muted { color:#526174!important; }
+
+/* GF-BACKOFFICE-SHELL-CONTRACT: uma página com shell próprio não recebe
+   a barra global legada de header.php. O frontend público não é afetado. */
+body:has(.main-wrapper.gf-unified-shell) .gf-legacy-bo-header,
+body:has(.main-wrapper.gf-unified-shell) > nav.navbar,
+body:has(.main-wrapper.gf-unified-shell) > nav.gf-admin-topbar,
+body:has(.main-wrapper.gf-unified-shell) > nav.gf-order-crumb,
+body:has(.shell-ops) .gf-legacy-bo-header,
+body:has(.shell-ops) > nav.navbar,
+body:has(.shell-ops) > nav.gf-admin-topbar,
+body:has(.shell-ops) > nav.gf-order-crumb {
+  display: none !important;
+  height: 0 !important;
+  min-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+}
+body:has(.main-wrapper.gf-unified-shell),
+body:has(.shell-ops) {
+  padding-top: 0 !important;
+}
+.shell-ops{box-sizing:border-box;max-width:100%;min-width:0;overflow:hidden}.shell-ops-worklist,.shell-ops-workspace,.shell-ops-sidebar{min-width:0;max-width:100%}.shell-ops-worklist-results,.shell-ops-workspace,.ops-worklist-item__content{min-width:0;overflow-wrap:anywhere}.ops-topbar__search input{max-width:100%;min-width:0}.ops-order-facts{max-width:100%;grid-template-columns:repeat(auto-fit,minmax(130px,1fr))}.ops-order-fact__value{overflow-wrap:anywhere}
+.bo,body:has(.bo),body:has(.main-wrapper.admin-shell){padding-top:0!important;margin-top:0!important}
+.main-wrapper.shell.admin-shell{background:#fff!important;color:#172033!important}.main-wrapper.shell.admin-shell .main-content,.main-wrapper.shell.admin-shell .shell-content{background:#fff!important;color:#172033!important}.main-wrapper.shell.admin-shell .card,.main-wrapper.shell.admin-shell .card-body,.main-wrapper.shell.admin-shell .table,.main-wrapper.shell.admin-shell .bo-panel{background:#fff;color:#172033}.main-wrapper.shell.admin-shell .table,.main-wrapper.shell.admin-shell .table td,.main-wrapper.shell.admin-shell .table th,.main-wrapper.shell.admin-shell label,.main-wrapper.shell.admin-shell p,.main-wrapper.shell.admin-shell h1,.main-wrapper.shell.admin-shell h2,.main-wrapper.shell.admin-shell h3{color:#172033}.main-wrapper.shell.admin-shell .table thead th{background:#f1f5f9;color:#334155}.main-wrapper.shell.admin-shell input,.main-wrapper.shell.admin-shell select,.main-wrapper.shell.admin-shell textarea{background:#fff;color:#172033;border-color:#cbd5e1}
+.gf-panel-topbar{background:#fff!important;color:#172033!important;border-bottom:1px solid #dce4e8!important}.gf-panel-topbar,.gf-panel-topbar *{color:#172033}.gf-panel-topbar a{color:#1a7f37}.gf-panel-topbar input,.gf-panel-topbar select{background:#fff;color:#172033;border-color:#cbd5e1}
+.gf-legacy-bo-header{background:#fff!important;color:#172033!important;border-bottom:1px solid #dce4e8!important}.gf-legacy-bo-header *{color:#172033!important}.gf-legacy-bo-header a{color:#1a7f37!important}
+body:has(.bo) .bo{min-width:0;max-width:100%;overflow-x:hidden}body:has(.bo) .bo-body{flex:1 1 0%;width:0;min-width:0;max-width:none;overflow-x:hidden}body:has(.bo) .bo-content{width:100%;min-width:0;max-width:100%;box-sizing:border-box;overflow-x:hidden}

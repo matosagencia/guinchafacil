@@ -33,6 +33,7 @@
  */
 
 $bp = defined('BASE_PATH') ? BASE_PATH : '';
+ob_start();
 
 $flashMessages = $_SESSION['_flash'] ?? [];
 
@@ -40,55 +41,42 @@ if (isset($flashMessages['message'])) $flashMessages = [$flashMessages];
 
 unset($_SESSION['_flash']);
 
-include __DIR__ . '/../layouts/header.php';
+
 
 ?>
 
-<link rel="stylesheet" href="<?php echo htmlspecialchars($bp); ?>/public/assets/css/pages/admin-central-operacional.css">
 
 
 
-<div class="ops-topbar" style="padding:10px 24px;border-bottom:1px solid var(--theme-border,#232c35);background:var(--theme-nav,#030405)">
 
-    <div class="ops-topbar__search"><i class="fas fa-magnifying-glass"></i><input type="search" id="despachoBusca" placeholder="Buscar na fila por cliente ou endereço" autocomplete="off" aria-label="Buscar na fila de despacho"></div>
-
-    <div class="ops-topbar__meta">
-
-        <span class="ops-topbar__status"><span class="ops-topbar__status-dot"></span><?php echo count($filas); ?> na fila</span>
-
-        <a href="<?php echo htmlspecialchars($bp); ?>/admin/central" class="ops-dashboard-link"><i class="fas fa-tower-broadcast me-1"></i>Central Operacional</a>
-
-    </div>
-
-</div>
 
 
 
 <?php foreach ($flashMessages as $flash): ?>
 
-<div class="alert alert-<?php echo ($flash['type'] ?? '') === 'success' ? 'success' : 'danger'; ?>" style="margin:16px 24px 0;"><i class="fas fa-<?php echo ($flash['type'] ?? '') === 'success' ? 'check-circle' : 'triangle-exclamation'; ?> me-2"></i><?php echo htmlspecialchars((string)($flash['message'] ?? '')); ?></div>
+<div class="alert alert-<?php echo ($flash['type'] ?? '') === 'success' ? 'success' : 'danger'; ?>"><?php echo htmlspecialchars((string)($flash['message'] ?? '')); ?></div>
 
 <?php endforeach; ?>
 
 
 
-<section class="ops-summary" aria-label="Resumo de despacho">
+<section class="bo-metrics" aria-label="Resumo de despacho">
 
-    <article class="ops-metric <?php echo count($filas) > 0 ? 'is-warning' : ''; ?>">
+    <article class="bo-metric <?php echo count($filas) > 0 ? 'is-warning' : ''; ?>">
 
-        <span class="ops-metric__label">Aguardando prestador</span>
+        <span class="bo-metric__label">Aguardando prestador</span>
 
-        <strong class="ops-metric__value"><?php echo count($filas); ?></strong>
+        <strong class="bo-metric__value"><?php echo count($filas); ?></strong>
 
     </article>
 
-    <article class="ops-metric <?php echo ($pedidoSelecionado && count($prestadores) === 0) ? 'is-danger' : ''; ?>">
+    <article class="bo-metric <?php echo ($pedidoSelecionado && count($prestadores) === 0) ? 'is-danger' : ''; ?>">
 
-        <span class="ops-metric__label">Prestadores elegíveis (pedido selecionado)</span>
+        <span class="bo-metric__label">Prestadores elegíveis (pedido selecionado)</span>
 
-        <strong class="ops-metric__value"><?php echo $pedidoSelecionado ? count($prestadores) : '—'; ?></strong>
+        <strong class="bo-metric__value"><?php echo $pedidoSelecionado ? count($prestadores) : '—'; ?></strong>
 
-        <?php if ($pedidoSelecionado && count($prestadores) === 0): ?><span class="ops-metric__trend">Sem opção — requer ação</span><?php endif; ?>
+        <?php if ($pedidoSelecionado && count($prestadores) === 0): ?><span class="bo-metric__trend">Sem opção — requer ação</span><?php endif; ?>
 
     </article>
 
@@ -97,25 +85,18 @@ include __DIR__ . '/../layouts/header.php';
 
 
 <?php /* Fase 18E: navegação por abas sobre rotas existentes */ ?>
-<link rel="stylesheet" href="<?= htmlspecialchars($bp, ENT_QUOTES, 'UTF-8') ?>/public/assets/css/pages/gf-f18e-operacao-tabs.css">
-<link rel="stylesheet" href="<?= htmlspecialchars($bp, ENT_QUOTES, 'UTF-8') ?>/public/assets/css/pages/gf-f18e2-shell-operacao.css?v=20261017-2">
-<link rel="stylesheet" href="<?= htmlspecialchars($bp, ENT_QUOTES, 'UTF-8') ?>/public/assets/css/pages/gf-f18e3-operacao-fix.css?v=20261017-3">
-<div class="gf18e-tabs-host"><?php include __DIR__ . '/../components/admin_operacao_tabs.php'; ?></div>
-<div class="shell-ops" id="despachoShell">
+
+<div class="bo-operation-grid" id="despachoShell">
 
 
 
-    <aside class="shell-ops-sidebar" id="despachoSidebar">
-
-        <?php include __DIR__ . '/../components/admin_nav_operacional.php'; ?>
-
-    </aside>
+    
 
 
 
     <section class="shell-ops-worklist" aria-label="Fila aguardando prestador">
 
-        <header class="ops-worklist-header">
+        <header class="bo-panel-heading">
 
             <span class="eyebrow">Operação</span>
 
@@ -127,13 +108,13 @@ include __DIR__ . '/../layouts/header.php';
 
 
 
-        <div class="ops-worklist-results" id="despachoFilaLista">
+        <div class="bo-orders__list" id="despachoFilaLista">
 
             <?php if (empty($filas)): ?>
 
-                <div class="ops-empty-state">
+                <div class="bo-empty">
 
-                    <i class="fas fa-circle-check"></i>
+                    
 
                     Nenhum pedido aguardando prestador no momento.
 
@@ -149,25 +130,25 @@ include __DIR__ . '/../layouts/header.php';
 
                 <a href="<?php echo htmlspecialchars($bp); ?>/admin/despacho?pedido_id=<?php echo (int)$f['id']; ?>"
 
-                   class="ops-worklist-item"
+                   class="bo-order"
 
                    aria-selected="<?php echo $ativo ? 'true' : 'false'; ?>"
 
                    data-search="<?php echo htmlspecialchars($textoBusca, ENT_QUOTES, 'UTF-8'); ?>">
 
-                    <span class="ops-worklist-item__priority" aria-hidden="true"></span>
+                    <span class="bo-order__priority" aria-hidden="true"></span>
 
-                    <span class="ops-worklist-item__content">
+                    <span class="bo-order__content">
 
-                        <span class="ops-worklist-item__top">
+                        <span class="bo-order__top">
 
                             <strong>#<?php echo (int)$f['id']; ?> — <?php echo htmlspecialchars((string)($f['cliente_nome'] ?? '')); ?></strong>
 
                         </span>
 
-                        <span class="ops-worklist-item__customer"><?php echo htmlspecialchars((string)($f['endereco_origem'] ?? '—')); ?></span>
+                        <span class="bo-order__customer"><?php echo htmlspecialchars((string)($f['endereco_origem'] ?? '—')); ?></span>
 
-                        <span class="ops-worklist-item__footer">
+                        <span class="bo-order__footer">
 
                             <span><?php echo htmlspecialchars((string)($f['criado_em'] ?? '')); ?></span>
 
@@ -189,9 +170,9 @@ include __DIR__ . '/../layouts/header.php';
 
         <?php if (!$pedidoSelecionado): ?>
 
-            <div class="ops-empty-state" style="padding:80px 20px">
+            <div class="bo-empty">
 
-                <i class="fas fa-hand-pointer"></i>
+                
 
                 Selecione um pedido na fila para ver os prestadores disponíveis.
 
@@ -199,7 +180,7 @@ include __DIR__ . '/../layouts/header.php';
 
         <?php else: ?>
 
-            <header class="ops-order-header">
+            <header class="bo-panel-heading">
 
                 <div>
 
@@ -209,9 +190,9 @@ include __DIR__ . '/../layouts/header.php';
 
                 </div>
 
-                <a href="<?php echo htmlspecialchars($bp); ?>/admin/pedido/<?php echo (int)$pedidoSelecionado['id']; ?>" class="ops-btn">
+                <a href="<?php echo htmlspecialchars($bp); ?>/admin/pedido/<?php echo (int)$pedidoSelecionado['id']; ?>" class="bo-btn">
 
-                    <i class="fas fa-eye"></i> Ver pedido completo
+                     Ver pedido completo
 
                 </a>
 
@@ -219,21 +200,21 @@ include __DIR__ . '/../layouts/header.php';
 
 
 
-            <div class="ops-order-facts">
+            <div class="bo-grid">
 
-                <div class="ops-order-fact"><span class="ops-order-fact__label">Cliente</span><span class="ops-order-fact__value"><?php echo htmlspecialchars((string)($pedidoSelecionado['cliente_nome'] ?? '—')); ?></span></div>
+                <div class="bo-panel"><span class="bo-panel__label">Cliente</span><span class="bo-panel__value"><?php echo htmlspecialchars((string)($pedidoSelecionado['cliente_nome'] ?? '—')); ?></span></div>
 
-                <div class="ops-order-fact"><span class="ops-order-fact__label">Veículo</span><span class="ops-order-fact__value"><?php echo htmlspecialchars(trim(($pedidoSelecionado['marca'] ?? '') . ' ' . ($pedidoSelecionado['modelo'] ?? '') . ' · ' . ($pedidoSelecionado['placa'] ?? ''))); ?></span></div>
+                <div class="bo-panel"><span class="bo-panel__label">Veículo</span><span class="bo-panel__value"><?php echo htmlspecialchars(trim(($pedidoSelecionado['marca'] ?? '') . ' ' . ($pedidoSelecionado['modelo'] ?? '') . ' · ' . ($pedidoSelecionado['placa'] ?? ''))); ?></span></div>
 
-                <div class="ops-order-fact"><span class="ops-order-fact__label">Origem</span><span class="ops-order-fact__value"><?php echo htmlspecialchars((string)($pedidoSelecionado['endereco_origem'] ?? '—')); ?></span></div>
+                <div class="bo-panel"><span class="bo-panel__label">Origem</span><span class="bo-panel__value"><?php echo htmlspecialchars((string)($pedidoSelecionado['endereco_origem'] ?? '—')); ?></span></div>
 
-                <div class="ops-order-fact"><span class="ops-order-fact__label">Destino</span><span class="ops-order-fact__value"><?php echo htmlspecialchars((string)($pedidoSelecionado['endereco_destino'] ?? '—')); ?></span></div>
+                <div class="bo-panel"><span class="bo-panel__label">Destino</span><span class="bo-panel__value"><?php echo htmlspecialchars((string)($pedidoSelecionado['endereco_destino'] ?? '—')); ?></span></div>
 
             </div>
 
 
 
-            <div style="padding:0 24px 32px">
+            <div>
 
                 <div class="card">
 
@@ -261,7 +242,7 @@ include __DIR__ . '/../layouts/header.php';
 
                                     </select>
 
-                                    <button type="button" id="despachoAtribuirSelecionado" class="btn btn-sm btn-primary" disabled><i class="fas fa-truck-fast me-1"></i>Atribuir selecionado</button>
+                                    <button type="button" id="despachoAtribuirSelecionado" class="btn btn-sm btn-primary" disabled>Atribuir selecionado</button>
 
                                 </div>
 
@@ -335,7 +316,7 @@ include __DIR__ . '/../layouts/header.php';
 
                                                     <button type="submit" class="btn btn-sm btn-primary">
 
-                                                        <i class="fas fa-truck-fast me-1"></i>Atribuir
+                                                        Atribuir
 
                                                     </button>
 
@@ -457,9 +438,5 @@ include __DIR__ . '/../layouts/header.php';
 
 ?>
 
-<script<?php echo csp_script_nonce_attr(); ?> src="<?php echo htmlspecialchars($bp); ?>/public/assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
 
-</body>
-
-</html>
-
+<?php $conteudo_pagina=ob_get_clean(); $perfil='admin'; $titulo_pagina='Despacho'; $breadcrumb=['Operação','Despacho']; $assets_css=['/public/assets/css/pages/bo-admin-operacao.css']; require __DIR__ . '/../layouts/backoffice_shell.php';

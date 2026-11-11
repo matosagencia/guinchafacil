@@ -1,11 +1,9 @@
 <?php
 $bp = defined('BASE_PATH') ? BASE_PATH : '';
-include __DIR__ . '/../layouts/header.php';
+ob_start();
 $editando = !empty($servico);
 ?>
-<div class="main-wrapper shell admin-shell">
-<?php include __DIR__ . '/../layouts/sidebar_admin.php'; ?>
-<main class="main-content shell-main shell-content"><?php include __DIR__ . '/partials/_panel_topbar_admin.php'; ?>
+
 
     <header class="page-head mb-4">
         <div>
@@ -96,6 +94,6 @@ $editando = !empty($servico);
         </div>
     </div>
 
-</main>
-</div>
-<?php include __DIR__ . '/../layouts/footer.php'; ?>
+
+
+<?php $conteudo_pagina=ob_get_clean(); $perfil='admin'; $titulo_pagina="Novo serviço"; $breadcrumb=["Catálogo e preços","Novo serviço"]; $assets_css=["/public/assets/css/pages/bo-admin-catalogo.css"]; require __DIR__ . '/../layouts/backoffice_shell.php';

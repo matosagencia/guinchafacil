@@ -20,7 +20,7 @@ $zonaPorBairro = static function (string $bairro) use ($zonasTerritoriais, $norm
     }
     return null;
 };
-include __DIR__ . '/../layouts/header.php';
+ob_start();
 ?>
 <main class="main-content"><div class="container-fluid py-4">
 <div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4">
@@ -42,4 +42,6 @@ include __DIR__ . '/../layouts/header.php';
 <section class="card shadow-sm mt-4"><div class="card-body"><h2 class="h6 mb-3"><i class="fas fa-palette me-2"></i>Legenda das zonas</h2><div class="d-flex flex-wrap gap-3 small"><?php foreach ($zonasTerritoriais as $idx => $zona): ?><span><i class="fas fa-circle me-1" style="color:<?= $esc($zonaCores[$idx % count($zonaCores)]) ?>"></i><?= $esc($zona['name']) ?> <span class="text-muted">(<?= $esc($zona['status_expansao'] ?? 'sem status') ?>)</span></span><?php endforeach; ?><?php if (empty($zonasTerritoriais)): ?><span class="text-muted">Nenhuma zona ativa carregada.</span><?php endif; ?></div></div></section>
 
 <section class="card border-warning shadow-sm mt-4"><div class="card-body"><h2 class="h5"><i class="fas fa-shield-halved me-2 text-warning"></i>Regra de decisão</h2><div class="row g-3 small"><div class="col-md-4"><strong>Pedra Viva</strong><br>demanda do produto + oferta mínima atingida.</div><div class="col-md-4"><strong>Pedra Morta</strong><br>há oportunidade externa, mas ainda falta validação operacional ou oferta.</div><div class="col-md-4"><strong>Próximo passo</strong><br>recrutar parceiros e medir pré-cotações antes de ampliar mídia.</div></div><hr><p class="small mb-0"><strong>Limitação:</strong> o arquivo RENAEST de Niterói não trouxe coordenadas válidas. A página não desenha pontos de sinistros e não afirma que uma via pertence a uma zona sem validação do polígono.</p></div></section>
-</div></main><?php include __DIR__ . '/../layouts/footer.php'; ?>
+</div>
+
+<?php $conteudo_pagina=ob_get_clean(); $perfil='admin'; $titulo_pagina="Demanda territorial"; $breadcrumb=["Território","Demanda territorial"]; $assets_css=["/public/assets/css/pages/bo-admin-operacao.css"]; require __DIR__ . '/../layouts/backoffice_shell.php';

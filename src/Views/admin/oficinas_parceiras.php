@@ -1,9 +1,10 @@
 <?php
 $bp = defined('BASE_PATH') ? BASE_PATH : '';
-include __DIR__ . '/../layouts/header.php';
+ob_start();
+
 $csrf = AuthService::gerarCsrfToken();
 ?>
-<div class="container py-4">
+<div class="bo-page">
     <div class="d-flex justify-content-between align-items-center mb-3"><div><h1 class="h3 mb-1">Oficinas parceiras</h1><p class="text-muted mb-0">Cadastro, aprovação e regras comerciais da monetização.</p></div><a class="btn btn-outline-primary" href="<?= htmlspecialchars($bp) ?>/admin/financeiro">Abrir extrato financeiro</a></div>
     <?php if ((string)Configuracao::get('monetizacao_oficinas_ativo', '0') !== '1'): ?><div class="alert alert-warning">A feature flag <code>monetizacao_oficinas_ativo</code> está desativada.</div><?php endif; ?>
     <div class="card mb-4"><div class="card-body"><h2 class="h5">Cadastrar oficina</h2><form method="post" action="<?= htmlspecialchars($bp) ?>/admin/oficina/cadastrar" class="row g-2"><input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf) ?>"><div class="col-md-3"><input class="form-control" name="legal_name" placeholder="Razão social" required></div><div class="col-md-3"><input class="form-control" name="trade_name" placeholder="Nome fantasia"></div><div class="col-md-2"><input class="form-control" name="document_number" placeholder="CNPJ"></div><div class="col-md-2"><input class="form-control" name="pix_key" placeholder="Chave Pix"></div><div class="col-md-1"><input class="form-control" name="fee_amount" value="30" type="number" min="0" step="0.01" title="Taxa"></div><div class="col-md-1"><button class="btn btn-primary w-100">Criar</button></div></form></div></div>
@@ -16,4 +17,4 @@ $csrf = AuthService::gerarCsrfToken();
     <h2 class="h5">Fila de revisão</h2><div class="table-responsive"><table class="table table-sm"><thead><tr><th>ID</th><th>Pedido</th><th>Oficina</th><th>Status</th><th>Revisão</th></tr></thead><tbody>
     <?php foreach (($indicacoes ?? []) as $i): ?><tr><td><?= (int)$i['id'] ?></td><td>#<?= (int)$i['pedido_id'] ?></td><td><?= htmlspecialchars((string)($i['trade_name'] ?: $i['legal_name'])) ?></td><td><?= htmlspecialchars((string)$i['status']) ?></td><td><form method="post" action="<?= htmlspecialchars($bp) ?>/admin/oficina/indicacao/revisar" class="d-flex gap-1"><input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf) ?>"><input type="hidden" name="id" value="<?= (int)$i['id'] ?>"><input class="form-control form-control-sm" name="nota" placeholder="Motivo/nota"><button name="veredito" value="APROVAR" class="btn btn-sm btn-success">Aprovar e cobrar</button><button name="veredito" value="REJEITAR" class="btn btn-sm btn-outline-danger">Rejeitar</button></form></td></tr><?php endforeach; ?></tbody></table></div>
 </div>
-<?php include __DIR__ . '/../layouts/footer.php'; ?>
+<?php $conteudo_pagina=ob_get_clean(); $perfil='admin'; $titulo_pagina='Oficinas parceiras'; $breadcrumb=['Pessoas e parceiros','Oficinas parceiras']; $assets_css=['/public/assets/css/pages/bo-admin-catalogo.css']; require __DIR__ . '/../layouts/backoffice_shell.php';

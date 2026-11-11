@@ -67,6 +67,9 @@ $debugModeAtivo = DebugMode::jsFlag();
     <link href="<?php echo htmlspecialchars($bp); ?>/public/assets/css/shell.css?v=20260802-2" rel="stylesheet">
        <!-- Onda 5.1: Manrope + gf-layout.css -->    <link rel="preconnect" href="https://fonts.googleapis.com">    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">    <link rel="stylesheet" href="<?php echo htmlspecialchars($bp ?? (defined('BASE_PATH') ? BASE_PATH : '')); ?>/public/assets/css/gf-layout.css">
     <link rel="stylesheet" href="<?php echo htmlspecialchars($bp ?? (defined('BASE_PATH') ? BASE_PATH : '')); ?>/public/assets/css/components/gf-footer-payments.css?v=20261101-2">
+    <?php if (in_array($temaClass, ['admin', 'guincho', 'oficina', 'cliente'], true)): ?>
+    <link rel="stylesheet" href="<?php echo htmlspecialchars($bp); ?>/public/assets/css/backoffice-themes.css?v=20261110-1">
+    <?php endif; ?>
     <?php if ($temaArquivo): ?>
     <link href="<?php echo htmlspecialchars($bp); ?>/public/assets/css/themes/<?php echo htmlspecialchars($temaArquivo); ?>.css" rel="stylesheet">
     <?php endif; ?>
@@ -509,7 +512,7 @@ $adminShellRoutes = [
 if (!in_array($adminPathForLegacyHeader, $adminShellRoutes, true)
     && !str_starts_with($adminPathForLegacyHeader, '/admin/pagamento/checkout/')):
 ?>
-<header class="bo-header gf-legacy-bo-header" role="banner">
+<header class="bo-header gf-panel-topbar gf-legacy-bo-header" role="banner">
     <div class="bo-header-start">
         <span class="bo-breadcrumb gf-order-crumb">Backoffice <span aria-hidden="true">›</span> <strong>GuinchaFácil</strong></span>
     </div>

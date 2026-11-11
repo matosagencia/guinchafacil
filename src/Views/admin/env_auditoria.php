@@ -1,19 +1,17 @@
 <?php
 $bp = defined('BASE_PATH') ? BASE_PATH : '';
-include __DIR__ . '/../layouts/header.php';
+ob_start();
 ?>
-<div class="main-wrapper shell admin-shell">
-<?php include __DIR__ . '/../layouts/sidebar_admin.php'; ?>
-<main class="main-content shell-main shell-content"><?php include __DIR__ . '/partials/_panel_topbar_admin.php'; ?>
+
 
     <?php
     $totalRegistros = count($registros ?? []);
     $totalRemovidos = count(array_filter($registros ?? [], static fn($r) => ($r['acao'] ?? '') === 'removido'));
     ?>
-    <div class="ops-topbar">
-        <div class="ops-topbar__search"><i class="fas fa-magnifying-glass"></i><input type="search" id="envAuditoriaBusca" placeholder="Buscar por chave ou admin" autocomplete="off" aria-label="Buscar auditoria do ambiente"></div>
-        <div class="ops-topbar__meta">
-            <span class="ops-topbar__status"><span class="ops-topbar__status-dot"></span><?php echo $totalRegistros; ?> alterações</span>
+    <div class="bo-toolbar">
+        <div class="bo-search"><i class="fas fa-magnifying-glass"></i><input type="search" id="envAuditoriaBusca" placeholder="Buscar por chave ou admin" autocomplete="off" aria-label="Buscar auditoria do ambiente"></div>
+        <div class="bo-toolbar-meta">
+            <span class="bo-toolbar-status"><span class="bo-toolbar-status-dot"></span><?php echo $totalRegistros; ?> alterações</span>
             <a href="<?php echo htmlspecialchars($bp); ?>/admin/configuracoes#ambiente" class="ops-dashboard-link"><i class="fas fa-shield-halved me-1"></i>Editar .env</a>
         </div>
     </div>
@@ -91,5 +89,6 @@ include __DIR__ . '/../layouts/header.php';
         });
     })();
     </script>
-</main>
-<?php include __DIR__ . '/../layouts/footer.php'; ?>
+
+
+<?php $conteudo_pagina=ob_get_clean(); $perfil='admin'; $titulo_pagina="Auditoria do ambiente"; $breadcrumb=["Sistema","Auditoria do ambiente"]; $assets_css=["/public/assets/css/pages/bo-admin-operacao.css"]; require __DIR__ . '/../layouts/backoffice_shell.php';

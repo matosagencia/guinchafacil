@@ -1,6 +1,7 @@
 <?php
 $bp = defined('BASE_PATH') ? BASE_PATH : '';
-include __DIR__ . '/../layouts/header.php';
+ob_start();
+
 
 $faturas   = $faturas   ?? [];
 $resumo    = $resumo    ?? [];
@@ -17,15 +18,11 @@ $statusLabels = [
     'cancelada' => ['label' => 'Cancelada', 'badge' => 'secondary'],
 ];
 ?>
-<link rel="stylesheet" href="<?= $bp ?>/public/assets/css/pages/tow-financeiro.css">
-<div class="main-wrapper shell admin-shell">
-<?php include __DIR__ . '/../layouts/sidebar_admin.php'; ?>
-<main class="main-content shell-main shell-content">
-<?php include __DIR__ . '/partials/_panel_topbar_admin.php'; ?>
-    <header class="page-head mb-4">
+<div class="bo-page">
+<header class="page-head mb-4">
         <div>
             <span class="eyebrow">Financeiro</span>
-            <h1><i class="fas fa-file-invoice-dollar me-2"></i>Faturas dos parceiros</h1>
+            <h1>Faturas dos parceiros</h1>
             <p>Ciclos semanais, repasses, PIX e bloqueios por vencimento.</p>
         </div>
     </header>
@@ -82,7 +79,7 @@ $statusLabels = [
                 <tr>
                     <td>#<?= (int)($f['id'] ?? 0) ?></td>
                     <td>
-                        <strong><?= htmlspecialchars((string)($f['parceiro_nome'] ?? 'â€”')) ?></strong>
+                        <strong><?= htmlspecialchars((string)($f['parceiro_nome'] ?? '—')) ?></strong>
                         <div class="small text-muted"><?= htmlspecialchars((string)($f['parceiro_tipo'] ?? '')) ?> #<?= (int)($f['parceiro_id'] ?? 0) ?></div>
                     </td>
                     <td>
@@ -102,11 +99,10 @@ $statusLabels = [
         </div>
         <?php else: ?>
         <div class="text-center py-5 text-muted">
-            <i class="fas fa-file-invoice fa-2x mb-2 d-block"></i>
+            
             Nenhuma fatura encontrada para os filtros selecionados.
         </div>
         <?php endif; ?>
     </section>
-</main>
 </div>
-<?php include __DIR__ . '/../layouts/footer.php';
+<?php $conteudo_pagina=ob_get_clean(); $perfil='admin'; $titulo_pagina='Faturas'; $breadcrumb=['Financeiro','Faturas']; $assets_css=['/public/assets/css/pages/bo-admin-financeiro.css']; require __DIR__ . '/../layouts/backoffice_shell.php';

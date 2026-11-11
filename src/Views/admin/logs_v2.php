@@ -1,6 +1,6 @@
 <?php
 $bp = defined('BASE_PATH') ? BASE_PATH : '';
-include __DIR__ . '/../layouts/header.php';
+ob_start();
 
 $buildQuery = static function (array $params): string {
     return http_build_query(array_filter($params, static fn ($value): bool => $value !== '' && $value !== null));
@@ -11,17 +11,15 @@ $formatMs = static function (?int $value): string {
 };
 ?>
 <link rel="stylesheet" href="<?php echo htmlspecialchars($bp); ?>/public/assets/css/pages/admin-logs.css">
-<div class="main-wrapper shell admin-shell">
-<?php include __DIR__ . '/../layouts/sidebar_admin.php'; ?>
-<main class="main-content shell-main shell-content"><?php include __DIR__ . '/partials/_panel_topbar_admin.php'; ?>
 
-    <div class="ops-topbar">
-        <form method="get" action="<?php echo htmlspecialchars($bp . '/admin/logs'); ?>" class="ops-topbar__search">
+
+    <div class="bo-toolbar">
+        <form method="get" action="<?php echo htmlspecialchars($bp . '/admin/logs'); ?>" class="bo-search">
             <i class="fas fa-magnifying-glass"></i>
             <input type="text" name="texto" value="<?php echo htmlspecialchars((string)($filtros['texto'] ?? '')); ?>" placeholder="Buscar por texto na mensagem de log" autocomplete="off" aria-label="Buscar logs">
         </form>
-        <div class="ops-topbar__meta">
-            <span class="ops-topbar__status"><span class="ops-topbar__status-dot"></span><?php echo (int)$appTotal; ?> eventos</span>
+        <div class="bo-toolbar-meta">
+            <span class="bo-toolbar-status"><span class="bo-toolbar-status-dot"></span><?php echo (int)$appTotal; ?> eventos</span>
             <?php if ((int)$stats['errors'] > 0): ?><span style="color:var(--danger,#dc3545);font-weight:700;"><i class="fas fa-triangle-exclamation me-1"></i><?php echo (int)$stats['errors']; ?> erros</span><?php endif; ?>
         </div>
     </div>
@@ -300,3 +298,5 @@ $formatMs = static function (?int $value): string {
 
 </main>
 <?php include __DIR__ . '/../layouts/footer.php'; ?>
+
+<?php $conteudo_pagina=ob_get_clean(); $perfil='admin'; $titulo_pagina="Logs"; $breadcrumb=["Sistema","Logs"]; $assets_css=["/public/assets/css/pages/bo-admin-operacao.css"]; require __DIR__ . '/../layouts/backoffice_shell.php';

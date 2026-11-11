@@ -1,0 +1,179 @@
+/*
+ * GuinchaFácil Backoffice Themes
+ * Fonte visual: arquivos HTML homologados em /lovable.
+ * Este arquivo define somente tokens por perfil; estrutura fica no shell.
+ */
+:root {
+  --gf-bo-font: 'Manrope', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --gf-bo-radius: 8px;
+}
+
+/* Admin: monitoramento/financeiro Lovable — índigo sobre marfim. */
+body.admin,
+body[data-role="admin"],
+body[data-theme="executive"],
+.bo[data-gf-profile="admin"] {
+  --gf-bo-bg: #fcfbf8;
+  --gf-bo-surface: #ffffff;
+  --gf-bo-surface-soft: #f3f2ee;
+  --gf-bo-border: #dcdad5;
+  --gf-bo-text: #1b1b1b;
+  --gf-bo-muted: #6d6a63;
+  --gf-bo-primary: #1b1b1b;
+  --gf-bo-primary-hover: #000000;
+  --gf-bo-primary-soft: #f0f0ee;
+  --gf-bo-sidebar: #1b1b1b;
+  --gf-bo-sidebar-text: #dcdad5;
+  --gf-bo-success: #25a64a;
+  --gf-bo-danger: #d7403a;
+  --gf-bo-warning: #e0bc00;
+}
+
+/* Guincho: operação Lovable — verde vivo de disponibilidade. */
+body.guincho,
+body[data-role="guincho"],
+body[data-theme="driver"],
+.bo[data-gf-profile="guincho"] {
+  --gf-bo-bg: #f7fbf8;
+  --gf-bo-surface: #ffffff;
+  --gf-bo-surface-soft: #eaf6ed;
+  --gf-bo-border: #cfe3d3;
+  --gf-bo-text: #142018;
+  --gf-bo-muted: #5a6b5f;
+  --gf-bo-primary: #25a64a;
+  --gf-bo-primary-hover: #1c853a;
+  --gf-bo-primary-soft: #e3f4e7;
+  --gf-bo-sidebar: #0f2415;
+  --gf-bo-sidebar-text: #d8f2de;
+  --gf-bo-success: #25a64a;
+  --gf-bo-danger: #d7403a;
+  --gf-bo-warning: #e0bc00;
+}
+
+/* Cliente: acolhimento e acompanhamento — verde marca com azul de contexto. */
+body.cliente,
+body[data-role="cliente"],
+body[data-theme="client"],
+.bo[data-gf-profile="cliente"] {
+  --gf-bo-bg: #fcfbf8;
+  --gf-bo-surface: #ffffff;
+  --gf-bo-surface-soft: #eef7f0;
+  --gf-bo-border: #d7e5da;
+  --gf-bo-text: #1b1b1b;
+  --gf-bo-muted: #65716a;
+  --gf-bo-primary: #25a64a;
+  --gf-bo-primary-hover: #1c853a;
+  --gf-bo-primary-soft: #e8f6eb;
+  --gf-bo-sidebar: #ffffff;
+  --gf-bo-sidebar-text: #405048;
+  --gf-bo-success: #25a64a;
+  --gf-bo-info: #4c7be1;
+  --gf-bo-danger: #d7403a;
+  --gf-bo-warning: #e0bc00;
+}
+
+/* Oficina: rede/parceiro — laranja mecânico com vermelho de alerta. */
+body.oficina,
+body[data-role="oficina"],
+body[data-theme="workshop"],
+.bo[data-gf-profile="oficina"] {
+  --gf-bo-bg: #fffaf5;
+  --gf-bo-surface: #ffffff;
+  --gf-bo-surface-soft: #fff0e4;
+  --gf-bo-border: #f1d4bd;
+  --gf-bo-text: #261812;
+  --gf-bo-muted: #7e6254;
+  --gf-bo-primary: #fe7b02;
+  --gf-bo-primary-hover: #d85f00;
+  --gf-bo-primary-soft: #fff0df;
+  --gf-bo-sidebar: #1b1b1b;
+  --gf-bo-sidebar-text: #f7e4d6;
+  --gf-bo-success: #25a64a;
+  --gf-bo-danger: #fe3f21;
+  --gf-bo-warning: #e0bc00;
+}
+
+/* Adaptação dos tokens antigos para que componentes legados consumam o tema. */
+body.admin, body.guincho, body.cliente, body.oficina {
+  --theme-bg: var(--gf-bo-bg);
+  --theme-surface: var(--gf-bo-surface);
+  --theme-surface-2: var(--gf-bo-surface-soft);
+  --theme-border: var(--gf-bo-border);
+  --theme-text: var(--gf-bo-text);
+  --theme-muted: var(--gf-bo-muted);
+  --theme-accent: var(--gf-bo-primary);
+  --theme-accent-hover: var(--gf-bo-primary-hover);
+  --theme-on-accent: #ffffff;
+  --theme-nav: var(--gf-bo-sidebar);
+  --theme-sidebar: var(--gf-bo-sidebar);
+  --primary: var(--gf-bo-primary);
+  --primary-hover: var(--gf-bo-primary-hover);
+  font-family: var(--gf-bo-font);
+}
+
+.bo[data-gf-profile] {
+  --theme-bg: var(--gf-bo-bg);
+  --theme-surface: var(--gf-bo-surface);
+  --theme-surface-2: var(--gf-bo-surface-soft);
+  --theme-border: var(--gf-bo-border);
+  --theme-text: var(--gf-bo-text);
+  --theme-muted: var(--gf-bo-muted);
+  --theme-accent: var(--gf-bo-primary);
+  --theme-accent-hover: var(--gf-bo-primary-hover);
+  --theme-nav: var(--gf-bo-sidebar);
+  --theme-sidebar: var(--gf-bo-sidebar);
+  font-family: var(--gf-bo-font);
+}
+
+body.admin .bo,
+body.guincho .bo,
+body.cliente .bo,
+body.oficina .bo {
+  background: var(--gf-bo-bg);
+  color: var(--gf-bo-text);
+}
+
+body.gf-backoffice-profile-admin,
+body.gf-backoffice-profile-guincho,
+body.gf-backoffice-profile-oficina,
+body.gf-backoffice-profile-cliente { margin: 0; padding: 0; min-width: 0; }
+
+.bo[data-gf-profile] .bo-content,
+.bo[data-gf-profile] .bo-content * { box-sizing: border-box; }
+.bo[data-gf-profile="admin"] .bo-content .cap-content-shell,
+.bo[data-gf-profile="admin"] .bo-content .cap-content-shell * { color: var(--gf-bo-text); }
+
+.bo-sidebar {
+  background: var(--gf-bo-sidebar);
+  color: var(--gf-bo-sidebar-text);
+}
+
+.bo-header,
+.bo-content,
+.bo-footer,
+.bo-orders,
+.bo-incident,
+.bo-ledger,
+.bo-ranking,
+.bo-statement {
+  background: var(--gf-bo-surface);
+  color: var(--gf-bo-text);
+  border-color: var(--gf-bo-border);
+}
+
+.bo-nav.active,
+.bo-status,
+.bo-inline-status,
+.bo-toast { background: var(--gf-bo-primary); color: var(--theme-on-accent); }
+.bo-nav.active { border-color: var(--gf-bo-primary); }
+.bo a { color: var(--gf-bo-primary); }
+.bo th { background: var(--gf-bo-surface-soft); color: var(--gf-bo-muted); }
+.bo td { border-color: var(--gf-bo-border); color: var(--gf-bo-text); }
+
+@media (max-width: 700px) {
+  .bo-sidebar { width: 100%; height: auto; position: relative; }
+  .bo-content { padding: 18px; }
+}
+
+/* Conteudo operacional dentro do shell canonico. */
+.bo-content .cap-content-shell{display:grid;grid-template-columns:minmax(340px,420px) minmax(0,1fr);gap:0;min-width:0;width:100%;background:var(--gf-bo-surface);border:1px solid var(--gf-bo-border);border-radius:var(--gf-bo-radius);overflow:hidden}.bo-content .cap-content-shell>.shell-ops-worklist{min-width:0;background:var(--gf-bo-surface)}.bo-content .cap-content-shell>.shell-ops-workspace{min-width:0;background:var(--gf-bo-bg);color:var(--gf-bo-text)}@media(max-width:760px){.bo-content .cap-content-shell{display:block}.bo-content .cap-content-shell>.shell-ops-workspace{min-height:420px}}

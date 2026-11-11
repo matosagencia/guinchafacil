@@ -1,12 +1,11 @@
 <?php
 $bp = defined('BASE_PATH') ? BASE_PATH : '';
+ob_start();
 $csrfToken = $csrfToken ?? AuthService::gerarCsrfToken();
-include __DIR__ . '/../layouts/header.php';
+
 ?>
-<style>
-  .mobile-admin{padding:28px;max-width:1500px;margin:auto}.mobile-hero{padding:28px;border-radius:20px;background:linear-gradient(135deg,#111827,#164e63);color:#fff;margin-bottom:22px}.mobile-hero h1{margin:0 0 8px;font-size:clamp(1.6rem,3vw,2.4rem)}.mobile-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(330px,1fr));gap:18px}.mobile-card{border:1px solid #dbe3ea;border-radius:18px;background:#fff;padding:20px;box-shadow:0 8px 24px rgba(15,23,42,.07)}.mobile-card__head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.mobile-card h2{font-size:1.1rem;margin:0}.mobile-muted{color:#64748b;font-size:.9rem}.mobile-badge{border-radius:999px;padding:5px 10px;font-size:.75rem;font-weight:700;background:#e2e8f0;color:#334155}.mobile-badge.ok{background:#dcfce7;color:#166534}.mobile-badge.pending{background:#fef3c7;color:#92400e}.mobile-rule{margin-top:18px;padding-top:16px;border-top:1px solid #e2e8f0}.mobile-rule h3{font-size:.98rem;margin:0 0 12px}.mobile-rule form{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.mobile-rule label{font-size:.78rem;color:#475569}.mobile-rule input{width:100%;border:1px solid #cbd5e1;border-radius:9px;padding:9px;margin-top:4px}.mobile-rule button{grid-column:1/-1;border:0;border-radius:10px;padding:10px;background:#0f766e;color:#fff;font-weight:700}.mobile-actions{display:flex;gap:8px;margin-top:16px}.mobile-actions form{display:inline}.mobile-actions button{border:1px solid #cbd5e1;background:#fff;border-radius:9px;padding:8px 12px}.mobile-actions .approve{background:#166534;color:#fff;border-color:#166534}
-</style>
-<main class="mobile-admin">
+
+<div class="bo-page">
   <section class="mobile-hero">
     <div class="mobile-muted" style="color:#a7f3d0">REDE DE ATENDIMENTO</div>
     <h1>Prestadores móveis</h1>
@@ -46,5 +45,6 @@ include __DIR__ . '/../layouts/header.php';
     <?php endforeach; ?>
   </div>
   <?php if (empty($prestadoresMoveis)): ?><div class="mobile-card" style="margin-top:18px;text-align:center">Nenhum prestador móvel ou oficina cadastrada.</div><?php endif; ?>
-</main>
-<?php include __DIR__ . '/../layouts/footer.php'; ?>
+</div>
+
+<?php $conteudo_pagina=ob_get_clean(); $perfil='admin'; $titulo_pagina='Prestadores móveis'; $breadcrumb=['Pessoas e parceiros','Prestadores móveis']; $assets_css=['/public/assets/css/pages/bo-admin-cadastros.css']; require __DIR__ . '/../layouts/backoffice_shell.php';

@@ -1,43 +1,18 @@
 <?php
-
 /**
-
- * Usuários — reestruturada pro padrão shell-ops (mesma arquitetura de
-
- * /admin/central, /admin/pedidos, /admin/guinchos...). A lista paginada
-
- * server-side vira a worklist clicável; o detalhe de cada usuário é
-
- * buscado via fetch() ao endpoint /admin/usuario-fragmento/{id}, que
-
- * devolve {ok, html} com o mesmo partial usado antes em usuariodetalhe.php.
-
- *
-
+ * Usuários — lista administrativa renderizada no shell V3.
  * @var array $usuarios
-
  * @var int $total
-
  * @var array $resumoUsuarios
-
  * @var string $csrfToken
-
  */
-
 $bp = defined('BASE_PATH') ? BASE_PATH : '';
-
-include __DIR__ . '/../layouts/header.php';
-
-$buscaAtual  = $_GET['busca'] ?? '';
-
-$tipoAtual   = $_GET['tipo']  ?? '';
-
-$ativoAtual  = $_GET['ativo'] ?? '';
-
+ob_start();
+$buscaAtual = $_GET['busca'] ?? '';
+$tipoAtual = $_GET['tipo'] ?? '';
+$ativoAtual = $_GET['ativo'] ?? '';
 $suspensosAtivo = $ativoAtual === '0';
-
 $paginaAtual = max(1, (int)($_GET['pagina'] ?? 1));
-
 $totalPaginas = (int)ceil(($total ?? 0) / 20);
 if (!function_exists('gfF18f19Count')) {
     function gfF18f19Count(int $n): string {
@@ -55,8 +30,8 @@ if (!function_exists('gfF18f19Count')) {
 ?>
 
 
-<link rel="stylesheet" href="<?= htmlspecialchars($bp, ENT_QUOTES, 'UTF-8') ?>/public/assets/css/pages/gf-f18f19-shell-unificado.css?v=20261018-2">
-<script>document.body.classList.add("gf-f18f19");</script>
+<link rel="stylesheet" href="<?= htmlspecialchars($bp, ENT_QUOTES, 'UTF-8') ?>/public/assets/css/pages/gf-f18f19-shell-unificado.css?v=20261110-usuarios">
+<script<?php echo csp_script_nonce_attr(); ?>>document.body.classList.add("gf-f18f19");</script>
 <link rel="stylesheet" href="<?php echo htmlspecialchars($bp); ?>/public/assets/css/pages/admin-central-operacional.css">
 <!-- GF-F18F15-REPAIRED -->
 <link rel="stylesheet" href="<?php echo htmlspecialchars($bp, ENT_QUOTES, 'UTF-8'); ?>/public/assets/css/pages/gf-f18f14b-acabamento.css?v=20261018-f15">
@@ -69,7 +44,7 @@ if (!function_exists('gfF18f19Count')) {
 <!-- /GF-F18F14-ASSET -->
 <!-- /GF-F18F12-ASSET -->
 <!-- GF-F18F12-SCOPE -->
-<script>document.body.classList.add("gf-f18f12");</script>
+
 <!-- /GF-F18F12-SCOPE -->
 
 
@@ -106,23 +81,11 @@ if (!function_exists('gfF18f19Count')) {
 
 
 <link rel="stylesheet" href="<?php echo htmlspecialchars($bp, ENT_QUOTES, 'UTF-8'); ?>/public/assets/css/pages/gf-f18f18-sidebar-cadastros.css?v=20261018-1">
-<script>document.body.classList.add("gf-f18f18");</script>
+
 <!-- GF-F18F1-NAV -->
 <!-- /GF-F18F1-NAV -->
 <div class="shell-ops" id="usuariosShell">
-
-
-
-    <aside class="shell-ops-sidebar gf-f18f18-sidebar" id="usuariosSidebar">
-
-        <div class="gf-f18f18-brand"><strong>Guincha<span>Fácil.</span></strong><small>Central GuinchaFácil</small></div>
-        <?php include __DIR__ . '/../components/admin_nav_operacional.php'; ?>
-
-    </aside>
-
-
-
-    <section class="shell-ops-worklist" aria-label="Usuários">
+<section class="shell-ops-worklist" aria-label="Usuários">
 
         
 <?php $gfF18f1Tab = $tipoAtual === 'oficina' ? 'oficinas' : ($tipoAtual === 'guincho' ? 'guinchos' : 'clientes'); include __DIR__ . '/../components/gf_f18f1_pessoas_tabs.php'; ?>
@@ -143,11 +106,11 @@ if (!function_exists('gfF18f19Count')) {
 
             <a href="<?php echo htmlspecialchars($bp); ?>/admin/usuarios" class="btn btn-sm <?php echo ($tipoAtual === '' && !$suspensosAtivo) ? 'btn-primary' : 'btn-outline-secondary'; ?>">Todos</a>
 
-            <a href="<?php echo htmlspecialchars($bp); ?>/admin/usuarios?tipo=cliente" class="btn btn-sm <?php echo $tipoAtual === 'cliente' ? 'btn-primary' : 'btn-outline-secondary'; ?>">Clientes <span class="gf-f18f19-count" title="<?php echo (int)($resumoUsuarios['clientes'] ?? 0); ?>">(<?php echo htmlspecialchars(gfF18f19Count((int)($resumoUsuarios['clientes'] ?? 0))); ?>)</span></a>
+            <a href="<?php echo htmlspecialchars($bp); ?>/admin/usuarios?tipo=cliente" class="btn btn-sm <?php echo $tipoAtual === 'cliente' ? 'btn-primary' : 'btn-outline-secondary'; ?>">Clientes <span class="gf-f18f19-count" title="<?php echo (int)($resumoUsuários['clientes'] ?? 0); ?>">(<?php echo htmlspecialchars(gfF18f19Count((int)($resumoUsuários['clientes'] ?? 0))); ?>)</span></a>
 
-            <a href="<?php echo htmlspecialchars($bp); ?>/admin/usuarios?tipo=guincho" class="btn btn-sm <?php echo $tipoAtual === 'guincho' ? 'btn-primary' : 'btn-outline-secondary'; ?>">Guinchos <span class="gf-f18f19-count" title="<?php echo (int)($resumoUsuarios['guinchos'] ?? 0); ?>">(<?php echo htmlspecialchars(gfF18f19Count((int)($resumoUsuarios['guinchos'] ?? 0))); ?>)</span></a>
-            <a href="<?php echo htmlspecialchars($bp); ?>/admin/usuarios?tipo=oficina" class="btn btn-sm <?php echo $tipoAtual === 'oficina' ? 'btn-primary' : 'btn-outline-secondary'; ?>">Oficinas <span class="gf-f18f19-count" title="<?php echo (int)($resumoUsuarios['oficinas'] ?? 0); ?>">(<?php echo htmlspecialchars(gfF18f19Count((int)($resumoUsuarios['oficinas'] ?? 0))); ?>)</span></a>
-            <a href="<?php echo htmlspecialchars($bp); ?>/admin/usuarios?tipo=parceiro" class="btn btn-sm <?php echo $tipoAtual === 'parceiro' ? 'btn-primary' : 'btn-outline-secondary'; ?>">Parceiros de indicação <span class="gf-f18f19-count" title="<?php echo (int)($resumoUsuarios['parceiros'] ?? 0); ?>">(<?php echo htmlspecialchars(gfF18f19Count((int)($resumoUsuarios['parceiros'] ?? 0))); ?>)</span></a>
+            <a href="<?php echo htmlspecialchars($bp); ?>/admin/usuarios?tipo=guincho" class="btn btn-sm <?php echo $tipoAtual === 'guincho' ? 'btn-primary' : 'btn-outline-secondary'; ?>">Guinchos <span class="gf-f18f19-count" title="<?php echo (int)($resumoUsuários['guinchos'] ?? 0); ?>">(<?php echo htmlspecialchars(gfF18f19Count((int)($resumoUsuários['guinchos'] ?? 0))); ?>)</span></a>
+            <a href="<?php echo htmlspecialchars($bp); ?>/admin/usuarios?tipo=oficina" class="btn btn-sm <?php echo $tipoAtual === 'oficina' ? 'btn-primary' : 'btn-outline-secondary'; ?>">Oficinas <span class="gf-f18f19-count" title="<?php echo (int)($resumoUsuários['oficinas'] ?? 0); ?>">(<?php echo htmlspecialchars(gfF18f19Count((int)($resumoUsuários['oficinas'] ?? 0))); ?>)</span></a>
+            <a href="<?php echo htmlspecialchars($bp); ?>/admin/usuarios?tipo=parceiro" class="btn btn-sm <?php echo $tipoAtual === 'parceiro' ? 'btn-primary' : 'btn-outline-secondary'; ?>">Parceiros de indicação <span class="gf-f18f19-count" title="<?php echo (int)($resumoUsuários['parceiros'] ?? 0); ?>">(<?php echo htmlspecialchars(gfF18f19Count((int)($resumoUsuários['parceiros'] ?? 0))); ?>)</span></a>
             <a href="<?php echo htmlspecialchars($bp); ?>/admin/usuarios?tipo=admin" class="btn btn-sm <?php echo $tipoAtual === 'admin' ? 'btn-primary' : 'btn-outline-secondary'; ?>">Administradores</a>
 
             <a href="<?php echo htmlspecialchars($bp); ?>/admin/usuarios?ativo=0" class="btn btn-sm <?php echo $suspensosAtivo ? 'btn-primary' : 'btn-outline-secondary'; ?>">Suspensos</a>
@@ -174,7 +137,7 @@ if (!function_exists('gfF18f19Count')) {
 
                     <i class="fas fa-users-slash"></i>
 
-                    Nenhum usuário encontrado.
+                    Nenhum usuÒ�¡rio encontrado.
 
                 </div>
 
@@ -216,7 +179,7 @@ if (!function_exists('gfF18f19Count')) {
 
                             <span>#<?php echo (int)$u['id']; ?></span>
 
-                            <span><?php echo htmlspecialchars($u['telefone'] ?? '—'); ?></span>
+                            <span><?php echo htmlspecialchars($u['telefone'] ?? '�â�a¬â��'); ?></span>
 
                         </span>
 
@@ -244,7 +207,7 @@ if (!function_exists('gfF18f19Count')) {
 
         <nav style="padding:10px 16px;">
 
-            <ul class="pagination pagination-sm justify-content-center mb-0">
+            <ul class="pagination-sm justify-content-center mb-0">
 
                 <?php for ($i = 1; $i <= $totalPaginas; $i++): ?>
 
@@ -252,7 +215,7 @@ if (!function_exists('gfF18f19Count')) {
 
                     <a class="page-link"
 
-                       href="<?php echo $bp; ?>/admin/usuarios?pagina=<?php echo $i; ?>&tipo=<?php echo urlencode($tipoAtual); ?>&busca=<?php echo urlencode($buscaAtual); ?><?php echo $suspensosAtivo ? '&ativo=0' : ''; ?>">
+                       href="<?php echo $bp; ?>/admin/usuarios?página=<?php echo $i; ?>&tipo=<?php echo urlencode($tipoAtual); ?>&busca=<?php echo urlencode($buscaAtual); ?><?php echo $suspensosAtivo ? '&ativo=0' : ''; ?>">
 
                         <?php echo $i; ?>
 
@@ -281,7 +244,7 @@ if (!function_exists('gfF18f19Count')) {
 
             <i class="fas fa-inbox"></i>
 
-            Nenhum usuário pra exibir.
+            Nenhum usuÒ�¡rio pra exibir.
 
         </div>
 
@@ -291,7 +254,7 @@ if (!function_exists('gfF18f19Count')) {
 
             <i class="fas fa-circle-notch fa-spin"></i>
 
-            Carregando…
+            Carregando�â�a¬¦
 
         </div>
 
@@ -343,7 +306,7 @@ if (!function_exists('gfF18f19Count')) {
 
     function renderSkeleton() {
 
-        workspace.innerHTML = '<div class="ops-empty-state" style="padding:60px 20px"><i class="fas fa-circle-notch fa-spin"></i>Carregando…</div>';
+        workspace.innerHTML = '<div class="ops-empty-state" style="padding:60px 20px"><i class="fas fa-circle-notch fa-spin"></i>Carregando�â�a¬¦</div>';
 
     }
 
@@ -361,7 +324,7 @@ if (!function_exists('gfF18f19Count')) {
 
         var back = workspace.querySelector('[data-action="us-clear-selection"]');
 
-        if (back) back.addEventListener('click', function () { selectUsuario(null); });
+        if (back) back.addEventListener('click', function () { selectUsuário(null); });
 
     }
 
@@ -403,7 +366,7 @@ if (!function_exists('gfF18f19Count')) {
 
 
 
-    function selectUsuario(usuarioId) {
+    function selectUsuário(usuarioId) {
 
         buttons.forEach(function (btn) {
 
@@ -413,7 +376,7 @@ if (!function_exists('gfF18f19Count')) {
 
         if (!usuarioId) {
 
-            workspace.innerHTML = '<div class="ops-empty-state" style="padding:80px 20px"><i class="fas fa-hand-pointer"></i>Selecione um usuário na lista ao lado.</div>';
+            workspace.innerHTML = '<div class="ops-empty-state" style="padding:80px 20px"><i class="fas fa-hand-pointer"></i>Selecione um usuÒ�¡rio na lista ao lado.</div>';
 
         } else {
 
@@ -437,7 +400,7 @@ if (!function_exists('gfF18f19Count')) {
 
         if (!item) return;
 
-        selectUsuario(Number(item.dataset.usuarioId));
+        selectUsuário(Number(item.dataset.usuarioId));
 
     });
 
@@ -465,21 +428,21 @@ if (!function_exists('gfF18f19Count')) {
 
 
 
-    // Reabre no mesmo usuário vindo do link antigo /admin/usuario/{id}
+    // Reabre no mesmo usuÒ�¡rio vindo do link antigo /admin/usuario/{id}
 
-    // (agora um redirect ?usuario_id=X), do retorno_usuario_id pós-ação,
+    // (agora um redirect ?usuario_id=X), do retorno_usuario_id pÒ�³s-aÒ�§Ò�£o,
 
     // ou seleciona o primeiro da lista.
 
-    var paramUsuario = Number(new URLSearchParams(window.location.search).get('usuario_id'));
+    var paramUsuário = Number(new URLSearchParams(window.location.search).get('usuario_id'));
 
-    if (paramUsuario && buttons.some(function (b) { return Number(b.dataset.usuarioId) === paramUsuario; })) {
+    if (paramUsuário && buttons.some(function (b) { return Number(b.dataset.usuarioId) === paramUsuário; })) {
 
-        selectUsuario(paramUsuario);
+        selectUsuário(paramUsuário);
 
     } else if (buttons.length > 0) {
 
-        selectUsuario(Number(buttons[0].dataset.usuarioId));
+        selectUsuário(Number(buttons[0].dataset.usuarioId));
 
     }
 
@@ -489,17 +452,8 @@ if (!function_exists('gfF18f19Count')) {
 
 
 
-<?php
 
-// Não usa layouts/footer.php: esta página usa .shell-ops (grid próprio),
 
-// igual à Central Operacional, Pedidos, Despacho, Alertas, Guinchos...
 
-?>
 
-<script<?php echo csp_script_nonce_attr(); ?> src="<?php echo htmlspecialchars($bp); ?>/public/assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
-
-</body>
-
-</html>
-
+<?php $conteudo_página=ob_get_clean(); $perfil='admin'; $titulo_página='Usuários'; $breadcrumb=['Pessoas e parceiros','Usuários']; $assets_css=['/public/assets/css/pages/bo-admin-cadastros.css']; require __DIR__ . '/../layouts/backoffice_shell.php';

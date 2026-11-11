@@ -10,15 +10,15 @@ body.admin.gf-f18f19 .admin-shell-sidebar .gf-f18f18-brand strong {display:block
 body.admin.gf-f18f19 .admin-shell-sidebar .gf-f18f18-brand small {display:block!important;font-size:11px!important;margin-top:9px!important;white-space:normal!important}
 body.admin.gf-f18f19 .admin-shell-sidebar .ops-nav-link__label {min-width:0!important;overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important}
 /* As listas usam shell-ops, nao a estrutura main-wrapper. */
-body.admin.gf-f18f19 .shell-ops {display:grid!important;grid-template-columns:var(--sidebar-width) minmax(260px,340px) minmax(0,1fr)!important;gap:0!important;width:100%!important;max-width:none!important;margin:0!important;padding:0!important;border-radius:0!important;align-items:stretch!important;min-height:100vh!important}
-body.admin.gf-f18f19 .shell-ops > .gf-f18f18-sidebar {margin:0!important;left:0!important;top:0!important;transform:none!important;box-sizing:border-box!important;width:var(--sidebar-width)!important;min-width:0!important;max-width:var(--sidebar-width)!important;position:relative!important;border-radius:0!important;padding:12px 8px!important;background:#101519!important;overflow-x:hidden!important}
+body.admin.gf-f18f19 .shell-ops {display:grid!important;grid-template-columns:var(--sidebar-width) minmax(360px,420px) minmax(0,1fr)!important;gap:0!important;width:100%!important;max-width:none!important;margin:0!important;padding:0!important;border-radius:0!important;align-items:stretch!important;min-height:100vh!important}
+body.admin.gf-f18f19 .shell-ops > .gf-f18f18-sidebar { grid-row:1 / span 2!important;margin:0!important;left:0!important;top:0!important;transform:none!important;box-sizing:border-box!important;width:var(--sidebar-width)!important;min-width:0!important;max-width:var(--sidebar-width)!important;position:relative!important;border-radius:0!important;padding:12px 8px!important;background:#101519!important;overflow-x:hidden!important}
 body.admin.gf-f18f19 .shell-ops > .gf-f18f18-sidebar .gf-f18f18-brand{padding:10px 8px 22px!important}
 body.admin.gf-f18f19 .shell-ops > .gf-f18f18-sidebar .gf-f18f18-brand strong {font-size:22px!important;white-space:nowrap!important}
 body.admin.gf-f18f19 .shell-ops > .shell-ops-worklist,body.admin.gf-f18f19 .shell-ops > .shell-ops-workspace{margin:0!important;min-width:0!important}
 body.admin.gf-f18f19 .gf-f18f19-count{display:inline-flex;max-width:5.5em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;vertical-align:middle;align-items:center;font-variant-numeric:tabular-nums}
 body.admin.gf-f18f19.is-sidebar-collapsed {--sidebar-width:68px}
 body.admin.gf-f18f19.is-sidebar-collapsed .admin-shell-sidebar .gf-f18f18-brand strong,body.admin.gf-f18f19.is-sidebar-collapsed .admin-shell-sidebar .gf-f18f18-brand small {display:none!important}
-@media(max-width:950px){body.admin.gf-f18f19 .shell-ops{grid-template-columns:var(--sidebar-width) minmax(220px,310px) minmax(0,1fr)!important}body.admin.gf-f18f19 .main-wrapper.admin-shell > .main-content{padding:14px!important}}
+@media(max-width:950px){body.admin.gf-f18f19 .shell-ops{grid-template-columns:var(--sidebar-width) minmax(320px,380px) minmax(0,1fr)!important}body.admin.gf-f18f19 .main-wrapper.admin-shell > .main-content{padding:14px!important}}
 @media(max-width:680px){body.admin.gf-f18f19 .shell-ops{display:block!important}body.admin.gf-f18f19 .shell-ops > .gf-f18f18-sidebar,body.admin.gf-f18f19 .main-wrapper.admin-shell > .admin-shell-sidebar{width:100%!important;max-width:none!important;min-height:0!important;flex-basis:auto!important}body.admin.gf-f18f19 .main-wrapper.admin-shell{display:block!important}}
 
 
@@ -56,3 +56,38 @@ body.admin.gf-f18f19 .shell-ops > .shell-ops-workspace {overflow-x:auto!importan
     width: 0 !important; height: 0 !important; display: none !important;
   }
 }
+
+/* Topo de Pessoas alinhado ao backoffice de referÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Âªncia. */
+body.admin.gf-f18f19 .gf-legacy-bo-header, body.admin.gf-f18f19 > nav.gf-admin-topbar, body.admin.gf-f18f19 > nav.gf-order-crumb { display:none!important; height:0!important; min-height:0!important; overflow:hidden!important; }
+body.admin.gf-f18f19 .usuarios-central-topbar { grid-column:2 / -1; grid-row:1; display:flex; align-items:center; justify-content:space-between; gap:16px; min-height:64px; height:64px; padding:0 24px; border-bottom:1px solid #232c35; background:#030405; color:#e8edf2; box-sizing:border-box; }
+body.admin.gf-f18f19 .usuarios-central-topbar .gf-f18c-breadcrumb { color:#a9b4bd; font-size:.82rem; }
+body.admin.gf-f18f19 .usuarios-central-topbar .gf-f18c-breadcrumb strong { color:#f5f7f9; }
+body.admin.gf-f18f19 .usuarios-central-topbar .gf-f18c-header-actions { display:flex; align-items:center; gap:16px; white-space:nowrap; }
+body.admin.gf-f18f19 .usuarios-central-topbar a { color:#dce5ea; text-decoration:none; }
+@media (max-width:680px) { body.admin.gf-f18f19 .usuarios-central-topbar { grid-column:1; min-height:56px; height:auto; padding:12px 14px; } body.admin.gf-f18f19 .usuarios-central-topbar .gf-f18c-user { display:none; } }
+/* ReferÃƒÂªncia Lovable: marca clara no sidebar escuro e worklist sem compressÃƒÂ£o. */
+body.admin.gf-f18f19 .gf-f18f18-sidebar .gf-f18f18-brand strong,
+body.admin.gf-f18f19 .gf-f18f18-sidebar .gf-f18f18-brand strong:first-child { color:#f8fafc!important; opacity:1!important; text-shadow:none!important; }
+body.admin.gf-f18f19 .gf-f18f18-sidebar .gf-f18f18-brand strong span { color:#2fb34a!important; }
+body.admin.gf-f18f19 .shell-ops > .shell-ops-worklist { min-width:360px!important; }
+@media(max-width:950px){ body.admin.gf-f18f19 .shell-ops > .shell-ops-worklist { min-width:320px!important; } }
+@media(max-width:680px){ body.admin.gf-f18f19 .shell-ops > .shell-ops-worklist { min-width:0!important; } }
+/* CorreÃ§Ã£o final do workspace de Pessoas: a referÃªncia usa sidebar + lista + detalhe legÃ­vel. */
+@media (min-width:681px) {
+  body.admin.gf-f18f19 #usuariosShell { grid-template-columns:220px minmax(360px,420px) minmax(700px,1fr)!important; width:100vw!important; max-width:none!important; overflow:visible!important; }
+  body.admin.gf-f18f19 #usuariosShell > .shell-ops-worklist { width:auto!important; min-width:360px!important; max-width:none!important; overflow-x:hidden!important; }
+  body.admin.gf-f18f19 #usuariosShell > .shell-ops-workspace { width:auto!important; min-width:700px!important; max-width:none!important; padding:24px!important; overflow-x:hidden!important; background:#f3f5f7!important; box-sizing:border-box!important; }
+  body.admin.gf-f18f19 #usuariosShell > .shell-ops-workspace .row { --bs-gutter-x:1.5rem; --bs-gutter-y:1.5rem; width:100%!important; margin-left:calc(-.5 * var(--bs-gutter-x)); margin-right:calc(-.5 * var(--bs-gutter-x)); }
+}
+body.admin.gf-f18f19 #usuariosShell .gf-f18f18-brand strong { font-size:0!important; color:#f8fafc!important; }
+body.admin.gf-f18f19 #usuariosShell .gf-f18f18-brand strong::before { content:"GuinchaFÃ¡cil."; font-size:22px; color:#f8fafc; letter-spacing:-.55px; }
+body.admin.gf-f18f19 #usuariosShell .gf-f18f18-brand small { color:#aab6bf!important; }
+/* GF-F18F116: guinchos usa o mesmo workspace legivel da Central. */
+@media (min-width:681px) {
+  body.admin.gf-f18f19 #guinchosShell { grid-template-columns:220px minmax(360px,420px) minmax(700px,1fr)!important; width:100vw!important; max-width:none!important; overflow:visible!important; }
+  body.admin.gf-f18f19 #guinchosShell > .shell-ops-worklist { min-width:360px!important; overflow-x:hidden!important; }
+  body.admin.gf-f18f19 #guinchosShell > .shell-ops-workspace { min-width:700px!important; padding:24px!important; overflow-x:hidden!important; background:#f3f5f7!important; box-sizing:border-box!important; }
+}
+body.admin.gf-f18f19 #guinchosShell .gf-f18f18-brand strong { font-size:22px!important; color:#f8fafc!important; }
+body.admin.gf-f18f19 #guinchosShell .gf-f18f18-brand strong span { color:#2fb34a!important; }
+body.admin.gf-f18f19 #guinchosShell .gf-f18f18-brand small { color:#aab6bf!important; }

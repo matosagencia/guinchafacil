@@ -1,6 +1,6 @@
 <?php
 $bp = defined('BASE_PATH') ? BASE_PATH : '';
-include __DIR__ . '/../layouts/header.php';
+ob_start();
 ?>
 <link rel="stylesheet" href="<?php echo htmlspecialchars($bp); ?>/public/assets/css/pages/admin-health.css">
 <?php
@@ -15,9 +15,7 @@ foreach (($artifacts ?? []) as $artifactRow) {
     $artifactsByStep[$stepKey][] = $artifactRow;
 }
 ?>
-<div class="main-wrapper shell admin-shell">
-<?php include __DIR__ . '/../layouts/sidebar_admin.php'; ?>
-<main class="main-content shell-main shell-content"><?php include __DIR__ . '/partials/_panel_topbar_admin.php'; ?>
+
 
     <header class="page-head mb-4">
         <div>
@@ -196,3 +194,5 @@ setInterval(function () {
 
 </main>
 <?php include __DIR__ . '/../layouts/footer.php'; ?>
+
+<?php $conteudo_pagina=ob_get_clean(); $perfil='admin'; $titulo_pagina="Resultado da simulação"; $breadcrumb=["Operação","Simulador"]; $assets_css=['/public/assets/css/pages/bo-admin-operacao.css']; require __DIR__ . '/../layouts/backoffice_shell.php';

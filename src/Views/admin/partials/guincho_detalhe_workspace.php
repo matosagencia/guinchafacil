@@ -120,7 +120,7 @@ $bp = defined('BASE_PATH') ? BASE_PATH : '';
 
         <div class="card mb-4">
 
-            <div class="card-header"><i class="fas fa-truck me-2"></i>Dados do Ve�culo</div>
+            <div class="card-header"><i class="fas fa-truck me-2"></i>Dados do Veículo</div>
 
             <div class="card-body">
 
@@ -130,7 +130,7 @@ $bp = defined('BASE_PATH') ? BASE_PATH : '';
 
                     <tr><td class="ghd-label">Emplacamento</td><td><?php echo htmlspecialchars(trim(($guincho['cidade_placa'] ?? '') . (!empty($guincho['uf_placa']) ? ' / ' . $guincho['uf_placa'] : '')) ?: '-'); ?></td></tr>
 
-                    <tr><td class="ghd-label">CNH N�</td><td><?php echo htmlspecialchars($guincho['cnh_numero'] ?? '-'); ?></td></tr>
+                    <tr><td class="ghd-label">CNH Nº</td><td><?php echo htmlspecialchars($guincho['cnh_numero'] ?? '-'); ?></td></tr>
 
                     <tr><td class="ghd-label">Validade CNH</td><td><?php echo isset($guincho['cnh_validade']) ? date('d/m/Y', strtotime($guincho['cnh_validade'])) : '-'; ?></td></tr>
 
@@ -140,7 +140,7 @@ $bp = defined('BASE_PATH') ? BASE_PATH : '';
 
                     <tr><td class="ghd-label">Local Operacional</td><td><?php echo isset($guincho['lat_operacao'], $guincho['lng_operacao']) ? htmlspecialchars(number_format((float)$guincho['lat_operacao'], 6, ',', '.') . ' / ' . number_format((float)$guincho['lng_operacao'], 6, ',', '.')) : '-'; ?></td></tr>
 
-                    <tr><td class="ghd-label">Reputa��o</td><td><?php echo number_format($guincho['reputacao'] ?? 0, 1); ?>/5 (<?php echo (int)($guincho['total_avaliacoes'] ?? 0); ?> avals)</td></tr>
+                    <tr><td class="ghd-label">Reputação</td><td><?php echo number_format($guincho['reputacao'] ?? 0, 1); ?>/5 (<?php echo (int)($guincho['total_avaliacoes'] ?? 0); ?> avals)</td></tr>
 
                 </table>
 
@@ -288,9 +288,9 @@ $bp = defined('BASE_PATH') ? BASE_PATH : '';
 
                 <p class="small text-muted mb-3">
 
-                    <i class="fas fa-circle-info me-1"></i>Serviços marcados como <span class="badge text-bg-warning">Pendente</span> s�o aprovados na
+                    <i class="fas fa-circle-info me-1"></i>Serviços marcados como <span class="badge text-bg-warning">Pendente</span> são aprovados na
 
-                    <a href="<?php echo htmlspecialchars($bp); ?>/admin/catalogo-servicos/capacidades">fila de capacidades</a>. O reboque � aprovado ao aprovar o prestador na fila de pendentes.
+                    <a href="<?php echo htmlspecialchars($bp); ?>/admin/catalogo-servicos/capacidades">fila de capacidades</a>. O reboque é aprovado ao aprovar o prestador na fila de pendentes.
 
                 </p>
 

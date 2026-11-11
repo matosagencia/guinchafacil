@@ -1,6 +1,6 @@
 <?php
 $bp = defined('BASE_PATH') ? BASE_PATH : '';
-include __DIR__ . '/../layouts/header.php';
+ob_start();
 $corLabels = ['tow' => 'Verde', 'battery' => 'Amarelo', 'tire' => 'Azul', 'fuel' => 'Laranja', 'schedule' => 'Verde'];
 $tipoLabels = [
     'eletrica' => 'Problema elétrico',
@@ -11,9 +11,7 @@ $tipoLabels = [
     'outro' => 'Outro',
 ];
 ?>
-<div class="main-wrapper shell admin-shell">
-<?php include __DIR__ . '/../layouts/sidebar_admin.php'; ?>
-<main class="main-content shell-main shell-content"><?php include __DIR__ . '/partials/_panel_topbar_admin.php'; ?>
+
 
     <header class="page-head mb-4">
         <div>
@@ -93,6 +91,6 @@ $tipoLabels = [
         </div>
     </div>
 
-</main>
-</div>
-<?php include __DIR__ . '/../layouts/footer.php'; ?>
+
+
+<?php $conteudo_pagina=ob_get_clean(); $perfil='admin'; $titulo_pagina="Catálogo de serviços"; $breadcrumb=["Catálogo e preços","Serviços"]; $assets_css=["/public/assets/css/pages/bo-admin-catalogo.css"]; require __DIR__ . '/../layouts/backoffice_shell.php';

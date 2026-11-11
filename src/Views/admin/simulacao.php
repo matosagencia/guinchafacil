@@ -1,21 +1,19 @@
 <?php
 $bp = defined('BASE_PATH') ? BASE_PATH : '';
-include __DIR__ . '/../layouts/header.php';
+ob_start();
 $simEnabled = defined('SIMULATION_ENABLED') ? SIMULATION_ENABLED : (env('SIMULATION_ENABLED', 'false') === 'true');
 $playwrightEnabled = $playwrightEnabled ?? false;
 ?>
-<div class="main-wrapper shell admin-shell">
-<?php include __DIR__ . '/../layouts/sidebar_admin.php'; ?>
-<main class="main-content shell-main shell-content"><?php include __DIR__ . '/partials/_panel_topbar_admin.php'; ?>
+
 
     <?php
     $totalRuns = count($runsRecentes ?? []);
     $runsFalhados = count(array_filter($runsRecentes ?? [], static fn($r) => ($r['status'] ?? '') === 'failed'));
     $runsRodando = count(array_filter($runsRecentes ?? [], static fn($r) => in_array(($r['status'] ?? ''), ['running', 'queued'], true)));
     ?>
-    <div class="ops-topbar">
-        <div class="ops-topbar__search"><i class="fas fa-magnifying-glass"></i><input type="search" id="simulacaoBusca" placeholder="Buscar por run_id, suite ou pedido" autocomplete="off" aria-label="Buscar execuções"></div>
-        <div class="ops-topbar__meta"><span class="ops-topbar__status"><span class="ops-topbar__status-dot <?php echo $simEnabled ? '' : 'is-warning'; ?>"></span><?php echo $simEnabled ? 'Simulador habilitado' : 'Simulador desabilitado'; ?></span></div>
+    <div class="bo-toolbar">
+        <div class="bo-search"><i class="fas fa-magnifying-glass"></i><input type="search" id="simulacaoBusca" placeholder="Buscar por run_id, suite ou pedido" autocomplete="off" aria-label="Buscar execuções"></div>
+        <div class="bo-toolbar-meta"><span class="bo-toolbar-status"><span class="bo-toolbar-status-dot <?php echo $simEnabled ? '' : 'is-warning'; ?>"></span><?php echo $simEnabled ? 'Simulador habilitado' : 'Simulador desabilitado'; ?></span></div>
     </div>
 
     <header class="page-head mb-3">
@@ -239,3 +237,5 @@ $playwrightEnabled = $playwrightEnabled ?? false;
     </script>
 </main>
 <?php include __DIR__ . '/../layouts/footer.php'; ?>
+
+<?php $conteudo_pagina=ob_get_clean(); $perfil='admin'; $titulo_pagina="Simulador"; $breadcrumb=["Operação","Simulador"]; $assets_css=['/public/assets/css/pages/bo-admin-operacao.css']; require __DIR__ . '/../layouts/backoffice_shell.php';

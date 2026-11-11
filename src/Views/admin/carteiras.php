@@ -4,27 +4,27 @@
 
  * Carteiras - reestruturada pro padrão shell-ops (mesma arquitetura de
 
- * /admin/central e /admin/catalogo-servicos/capacidades, pedido expl�cito
+ * /admin/central e /admin/catalogo-servicos/capacidades, pedido explícito
 
  * do usuário). Fundiu esta lista com a antiga /admin/carteira/{id}
 
- * (extrato individual): agora � uma p�gina s�, lista + workspace, e o
+ * (extrato individual): agora é uma página só, lista + workspace, e o
 
- * detalhe de cada guincheiro � buscado via fetch() ao endpoint JSON
+ * detalhe de cada guincheiro · buscado via fetch() ao endpoint JSON
 
  * /admin/carteira-json/{id} - evita reintroduzir N+1 (CarteiraService
 
- * já documenta explicitamente esse cuidado) buscando s� o detalhe do
+ * já documenta explicitamente esse cuidado) buscando só o detalhe do
 
  * guincheiro selecionado, não de todos de uma vez.
 
  *
 
- * Painel de VISIBILIDADE sobre o repasse Pix já autom�tico - não � saldo
+ * Painel de VISIBILIDADE sobre o repasse Pix já automático - não · saldo
 
  * retido nem saque manual (ver CarteiraService). Toda falha de query
 
- * aparece como alerta expl�cito, nunca como "R$ 0,00" silencioso.
+ * aparece como alerta explícito, nunca como "R$ 0,00" silencioso.
 
  *
 
@@ -35,8 +35,8 @@
  */
 
 $bp = defined('BASE_PATH') ? BASE_PATH : '';
+ob_start();
 
-include __DIR__ . '/../layouts/header.php';
 
 
 
@@ -58,41 +58,16 @@ foreach ($resumo['linhas'] ?? [] as $l) {
 ?>
 
 <link rel="stylesheet" href="<?php echo htmlspecialchars($bp); ?>/public/assets/css/pages/admin-central-operacional.css">
-<!-- GF-FIN2-R4-SHELL -->
 <link rel="stylesheet" href="<?php echo htmlspecialchars($bp, ENT_QUOTES, 'UTF-8'); ?>/public/assets/css/pages/gf-fin2-r4-shell-unificado.css?v=20261019-r4">
 <link rel="stylesheet" href="<?= htmlspecialchars($bp, ENT_QUOTES, 'UTF-8') ?>/public/assets/css/pages/gf-fin2-r5-layout.css?v=20261019-r5">
 
 
 
-<div class="ops-topbar" style="padding:10px 24px;border-bottom:1px solid var(--theme-border,#232c35);background:var(--theme-nav,#030405)">
-
-    <div class="ops-topbar__search">
-
-        <i class="fas fa-magnifying-glass"></i>
-
-        <input type="search" id="cartWorklistSearchTop" placeholder="Buscar por nome ou placa" autocomplete="off">
-
-    </div>
-
-    <div class="ops-topbar__meta">
-
-        <a href="<?php echo htmlspecialchars($bp); ?>/admin/saques" class="ops-dashboard-link" style="color:var(--brand);text-decoration:none;">
-
-            <i class="fas fa-money-bill-transfer me-1"></i>Ver repasses pendentes
-
-        </a>
-
-    </div>
-
-</div>
-
-
-
 <?php if (!$resumo['ok']): ?>
 
-<div class="alert alert-danger" style="margin:16px 24px 0;">
+<div class="alert alert-danger">
 
-    <i class="fas fa-triangle-exclamation me-2"></i>
+    
 
     <strong>Falha ao calcular o resumo de carteiras.</strong> Isto NÃO significa saldo zero - a consulta falhou.
 
@@ -108,17 +83,17 @@ foreach ($resumo['linhas'] ?? [] as $l) {
 
 <?php if ($reconciliacao['ok'] && !$reconciliacao['consistente']): ?>
 
-<div class="alert alert-warning" style="margin:16px 24px 0;">
+<div class="alert alert-warning">
 
-    <i class="fas fa-scale-unbalanced me-2"></i>
+    
 
-    <strong>Diverg�ncia de reconciliação detectada.</strong>
+    <strong>Divergência de reconciliação detectada.</strong>
 
-    Ledger cont�bil: R$ <?php echo number_format($reconciliacao['credito_guincho_ledger'], 2, ',', '.'); ?> �
+    Ledger contábil: R$ <?php echo number_format($reconciliacao['credito_guincho_ledger'], 2, ',', '.'); ?> ·
 
     Soma em pagamentos: R$ <?php echo number_format($reconciliacao['credito_guincho_pagamentos'], 2, ',', '.'); ?> ·
 
-    Diferen�a: R$ <?php echo number_format($reconciliacao['diferenca'], 2, ',', '.'); ?>.
+    Diferença: R$ <?php echo number_format($reconciliacao['diferenca'], 2, ',', '.'); ?>.
 
     Isso indica um bug real em algum dos dois caminhos - não ignore.
 
@@ -126,9 +101,9 @@ foreach ($resumo['linhas'] ?? [] as $l) {
 
 <?php elseif (!$reconciliacao['ok']): ?>
 
-<div class="alert alert-danger" style="margin:16px 24px 0;">
+<div class="alert alert-danger">
 
-    <i class="fas fa-triangle-exclamation me-2"></i>Falha ao checar reconciliação: <?php echo htmlspecialchars((string)($reconciliacao['erro'] ?? '')); ?>
+    Falha ao checar reconciliação: <?php echo htmlspecialchars((string)($reconciliacao['erro'] ?? '')); ?>
 
 </div>
 
@@ -140,7 +115,7 @@ foreach ($resumo['linhas'] ?? [] as $l) {
 
     <article class="ops-metric">
 
-        <span class="ops-metric__label">Em compensa��o</span>
+        <span class="ops-metric__label">Em compensação</span>
 
         <strong class="ops-metric__value">R$ <?php echo number_format($totalCompensacao, 2, ',', '.'); ?></strong>
 
@@ -188,22 +163,13 @@ foreach ($resumo['linhas'] ?? [] as $l) {
 
 
 
-<div class="shell-ops" id="cartShell">
+<div class="bo-operation-grid" id="cartShell">
 
 
 
-    <aside class="shell-ops-sidebar" id="cartSidebar">
+    <section class="shell-ops-worklist" aria-label="Guincheiros com movimentação financeira">
 
-        <div class="gf-fin2-brand"><strong>Guincha<span>Fácil.</span></strong><small>Central GuinchaFácil</small></div>
-        <?php include __DIR__ . '/../components/admin_nav_operacional.php'; ?>
-
-    </aside>
-
-
-
-    <section class="shell-ops-worklist" aria-label="Guincheiros com movimenta��o financeira">
-
-        <header class="ops-worklist-header">
+        <header class="bo-panel-heading">
 
             <span class="eyebrow">Financeiro</span>
 
@@ -215,9 +181,9 @@ foreach ($resumo['linhas'] ?? [] as $l) {
 
 
 
-        <div class="ops-worklist-search">
+        <div class="bo-search">
 
-            <i class="fas fa-magnifying-glass"></i>
+            
 
             <input type="search" id="cartWorklistSearch" placeholder="Filtrar nesta lista" autocomplete="off">
 
@@ -225,15 +191,15 @@ foreach ($resumo['linhas'] ?? [] as $l) {
 
 
 
-        <div class="ops-worklist-results" id="cartWorklistResults">
+        <div class="bo-orders__list" id="cartWorklistResults">
 
             <?php if (empty($resumo['linhas'])): ?>
 
-                <div class="ops-empty-state">
+                <div class="bo-empty">
 
-                    <i class="fas fa-circle-check"></i>
+                    
 
-                    <?php echo $resumo['ok'] ? 'Nenhum guincheiro aprovado com movimenta��o.' : 'Não foi poss�vel carregar (ver alerta acima).'; ?>
+                    <?php echo $resumo['ok'] ? 'Nenhum guincheiro aprovado com movimentação.' : 'Não foi possível carregar (ver alerta acima).'; ?>
 
                 </div>
 
@@ -247,7 +213,7 @@ foreach ($resumo['linhas'] ?? [] as $l) {
 
                 <button type="button"
 
-                    class="ops-worklist-item <?php echo $temFalha ? 'is-warning' : ''; ?>"
+                    class="bo-order <?php echo $temFalha ? 'is-warning' : ''; ?>"
 
                     data-guincho-id="<?php echo (int)$l['guincho_id']; ?>"
 
@@ -257,21 +223,21 @@ foreach ($resumo['linhas'] ?? [] as $l) {
 
                 >
 
-                    <span class="ops-worklist-item__priority" aria-hidden="true"></span>
+                    <span class="bo-order__priority" aria-hidden="true"></span>
 
-                    <span class="ops-worklist-item__content">
+                    <span class="bo-order__content">
 
-                        <span class="ops-worklist-item__top">
+                        <span class="bo-order__top">
 
                             <strong><?php echo htmlspecialchars($l['nome_operador']); ?></strong>
 
-                            <span class="ops-badge ops-badge--service">R$ <?php echo number_format((float)$l['saldo_pago'], 2, ',', '.'); ?></span>
+                            <span class="bo-status bo-status--service">R$ <?php echo number_format((float)$l['saldo_pago'], 2, ',', '.'); ?></span>
 
                         </span>
 
-                        <span class="ops-worklist-item__customer"><?php echo htmlspecialchars($l['placa_guincho'] ?? '-'); ?> � em compensa��o: R$ <?php echo number_format((float)$l['saldo_em_compensacao'], 2, ',', '.'); ?></span>
+                        <span class="bo-order__customer"><?php echo htmlspecialchars($l['placa_guincho'] ?? '-'); ?> · em compensação: R$ <?php echo number_format((float)$l['saldo_em_compensacao'], 2, ',', '.'); ?></span>
 
-                        <span class="ops-worklist-item__footer">
+                        <span class="bo-order__footer">
 
                             <span>#<?php echo (int)$l['guincho_id']; ?></span>
 
@@ -281,11 +247,11 @@ foreach ($resumo['linhas'] ?? [] as $l) {
 
                     </span>
 
-                    <span class="ops-worklist-item__signals">
+                    <span class="bo-order__signals">
 
                         <?php if ($temFalha): ?>
 
-                        <span class="ops-signal is-danger" title="Repasse com falha"><i class="fas fa-triangle-exclamation"></i></span>
+                        <span class="ops-signal is-danger" title="Repasse com falha"></span>
 
                         <?php endif; ?>
 
@@ -305,9 +271,9 @@ foreach ($resumo['linhas'] ?? [] as $l) {
 
         <?php if (empty($resumo['linhas'])): ?>
 
-        <div class="ops-empty-state" style="padding:80px 20px">
+        <div class="bo-empty">
 
-            <i class="fas fa-inbox"></i>
+            
 
             Nenhum guincheiro pra exibir.
 
@@ -315,9 +281,9 @@ foreach ($resumo['linhas'] ?? [] as $l) {
 
         <?php else: ?>
 
-        <div class="ops-empty-state" style="padding:80px 20px">
+        <div class="bo-empty">
 
-            <i class="fas fa-hand-pointer"></i>
+            
 
             Selecione um guincheiro na lista ao lado pra ver o extrato completo.
 
@@ -359,7 +325,7 @@ foreach ($resumo['linhas'] ?? [] as $l) {
 
     var statusPixLabel = { pendente: 'Pendente', processando: 'Processando', concluido: 'Concluído', falha: 'Falha', falha_permanente: 'Falha permanente' };
 
-    var statusPixBadge = { pendente: 'ops-badge--new', processando: 'ops-badge--route', concluido: 'ops-badge--service', falha: 'ops-badge--critical', falha_permanente: 'ops-badge--critical' };
+    var statusPixBadge = { pendente: 'bo-status--new', processando: 'bo-status--route', concluido: 'bo-status--service', falha: 'bo-status--critical', falha_permanente: 'bo-status--critical' };
 
 
 
@@ -377,7 +343,7 @@ foreach ($resumo['linhas'] ?? [] as $l) {
 
     function renderSkeleton() {
 
-        workspace.innerHTML = '<div class="ops-empty-state" style="padding:60px 20px"><i class="fas fa-circle-notch fa-spin"></i>Carregando extrato.</div>';
+        workspace.innerHTML = '<div class="bo-empty">Carregando extrato.</div>';
 
     }
 
@@ -385,7 +351,7 @@ foreach ($resumo['linhas'] ?? [] as $l) {
 
     function renderError(message) {
 
-        workspace.innerHTML = '<div class="ops-empty-state" style="padding:60px 20px"><i class="fas fa-triangle-exclamation"></i>' + escapeHtml(message) + '</div>';
+        workspace.innerHTML = '<div class="bo-empty">' + escapeHtml(message) + '</div>';
 
     }
 
@@ -397,9 +363,9 @@ foreach ($resumo['linhas'] ?? [] as $l) {
 
 
 
-        var html = '<header class="ops-order-header">' +
+        var html = '<header class="bo-panel-heading">' +
 
-            '<div><button type="button" class="ops-back-link" data-action="cart-clear-selection"><i class="fas fa-arrow-left"></i> Todos os guincheiros</button>' +
+            '<div><button type="button" class="ops-back-link" data-action="cart-clear-selection"> Todos os guincheiros</button>' +
 
             '<h1>' + escapeHtml(g.nome_operador) + '</h1>' +
 
@@ -411,19 +377,19 @@ foreach ($resumo['linhas'] ?? [] as $l) {
 
         if (!saldo.ok) {
 
-            html += '<div class="alert alert-danger" style="margin:0 24px"><i class="fas fa-triangle-exclamation me-2"></i>Falha ao calcular o saldo: ' + escapeHtml(saldo.erro || '') + '</div>';
+            html += '<div class="alert alert-danger">Falha ao calcular o saldo: ' + escapeHtml(saldo.erro || '') + '</div>';
 
         } else {
 
-            html += '<div class="ops-order-facts">' +
+            html += '<div class="bo-grid">' +
 
-                '<div class="ops-order-fact"><span class="ops-order-fact__label">Em compensa��o</span><span class="ops-order-fact__value">R$ ' + Number(saldo.saldo_em_compensacao).toLocaleString('pt-BR', {minimumFractionDigits:2}) + '</span></div>' +
+                '<div class="bo-panel"><span class="bo-panel__label">Em compensação</span><span class="bo-panel__value">R$ ' + Number(saldo.saldo_em_compensacao).toLocaleString('pt-BR', {minimumFractionDigits:2}) + '</span></div>' +
 
-                '<div class="ops-order-fact"><span class="ops-order-fact__label">Pago</span><span class="ops-order-fact__value">R$ ' + Number(saldo.saldo_pago).toLocaleString('pt-BR', {minimumFractionDigits:2}) + '</span></div>' +
+                '<div class="bo-panel"><span class="bo-panel__label">Pago</span><span class="bo-panel__value">R$ ' + Number(saldo.saldo_pago).toLocaleString('pt-BR', {minimumFractionDigits:2}) + '</span></div>' +
 
-                '<div class="ops-order-fact"><span class="ops-order-fact__label">Estornado</span><span class="ops-order-fact__value">R$ ' + Number(saldo.saldo_estornado).toLocaleString('pt-BR', {minimumFractionDigits:2}) + '</span></div>' +
+                '<div class="bo-panel"><span class="bo-panel__label">Estornado</span><span class="bo-panel__value">R$ ' + Number(saldo.saldo_estornado).toLocaleString('pt-BR', {minimumFractionDigits:2}) + '</span></div>' +
 
-                '<div class="ops-order-fact"><span class="ops-order-fact__label">Último repasse</span><span class="ops-order-fact__value">' + escapeHtml(saldo.ultimo_repasse_em || '-') + '</span></div>' +
+                '<div class="bo-panel"><span class="bo-panel__label">Último repasse</span><span class="bo-panel__value">' + escapeHtml(saldo.ultimo_repasse_em || '-') + '</span></div>' +
 
                 '</div>';
 
@@ -431,9 +397,9 @@ foreach ($resumo['linhas'] ?? [] as $l) {
 
 
 
-        html += '<div style="padding:18px 24px 32px"><table class="table table-sm mb-0 align-middle">' +
+        html += '<div><table class="table table-sm mb-0 align-middle">' +
 
-            '<thead><tr><th>Pedido</th><th>Status pedido</th><th>Valor total</th><th>Valor guincho</th><th>Status Pix</th><th>Transa��o Pix</th><th>Pago em</th></tr></thead><tbody>';
+            '<thead><tr><th>Pedido</th><th>Status pedido</th><th>Valor total</th><th>Valor guincho</th><th>Status Pix</th><th>Transação Pix</th><th>Pago em</th></tr></thead><tbody>';
 
 
 
@@ -449,7 +415,7 @@ foreach ($resumo['linhas'] ?? [] as $l) {
 
             extrato.linhas.forEach(function (r) {
 
-                var badge = r.status_pix ? '<span class="ops-badge ' + (statusPixBadge[r.status_pix] || 'ops-badge--audit') + '">' + escapeHtml(statusPixLabel[r.status_pix] || r.status_pix) + '</span>' : '-';
+                var badge = r.status_pix ? '<span class="bo-status ' + (statusPixBadge[r.status_pix] || 'bo-status--audit') + '">' + escapeHtml(statusPixLabel[r.status_pix] || r.status_pix) + '</span>' : '-';
 
                 html += '<tr>' +
 
@@ -531,7 +497,7 @@ foreach ($resumo['linhas'] ?? [] as $l) {
 
         if (!guinchoId) {
 
-            workspace.innerHTML = '<div class="ops-empty-state" style="padding:80px 20px"><i class="fas fa-hand-pointer"></i>Selecione um guincheiro na lista ao lado pra ver o extrato completo.</div>';
+            workspace.innerHTML = '<div class="bo-empty">Selecione um guincheiro na lista ao lado pra ver o extrato completo.</div>';
 
         } else {
 
@@ -617,16 +583,12 @@ foreach ($resumo['linhas'] ?? [] as $l) {
 
 <?php
 
-// Não usa layouts/footer.php: esta p�gina usa .shell-ops (grid pr�prio),
+// Não usa layouts/footer.php: esta página usa .shell-ops (grid próprio),
 
-// igual � Central Operacional e Capacidades - fechamento m�nimo equivalente.
+// igual à Central Operacional e Capacidades - fechamento m·nimo equivalente.
 
 ?>
 
 <script<?php echo csp_script_nonce_attr(); ?> src="<?php echo htmlspecialchars($bp); ?>/public/assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
 
-</body>
-
-</html>
-
-
+<?php $conteudo_pagina=ob_get_clean(); $perfil='admin'; $titulo_pagina='Carteiras'; $breadcrumb=['Financeiro','Carteiras']; $assets_css=['/public/assets/css/pages/bo-admin-carteiras.css']; require __DIR__ . '/../layouts/backoffice_shell.php';

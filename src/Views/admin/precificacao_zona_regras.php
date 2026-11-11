@@ -2,7 +2,7 @@
 
 $bp = defined('BASE_PATH') ? BASE_PATH : '';
 
-include __DIR__ . '/../layouts/header.php';
+ob_start();
 
 // vehicle_category aqui casa com veiculos.tipo (carro/moto/caminhao/van/onibus/outro)
 
@@ -16,24 +16,19 @@ $categorias = ['' => 'Qualquer tipo de veículo (coringa)', 'carro' => 'Carro', 
 
 ?>
 
-<div class="main-wrapper shell admin-shell">
 
-<?php include __DIR__ . '/../layouts/sidebar_admin.php'; ?>
-
-<main class="main-content shell-main shell-content">
-<?php include __DIR__ . '/partials/_panel_topbar_admin.php'; ?>
 
 
 
     <?php $totalRegrasZona = count($regras ?? []); ?>
 
-    <div class="ops-topbar">
+    <div class="bo-toolbar">
 
-        <div class="ops-topbar__search"><i class="fas fa-magnifying-glass"></i><input type="search" id="regrasZonaBusca" placeholder="Buscar por serviço ou categoria" autocomplete="off" aria-label="Buscar regras da zona"></div>
+        <div class="bo-search"><i class="fas fa-magnifying-glass"></i><input type="search" id="regrasZonaBusca" placeholder="Buscar por serviço ou categoria" autocomplete="off" aria-label="Buscar regras da zona"></div>
 
-        <div class="ops-topbar__meta">
+        <div class="bo-toolbar-meta">
 
-            <span class="ops-topbar__status"><span class="ops-topbar__status-dot"></span><?php echo $totalRegrasZona; ?> regras vigentes</span>
+            <span class="bo-toolbar-status"><span class="bo-toolbar-status-dot"></span><?php echo $totalRegrasZona; ?> regras vigentes</span>
 
             <?php if (empty($zona['polygon_geojson'])): ?><span style="color:var(--danger,#dc3545);font-weight:700;"><i class="fas fa-triangle-exclamation me-1"></i>Sem polígono</span><?php endif; ?>
 
@@ -395,10 +390,8 @@ $categorias = ['' => 'Qualquer tipo de veículo (coringa)', 'carro' => 'Carro', 
 
     </script>
 
-</main>
-
-</div>
-
-<?php include __DIR__ . '/../layouts/footer.php'; ?>
 
 
+
+
+<?php $conteudo_pagina=ob_get_clean(); $perfil='admin'; $titulo_pagina="Regras de zona"; $breadcrumb=["Território","Regras de zona"]; $assets_css=["/public/assets/css/pages/bo-admin-operacao.css"]; require __DIR__ . '/../layouts/backoffice_shell.php';

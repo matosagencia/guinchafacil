@@ -7,12 +7,14 @@
  * A autenticação e autorização permanecem obrigatórias no controller.
  */
 require_once __DIR__ . '/backoffice_helpers.php';
-$classes = ['admin'=>'operator','operador'=>'operator','guincho'=>'driver','oficina'=>'workshop','cliente'=>'client'];
+$contract = require __DIR__ . '/backoffice_contract.php';
+$classes = ['admin'=>'operator','funcionario'=>'finance','gerente'=>'executive','guincho'=>'driver','oficina'=>'workshop','cliente'=>'client','especialista'=>'driver','parceiro'=>'operator'];
 $papel = (string)($perfil ?? ($_SESSION['user']['tipo'] ?? ''));
 if (!isset($classes[$papel])) { throw new RuntimeException('Papel invalido no shell'); }
 $papelAutenticado = (string)($_SESSION['user']['tipo'] ?? '');
-if ($papel === 'admin' && $papelAutenticado !== 'admin') { throw new RuntimeException('Papel nao autorizado'); }
+if ($papel !== $papelAutenticado && $papelAutenticado !== 'admin') { throw new RuntimeException('Perfil não autorizado'); }
 $tema = $classes[$papel];
+$profileContract = $contract[$papel] ?? $contract['admin'];
 $nome = (string)($_SESSION['user']['nome'] ?? 'Usuário');
 $iniciais = '';
 foreach (preg_split('/\s+/u',trim($nome)) ?: [] as $p) { if ($p !== '' && strlen($iniciais) < 2) $iniciais .= strtoupper(substr($p,0,1)); }
@@ -21,89 +23,8 @@ $bp = rtrim((string)(defined('BASE_PATH') ? BASE_PATH : ''), '/');
 $titulo_pagina = (string)($titulo_pagina ?? 'Painel');
 $breadcrumb = (array)($breadcrumb ?? ['Backoffice', $titulo_pagina]);
 $conteudo_pagina = (string)($conteudo_pagina ?? '');
-$conteudo_pagina = strtr($conteudo_pagina, [
-    'ï¿½ï¿½' => 'ã',
-    'ï¿½' => '�',
-    'avalia��es' => 'avaliações',
-    'avaliaï¿½ï¿½es' => 'avaliações',
-    'coment�rio' => 'comentário',
-    'comentï¿½rio' => 'comentário',
-    'configura��es' => 'configurações',
-    'configuraï¿½ï¿½es' => 'configurações',
-    'navega��o' => 'navegação',
-    'navegaï¿½ï¿½o' => 'navegação',
-    'seguran�a' => 'segurança',
-    'seguranï¿½a' => 'segurança',
-    'm�dia' => 'média',
-    'mï¿½dia' => 'média',
-    'comiss�o' => 'comissão',
-    'comissï¿½o' => 'comissão',
-    'opera��o' => 'operação',
-    'operaï¿½ï¿½o' => 'operação',
-    'hist��rico' => 'histórico',
-    'histï¿½rico' => 'histórico',
-    've��culos' => 'veículos',
-    'veï¿½culos' => 'veículos',
-    'servi��os' => 'serviços',
-    'serviï¿½os' => 'serviços',
-    'n�o' => 'não',
-    'nï¿½o' => 'não',
-    '�ltimo' => 'Último',
-    'ï¿½ltimo' => 'Último',
-    'GuinchaF�cil' => 'GuinchaFácil',
-    'GuinchaFï¿½cil' => 'GuinchaFácil',
-    'Identificaï¿½ï¿½o' => 'Identificação',
-    'Identifica��o' => 'Identificação',
-    'veï¿½culo' => 'veículo',
-    've��culo' => 'veículo',
-    'rï¿½pidos' => 'rápidos',
-    'r��pidos' => 'rápidos',
-    'cotaï¿½ï¿½o' => 'cotação',
-    'cota��o' => 'cotação',
-    'precificaï¿½ï¿½o' => 'precificação',
-    'precifica��o' => 'precificação',
-    'localizaï¿½ï¿½o' => 'localização',
-    'localiza��o' => 'localização',
-    'ocorrï¿½ncia' => 'ocorrência',
-    'ocorr��ncia' => 'ocorrência',
-]);
-$espacos = [
-  'admin'=>['Central GuinchaFácil','Workspace operacional'],
-  'operador'=>['Central GuinchaFácil','Workspace operacional'],
-  'guincho'=>['Guincho parceiro','Operação do prestador'],
-  'oficina'=>['Oficina parceira','Operação da oficina'],
-  'cliente'=>['Área do cliente','Minhas solicitações'],
-];
-$menuBase = [
- 'admin'=>[
-  ['section'=>'PRINCIPAL'],['label'=>'Central operacional','href'=>'/admin/central','icon'=>'layout-dashboard'],
-  ['label'=>'Pedidos','href'=>'/admin/pedidos','icon'=>'list-checks'],
-  ['label'=>'Criar pedido','href'=>'/admin/pedido/novo','icon'=>'plus-circle'],
-  ['label'=>'Despacho','href'=>'/admin/despacho','icon'=>'truck'],
-  ['label'=>'Financeiro e repasses','href'=>'/admin/financeiro','icon'=>'wallet'],
-  ['section'=>'SERVIÇOS'],['label'=>'Tipos de serviço','href'=>'/admin/catalogo-servicos/tipos','icon'=>'wrench'],
- ],
- 'guincho'=>[
-  ['section'=>'OPERAÇÃO'],['label'=>'Painel','href'=>'/guincho/dashboard','icon'=>'layout-dashboard'],
-  ['label'=>'Histórico','href'=>'/guincho/historico','icon'=>'history'],
-  ['label'=>'Financeiro','href'=>'/guincho/financeiro','icon'=>'wallet'],
-  ['section'=>'CONTA'],['label'=>'Meu perfil','href'=>'/guincho/perfil','icon'=>'user-round'],
- ],
- 'oficina'=>[
-  ['section'=>'OPERAÇÃO'],['label'=>'Painel','href'=>'/oficina/dashboard','icon'=>'layout-dashboard'],
-  ['label'=>'Ofertas','href'=>'/oficina/pedidos','icon'=>'bell'],
-  ['label'=>'Histórico','href'=>'/oficina/historico','icon'=>'history'],
-  ['label'=>'Financeiro','href'=>'/oficina/financeiro','icon'=>'wallet'],
-  ['section'=>'CONTA'],['label'=>'Meu perfil','href'=>'/oficina/perfil','icon'=>'user-round'],
- ],
- 'cliente'=>[
-  ['section'=>'SOLICITAÇÕES'],['label'=>'Painel','href'=>'/cliente/dashboard','icon'=>'layout-dashboard'],
-  ['label'=>'Pedir socorro','href'=>'/cliente/pedido/novo','icon'=>'truck'],
-  ['label'=>'Histórico','href'=>'/cliente/historico','icon'=>'history'],
-  ['section'=>'CONTA'],['label'=>'Veículos','href'=>'/cliente/veiculos','icon'=>'car'],
-  ['label'=>'Meu perfil','href'=>'/cliente/perfil','icon'=>'user-round'],
- ],
-];
+$espacos = array_fill_keys(array_keys($classes), $profileContract['workspace']);
+$menuBase = require __DIR__ . '/backoffice_menus.php';
 $itens_menu = (array)($itens_menu ?? ($menuBase[$papel] ?? $menuBase['admin']));
 $rota = parse_url((string)($_SERVER['REQUEST_URI'] ?? '/'), PHP_URL_PATH) ?: '/';
 $notificacoes_url = isset($notificacoes_url) ? gfBoHref((string)$notificacoes_url) : '#';
@@ -118,13 +39,15 @@ $scriptNonce = function_exists('csp_script_nonce_attr') ? (string)csp_script_non
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;display=swap">
 <link rel="stylesheet" href="<?= gfBoH($bp) ?>/public/assets/css/gf-bo-lovable.css?v=20261017-18">
+<link rel="stylesheet" href="<?= gfBoH($bp) ?>/public/assets/css/gf-bo-profiles.css?v=20261110-1">
+<link rel="stylesheet" href="<?= gfBoH($bp) ?>/public/assets/css/gf-bo-components.css?v=20261110-1">
 <link rel="stylesheet" href="<?= gfBoH($bp) ?>/public/assets/css/components/gf-footer-payments.css?v=20261101-3">
 <?php foreach ((array)($assets_css ?? []) as $sheet): if (is_string($sheet) && gfBoHref($sheet) !== '#'): ?>
 <link rel="stylesheet" href="<?= gfBoH($bp.$sheet) ?>">
 <?php endif; endforeach; ?>
 </head>
-<body>
-<div class="bo bo-<?= gfBoH($tema) ?>" data-gf-profile="<?= gfBoH($papel) ?>">
+<body class="gf-backoffice-profile-<?= gfBoH($papel) ?>" data-role="<?= gfBoH($papel) ?>" data-theme="<?= gfBoH($profileContract['preset']) ?>">
+<div class="bo bo-<?= gfBoH($tema) ?> bo-p-<?= gfBoH($papel) ?>" data-gf-profile="<?= gfBoH($papel) ?>">
   <aside class="bo-sidebar" aria-label="Menu principal">
     <a class="brand-name bo-brand" href="<?= gfBoH($bp) ?>/" aria-label="GuinchaFácil — início">Guincha<span>Fácil</span><span class="brand-period">.</span></a>
     <div class="bo-workspace"><span class="bo-avatar"><?= gfBoIcon('shield-check',17) ?></span>
@@ -135,9 +58,11 @@ $scriptNonce = function_exists('csp_script_nonce_attr') ? (string)csp_script_non
       <?php if (isset($item['section'])): ?><small class="bo-nav-label"><?= gfBoH($item['section']) ?></small><?php continue; endif; ?>
       <?php if (empty($item['label']) || empty($item['href'])) continue;
         $href=gfBoHref((string)$item['href']); if ($href==='#') continue;
-        $ativo=(rtrim($rota,'/')===rtrim($href,'/')); ?>
+        $matches = (array)($item['match'] ?? [$href]); $ativo = false; foreach ($matches as $prefix) { if ($rota === $prefix || str_starts_with($rota, rtrim($prefix, '/') . '/')) { $ativo = true; break; } } ?>
       <a class="bo-nav<?= $ativo ? ' active' : '' ?>" href="<?= gfBoH($bp.$href) ?>" title="<?= gfBoH($item['label']) ?>" <?= $ativo ? 'aria-current="page"' : '' ?>>
         <?= gfBoIcon((string)($item['icon'] ?? 'layout-dashboard')) ?><span><?= gfBoH($item['label']) ?></span></a>
+      <?php if (!empty($item['children'])): ?><div class="bo-nav-submenu" aria-label="<?= gfBoH($item['label']) ?> submenu">
+      <?php foreach ((array)$item['children'] as $child): $chref=gfBoHref((string)($child['href'] ?? '#')); if ($chref === '#') continue; $chativo=false; foreach ((array)($child['match'] ?? [$chref]) as $prefix) { if ($rota === $prefix || str_starts_with($rota, rtrim($prefix, '/') . '/')) { $chativo=true; break; } } ?><a class="bo-nav bo-nav-sub<?= $chativo ? ' active' : '' ?>" href="<?= gfBoH($bp.$chref) ?>" <?= $chativo ? 'aria-current="page"' : '' ?>><?= gfBoIcon((string)($child['icon'] ?? 'circle'),16) ?><span><?= gfBoH($child['label'] ?? '') ?></span></a><?php endforeach; ?></div><?php endif; ?>
     <?php endforeach; ?>
     </nav>
     <div class="bo-sidebar-bottom"><a class="bo-nav" href="<?= gfBoH($bp) ?>/" title="Voltar ao site"><?= gfBoIcon('external-link') ?><span>Voltar ao site</span></a>
@@ -145,9 +70,9 @@ $scriptNonce = function_exists('csp_script_nonce_attr') ? (string)csp_script_non
     </div>
   </aside>
   <div class="bo-body">
-    <header class="bo-header">
+    <header class="bo-header gf-panel-topbar">
       <div class="bo-header-start"><button type="button" class="bo-header-button" data-bo-collapse aria-expanded="true" aria-label="Recolher menu lateral"><?= gfBoIcon('chevron-left',20) ?></button>
-        <span class="bo-breadcrumb gf-order-crumb">
+        <span class="bo-breadcrumb bo-breadcrumb">
         <?php $partes=array_values($breadcrumb); foreach ($partes as $i => $parte):
            if ($i>0) echo gfBoIcon('chevron-right',13);
            if ($i===count($partes)-1): ?><strong><?= gfBoH($parte) ?></strong>
@@ -155,19 +80,13 @@ $scriptNonce = function_exists('csp_script_nonce_attr') ? (string)csp_script_non
         </span>
       </div>
       <div class="bo-header-actions">
-        <label class="bo-theme-select"><span class="bo-theme-dot" aria-hidden="true"></span>
-          <select data-bo-theme aria-label="Tema visual" <?= $papel !== 'admin' ? 'disabled' : '' ?>>
-            <?php foreach (['operator'=>'Operador / Despacho','driver'=>'Prestador / Guincheiro','client'=>'Cliente','workshop'=>'Oficina Parceira'] as $id => $label):
-               if ($papel !== 'admin' && $id !== $tema) continue; ?>
-            <option value="<?= gfBoH($id) ?>" <?= $tema===$id ? 'selected' : '' ?>><?= gfBoH($label) ?></option>
-            <?php endforeach; ?>
-          </select>
-        </label>
+        <span class="bo-theme-select bo-theme-select--fixed" aria-label="Perfil visual definido pela sessão"><span class="bo-theme-dot" aria-hidden="true"></span><span><?= gfBoH($profileContract['workspace'][0] ?? 'Perfil') ?></span></span>
         <?php if ($notificacoes_url !== '#'): ?>
           <a class="bo-notification-link" href="<?= gfBoH($bp.$notificacoes_url) ?>" aria-label="Notificações"><?= gfBoIcon('bell',18) ?>
           <?php if ($notificacoes_count>0): ?><span class="bo-notification-count"><?= $notificacoes_count ?></span><?php endif; ?></a>
         <?php else: ?><span class="bo-notification-link" aria-label="Notificações não configuradas"><?= gfBoIcon('bell',18) ?></span><?php endif; ?>
         <span class="bo-avatar" title="<?= gfBoH($nome) ?>"><?= gfBoH($iniciais) ?></span>
+        <a class="bo-header-button" href="<?= gfBoH($bp) ?>/logout" data-confirm-logout aria-label="Sair"><?= gfBoIcon('log-out', 17) ?></a>
       </div>
     </header>
     <main class="bo-content"><?= $conteudo_pagina /* O conteúdo vem da view interna, nunca de $_GET/$_POST sem escapar */ ?></main>
@@ -178,4 +97,6 @@ $scriptNonce = function_exists('csp_script_nonce_attr') ? (string)csp_script_non
   </div>
 </div>
 <script<?= $scriptNonce ?> defer src="<?= gfBoH($bp) ?>/public/assets/js/gf-bo-shell.js?v=20261017-18"></script>
+<script<?= $scriptNonce ?> defer src="<?= gfBoH($bp) ?>/public/assets/js/gf-bo-dialog.js?v=20261110-1"></script>
+<script<?= $scriptNonce ?> defer src="<?= gfBoH($bp) ?>/public/assets/js/session-manager.js"></script>
 </body></html>

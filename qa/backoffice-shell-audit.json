@@ -1,0 +1,1228 @@
+{
+  "generatedAt": "2026-11-11T03:24:52.567Z",
+  "routes": [
+    {
+      "route": "/admin/alertas",
+      "http": 200,
+      "url": "http://localhost:8080/admin/alertas",
+      "data": {
+        "profile": "gf-backoffice-profile-admin",
+        "mojibake": false,
+        "legacyHeader": 0,
+        "headers": 1,
+        "sidebars": 2,
+        "content": 2,
+        "overflow": false,
+        "consoleErrors": []
+      }
+    },
+    {
+      "route": "/admin/avaliacoes",
+      "http": 200,
+      "url": "http://localhost:8080/admin/avaliacoes",
+      "data": {
+        "profile": "gf-backoffice-profile-admin",
+        "mojibake": false,
+        "legacyHeader": 0,
+        "headers": 1,
+        "sidebars": 1,
+        "content": 1,
+        "overflow": false,
+        "consoleErrors": []
+      }
+    },
+    {
+      "route": "/admin/carteiras",
+      "http": 200,
+      "url": "http://localhost:8080/admin/carteiras",
+      "data": {
+        "profile": "gf-backoffice-profile-admin",
+        "mojibake": false,
+        "legacyHeader": 0,
+        "headers": 1,
+        "sidebars": 1,
+        "content": 2,
+        "overflow": false,
+        "consoleErrors": []
+      }
+    },
+    {
+      "route": "/admin/catalogo-servicos/capacidades",
+      "http": 200,
+      "url": "http://localhost:8080/admin/catalogo-servicos/capacidades?guincho_id=29",
+      "data": {
+        "profile": "gf-backoffice-profile-admin",
+        "mojibake": false,
+        "legacyHeader": 0,
+        "headers": 1,
+        "sidebars": 1,
+        "content": 1,
+        "overflow": false,
+        "consoleErrors": []
+      }
+    },
+    {
+      "route": "/admin/catalogo-servicos/compatibilidade",
+      "http": 200,
+      "url": "http://localhost:8080/admin/catalogo-servicos/compatibilidade",
+      "data": {
+        "profile": "gf-backoffice-profile-admin",
+        "mojibake": false,
+        "legacyHeader": 0,
+        "headers": 1,
+        "sidebars": 1,
+        "content": 1,
+        "overflow": false,
+        "consoleErrors": []
+      }
+    },
+    {
+      "route": "/admin/catalogo-servicos/tarifas",
+      "http": 200,
+      "url": "http://localhost:8080/admin/catalogo-servicos/tarifas",
+      "data": {
+        "profile": "gf-backoffice-profile-admin",
+        "mojibake": false,
+        "legacyHeader": 0,
+        "headers": 1,
+        "sidebars": 1,
+        "content": 1,
+        "overflow": false,
+        "consoleErrors": []
+      }
+    },
+    {
+      "route": "/admin/catalogo-servicos/tipo/novo",
+      "http": 200,
+      "url": "http://localhost:8080/admin/catalogo-servicos/tipo/novo",
+      "data": {
+        "profile": "gf-backoffice-profile-admin",
+        "mojibake": false,
+        "legacyHeader": 0,
+        "headers": 1,
+        "sidebars": 1,
+        "content": 1,
+        "overflow": false,
+        "consoleErrors": []
+      }
+    },
+    {
+      "route": "/admin/catalogo-servicos/tipos",
+      "http": 200,
+      "url": "http://localhost:8080/admin/catalogo-servicos/tipos",
+      "data": {
+        "profile": "gf-backoffice-profile-admin",
+        "mojibake": false,
+        "legacyHeader": 0,
+        "headers": 1,
+        "sidebars": 1,
+        "content": 2,
+        "overflow": false,
+        "consoleErrors": []
+      }
+    },
+    {
+      "route": "/admin/catalogo-veiculos",
+      "http": 200,
+      "url": "http://localhost:8080/admin/catalogo-veiculos",
+      "data": {
+        "profile": "gf-backoffice-profile-admin",
+        "mojibake": false,
+        "legacyHeader": 0,
+        "headers": 1,
+        "sidebars": 1,
+        "content": 1,
+        "overflow": false,
+        "consoleErrors": []
+      }
+    },
+    {
+      "route": "/admin/catalogo-veiculos/marca/novo",
+      "http": 200,
+      "url": "http://localhost:8080/admin/catalogo-veiculos/marca/novo",
+      "data": {
+        "profile": "gf-backoffice-profile-admin",
+        "mojibake": false,
+        "legacyHeader": 0,
+        "headers": 1,
+        "sidebars": 1,
+        "content": 1,
+        "overflow": false,
+        "consoleErrors": []
+      }
+    },
+    {
+      "route": "/admin/catalogo-veiculos/modelo/novo",
+      "http": 200,
+      "url": "http://localhost:8080/admin/catalogo-veiculos",
+      "data": {
+        "profile": "gf-backoffice-profile-admin",
+        "mojibake": false,
+        "legacyHeader": 0,
+        "headers": 1,
+        "sidebars": 1,
+        "content": 1,
+        "overflow": false,
+        "consoleErrors": []
+      }
+    },
+    {
+      "route": "/admin/catalogo-veiculos/versao/novo",
+      "http": 200,
+      "url": "http://localhost:8080/admin/catalogo-veiculos",
+      "data": {
+        "profile": "gf-backoffice-profile-admin",
+        "mojibake": false,
+        "legacyHeader": 0,
+        "headers": 1,
+        "sidebars": 1,
+        "content": 1,
+        "overflow": false,
+        "consoleErrors": []
+      }
+    },
+    {
+      "route": "/admin/central",
+      "http": 200,
+      "url": "http://localhost:8080/admin/central",
+      "data": {
+        "profile": "gf-backoffice-profile-admin",
+        "mojibake": false,
+        "legacyHeader": 0,
+        "headers": 1,
+        "sidebars": 1,
+        "content": 2,
+        "overflow": false,
+        "consoleErrors": []
+      }
+    },
+    {
+      "route": "/admin/chat",
+      "http": 200,
+      "url": "http://localhost:8080/admin/chat",
+      "data": {
+        "profile": "gf-backoffice-profile-admin",
+        "mojibake": false,
+        "legacyHeader": 0,
+        "headers": 1,
+        "sidebars": 1,
+        "content": 1,
+        "overflow": false,
+        "consoleErrors": []
+      }
+    },
+    {
+      "route": "/admin/checklists-incompletos",
+      "error": "page.goto: Timeout 15000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://localhost:8080/admin/checklists-incompletos\", waiting until \"domcontentloaded\"\u001b[22m\n"
+    },
+    {
+      "route": "/admin/cidade/excluir",
+      "http": 200,
+      "url": "http://localhost:8080/admin/cidades?erro=excluir",
+      "data": {
+        "profile": "gf-backoffice-profile-admin",
+        "mojibake": false,
+        "legacyHeader": 0,
+        "headers": 1,
+        "sidebars": 1,
+        "content": 1,
+        "overflow": false,
+        "consoleErrors": []
+      }
+    },
+    {
+      "route": "/admin/cidades",
+      "http": 200,
+      "url": "http://localhost:8080/admin/cidades",
+      "data": {
+        "profile": "gf-backoffice-profile-admin",
+        "mojibake": false,
+        "legacyHeader": 0,
+        "headers": 1,
+        "sidebars": 1,
+        "content": 1,
+        "overflow": false,
+        "consoleErrors": []
+      }
+    },
+    {
+      "route": "/admin/clientes/ajax",
+      "http": 200,
+      "url": "http://localhost:8080/admin/clientes/ajax",
+      "data": {
+        "profile": "",
+        "mojibake": false,
+        "legacyHeader": 0,
+        "headers": 0,
+        "sidebars": 0,
+        "content": 0,
+        "overflow": false,
+        "consoleErrors": []
+      }
+    },
+    {
+      "route": "/admin/comunicado/novo",
+      "http": 200,
+      "url": "http://localhost:8080/admin/comunicado/novo",
+      "data": {
+        "profile": "gf-backoffice-profile-admin",
+        "mojibake": false,
+        "legacyHeader": 0,
+        "headers": 1,
+        "sidebars": 1,
+        "content": 1,
+        "overflow": false,
+        "consoleErrors": []
+      }
+    },
+    {
+      "route": "/admin/comunicados",
+      "http": 200,
+      "url": "http://localhost:8080/admin/comunicados",
+      "data": {
+        "profile": "gf-backoffice-profile-admin",
+        "mojibake": false,
+        "legacyHeader": 0,
+        "headers": 1,
+        "sidebars": 1,
+        "content": 2,
+        "overflow": false,
+        "consoleErrors": []
+      }
+    },
+    {
+      "route": "/admin/configuracoes",
+      "http": 200,
+      "url": "http://localhost:8080/admin/configuracoes",
+      "data": {
+        "profile": "gf-backoffice-profile-admin",
+        "mojibake": false,
+        "legacyHeader": 0,
+        "headers": 1,
+        "sidebars": 1,
+        "content": 1,
+        "overflow": false,
+        "consoleErrors": []
+      }
+    },
+    {
+      "route": "/admin/dashboard",
+      "http": 200,
+      "url": "http://localhost:8080/admin/dashboard",
+      "data": {
+        "profile": "gf-backoffice-profile-admin",
+        "mojibake": false,
+        "legacyHeader": 0,
+        "headers": 1,
+        "sidebars": 1,
+        "content": 1,
+        "overflow": false,
+        "consoleErrors": []
+      }
+    },
+    {
+      "route": "/admin/dashboard/mapa-json",
+      "http": 200,
+      "url": "http://localhost:8080/admin/dashboard/mapa-json",
+      "data": {
+        "profile": "",
+        "mojibake": false,
+        "legacyHeader": 0,
+        "headers": 0,
+        "sidebars": 0,
+        "content": 0,
+        "overflow": false,
+        "consoleErrors": []
+      }
+    },
+    {
+      "route": "/admin/demanda-territorial",
+      "http": 200,
+      "url": "http://localhost:8080/admin/demanda-territorial",
+      "data": {
+        "profile": "gf-backoffice-profile-admin",
+        "mojibake": false,
+        "legacyHeader": 0,
+        "headers": 1,
+        "sidebars": 1,
+        "content": 2,
+        "overflow": false,
+        "consoleErrors": []
+      }
+    },
+    {
+      "route": "/admin/despacho",
+      "http": 200,
+      "url": "http://localhost:8080/admin/despacho",
+      "data": {
+        "profile": "gf-backoffice-profile-admin",
+        "mojibake": false,
+        "legacyHeader": 0,
+        "headers": 1,
+        "sidebars": 1,
+        "content": 2,
+        "overflow": false,
+        "consoleErrors": []
+      }
+    },
+    {
+      "route": "/admin/documentos",
+      "http": 200,
+      "url": "http://localhost:8080/admin/documentos",
+      "data": {
+        "profile": "gf-backoffice-profile-admin",
+        "mojibake": false,
+        "legacyHeader": 0,
+        "headers": 1,
+        "sidebars": 1,
+        "content": 2,
+        "overflow": false,
+        "consoleErrors": []
+      }
+    },
+    {
+      "route": "/admin/env",
+      "http": 200,
+      "url": "http://localhost:8080/admin/env",
+      "data": {
+        "profile": "gf-backoffice-profile-admin",
+        "mojibake": false,
+        "legacyHeader": 0,
+        "headers": 1,
+        "sidebars": 1,
+        "content": 1,
+        "overflow": false,
+        "consoleErrors": []
+      }
+    },
+    {
+      "route": "/admin/env/auditoria",
+      "http": 200,
+      "url": "http://localhost:8080/admin/env/auditoria",
+      "data": {
+        "profile": "gf-backoffice-profile-admin",
+        "mojibake": false,
+        "legacyHeader": 0,
+        "headers": 1,
+        "sidebars": 1,
+        "content": 1,
+        "overflow": false,
+        "consoleErrors": []
+      }
+    },
+    {
+      "route": "/admin/especialista/documento-status",
+      "error": "page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at http://localhost:8080/admin/especialista/documento-status\nCall log:\n\u001b[2m  - navigating to \"http://localhost:8080/admin/especialista/documento-status\", waiting until \"domcontentloaded\"\u001b[22m\n"
+    },
+    {
+      "route": "/admin/especialistas",
+      "error": "page.goto: Navigation to \"http://localhost:8080/admin/especialistas\" is interrupted by another navigation to \"chrome-error://chromewebdata/\"\nCall log:\n\u001b[2m  - navigating to \"http://localhost:8080/admin/especialistas\", waiting until \"domcontentloaded\"\u001b[22m\n"
+    },
+    {
+      "route": "/admin/especialistas/cadastrar",
+      "error": "page.goto: Navigation to \"http://localhost:8080/admin/especialistas/cadastrar\" is interrupted by another navigation to \"http://localhost:8080/admin/especialistas\"\nCall log:\n\u001b[2m  - navigating to \"http://localhost:8080/admin/especialistas/cadastrar\", waiting until \"domcontentloaded\"\u001b[22m\n"
+    },
+    {
+      "route": "/admin/faturas",
+      "error": "page.goto: Navigation to \"http://localhost:8080/admin/faturas\" is interrupted by another navigation to \"http://localhost:8080/admin/especialistas/cadastrar\"\nCall log:\n\u001b[2m  - navigating to \"http://localhost:8080/admin/faturas\", waiting until \"domcontentloaded\"\u001b[22m\n"
+    },
+    {
+      "route": "/admin/feriados",
+      "error": "page.goto: Navigation to \"http://localhost:8080/admin/feriados\" is interrupted by another navigation to \"http://localhost:8080/admin/faturas\"\nCall log:\n\u001b[2m  - navigating to \"http://localhost:8080/admin/feriados\", waiting until \"domcontentloaded\"\u001b[22m\n"
+    },
+    {
+      "route": "/admin/financeiro",
+      "error": "page.goto: Navigation to \"http://localhost:8080/admin/financeiro\" is interrupted by another navigation to \"http://localhost:8080/admin/feriados\"\nCall log:\n\u001b[2m  - navigating to \"http://localhost:8080/admin/financeiro\", waiting until \"domcontentloaded\"\u001b[22m\n"
+    },
+    {
+      "route": "/admin/financeiro/bypass-alertas",
+      "error": "page.goto: Navigation to \"http://localhost:8080/admin/financeiro/bypass-alertas\" is interrupted by another navigation to \"http://localhost:8080/admin/financeiro\"\nCall log:\n\u001b[2m  - navigating to \"http://localhost:8080/admin/financeiro/bypass-alertas\", waiting until \"domcontentloaded\"\u001b[22m\n"
+    },
+    {
+      "route": "/admin/financeiro/bypass-alertas/decidir",
+      "error": "page.goto: Navigation to \"http://localhost:8080/admin/financeiro/bypass-alertas/decidir\" is interrupted by another navigation to \"http://localhost:8080/admin/financeiro/bypass-alertas\"\nCall log:\n\u001b[2m  - navigating to \"http://localhost:8080/admin/financeiro/bypass-alertas/decidir\", waiting until \"domcontentloaded\"\u001b[22m\n"
+    },
+    {
+      "route": "/admin/financeiro/compensacao",
+      "error": "page.goto: Navigation to \"http://localhost:8080/admin/financeiro/compensacao\" is interrupted by another navigation to \"http://localhost:8080/admin/financeiro/bypass-alertas/decidir\"\nCall log:\n\u001b[2m  - navigating to \"http://localhost:8080/admin/financeiro/compensacao\", waiting until \"domcontentloaded\"\u001b[22m\n"
+    },
+    {
+      "route": "/admin/financeiro/csv",
+      "error": "page.goto: Download is starting\nCall log:\n\u001b[2m  - navigating to \"http://localhost:8080/admin/financeiro/csv\", waiting until \"domcontentloaded\"\u001b[22m\n"
+    },
+    {
+      "route": "/admin/financeiro/marketing/excluir",
+      "error": "page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at http://localhost:8080/admin/financeiro/marketing/excluir\nCall log:\n\u001b[2m  - navigating to \"http://localhost:8080/admin/financeiro/marketing/excluir\", waiting until \"domcontentloaded\"\u001b[22m\n"
+    },
+    {
+      "route": "/admin/financeiro/marketing/gasto",
+      "error": "page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at http://localhost:8080/admin/financeiro/marketing/gasto\nCall log:\n\u001b[2m  - navigating to \"http://localhost:8080/admin/financeiro/marketing/gasto\", waiting until \"domcontentloaded\"\u001b[22m\n"
+    },
+    {
+      "route": "/admin/financeiro/marketing/importar",
+      "error": "page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at http://localhost:8080/admin/financeiro/marketing/importar\nCall log:\n\u001b[2m  - navigating to \"http://localhost:8080/admin/financeiro/marketing/importar\", waiting until \"domcontentloaded\"\u001b[22m\n"
+    },
+    {
+      "route": "/admin/financeiro/visao-unificada",
+      "http": 200,
+      "url": "http://localhost:8080/admin/financeiro/visao-unificada",
+      "data": {
+        "profile": "gf-backoffice-profile-admin",
+        "mojibake": false,
+        "legacyHeader": 0,
+        "headers": 1,
+        "sidebars": 1,
+        "content": 2,
+        "overflow": false,
+        "consoleErrors": []
+      }
+    },
+    {
+      "route": "/admin/financeiro/visao-unificada/csv",
+      "error": "page.goto: Download is starting\nCall log:\n\u001b[2m  - navigating to \"http://localhost:8080/admin/financeiro/visao-unificada/csv\", waiting until \"domcontentloaded\"\u001b[22m\n"
+    },
+    {
+      "route": "/admin/guincho/novo",
+      "http": 200,
+      "url": "http://localhost:8080/admin/guincho/novo",
+      "data": {
+        "profile": "gf-backoffice-profile-admin",
+        "mojibake": false,
+        "legacyHeader": 0,
+        "headers": 1,
+        "sidebars": 1,
+        "content": 1,
+        "overflow": false,
+        "consoleErrors": []
+      }
+    },
+    {
+      "route": "/admin/guinchos",
+      "http": 200,
+      "url": "http://localhost:8080/admin/guinchos",
+      "data": {
+        "profile": "gf-backoffice-profile-admin gf-f18f19 gf-f18f12",
+        "mojibake": false,
+        "legacyHeader": 0,
+        "headers": 1,
+        "sidebars": 2,
+        "content": 2,
+        "overflow": false,
+        "consoleErrors": []
+      }
+    },
+    {
+      "route": "/admin/guinchospendentes",
+      "http": 200,
+      "url": "http://localhost:8080/admin/guinchospendentes",
+      "data": {
+        "profile": "gf-backoffice-profile-admin",
+        "mojibake": false,
+        "legacyHeader": 0,
+        "headers": 1,
+        "sidebars": 1,
+        "content": 2,
+        "overflow": false,
+        "consoleErrors": []
+      }
+    },
+    {
+      "route": "/admin/health",
+      "http": 200,
+      "url": "http://localhost:8080/admin/health",
+      "data": {
+        "profile": "gf-backoffice-profile-admin",
+        "mojibake": false,
+        "legacyHeader": 0,
+        "headers": 1,
+        "sidebars": 1,
+        "content": 1,
+        "overflow": false,
+        "consoleErrors": []
+      }
+    },
+    {
+      "route": "/admin/logs",
+      "http": 200,
+      "url": "http://localhost:8080/admin/logs",
+      "data": {
+        "profile": "gf-backoffice-profile-admin",
+        "mojibake": true,
+        "legacyHeader": 0,
+        "headers": 1,
+        "sidebars": 1,
+        "content": 1,
+        "overflow": false,
+        "consoleErrors": []
+      }
+    },
+    {
+      "route": "/admin/logs/export",
+      "error": "page.goto: Download is starting\nCall log:\n\u001b[2m  - navigating to \"http://localhost:8080/admin/logs/export\", waiting until \"domcontentloaded\"\u001b[22m\n"
+    },
+    {
+      "route": "/admin/marketing",
+      "http": 200,
+      "url": "http://localhost:8080/admin/marketing",
+      "data": {
+        "profile": "gf-backoffice-profile-admin",
+        "mojibake": true,
+        "legacyHeader": 0,
+        "headers": 1,
+        "sidebars": 1,
+        "content": 2,
+        "overflow": false,
+        "consoleErrors": []
+      }
+    },
+    {
+      "route": "/admin/marketing/campanha/salvar",
+      "error": "page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at http://localhost:8080/admin/marketing/campanha/salvar\nCall log:\n\u001b[2m  - navigating to \"http://localhost:8080/admin/marketing/campanha/salvar\", waiting until \"domcontentloaded\"\u001b[22m\n"
+    },
+    {
+      "route": "/admin/marketing/comissoes-indicacao",
+      "error": "page.goto: Navigation to \"http://localhost:8080/admin/marketing/comissoes-indicacao\" is interrupted by another navigation to \"chrome-error://chromewebdata/\"\nCall log:\n\u001b[2m  - navigating to \"http://localhost:8080/admin/marketing/comissoes-indicacao\", waiting until \"domcontentloaded\"\u001b[22m\n"
+    },
+    {
+      "route": "/admin/marketing/eventos",
+      "error": "page.goto: Navigation to \"http://localhost:8080/admin/marketing/eventos\" is interrupted by another navigation to \"http://localhost:8080/admin/marketing/comissoes-indicacao\"\nCall log:\n\u001b[2m  - navigating to \"http://localhost:8080/admin/marketing/eventos\", waiting until \"domcontentloaded\"\u001b[22m\n"
+    },
+    {
+      "route": "/admin/marketing/prospeccao/buscar",
+      "error": "page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at http://localhost:8080/admin/marketing/prospeccao/buscar\nCall log:\n\u001b[2m  - navigating to \"http://localhost:8080/admin/marketing/prospeccao/buscar\", waiting until \"domcontentloaded\"\u001b[22m\n"
+    },
+    {
+      "route": "/admin/marketing/prospeccao/regioes/salvar",
+      "error": "page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at http://localhost:8080/admin/marketing/prospeccao/regioes/salvar\nCall log:\n\u001b[2m  - navigating to \"http://localhost:8080/admin/marketing/prospeccao/regioes/salvar\", waiting until \"domcontentloaded\"\u001b[22m\n"
+    },
+    {
+      "route": "/admin/marketing/prospeccao/sincronizar-zonas",
+      "error": "page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at http://localhost:8080/admin/marketing/prospeccao/sincronizar-zonas\nCall log:\n\u001b[2m  - navigating to \"http://localhost:8080/admin/marketing/prospeccao/sincronizar-zonas\", waiting until \"domcontentloaded\"\u001b[22m\n"
+    },
+    {
+      "route": "/admin/marketing/referrals",
+      "error": "page.goto: Navigation to \"http://localhost:8080/admin/marketing/referrals\" is interrupted by another navigation to \"chrome-error://chromewebdata/\"\nCall log:\n\u001b[2m  - navigating to \"http://localhost:8080/admin/marketing/referrals\", waiting until \"domcontentloaded\"\u001b[22m\n"
+    },
+    {
+      "route": "/admin/ocorrencia/criar",
+      "error": "page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at http://localhost:8080/admin/ocorrencia/criar\nCall log:\n\u001b[2m  - navigating to \"http://localhost:8080/admin/ocorrencia/criar\", waiting until \"domcontentloaded\"\u001b[22m\n"
+    },
+    {
+      "route": "/admin/ocorrencia/resolver",
+      "error": "page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at http://localhost:8080/admin/ocorrencia/resolver\nCall log:\n\u001b[2m  - navigating to \"http://localhost:8080/admin/ocorrencia/resolver\", waiting until \"domcontentloaded\"\u001b[22m\n"
+    },
+    {
+      "route": "/admin/ocorrencias",
+      "error": "page.goto: Navigation to \"http://localhost:8080/admin/ocorrencias\" is interrupted by another navigation to \"chrome-error://chromewebdata/\"\nCall log:\n\u001b[2m  - navigating to \"http://localhost:8080/admin/ocorrencias\", waiting until \"domcontentloaded\"\u001b[22m\n"
+    },
+    {
+      "route": "/admin/oficinas-parceiras",
+      "http": 200,
+      "url": "http://localhost:8080/admin/oficinas-parceiras",
+      "data": {
+        "profile": "gf-backoffice-profile-admin",
+        "mojibake": false,
+        "legacyHeader": 0,
+        "headers": 1,
+        "sidebars": 1,
+        "content": 1,
+        "overflow": false,
+        "consoleErrors": []
+      }
+    },
+    {
+      "route": "/admin/oficinas/ajax",
+      "http": 200,
+      "url": "http://localhost:8080/admin/oficinas/ajax",
+      "data": {
+        "profile": "",
+        "mojibake": false,
+        "legacyHeader": 0,
+        "headers": 0,
+        "sidebars": 0,
+        "content": 0,
+        "overflow": false,
+        "consoleErrors": []
+      }
+    },
+    {
+      "route": "/admin/pedido/criar",
+      "error": "page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at http://localhost:8080/admin/pedido/criar\nCall log:\n\u001b[2m  - navigating to \"http://localhost:8080/admin/pedido/criar\", waiting until \"domcontentloaded\"\u001b[22m\n"
+    },
+    {
+      "route": "/admin/pedido/custo",
+      "error": "page.goto: Navigation to \"http://localhost:8080/admin/pedido/custo\" is interrupted by another navigation to \"chrome-error://chromewebdata/\"\nCall log:\n\u001b[2m  - navigating to \"http://localhost:8080/admin/pedido/custo\", waiting until \"domcontentloaded\"\u001b[22m\n"
+    },
+    {
+      "route": "/admin/pedido/novo",
+      "error": "page.goto: Navigation to \"http://localhost:8080/admin/pedido/novo\" is interrupted by another navigation to \"http://localhost:8080/admin/pedido/custo\"\nCall log:\n\u001b[2m  - navigating to \"http://localhost:8080/admin/pedido/novo\", waiting until \"domcontentloaded\"\u001b[22m\n"
+    },
+    {
+      "route": "/admin/pedido/novo/funil",
+      "error": "page.goto: Navigation to \"http://localhost:8080/admin/pedido/novo/funil\" is interrupted by another navigation to \"http://localhost:8080/admin/pedido/novo\"\nCall log:\n\u001b[2m  - navigating to \"http://localhost:8080/admin/pedido/novo/funil\", waiting until \"domcontentloaded\"\u001b[22m\n"
+    },
+    {
+      "route": "/admin/pedido/novo/v2",
+      "error": "page.goto: Navigation to \"http://localhost:8080/admin/pedido/novo/v2\" is interrupted by another navigation to \"http://localhost:8080/admin/pedido/novo/v2\"\nCall log:\n\u001b[2m  - navigating to \"http://localhost:8080/admin/pedido/novo/v2\", waiting until \"domcontentloaded\"\u001b[22m\n"
+    },
+    {
+      "route": "/admin/pedidos",
+      "error": "page.goto: Navigation to \"http://localhost:8080/admin/pedidos\" is interrupted by another navigation to \"http://localhost:8080/admin/pedido/novo/v2\"\nCall log:\n\u001b[2m  - navigating to \"http://localhost:8080/admin/pedidos\", waiting until \"domcontentloaded\"\u001b[22m\n"
+    },
+    {
+      "route": "/admin/planejamento",
+      "error": "page.goto: Navigation to \"http://localhost:8080/admin/planejamento\" is interrupted by another navigation to \"http://localhost:8080/admin/pedidos\"\nCall log:\n\u001b[2m  - navigating to \"http://localhost:8080/admin/planejamento\", waiting until \"domcontentloaded\"\u001b[22m\n"
+    },
+    {
+      "route": "/admin/precificacao/zonas",
+      "error": "page.goto: Navigation to \"http://localhost:8080/admin/precificacao/zonas\" is interrupted by another navigation to \"http://localhost:8080/admin/planejamento\"\nCall log:\n\u001b[2m  - navigating to \"http://localhost:8080/admin/precificacao/zonas\", waiting until \"domcontentloaded\"\u001b[22m\n"
+    },
+    {
+      "route": "/admin/prestadores",
+      "error": "page.goto: Navigation to \"http://localhost:8080/admin/prestadores\" is interrupted by another navigation to \"http://localhost:8080/admin/precificacao/zonas\"\nCall log:\n\u001b[2m  - navigating to \"http://localhost:8080/admin/prestadores\", waiting until \"domcontentloaded\"\u001b[22m\n"
+    },
+    {
+      "route": "/admin/prestadores-moveis",
+      "error": "page.goto: Navigation to \"http://localhost:8080/admin/prestadores-moveis\" is interrupted by another navigation to \"http://localhost:8080/admin/prestadores\"\nCall log:\n\u001b[2m  - navigating to \"http://localhost:8080/admin/prestadores-moveis\", waiting until \"domcontentloaded\"\u001b[22m\n"
+    },
+    {
+      "route": "/admin/produto/novo",
+      "error": "page.goto: Navigation to \"http://localhost:8080/admin/produto/novo\" is interrupted by another navigation to \"http://localhost:8080/admin/prestadores-moveis\"\nCall log:\n\u001b[2m  - navigating to \"http://localhost:8080/admin/produto/novo\", waiting until \"domcontentloaded\"\u001b[22m\n"
+    },
+    {
+      "route": "/admin/produtos",
+      "error": "page.goto: Navigation to \"http://localhost:8080/admin/produtos\" is interrupted by another navigation to \"http://localhost:8080/admin/produto/novo\"\nCall log:\n\u001b[2m  - navigating to \"http://localhost:8080/admin/produtos\", waiting until \"domcontentloaded\"\u001b[22m\n"
+    },
+    {
+      "route": "/admin/proof-of-road",
+      "error": "page.goto: Navigation to \"http://localhost:8080/admin/proof-of-road\" is interrupted by another navigation to \"http://localhost:8080/admin/produtos\"\nCall log:\n\u001b[2m  - navigating to \"http://localhost:8080/admin/proof-of-road\", waiting until \"domcontentloaded\"\u001b[22m\n"
+    },
+    {
+      "route": "/admin/prospeccao",
+      "error": "page.goto: Navigation to \"http://localhost:8080/admin/prospeccao\" is interrupted by another navigation to \"http://localhost:8080/admin/proof-of-road\"\nCall log:\n\u001b[2m  - navigating to \"http://localhost:8080/admin/prospeccao\", waiting until \"domcontentloaded\"\u001b[22m\n"
+    },
+    {
+      "route": "/admin/prospeccao/buscar",
+      "error": "page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at http://localhost:8080/admin/prospeccao/buscar\nCall log:\n\u001b[2m  - navigating to \"http://localhost:8080/admin/prospeccao/buscar\", waiting until \"domcontentloaded\"\u001b[22m\n"
+    },
+    {
+      "route": "/admin/prospeccao/regioes",
+      "http": 200,
+      "url": "http://localhost:8080/admin/prospeccao/regioes",
+      "data": {
+        "profile": "gf-backoffice-profile-admin",
+        "mojibake": true,
+        "legacyHeader": 0,
+        "headers": 1,
+        "sidebars": 1,
+        "content": 2,
+        "overflow": false,
+        "consoleErrors": []
+      }
+    },
+    {
+      "route": "/admin/prospeccao/regioes/salvar",
+      "error": "page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at http://localhost:8080/admin/prospeccao/regioes/salvar\nCall log:\n\u001b[2m  - navigating to \"http://localhost:8080/admin/prospeccao/regioes/salvar\", waiting until \"domcontentloaded\"\u001b[22m\n"
+    },
+    {
+      "route": "/admin/prospeccao/sincronizar-zonas",
+      "error": "page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at http://localhost:8080/admin/prospeccao/sincronizar-zonas\nCall log:\n\u001b[2m  - navigating to \"http://localhost:8080/admin/prospeccao/sincronizar-zonas\", waiting until \"domcontentloaded\"\u001b[22m\n"
+    },
+    {
+      "route": "/admin/repasses/demanda",
+      "error": "page.goto: Navigation to \"http://localhost:8080/admin/repasses/demanda\" is interrupted by another navigation to \"chrome-error://chromewebdata/\"\nCall log:\n\u001b[2m  - navigating to \"http://localhost:8080/admin/repasses/demanda\", waiting until \"domcontentloaded\"\u001b[22m\n"
+    },
+    {
+      "route": "/admin/repasses/demandas",
+      "error": "page.goto: Navigation to \"http://localhost:8080/admin/repasses/demandas\" is interrupted by another navigation to \"http://localhost:8080/admin/repasses/demanda\"\nCall log:\n\u001b[2m  - navigating to \"http://localhost:8080/admin/repasses/demandas\", waiting until \"domcontentloaded\"\u001b[22m\n"
+    },
+    {
+      "route": "/admin/repasses/recuperacao",
+      "error": "page.goto: Navigation to \"http://localhost:8080/admin/repasses/recuperacao\" is interrupted by another navigation to \"http://localhost:8080/admin/repasses/demandas\"\nCall log:\n\u001b[2m  - navigating to \"http://localhost:8080/admin/repasses/recuperacao\", waiting until \"domcontentloaded\"\u001b[22m\n"
+    },
+    {
+      "route": "/admin/repasses/triagem",
+      "error": "page.goto: Navigation to \"http://localhost:8080/admin/repasses/triagem\" is interrupted by another navigation to \"http://localhost:8080/admin/repasses/recuperacao\"\nCall log:\n\u001b[2m  - navigating to \"http://localhost:8080/admin/repasses/triagem\", waiting until \"domcontentloaded\"\u001b[22m\n"
+    },
+    {
+      "route": "/admin/revisoes-manuais",
+      "error": "page.goto: Navigation to \"http://localhost:8080/admin/revisoes-manuais\" is interrupted by another navigation to \"http://localhost:8080/admin/repasses/triagem\"\nCall log:\n\u001b[2m  - navigating to \"http://localhost:8080/admin/revisoes-manuais\", waiting until \"domcontentloaded\"\u001b[22m\n"
+    },
+    {
+      "route": "/admin/saques",
+      "error": "page.goto: Navigation to \"http://localhost:8080/admin/saques\" is interrupted by another navigation to \"http://localhost:8080/admin/revisoes-manuais\"\nCall log:\n\u001b[2m  - navigating to \"http://localhost:8080/admin/saques\", waiting until \"domcontentloaded\"\u001b[22m\n"
+    },
+    {
+      "route": "/admin/servico/novo",
+      "error": "page.goto: Navigation to \"http://localhost:8080/admin/servico/novo\" is interrupted by another navigation to \"http://localhost:8080/admin/saques\"\nCall log:\n\u001b[2m  - navigating to \"http://localhost:8080/admin/servico/novo\", waiting until \"domcontentloaded\"\u001b[22m\n"
+    },
+    {
+      "route": "/admin/servicos",
+      "error": "page.goto: Navigation to \"http://localhost:8080/admin/servicos\" is interrupted by another navigation to \"http://localhost:8080/admin/servico/novo\"\nCall log:\n\u001b[2m  - navigating to \"http://localhost:8080/admin/servicos\", waiting until \"domcontentloaded\"\u001b[22m\n"
+    },
+    {
+      "route": "/admin/simulador",
+      "error": "page.goto: Navigation to \"http://localhost:8080/admin/simulador\" is interrupted by another navigation to \"http://localhost:8080/admin/catalogo-servicos/tipos\"\nCall log:\n\u001b[2m  - navigating to \"http://localhost:8080/admin/simulador\", waiting until \"domcontentloaded\"\u001b[22m\n"
+    },
+    {
+      "route": "/admin/usuario/novo",
+      "error": "page.goto: Navigation to \"http://localhost:8080/admin/usuario/novo\" is interrupted by another navigation to \"http://localhost:8080/admin/simulador\"\nCall log:\n\u001b[2m  - navigating to \"http://localhost:8080/admin/usuario/novo\", waiting until \"domcontentloaded\"\u001b[22m\n"
+    },
+    {
+      "route": "/admin/usuario/suspender",
+      "error": "page.goto: Navigation to \"http://localhost:8080/admin/usuario/suspender\" is interrupted by another navigation to \"http://localhost:8080/admin/usuario/novo\"\nCall log:\n\u001b[2m  - navigating to \"http://localhost:8080/admin/usuario/suspender\", waiting until \"domcontentloaded\"\u001b[22m\n"
+    },
+    {
+      "route": "/admin/usuarios",
+      "error": "page.goto: Navigation to \"http://localhost:8080/admin/usuarios\" is interrupted by another navigation to \"http://localhost:8080/admin/usuarios?info=suspensao_via_post\"\nCall log:\n\u001b[2m  - navigating to \"http://localhost:8080/admin/usuarios\", waiting until \"domcontentloaded\"\u001b[22m\n"
+    },
+    {
+      "route": "/admin/veiculos/ajax",
+      "error": "page.goto: Navigation to \"http://localhost:8080/admin/veiculos/ajax\" is interrupted by another navigation to \"http://localhost:8080/admin/usuarios\"\nCall log:\n\u001b[2m  - navigating to \"http://localhost:8080/admin/veiculos/ajax\", waiting until \"domcontentloaded\"\u001b[22m\n"
+    },
+    {
+      "route": "/cliente/dashboard",
+      "error": "page.goto: Navigation to \"http://localhost:8080/cliente/dashboard\" is interrupted by another navigation to \"http://localhost:8080/admin/veiculos/ajax\"\nCall log:\n\u001b[2m  - navigating to \"http://localhost:8080/cliente/dashboard\", waiting until \"domcontentloaded\"\u001b[22m\n"
+    },
+    {
+      "route": "/cliente/financeiro",
+      "error": "page.goto: Navigation to \"http://localhost:8080/cliente/financeiro\" is interrupted by another navigation to \"http://localhost:8080/cliente/dashboard\"\nCall log:\n\u001b[2m  - navigating to \"http://localhost:8080/cliente/financeiro\", waiting until \"domcontentloaded\"\u001b[22m\n"
+    },
+    {
+      "route": "/cliente/historico",
+      "error": "page.goto: Navigation to \"http://localhost:8080/cliente/historico\" is interrupted by another navigation to \"http://localhost:8080/cliente/financeiro\"\nCall log:\n\u001b[2m  - navigating to \"http://localhost:8080/cliente/historico\", waiting until \"domcontentloaded\"\u001b[22m\n"
+    },
+    {
+      "route": "/cliente/oficina/nova",
+      "error": "page.goto: Navigation to \"http://localhost:8080/cliente/oficina/nova\" is interrupted by another navigation to \"http://localhost:8080/cliente/historico\"\nCall log:\n\u001b[2m  - navigating to \"http://localhost:8080/cliente/oficina/nova\", waiting until \"domcontentloaded\"\u001b[22m\n"
+    },
+    {
+      "route": "/cliente/oficinas",
+      "error": "page.goto: Navigation to \"http://localhost:8080/cliente/oficinas\" is interrupted by another navigation to \"http://localhost:8080/cliente/oficina/nova\"\nCall log:\n\u001b[2m  - navigating to \"http://localhost:8080/cliente/oficinas\", waiting until \"domcontentloaded\"\u001b[22m\n"
+    },
+    {
+      "route": "/cliente/oficinas-parceiras",
+      "error": "page.goto: Navigation to \"http://localhost:8080/cliente/oficinas-parceiras\" is interrupted by another navigation to \"http://localhost:8080/cliente/oficinas\"\nCall log:\n\u001b[2m  - navigating to \"http://localhost:8080/cliente/oficinas-parceiras\", waiting until \"domcontentloaded\"\u001b[22m\n"
+    },
+    {
+      "route": "/cliente/oficinas/nova",
+      "http": 200,
+      "url": "http://localhost:8080/cliente/oficinas/nova",
+      "data": {
+        "profile": "admin bo bo-admin",
+        "mojibake": false,
+        "legacyHeader": 1,
+        "headers": 1,
+        "sidebars": 1,
+        "content": 1,
+        "overflow": false,
+        "consoleErrors": []
+      }
+    },
+    {
+      "route": "/cliente/pedido/custo",
+      "http": 422,
+      "url": "http://localhost:8080/cliente/pedido/custo",
+      "data": {
+        "profile": "",
+        "mojibake": false,
+        "legacyHeader": 0,
+        "headers": 0,
+        "sidebars": 0,
+        "content": 0,
+        "overflow": false,
+        "consoleErrors": []
+      }
+    },
+    {
+      "route": "/cliente/pedido/novo",
+      "http": 200,
+      "url": "http://localhost:8080/cliente/veiculo/novo?retorno=pedido",
+      "data": {
+        "profile": "admin bo bo-admin",
+        "mojibake": false,
+        "legacyHeader": 1,
+        "headers": 1,
+        "sidebars": 1,
+        "content": 1,
+        "overflow": false,
+        "consoleErrors": []
+      }
+    },
+    {
+      "route": "/cliente/pedido/rascunho",
+      "http": 403,
+      "url": "http://localhost:8080/cliente/pedido/rascunho",
+      "data": {
+        "profile": "",
+        "mojibake": true,
+        "legacyHeader": 0,
+        "headers": 0,
+        "sidebars": 0,
+        "content": 0,
+        "overflow": false,
+        "consoleErrors": []
+      }
+    },
+    {
+      "route": "/cliente/perfil",
+      "http": 200,
+      "url": "http://localhost:8080/cliente/perfil",
+      "data": {
+        "profile": "admin bo bo-admin",
+        "mojibake": false,
+        "legacyHeader": 1,
+        "headers": 1,
+        "sidebars": 1,
+        "content": 1,
+        "overflow": false,
+        "consoleErrors": []
+      }
+    },
+    {
+      "route": "/cliente/triagem",
+      "http": 200,
+      "url": "http://localhost:8080/cliente/triagem",
+      "data": {
+        "profile": "admin bo bo-admin",
+        "mojibake": false,
+        "legacyHeader": 1,
+        "headers": 1,
+        "sidebars": 1,
+        "content": 1,
+        "overflow": false,
+        "consoleErrors": []
+      }
+    },
+    {
+      "route": "/cliente/triagem/resultado",
+      "http": 200,
+      "url": "http://localhost:8080/cliente/triagem",
+      "data": {
+        "profile": "admin bo bo-admin",
+        "mojibake": false,
+        "legacyHeader": 1,
+        "headers": 1,
+        "sidebars": 1,
+        "content": 1,
+        "overflow": false,
+        "consoleErrors": []
+      }
+    },
+    {
+      "route": "/cliente/veiculo/novo",
+      "http": 200,
+      "url": "http://localhost:8080/cliente/veiculo/novo",
+      "data": {
+        "profile": "admin bo bo-admin",
+        "mojibake": false,
+        "legacyHeader": 1,
+        "headers": 1,
+        "sidebars": 1,
+        "content": 1,
+        "overflow": false,
+        "consoleErrors": []
+      }
+    },
+    {
+      "route": "/cliente/veiculos",
+      "http": 200,
+      "url": "http://localhost:8080/cliente/veiculos",
+      "data": {
+        "profile": "admin bo bo-admin",
+        "mojibake": false,
+        "legacyHeader": 1,
+        "headers": 1,
+        "sidebars": 1,
+        "content": 1,
+        "overflow": false,
+        "consoleErrors": []
+      }
+    },
+    {
+      "route": "/cliente/veiculos/novo",
+      "http": 200,
+      "url": "http://localhost:8080/cliente/veiculos/novo",
+      "data": {
+        "profile": "admin bo bo-admin",
+        "mojibake": false,
+        "legacyHeader": 1,
+        "headers": 1,
+        "sidebars": 1,
+        "content": 1,
+        "overflow": false,
+        "consoleErrors": []
+      }
+    },
+    {
+      "route": "/guincho",
+      "http": 200,
+      "url": "http://localhost:8080/guincho",
+      "data": {
+        "profile": "gf-landing",
+        "mojibake": false,
+        "legacyHeader": 0,
+        "headers": 0,
+        "sidebars": 0,
+        "content": 0,
+        "overflow": false,
+        "consoleErrors": []
+      }
+    },
+    {
+      "route": "/guincho/bancario",
+      "http": 200,
+      "url": "http://localhost:8080/admin/dashboard",
+      "data": {
+        "profile": "gf-backoffice-profile-admin",
+        "mojibake": false,
+        "legacyHeader": 0,
+        "headers": 1,
+        "sidebars": 1,
+        "content": 1,
+        "overflow": false,
+        "consoleErrors": []
+      }
+    },
+    {
+      "route": "/guincho/capacidades",
+      "http": 200,
+      "url": "http://localhost:8080/admin/dashboard",
+      "data": {
+        "profile": "gf-backoffice-profile-admin",
+        "mojibake": false,
+        "legacyHeader": 0,
+        "headers": 1,
+        "sidebars": 1,
+        "content": 1,
+        "overflow": false,
+        "consoleErrors": []
+      }
+    },
+    {
+      "route": "/guincho/dashboard",
+      "http": 200,
+      "url": "http://localhost:8080/admin/dashboard",
+      "data": {
+        "profile": "gf-backoffice-profile-admin",
+        "mojibake": false,
+        "legacyHeader": 0,
+        "headers": 1,
+        "sidebars": 1,
+        "content": 1,
+        "overflow": false,
+        "consoleErrors": []
+      }
+    },
+    {
+      "route": "/guincho/estoque",
+      "http": 200,
+      "url": "http://localhost:8080/admin/dashboard",
+      "data": {
+        "profile": "gf-backoffice-profile-admin",
+        "mojibake": false,
+        "legacyHeader": 0,
+        "headers": 1,
+        "sidebars": 1,
+        "content": 1,
+        "overflow": false,
+        "consoleErrors": []
+      }
+    },
+    {
+      "route": "/guincho/financeiro",
+      "http": 200,
+      "url": "http://localhost:8080/guincho/financeiro",
+      "data": {
+        "profile": "admin bo bo-admin",
+        "mojibake": false,
+        "legacyHeader": 1,
+        "headers": 1,
+        "sidebars": 1,
+        "content": 1,
+        "overflow": false,
+        "consoleErrors": []
+      }
+    },
+    {
+      "route": "/guincho/historico",
+      "http": 500,
+      "url": "http://localhost:8080/guincho/historico",
+      "data": {
+        "profile": "",
+        "mojibake": false,
+        "legacyHeader": 0,
+        "headers": 0,
+        "sidebars": 0,
+        "content": 0,
+        "overflow": false,
+        "consoleErrors": []
+      }
+    },
+    {
+      "route": "/guincho/operacao",
+      "http": 200,
+      "url": "http://localhost:8080/admin/dashboard",
+      "data": {
+        "profile": "gf-backoffice-profile-admin",
+        "mojibake": false,
+        "legacyHeader": 0,
+        "headers": 1,
+        "sidebars": 1,
+        "content": 1,
+        "overflow": false,
+        "consoleErrors": []
+      }
+    },
+    {
+      "route": "/guincho/pedidos",
+      "http": 200,
+      "url": "http://localhost:8080/guincho/pedidos",
+      "data": {
+        "profile": "",
+        "mojibake": false,
+        "legacyHeader": 0,
+        "headers": 0,
+        "sidebars": 0,
+        "content": 0,
+        "overflow": false,
+        "consoleErrors": []
+      }
+    },
+    {
+      "route": "/guincho/pedidos-disponiveis",
+      "http": 200,
+      "url": "http://localhost:8080/guincho/pedidos-disponiveis",
+      "data": {
+        "profile": "",
+        "mojibake": false,
+        "legacyHeader": 0,
+        "headers": 0,
+        "sidebars": 0,
+        "content": 0,
+        "overflow": false,
+        "consoleErrors": []
+      }
+    },
+    {
+      "route": "/guincho/perfil",
+      "http": 200,
+      "url": "http://localhost:8080/admin/dashboard",
+      "data": {
+        "profile": "gf-backoffice-profile-admin",
+        "mojibake": false,
+        "legacyHeader": 0,
+        "headers": 1,
+        "sidebars": 1,
+        "content": 1,
+        "overflow": false,
+        "consoleErrors": []
+      }
+    },
+    {
+      "route": "/guincho/tornar-se-guincho",
+      "http": 200,
+      "url": "http://localhost:8080/admin/dashboard",
+      "data": {
+        "profile": "gf-backoffice-profile-admin",
+        "mojibake": false,
+        "legacyHeader": 0,
+        "headers": 1,
+        "sidebars": 1,
+        "content": 1,
+        "overflow": false,
+        "consoleErrors": []
+      }
+    },
+    {
+      "route": "/oficina/dashboard",
+      "http": 403,
+      "url": "http://localhost:8080/oficina/dashboard",
+      "data": {
+        "profile": "",
+        "mojibake": false,
+        "legacyHeader": 0,
+        "headers": 0,
+        "sidebars": 0,
+        "content": 0,
+        "overflow": false,
+        "consoleErrors": []
+      }
+    },
+    {
+      "route": "/oficina/financeiro",
+      "http": 403,
+      "url": "http://localhost:8080/oficina/financeiro",
+      "data": {
+        "profile": "",
+        "mojibake": false,
+        "legacyHeader": 0,
+        "headers": 0,
+        "sidebars": 0,
+        "content": 0,
+        "overflow": false,
+        "consoleErrors": []
+      }
+    },
+    {
+      "route": "/oficina/historico",
+      "http": 403,
+      "url": "http://localhost:8080/oficina/historico",
+      "data": {
+        "profile": "",
+        "mojibake": false,
+        "legacyHeader": 0,
+        "headers": 0,
+        "sidebars": 0,
+        "content": 0,
+        "overflow": false,
+        "consoleErrors": []
+      }
+    },
+    {
+      "route": "/oficina/pedidos",
+      "http": 403,
+      "url": "http://localhost:8080/oficina/pedidos",
+      "data": {
+        "profile": "",
+        "mojibake": false,
+        "legacyHeader": 0,
+        "headers": 0,
+        "sidebars": 0,
+        "content": 0,
+        "overflow": false,
+        "consoleErrors": []
+      }
+    },
+    {
+      "route": "/oficina/pedidos-disponiveis",
+      "http": 403,
+      "url": "http://localhost:8080/oficina/pedidos-disponiveis",
+      "data": {
+        "profile": "",
+        "mojibake": false,
+        "legacyHeader": 0,
+        "headers": 0,
+        "sidebars": 0,
+        "content": 0,
+        "overflow": false,
+        "consoleErrors": []
+      }
+    },
+    {
+      "route": "/oficina/perfil",
+      "http": 403,
+      "url": "http://localhost:8080/oficina/perfil",
+      "data": {
+        "profile": "",
+        "mojibake": false,
+        "legacyHeader": 0,
+        "headers": 0,
+        "sidebars": 0,
+        "content": 0,
+        "overflow": false,
+        "consoleErrors": []
+      }
+    }
+  ]
+}

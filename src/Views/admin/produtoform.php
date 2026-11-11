@@ -1,15 +1,13 @@
 <?php
 $bp = defined('BASE_PATH') ? BASE_PATH : '';
-include __DIR__ . '/../layouts/header.php';
+ob_start();
 $editando = !empty($produto['id']);
 $cats = [
     'bateria' => 'Bateria', 'pneu' => 'Pneu', 'combustivel' => 'Combustível',
     'chaveiro' => 'Chaveiro', 'eletrica' => 'Elétrica', 'fluido' => 'Fluido', 'outro' => 'Outro',
 ];
 ?>
-<div class="main-wrapper shell admin-shell">
-<?php include __DIR__ . '/../layouts/sidebar_admin.php'; ?>
-<main class="main-content shell-main shell-content"><?php include __DIR__ . '/partials/_panel_topbar_admin.php'; ?>
+
 
     <header class="page-head mb-4">
         <div>
@@ -82,6 +80,6 @@ $cats = [
         </div>
     </div>
 
-</main>
-</div>
-<?php include __DIR__ . '/../layouts/footer.php'; ?>
+
+
+<?php $conteudo_pagina=ob_get_clean(); $perfil='admin'; $titulo_pagina="Novo produto"; $breadcrumb=["Catálogo e preços","Novo produto"]; $assets_css=["/public/assets/css/pages/bo-admin-catalogo.css"]; require __DIR__ . '/../layouts/backoffice_shell.php';

@@ -30,7 +30,7 @@
 
 $bp = defined('BASE_PATH') ? BASE_PATH : '';
 
-include __DIR__ . '/../layouts/header.php';
+ob_start();
 
 ?>
 
@@ -43,22 +43,10 @@ include __DIR__ . '/../layouts/header.php';
 
 
 
-<div class="bo bo-operator gf-f18c-root" id="gfF18cRoot">
-  <aside class="bo-sidebar gf-f18c-sidebar" id="gfF18cSidebar" aria-label="Navegação do administrador">
-    <a class="gf-f18c-brand" href="<?php echo htmlspecialchars($bp, ENT_QUOTES, 'UTF-8'); ?>/admin/central">Guincha<span>Fácil</span><i>.</i></a>
-    <div class="gf-f18c-workspace"><span class="gf-f18c-avatar"><i class="fas fa-shield-halved" aria-hidden="true"></i></span><span><strong>Central GuinchaFácil</strong><small>Workspace operacional</small></span></div>
-    <?php include __DIR__ . '/../components/admin_nav_operacional.php'; ?>
-    <div class="gf-f18c-sidebar-footer"><a href="<?php echo htmlspecialchars($bp, ENT_QUOTES, 'UTF-8'); ?>/">Voltar ao site</a></div>
-  </aside>
-  <div class="bo-body">
-    <header class="bo-header">
-      <div class="gf-f18c-breadcrumb"><button type="button" id="gfF18cCollapse" aria-label="Recolher ou expandir menu" aria-controls="gfF18cSidebar" aria-expanded="true"><i class="fas fa-chevron-left" aria-hidden="true"></i></button><span>Backoffice <i class="fas fa-chevron-right" aria-hidden="true"></i> <strong>Central operacional</strong></span></div>
-      <div class="gf-f18c-header-actions"><a href="<?php echo htmlspecialchars($bp, ENT_QUOTES, 'UTF-8'); ?>/admin/alertas" aria-label="Abrir alertas operacionais"><i class="far fa-bell" aria-hidden="true"></i></a><span class="gf-f18c-user"><?php echo htmlspecialchars((string)($_SESSION['user']['nome'] ?? 'Operador'), ENT_QUOTES, 'UTF-8'); ?></span><a class="gf-f18c-logout" href="<?php echo htmlspecialchars($bp, ENT_QUOTES, 'UTF-8'); ?>/logout" data-confirm-logout><i class="fas fa-right-from-bracket" aria-hidden="true"></i><span>Sair</span></a></div>
-    </header>
-    <main class="bo-content">
-<div class="ops-topbar" style="padding:10px 24px;border-bottom:1px solid var(--theme-border,#232c35);background:var(--theme-nav,#030405)">
 
-    <div class="ops-topbar__search">
+<div class="bo-toolbar" style="padding:10px 24px;border-bottom:1px solid var(--theme-border,#232c35);background:var(--theme-nav,#030405)">
+
+    <div class="bo-search">
 
         <i class="fas fa-magnifying-glass"></i>
 
@@ -76,11 +64,11 @@ include __DIR__ . '/../layouts/header.php';
 
     </div>
 
-    <div class="ops-topbar__meta">
+    <div class="bo-toolbar-meta">
 
-        <span class="ops-topbar__status">
+        <span class="bo-toolbar-status">
 
-            <span class="ops-topbar__status-dot"></span>
+            <span class="bo-toolbar-status-dot"></span>
 
             Operação normal
 
@@ -340,12 +328,6 @@ include __DIR__ . '/../layouts/header.php';
 
 
 
-</div>
-
-
-
-    </main>
-  </div>
 </div>
 <script<?php echo csp_script_nonce_attr(); ?> src="<?php echo htmlspecialchars($bp); ?>/public/assets/vendor/leaflet/leaflet.js"></script>
 
@@ -761,8 +743,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 ?>
 
-<script<?php echo csp_script_nonce_attr(); ?> src="<?php echo htmlspecialchars($bp); ?>/public/assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
 
-</body>
 
-</html>
+
+<?php $conteudo_pagina=ob_get_clean(); $perfil='admin'; $titulo_pagina='Central operacional'; $breadcrumb=['Operação','Central operacional']; $assets_css=['/public/assets/css/pages/bo-admin-operacao.css']; require __DIR__ . '/../layouts/backoffice_shell.php';

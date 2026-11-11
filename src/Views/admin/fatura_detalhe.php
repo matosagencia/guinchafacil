@@ -1,6 +1,7 @@
 <?php
 $bp = defined('BASE_PATH') ? BASE_PATH : '';
-include __DIR__ . '/../layouts/header.php';
+ob_start();
+
 
 $fatura     = $fatura     ?? [];
 $itens      = $itens      ?? [];
@@ -20,17 +21,13 @@ $badges = [
 $badge = $badges[$status] ?? 'secondary';
 $saldo = (float)($fatura['saldo'] ?? 0);
 ?>
-<link rel="stylesheet" href="<?= $bp ?>/public/assets/css/pages/tow-financeiro.css">
-<div class="main-wrapper shell admin-shell">
-<?php include __DIR__ . '/../layouts/sidebar_admin.php'; ?>
-<main class="main-content shell-main shell-content">
-<?php include __DIR__ . '/partials/_panel_topbar_admin.php'; ?>
-    <header class="page-head mb-4">
+<div class="bo-page">
+<header class="page-head mb-4">
         <div>
             <span class="eyebrow">Financeiro</span>
             <h1>Fatura #<?= (int)($fatura['id'] ?? 0) ?></h1>
             <p>
-                <?= htmlspecialchars((string)($fatura['parceiro_nome'] ?? 'â€”')) ?>
+                <?= htmlspecialchars((string)($fatura['parceiro_nome'] ?? '—')) ?>
                 (<?= htmlspecialchars((string)($fatura['parceiro_tipo'] ?? '')) ?> #<?= (int)($fatura['parceiro_id'] ?? 0) ?>)
                 <span class="badge bg-<?= $badge ?> ms-2"><?= htmlspecialchars(ucfirst($status)) ?></span>
             </p>
@@ -50,7 +47,7 @@ $saldo = (float)($fatura['saldo'] ?? 0);
         <div class="col-md-3"><div class="stat-card"><div class="stat-label">Saldo</div><div class="stat-value <?= $saldo > 0 ? 'text-success' : ($saldo < 0 ? 'text-danger' : '') ?>"><?= $money($saldo) ?></div></div></div>
     </div>
     <section class="fin-card p-4 mb-4">
-        <h3 class="fin-subtitle mb-3"><i class="fas fa-list me-2"></i>Itens (<?= count($itens) ?>)</h3>
+        <h3 class="fin-subtitle mb-3">Itens (<?= count($itens) ?>)</h3>
         <?php if (!empty($itens)): ?>
         <div class="table-responsive"><table class="table table-sm align-middle">
             <thead><tr><th>Pedido</th><th>Data</th><th>Cliente</th>
@@ -61,7 +58,7 @@ $saldo = (float)($fatura['saldo'] ?? 0);
             <tr>
                 <td><a href="<?= $bp ?>/admin/pedido/<?= (int)($i['pedido_id'] ?? 0) ?>">#<?= (int)($i['pedido_id'] ?? 0) ?></a></td>
                 <td><?= date('d/m/Y H:i', strtotime((string)($i['pedido_em'] ?? 'now'))) ?></td>
-                <td><?= htmlspecialchars((string)($i['cliente_nome'] ?? 'â€”')) ?><div class="small text-muted"><?= htmlspecialchars((string)($i['tipo_problema'] ?? '')) ?></div></td>
+                <td><?= htmlspecialchars((string)($i['cliente_nome'] ?? '—')) ?><div class="small text-muted"><?= htmlspecialchars((string)($i['tipo_problema'] ?? '')) ?></div></td>
                 <td class="text-end"><?= $money($i['valor_total'] ?? 0) ?></td>
                 <td class="text-end text-danger">-<?= $money($i['comissao_valor'] ?? 0) ?></td>
                 <td class="text-end"><strong><?= $money($i['valor_liquido_parceiro'] ?? 0) ?></strong></td>
@@ -72,8 +69,8 @@ $saldo = (float)($fatura['saldo'] ?? 0);
             <tr class="table-light">
                 <td colspan="7" class="p-0">
                     <details>
-                        <summary class="p-2 small" style="cursor:pointer;"><i class="fas fa-calculator me-1"></i>Composicao do preco</summary>
-                        <table class="table table-sm mb-0" style="font-size:.85rem;">
+                        <summary class="p-2 small">Composicao do preco</summary>
+                        <table class="table table-sm mb-0">
                             <tr><td>Base (km x tarifa)</td><td class="text-end"><?= $money($comp['component_frete'] ?? 0) ?></td></tr>
                             <tr><td>Intermediacao</td><td class="text-end"><?= $money($comp['component_intermediacao'] ?? 0) ?></td></tr>
                             <?php if (($comp['component_elevacao'] ?? 0) > 0): ?><tr><td>Elevacao</td><td class="text-end"><?= $money($comp['component_elevacao']) ?></td></tr><?php endif; ?>
@@ -97,7 +94,7 @@ $saldo = (float)($fatura['saldo'] ?? 0);
     </section>
     <?php if (!empty($fatura['pix_copia_cola']) || !empty($fatura['pix_qrcode'])): ?>
     <section class="fin-card p-4 mb-4">
-        <h3 class="fin-subtitle mb-3"><i class="fas fa-qrcode me-2"></i>PIX</h3>
+        <h3 class="fin-subtitle mb-3">PIX</h3>
         <?php if (!empty($fatura['pix_copia_cola'])): ?>
         <label class="form-label small">Copia e cola</label>
         <textarea class="form-control" rows="3" readonly><?= htmlspecialchars((string)$fatura['pix_copia_cola']) ?></textarea>
@@ -105,7 +102,7 @@ $saldo = (float)($fatura['saldo'] ?? 0);
     </section>
     <?php endif; ?>
     <section class="fin-card p-4 mb-4">
-        <h3 class="fin-subtitle mb-3"><i class="fas fa-history me-2"></i>Pagamentos (<?= count($pagamentos) ?>)</h3>
+        <h3 class="fin-subtitle mb-3">Pagamentos (<?= count($pagamentos) ?>)</h3>
         <?php if (!empty($pagamentos)): ?>
         <table class="table table-sm">
             <thead><tr><th>Data</th><th>Transacao</th><th>Metodo</th><th class="text-end">Valor</th></tr></thead>
@@ -125,12 +122,12 @@ $saldo = (float)($fatura['saldo'] ?? 0);
         <?php endif; ?>
     </section>
     <section class="fin-card p-4">
-        <h3 class="fin-subtitle mb-3"><i class="fas fa-cogs me-2"></i>Acoes</h3>
+        <h3 class="fin-subtitle mb-3">Acoes</h3>
         <div class="d-flex gap-2 flex-wrap">
             <?php if ($status !== 'paga'): ?>
             <form method="POST" action="<?= $bp ?>/admin/fatura/<?= (int)($fatura['id'] ?? 0) ?>/marcar-paga" class="d-flex gap-2">
                 <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken) ?>">
-                <input type="text" name="transacao_id" class="form-control form-control-sm" placeholder="transacao_id (opcional)" style="width:260px">
+                <input type="text" name="transacao_id" class="form-control form-control-sm" placeholder="transacao_id (opcional)">
                 <button class="btn btn-success btn-sm" onclick="return confirm('Confirmar baixa manual?')">Marcar como paga</button>
             </form>
             <?php endif; ?>
@@ -142,6 +139,5 @@ $saldo = (float)($fatura['saldo'] ?? 0);
             <?php endif; ?>
         </div>
     </section>
-</main>
 </div>
-<?php include __DIR__ . '/../layouts/footer.php';
+<?php $conteudo_pagina=ob_get_clean(); $perfil='admin'; $titulo_pagina='Detalhe da fatura'; $breadcrumb=['Financeiro','Fatura']; $assets_css=['/public/assets/css/pages/bo-admin-financeiro.css']; require __DIR__ . '/../layouts/backoffice_shell.php';

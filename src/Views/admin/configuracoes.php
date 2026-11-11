@@ -2,7 +2,7 @@
 
 $bp = defined('BASE_PATH') ? BASE_PATH : '';
 
-include __DIR__ . '/../layouts/header.php';
+ob_start();
 
 $sensivelEnv = ['DB_PASS', 'SMTP_PASS', 'GOOGLE_CLIENT_SECRET', 'ENCRYPTION_KEY', 'SIMULATION_ADMIN_TOKEN'];
 $gruposEnv = [
@@ -30,20 +30,7 @@ function maskEnvValue(string $value): string {
 <link rel="stylesheet" href="<?php echo htmlspecialchars($bp); ?>/public/assets/css/pages/admin-configuracoes.css?v=20260813-2">
 <link rel="stylesheet" href="<?php echo htmlspecialchars($bp); ?>/public/assets/css/pages/gf-f18c-shell.css?v=20261101-4">
 
-<div class="bo bo-operator gf-f18c-root gf-admin-config-root" id="gfAdminConfigRoot">
-
-<aside class="bo-sidebar gf-f18c-sidebar" aria-label="Navegação do administrador">
-    <a class="gf-f18c-brand" href="<?php echo htmlspecialchars($bp); ?>/admin/central">Guincha<span>Fácil</span><i>.</i></a>
-    <div class="gf-f18c-workspace"><span class="gf-f18c-avatar"><i class="fas fa-shield-halved" aria-hidden="true"></i></span><span><strong>Central GuinchaFácil</strong><small>Workspace operacional</small></span></div>
-    <?php include __DIR__ . '/../components/admin_nav_operacional.php'; ?>
-    <div class="gf-f18c-sidebar-footer"><a href="<?php echo htmlspecialchars($bp); ?>/">Voltar ao site</a></div>
-</aside>
-<div class="bo-body">
-<header class="bo-header">
-    <div class="gf-f18c-breadcrumb"><span>Backoffice <i class="fas fa-chevron-right" aria-hidden="true"></i> <strong>Configurações</strong></span></div>
-    <div class="gf-f18c-header-actions"><span class="gf-f18c-user"><?php echo htmlspecialchars((string)($_SESSION['user']['nome'] ?? 'Administrador')); ?></span><a class="gf-f18c-logout" href="<?php echo htmlspecialchars($bp); ?>/logout" data-confirm-logout><i class="fas fa-right-from-bracket" aria-hidden="true"></i><span>Sair</span></a></div>
-</header>
-<main class="bo-content gf-admin-config-content">
+<div class="bo-page gf-admin-config-content">
 
     <nav class="gf-config-index" aria-label="Seções de configuração">
         <a href="#config-resumo"><i class="fas fa-eye"></i><span>Resumo efetivo</span></a>
@@ -993,10 +980,7 @@ function maskEnvValue(string $value): string {
 
 
 
-</main>
 </div>
-</div>
-
 <script<?php echo csp_script_nonce_attr(); ?>>
 (function () {
     const form = document.getElementById('adminMigrationForm');
@@ -1030,3 +1014,5 @@ function maskEnvValue(string $value): string {
 
 
 
+
+<?php $conteudo_pagina=ob_get_clean(); $perfil='admin'; $titulo_pagina='Configurações'; $breadcrumb=['Sistema','Configurações']; $assets_css=['/public/assets/css/pages/bo-admin-operacao.css']; require __DIR__ . '/../layouts/backoffice_shell.php';

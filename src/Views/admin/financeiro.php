@@ -17,7 +17,7 @@
  * @var array $filtrosJobs
  */
 $bp = defined('BASE_PATH') ? BASE_PATH : '';
-include __DIR__ . '/../layouts/header.php';
+ob_start();
 
 /**
  * §GATEWAY-STATUS-02: mapeia bandeira/forma de pagamento (payment_method_id
@@ -161,11 +161,8 @@ foreach (($pagamentos ?? []) as $p) {
 <link rel="stylesheet" href="<?= htmlspecialchars($bp, ENT_QUOTES, 'UTF-8') ?>/public/assets/css/pages/gf-fin2-r5-layout.css?v=20261019-r5">
 <!-- GF-FIN2-SHELL-20261019 -->
 <link rel="stylesheet" href="<?= htmlspecialchars($bp, ENT_QUOTES, 'UTF-8') ?>/public/assets/css/pages/gf-fin2-shell-fix.css?v=20261019">
-<div class="gf-finance-v3 shell-ops" id="financeiroShell">
-    <aside class="shell-ops-sidebar gf-finance-v3-sidebar" id="financeiroSidebar" aria-label="Navegação administrativa">
-        <div class="gf-fin2-brand"><strong>Guincha<span>Fácil.</span></strong><small>Central GuinchaFácil</small></div>
-        <?php include __DIR__ . '/../components/admin_nav_operacional.php'; ?>
-    </aside>
+<div class="shell-ops" id="financeiroShell">
+    
     <main class="gf-finance-v3-main" id="financeiroMain">
         <nav class="gf-finance-v3-breadcrumb" aria-label="Voc� está em">Backoffice <span aria-hidden="true">></span> <strong>Financeiro</strong></nav>
 
@@ -636,12 +633,7 @@ var FIN_QUERY = <?php echo json_encode('/admin/financeiro?' . http_build_query($
 })();
 </script>
 
-<?php
-// Não usa layouts/footer.php: esta p�gina usa .shell-ops (grid pr�prio),
-// igual � Central Operacional, Alertas, Documentos, Guinchos, Usu�rios...
-?>
 <script<?php echo csp_script_nonce_attr(); ?> src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script<?php echo csp_script_nonce_attr(); ?> src="<?php echo htmlspecialchars($bp); ?>/public/assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
 <script<?php echo csp_script_nonce_attr(); ?>>
 document.addEventListener('DOMContentLoaded', function () {
     const textColor = getComputedStyle(document.body).getPropertyValue('--theme-text') || '#e8e8e8';
@@ -743,6 +735,6 @@ document.addEventListener('DOMContentLoaded', function () {
 </details>
     </main>
 </div>
-</body>
-</html>
 
+
+<?php $conteudo_pagina=ob_get_clean(); $perfil='admin'; $titulo_pagina="Financeiro"; $breadcrumb=["Financeiro","Visão geral"]; $assets_css=['/public/assets/css/pages/bo-admin-financeiro.css']; require __DIR__ . '/../layouts/backoffice_shell.php';
