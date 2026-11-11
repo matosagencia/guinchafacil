@@ -456,4 +456,4 @@ if (!function_exists('gfF18f19Count')) {
 
 
 
-<?php $conteudo_página=ob_get_clean(); $perfil='admin'; $titulo_página='Usuários'; $breadcrumb=['Pessoas e parceiros','Usuários']; $assets_css=['/public/assets/css/pages/bo-admin-cadastros.css']; require __DIR__ . '/../layouts/backoffice_shell.php';
+<?php $conteudo_pagina=ob_get_clean(); $perfil='admin'; $titulo_pagina='Usuários'; $breadcrumb=['Pessoas e parceiros','Usuários']; $assets_css=['/public/assets/css/pages/bo-admin-cadastros.css']; require __DIR__ . '/../layouts/backoffice_shell.php';

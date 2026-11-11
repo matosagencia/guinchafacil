@@ -99,15 +99,6 @@ $getOrigemFunilBadge = static function ($origem): string {
 <link rel="stylesheet" href="<?= htmlspecialchars($bp, ENT_QUOTES, 'UTF-8') ?>/public/assets/css/pages/gf-f18e3-operacao-fix.css?v=20261017-3">
 <div class="gf18e-tabs-host"><?php include __DIR__ . '/../components/admin_operacao_tabs.php'; ?></div>
 <div class="shell-ops gf-orders-v1" id="pedShell">
-    <aside
-        class="shell-ops-sidebar"
-        id="pedSidebar"
-    >
-        <?php
-        include __DIR__ . '/../components/admin_nav_operacional.php';
-        ?>
-    </aside>
-
     <main class="gf-orders-main">
       <nav class="gf-orders-breadcrumb" aria-label="Localiza��o">Backoffice <span aria-hidden="true">></span> <strong>Pedidos</strong></nav>
       <div class="gf-orders-head"><div><small>OPERA��O / PEDIDOS</small><h1>Gestáo de pedidos</h1><p>Acompanhe cada chamado e aja com rapidez.</p></div></div>

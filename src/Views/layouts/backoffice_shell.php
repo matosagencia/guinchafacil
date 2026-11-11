@@ -45,6 +45,7 @@ $scriptNonce = function_exists('csp_script_nonce_attr') ? (string)csp_script_non
 <?php foreach ((array)($assets_css ?? []) as $sheet): if (is_string($sheet) && gfBoHref($sheet) !== '#'): ?>
 <link rel="stylesheet" href="<?= gfBoH($bp.$sheet) ?>">
 <?php endif; endforeach; ?>
+<link rel="stylesheet" href="<?= gfBoH($bp) ?>/public/assets/css/backoffice-v3-overrides.css?v=20261111-1">
 </head>
 <body class="gf-backoffice-profile-<?= gfBoH($papel) ?>" data-role="<?= gfBoH($papel) ?>" data-theme="<?= gfBoH($profileContract['preset']) ?>">
 <div class="bo bo-<?= gfBoH($tema) ?> bo-p-<?= gfBoH($papel) ?>" data-gf-profile="<?= gfBoH($papel) ?>">
