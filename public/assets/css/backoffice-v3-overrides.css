@@ -15,6 +15,8 @@
 }
 .bo-body, .bo-content { background: #f4f6f8 !important; color: #172033 !important; }
 .bo-content { isolation: isolate; }
+body:has(.bo) { margin: 0 !important; padding: 0 !important; min-width: 0; }
+body:has(.bo) .bo { min-height: 100vh !important; width: 100%; }
 body:has(.bo) .bo-sidebar { position: sticky !important; top: 0 !important; align-self: flex-start !important; height: 100vh !important; min-height: 100vh !important; max-height: 100vh !important; overflow-y: auto !important; overflow-x: hidden !important; }
 body:has(.bo) .bo-sidebar { scrollbar-width: none !important; -ms-overflow-style: none !important; }
 body:has(.bo) .bo-sidebar::-webkit-scrollbar { width: 0 !important; height: 0 !important; display: none !important; }
