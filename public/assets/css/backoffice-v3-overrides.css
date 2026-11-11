@@ -32,6 +32,17 @@
 .bo-content :is(.badge,.status-badge) { color: #172033; border: 1px solid #cbd5e1; }
 .bo-content :is(.btn-primary,.btn-success,.btn-danger) { color: #fff !important; }
 .bo-content :is(.btn-outline-secondary,.btn-outline-primary,.btn-light) { color: #172033 !important; background: #fff !important; }
+/* Contrato global: nenhuma view pode redefinir contraste de controles e tabelas. */
+body:has(.bo) .bo-content :is(.btn,.btn-sm) { display: inline-flex !important; align-items: center !important; justify-content: center !important; min-height: 36px !important; padding: 8px 12px !important; border-radius: 6px !important; font-weight: 700 !important; opacity: 1 !important; }
+body:has(.bo) .bo-content :is(.btn-primary,.btn-success,.btn-danger,.btn-warning) { background: #1a7f37 !important; border: 1px solid #1a7f37 !important; color: #fff !important; }
+body:has(.bo) .bo-content :is(.btn-outline-secondary,.btn-outline-primary,.btn-light,.btn-outline-dark) { background: #fff !important; border: 1px solid #64748b !important; color: #172033 !important; }
+body:has(.bo) .bo-content :is(table,.table) { width: 100%; background: #fff !important; color: #172033 !important; border-color: #d9e1ea !important; }
+body:has(.bo) .bo-content :is(table thead, .table thead) :is(th,td) { background: #e8eef5 !important; color: #172033 !important; border-color: #cbd5e1 !important; }
+body:has(.bo) .bo-content :is(table tbody, .table tbody) :is(th,td) { background: #fff !important; color: #172033 !important; border-color: #d9e1ea !important; }
+body:has(.bo) .bo-content :is(table tbody tr:nth-child(even), .table tbody tr:nth-child(even)) :is(th,td) { background: #f8fafc !important; }
+body:has(.bo) .bo-content :is(.bo-toolbar,.ops-topbar,.ops-worklist-search) { background: #fff !important; color: #172033 !important; border-color: #d9e1ea !important; }
+body:has(.bo) .bo-content :is(.bo-toolbar input,.ops-topbar input,.ops-worklist-search input) { background: #f8fafc !important; color: #172033 !important; border-color: #cbd5e1 !important; }
+body:has(.bo) .bo-content :is(.shell-ops-worklist,.shell-ops-workspace,.bo-panel,.card) { color: #172033 !important; }
 .bo-content :is(.btn-primary,.btn-success,.btn-danger) { background: #1a7f37 !important; border-color: #1a7f37 !important; color: #fff !important; }
 .bo-content :is(.btn,.btn-sm) { display: inline-flex; align-items: center; justify-content: center; min-height: 36px; padding: 0 12px; border-radius: 6px; font: 600 12px/1.2 inherit; text-decoration: none; cursor: pointer; }
 .bo-content :is(.btn-outline-secondary,.btn-outline-primary,.btn-light) { background: #fff !important; border: 1px solid #94a3b8 !important; color: #172033 !important; box-shadow: 0 1px 2px rgba(15,23,42,.08); }
