@@ -8,13 +8,13 @@ $osrmBaseUrl = PorThresholds::routingFrontendBaseUrl();
  * Pedidos - padrão shell-ops.
  *
  * A fila vem paginada/filtrada no servidor (status/busca/data).
- * O workspace de detalhe reaproveita o mesmo m�dulo JS e a mesma API
+ * O workspace de detalhe reaproveita o mesmo módulo JS e a mesma API
  * de /admin/central:
  *
  *   AdminOrderWorkspace
  *   /api/admin/orders/{id}
  *
- * Esta view não duplica a l�gica operacional.
+ * Esta view não duplica a lógica operacional.
  *
  * @var array $pedidos
  * @var array $worklist
@@ -51,13 +51,13 @@ $totalPaginas = $totalPaginas ?? 1;
 $resumoPedidos = $resumoPedidos ?? [];
 
 /**
- * Normaliza a origem do funil para a apresenta��o.
+ * Normaliza a origem do funil para a apresentação.
  *
- * Idempot�ncia:
+ * Idempotência:
  * - não modifica $worklist;
  * - sempre parte do mesmo campo contratual: origem_funil;
  * - valores desconhecidos permanecem neutros;
- * - evita l�gica duplicada dentro do HTML.
+ * - evita lógica duplicada dentro do HTML.
  */
 $getOrigemFunilBadge = static function ($origem): string {
     if ($origem === 'oficina') {
@@ -100,8 +100,8 @@ $getOrigemFunilBadge = static function ($origem): string {
 <div class="gf18e-tabs-host"><?php include __DIR__ . '/../components/admin_operacao_tabs.php'; ?></div>
 <div class="shell-ops gf-orders-v1" id="pedShell">
     <main class="gf-orders-main">
-      <nav class="gf-orders-breadcrumb" aria-label="Localiza��o">Backoffice <span aria-hidden="true">></span> <strong>Pedidos</strong></nav>
-      <div class="gf-orders-head"><div><small>OPERA��O / PEDIDOS</small><h1>Gestáo de pedidos</h1><p>Acompanhe cada chamado e aja com rapidez.</p></div></div>
+      <nav class="gf-orders-breadcrumb" aria-label="Localização">Backoffice <span aria-hidden="true">></span> <strong>Pedidos</strong></nav>
+      <div class="gf-orders-head"><div><small>OPERAÇÃO / PEDIDOS</small><h1>Gestão de pedidos</h1><p>Acompanhe cada chamado e aja com rapidez.</p></div></div>
 <div
     class="bo-toolbar"
     style="padding:10px 24px;border-bottom:1px solid var(--theme-border,#232c35);background:var(--theme-nav,#030405)"
@@ -125,7 +125,7 @@ $getOrigemFunilBadge = static function ($origem): string {
                 ENT_QUOTES,
                 'UTF-8'
             ); ?>"
-            placeholder="Buscar por n� do pedido, cliente, placa ou endereço"
+                placeholder="Buscar por número do pedido, cliente, placa ou endereço"
             autocomplete="off"
         >
 
@@ -167,7 +167,7 @@ $getOrigemFunilBadge = static function ($origem): string {
                 || $dataAtual !== ''
             ):
             ?>
-                � filtrado
+                é filtrado
             <?php endif; ?>
         </span>
 
@@ -225,7 +225,7 @@ $getOrigemFunilBadge = static function ($origem): string {
             <span class="ops-metric__label">
                 Aguard. guincho<?php
                 echo $statusAtual === 'aguardando_guincho'
-                    ? ' � filtrando'
+                    ? ' — filtrando'
                     : '';
                 ?>
             </span>
@@ -235,7 +235,7 @@ $getOrigemFunilBadge = static function ($origem): string {
             </strong>
 
             <span class="ops-metric__trend">
-                Requer a��o
+                Requer ação
             </span>
         </article>
     </a>
@@ -291,7 +291,7 @@ $getOrigemFunilBadge = static function ($origem): string {
             <span class="ops-metric__label">
                 Cancelados<?php
                 echo $statusAtual === 'cancelado'
-                    ? ' � filtrando'
+                    ? ' — filtrando'
                     : '';
                 ?>
             </span>
@@ -323,7 +323,7 @@ $getOrigemFunilBadge = static function ($origem): string {
                     <?php echo count($worklist ?? []); ?>
                 </span>
 
-                nesta p�gina �
+                nesta página é
 
                 <?php echo (int)($total ?? 0); ?>
 
@@ -378,7 +378,7 @@ $getOrigemFunilBadge = static function ($origem): string {
             <input
                 type="search"
                 id="pedWorklistSearch"
-                placeholder="Filtrar nesta p�gina"
+                placeholder="Filtrar nesta página"
                 autocomplete="off"
             >
         </div>
@@ -406,7 +406,7 @@ $getOrigemFunilBadge = static function ($origem): string {
                      *
                      * Não criamos fallback para outros campos.
                      *
-                     * A normaliza��o � somente de apresenta��o.
+                     * A normalização é somente de apresentação.
                      */
                     $origemFunil = $w['origem_funil'] ?? null;
 
@@ -464,9 +464,9 @@ $getOrigemFunilBadge = static function ($origem): string {
                                 /*
                                  * Badge da origem do funil.
                                  *
-                                 * A regra � centralizada em
+                                 * A regra é centralizada em
                                  * $getOrigemFunilBadge() para impedir
-                                 * diverg�ncia entre linhas.
+                                 * divergência entre linhas.
                                  */
                                 echo $origemFunilBadge;
                                 ?>
@@ -515,7 +515,7 @@ $getOrigemFunilBadge = static function ($origem): string {
                                     echo htmlspecialchars(
                                         $guinchoOperador
                                             ? 'Prestador: ' . $guinchoOperador
-                                            : 'Sem prestador atribu�do',
+                                            : 'Sem prestador atribuído',
                                         ENT_QUOTES,
                                         'UTF-8'
                                     );
@@ -523,7 +523,7 @@ $getOrigemFunilBadge = static function ($origem): string {
                                 </span>
 
                                 <span>
-                                    H�
+                                    Há
                                     <?php echo (int)($w['minutos_decorridos'] ?? 0); ?>
                                     min
                                 </span>
@@ -538,7 +538,7 @@ $getOrigemFunilBadge = static function ($origem): string {
 
                                 <span
                                     class="ops-signal is-warning"
-                                    title="Aguardando h� mais de 15 min"
+                        title="Aguardando há mais de 15 min"
                                 >
                                     <i class="fas fa-clock"></i>
                                 </span>
@@ -658,8 +658,8 @@ AdminOrderWorkspace.init({
 <?php
 /*
  * Não usa layouts/footer.php:
- * esta p�gina utiliza .shell-ops com grid pr�prio,
- * igual � Central Operacional, Ocorr�ncias, Carteiras e Guinchos.
+ * esta página utiliza .shell-ops com grid próprio,
+ * igual à Central Operacional, Ocorrências, Carteiras e Guinchos.
  */
 ?>
 

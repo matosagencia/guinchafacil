@@ -25,10 +25,16 @@
 .bo-content :is(input,select,textarea,.form-control,.form-select) { background: #fff; color: #172033; border-color: #cbd5e1; }
 .bo-content :is(.table,.table-responsive table) { color: #172033; background: #fff; }
 .bo-content :is(.table thead th,.table th) { background: #eef2f6; color: #334155; }
+.bo-content :is(.btn-primary,.btn-success,.btn-danger) { background: #1a7f37 !important; border-color: #1a7f37 !important; color: #fff !important; }
+.bo-content :is(.btn-outline-secondary,.btn-outline-primary,.btn-light) { background: #fff !important; border: 1px solid #94a3b8 !important; color: #172033 !important; }
+.bo-content :is(.btn-primary,.btn-success,.btn-danger,.btn-outline-secondary,.btn-outline-primary,.btn-light):hover { filter: brightness(.94); }
 .bo-content :is(.shell-ops-worklist,.shell-ops-workspace) { min-width: 0; max-width: 100%; overflow: hidden; }
 .bo-content .table-responsive { max-width: 100%; overflow-x: auto; }
 body:has(.bo) .bo-content .gf-orders-v1 { width: 100%; max-width: 100%; margin: 0; }
 body:has(.bo) .bo-content .gf-orders-v1 > .shell-ops-sidebar { display: none !important; }
 body:has(.bo) .bo-content .gf-orders-v1 > .gf-orders-main { grid-column: 1 / -1 !important; width: 100%; padding: 0 !important; }
 body:has(.bo) .bo-content .gf-orders-v1 { grid-template-columns: 1fr !important; min-height: 0; }
+body:has(.bo) .bo-content .gf-orders-v1 .gf-orders-head h1,
+body:has(.bo) .bo-content .gf-orders-v1 .gf-orders-head p,
+body:has(.bo) .bo-content .gf-orders-v1 .gf-orders-breadcrumb { color: #172033 !important; }
 @media (max-width: 900px) { .bo-content { padding: 18px 12px !important; } }
