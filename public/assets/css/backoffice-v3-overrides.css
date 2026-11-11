@@ -43,6 +43,19 @@ body:has(.bo) .bo-content :is(table tbody tr:nth-child(even), .table tbody tr:nt
 body:has(.bo) .bo-content :is(.bo-toolbar,.ops-topbar,.ops-worklist-search) { background: #fff !important; color: #172033 !important; border-color: #d9e1ea !important; }
 body:has(.bo) .bo-content :is(.bo-toolbar input,.ops-topbar input,.ops-worklist-search input) { background: #f8fafc !important; color: #172033 !important; border-color: #cbd5e1 !important; }
 body:has(.bo) .bo-content :is(.shell-ops-worklist,.shell-ops-workspace,.bo-panel,.card) { color: #172033 !important; }
+body:has(.bo) .bo-content nav:not(.bo-breadcrumb) { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; color: #172033; }
+body:has(.bo) .bo-content nav:not(.bo-breadcrumb) a { color: #14532d; text-decoration: none; }
+body:has(.bo) .bo-content nav:not(.bo-breadcrumb) a:hover { color: #0f3d22; text-decoration: underline; }
+body:has(.bo) .bo-content ul:not(.pagination), body:has(.bo) .bo-content ol:not(.pagination) { margin: 0; padding-left: 1.25rem; color: #172033; }
+body:has(.bo) .bo-content ul:not(.pagination) li, body:has(.bo) .bo-content ol:not(.pagination) li { color: #172033; margin: 4px 0; }
+body:has(.bo) .bo-content .pagination { display: flex !important; align-items: center !important; justify-content: center !important; gap: 5px !important; flex-wrap: wrap; margin: 16px 0 !important; padding: 0 !important; list-style: none !important; }
+body:has(.bo) .bo-content .pagination .page-item { display: block !important; margin: 0 !important; }
+body:has(.bo) .bo-content .pagination .page-link { display: inline-flex !important; align-items: center !important; justify-content: center !important; min-width: 34px !important; min-height: 34px !important; padding: 6px 10px !important; border: 1px solid #cbd5e1 !important; border-radius: 6px !important; background: #fff !important; color: #172033 !important; text-decoration: none !important; font-weight: 700 !important; }
+body:has(.bo) .bo-content .pagination .page-item.active .page-link { background: #1a7f37 !important; border-color: #1a7f37 !important; color: #fff !important; }
+body:has(.bo) .bo-content .pagination .page-item.disabled .page-link { background: #f1f5f9 !important; color: #94a3b8 !important; border-color: #e2e8f0 !important; }
+body:has(.bo) .bo-content :is(.ops-btn,.ops-btn-primary,.ops-btn-secondary) { display: inline-flex !important; align-items: center !important; justify-content: center !important; min-height: 36px !important; padding: 8px 13px !important; border: 1px solid #64748b !important; border-radius: 6px !important; background: #fff !important; color: #172033 !important; font-weight: 700 !important; text-decoration: none !important; cursor: pointer !important; }
+body:has(.bo) .bo-content :is(.ops-btn-primary,.ops-btn--primary,.ops-btn.is-primary) { background: #1a7f37 !important; border-color: #1a7f37 !important; color: #fff !important; }
+body:has(.bo) .bo-content :is(.ops-btn-danger,.ops-btn--danger,.ops-btn.is-danger) { background: #fff !important; border-color: #b42318 !important; color: #9f1d16 !important; }
 .bo-content :is(.btn-primary,.btn-success,.btn-danger) { background: #1a7f37 !important; border-color: #1a7f37 !important; color: #fff !important; }
 .bo-content :is(.btn,.btn-sm) { display: inline-flex; align-items: center; justify-content: center; min-height: 36px; padding: 0 12px; border-radius: 6px; font: 600 12px/1.2 inherit; text-decoration: none; cursor: pointer; }
 .bo-content :is(.btn-outline-secondary,.btn-outline-primary,.btn-light) { background: #fff !important; border: 1px solid #94a3b8 !important; color: #172033 !important; box-shadow: 0 1px 2px rgba(15,23,42,.08); }
