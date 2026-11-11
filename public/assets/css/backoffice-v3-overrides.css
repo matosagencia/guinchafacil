@@ -49,4 +49,11 @@ body:has(.bo) .bo-sidebar { min-height: 100vh !important; height: 100vh !importa
 body:has(.bo) .bo-content .gf-orders-v1 .gf-orders-head h1,
 body:has(.bo) .bo-content .gf-orders-v1 .gf-orders-head p,
 body:has(.bo) .bo-content .gf-orders-v1 .gf-orders-breadcrumb { color: #172033 !important; }
+body:has(#pedShell) .bo-content #pedShell :is(.btn,.btn-sm,.btn-outline-secondary,.btn-primary) { min-height: 36px !important; padding: 8px 12px !important; border-radius: 6px !important; font-weight: 700 !important; opacity: 1 !important; }
+body:has(#pedShell) .bo-content #pedShell .btn-outline-secondary { background: #fff !important; color: #172033 !important; border: 1px solid #64748b !important; }
+body:has(#pedShell) .bo-content #pedShell .btn-primary { background: #1a7f37 !important; color: #fff !important; border: 1px solid #1a7f37 !important; }
+body:has(#pedShell) .bo-content #pedShell .bo-toolbar { background: #fff !important; color: #172033 !important; border-color: #d9e1ea !important; }
+body:has(#pedShell) .bo-content #pedShell .bo-toolbar input { background: #f8fafc !important; color: #172033 !important; border-color: #cbd5e1 !important; }
+body:has(#pedShell) .bo-content #pedShell :is(.ops-worklist-item,.ops-worklist-results,.ops-worklist-search,.ops-order-header,.ops-order-facts,.ops-order-fact,.card,.table) { color: #172033 !important; background-color: #fff !important; }
+body:has(#pedShell) .bo-content #pedShell :is(.ops-worklist-item__footer,.ops-worklist-item__vehicle,.ops-worklist-item__customer,.ops-order-fact__label,.text-muted) { color: #475569 !important; }
 @media (max-width: 900px) { .bo-content { padding: 18px 12px !important; } body:has(.bo) .bo-content #usuariosShell { grid-template-columns: 1fr !important; } }
