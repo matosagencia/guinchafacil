@@ -15,6 +15,7 @@
 }
 .bo-body, .bo-content { background: #f4f6f8 !important; color: #172033 !important; }
 .bo-content { isolation: isolate; }
+body:has(.bo) .bo-sidebar { position: sticky !important; top: 0 !important; align-self: flex-start !important; height: 100vh !important; min-height: 100vh !important; max-height: 100vh !important; overflow-y: auto !important; overflow-x: hidden !important; }
 .bo-content :is(.shell-ops,.bo-page,.bo-operation-grid,.gf-finance-page,.gf-orders-main) { color: #172033; }
 .bo-content :is(.card,.card-body,.bo-panel,.shell-ops-worklist,.shell-ops-workspace,.gf-finance-v3-main,.gf-orders-main) {
   color: #172033;
@@ -87,4 +88,4 @@ body:has(#pedShell) .bo-content #pedShell .bo-toolbar { background: #fff !import
 body:has(#pedShell) .bo-content #pedShell .bo-toolbar input { background: #f8fafc !important; color: #172033 !important; border-color: #cbd5e1 !important; }
 body:has(#pedShell) .bo-content #pedShell :is(.ops-worklist-item,.ops-worklist-results,.ops-worklist-search,.ops-order-header,.ops-order-facts,.ops-order-fact,.card,.table) { color: #172033 !important; background-color: #fff !important; }
 body:has(#pedShell) .bo-content #pedShell :is(.ops-worklist-item__footer,.ops-worklist-item__vehicle,.ops-worklist-item__customer,.ops-order-fact__label,.text-muted) { color: #475569 !important; }
-@media (max-width: 900px) { .bo-content { padding: 18px 12px !important; } body:has(.bo) .bo-content #usuariosShell { grid-template-columns: 1fr !important; } }
+@media (max-width: 900px) { .bo-content { padding: 18px 12px !important; } body:has(.bo) .bo-content #usuariosShell { grid-template-columns: 1fr !important; } body:has(.bo) .bo-sidebar { position: fixed !important; height: 100dvh !important; min-height: 100dvh !important; max-height: 100dvh !important; } }
