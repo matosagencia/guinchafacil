@@ -660,8 +660,9 @@ body.gf-preq-body > .gf-site-footer {
 .gf-ac__item:hover,
 .gf-ac__item:focus,
 .gf-ac__item.is-active {
-    background: var(--gf-accent) !important;
-    color: #0d5a2e !important;
+    background: #fff !important;
+    color: #172536 !important;
+    box-shadow: inset 3px 0 #35b34c;
     outline: none;
 }
 .gf-ac__item strong {
@@ -679,11 +680,61 @@ body.gf-preq-body > .gf-site-footer {
     line-height: 1.35;
 }
 
+/* Autocomplete de endereço: dropdown neutro, sem herdar o verde dos botões */
+#localizacao + .gf-ac,
+.gf-field--location .gf-ac {
+    background: #fff !important;
+    border: 1px solid #d5dde5 !important;
+    border-radius: 6px;
+    box-shadow: 0 8px 20px rgba(15, 23, 42, .12);
+}
+.gf-field--location .gf-ac__item,
+.gf-field--location .gf-ac__item:hover,
+.gf-field--location .gf-ac__item:focus,
+.gf-field--location .gf-ac__item.is-active {
+    background: #fff !important;
+    color: #000 !important;
+    border-color: #e1e7ec !important;
+    box-shadow: none !important;
+}
+.gf-field--location .gf-ac__item:hover,
+.gf-field--location .gf-ac__item:focus,
+.gf-field--location .gf-ac__item.is-active {
+    box-shadow: inset 3px 0 #35b34c !important;
+    outline: none;
+}
+.gf-field--location .gf-ac__item strong {
+    color: #000 !important;
+    font-weight: 750;
+}
+.gf-field--location .gf-ac__item small {
+    color: #4b5563 !important;
+}
+
 /* Bump do z-index do container quando o autocomplete está aberto,
    para não ser cortado por outros elementos do form */
 .gf-field--icon:has(.gf-ac:not([hidden])) {
     z-index: 50;
 }
+
+/* GPS integrado visualmente ao campo de localização */
+.gf-field--location { position: relative; }
+.gf-field--location .gf-field__gps {
+    display: none !important;
+}
+.gf-field--location::before {
+    content: "\f3c5";
+    position: absolute;
+    top: 35px;
+    left: 13px;
+    z-index: 2;
+    color: #7b8794;
+    font-family: "Font Awesome 5 Free";
+    font-size: 14px;
+    font-weight: 900;
+    pointer-events: none;
+}
+.gf-field--location input { padding-left: 38px; padding-right: 12px; }
 
 /* ─── Painel de debug ─────────────────────────────────────────── */
 .gf-dbg {

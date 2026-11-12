@@ -48,17 +48,17 @@ $tipoLabels = ['avaria' => 'Avaria', 'atraso' => 'Atraso', 'conduta' => 'Conduta
 
 
 
-<section class="bo-metrics" aria-label="Resumo de ocorrências">
+<section class="ops-summary bo-metrics" aria-label="Resumo de ocorrências">
 
     <?php foreach (['aberta', 'em_analise', 'resolvida', 'arquivada'] as $st): ?>
 
     <a href="<?php echo htmlspecialchars($bp); ?>/admin/ocorrencias?status=<?php echo $st; ?>">
 
-        <article class="bo-metric <?php echo $st === 'aberta' && ($contagemPorStatus[$st] ?? 0) > 0 ? 'is-danger' : ($statusFiltro === $st ? 'is-warning' : ''); ?>">
+        <article class="ops-metric bo-metric <?php echo $st === 'aberta' && ($contagemPorStatus[$st] ?? 0) > 0 ? 'is-danger' : ($statusFiltro === $st ? 'is-warning' : ''); ?>">
 
-            <span class="bo-metric__label"><?php echo $statusLabels[$st]; ?><?php echo $statusFiltro === $st ? ' · filtrando' : ''; ?></span>
+            <span class="ops-metric__label bo-metric__label"><?php echo $statusLabels[$st]; ?><?php echo $statusFiltro === $st ? ' · filtrando' : ''; ?></span>
 
-            <strong class="bo-metric__value"><?php echo (int)($contagemPorStatus[$st] ?? 0); ?></strong>
+            <strong class="ops-metric__value bo-metric__value"><?php echo (int)($contagemPorStatus[$st] ?? 0); ?></strong>
 
         </article>
 
@@ -545,6 +545,16 @@ $tipoLabels = ['avaria' => 'Avaria', 'atraso' => 'Atraso', 'conduta' => 'Conduta
 </div>
 
 
+
+<script<?php echo csp_script_nonce_attr(); ?>>
+(function () {
+    var modal = document.getElementById('modalNovaOcorrencia');
+    var list = document.getElementById('ocWorklistResults');
+    if (modal && list && modal.parentElement !== list) {
+        list.appendChild(modal);
+    }
+}());
+</script>
 
 <?php
 

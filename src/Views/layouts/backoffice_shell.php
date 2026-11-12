@@ -1,9 +1,9 @@
-<?php
+﻿<?php
 /**
  * Layout Lovable reutilizável para views PHP restritas.
  * Controller fornece $perfil, $conteudo_pagina e opcionalmente $titulo_pagina,
  * $breadcrumb, $itens_menu, $notificacoes_url, $notificacoes_count e $assets_css.
- * NÃO usar simultaneamente src/Views/layouts/header.php ou footer.php legados.
+ * NÃƒO usar simultaneamente src/Views/layouts/header.php ou footer.php legados.
  * A autenticação e autorização permanecem obrigatórias no controller.
  */
 require_once __DIR__ . '/backoffice_helpers.php';
@@ -36,19 +36,18 @@ $scriptNonce = function_exists('csp_script_nonce_attr') ? (string)csp_script_non
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title><?= gfBoH($titulo_pagina) ?> — GuinchaFácil</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;display=swap">
-<link rel="stylesheet" href="<?= gfBoH($bp) ?>/public/assets/css/gf-bo-lovable.css?v=20261017-18">
-<link rel="stylesheet" href="<?= gfBoH($bp) ?>/public/assets/css/gf-bo-profiles.css?v=20261110-1">
+<link rel="stylesheet" href="<?= gfBoH($bp) ?>/public/assets/css/gf-bo-lovable.css?v=20261111-2">
+<link rel="stylesheet" href="<?= gfBoH($bp) ?>/public/assets/css/gf-bo-profiles.css?v=20261111-2">
 <link rel="stylesheet" href="<?= gfBoH($bp) ?>/public/assets/css/gf-bo-components.css?v=20261110-1">
 <link rel="stylesheet" href="<?= gfBoH($bp) ?>/public/assets/css/components/gf-footer-payments.css?v=20261101-3">
 <?php foreach ((array)($assets_css ?? []) as $sheet): if (is_string($sheet) && gfBoHref($sheet) !== '#'): ?>
 <link rel="stylesheet" href="<?= gfBoH($bp.$sheet) ?>">
 <?php endif; endforeach; ?>
-<link rel="stylesheet" href="<?= gfBoH($bp) ?>/public/assets/css/backoffice-v3-overrides.css?v=20261111-1">
+<link rel="stylesheet" href="<?= gfBoH($bp) ?>/public/assets/css/backoffice-v3-overrides.css?v=20261111-54">
 </head>
 <body class="gf-backoffice-profile-<?= gfBoH($papel) ?>" data-role="<?= gfBoH($papel) ?>" data-theme="<?= gfBoH($profileContract['preset']) ?>">
 <div class="bo bo-<?= gfBoH($tema) ?> bo-p-<?= gfBoH($papel) ?>" data-gf-profile="<?= gfBoH($papel) ?>">
+  <div class="bo-main-row">
   <aside class="bo-sidebar" aria-label="Menu principal">
     <a class="brand-name bo-brand" href="<?= gfBoH($bp) ?>/" aria-label="GuinchaFácil — início">Guincha<span>Fácil</span><span class="brand-period">.</span></a>
     <div class="bo-workspace"><span class="bo-avatar"><?= gfBoIcon('shield-check',17) ?></span>
@@ -91,13 +90,33 @@ $scriptNonce = function_exists('csp_script_nonce_attr') ? (string)csp_script_non
       </div>
     </header>
     <main class="bo-content"><?= $conteudo_pagina /* O conteúdo vem da view interna, nunca de $_GET/$_POST sem escapar */ ?></main>
-    <footer class="bo-footer">
-      <div class="bo-footer__meta"><span><span class="status-dot" aria-hidden="true"></span> Dados operacionais do GuinchaFácil</span><span>GuinchaFácil / Backoffice</span></div>
-      <?php require __DIR__ . '/../components/gf-footer-payments.php'; ?>
-    </footer>
   </div>
+  </div>
+  <footer class="bo-footer">
+    <div class="bo-footer__meta"><span><span class="status-dot" aria-hidden="true"></span> Dados operacionais do GuinchaFácil</span><span>GuinchaFácil / Backoffice</span></div>
+    <?php require __DIR__ . '/../components/gf-footer-payments.php'; ?>
+  </footer>
 </div>
 <script<?= $scriptNonce ?> defer src="<?= gfBoH($bp) ?>/public/assets/js/gf-bo-shell.js?v=20261017-18"></script>
 <script<?= $scriptNonce ?> defer src="<?= gfBoH($bp) ?>/public/assets/js/gf-bo-dialog.js?v=20261110-1"></script>
 <script<?= $scriptNonce ?> defer src="<?= gfBoH($bp) ?>/public/assets/js/session-manager.js"></script>
 </body></html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

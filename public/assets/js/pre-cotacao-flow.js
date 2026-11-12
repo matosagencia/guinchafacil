@@ -187,9 +187,9 @@
                 var principal = (r.principal || r.display_name || r.label || r.endereco || '').replace(/[<>&]/g, '');
                 var secundario = (r.secundario || r.display_name || '').replace(/[<>&]/g, '');
                 if (principal === secundario) secundario = '';
-                return '<button type="button" class="gf-ac__item" data-i="' + i + '">' +
+                return '<div class="gf-ac__item" role="option" tabindex="0" data-i="' + i + '">' +
                     '<strong>' + principal + '</strong>' +
-                    (secundario ? '<small>' + secundario + '</small>' : '') + '</button>';
+                    (secundario ? '<small>' + secundario + '</small>' : '') + '</div>';
             }).join('');
             list.hidden = false;
             list.querySelectorAll('.gf-ac__item').forEach(function (btn) {

@@ -26,12 +26,29 @@ $adminCtx = $adminCtx ?? [];
 $csrf_token = $csrf_token ?? '';
 
 ob_start();
+ob_start(static function (string $html): string {
+    $html = strtr($html, [
+        'LocalizaÃ§Ã£o' => 'Localização', 'PRECIFICAÃ‡ÃƒO' => 'PRECIFICAÇÃO',
+        'ocorrÃªncia' => 'ocorrência', 'cotaÃ§Ã£o' => 'cotação',
+        'veÃ­culo' => 'veículo', 'Veï¿½culo' => 'Veículo', 'ConcluÃ­do' => 'Concluído',
+        'REGIï¿½O' => 'REGIÃO', 'NÃ£o' => 'Não', 'exclusï¿½o' => 'exclusão',
+        'endereÃ§o' => 'endereço', 'LocalizaÃ§Ã£o' => 'Localização',
+        'estÃ¡' => 'está', 'aplicÃ¡vel' => 'aplicável',
+    ]);
+    return strtr($html, [
+        'LocalizaÃ§Ã£o' => 'Localização', 'PRECIFICAÃ‡ÃƒO' => 'PRECIFICAÇÃO',
+        'ocorrÃªncia' => 'ocorrência', 'cotaÃ§Ã£o' => 'cotação',
+        'veÃ­culo' => 'veículo', 'Veï¿½culo' => 'Veículo', 'ConcluÃ­do' => 'Concluído',
+        'REGIï¿½O' => 'REGIÃO', 'NÃ£o' => 'Não', 'exclusï¿½o' => 'exclusão',
+        'endereÃ§o' => 'endereço', 'estÃ¡' => 'está', 'aplicÃ¡vel' => 'aplicável',
+    ]);
+});
 ?>
 <link rel="stylesheet" href="<?= $e($bp) ?>/public/assets/vendor/leaflet/leaflet.css">
 <link rel="stylesheet" href="<?= $e($bp) ?>/public/assets/css/pages/public-pre-cotacao.css?v=20260812-3">
 <link rel="stylesheet" href="<?= $e($bp) ?>/public/assets/css/pages/public-pre-cotacao-map.css?v=20260924-1">
 <link rel="stylesheet" href="<?= $e($bp) ?>/public/assets/css/components/address-picker.css?v=20260929-11">
-<link rel="stylesheet" href="<?= $e($bp) ?>/public/assets/css/pages/pre-cotacao.css?v=20261101-1">
+<link rel="stylesheet" href="<?= $e($bp) ?>/public/assets/css/pages/pre-cotacao.css?v=20261111-2">
 <link rel="stylesheet" href="<?= $e($bp) ?>/public/assets/css/pages/admin-pedido-flow.css?v=20261002-1">
 <link rel="stylesheet" href="<?= $e($bp) ?>/public/assets/css/pages/lovable-admin-funil.css?v=20261016-4b">
 
@@ -44,16 +61,19 @@ ob_start();
 
     <nav class="gf-order-crumb" aria-label="Localização"><a href="<?= $e($bp) ?>/admin/dashboard">Backoffice</a><span aria-hidden="true">></span><a href="<?= $e($bp) ?>/admin/pedidos">Pedidos</a><span aria-hidden="true">></span><strong>Novo pedido</strong></nav>
     <header class="gf-order-intro"><div><span class="gf-order-eyebrow">ATENDIMENTO / TRIAGEM E PRECIFICAÇÃO</span><h1>Novo pedido de socorro</h1><p>Informe a ocorrência e confirme a cotação oficial.</p></div><a class="gf-order-back" href="<?= $e($bp) ?>/admin/pedido/novo/v2">Alterar cliente ou veículo</a></header>
+    <section class="gf-order-progress-card" aria-label="Progresso do pedido">
+    <div class="gf-order-progress-card__head"><span class="gf-order-eyebrow">PROGRESSO DO ATENDIMENTO</span><strong>Etapas do pedido</strong></div>
     <ol class="gf-order-progress" aria-label="Etapas do pedido">
       <li class="is-complete"><span aria-label="Concluído">✓</span><div><strong>Cliente e veículo</strong><small>Identificados</small></div></li>
       <li class="is-active" aria-current="step"><span>2</span><div><strong>Triagem e cotação</strong><small>Em andamento</small></div></li>
     </ol>
+    </section>
     <div class="admin-flow-context">
         <div>
             <span class="admin-flow-context__label">Criando pedido em nome de:</span>
             <strong><?= $e($ctx['cliente_nome'] ?? '') ?></strong>
             <span class="text-muted">
-                 Ve�culo: <?= $e($ctx['veiculo_resumo'] ?? '') ?>
+                 Veículo: <?= $e($ctx['veiculo_resumo'] ?? '') ?>
             </span>
         </div>
         <a href="<?= $e($bp) ?>/admin/pedido/novo/v2" class="btn btn-sm btn-outline-secondary">
@@ -64,13 +84,13 @@ ob_start();
 
     <!-- Contadores operacionais exclusivos da area Admin; dados consultados por coordenada. -->
     <section class="gf-ops-availability" id="gfOpsAvailability" aria-label="Disponibilidade regional de parceiros" data-endpoint="<?= $e($bp) ?>/public/admin-disponibilidade.php">
-      <div class="gf-ops-availability__intro"><span class="gf-order-eyebrow">REDE DE ATENDIMENTO / REGI�O</span><h2>Disponibilidade para este chamado</h2><p>Indicadores em tempo real de elegibilidade operacional. Não representam reserva nem aceite do parceiro.</p></div>
+      <div class="gf-ops-availability__intro"><span class="gf-order-eyebrow">REDE DE ATENDIMENTO / REGIÃO</span><h2>Disponibilidade para este chamado</h2><p>Indicadores em tempo real de elegibilidade operacional. Não representam reserva nem aceite do parceiro.</p></div>
       <div class="gf-ops-availability__grid">
         <div class="gf-ops-availability__metric"><span>Guinchos aptos</span><strong id="gfOpsGuinchos">-</strong><small id="gfOpsGuinchosHint">Confirme a origem no mapa</small></div>
         <div class="gf-ops-availability__metric"><span>Oficinas aptas a receber</span><strong id="gfOpsOficinas">-</strong><small id="gfOpsOficinasHint">Confirme a origem ou o destino</small></div>
       </div>
       <details style="margin-top:12px;border-top:1px solid #dce3e8;padding-top:10px" id="gfOpsDetails">
-        <summary style="cursor:pointer;font-weight:600">Ver elegibilidade individual e motivos de exclus�o</summary>
+        <summary style="cursor:pointer;font-weight:600">Ver elegibilidade individual e motivos de exclusão</summary>
         <div id="gfOpsDetailsBody" style="display:grid;gap:8px;padding-top:10px"><small>Confirme a origem para consultar.</small></div>
       </details>
       <p class="gf-ops-availability__note" id="gfOpsStatus" role="status" aria-live="polite">Aguardando endereço confirmado.</p>

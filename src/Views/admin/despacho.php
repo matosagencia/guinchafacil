@@ -60,21 +60,21 @@ unset($_SESSION['_flash']);
 
 
 
-<section class="bo-metrics" aria-label="Resumo de despacho">
+<section class="ops-summary bo-metrics" aria-label="Resumo de despacho">
 
-    <article class="bo-metric <?php echo count($filas) > 0 ? 'is-warning' : ''; ?>">
+    <article class="ops-metric bo-metric <?php echo count($filas) > 0 ? 'is-warning' : ''; ?>">
 
-        <span class="bo-metric__label">Aguardando prestador</span>
+        <span class="ops-metric__label bo-metric__label">Aguardando prestador</span>
 
-        <strong class="bo-metric__value"><?php echo count($filas); ?></strong>
+        <strong class="ops-metric__value bo-metric__value"><?php echo count($filas); ?></strong>
 
     </article>
 
-    <article class="bo-metric <?php echo ($pedidoSelecionado && count($prestadores) === 0) ? 'is-danger' : ''; ?>">
+    <article class="ops-metric bo-metric <?php echo ($pedidoSelecionado && count($prestadores) === 0) ? 'is-danger' : ''; ?>">
 
-        <span class="bo-metric__label">Prestadores elegíveis (pedido selecionado)</span>
+        <span class="ops-metric__label bo-metric__label">Prestadores elegíveis (pedido selecionado)</span>
 
-        <strong class="bo-metric__value"><?php echo $pedidoSelecionado ? count($prestadores) : '—'; ?></strong>
+        <strong class="ops-metric__value bo-metric__value"><?php echo $pedidoSelecionado ? count($prestadores) : '—'; ?></strong>
 
         <?php if ($pedidoSelecionado && count($prestadores) === 0): ?><span class="bo-metric__trend">Sem opção — requer ação</span><?php endif; ?>
 

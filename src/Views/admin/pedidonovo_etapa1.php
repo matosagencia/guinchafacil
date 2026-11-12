@@ -15,6 +15,16 @@ $clientes = $clientes ?? [];
 $flash = $flash ?? null;
 
 ob_start();
+ob_start(static function (string $html): string {
+    return strtr($html, [
+        'LocalizaÃ§Ã£o' => 'Localização', 'veÃ­culo' => 'veículo',
+        'VeÃ­culo' => 'Veículo', 'Veï¿½culo' => 'Veículo', 'Ve�culo' => 'Veículo',
+        'IdentificaÃ§Ã£o' => 'Identificação', 'cotaÃ§Ã£o' => 'cotação',
+        'rÃ¡pidos' => 'rápidos', 'disponÃ­veis' => 'disponíveis',
+        'vocÃª' => 'você', 'nÃ£o' => 'não', 'OperaÃ§Ã£o' => 'Operação',
+        'invï¿½lidos' => 'inválidos',
+    ]);
+});
 ?>
 <link rel="stylesheet" href="<?= $e($bp) ?>/public/assets/css/pages/admin-pedido-flow.css?v=20261002-1">
 <link rel="stylesheet" href="<?= $e($bp) ?>/public/assets/css/pages/lovable-admin-funil.css?v=20261016-4b">

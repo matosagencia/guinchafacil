@@ -82,7 +82,7 @@ require __DIR__ . '/_header-public.php';
 
                     <div class="gf-field gf-field--icon gf-field--location">
                         <label for="localizacao">Endereço de retirada</label>
-                        <button type="button" class="gf-field__gps" id="btnGps" aria-label="Usar minha localização" title="Usar minha localização"><i class="fas fa-location-crosshairs" aria-hidden="true"></i></button>
+                        <button type="button" class="gf-field__gps" id="btnGps" aria-label="Usar minha localização" title="Usar minha localização"><i class="fas fa-location-crosshairs" aria-hidden="true"></i><span>Usar minha localização</span></button>
                         <input type="text" id="localizacao" name="localizacao" maxlength="220"
                                placeholder="Rua, bairro e cidade" autocomplete="street-address" required>
                     </div>
