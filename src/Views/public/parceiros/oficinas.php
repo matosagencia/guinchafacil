@@ -70,7 +70,7 @@ require __DIR__ . '/../_header-public.php';
                 <h1 id="hero-oficinas">Encha sua agenda<br>com <em>clientes.</em></h1>
                 <p>Receba encaminhamentos de veiculos que precisam dos seus servicos. Cadastro gratuito, sem mensalidade, com repasse via PIX.</p>
                 <div class="gf-hero__actions">
-                    <a class="gf-btn gf-btn--primary gf-btn--lg" href="#quero-participar">
+                    <a class="gf-btn gf-btn--primary gf-btn--lg" href="<?php echo $e($bp); ?>/registro/simples/oficina">
                         Quero fazer parte &nearr;
                     </a>
                     <a class="gf-btn gf-btn--outline gf-btn--lg" href="#faq">
@@ -149,11 +149,11 @@ require __DIR__ . '/../_header-public.php';
             <div class="gf-eyebrow">SIMULADOR DE GANHOS</div>
             <h2 class="gf-section-title">Projete uma referência para sua oficina.</h2>
             <p class="gf-section-description">Simulação ilustrativa. Comissão configurada para oficinas: <strong><?= $e(number_format((float)$comissao_parceiro_percentual, 2, ',', '.')) ?>%</strong>. Não é promessa de demanda ou renda.</p>
-            <div class="gf-simulator" data-commission="<?= $e((string)$comissao_parceiro_percentual) ?>"><label class="gf-simulator__field"><span class="gf-field-label">Atendimentos por dia: <strong id="of-sim-atend">2</strong></span><input type="range" id="of-sim-atend-range" min="1" max="10" value="2" class="gf-simulator__range"></label><label class="gf-simulator__field"><span class="gf-field-label">Dias de trabalho por mês: <strong id="of-sim-dias">22</strong></span><input type="range" id="of-sim-dias-range" min="1" max="30" value="22" class="gf-simulator__range"></label><div class="gf-price-result"><span class="gf-price-result__eyebrow">Receita líquida mensal simulada</span><strong class="gf-price-result__value" id="of-sim-total">R$ 0</strong><p class="gf-form-note">Referência fictícia de R$ 500 por atendimento, antes de custos e impostos.</p></div></div>
+            <div class="gf-simulator" data-commission="<?= $e((string)$comissao_parceiro_percentual) ?>"><label class="gf-simulator__field"><span class="gf-field-label">Atendimentos por dia: <strong id="of-sim-atend">2</strong></span><input type="range" id="of-sim-atend-range" min="1" max="10" value="2" class="gf-simulator__range"></label><label class="gf-simulator__field"><span class="gf-field-label">Dias de trabalho por mês: <strong id="of-sim-dias">22</strong></span><input type="range" id="of-sim-dias-range" min="1" max="30" value="22" class="gf-simulator__range"></label><div class="gf-price-result"><span class="gf-price-result__eyebrow">Receita líquida mensal simulada</span><strong class="gf-price-result__value" id="of-sim-total">R$ 22.000</strong><p class="gf-form-note">Referência fictícia de R$ 500 por atendimento, antes de custos e impostos.</p></div></div>
         </div>
     </section>
 
-    <script>(function(){var a=document.getElementById('of-sim-atend-range'),d=document.getElementById('of-sim-dias-range'),la=document.getElementById('of-sim-atend'),ld=document.getElementById('of-sim-dias'),t=document.getElementById('of-sim-total'),c=<?= json_encode((float)$comissao_parceiro_percentual) ?>/100;if(!a||!d||!t)return;function f(){la.textContent=a.value;ld.textContent=d.value;t.textContent='R$ '+Number(Number(a.value)*Number(d.value)*500*(1-c)).toLocaleString('pt-BR',{maximumFractionDigits:0});}a.addEventListener('input',f);d.addEventListener('input',f);f();}());</script>
+    <script<?php echo csp_script_nonce_attr(); ?>>(function(){var a=document.getElementById('of-sim-atend-range'),d=document.getElementById('of-sim-dias-range'),la=document.getElementById('of-sim-atend'),ld=document.getElementById('of-sim-dias'),t=document.getElementById('of-sim-total'),c=<?= json_encode((float)$comissao_parceiro_percentual) ?>/100;if(!a||!d||!t)return;function f(){la.textContent=a.value;ld.textContent=d.value;t.textContent='R$ '+Number(Number(a.value)*Number(d.value)*500*(1-c)).toLocaleString('pt-BR',{maximumFractionDigits:0});}a.addEventListener('input',f);d.addEventListener('input',f);f();}());</script>
 
     <section class="gf-section" id="faq">
         <div class="gf-container">

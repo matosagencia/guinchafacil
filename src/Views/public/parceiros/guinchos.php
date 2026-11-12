@@ -70,7 +70,7 @@ require __DIR__ . '/../_header-public.php';
                 <h1 id="hero-guinchos">Seu guincho merece<br>novos <em>caminhos.</em></h1>
                 <p>Mais oportunidades na sua regiao, autonomia para aceitar chamados e clareza em cada atendimento. Cadastro gratuito, sem mensalidade.</p>
                 <div class="gf-hero__actions">
-                    <a class="gf-btn gf-btn--primary gf-btn--lg" href="#quero-participar">
+                    <a class="gf-btn gf-btn--primary gf-btn--lg" href="<?php echo $e($bp); ?>/registro/simples/guincho">
                         Quero fazer parte &nearr;
                     </a>
                     <a class="gf-btn gf-btn--outline gf-btn--lg" href="#faq">
@@ -148,7 +148,7 @@ require __DIR__ . '/../_header-public.php';
     </section>
 </main>
 
-<script>
+<script<?php echo csp_script_nonce_attr(); ?>>
 (function(){
     var rAt = document.getElementById('sim-atend-range');
     var rDi = document.getElementById('sim-dias-range');
