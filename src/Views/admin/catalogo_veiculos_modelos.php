@@ -6,6 +6,24 @@ require_once __DIR__ . '/../components/vehicle_brand_badge.php';
 
 $marca = $marca ?? [];
 $modelos = $modelos ?? [];
+$catalogoModelosUrl = (defined('BASE_PATH') ? BASE_PATH : '') . '/public/assets/vehicle-catalog/midia/modelos/';
+$catalogoModelosDir = dirname(__DIR__, 3) . '/public/assets/vehicle-catalog/midia/modelos/';
+$slugModelo = static function (string $nome): string {
+    $nome = iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $nome) ?: $nome;
+    return trim((string)preg_replace('/[^a-z0-9]+/i', '-', strtolower($nome)), '-');
+};
+$imagemDoModelo = static function (string $marcaNome, string $modeloNome) use ($catalogoModelosDir, $catalogoModelosUrl, $slugModelo): ?array {
+    $base = $slugModelo($marcaNome . '-' . $modeloNome);
+    foreach (['carros', 'suv', 'picapes', 'caminhoes', 'motocicletas'] as $categoria) {
+        foreach (['jpg', 'jpeg', 'png', 'webp'] as $extensao) {
+            $arquivo = $base . '.' . $extensao;
+            if (is_file($catalogoModelosDir . $categoria . '/' . $arquivo)) {
+                return ['url' => $catalogoModelosUrl . $categoria . '/' . $arquivo, 'categoria' => $categoria];
+            }
+        }
+    }
+    return null;
+};
 $gruposAlfabeticos = [];
 foreach ($modelos as $modeloItem) {
     $letra = strtoupper(mb_substr(trim((string)($modeloItem['name'] ?? '#')), 0, 1, 'UTF-8'));
@@ -53,11 +71,13 @@ ksort($gruposAlfabeticos, SORT_NATURAL | SORT_FLAG_CASE);
         <section class="vehicle-catalog-letter-group" id="modelo-<?php echo htmlspecialchars($letra); ?>">
             <h2 class="vehicle-catalog-letter"><span><?php echo htmlspecialchars($letra); ?></span><span class="vehicle-catalog-letter__count"><?php echo count($modelosDoGrupo); ?> modelos</span></h2>
             <div class="row g-3">
-        <?php foreach ($modelosDoGrupo as $mo): ?>
+        <?php foreach ($modelosDoGrupo as $mo): $imagemCatalogo = $imagemDoModelo((string)($marca['name'] ?? ''), (string)($mo['name'] ?? '')); ?>
         <div class="col-6 col-md-4 col-lg-3 col-xl-2">
             <div class="card vehicle-catalog-card vehicle-model-card <?php echo empty($mo['active']) ? 'is-inactive' : ''; ?>">
                 <a href="<?php echo htmlspecialchars($bp); ?>/admin/catalogo-veiculos/modelo/<?php echo (int)$mo['id']; ?>" class="card-body d-flex flex-column align-items-center justify-content-center gap-2 text-decoration-none">
-                    <?php if (!empty($mo['image_path'])): ?>
+                    <?php if (!empty($imagemCatalogo['url'])): ?>
+                        <img class="vehicle-model-image" src="<?php echo htmlspecialchars($imagemCatalogo['url'], ENT_QUOTES, 'UTF-8'); ?>" alt="<?php echo htmlspecialchars($mo['name']); ?>">
+                    <?php elseif (!empty($mo['image_path'])): ?>
                         <img src="<?php echo htmlspecialchars($mo['image_path'], ENT_QUOTES, 'UTF-8'); ?>" alt="<?php echo htmlspecialchars($mo['name']); ?>" style="width:96px;height:64px;object-fit:contain;">
                     <?php else: ?>
                         <?php echo vehicle_model_placeholder_html(96); ?>
@@ -77,4 +97,4 @@ ksort($gruposAlfabeticos, SORT_NATURAL | SORT_FLAG_CASE);
     </div>
 </div>
 
-<?php $conteudo_pagina=ob_get_clean(); $perfil='admin'; $titulo_pagina='Modelos de veículos'; $breadcrumb=['Catálogo e preços','Modelos de veículos']; $assets_css=['/public/assets/css/pages/bo-admin-catalogo.css','/public/assets/css/pages/gf-admin-catalogo-veiculos-v2.css','/public/assets/css/pages/gf-admin-catalogo-veiculos-logo-fix.css']; require __DIR__ . '/../layouts/backoffice_shell.php';
+<?php $conteudo_pagina=ob_get_clean(); $perfil='admin'; $titulo_pagina='Modelos de veículos'; $breadcrumb=['Catálogo e preços','Modelos de veículos']; $assets_css=['/public/assets/css/pages/bo-admin-catalogo.css','/public/assets/css/pages/gf-admin-catalogo-veiculos-v2.css','/public/assets/css/pages/gf-admin-catalogo-veiculos-logo-fix.css','/public/assets/css/pages/gf-admin-catalogo-veiculos-model-image.css']; require __DIR__ . '/../layouts/backoffice_shell.php';
