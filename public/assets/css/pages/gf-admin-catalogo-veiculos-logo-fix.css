@@ -1,0 +1,4 @@
+.vehicle-catalog-card__media{display:grid;place-items:center;width:100%;height:82px;min-height:82px;padding:10px 18px}
+.vehicle-catalog-logo{display:block;width:132px;height:58px;object-fit:contain;object-position:center}
+.vehicle-catalog-card .vehicle-brand-card__logo{display:grid;place-items:center;width:100%;height:82px;min-height:82px}
+.vehicle-catalog-card .card-body{display:flex;flex-direction:column;align-items:center}

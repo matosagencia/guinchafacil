@@ -1,0 +1,3727 @@
+[
+  {
+    "arquivo": "logos/agrale.svg",
+    "fabricante": "Agrale",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Agrale.svg",
+    "licenca": "Public domain",
+    "licenca_url": null,
+    "autor": "Agrale"
+  },
+  {
+    "arquivo": "logos/aston-martin.svg",
+    "fabricante": "Aston Martin",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Aston_Martin_wordmark.svg",
+    "licenca": "Public domain",
+    "licenca_url": null,
+    "autor": "Aston Martin"
+  },
+  {
+    "arquivo": "modelos/carros/aston-martin-vanquish.jpg",
+    "fabricante": "Aston Martin",
+    "modelo": "Vanquish",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Aston_Martin_Vanquish_(2024)_DSC_7892.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Alexander Migl"
+  },
+  {
+    "arquivo": "modelos/suv/aston-martin-dbx.jpg",
+    "fabricante": "Aston Martin",
+    "modelo": "DBX",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Aston_Martin_DBX_707_3.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Calreyn88"
+  },
+  {
+    "arquivo": "logos/audi.svg",
+    "fabricante": "Audi",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Audi-Logo_2016.svg",
+    "licenca": "Public domain",
+    "licenca_url": null,
+    "autor": "Strichpunkt / KMS Team"
+  },
+  {
+    "arquivo": "modelos/carros/audi-a4.jpg",
+    "fabricante": "Audi",
+    "modelo": "A4",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Audi_A4_B9_sedans_(FL)_1X7A6816.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Alexander-93"
+  },
+  {
+    "arquivo": "modelos/carros/audi-a5.jpg",
+    "fabricante": "Audi",
+    "modelo": "A5",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Audi_A5_B10_DSC_7178.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Alexander Migl"
+  },
+  {
+    "arquivo": "modelos/carros/audi-a6.jpg",
+    "fabricante": "Audi",
+    "modelo": "A6",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Audi_A6_C9_IAA_2025_DSC_1920.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Alexander-93"
+  },
+  {
+    "arquivo": "modelos/carros/audi-a8.jpg",
+    "fabricante": "Audi",
+    "modelo": "A8",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Audi_A8L_D5_(2021)_1X7A1787.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Alexander-93"
+  },
+  {
+    "arquivo": "modelos/carros/audi-s3.jpg",
+    "fabricante": "Audi",
+    "modelo": "S3",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:2024_Audi_S3_8Y_Sedan_DSC_7356.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Alexander Migl"
+  },
+  {
+    "arquivo": "modelos/carros/audi-tt.jpg",
+    "fabricante": "Audi",
+    "modelo": "TT",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Audi_TT.jpg",
+    "licenca": "CC BY 2.0",
+    "licenca_url": "https://creativecommons.org/licenses/by/2.0",
+    "autor": "shahram sharif from Tehran, IRAN"
+  },
+  {
+    "arquivo": "modelos/carros/audi-r8.jpg",
+    "fabricante": "Audi",
+    "modelo": "R8",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:2007_Audi_R8.jpg",
+    "licenca": "Public domain",
+    "licenca_url": null,
+    "autor": "Hatsukari715"
+  },
+  {
+    "arquivo": "modelos/carros/audi-e-tron-gt.jpg",
+    "fabricante": "Audi",
+    "modelo": "e-tron GT",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Audi_RS_e-tron_GT_IMG_0703.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Alexander-93"
+  },
+  {
+    "arquivo": "modelos/suv/audi-q3.jpg",
+    "fabricante": "Audi",
+    "modelo": "Q3",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Audi_Q3_FJ_Sportback_IAA_2025_DSC_1742.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Alexander-93"
+  },
+  {
+    "arquivo": "modelos/suv/audi-q3-sportback.jpg",
+    "fabricante": "Audi",
+    "modelo": "Q3 Sportback",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:2025_Audi_Q3_35_TFSI_S-Line_front_(Hertz).jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "LuvsMG481"
+  },
+  {
+    "arquivo": "modelos/suv/audi-q5.jpg",
+    "fabricante": "Audi",
+    "modelo": "Q5",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Audi_Q5_GU_DSC_8460.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Alexander Migl"
+  },
+  {
+    "arquivo": "modelos/suv/audi-q7.jpg",
+    "fabricante": "Audi",
+    "modelo": "Q7",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Audi_Q7_4M_FL2_3.0_V6_MHEV_quattro_Satellite_Silver_Metallic_01_(cropped).jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Ethan Llamas"
+  },
+  {
+    "arquivo": "modelos/suv/audi-q8.jpg",
+    "fabricante": "Audi",
+    "modelo": "Q8",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Audi_Q8_e-tron_Sportback_1X7A7167.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Alexander-93"
+  },
+  {
+    "arquivo": "modelos/suv/audi-q4-e-tron.jpg",
+    "fabricante": "Audi",
+    "modelo": "Q4 e-tron",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Audi_Q4_e-tron_50_quattro_%E2%80%93_f_22012023.jpg",
+    "licenca": "CC BY-SA 3.0 de",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/3.0/de/deed.en",
+    "autor": "© M 93"
+  },
+  {
+    "arquivo": "modelos/suv/audi-q6-e-tron.jpg",
+    "fabricante": "Audi",
+    "modelo": "Q6 e-tron",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Audi_SQ6_e-tron_Automesse_Ludwigsburg_2024_IMG_1395.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Alexander-93"
+  },
+  {
+    "arquivo": "modelos/suv/audi-q8-e-tron.jpg",
+    "fabricante": "Audi",
+    "modelo": "Q8 e-tron",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Audi,_Paris_Motor_Show_2018,_Paris_(1Y7A1756).jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Matti Blume"
+  },
+  {
+    "arquivo": "logos/bajaj.svg",
+    "fabricante": "Bajaj",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Bajaj_Auto_Ltd_logo.svg",
+    "licenca": "Public domain",
+    "licenca_url": null,
+    "autor": "Bajaj Auto"
+  },
+  {
+    "arquivo": "modelos/carros/bentley-continental-gt.jpg",
+    "fabricante": "Bentley",
+    "modelo": "Continental GT",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Bentley_Continental_GT_(4th_gen.)_DSC_8518.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Alexander Migl"
+  },
+  {
+    "arquivo": "modelos/carros/bentley-flying-spur.jpg",
+    "fabricante": "Bentley",
+    "modelo": "Flying Spur",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Bentley_Continental_Flying_Spur_Speed_%E2%80%93_Frontansicht_(2),_5._April_2012,_D%C3%BCsseldorf.jpg",
+    "licenca": "CC BY-SA 3.0 de",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/3.0/de/deed.en",
+    "autor": "M 93"
+  },
+  {
+    "arquivo": "modelos/suv/bentley-bentayga.jpg",
+    "fabricante": "Bentley",
+    "modelo": "Bentayga",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Bentley_Bentayga_(FL)_Azure_1X7A7439.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Alexander-93"
+  },
+  {
+    "arquivo": "logos/bmw.svg",
+    "fabricante": "BMW",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:BMW_logo_(gray).svg",
+    "licenca": "Public domain",
+    "licenca_url": null,
+    "autor": "BMW"
+  },
+  {
+    "arquivo": "modelos/carros/bmw-s-rie-1.jpg",
+    "fabricante": "BMW",
+    "modelo": "Série 1",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:BMW_F40_1X7A1835.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Alexander-93"
+  },
+  {
+    "arquivo": "modelos/carros/bmw-s-rie-2.jpg",
+    "fabricante": "BMW",
+    "modelo": "Série 2",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:BMW_G42_1X7A0370.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Alexander Migl"
+  },
+  {
+    "arquivo": "modelos/carros/bmw-s-rie-3.jpg",
+    "fabricante": "BMW",
+    "modelo": "Série 3",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:BMW_G20_(2022)_1X7A6120.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Alexander Migl"
+  },
+  {
+    "arquivo": "modelos/carros/bmw-s-rie-4.jpg",
+    "fabricante": "BMW",
+    "modelo": "Série 4",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:2024_BMW_4_Series_Gran_Coup%C3%A9_(G26)_DSC_9803_(cropped).jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Alexander Migl"
+  },
+  {
+    "arquivo": "modelos/carros/bmw-s-rie-5.jpg",
+    "fabricante": "BMW",
+    "modelo": "Série 5",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:2024_BMW_5-Series_520d_M_Sport.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Chanokchon"
+  },
+  {
+    "arquivo": "modelos/carros/bmw-s-rie-7.jpg",
+    "fabricante": "BMW",
+    "modelo": "Série 7",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:BMW_7-Series_(G70)_750e_IMG_9358.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Alexander-93"
+  },
+  {
+    "arquivo": "modelos/carros/bmw-s-rie-8.jpg",
+    "fabricante": "BMW",
+    "modelo": "Série 8",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:BMW_8_SERIES_COUPE_(G15)_China.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Dinkun Chen"
+  },
+  {
+    "arquivo": "modelos/carros/bmw-i4.jpg",
+    "fabricante": "BMW",
+    "modelo": "i4",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:BMW_i4_eDrive40_Gran_Coup%C3%A9_M_Sportpaket_(G26,_Facelift)_%E2%80%93_f_18042025.jpg",
+    "licenca": "CC BY-SA 3.0 de",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/3.0/de/deed.en",
+    "autor": "© M 93"
+  },
+  {
+    "arquivo": "modelos/carros/bmw-i5.jpg",
+    "fabricante": "BMW",
+    "modelo": "i5",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:BMW_i5_IAA_2023_1X7A0105.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Alexander-93"
+  },
+  {
+    "arquivo": "modelos/carros/bmw-i7.jpg",
+    "fabricante": "BMW",
+    "modelo": "i7",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:BMW_7-Series_(G70)_750e_1X7A1893.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Alexander-93"
+  },
+  {
+    "arquivo": "modelos/carros/bmw-m2.jpg",
+    "fabricante": "BMW",
+    "modelo": "M2",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:BMW_M2_CS_(G87)_DSC_9727.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Alexander Migl"
+  },
+  {
+    "arquivo": "modelos/carros/bmw-m3.jpg",
+    "fabricante": "BMW",
+    "modelo": "M3",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:BMW_M3_CS_1X7A6394.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Alexander Migl"
+  },
+  {
+    "arquivo": "modelos/carros/bmw-m5.jpg",
+    "fabricante": "BMW",
+    "modelo": "M5",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:BMW_M5_(G90)_DSC_6010.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Alexander-93"
+  },
+  {
+    "arquivo": "modelos/carros/bmw-z4.jpg",
+    "fabricante": "BMW",
+    "modelo": "Z4",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:BMW_Z4,_Paris_Motor_Show_2018,_Paris_(1Y7A1387).jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Matti Blume"
+  },
+  {
+    "arquivo": "modelos/suv/bmw-x1.jpg",
+    "fabricante": "BMW",
+    "modelo": "X1",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:BMW_U11_X1_M35i_DSC_9809.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Alexander Migl"
+  },
+  {
+    "arquivo": "modelos/suv/bmw-x2.jpg",
+    "fabricante": "BMW",
+    "modelo": "X2",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:BMW_U10_X2_M35i_DSC_5986.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Alexander-93"
+  },
+  {
+    "arquivo": "modelos/suv/bmw-x3.jpg",
+    "fabricante": "BMW",
+    "modelo": "X3",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:BMW_G45_X3_M50_Auto_Zuerich_2024_DSC_6679.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Alexander-93"
+  },
+  {
+    "arquivo": "modelos/suv/bmw-x4.jpg",
+    "fabricante": "BMW",
+    "modelo": "X4",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:BMW_X4_M_(G02)_IMG_2031.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Alexander Migl"
+  },
+  {
+    "arquivo": "modelos/suv/bmw-x5.jpg",
+    "fabricante": "BMW",
+    "modelo": "X5",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:2023_BMW_X5_M_(G05)_1X7A0891.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Alexander-93"
+  },
+  {
+    "arquivo": "modelos/suv/bmw-x6.jpg",
+    "fabricante": "BMW",
+    "modelo": "X6",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:BMW_G06_M60i_IMG_9712.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Alexander-93"
+  },
+  {
+    "arquivo": "modelos/suv/bmw-x7.jpg",
+    "fabricante": "BMW",
+    "modelo": "X7",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:BMW_X7_xDrive40d_M_Sport_(G07)_front.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Tokumeigakarinoaoshima"
+  },
+  {
+    "arquivo": "modelos/suv/bmw-xm.jpg",
+    "fabricante": "BMW",
+    "modelo": "XM",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:BMW_XM_(G09)_DSC_8506.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Alexander Migl"
+  },
+  {
+    "arquivo": "modelos/suv/bmw-ix.jpg",
+    "fabricante": "BMW",
+    "modelo": "iX",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:BMW_iX_IAA_2021_1X7A0241.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Alexander Migl"
+  },
+  {
+    "arquivo": "modelos/suv/bmw-ix1.jpg",
+    "fabricante": "BMW",
+    "modelo": "iX1",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:BMW_iX1_IMG_5594.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Alexander Migl"
+  },
+  {
+    "arquivo": "modelos/suv/bmw-ix3.jpg",
+    "fabricante": "BMW",
+    "modelo": "iX3",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:BMW_iX3_NA5_IAA_2025_DSC_1684.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Alexander-93"
+  },
+  {
+    "arquivo": "modelos/motocicletas/bmw-g-310-gs.jpg",
+    "fabricante": "BMW",
+    "modelo": "G 310 GS",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:BMW_G_motorcycle_in_Athens_on_June_25,_2023.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "George E. Koronaios"
+  },
+  {
+    "arquivo": "modelos/motocicletas/bmw-f-800-gs.jpg",
+    "fabricante": "BMW",
+    "modelo": "F 800 GS",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Liesel_14-11-10_BMW_F_800_GS_01-2.JPG",
+    "licenca": "CC BY-SA 3.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/3.0",
+    "autor": "Liesel"
+  },
+  {
+    "arquivo": "modelos/motocicletas/bmw-f-900-r.jpg",
+    "fabricante": "BMW",
+    "modelo": "F 900 R",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:BMW_F900R_(1crop).jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Wiki LIC"
+  },
+  {
+    "arquivo": "modelos/motocicletas/bmw-r-1250-rt.jpg",
+    "fabricante": "BMW",
+    "modelo": "R 1250 RT",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:2022-09_R1250_RT_im_B%C3%B6hmerwald_(bearb_Sp).jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Bayahusa"
+  },
+  {
+    "arquivo": "modelos/motocicletas/bmw-r-12-ninet.jpg",
+    "fabricante": "BMW",
+    "modelo": "R 12 nineT",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:2024-06_BMW_R12-A_(bearb_Sp).jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Wikisympathisant"
+  },
+  {
+    "arquivo": "modelos/motocicletas/bmw-s-1000-r.jpg",
+    "fabricante": "BMW",
+    "modelo": "S 1000 R",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:BMW_S_1000_R_noBG.jpg",
+    "licenca": "CC BY-SA 3.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/3.0",
+    "autor": "San Andreas  /  Freisteller von Auge=mit"
+  },
+  {
+    "arquivo": "modelos/motocicletas/bmw-ce-04.jpeg",
+    "fabricante": "BMW",
+    "modelo": "CE 04",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:BMW_CE_04.jpeg",
+    "licenca": "CC BY-SA 3.0 de",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/3.0/de/deed.en",
+    "autor": "User \"Romiman\""
+  },
+  {
+    "arquivo": "logos/byd.svg",
+    "fabricante": "BYD",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:BYD_Auto_2022_logo.svg",
+    "licenca": "Public domain",
+    "licenca_url": null,
+    "autor": "BYD"
+  },
+  {
+    "arquivo": "modelos/carros/byd-dolphin-mini.jpg",
+    "fabricante": "BYD",
+    "modelo": "Dolphin Mini",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:BYD_Seagull_009.jpg",
+    "licenca": "CC0",
+    "licenca_url": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+    "autor": "Quzhouliulian"
+  },
+  {
+    "arquivo": "modelos/carros/byd-dolphin.jpg",
+    "fabricante": "BYD",
+    "modelo": "Dolphin",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:BYD_Dolphin_IAA_2023_1X7A0637.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Alexander-93"
+  },
+  {
+    "arquivo": "modelos/suv/byd-song-plus.jpg",
+    "fabricante": "BYD",
+    "modelo": "Song Plus",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:%D0%91%D1%83%D1%85%D0%B0%D1%80%D0%B0,_BYD_Song_Plus_%D0%BD%D0%B0_%D0%A0%D1%83%D1%88%D0%BD%D0%BE%D0%B8-%D0%9D%D0%B0%D0%BC%D0%B0%D0%B7%D0%B3%D0%BE%D1%85%D0%B5.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Nikolai Bulykin"
+  },
+  {
+    "arquivo": "modelos/suv/byd-sealion-7.jpg",
+    "fabricante": "BYD",
+    "modelo": "Sealion 7",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:BYD_Sealion_07_EV_DSC_8264_(cropped).jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Alexander Migl"
+  },
+  {
+    "arquivo": "modelos/picapes/byd-shark.jpg",
+    "fabricante": "BYD",
+    "modelo": "Shark",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:2025_BYD_Shark_6_front.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "LuvsMG481"
+  },
+  {
+    "arquivo": "modelos/carros/caoa-chery-qq.jpg",
+    "fabricante": "CAOA Chery",
+    "modelo": "QQ",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Chery_QQ_face_-_FPMS.jpg",
+    "licenca": "CC BY-SA 2.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/2.0",
+    "autor": "Anuradha Ratnaweera"
+  },
+  {
+    "arquivo": "modelos/carros/caoa-chery-arrizo-5.jpg",
+    "fabricante": "CAOA Chery",
+    "modelo": "Arrizo 5",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Chery_Arrizo_5_2024_facelift_003.jpg",
+    "licenca": "CC0",
+    "licenca_url": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+    "autor": "JustAnotherCarDesigner"
+  },
+  {
+    "arquivo": "modelos/suv/caoa-chery-tiggo-3x.jpg",
+    "fabricante": "CAOA Chery",
+    "modelo": "Tiggo 3X",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Chery_Tiggo_3x_Plus_IMG003.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Zotyefan"
+  },
+  {
+    "arquivo": "modelos/suv/caoa-chery-tiggo-5x.jpg",
+    "fabricante": "CAOA Chery",
+    "modelo": "Tiggo 5X",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Chery_Tiggo_5X_(cropped).jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Jengtingchen"
+  },
+  {
+    "arquivo": "modelos/suv/caoa-chery-tiggo-7.jpg",
+    "fabricante": "CAOA Chery",
+    "modelo": "Tiggo 7",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Chery_Tiggo_7_II_008.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "SAIC GM sucks"
+  },
+  {
+    "arquivo": "modelos/suv/caoa-chery-tiggo-8.jpg",
+    "fabricante": "CAOA Chery",
+    "modelo": "Tiggo 8",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:2018_Chery_Tiggo_8,_front_(2)_8.7.18.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Kevauto"
+  },
+  {
+    "arquivo": "logos/chevrolet.svg",
+    "fabricante": "Chevrolet",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Chevrolet_simple_logo.svg",
+    "licenca": "Public domain",
+    "licenca_url": null,
+    "autor": "Unknown authorUnknown author"
+  },
+  {
+    "arquivo": "modelos/carros/chevrolet-celta.jpg",
+    "fabricante": "Chevrolet",
+    "modelo": "Celta",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Chevrolet_Celta_2013_in_Uruguay.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "NaBUru38"
+  },
+  {
+    "arquivo": "modelos/carros/chevrolet-corsa.jpg",
+    "fabricante": "Chevrolet",
+    "modelo": "Corsa",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Chevrolet_Corsa_1.6_Sedan_2009.jpg",
+    "licenca": "CC BY-SA 2.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/2.0",
+    "autor": "raul"
+  },
+  {
+    "arquivo": "modelos/carros/chevrolet-classic.jpg",
+    "fabricante": "Chevrolet",
+    "modelo": "Classic",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Chevrolet_Classic_20150814-DSC05670.JPG",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Matti Blume"
+  },
+  {
+    "arquivo": "modelos/carros/chevrolet-prisma.jpg",
+    "fabricante": "Chevrolet",
+    "modelo": "Prisma",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Chevrolet_Prisma_in_Santiago,_Chile.JPG",
+    "licenca": "CC BY-SA 3.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/3.0",
+    "autor": "Viva Chile!"
+  },
+  {
+    "arquivo": "modelos/carros/chevrolet-cobalt.jpg",
+    "fabricante": "Chevrolet",
+    "modelo": "Cobalt",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Chevrolet-Cobalt-Coupe.JPG",
+    "licenca": "Public domain",
+    "licenca_url": null,
+    "autor": "IFCAR"
+  },
+  {
+    "arquivo": "modelos/carros/chevrolet-agile.jpg",
+    "fabricante": "Chevrolet",
+    "modelo": "Agile",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Chevrolet_Agile_front.JPG",
+    "licenca": "CC BY 3.0",
+    "licenca_url": "https://creativecommons.org/licenses/by/3.0",
+    "autor": "Diego HC"
+  },
+  {
+    "arquivo": "modelos/carros/chevrolet-sonic.jpg",
+    "fabricante": "Chevrolet",
+    "modelo": "Sonic",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Chevrolet-nuevo-aveo-4p-rojo.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Wavys"
+  },
+  {
+    "arquivo": "modelos/carros/chevrolet-onix.jpg",
+    "fabricante": "Chevrolet",
+    "modelo": "Onix",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:2020_SAIC-GM_Chevrolet_Onix_sedan.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "User3204"
+  },
+  {
+    "arquivo": "modelos/carros/chevrolet-cruze.jpg",
+    "fabricante": "Chevrolet",
+    "modelo": "Cruze",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Chevrolet_Cruze_Back_P4250805.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Alexander Migl"
+  },
+  {
+    "arquivo": "modelos/carros/chevrolet-spin.jpg",
+    "fabricante": "Chevrolet",
+    "modelo": "Spin",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:2025_Chevrolet_Spin_1.8_LT.jpg",
+    "licenca": "CC BY 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by/4.0",
+    "autor": "Just a Man"
+  },
+  {
+    "arquivo": "modelos/carros/chevrolet-camaro.jpg",
+    "fabricante": "Chevrolet",
+    "modelo": "Camaro",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:2021-Chevrolet-Camaro-RS-convertible-front.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "JellyNinjaWiki"
+  },
+  {
+    "arquivo": "modelos/suv/chevrolet-tracker.jpg",
+    "fabricante": "Chevrolet",
+    "modelo": "Tracker",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Chevrolet-Tracker-4door.jpg",
+    "licenca": "Public domain",
+    "licenca_url": null,
+    "autor": "IFCAR"
+  },
+  {
+    "arquivo": "modelos/suv/chevrolet-equinox.jpg",
+    "fabricante": "Chevrolet",
+    "modelo": "Equinox",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:2025_Chevrolet_Equinox,_front_12.10.24.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Kevauto"
+  },
+  {
+    "arquivo": "modelos/suv/chevrolet-equinox-ev.png",
+    "fabricante": "Chevrolet",
+    "modelo": "Equinox EV",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:2024_Chevrolet_Equinox_EV_AWD_(United_States)_front_view.png",
+    "licenca": "CC BY 3.0",
+    "licenca_url": "https://creativecommons.org/licenses/by/3.0",
+    "autor": "Booredatwork.com"
+  },
+  {
+    "arquivo": "modelos/suv/chevrolet-trailblazer.jpg",
+    "fabricante": "Chevrolet",
+    "modelo": "Trailblazer",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Chevrolet_TrailBlazer_--_06-05-2010.jpg",
+    "licenca": "Public domain",
+    "licenca_url": null,
+    "autor": "IFCAR"
+  },
+  {
+    "arquivo": "modelos/suv/chevrolet-blazer-ev.jpg",
+    "fabricante": "Chevrolet",
+    "modelo": "Blazer EV",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Chevrolet_Blazer_EV_RS_eAWD_(2024)_(53619432081).jpg",
+    "licenca": "CC BY 2.0",
+    "licenca_url": "https://creativecommons.org/licenses/by/2.0",
+    "autor": "Charles from Port Chester, New York"
+  },
+  {
+    "arquivo": "modelos/picapes/chevrolet-montana.jpg",
+    "fabricante": "Chevrolet",
+    "modelo": "Montana",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:2023_Chevrolet_Montana_Premier_(Brazil)_front_view_01.jpg",
+    "licenca": "CC BY 3.0",
+    "licenca_url": "https://creativecommons.org/licenses/by/3.0",
+    "autor": "Autosdeprimera"
+  },
+  {
+    "arquivo": "modelos/picapes/chevrolet-s10.jpg",
+    "fabricante": "Chevrolet",
+    "modelo": "S10",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:2024_Chevrolet_Colorado_ZR2,_front_right,_07-18-2024.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "MercurySable99"
+  },
+  {
+    "arquivo": "modelos/picapes/chevrolet-silverado.jpg",
+    "fabricante": "Chevrolet",
+    "modelo": "Silverado",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:2024_Chevrolet_Silverado_2500HD_au_SIAM_2023.JPG",
+    "licenca": "Public domain",
+    "licenca_url": null,
+    "autor": "Bull-Doser"
+  },
+  {
+    "arquivo": "logos/citroen.png",
+    "fabricante": "Citroën",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Logo-citroen-1919.png",
+    "licenca": "Public domain",
+    "licenca_url": null,
+    "autor": "Unknown"
+  },
+  {
+    "arquivo": "modelos/carros/citroen-c3.jpg",
+    "fabricante": "Citroën",
+    "modelo": "C3",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:2020_Citro%C3%ABn_C3_AIRCROSS_front_view_in_Brunei.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "AIMHO'S REBELLION 8490s"
+  },
+  {
+    "arquivo": "modelos/carros/citroen-c3.jpg",
+    "fabricante": "Citroën",
+    "modelo": "ë-C3",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Citro%C3%ABn_C3_(4th_generation)_DSC_7101.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Alexander Migl"
+  },
+  {
+    "arquivo": "modelos/carros/citroen-c4-cactus.jpg",
+    "fabricante": "Citroën",
+    "modelo": "C4 Cactus",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Citroen_C4_Cactus_(2018)_IMG_4062.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Alexander Migl"
+  },
+  {
+    "arquivo": "modelos/carros/citroen-xsara-picasso.jpg",
+    "fabricante": "Citroën",
+    "modelo": "Xsara Picasso",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Citroen_Xsara_Picasso_front_20080705.jpg",
+    "licenca": "Attribution",
+    "licenca_url": null,
+    "autor": "Rudolf Stricker"
+  },
+  {
+    "arquivo": "modelos/suv/citroen-c3-aircross.jpg",
+    "fabricante": "Citroën",
+    "modelo": "C3 Aircross",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:C3PicassoAircross4774526251_4ef8ab3da1_b.jpg",
+    "licenca": "CC BY 2.0",
+    "licenca_url": "https://creativecommons.org/licenses/by/2.0",
+    "autor": "nenoberto"
+  },
+  {
+    "arquivo": "modelos/suv/citroen-aircross.jpg",
+    "fabricante": "Citroën",
+    "modelo": "Aircross",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Citroen_Aircross._Spielvogel_1.jpg",
+    "licenca": "CC0",
+    "licenca_url": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+    "autor": "Spielvogel\n\nFor a gallery of some more of my uploaded pictures see: here.\nAll images can be used free of charge."
+  },
+  {
+    "arquivo": "logos/daf.svg",
+    "fabricante": "DAF",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:DAF_logo.svg",
+    "licenca": "Public domain",
+    "licenca_url": null,
+    "autor": "DAF Trucks"
+  },
+  {
+    "arquivo": "modelos/caminhoes/daf-cf.jpg",
+    "fabricante": "DAF",
+    "modelo": "CF",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Daf_CF_85.410_Sligro.jpg",
+    "licenca": "CC BY 2.0",
+    "licenca_url": "https://creativecommons.org/licenses/by/2.0",
+    "autor": "Joost J. Bakker from IJmuiden"
+  },
+  {
+    "arquivo": "modelos/caminhoes/daf-xf.jpg",
+    "fabricante": "DAF",
+    "modelo": "XF",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:DAF_XF_105.460_(KX63_KXH)_with_Stobart_trailer,_4_December_2013.jpg",
+    "licenca": "CC BY 2.0",
+    "licenca_url": "https://creativecommons.org/licenses/by/2.0",
+    "autor": "Alan Sansbury from Liverpool, England"
+  },
+  {
+    "arquivo": "modelos/caminhoes/daf-xf-nova-gera-o.jpg",
+    "fabricante": "DAF",
+    "modelo": "XF (nova geração)",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:DAF_XF_105.460_(KX63_KXH)_with_Stobart_trailer,_4_December_2013.jpg",
+    "licenca": "CC BY 2.0",
+    "licenca_url": "https://creativecommons.org/licenses/by/2.0",
+    "autor": "Alan Sansbury from Liverpool, England"
+  },
+  {
+    "arquivo": "logos/ducati.svg",
+    "fabricante": "Ducati",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Ducati_red_logo.svg",
+    "licenca": "Public domain",
+    "licenca_url": null,
+    "autor": "Original by Ducati Motor HoldingVectorized by ReneeWrites"
+  },
+  {
+    "arquivo": "modelos/motocicletas/ducati-monster.jpg",
+    "fabricante": "Ducati",
+    "modelo": "Monster",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Ducati_Monster_900_1994_at_QGOMA,_Brisbane,_01.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Chris Olszewski"
+  },
+  {
+    "arquivo": "modelos/motocicletas/ducati-panigale-v2.jpg",
+    "fabricante": "Ducati",
+    "modelo": "Panigale V2",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Ducati_955_Panigale_V2_(IMG_9851).jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Terragio67"
+  },
+  {
+    "arquivo": "modelos/motocicletas/ducati-panigale-v4.jpg",
+    "fabricante": "Ducati",
+    "modelo": "Panigale V4",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Ducati_Panigale_V4_-_Tuning_World_Bodensee_2018,_Friedrichshafen_(OW1A0484).jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Matti Blume"
+  },
+  {
+    "arquivo": "modelos/motocicletas/ducati-desertx.jpg",
+    "fabricante": "Ducati",
+    "modelo": "DesertX",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Ducati_DesertX_in_Barcelona_(edited).jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Original:  Artem Lepesin / Derivative work:  Danyele"
+  },
+  {
+    "arquivo": "logos/ferrari.svg",
+    "fabricante": "Ferrari",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Ferrari_wordmark.svg",
+    "licenca": "Public domain",
+    "licenca_url": null,
+    "autor": "Ferrari"
+  },
+  {
+    "arquivo": "modelos/carros/ferrari-296-gtb.jpg",
+    "fabricante": "Ferrari",
+    "modelo": "296 GTB",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Ferrari_296_GTB_DSC_6997.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Alexander Migl"
+  },
+  {
+    "arquivo": "modelos/carros/ferrari-roma.jpg",
+    "fabricante": "Ferrari",
+    "modelo": "Roma",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Ferrari_Roma_IMG_9620_(cropped).jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Alexander-93"
+  },
+  {
+    "arquivo": "modelos/carros/ferrari-sf90-stradale.jpg",
+    "fabricante": "Ferrari",
+    "modelo": "SF90 Stradale",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Ferrari_SF90,_BAS_24,_Brussels_(P1170486-RR).jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Matti Blume"
+  },
+  {
+    "arquivo": "modelos/carros/ferrari-12cilindri.jpg",
+    "fabricante": "Ferrari",
+    "modelo": "12Cilindri",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:2024_Ferrari_12_Cilindri.jpg",
+    "licenca": "CC0",
+    "licenca_url": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+    "autor": "TTTNIS"
+  },
+  {
+    "arquivo": "modelos/suv/ferrari-purosangue.jpg",
+    "fabricante": "Ferrari",
+    "modelo": "Purosangue",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Ferrari_Purosangue_DSC_7007.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Alexander Migl"
+  },
+  {
+    "arquivo": "logos/fiat.svg",
+    "fabricante": "Fiat",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:FIAT_logo_(2020).svg",
+    "licenca": "Public domain",
+    "licenca_url": null,
+    "autor": "FIAT"
+  },
+  {
+    "arquivo": "modelos/carros/fiat-uno.jpg",
+    "fabricante": "Fiat",
+    "modelo": "Uno",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:1986_Fiat_Uno_Turbo_i.e_(25420774522).jpg",
+    "licenca": "CC BY 2.0",
+    "licenca_url": "https://creativecommons.org/licenses/by/2.0",
+    "autor": "Riley from Christchurch, New Zealand"
+  },
+  {
+    "arquivo": "modelos/carros/fiat-palio.jpg",
+    "fabricante": "Fiat",
+    "modelo": "Palio",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Fiat_Palio_1.4_Attractive_2014_(12280182114).jpg",
+    "licenca": "CC BY-SA 2.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/2.0",
+    "autor": "order_242 from Chile"
+  },
+  {
+    "arquivo": "modelos/carros/fiat-grand-siena.jpg",
+    "fabricante": "Fiat",
+    "modelo": "Grand Siena",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Fiat_Grand_Siena_in_Maldonado_-_front.jpg",
+    "licenca": "CC BY 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by/4.0",
+    "autor": "NaBUru38"
+  },
+  {
+    "arquivo": "modelos/carros/fiat-punto.jpg",
+    "fabricante": "Fiat",
+    "modelo": "Punto",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Fiat_Punto_HGT_Abarth_%2700.jpg",
+    "licenca": "CC BY-SA 3.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/3.0",
+    "autor": "Jack"
+  },
+  {
+    "arquivo": "modelos/carros/fiat-linea.jpg",
+    "fabricante": "Fiat",
+    "modelo": "Linea",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Fiat_Linea_1.4_TJet_Dynamic_2010_(16452173783).jpg",
+    "licenca": "CC BY-SA 2.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/2.0",
+    "autor": "order_242 from Chile"
+  },
+  {
+    "arquivo": "modelos/carros/fiat-bravo.jpg",
+    "fabricante": "Fiat",
+    "modelo": "Bravo",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Fiat_Bravo_II_front_20100501.jpg",
+    "licenca": "Attribution",
+    "licenca_url": null,
+    "autor": "M 93"
+  },
+  {
+    "arquivo": "modelos/carros/fiat-idea.jpg",
+    "fabricante": "Fiat",
+    "modelo": "Idea",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:2005_Fiat_Idea_Active_1.4_Front.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Vauxford"
+  },
+  {
+    "arquivo": "modelos/picapes/fiat-strada.jpg",
+    "fabricante": "Fiat",
+    "modelo": "Strada",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Fiat_Strada_Mk6_1.4_Endurance_in_Montevideo_in_2024.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "NaBUru38"
+  },
+  {
+    "arquivo": "modelos/picapes/fiat-toro.png",
+    "fabricante": "Fiat",
+    "modelo": "Toro",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Fiat_Toro_(r).png",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Diego HC"
+  },
+  {
+    "arquivo": "logos/ford.svg",
+    "fabricante": "Ford",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Ford_logo_flat.svg",
+    "licenca": "Public domain",
+    "licenca_url": null,
+    "autor": "Ford Motor Company"
+  },
+  {
+    "arquivo": "modelos/carros/ford-ka.jpg",
+    "fabricante": "Ford",
+    "modelo": "Ka",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Ford_Figo_Second_Generation_(2016).jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Keith Sebastian"
+  },
+  {
+    "arquivo": "modelos/carros/ford-fiesta.jpg",
+    "fabricante": "Ford",
+    "modelo": "Fiesta",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Ford_Fiesta_ST_Line_B479_Chrome_Blue_(1).jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Damian B Oh"
+  },
+  {
+    "arquivo": "modelos/carros/ford-focus.jpg",
+    "fabricante": "Ford",
+    "modelo": "Focus",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:2018_Ford_Focus_ST-Line_X_1.0.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Vauxford"
+  },
+  {
+    "arquivo": "modelos/carros/ford-fusion.jpg",
+    "fabricante": "Ford",
+    "modelo": "Fusion",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:2006_Ford_Fusion_--_NHTSA.jpg",
+    "licenca": "Public domain",
+    "licenca_url": null,
+    "autor": "U.S. National Highway Traffic Safety Administration"
+  },
+  {
+    "arquivo": "modelos/carros/ford-mustang.jpg",
+    "fabricante": "Ford",
+    "modelo": "Mustang",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:2024_Ford_Mustang_GT_Las_Vegas_2025_(cropped).jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "TaurusEmerald"
+  },
+  {
+    "arquivo": "modelos/suv/ford-ecosport.jpg",
+    "fabricante": "Ford",
+    "modelo": "EcoSport",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:2018_Ford_EcoSport_ST-Line_1.0_(1).jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Vauxford"
+  },
+  {
+    "arquivo": "modelos/suv/ford-territory.jpg",
+    "fabricante": "Ford",
+    "modelo": "Territory",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:2009-2010_Ford_Territory_(SY_II)_TX_wagon_01.jpg",
+    "licenca": "Public domain",
+    "licenca_url": null,
+    "autor": "OSX"
+  },
+  {
+    "arquivo": "modelos/suv/ford-bronco-sport.jpg",
+    "fabricante": "Ford",
+    "modelo": "Bronco Sport",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Ford_Bronco_Sport_Badlands_1X7A0168.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Alexander Migl"
+  },
+  {
+    "arquivo": "modelos/suv/ford-edge.jpg",
+    "fabricante": "Ford",
+    "modelo": "Edge",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:2023_Chang%27an-Ford_Edge_L.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "User3204"
+  },
+  {
+    "arquivo": "modelos/suv/ford-mustang-mach-e.jpg",
+    "fabricante": "Ford",
+    "modelo": "Mustang Mach-E",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:2021_Mustang_Mach-E_Red_Ford.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "MrWalkr"
+  },
+  {
+    "arquivo": "modelos/picapes/ford-courier.jpg",
+    "fabricante": "Ford",
+    "modelo": "Courier",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Courier_wikipedia.jpg",
+    "licenca": "Public domain",
+    "licenca_url": null,
+    "autor": "It's me"
+  },
+  {
+    "arquivo": "modelos/picapes/ford-maverick.jpg",
+    "fabricante": "Ford",
+    "modelo": "Maverick",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:1972_Ford_Maverick_Sprint_(616806978).jpg",
+    "licenca": "CC BY-SA 2.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/2.0",
+    "autor": "dave_7 from Lethbridge, Canada"
+  },
+  {
+    "arquivo": "modelos/picapes/ford-ranger.jpg",
+    "fabricante": "Ford",
+    "modelo": "Ranger",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Ford_Ranger_Raptor_(P703)_1X7A6776.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Alexander-93"
+  },
+  {
+    "arquivo": "modelos/picapes/ford-f-150.jpg",
+    "fabricante": "Ford",
+    "modelo": "F-150",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Ford_F-150_(fourteenth_generation)_Rutesheimer_Autoschau_2025_DSC_9217.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Alexander Migl"
+  },
+  {
+    "arquivo": "modelos/picapes/ford-f-250.jpg",
+    "fabricante": "Ford",
+    "modelo": "F-250",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:2024_Ford_F-150_SuperCrew_Tremor_in_Avalanche,_front_right,_2024-09-03.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Elise240SX"
+  },
+  {
+    "arquivo": "modelos/caminhoes/ford-f-4000.jpg",
+    "fabricante": "Ford",
+    "modelo": "F-4000",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:2011_Ford_F-250_XLT_--_07-10-2010.jpg",
+    "licenca": "Public domain",
+    "licenca_url": null,
+    "autor": "IFCAR"
+  },
+  {
+    "arquivo": "modelos/caminhoes/ford-cargo.jpg",
+    "fabricante": "Ford",
+    "modelo": "Cargo",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Ford_Cargo_4432_E_truck_(2005-2008)_in_Red,_front.jpg",
+    "licenca": "CC BY-SA 3.0",
+    "licenca_url": "http://creativecommons.org/licenses/by-sa/3.0/",
+    "autor": "Subtosilencio"
+  },
+  {
+    "arquivo": "logos/foton.svg",
+    "fabricante": "Foton",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Foton_Motor_logo.svg",
+    "licenca": "Public domain",
+    "licenca_url": null,
+    "autor": "Foton Motor"
+  },
+  {
+    "arquivo": "modelos/caminhoes/foton-auman.jpg",
+    "fabricante": "Foton",
+    "modelo": "Auman",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Auman_EST_-_Energy_Super_Truck.jpg",
+    "licenca": "CC BY-SA 3.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/3.0",
+    "autor": "Spielvogel, the copyright holder of this work, hereby publishes it under the following license:"
+  },
+  {
+    "arquivo": "modelos/suv/gac-gs4.jpg",
+    "fabricante": "GAC",
+    "modelo": "GS4",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:GAC_Trumpchi_GS4_3_China_2016-04-11.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Navigator84"
+  },
+  {
+    "arquivo": "modelos/suv/gac-aion-y.jpg",
+    "fabricante": "GAC",
+    "modelo": "Aion Y",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:2021_GAC_Aion_Y_(front).jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "User3204"
+  },
+  {
+    "arquivo": "modelos/suv/gac-aion-v.jpg",
+    "fabricante": "GAC",
+    "modelo": "Aion V",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Aion_V_006.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Jengtingchen"
+  },
+  {
+    "arquivo": "logos/geely.svg",
+    "fabricante": "Geely",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Geely_Auto_2023.svg",
+    "licenca": "Public domain",
+    "licenca_url": null,
+    "autor": "Geely Auto"
+  },
+  {
+    "arquivo": "modelos/suv/geely-ex5.jpg",
+    "fabricante": "Geely",
+    "modelo": "EX5",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Geely_Galaxy_E5_001.jpg",
+    "licenca": "CC0",
+    "licenca_url": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+    "autor": "JustAnotherCarDesigner"
+  },
+  {
+    "arquivo": "logos/gwm.png",
+    "fabricante": "GWM",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Logo_da_Great_Wall_Motors.png",
+    "licenca": "Public domain",
+    "licenca_url": null,
+    "autor": "Great Wall Motors Company Limited"
+  },
+  {
+    "arquivo": "modelos/suv/gwm-haval-h6.jpg",
+    "fabricante": "GWM",
+    "modelo": "Haval H6",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Havalh666-e1678218268854.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Motor Show Brasil"
+  },
+  {
+    "arquivo": "modelos/suv/gwm-haval-h9.jpg",
+    "fabricante": "GWM",
+    "modelo": "Haval H9",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Haval_H9_China_2015-04-08.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Navigator84"
+  },
+  {
+    "arquivo": "modelos/suv/gwm-tank-300.jpg",
+    "fabricante": "GWM",
+    "modelo": "Tank 300",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:%D0%90%D0%BB%D0%BC%D0%B0%D1%82%D1%8B,_Tank_300_%D0%BD%D0%B0_%D0%9A%D0%B0%D1%80%D0%B8%D0%BC%D0%BE%D0%B2%D0%B0.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Nikolai Bulykin"
+  },
+  {
+    "arquivo": "logos/haojue.svg",
+    "fabricante": "Haojue",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Haojue_Holdings_logo.svg",
+    "licenca": "Public domain",
+    "licenca_url": null,
+    "autor": "Haojue Holdings"
+  },
+  {
+    "arquivo": "logos/harley-davidson.svg",
+    "fabricante": "Harley-Davidson",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Harley_Davidson_orange_logo.svg",
+    "licenca": "Public domain",
+    "licenca_url": null,
+    "autor": "Unknown authorUnknown author"
+  },
+  {
+    "arquivo": "modelos/motocicletas/harley-davidson-fat-boy.jpg",
+    "fabricante": "Harley-Davidson",
+    "modelo": "Fat Boy",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Harley_Davidson_Fat_Boy_2018_FLFBS.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Nitot"
+  },
+  {
+    "arquivo": "modelos/motocicletas/harley-davidson-breakout.jpg",
+    "fabricante": "Harley-Davidson",
+    "modelo": "Breakout",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Harley-Davidson_Softail_Breakout_Review_103.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Юкатан"
+  },
+  {
+    "arquivo": "modelos/motocicletas/harley-davidson-road-king.jpg",
+    "fabricante": "Harley-Davidson",
+    "modelo": "Road King",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Harley-Davidson_Road_King.jpg",
+    "licenca": "CC BY-SA 3.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/3.0",
+    "autor": "Fletcher6"
+  },
+  {
+    "arquivo": "logos/honda.svg",
+    "fabricante": "Honda",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Honda_logo.svg",
+    "licenca": "Public domain",
+    "licenca_url": null,
+    "autor": "TTTNIS"
+  },
+  {
+    "arquivo": "modelos/carros/honda-fit.jpg",
+    "fabricante": "Honda",
+    "modelo": "Fit",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:2015-2017_Honda_Fit_Hybrid_F_Package.jpg",
+    "licenca": "CC0",
+    "licenca_url": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+    "autor": "TTTNIS"
+  },
+  {
+    "arquivo": "modelos/carros/honda-civic-type-r.jpg",
+    "fabricante": "Honda",
+    "modelo": "Civic Type R",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:2024_Honda_Civic_Type_R_FL5_in_Championship_White,_front_left,_06-30-2024.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Ethan Llamas"
+  },
+  {
+    "arquivo": "modelos/suv/honda-hr-v.jpg",
+    "fabricante": "Honda",
+    "modelo": "HR-V",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:2023_Honda_HR-V_LX_AWD,_front_right,_11-13-2022.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "MercurySable99"
+  },
+  {
+    "arquivo": "modelos/suv/honda-zr-v.jpg",
+    "fabricante": "Honda",
+    "modelo": "ZR-V",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Honda_ZR-V_e-HEV_Advance_%E2%80%93_f_14072024.jpg",
+    "licenca": "CC BY-SA 3.0 de",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/3.0/de/deed.en",
+    "autor": "© M 93"
+  },
+  {
+    "arquivo": "modelos/suv/honda-cr-v.jpg",
+    "fabricante": "Honda",
+    "modelo": "CR-V",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Honda_CR-V_(6th_generation)_hybrid_1X7A1957.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Alexander-93"
+  },
+  {
+    "arquivo": "logos/husqvarna.png",
+    "fabricante": "Husqvarna",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Husqvarna_Logo.png",
+    "licenca": "Public domain",
+    "licenca_url": null,
+    "autor": "Husqvarna Motorcycles GmbH"
+  },
+  {
+    "arquivo": "modelos/motocicletas/husqvarna-norden-901.jpg",
+    "fabricante": "Husqvarna",
+    "modelo": "Norden 901",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Husqvarna_901_Norden.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "MDzakovic"
+  },
+  {
+    "arquivo": "logos/hyundai.svg",
+    "fabricante": "Hyundai",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Hyundai_Motor_Company_logo.svg",
+    "licenca": "Public domain",
+    "licenca_url": null,
+    "autor": "Hyundai Motor Company"
+  },
+  {
+    "arquivo": "modelos/carros/hyundai-hb20.jpg",
+    "fabricante": "Hyundai",
+    "modelo": "HB20",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Red_hyundai_hb20.JPG",
+    "licenca": "CC BY-SA 3.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/3.0",
+    "autor": "Samtyler654"
+  },
+  {
+    "arquivo": "modelos/carros/hyundai-hb20s.jpg",
+    "fabricante": "Hyundai",
+    "modelo": "HB20S",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Red_hyundai_hb20.JPG",
+    "licenca": "CC BY-SA 3.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/3.0",
+    "autor": "Samtyler654"
+  },
+  {
+    "arquivo": "modelos/carros/hyundai-i30.jpg",
+    "fabricante": "Hyundai",
+    "modelo": "i30",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:2024_Hyundai_i30_Wagon_Auto_Zuerich_2024_DSC_6744.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Alexander-93"
+  },
+  {
+    "arquivo": "modelos/carros/hyundai-elantra.jpg",
+    "fabricante": "Hyundai",
+    "modelo": "Elantra",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:2024_Hyundai_Elantra_Luxury_in_Atlas_White,_front_left,_2024-08-11.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Elise240SX"
+  },
+  {
+    "arquivo": "modelos/carros/hyundai-azera.jpg",
+    "fabricante": "Hyundai",
+    "modelo": "Azera",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Hyundai_Grandeur_GN7_Yugi_Bronze_Metallic_(15)_(cropped).jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Damian B Oh"
+  },
+  {
+    "arquivo": "modelos/carros/hyundai-veloster.jpg",
+    "fabricante": "Hyundai",
+    "modelo": "Veloster",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:0_Hyundai_Veloster_(JS)_N_1.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Benespit"
+  },
+  {
+    "arquivo": "modelos/suv/hyundai-creta.jpg",
+    "fabricante": "Hyundai",
+    "modelo": "Creta",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:2025_Hyundai_Creta_N_Line.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Chanokchon"
+  },
+  {
+    "arquivo": "modelos/suv/hyundai-ix35.jpg",
+    "fabricante": "Hyundai",
+    "modelo": "ix35",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:2013_Hyundai_ix35_Premium_2WD_CRDi_1.7.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Vauxford"
+  },
+  {
+    "arquivo": "modelos/suv/hyundai-tucson.jpg",
+    "fabricante": "Hyundai",
+    "modelo": "Tucson",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Hyundai_Tucson_(NX4,_SWB)_Facelift_IMG_2344.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Alexander-93"
+  },
+  {
+    "arquivo": "modelos/suv/hyundai-santa-fe.jpg",
+    "fabricante": "Hyundai",
+    "modelo": "Santa Fe",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:2024_Hyundai_Santa_Fe_(MX5)_IMG_5295.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Alexander Migl"
+  },
+  {
+    "arquivo": "modelos/suv/hyundai-kona.jpg",
+    "fabricante": "Hyundai",
+    "modelo": "Kona",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Hyundai_Kona_Inspiration_SX2_Atlas_White_(3)_(cropped).jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Damian B Oh"
+  },
+  {
+    "arquivo": "modelos/suv/hyundai-ioniq-5.jpg",
+    "fabricante": "Hyundai",
+    "modelo": "Ioniq 5",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Hyundai_IONIQ_5_Long_Range_Prestige_NE1_PE_Atlas_White_Matte_(7).jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Damian B Oh"
+  },
+  {
+    "arquivo": "modelos/caminhoes/hyundai-hr.jpg",
+    "fabricante": "Hyundai",
+    "modelo": "HR",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:00_hyundai_porter_003.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Benespit"
+  },
+  {
+    "arquivo": "logos/indian.svg",
+    "fabricante": "Indian",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Indian_Motorcycle_tank_logo.svg",
+    "licenca": "Public domain",
+    "licenca_url": null,
+    "autor": "Original: Indian Motorcycle Vector:  JBarta"
+  },
+  {
+    "arquivo": "modelos/motocicletas/indian-scout.jpg",
+    "fabricante": "Indian",
+    "modelo": "Scout",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Indian_Scout_600_cc_1920.jpg",
+    "licenca": "CC BY-SA 3.0",
+    "licenca_url": "http://creativecommons.org/licenses/by-sa/3.0/",
+    "autor": "Piero at Dutch Wikipedia"
+  },
+  {
+    "arquivo": "modelos/motocicletas/indian-chief.jpg",
+    "fabricante": "Indian",
+    "modelo": "Chief",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Indian_Chief_Black_Hawk_80_cubic_inch_1950.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Yesterdays Antique Motorcycles"
+  },
+  {
+    "arquivo": "modelos/motocicletas/indian-roadmaster.jpg",
+    "fabricante": "Indian",
+    "modelo": "Roadmaster",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Indian_Roadmaster,_2015_(3).jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Cjp24"
+  },
+  {
+    "arquivo": "logos/iveco.svg",
+    "fabricante": "Iveco",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:IVECO_2.svg",
+    "licenca": "Public domain",
+    "licenca_url": null,
+    "autor": "Avala"
+  },
+  {
+    "arquivo": "modelos/caminhoes/iveco-daily.jpg",
+    "fabricante": "Iveco",
+    "modelo": "Daily",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:2014_Iveco_Daily_35_S13_MWB_2.3.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Vauxford"
+  },
+  {
+    "arquivo": "modelos/caminhoes/iveco-tector.jpg",
+    "fabricante": "Iveco",
+    "modelo": "Tector",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:IVECO_Tector_8_e_11_toneladas.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Rayzakamke"
+  },
+  {
+    "arquivo": "modelos/caminhoes/iveco-s-way.jpg",
+    "fabricante": "Iveco",
+    "modelo": "S-Way",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:2019_Iveco_S-Way_in_Madrid.jpg",
+    "licenca": "CC BY 3.0",
+    "licenca_url": "https://creativecommons.org/licenses/by/3.0",
+    "autor": "GinaCostanza76"
+  },
+  {
+    "arquivo": "logos/jac.png",
+    "fabricante": "JAC",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Jac_motors_textlogo.png",
+    "licenca": "Public domain",
+    "licenca_url": null,
+    "autor": "Unknown authorUnknown author"
+  },
+  {
+    "arquivo": "modelos/carros/jac-j3.jpg",
+    "fabricante": "JAC",
+    "modelo": "J3",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:JAC_J3_Turin_1.3_2014_(14529158453).jpg",
+    "licenca": "CC BY-SA 2.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/2.0",
+    "autor": "order_242 from Chile"
+  },
+  {
+    "arquivo": "modelos/carros/jac-j5.jpg",
+    "fabricante": "JAC",
+    "modelo": "J5",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:JAC_Heyue_001_China_2012-04-15.jpg",
+    "licenca": "CC BY-SA 3.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/3.0",
+    "autor": "Navigator84"
+  },
+  {
+    "arquivo": "modelos/suv/jac-t40.jpg",
+    "fabricante": "JAC",
+    "modelo": "T40",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:JAC_Refine_S4_01_China_2019-03-14.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Navigator84"
+  },
+  {
+    "arquivo": "modelos/picapes/jac-t8.jpg",
+    "fabricante": "JAC",
+    "modelo": "T8",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:JAC_Frison.jpg",
+    "licenca": "CC BY 2.0",
+    "licenca_url": "https://creativecommons.org/licenses/by/2.0",
+    "autor": "Jason Lawrence"
+  },
+  {
+    "arquivo": "modelos/picapes/jac-hunter.jpg",
+    "fabricante": "JAC",
+    "modelo": "Hunter",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:JAC_Hunter_facelift_001.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "JustAnotherCarDesigner"
+  },
+  {
+    "arquivo": "logos/jaguar.svg",
+    "fabricante": "Jaguar",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Jaguar_2024.svg",
+    "licenca": "Public domain",
+    "licenca_url": null,
+    "autor": "Jaguar Cars"
+  },
+  {
+    "arquivo": "modelos/carros/jaguar-xe.jpg",
+    "fabricante": "Jaguar",
+    "modelo": "XE",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:2017_Jaguar_XE_Portfolio_Diesel_Automatic_2.0_Front.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Vauxford"
+  },
+  {
+    "arquivo": "modelos/carros/jaguar-xf.jpg",
+    "fabricante": "Jaguar",
+    "modelo": "XF",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Jaguar_XF_(X260)_Sportbrake_Facelift_IMG_8892.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Alexander-93"
+  },
+  {
+    "arquivo": "modelos/suv/jaguar-e-pace.jpg",
+    "fabricante": "Jaguar",
+    "modelo": "E-Pace",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:2018_Jaguar_E-Pace_HSE_Diesel_Automatic_2.0.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Vauxford"
+  },
+  {
+    "arquivo": "modelos/suv/jaguar-f-pace.jpg",
+    "fabricante": "Jaguar",
+    "modelo": "F-Pace",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:2021_Jaguar_F-Pace_HSE_Diesel_MHEV_AWD_Automatic_facelift_2.0_Front.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Vauxford"
+  },
+  {
+    "arquivo": "logos/jeep.svg",
+    "fabricante": "Jeep",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Jeep_wordmark.svg",
+    "licenca": "Public domain",
+    "licenca_url": null,
+    "autor": "Jeep"
+  },
+  {
+    "arquivo": "modelos/suv/jeep-renegade.jpg",
+    "fabricante": "Jeep",
+    "modelo": "Renegade",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Jeep_Renegade_4xe_1X7A6026.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Alexander Migl"
+  },
+  {
+    "arquivo": "modelos/suv/jeep-compass.jpg",
+    "fabricante": "Jeep",
+    "modelo": "Compass",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Jeep_Compass_(J4U)_IMG_5727.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Alexander Migl"
+  },
+  {
+    "arquivo": "modelos/suv/jeep-commander.jpg",
+    "fabricante": "Jeep",
+    "modelo": "Commander",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Jeep_Commander_4.7_Limited_2006_(10318160225).jpg",
+    "licenca": "CC BY-SA 2.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/2.0",
+    "autor": "order_242 from Chile"
+  },
+  {
+    "arquivo": "modelos/suv/jeep-grand-cherokee.jpg",
+    "fabricante": "Jeep",
+    "modelo": "Grand Cherokee",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Jeep_Grand_Cherokee_(WL)_IMG_7791.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Alexander-93"
+  },
+  {
+    "arquivo": "modelos/suv/jeep-wrangler.jpg",
+    "fabricante": "Jeep",
+    "modelo": "Wrangler",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Jeep_Wrangler_Rubicon_(JL)_4xe_1X7A0285.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Alexander Migl"
+  },
+  {
+    "arquivo": "logos/kawasaki.svg",
+    "fabricante": "Kawasaki",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Kawasaki-logo.svg",
+    "licenca": "Public domain",
+    "licenca_url": null,
+    "autor": "Kawasaki Heavy Industries"
+  },
+  {
+    "arquivo": "modelos/motocicletas/kawasaki-ninja-400.jpg",
+    "fabricante": "Kawasaki",
+    "modelo": "Ninja 400",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Kawasaki_Ninja_400.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Rikita"
+  },
+  {
+    "arquivo": "modelos/motocicletas/kawasaki-ninja-zx-6r.jpg",
+    "fabricante": "Kawasaki",
+    "modelo": "Ninja ZX-6R",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Zx6r_2013_white.jpg",
+    "licenca": "CC BY-SA 3.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/3.0",
+    "autor": "Alexandru.paul.popa"
+  },
+  {
+    "arquivo": "modelos/motocicletas/kawasaki-z300.jpg",
+    "fabricante": "Kawasaki",
+    "modelo": "Z300",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Kawasaki_Z300SE.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Vpr9"
+  },
+  {
+    "arquivo": "modelos/motocicletas/kawasaki-z400.jpg",
+    "fabricante": "Kawasaki",
+    "modelo": "Z400",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:The_frontview_of_Kawasaki_Z400_mid-year_2019.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Tokumeigakarinoaoshima"
+  },
+  {
+    "arquivo": "modelos/motocicletas/kawasaki-z650.jpg",
+    "fabricante": "Kawasaki",
+    "modelo": "Z650",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Kawasaki_Z_650_MY_2017.jpg",
+    "licenca": "CC BY-SA 3.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/3.0",
+    "autor": "Sebastian6186"
+  },
+  {
+    "arquivo": "modelos/motocicletas/kawasaki-z900.jpg",
+    "fabricante": "Kawasaki",
+    "modelo": "Z900",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:KawasakiZ900.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "T.doi.z900"
+  },
+  {
+    "arquivo": "modelos/motocicletas/kawasaki-versys-x-300.jpg",
+    "fabricante": "Kawasaki",
+    "modelo": "Versys-X 300",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Kawasaki_Versys-X_300.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Sgroey"
+  },
+  {
+    "arquivo": "modelos/motocicletas/kawasaki-versys-650.jpg",
+    "fabricante": "Kawasaki",
+    "modelo": "Versys 650",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Kawasaki_Versys_red.jpg",
+    "licenca": "CC BY 2.0",
+    "licenca_url": "https://creativecommons.org/licenses/by/2.0",
+    "autor": "\"S de Santi\""
+  },
+  {
+    "arquivo": "modelos/motocicletas/kawasaki-versys-1000.jpg",
+    "fabricante": "Kawasaki",
+    "modelo": "Versys 1000",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Kawasaki_Versys1000_Metallic_Magnesium_Gray_right-side_2011_Tokyo_Motor_Show.jpg",
+    "licenca": "CC BY-SA 3.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/3.0",
+    "autor": "PekePON"
+  },
+  {
+    "arquivo": "logos/kia.svg",
+    "fabricante": "Kia",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:KIA_logo3.svg",
+    "licenca": "Public domain",
+    "licenca_url": null,
+    "autor": "Kia Corporation"
+  },
+  {
+    "arquivo": "modelos/carros/kia-picanto.jpg",
+    "fabricante": "Kia",
+    "modelo": "Picanto",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:2024_Kia_Picanto_(JA)_IAA_2025_DSC_1271.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Alexander Migl"
+  },
+  {
+    "arquivo": "modelos/carros/kia-cerato.jpg",
+    "fabricante": "Kia",
+    "modelo": "Cerato",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Kia_Cerato_1.6_EX_2023_(53135607211).jpg",
+    "licenca": "CC BY-SA 2.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/2.0",
+    "autor": "RL GNZLZ from Chile"
+  },
+  {
+    "arquivo": "modelos/carros/kia-soul.jpg",
+    "fabricante": "Kia",
+    "modelo": "Soul",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:2023_Kia_Soul_GT-Line_Limited_in_Snow_White_Pearl,_Front_Right,_09-05-2022.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Elise240SX"
+  },
+  {
+    "arquivo": "modelos/carros/kia-stinger.jpg",
+    "fabricante": "Kia",
+    "modelo": "Stinger",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Kia_Stinger_(CK)_Washington_DC_Metro_Area,_USA.jpg",
+    "licenca": "CC BY 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by/4.0",
+    "autor": "OWS Photography"
+  },
+  {
+    "arquivo": "modelos/carros/kia-carnival.jpg",
+    "fabricante": "Kia",
+    "modelo": "Carnival",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Kia_Carnival_Hybrid_KA4_PE_HEV_Snow_White_Pearl_(5)_(cropped).jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Damian B Oh"
+  },
+  {
+    "arquivo": "modelos/suv/kia-stonic.jpg",
+    "fabricante": "Kia",
+    "modelo": "Stonic",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:2025_Kia_Stonic_GT-Line_Auto_Zuerich_2025_DSC_3045.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Alexander Migl"
+  },
+  {
+    "arquivo": "modelos/suv/kia-niro.jpg",
+    "fabricante": "Kia",
+    "modelo": "Niro",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Kia_Niro_(SG2)_PHEV_1X7A6014.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Alexander Migl"
+  },
+  {
+    "arquivo": "modelos/suv/kia-sportage.jpg",
+    "fabricante": "Kia",
+    "modelo": "Sportage",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:2025_Kia_Sportage_(NQ5)_Automesse_Ludwigsburg_2025_DSC_2532.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Alexander Migl"
+  },
+  {
+    "arquivo": "modelos/suv/kia-sorento.jpg",
+    "fabricante": "Kia",
+    "modelo": "Sorento",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Kia_Sorento_2.2_CRDi_DCT_AWD_Platinum_(IV,_Facelift)_%E2%80%93_f_14102025.jpg",
+    "licenca": "CC BY-SA 3.0 de",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/3.0/de/deed.en",
+    "autor": "© M 93"
+  },
+  {
+    "arquivo": "modelos/suv/kia-ev5.jpg",
+    "fabricante": "Kia",
+    "modelo": "EV5",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:KIA_EV5_20231120_(cropped).jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Nissangeniss"
+  },
+  {
+    "arquivo": "modelos/suv/kia-ev6.jpg",
+    "fabricante": "Kia",
+    "modelo": "EV6",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Kia_EV6_(2024%E2%80%93)_Autofr%C3%BChling_Ulm_2025_DSC_8698.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Alexander Migl"
+  },
+  {
+    "arquivo": "modelos/suv/kia-ev9.jpg",
+    "fabricante": "Kia",
+    "modelo": "EV9",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Kia_EV9_GT-Line_IMG_2595.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Alexander-93"
+  },
+  {
+    "arquivo": "modelos/caminhoes/kia-bongo.jpg",
+    "fabricante": "Kia",
+    "modelo": "Bongo",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:2006_Kia_K2700_(PU)_2-door_cab_chassis_(2015-06-18).jpg",
+    "licenca": "Public domain",
+    "licenca_url": null,
+    "autor": "OSX"
+  },
+  {
+    "arquivo": "logos/ktm.svg",
+    "fabricante": "KTM",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:KTM-Logo.svg",
+    "licenca": "Public domain",
+    "licenca_url": null,
+    "autor": "Unknown authorUnknown author"
+  },
+  {
+    "arquivo": "modelos/motocicletas/ktm-200-duke.jpg",
+    "fabricante": "KTM",
+    "modelo": "200 Duke",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:KTM_DUKE_200_front.JPG",
+    "licenca": "CC BY-SA 3.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/3.0",
+    "autor": "じぶろ"
+  },
+  {
+    "arquivo": "modelos/motocicletas/ktm-390-duke.jpg",
+    "fabricante": "KTM",
+    "modelo": "390 Duke",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:KTM_Duke_390-01.jpg",
+    "licenca": "Public domain",
+    "licenca_url": null,
+    "autor": "Priwo"
+  },
+  {
+    "arquivo": "modelos/motocicletas/ktm-790-duke.jpg",
+    "fabricante": "KTM",
+    "modelo": "790 Duke",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:KTM_Duke_790_2018.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "28pg"
+  },
+  {
+    "arquivo": "modelos/motocicletas/ktm-890-adventure.jpg",
+    "fabricante": "KTM",
+    "modelo": "890 Adventure",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:KTM_890_Adventure.jpg",
+    "licenca": "CC0",
+    "licenca_url": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+    "autor": "Siechfred"
+  },
+  {
+    "arquivo": "modelos/motocicletas/ktm-1290-super-adventure.jpeg",
+    "fabricante": "KTM",
+    "modelo": "1290 Super Adventure",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:KTM_1290_Super_Adventure.jpeg",
+    "licenca": "CC BY-SA 3.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/3.0",
+    "autor": "San Andreas"
+  },
+  {
+    "arquivo": "logos/lamborghini.svg",
+    "fabricante": "Lamborghini",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Lamborghini_-_logo_wordmark%2Bpayoff_(Italy,_1963-).svg",
+    "licenca": "Public domain",
+    "licenca_url": null,
+    "autor": "Self made"
+  },
+  {
+    "arquivo": "modelos/carros/lamborghini-hurac-n.jpg",
+    "fabricante": "Lamborghini",
+    "modelo": "Huracán",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Lamborghini_Hurac%C3%A1n_Tecnica_1X7A7430.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Alexander-93"
+  },
+  {
+    "arquivo": "modelos/carros/lamborghini-temerario.jpg",
+    "fabricante": "Lamborghini",
+    "modelo": "Temerario",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Lamborghini_Temerario_IMG_5361.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Alexander Migl"
+  },
+  {
+    "arquivo": "modelos/carros/lamborghini-revuelto.jpg",
+    "fabricante": "Lamborghini",
+    "modelo": "Revuelto",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Lamborghini_Revuelto_-_2024_(54326344793).jpg",
+    "licenca": "CC BY 2.0",
+    "licenca_url": "https://creativecommons.org/licenses/by/2.0",
+    "autor": "John Bauld from Toronto, Canada"
+  },
+  {
+    "arquivo": "modelos/suv/lamborghini-urus.jpg",
+    "fabricante": "Lamborghini",
+    "modelo": "Urus",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:2025_Lamborghini_Urus_SE_PHEV_-_3996cc_4.0_(789PS)_PHEV_-_Nero_Helene_-_02-2025,_Front.jpg",
+    "licenca": "CC0",
+    "licenca_url": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+    "autor": "Harvey Bold"
+  },
+  {
+    "arquivo": "modelos/suv/land-rover-defender.jpg",
+    "fabricante": "Land Rover",
+    "modelo": "Defender",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:2012_Land_Rover_Defender_90_(L316_MY12)_3-door_wagon_(16084089836).jpg",
+    "licenca": "CC BY 2.0",
+    "licenca_url": "https://creativecommons.org/licenses/by/2.0",
+    "autor": "Jeremy from Sydney, Australia"
+  },
+  {
+    "arquivo": "modelos/suv/land-rover-discovery.jpg",
+    "fabricante": "Land Rover",
+    "modelo": "Discovery",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:0_Land_Rover_Discovery_5_1.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Benespit"
+  },
+  {
+    "arquivo": "modelos/suv/land-rover-discovery-sport.jpg",
+    "fabricante": "Land Rover",
+    "modelo": "Discovery Sport",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Land_Rover_Discovery_Sport_01_China_2016-04-16.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Navigator84"
+  },
+  {
+    "arquivo": "modelos/suv/land-rover-freelander.jpg",
+    "fabricante": "Land Rover",
+    "modelo": "Freelander",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Land_Rover_Freelander_L359_China_2012-05-12.jpg",
+    "licenca": "CC BY-SA 3.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/3.0",
+    "autor": "Navigator84"
+  },
+  {
+    "arquivo": "modelos/suv/land-rover-range-rover.jpg",
+    "fabricante": "Land Rover",
+    "modelo": "Range Rover",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:2022_Land_Rover_Range_Rover_SVAutobiography.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "MrWalkr"
+  },
+  {
+    "arquivo": "modelos/suv/land-rover-range-rover-sport.jpg",
+    "fabricante": "Land Rover",
+    "modelo": "Range Rover Sport",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Range_Rover_Sport_Series_III_Rasant_Automobilmesse_Metzingen_2024_IMG_2195.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Alexander-93"
+  },
+  {
+    "arquivo": "modelos/suv/land-rover-range-rover-velar.jpg",
+    "fabricante": "Land Rover",
+    "modelo": "Range Rover Velar",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:2018_Land_Rover_Range_Rover_Velar_front_3.17.18.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Kevauto"
+  },
+  {
+    "arquivo": "modelos/suv/land-rover-range-rover-evoque.jpg",
+    "fabricante": "Land Rover",
+    "modelo": "Range Rover Evoque",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Range_Rover_Evoque_(L551)_IMG_2660.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Alexander Migl"
+  },
+  {
+    "arquivo": "logos/leapmotor.svg",
+    "fabricante": "Leapmotor",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Leapmotor_logo_en.svg",
+    "licenca": "Public domain",
+    "licenca_url": null,
+    "autor": "零跑汽车"
+  },
+  {
+    "arquivo": "modelos/suv/leapmotor-b10.jpg",
+    "fabricante": "Leapmotor",
+    "modelo": "B10",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Leapmotor_B10_IAA_2025_DSC_2067.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Alexander-93"
+  },
+  {
+    "arquivo": "modelos/suv/leapmotor-c10.jpg",
+    "fabricante": "Leapmotor",
+    "modelo": "C10",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Leapmotor_C10_Leonberg_2026_IMG_8600.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Alexander Migl"
+  },
+  {
+    "arquivo": "logos/lexus.svg",
+    "fabricante": "Lexus",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Lexus.svg",
+    "licenca": "Public domain",
+    "licenca_url": null,
+    "autor": "Gaspard"
+  },
+  {
+    "arquivo": "modelos/carros/lexus-is.jpg",
+    "fabricante": "Lexus",
+    "modelo": "IS",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:2026_Lexus_IS300h_F_Sport_front.jpg",
+    "licenca": "CC0",
+    "licenca_url": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+    "autor": "TTTNIS"
+  },
+  {
+    "arquivo": "modelos/carros/lexus-es.jpg",
+    "fabricante": "Lexus",
+    "modelo": "ES",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Lexus_ES_350h_(XZ20)_Auto_Zuerich_2025_DSC_3061.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Alexander Migl"
+  },
+  {
+    "arquivo": "modelos/carros/lexus-ls.jpg",
+    "fabricante": "Lexus",
+    "modelo": "LS",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:22_Lexus_LS_500h_Base.jpg",
+    "licenca": "CC0",
+    "licenca_url": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+    "autor": "HJUdall"
+  },
+  {
+    "arquivo": "modelos/carros/lexus-lc.jpg",
+    "fabricante": "Lexus",
+    "modelo": "LC",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:2018_Lexus_LC_500h_(31663804097).jpg",
+    "licenca": "CC BY 2.0",
+    "licenca_url": "https://creativecommons.org/licenses/by/2.0",
+    "autor": "Rutger van der Maar"
+  },
+  {
+    "arquivo": "modelos/suv/lexus-ux.jpg",
+    "fabricante": "Lexus",
+    "modelo": "UX",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:2020_Lexus_UX_250h_F_Sport_CVT_4X2_2.0_Front.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Vauxford"
+  },
+  {
+    "arquivo": "modelos/suv/lexus-nx.jpg",
+    "fabricante": "Lexus",
+    "modelo": "NX",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Lexus_NX_350_F_Sport_AWD_TAZA25_Celestial_Blue_Glass_Flake_01.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Ethan Llamas"
+  },
+  {
+    "arquivo": "modelos/suv/lexus-rx.jpg",
+    "fabricante": "Lexus",
+    "modelo": "RX",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:2023_Lexus_RX_350_Premium_Plus_in_Matador_Red_Mica,_front_left.jpg",
+    "licenca": "CC BY-SA 3.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/3.0",
+    "autor": "Mr.choppers"
+  },
+  {
+    "arquivo": "modelos/suv/lexus-rz.jpg",
+    "fabricante": "Lexus",
+    "modelo": "RZ",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:2023_Lexus_RZ_450e_in_Ether,_front_left.jpg",
+    "licenca": "CC BY-SA 3.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/3.0",
+    "autor": "Mr.choppers"
+  },
+  {
+    "arquivo": "modelos/suv/lexus-lx.jpg",
+    "fabricante": "Lexus",
+    "modelo": "LX",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Lexus_LX_600_VJA310_F_Sport_White_Nova_01.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Ethan Llamas"
+  },
+  {
+    "arquivo": "modelos/caminhoes/man-tgx.jpg",
+    "fabricante": "MAN",
+    "modelo": "TGX",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:MAN_TGX_EOT_18680_V8_06.jpg",
+    "licenca": "CC BY 3.0",
+    "licenca_url": "https://creativecommons.org/licenses/by/3.0",
+    "autor": "User:Julo mit © MAN Nutzfahrzeuge Group vom 5.9.2007"
+  },
+  {
+    "arquivo": "logos/maserati.svg",
+    "fabricante": "Maserati",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Maserati_logo_2.svg",
+    "licenca": "Public domain",
+    "licenca_url": null,
+    "autor": "Maserati"
+  },
+  {
+    "arquivo": "modelos/carros/maserati-ghibli.jpg",
+    "fabricante": "Maserati",
+    "modelo": "Ghibli",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Maserati_Ghibli_in_Germany_(cropped).jpg",
+    "licenca": "CC BY 2.0",
+    "licenca_url": "https://creativecommons.org/licenses/by/2.0",
+    "autor": "Rutger van der Maar"
+  },
+  {
+    "arquivo": "modelos/carros/maserati-quattroporte.jpg",
+    "fabricante": "Maserati",
+    "modelo": "Quattroporte",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Maserati_Quattroporte_VI_1X7A6793.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Alexander-93"
+  },
+  {
+    "arquivo": "modelos/carros/maserati-mc20.jpg",
+    "fabricante": "Maserati",
+    "modelo": "MC20",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Maserati_MC20_Cielo_IAA_2023_1X7A0050.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Alexander-93"
+  },
+  {
+    "arquivo": "modelos/suv/maserati-grecale.jpg",
+    "fabricante": "Maserati",
+    "modelo": "Grecale",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Maserati_Grecale_Modena_1X7A6369.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Alexander Migl"
+  },
+  {
+    "arquivo": "logos/mclaren.svg",
+    "fabricante": "McLaren",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:McLaren_logo_(2026).svg",
+    "licenca": "Public domain",
+    "licenca_url": null,
+    "autor": "McLaren"
+  },
+  {
+    "arquivo": "modelos/carros/mclaren-artura.jpg",
+    "fabricante": "McLaren",
+    "modelo": "Artura",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:2021_Black_McLaren_Artura.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "MrWalkr"
+  },
+  {
+    "arquivo": "logos/mercedes-benz.svg",
+    "fabricante": "Mercedes-Benz",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Mercedes-Benz_Logo_2010.svg",
+    "licenca": "Public domain",
+    "licenca_url": null,
+    "autor": "Mercedes-Benz"
+  },
+  {
+    "arquivo": "modelos/carros/mercedes-benz-classe-a.jpg",
+    "fabricante": "Mercedes-Benz",
+    "modelo": "Classe A",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Mercedes-Benz_A-Class_Z177_2_China_2019-03-20.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Navigator84"
+  },
+  {
+    "arquivo": "modelos/carros/mercedes-benz-classe-c.jpg",
+    "fabricante": "Mercedes-Benz",
+    "modelo": "Classe C",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Mercedes-AMG_C_43_(W206)_IMG_7393.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Alexander-93"
+  },
+  {
+    "arquivo": "modelos/carros/mercedes-benz-classe-s.jpg",
+    "fabricante": "Mercedes-Benz",
+    "modelo": "Classe S",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Mercedes-Maybach_Z223_680_1X7A5831.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Alexander Migl"
+  },
+  {
+    "arquivo": "modelos/suv/mercedes-benz-glb.jpg",
+    "fabricante": "Mercedes-Benz",
+    "modelo": "GLB",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Mercedes-Benz_X244_IMG_6206.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Alexander Migl"
+  },
+  {
+    "arquivo": "modelos/suv/mercedes-benz-glc.jpg",
+    "fabricante": "Mercedes-Benz",
+    "modelo": "GLC",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Mercedes-Benz_GLC_with_EQ_Technology_IMG_6095.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Alexander Migl"
+  },
+  {
+    "arquivo": "modelos/suv/mercedes-benz-gle.jpg",
+    "fabricante": "Mercedes-Benz",
+    "modelo": "GLE",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Mercedes-Benz_GLE_AMG_Line_(V_167,_Facelift)_%E2%80%93_f_14042024.jpg",
+    "licenca": "CC BY-SA 3.0 de",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/3.0/de/deed.en",
+    "autor": "© M 93"
+  },
+  {
+    "arquivo": "modelos/suv/mercedes-benz-gls.jpg",
+    "fabricante": "Mercedes-Benz",
+    "modelo": "GLS",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Mercedes-Benz_X167_(2023%E2%80%93)_DSC_0705.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Alexander-93"
+  },
+  {
+    "arquivo": "modelos/suv/mercedes-benz-classe-g.jpg",
+    "fabricante": "Mercedes-Benz",
+    "modelo": "Classe G",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Mercedes-Benz_W465_DSC_8927.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Alexander Migl"
+  },
+  {
+    "arquivo": "modelos/suv/mercedes-benz-eqa.jpg",
+    "fabricante": "Mercedes-Benz",
+    "modelo": "EQA",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Mercedes-Benz_H243_1X7A0089.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Alexander Migl"
+  },
+  {
+    "arquivo": "modelos/suv/mercedes-benz-eqb.jpg",
+    "fabricante": "Mercedes-Benz",
+    "modelo": "EQB",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:MERCEDES-EQ_EQB_China.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Dinkun Chen"
+  },
+  {
+    "arquivo": "modelos/suv/mercedes-benz-eqe-suv.jpg",
+    "fabricante": "Mercedes-Benz",
+    "modelo": "EQE SUV",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Mercedes-Benz_X294_1X7A1535.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Alexander Migl"
+  },
+  {
+    "arquivo": "modelos/suv/mercedes-benz-eqs-suv.jpg",
+    "fabricante": "Mercedes-Benz",
+    "modelo": "EQS SUV",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Mercedes-Benz_X296_450%2B_1X7A6277.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Alexander Migl"
+  },
+  {
+    "arquivo": "modelos/caminhoes/mercedes-benz-accelo.jpg",
+    "fabricante": "Mercedes-Benz",
+    "modelo": "Accelo",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:CBMDF_(6125366180).jpg",
+    "licenca": "CC BY 2.0",
+    "licenca_url": "https://creativecommons.org/licenses/by/2.0",
+    "autor": "Andre Gustavo Stumpf Filho from Brasil"
+  },
+  {
+    "arquivo": "modelos/caminhoes/mercedes-benz-atego.jpg",
+    "fabricante": "Mercedes-Benz",
+    "modelo": "Atego",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Mercedes-Benz_Atego_Facelift_front.JPG",
+    "licenca": "CC BY-SA 3.0",
+    "licenca_url": "http://creativecommons.org/licenses/by-sa/3.0/",
+    "autor": "Samoborac"
+  },
+  {
+    "arquivo": "modelos/caminhoes/mercedes-benz-axor.jpg",
+    "fabricante": "Mercedes-Benz",
+    "modelo": "Axor",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Mercedes-Axor-1843LH-Gardinenplanensattelzug.jpg",
+    "licenca": "CC BY-SA 2.0 de",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/2.0/de/deed.en",
+    "autor": "ONordsieck 19:53, 25. Jun. 2008 (CEST)"
+  },
+  {
+    "arquivo": "modelos/caminhoes/mercedes-benz-actros.jpg",
+    "fabricante": "Mercedes-Benz",
+    "modelo": "Actros",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Mercedes-Benz_Actros_1848_BlueTec_5-5.JPG",
+    "licenca": "CC BY-SA 3.0",
+    "licenca_url": "http://creativecommons.org/licenses/by-sa/3.0/",
+    "autor": "Manecke"
+  },
+  {
+    "arquivo": "modelos/caminhoes/mercedes-benz-arocs.jpg",
+    "fabricante": "Mercedes-Benz",
+    "modelo": "Arocs",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Eppelheim_-_Mercedes-Benz_Arocs_3242_-_2018-12-09_15-59-11.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Photographs by Radosław Drożdżewski (User:Zwiadowca21)"
+  },
+  {
+    "arquivo": "logos/mini.svg",
+    "fabricante": "MINI",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:MINI_logo.svg",
+    "licenca": "Public domain",
+    "licenca_url": null,
+    "autor": "BMW\n\nSVG by CMetalCore This W3C-unspecified vector image was created with Inkscape ."
+  },
+  {
+    "arquivo": "modelos/carros/mini-cooper.jpg",
+    "fabricante": "MINI",
+    "modelo": "Cooper",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Morris_Mini-Minor_1959_(621_AOK).jpg",
+    "licenca": "CC BY-SA 2.5",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/2.5",
+    "autor": "DeFacto"
+  },
+  {
+    "arquivo": "modelos/carros/mini-cooper-s.jpg",
+    "fabricante": "MINI",
+    "modelo": "Cooper S",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Mini_Hatch_(J01)_John_Cooper_Works_DSC_9696.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Alexander Migl"
+  },
+  {
+    "arquivo": "modelos/suv/mini-countryman.jpg",
+    "fabricante": "MINI",
+    "modelo": "Countryman",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Mini_Countryman_(U25)_John_Cooper_Works_IMG_0034.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Alexander-93"
+  },
+  {
+    "arquivo": "logos/mitsubishi.svg",
+    "fabricante": "Mitsubishi",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Mitsubishi_motors_new_logo.svg",
+    "licenca": "Public domain",
+    "licenca_url": null,
+    "autor": "Mitsubishi Motors Corporation"
+  },
+  {
+    "arquivo": "modelos/carros/mitsubishi-lancer.jpg",
+    "fabricante": "Mitsubishi",
+    "modelo": "Lancer",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:2008_Mitsubishi_Lancer_(CJ_MY08)_ES_sedan_(15890721678).jpg",
+    "licenca": "CC BY 2.0",
+    "licenca_url": "https://creativecommons.org/licenses/by/2.0",
+    "autor": "Jeremy from Sydney, Australia"
+  },
+  {
+    "arquivo": "modelos/suv/mitsubishi-asx.jpg",
+    "fabricante": "Mitsubishi",
+    "modelo": "ASX",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:2024_Mitsubishi_ASX_Leonberg_2024_IMG_1053.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Alexander-93"
+  },
+  {
+    "arquivo": "modelos/suv/mitsubishi-outlander-sport.jpg",
+    "fabricante": "Mitsubishi",
+    "modelo": "Outlander Sport",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Mitsubishi_Outlander_Sport_(ASX)_(51158833148)_(cropped).jpg",
+    "licenca": "CC BY 2.0",
+    "licenca_url": "https://creativecommons.org/licenses/by/2.0",
+    "autor": "ajay_suresh"
+  },
+  {
+    "arquivo": "modelos/suv/mitsubishi-eclipse-cross.jpg",
+    "fabricante": "Mitsubishi",
+    "modelo": "Eclipse Cross",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:2022_Mitsubishi_Eclipse_Cross_SEL_(facelift),_front_2.1.22.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Kevauto"
+  },
+  {
+    "arquivo": "modelos/suv/mitsubishi-outlander.jpg",
+    "fabricante": "Mitsubishi",
+    "modelo": "Outlander",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:2025_Mitsubishi_Outlander_PHEV_(fourth_generation)_IMG_3128_(cropped).jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Alexander Migl"
+  },
+  {
+    "arquivo": "modelos/suv/mitsubishi-pajero-full.jpg",
+    "fabricante": "Mitsubishi",
+    "modelo": "Pajero Full",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Mitsubishi_Pajero_Exceed.jpg",
+    "licenca": "Public domain",
+    "licenca_url": null,
+    "autor": "TTTNIS"
+  },
+  {
+    "arquivo": "modelos/suv/mitsubishi-pajero-sport.jpg",
+    "fabricante": "Mitsubishi",
+    "modelo": "Pajero Sport",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Mitsubishi_Pajero_Sport_(3rd_generation)_1X7A0409.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Alexander Migl"
+  },
+  {
+    "arquivo": "logos/nissan.svg",
+    "fabricante": "Nissan",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Nissan_brand_wordmark.svg",
+    "licenca": "Public domain",
+    "licenca_url": null,
+    "autor": "Nissan"
+  },
+  {
+    "arquivo": "modelos/carros/nissan-march.jpg",
+    "fabricante": "Nissan",
+    "modelo": "March",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Nissan_Micra_EV_IMG_4978.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Alexander Migl"
+  },
+  {
+    "arquivo": "modelos/carros/nissan-versa.jpg",
+    "fabricante": "Nissan",
+    "modelo": "Versa",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:2023_Nissan_Versa_(N18)_IMG_3105.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Alexander Migl"
+  },
+  {
+    "arquivo": "modelos/carros/nissan-sentra.jpg",
+    "fabricante": "Nissan",
+    "modelo": "Sentra",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:2026_Nissan_Sentra_front_view.jpg",
+    "licenca": "CC BY 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by/4.0",
+    "autor": "Deathpallie325"
+  },
+  {
+    "arquivo": "modelos/carros/nissan-leaf.jpg",
+    "fabricante": "Nissan",
+    "modelo": "Leaf",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Nissan_Leaf_(ZE2)_Auto_Zuerich_2025_DSC_3011.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Alexander Migl"
+  },
+  {
+    "arquivo": "modelos/suv/nissan-kait.jpg",
+    "fabricante": "Nissan",
+    "modelo": "Kait",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:2026_Nissan_Kicks_e-Power_SV_(Thailand)_front_view.jpg",
+    "licenca": "CC BY 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by/4.0",
+    "autor": "Andra Febrian"
+  },
+  {
+    "arquivo": "modelos/suv/nissan-kicks.jpg",
+    "fabricante": "Nissan",
+    "modelo": "Kicks",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:2025_Nissan_Kicks_SR,_front_4.12.25.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Kevauto"
+  },
+  {
+    "arquivo": "modelos/suv/nissan-x-trail.jpg",
+    "fabricante": "Nissan",
+    "modelo": "X-Trail",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:2025_Nissan_X-Trail_Nismo_Advanced_Package_e-4ORCE.jpg",
+    "licenca": "CC0",
+    "licenca_url": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+    "autor": "TTTNIS"
+  },
+  {
+    "arquivo": "modelos/picapes/nissan-frontier.jpg",
+    "fabricante": "Nissan",
+    "modelo": "Frontier",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Nissan_Frontier_(D41)_Pro-4X_Automesse_Ludwigsburg_2022_1X7A5885.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Alexander Migl"
+  },
+  {
+    "arquivo": "logos/omoda-jaecoo.svg",
+    "fabricante": "Omoda & Jaecoo",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Omoda_wordmark.svg",
+    "licenca": "Public domain",
+    "licenca_url": null,
+    "autor": "Chery"
+  },
+  {
+    "arquivo": "logos/peugeot.svg",
+    "fabricante": "Peugeot",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Wordmark_Peugeot_2021.svg",
+    "licenca": "Public domain",
+    "licenca_url": null,
+    "autor": "Peugeot"
+  },
+  {
+    "arquivo": "modelos/carros/peugeot-206.jpg",
+    "fabricante": "Peugeot",
+    "modelo": "206",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:2002_Peugeot_206_LX_1.4_Front.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Vauxford"
+  },
+  {
+    "arquivo": "modelos/carros/peugeot-207.jpg",
+    "fabricante": "Peugeot",
+    "modelo": "207",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Peugeot_207_02.jpg",
+    "licenca": "Public domain",
+    "licenca_url": null,
+    "autor": "User:Arnaud 25"
+  },
+  {
+    "arquivo": "modelos/carros/peugeot-e-208.jpg",
+    "fabricante": "Peugeot",
+    "modelo": "e-208",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Peugeot_e-208_Allure_Genf_2019_1Y7A5132.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Alexander Migl"
+  },
+  {
+    "arquivo": "modelos/carros/peugeot-308.jpg",
+    "fabricante": "Peugeot",
+    "modelo": "308",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:2022_Peugeot_308_Allure_Premium_SW_PureTech_S%26S_Automatic_1.2_Front.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Vauxford"
+  },
+  {
+    "arquivo": "modelos/carros/peugeot-408.jpg",
+    "fabricante": "Peugeot",
+    "modelo": "408",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Peugeot_408_China_2012-05-12.JPG",
+    "licenca": "CC BY-SA 3.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/3.0",
+    "autor": "Navigator84"
+  },
+  {
+    "arquivo": "modelos/suv/peugeot-2008.jpg",
+    "fabricante": "Peugeot",
+    "modelo": "2008",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Peugeot_e-2008_Facelift_Autofr%C3%BChling_Ulm_IMG_9302.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Alexander-93"
+  },
+  {
+    "arquivo": "modelos/suv/peugeot-e-2008.jpg",
+    "fabricante": "Peugeot",
+    "modelo": "e-2008",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Peugeot_e-2008_Facelift_Autofr%C3%BChling_Ulm_IMG_9302.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Alexander-93"
+  },
+  {
+    "arquivo": "modelos/suv/peugeot-3008.jpg",
+    "fabricante": "Peugeot",
+    "modelo": "3008",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Peugeot_e-3008_Auto_Zuerich_2023_1X7A1012.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Alexander-93"
+  },
+  {
+    "arquivo": "modelos/suv/peugeot-5008.jpg",
+    "fabricante": "Peugeot",
+    "modelo": "5008",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Peugeot_5008_C_Automesse_Ludwigsburg_2024_IMG_1452.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Alexander-93"
+  },
+  {
+    "arquivo": "logos/porsche.svg",
+    "fabricante": "Porsche",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Porsche_Schriftzug.svg",
+    "licenca": "Public domain",
+    "licenca_url": null,
+    "autor": "Unknown authorUnknown author"
+  },
+  {
+    "arquivo": "modelos/carros/porsche-911.jpg",
+    "fabricante": "Porsche",
+    "modelo": "911",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:2025_Porsche_992_Carrera_convertible_Auto_Zuerich_2024_DSC_6527.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Alexander-93"
+  },
+  {
+    "arquivo": "modelos/carros/porsche-718-boxster.jpg",
+    "fabricante": "Porsche",
+    "modelo": "718 Boxster",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:2018_Porsche_718_Boxster_S_S-A_2.5_Front.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Vauxford"
+  },
+  {
+    "arquivo": "modelos/carros/porsche-718-cayman.jpg",
+    "fabricante": "Porsche",
+    "modelo": "718 Cayman",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Porsche_718_Cayman_(MSP17).jpg",
+    "licenca": "CC BY-SA 3.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/3.0",
+    "autor": "Jakub \"flyz1\" Maciejewski"
+  },
+  {
+    "arquivo": "modelos/carros/porsche-panamera.jpg",
+    "fabricante": "Porsche",
+    "modelo": "Panamera",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:2025_Porsche_Panamera_in_Lugano_Blue,_front_left.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Ethan Llamas"
+  },
+  {
+    "arquivo": "modelos/carros/porsche-taycan.jpg",
+    "fabricante": "Porsche",
+    "modelo": "Taycan",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:2024_Porsche_Taycan_GTS_IAA_2025_DSC_1988.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Alexander-93"
+  },
+  {
+    "arquivo": "modelos/suv/porsche-macan.jpg",
+    "fabricante": "Porsche",
+    "modelo": "Macan",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:2018_Porsche_Macan_2.0_Front.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Vauxford"
+  },
+  {
+    "arquivo": "modelos/suv/porsche-cayenne.jpg",
+    "fabricante": "Porsche",
+    "modelo": "Cayenne",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Porsche_Cayenne_Electric_IMG_6129.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Alexander Migl"
+  },
+  {
+    "arquivo": "logos/ram.svg",
+    "fabricante": "Ram",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Ram_Trucks_2009_wordmark.svg",
+    "licenca": "Public domain",
+    "licenca_url": null,
+    "autor": "FCA US LLC"
+  },
+  {
+    "arquivo": "modelos/picapes/ram-rampage.png",
+    "fabricante": "Ram",
+    "modelo": "Rampage",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:2024_Ram_Rampage_Rebel_(Brazil)_front_view.png",
+    "licenca": "CC BY 3.0",
+    "licenca_url": "https://creativecommons.org/licenses/by/3.0",
+    "autor": "Garagem do Jabulas"
+  },
+  {
+    "arquivo": "modelos/picapes/ram-dakota.jpg",
+    "fabricante": "Ram",
+    "modelo": "Dakota",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:87-90_Dodge_Dakota.jpg",
+    "licenca": "Public domain",
+    "licenca_url": null,
+    "autor": "IFCAR"
+  },
+  {
+    "arquivo": "logos/renault.svg",
+    "fabricante": "Renault",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:2021_Renault_Group_logo.svg",
+    "licenca": "Public domain",
+    "licenca_url": null,
+    "autor": "Renault S.A."
+  },
+  {
+    "arquivo": "modelos/carros/renault-kwid.png",
+    "fabricante": "Renault",
+    "modelo": "Kwid",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:2023_Renault_Kwid_Iconic_(Colombia)_front_view_02.png",
+    "licenca": "CC BY 3.0",
+    "licenca_url": "https://creativecommons.org/licenses/by/3.0",
+    "autor": "Autosdeprimera"
+  },
+  {
+    "arquivo": "modelos/carros/renault-sandero.jpg",
+    "fabricante": "Renault",
+    "modelo": "Sandero",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Dacia_Sandero_III_1X7A0382.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Alexander Migl"
+  },
+  {
+    "arquivo": "modelos/carros/renault-sandero-stepway.jpg",
+    "fabricante": "Renault",
+    "modelo": "Sandero Stepway",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Dacia_Sandero_III_1X7A0382.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Alexander Migl"
+  },
+  {
+    "arquivo": "modelos/carros/renault-fluence.jpg",
+    "fabricante": "Renault",
+    "modelo": "Fluence",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Renault_Fluence_front_20100918.jpg",
+    "licenca": "Attribution",
+    "licenca_url": null,
+    "autor": "M 93"
+  },
+  {
+    "arquivo": "modelos/carros/renault-m-gane-e-tech.jpg",
+    "fabricante": "Renault",
+    "modelo": "Mégane E-Tech",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:2022_Renault_Megane_E-Tech_Techno_EV_Front.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Vauxford"
+  },
+  {
+    "arquivo": "modelos/carros/renault-zoe.jpg",
+    "fabricante": "Renault",
+    "modelo": "Zoe",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:2018_Renault_ZOE.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Vauxford"
+  },
+  {
+    "arquivo": "modelos/suv/renault-kardian.jpg",
+    "fabricante": "Renault",
+    "modelo": "Kardian",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:2024_Renault_Kardian_1.0_200_EDC_Premiere_Edition,_front.jpg",
+    "licenca": "CC BY 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by/4.0",
+    "autor": "Just a Man"
+  },
+  {
+    "arquivo": "modelos/suv/renault-captur.jpg",
+    "fabricante": "Renault",
+    "modelo": "Captur",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:2024_Renault_Captur_II_IMG_9306.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Alexander-93"
+  },
+  {
+    "arquivo": "modelos/suv/renault-koleos.jpg",
+    "fabricante": "Renault",
+    "modelo": "Koleos",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Renault_Koleos_Initiale_Paris,_IAA_2017,_Frankfurt_(1Y7A3353).jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Matti Blume"
+  },
+  {
+    "arquivo": "modelos/picapes/renault-oroch.jpg",
+    "fabricante": "Renault",
+    "modelo": "Oroch",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Renault_Duster_Oroch_1.6_Zen_2018_(39788485004).jpg",
+    "licenca": "CC BY-SA 2.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/2.0",
+    "autor": "RL GNZLZ from Chile"
+  },
+  {
+    "arquivo": "logos/rolls-royce.svg",
+    "fabricante": "Rolls-Royce",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Rolls-Royce_Motor_Cars_logo.svg",
+    "licenca": "Public domain",
+    "licenca_url": null,
+    "autor": ""
+  },
+  {
+    "arquivo": "modelos/carros/rolls-royce-ghost.jpg",
+    "fabricante": "Rolls-Royce",
+    "modelo": "Ghost",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Rolls-Royce_Ghost.JPG",
+    "licenca": "CC BY 3.0",
+    "licenca_url": "https://creativecommons.org/licenses/by/3.0",
+    "autor": "Thomas doerfer"
+  },
+  {
+    "arquivo": "modelos/suv/rolls-royce-cullinan.jpg",
+    "fabricante": "Rolls-Royce",
+    "modelo": "Cullinan",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:2024_Rolls-Royce_Cullinan_(70701).jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Calreyn88"
+  },
+  {
+    "arquivo": "logos/royal-enfield.svg",
+    "fabricante": "Royal Enfield",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Royal_Enfield_logo_new.svg",
+    "licenca": "Public domain",
+    "licenca_url": null,
+    "autor": "Royal Enfield"
+  },
+  {
+    "arquivo": "modelos/motocicletas/royal-enfield-hunter-350.png",
+    "fabricante": "Royal Enfield",
+    "modelo": "Hunter 350",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Royal_Enfield_Hunter_350_Rebel_balck.png",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Pintu dasaundhi"
+  },
+  {
+    "arquivo": "modelos/motocicletas/royal-enfield-interceptor-650.jpg",
+    "fabricante": "Royal Enfield",
+    "modelo": "Interceptor 650",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Royal_Enfield_650_Interceptor_links_rechts_noBG.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Auge=mit"
+  },
+  {
+    "arquivo": "modelos/motocicletas/royal-enfield-super-meteor-650.jpg",
+    "fabricante": "Royal Enfield",
+    "modelo": "Super Meteor 650",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Royal_Enfield_Super_Meteor_650_(02).jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "iMahesh"
+  },
+  {
+    "arquivo": "modelos/caminhoes/scania-s-rie-p.jpg",
+    "fabricante": "Scania",
+    "modelo": "Série P",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Scania_tipper_lorry_in_Russia.jpg",
+    "licenca": "CC BY 2.0",
+    "licenca_url": "https://creativecommons.org/licenses/by/2.0",
+    "autor": "Данила"
+  },
+  {
+    "arquivo": "modelos/caminhoes/scania-s-rie-g.jpg",
+    "fabricante": "Scania",
+    "modelo": "Série G",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Scania_G480_Lippujuhlan_p%C3%A4iv%C3%A4_2013_2.JPG",
+    "licenca": "Public domain",
+    "licenca_url": null,
+    "autor": "MKFI"
+  },
+  {
+    "arquivo": "modelos/caminhoes/scania-s-rie-r.jpg",
+    "fabricante": "Scania",
+    "modelo": "Série R",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:ScaniaSleipner.jpg",
+    "licenca": "CC BY-SA 2.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/2.0",
+    "autor": "liftarn"
+  },
+  {
+    "arquivo": "logos/shacman.png",
+    "fabricante": "Shacman",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Shacman_Logo.png",
+    "licenca": "Public domain",
+    "licenca_url": null,
+    "autor": "Unknown authorUnknown author"
+  },
+  {
+    "arquivo": "logos/sinotruk-sitrak.png",
+    "fabricante": "Sinotruk / Sitrak",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Sinotruk_logo_2.png",
+    "licenca": "Public domain",
+    "licenca_url": null,
+    "autor": "Sinotruk Group"
+  },
+  {
+    "arquivo": "logos/suzuki.svg",
+    "fabricante": "Suzuki",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Suzuki_logo_2025.svg",
+    "licenca": "Public domain",
+    "licenca_url": null,
+    "autor": "Suzuki Motor Corporation"
+  },
+  {
+    "arquivo": "modelos/carros/suzuki-swift.jpg",
+    "fabricante": "Suzuki",
+    "modelo": "Swift",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Suzuki_Swift_(2024)_hybrid_DSC_7922.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Alexander Migl"
+  },
+  {
+    "arquivo": "modelos/suv/suzuki-jimny.jpg",
+    "fabricante": "Suzuki",
+    "modelo": "Jimny",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:2018-2024_Suzuki_Jimny_Sierra_JC.jpg",
+    "licenca": "CC0",
+    "licenca_url": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+    "autor": "TTTNIS"
+  },
+  {
+    "arquivo": "modelos/suv/suzuki-vitara.jpg",
+    "fabricante": "Suzuki",
+    "modelo": "Vitara",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:2015_Suzuki_Vitara_SZ5_Rugged_Allgrip_1.6.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Vauxford"
+  },
+  {
+    "arquivo": "modelos/suv/suzuki-s-cross.jpg",
+    "fabricante": "Suzuki",
+    "modelo": "S-Cross",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Suzuki_SX4_(3rd_generation)_1X7A6318.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Alexander Migl"
+  },
+  {
+    "arquivo": "modelos/motocicletas/suzuki-burgman-125.jpg",
+    "fabricante": "Suzuki",
+    "modelo": "Burgman 125",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Suzuki_Burgman_400.JPG",
+    "licenca": "CC BY-SA 3.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/3.0",
+    "autor": "Gunnar Richter Namenlos.net"
+  },
+  {
+    "arquivo": "modelos/motocicletas/suzuki-v-strom-650.jpg",
+    "fabricante": "Suzuki",
+    "modelo": "V-Strom 650",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Suzuki_vstrom_dl650_motorcycle.jpg",
+    "licenca": "CC BY-SA 3.0",
+    "licenca_url": "http://creativecommons.org/licenses/by-sa/3.0/",
+    "autor": "Ibanix"
+  },
+  {
+    "arquivo": "modelos/motocicletas/suzuki-v-strom-1050.jpg",
+    "fabricante": "Suzuki",
+    "modelo": "V-Strom 1050",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Suzuki_DL1050_V-Strom_XT.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Maaj01"
+  },
+  {
+    "arquivo": "modelos/motocicletas/suzuki-gsx-s750.jpg",
+    "fabricante": "Suzuki",
+    "modelo": "GSX-S750",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:GSX-S750.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Jamie Hicken"
+  },
+  {
+    "arquivo": "modelos/motocicletas/suzuki-gsx-s1000.jpg",
+    "fabricante": "Suzuki",
+    "modelo": "GSX-S1000",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Motodays_2019_42.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Nicholas Gemini"
+  },
+  {
+    "arquivo": "modelos/motocicletas/suzuki-gsx-r1000.jpg",
+    "fabricante": "Suzuki",
+    "modelo": "GSX-R1000",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Luke_Delehanty%27s_2001_GSX-R1000.jpg",
+    "licenca": "Public domain",
+    "licenca_url": null,
+    "autor": "uploader was User:Delehanty at en.wikipedia"
+  },
+  {
+    "arquivo": "modelos/motocicletas/suzuki-hayabusa.jpg",
+    "fabricante": "Suzuki",
+    "modelo": "Hayabusa",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Hayabusa.jpg",
+    "licenca": "CC BY-SA 2.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/2.0",
+    "autor": "Yuichiro Katsumoto"
+  },
+  {
+    "arquivo": "logos/toyota.svg",
+    "fabricante": "Toyota",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Toyota_Symbol.svg",
+    "licenca": "Public domain",
+    "licenca_url": null,
+    "autor": "Toyota"
+  },
+  {
+    "arquivo": "modelos/carros/toyota-etios.jpg",
+    "fabricante": "Toyota",
+    "modelo": "Etios",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:2013_Toyota_Etios_Valco_E_(Indonesia)_front_view.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Andra Febrian"
+  },
+  {
+    "arquivo": "modelos/carros/toyota-yaris-sedan.jpg",
+    "fabricante": "Toyota",
+    "modelo": "Yaris Sedan",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:2005_Toyota_Belta_01.jpg",
+    "licenca": "CC BY-SA 3.0",
+    "licenca_url": "http://creativecommons.org/licenses/by-sa/3.0/",
+    "autor": "Mytho88"
+  },
+  {
+    "arquivo": "modelos/carros/toyota-corolla.jpg",
+    "fabricante": "Toyota",
+    "modelo": "Corolla",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:2019-2022_Toyota_Corolla_G-X_1.8_3BA-ZRE212_(20220911).jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "オーバードライブ83"
+  },
+  {
+    "arquivo": "modelos/carros/toyota-prius.jpg",
+    "fabricante": "Toyota",
+    "modelo": "Prius",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:2023_Toyota_Prius_Z_HEV.jpg",
+    "licenca": "CC0",
+    "licenca_url": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+    "autor": "TTTNIS"
+  },
+  {
+    "arquivo": "modelos/carros/toyota-gr-corolla.jpg",
+    "fabricante": "Toyota",
+    "modelo": "GR Corolla",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Osaka_Auto_Messe_2025_(9)_-_Toyota_GR_COROLLA_RZ_GR-DAT_(4BA-GZEA14H-BHZRZ).jpg",
+    "licenca": "CC0",
+    "licenca_url": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+    "autor": "Tokumeigakarinoaoshima"
+  },
+  {
+    "arquivo": "modelos/suv/toyota-yaris-cross.jpg",
+    "fabricante": "Toyota",
+    "modelo": "Yaris Cross",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Toyota_Yaris_Cross_Hybrid_(XP210)_1X7A1846.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Alexander-93"
+  },
+  {
+    "arquivo": "modelos/suv/toyota-rav4.jpg",
+    "fabricante": "Toyota",
+    "modelo": "RAV4",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:2025_Toyota_RAV4_Hybrid_Z_Prototype.jpg",
+    "licenca": "CC0",
+    "licenca_url": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+    "autor": "TTTNIS"
+  },
+  {
+    "arquivo": "modelos/suv/toyota-sw4.jpg",
+    "fabricante": "Toyota",
+    "modelo": "SW4",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Toyota_Fortuner_GUN156_Legender_2.8_LTD_4x4_Platinum_White_Pearl_x_Attitude_Black_Mica.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Ethan Llamas"
+  },
+  {
+    "arquivo": "modelos/suv/toyota-bz4x.jpg",
+    "fabricante": "Toyota",
+    "modelo": "bZ4X",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:2026_Toyota_bZ4X_IMG_5806.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Alexander Migl"
+  },
+  {
+    "arquivo": "modelos/picapes/toyota-hilux.jpg",
+    "fabricante": "Toyota",
+    "modelo": "Hilux",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:2025_Toyota_Hilux_Travo_Overland_Double-Cab_2.8_Plus_4TREX.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Chanokchon"
+  },
+  {
+    "arquivo": "modelos/picapes/toyota-bandeirante.jpg",
+    "fabricante": "Toyota",
+    "modelo": "Bandeirante",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:TBJ40.JPG",
+    "licenca": "Public domain",
+    "licenca_url": null,
+    "autor": "Spiggot at English Wikipedia"
+  },
+  {
+    "arquivo": "modelos/motocicletas/triumph-tiger-sport-660.jpg",
+    "fabricante": "Triumph",
+    "modelo": "Tiger Sport 660",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Tiger_sport_660.jpg",
+    "licenca": "CC BY 3.0",
+    "licenca_url": "https://creativecommons.org/licenses/by/3.0",
+    "autor": "Lamb Chop Rides"
+  },
+  {
+    "arquivo": "modelos/motocicletas/triumph-tiger-900.jpg",
+    "fabricante": "Triumph",
+    "modelo": "Tiger 900",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:2021_Triumph_Tiger_900_GT_LRH.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Vauxford"
+  },
+  {
+    "arquivo": "modelos/motocicletas/triumph-speed-twin-900.jpg",
+    "fabricante": "Triumph",
+    "modelo": "Speed Twin 900",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Triumph_Street_Twin@Motodays_2017.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Nicholas Gemini"
+  },
+  {
+    "arquivo": "logos/troller.png",
+    "fabricante": "Troller",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Troller_logo.png",
+    "licenca": "CC BY-SA 3.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/3.0",
+    "autor": "Criador do Logo"
+  },
+  {
+    "arquivo": "modelos/suv/troller-t4.jpg",
+    "fabricante": "Troller",
+    "modelo": "T4",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Troller_T4.jpg",
+    "licenca": "CC BY-SA 3.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/3.0",
+    "autor": "Uploader's brother, cropped and plates anonymized by Mr.choppers"
+  },
+  {
+    "arquivo": "logos/volkswagen.svg",
+    "fabricante": "Volkswagen",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Volkswagen_logo_2019.svg",
+    "licenca": "Public domain",
+    "licenca_url": null,
+    "autor": "Volkswagen"
+  },
+  {
+    "arquivo": "modelos/carros/volkswagen-gol.jpg",
+    "fabricante": "Volkswagen",
+    "modelo": "Gol",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:VW_Gol_2009_front.jpg",
+    "licenca": "Public domain",
+    "licenca_url": null,
+    "autor": "Passarinho"
+  },
+  {
+    "arquivo": "modelos/carros/volkswagen-voyage.jpg",
+    "fabricante": "Volkswagen",
+    "modelo": "Voyage",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Volkswagen_Gol_sed%C3%A1n_Mk6_in_Uruguay.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "NaBUru38"
+  },
+  {
+    "arquivo": "modelos/carros/volkswagen-fox.jpg",
+    "fabricante": "Volkswagen",
+    "modelo": "Fox",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:VW_Fox_2012.jpg",
+    "licenca": "CC BY-SA 3.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/3.0",
+    "autor": "Biology9"
+  },
+  {
+    "arquivo": "modelos/carros/volkswagen-crossfox.jpg",
+    "fabricante": "Volkswagen",
+    "modelo": "CrossFox",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:VW_Fox_2012.jpg",
+    "licenca": "CC BY-SA 3.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/3.0",
+    "autor": "Biology9"
+  },
+  {
+    "arquivo": "modelos/carros/volkswagen-spacefox.jpg",
+    "fabricante": "Volkswagen",
+    "modelo": "SpaceFox",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:VW_Fox_2012.jpg",
+    "licenca": "CC BY-SA 3.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/3.0",
+    "autor": "Biology9"
+  },
+  {
+    "arquivo": "modelos/carros/volkswagen-up.jpg",
+    "fabricante": "Volkswagen",
+    "modelo": "up!",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:2013_Volkswagen_Take_UP!_1.0.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Vauxford"
+  },
+  {
+    "arquivo": "modelos/carros/volkswagen-polo.jpg",
+    "fabricante": "Volkswagen",
+    "modelo": "Polo",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:2018_Volkswagen_Polo_SE_TSi_1.0_Front.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Vauxford"
+  },
+  {
+    "arquivo": "modelos/carros/volkswagen-virtus.jpg",
+    "fabricante": "Volkswagen",
+    "modelo": "Virtus",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Sal%C3%A3o_do_Autom%C3%B3vel_2018_(45890970041).jpg",
+    "licenca": "CC BY 2.0",
+    "licenca_url": "https://creativecommons.org/licenses/by/2.0",
+    "autor": "Paulo Guereta from São Paulo"
+  },
+  {
+    "arquivo": "modelos/carros/volkswagen-golf.jpg",
+    "fabricante": "Volkswagen",
+    "modelo": "Golf",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:VW_Golf_GOAL_(VIII,_Facelift)_%E2%80%93_f_18042025.jpg",
+    "licenca": "CC BY-SA 3.0 de",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/3.0/de/deed.en",
+    "autor": "© M 93"
+  },
+  {
+    "arquivo": "modelos/carros/volkswagen-golf-gti.jpg",
+    "fabricante": "Volkswagen",
+    "modelo": "Golf GTI",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Volkswagen_Golf_GTi_(2015)_in_Wolfsburg.JPG",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Charles01"
+  },
+  {
+    "arquivo": "modelos/carros/volkswagen-jetta.jpg",
+    "fabricante": "Volkswagen",
+    "modelo": "Jetta",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:2025_Volkswagen_Jetta_SEL,_front_3.28.25.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Kevauto"
+  },
+  {
+    "arquivo": "modelos/carros/volkswagen-passat.jpg",
+    "fabricante": "Volkswagen",
+    "modelo": "Passat",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Volkswagen_Passat_PHEV_001.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Jengtingchen"
+  },
+  {
+    "arquivo": "modelos/suv/volkswagen-tera.jpg",
+    "fabricante": "Volkswagen",
+    "modelo": "Tera",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Volkswagen_Tera.jpg",
+    "licenca": "CC0",
+    "licenca_url": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+    "autor": "NeroRezend"
+  },
+  {
+    "arquivo": "modelos/suv/volkswagen-t-cross.jpg",
+    "fabricante": "Volkswagen",
+    "modelo": "T-Cross",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:2019_Volkswagen_T-Cross_First_Edition_TSi_1.0.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Vauxford"
+  },
+  {
+    "arquivo": "modelos/suv/volkswagen-nivus.jpg",
+    "fabricante": "Volkswagen",
+    "modelo": "Nivus",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Volkswagen_Taigo_1X7A6742.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Alexander Migl"
+  },
+  {
+    "arquivo": "modelos/suv/volkswagen-taos.jpg",
+    "fabricante": "Volkswagen",
+    "modelo": "Taos",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:2025_Volkswagen_Taos_IMG_3640.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Alexander Migl"
+  },
+  {
+    "arquivo": "modelos/suv/volkswagen-tiguan-allspace.jpg",
+    "fabricante": "Volkswagen",
+    "modelo": "Tiguan Allspace",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:2018_Volkswagen_Tiguan_SE_Nav_TSi_1.4.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Vauxford"
+  },
+  {
+    "arquivo": "modelos/suv/volkswagen-touareg.jpg",
+    "fabricante": "Volkswagen",
+    "modelo": "Touareg",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:2024_Volkswagen_Touareg_R_Auto_Zuerich_2023_1X7A1339.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Alexander-93"
+  },
+  {
+    "arquivo": "modelos/suv/volkswagen-id-4.jpg",
+    "fabricante": "Volkswagen",
+    "modelo": "ID.4",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Volkswagen_ID.4_1X7A0360.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Alexander Migl"
+  },
+  {
+    "arquivo": "modelos/picapes/volkswagen-saveiro.jpg",
+    "fabricante": "Volkswagen",
+    "modelo": "Saveiro",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Volkswagen_Saveiro_NF_2010_-_front.jpg",
+    "licenca": "CC BY-SA 3.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/3.0",
+    "autor": "NaBUru38"
+  },
+  {
+    "arquivo": "modelos/picapes/volkswagen-amarok.jpg",
+    "fabricante": "Volkswagen",
+    "modelo": "Amarok",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Volkswagen_Amarok_Mk2_Auto_Zuerich_2023_1X7A1337.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Alexander-93"
+  },
+  {
+    "arquivo": "logos/volkswagen-caminhoes-e-onibus.svg",
+    "fabricante": "Volkswagen Caminhões e Ônibus",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Logo_da_Volkswagen_Caminh%C3%B5es_e_%C3%94nibus.svg",
+    "licenca": "Public domain",
+    "licenca_url": null,
+    "autor": "Volkswagen Caminhões e Ônibus"
+  },
+  {
+    "arquivo": "modelos/caminhoes/volkswagen-caminhoes-e-onibus-worker.jpg",
+    "fabricante": "Volkswagen Caminhões e Ônibus",
+    "modelo": "Worker",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Formula_Truck_2006_Volkswagen_Monteiro..jpg",
+    "licenca": "CC BY-SA 3.0",
+    "licenca_url": "http://creativecommons.org/licenses/by-sa/3.0/",
+    "autor": "Morio"
+  },
+  {
+    "arquivo": "logos/volvo.png",
+    "fabricante": "Volvo",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Volvo_Trucks_Logo.png",
+    "licenca": "Public domain",
+    "licenca_url": null,
+    "autor": "Asianthieu (talk) 22:11, 3 December 2018 (UTC)"
+  },
+  {
+    "arquivo": "modelos/carros/volvo-s60.jpg",
+    "fabricante": "Volvo",
+    "modelo": "S60",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:0_Volvo_S60_(3rd_generation)_1.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Benespit"
+  },
+  {
+    "arquivo": "modelos/suv/volvo-ex30.jpg",
+    "fabricante": "Volvo",
+    "modelo": "EX30",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Volvo_EX30_1X7A2476.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Alexander-93"
+  },
+  {
+    "arquivo": "modelos/suv/volvo-xc60.jpg",
+    "fabricante": "Volvo",
+    "modelo": "XC60",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:2017_Volvo_XC60_Momentum_T5_AWD_Automatic_2.0_Front.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Vauxford"
+  },
+  {
+    "arquivo": "modelos/suv/volvo-xc90.jpg",
+    "fabricante": "Volvo",
+    "modelo": "XC90",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:2025_Volvo_XC90_II_DSC_7423.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Alexander Migl"
+  },
+  {
+    "arquivo": "modelos/caminhoes/volvo-fm.jpg",
+    "fabricante": "Volvo",
+    "modelo": "FM",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Volvo_FM14_Globetrotter_Tractor.jpg",
+    "licenca": "CC BY-SA 3.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/3.0",
+    "autor": "Trevor Marron"
+  },
+  {
+    "arquivo": "modelos/caminhoes/volvo-fmx.jpg",
+    "fabricante": "Volvo",
+    "modelo": "FMX",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Volvo_FMX_460_6x4_2012_(15057486052).jpg",
+    "licenca": "CC BY-SA 2.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/2.0",
+    "autor": "order_242 from Chile"
+  },
+  {
+    "arquivo": "modelos/caminhoes/volvo-fh.jpg",
+    "fabricante": "Volvo",
+    "modelo": "FH",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:2013_Volvo_FH16_540_demotruck.jpg",
+    "licenca": "CC BY-SA 3.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/3.0",
+    "autor": "Mr.choppers"
+  },
+  {
+    "arquivo": "logos/yamaha.svg",
+    "fabricante": "Yamaha",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Yamaha_Motor_2025.svg",
+    "licenca": "Public domain",
+    "licenca_url": null,
+    "autor": "Yamaha Motor Co., Ltd."
+  },
+  {
+    "arquivo": "modelos/motocicletas/yamaha-t-n-r-700.jpg",
+    "fabricante": "Yamaha",
+    "modelo": "Ténéré 700",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Yamaha_Tenere_700.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Roland Niedermeier"
+  },
+  {
+    "arquivo": "modelos/motocicletas/yamaha-mt-03.jpg",
+    "fabricante": "Yamaha",
+    "modelo": "MT-03",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:YAMAHA_MT-03_at_the_Tokyo_Motor_Show_2015.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "PekePON"
+  },
+  {
+    "arquivo": "modelos/motocicletas/yamaha-mt-09.jpg",
+    "fabricante": "Yamaha",
+    "modelo": "MT-09",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Yamaha_MT-09_2014.jpg",
+    "licenca": "CC BY-SA 3.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/3.0",
+    "autor": "TheMalsa"
+  },
+  {
+    "arquivo": "modelos/motocicletas/yamaha-yzf-r1.jpg",
+    "fabricante": "Yamaha",
+    "modelo": "YZF-R1",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:1998_Yamaha_YZF-R1_in_the_Yamaha_Communication_Plaza.JPG",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "Rainmaker47"
+  },
+  {
+    "arquivo": "logos/zeekr.svg",
+    "fabricante": "Zeekr",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Zeekr_logo.svg",
+    "licenca": "Public domain",
+    "licenca_url": null,
+    "autor": "Zeekr"
+  },
+  {
+    "arquivo": "modelos/suv/zeekr-x.jpg",
+    "fabricante": "Zeekr",
+    "modelo": "X",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Zeekr_X_012.jpg",
+    "licenca": "CC BY-SA 4.0",
+    "licenca_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "autor": "JustAnotherCarDesigner"
+  },
+  {
+    "arquivo": "modelos/suv/zeekr-7x.jpg",
+    "fabricante": "Zeekr",
+    "modelo": "7X",
+    "pagina_commons": "https://commons.wikimedia.org/wiki/File:Zeekr_7X_005_(cropped).jpg",
+    "licenca": "CC0",
+    "licenca_url": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+    "autor": "JustAnotherCarDesigner"
+  }
+]

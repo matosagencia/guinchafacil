@@ -1,0 +1,7 @@
+.vehicle-catalog-directory{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:26px 22px;padding:24px;background:#fff;border:1px solid #dce7ef;border-radius:18px;box-shadow:0 8px 24px rgba(15,23,42,.05)}
+.vehicle-catalog-directory .vehicle-catalog-letter-group{min-width:0}
+.vehicle-catalog-directory .vehicle-catalog-letter{margin-top:0}
+.vehicle-catalog-directory .vehicle-catalog-letter::after{background:#d9e7ee}
+.vehicle-catalog-directory .vehicle-catalog-card .card-body{min-height:142px}
+@media(max-width:1050px){.vehicle-catalog-directory{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:640px){.vehicle-catalog-directory{grid-template-columns:1fr;padding:16px;gap:20px}.vehicle-catalog-directory .vehicle-catalog-card .card-body{min-height:132px}}
