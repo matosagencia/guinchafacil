@@ -163,7 +163,7 @@ if (defined('FORCE_BASEPATH') && trim((string)FORCE_BASEPATH) !== '') {
 if (!defined('BASE_PATH')) {
     define('BASE_PATH', $basePath);
 }
-if (isset($_GET['__route_debug'])) {
+if (isset($_GET['__route_debug']) && defined('APP_ENV') && strtolower((string)APP_ENV) === 'development') {
     header('Content-Type: text/plain; charset=UTF-8');
     echo 'REQUEST_URI=' . ($_SERVER['REQUEST_URI'] ?? '') . PHP_EOL;
     echo 'SCRIPT_NAME=' . ($_SERVER['SCRIPT_NAME'] ?? '') . PHP_EOL;

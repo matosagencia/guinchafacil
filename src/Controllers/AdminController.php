@@ -3786,12 +3786,15 @@ $lngDestino = ($_POST['lng_destino'] ?? '') !== '' ? (float)$_POST['lng_destino'
     {
         if (!isset($_FILES[$campo]) || $_FILES[$campo]['error'] !== UPLOAD_ERR_OK) return null;
         $file = $_FILES[$campo];
-        if ($file['size'] > 5 * 1024 * 1024) return null;
-        $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
-        if (!in_array($ext, ['jpg','jpeg','png','pdf'])) return null;
+        if (!is_uploaded_file((string)$file['tmp_name']) || $file['size'] > 5 * 1024 * 1024) return null;
+        $mime = (new \finfo(FILEINFO_MIME_TYPE))->file((string)$file['tmp_name']);
+        $extensions = ['image/jpeg'=>'jpg','image/png'=>'png','application/pdf'=>'pdf'];
+        if (!isset($extensions[$mime])) return null;
+        if (str_starts_with($mime, 'image/') && !@getimagesize((string)$file['tmp_name'])) return null;
+        $ext = $extensions[$mime];
         $destDir = defined('UPLOAD_PATH') ? UPLOAD_PATH : (dirname(__DIR__, 3) . '/uploads');
         if (!is_dir($destDir)) @mkdir($destDir, 0775, true);
-        $fileName = uniqid($campo . '_') . '.' . $ext;
+        $fileName = $campo . '_' . bin2hex(random_bytes(16)) . '.' . $ext;
         $destPath = $destDir . '/' . $fileName;
         if (move_uploaded_file($file['tmp_name'], $destPath)) return $fileName;
         return null;

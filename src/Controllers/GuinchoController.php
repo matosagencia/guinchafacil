@@ -2343,11 +2343,14 @@ class GuinchoController extends BaseController
 
         // Valida tamanho (mÃ¡x 5MB)
 
-        if ($file['size'] > 5 * 1024 * 1024) return null;
+        if (!is_uploaded_file((string)$file['tmp_name']) || $file['size'] > 5 * 1024 * 1024) return null;
 
         
 
-        $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+        $mime = (new \finfo(FILEINFO_MIME_TYPE))->file((string)$file['tmp_name']);
+        $extensions = ['image/jpeg'=>'jpg','image/png'=>'png'];
+        if (!isset($extensions[$mime]) || !@getimagesize((string)$file['tmp_name'])) return null;
+        $ext = $extensions[$mime];
 
         // Valida extensÃ£o
 
@@ -2361,7 +2364,7 @@ class GuinchoController extends BaseController
 
         
 
-        $fileName = uniqid($campo . '_') . '.' . $ext;
+        $fileName = $campo . '_' . bin2hex(random_bytes(16)) . '.' . $ext;
 
         $destPath = $destDir . '/' . $fileName;
 

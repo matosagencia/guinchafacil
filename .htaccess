@@ -21,7 +21,7 @@ SetEnv TZ America/Sao_Paulo
         Require all denied
     </FilesMatch>
 
-    <FilesMatch "\.(sql|log|md|env|git|htaccess|htpasswd|ini|bak|old)$">
+    <FilesMatch "\.(sql|log|md|env|git|htaccess|htpasswd|ini|bak|old|txt)$">
         Require all denied
     </FilesMatch>
 
