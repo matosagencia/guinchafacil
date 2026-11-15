@@ -48,7 +48,7 @@ final class AdminMarketingReferralController extends BaseController
     {
         AuthService::requireAuth('admin');
         $rows = [];
-        try { $rows = getPDO()->query('SELECT * FROM partner_referral_commission_rules ORDER BY partner_profile, effective_from DESC')->fetchAll(PDO::FETCH_ASSOC); } catch (Throwable $e) { $erro = 'A migration de comissões de indicação ainda não foi aplicada.'; }
+        try { $rows = getPDO()->query("SELECT * FROM partner_referral_commission_rules WHERE partner_profile = 'distribuicao' ORDER BY effective_from DESC, id DESC LIMIT 1")->fetchAll(PDO::FETCH_ASSOC); } catch (Throwable $e) { $erro = 'A migration de comissões de indicação ainda não foi aplicada.'; }
         $csrfToken = AuthService::gerarCsrfToken();
         require __DIR__ . '/../Views/admin/marketing_comissoes_indicacao.php';
     }
@@ -61,7 +61,7 @@ final class AdminMarketingReferralController extends BaseController
         $share = max(0.0, min(100.0, (float)($_POST['referral_share_percent'] ?? 0)));
         $discount = max(0.0, min(100.0, (float)($_POST['discount_percent'] ?? 0)));
         if (!in_array($profile, ['guincho','oficina','distribuicao'], true)) { $this->redirect('/admin/marketing/comissoes-indicacao?erro=validacao'); return; }
-        try { getPDO()->prepare("INSERT INTO partner_referral_commission_rules (partner_profile,commission_percent,discount_percent,status,effective_from,created_by_admin_id) VALUES (?,?,?,'ativo',NOW(),?)")->execute([$profile,$share,$discount,(int)$admin['id']]); $this->redirect('/admin/marketing/comissoes-indicacao?ok=1'); } catch (Throwable $e) { $this->redirect('/admin/marketing/comissoes-indicacao?erro=schema'); }
+        try { $pdo=getPDO(); $id=$pdo->query("SELECT id FROM partner_referral_commission_rules WHERE partner_profile='distribuicao' ORDER BY id DESC LIMIT 1")->fetchColumn(); if($id){$pdo->prepare("UPDATE partner_referral_commission_rules SET commission_percent=?,discount_percent=?,status='ativo',effective_from=NOW(),created_by_admin_id=? WHERE id=?")->execute([$share,$discount,(int)$admin['id'],(int)$id]);}else{$pdo->prepare("INSERT INTO partner_referral_commission_rules (partner_profile,commission_percent,discount_percent,status,effective_from,created_by_admin_id) VALUES ('distribuicao',?,?, 'ativo',NOW(),?)")->execute([$share,$discount,(int)$admin['id']]);}$this->redirect('/admin/marketing/comissoes-indicacao?ok=1'); } catch (Throwable $e) { $this->redirect('/admin/marketing/comissoes-indicacao?erro=schema'); }
     }
 
     public function promotions(): void
