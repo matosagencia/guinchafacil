@@ -704,7 +704,7 @@ class AdminController extends BaseController
                     u.nome AS cliente_nome
              FROM pedidos p
              JOIN usuarios u ON u.id = p.cliente_id
-             WHERE p.status IN ('aguardando_guincho','a_caminho','no_local','em_reboque')
+             WHERE p.status IN ('aguardando_pagamento','aguardando_guincho','a_caminho','no_local','em_reboque','teste_final')
                AND p.lat_origem IS NOT NULL AND p.lng_origem IS NOT NULL
              ORDER BY p.criado_em DESC
              LIMIT 100"
@@ -1974,7 +1974,7 @@ $lngDestino = ($_POST['lng_destino'] ?? '') !== '' ? (float)$_POST['lng_destino'
             $veiculo = Veiculo::buscarPorId($veiculoId);
             if (!$veiculo) {
                 http_response_code(404);
-                echo json_encode(['ok' => false, 'erro' => 'Ve�culo n�o encontrado'], JSON_UNESCAPED_UNICODE);
+                echo json_encode(['ok' => false, 'erro' => 'Veículo não encontrado'], JSON_UNESCAPED_UNICODE);
                 exit;
             }
             if ($categoria === '') {
@@ -4450,7 +4450,7 @@ $lngDestino = ($_POST['lng_destino'] ?? '') !== '' ? (float)$_POST['lng_destino'
 
         $contexto = [
             'cliente_nome'   => $cliente['nome'] ?? 'Cliente n�o identificado',
-            'veiculo_resumo' => $veiculoResumo ?: 'Ve�culo n�o informado',
+            'veiculo_resumo' => $veiculoResumo ?: 'Veículo não informado',
             'guincho_nome'   => $guincho['nome_operador'] ?? ($guincho['nome'] ?? null),
         ];
         $csrf_token = AuthService::gerarCsrfToken();

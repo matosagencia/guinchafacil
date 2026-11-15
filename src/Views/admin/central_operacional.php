@@ -38,7 +38,7 @@ ob_start();
 
 <link rel="stylesheet" href="<?php echo htmlspecialchars($bp); ?>/public/assets/css/pages/admin-central-operacional.css">
 <link rel="stylesheet" href="<?php echo htmlspecialchars($bp, ENT_QUOTES, 'UTF-8'); ?>/public/assets/css/pages/gf-admin-lovable-shell-v1.css?v=20261016">
-<link rel="stylesheet" href="<?php echo htmlspecialchars($bp, ENT_QUOTES, 'UTF-8'); ?>/public/assets/css/pages/gf-bo-central-rebase.css?v=20261017-18b2">
+<link rel="stylesheet" href="<?php echo htmlspecialchars($bp, ENT_QUOTES, 'UTF-8'); ?>/public/assets/css/pages/gf-bo-central-rebase.css?v=20261115-central-grid-1">
 <link rel="stylesheet" href="<?php echo htmlspecialchars($bp, ENT_QUOTES, 'UTF-8'); ?>/public/assets/css/pages/gf-f18c-shell.css?v=20261017-18c1">
 
 
@@ -248,7 +248,7 @@ ob_start();
 
                         data-search-blob="<?php echo htmlspecialchars(mb_strtolower($w['codigo'] . ' ' . $w['cliente_nome'] . ' ' . $w['veiculo_resumo']), ENT_QUOTES, 'UTF-8'); ?>"
 
-                        aria-selected="<?php echo $i === 0 ? 'true' : 'false'; ?>"
+                        aria-selected="false"
 
                     >
 
@@ -331,7 +331,7 @@ ob_start();
 </div>
 <script<?php echo csp_script_nonce_attr(); ?> src="<?php echo htmlspecialchars($bp); ?>/public/assets/vendor/leaflet/leaflet.js"></script>
 
-<script<?php echo csp_script_nonce_attr(); ?> src="<?php echo htmlspecialchars($bp); ?>/public/assets/js/admin-order-workspace.js?v=20260815-1"></script>
+<script<?php echo csp_script_nonce_attr(); ?> src="<?php echo htmlspecialchars($bp); ?>/public/assets/js/admin-order-workspace.js?v=20261115-central-map-1"></script>
 
 <script<?php echo csp_script_nonce_attr(); ?>>
 
@@ -356,6 +356,7 @@ AdminOrderWorkspace.init({
     osrmBaseUrl: <?php echo json_encode($osrmBaseUrl, JSON_UNESCAPED_SLASHES); ?>,
 
     emptyLabel: 'Nenhum pedido selecionado.'
+    ,autoSelectFirst: false
 
 });
 
@@ -468,6 +469,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
         let marcadores = [];
+        let pedidoMapaSelecionado = null;
 
         let rotaSyncEpoch = 0;
 
@@ -544,6 +546,12 @@ document.addEventListener('DOMContentLoaded', function () {
                 const payload = await resp.json();
 
                 if (!payload || payload.ok !== true) return;
+                const clientesVisiveis = pedidoMapaSelecionado === null
+                    ? (payload.clientes || [])
+                    : (payload.clientes || []).filter((c) => Number(c.pedido_id) === Number(pedidoMapaSelecionado));
+                const guinchosVisiveis = pedidoMapaSelecionado === null
+                    ? (payload.guinchos || [])
+                    : (payload.guinchos || []).filter((g) => Number(g.pedido_id) === Number(pedidoMapaSelecionado));
 
 
 
@@ -557,7 +565,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
 
-                (payload.clientes || []).forEach((c) => {
+                clientesVisiveis.forEach((c) => {
 
                     const chegouNaOrigem = ['no_local', 'em_reboque'].includes(String(c.status || ''));
 
@@ -599,7 +607,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
 
-                (payload.guinchos || []).forEach((g) => {
+                guinchosVisiveis.forEach((g) => {
 
                     const emReboque = g.em_atendimento && g.rota && g.rota.indo_para === 'destino';
 
@@ -687,13 +695,13 @@ document.addEventListener('DOMContentLoaded', function () {
                 // Não modifica o zoom depois que o operador interagir com o mapa.
                 if (!map.__gfInitialFitDone) {
                     const pontos = [];
-                    (payload.clientes || []).forEach((c) => {
+                    clientesVisiveis.forEach((c) => {
                         const lat = Number(c.lat), lng = Number(c.lng);
                         if (Number.isFinite(lat) && Number.isFinite(lng) && Math.abs(lat) <= 90 && Math.abs(lng) <= 180 && (lat || lng)) pontos.push([lat, lng]);
                         const dlat = Number(c.lat_destino), dlng = Number(c.lng_destino);
                         if (c.lat_destino != null && c.lng_destino != null && Number.isFinite(dlat) && Number.isFinite(dlng) && Math.abs(dlat) <= 90 && Math.abs(dlng) <= 180) pontos.push([dlat, dlng]);
                     });
-                    (payload.guinchos || []).forEach((g) => {
+                    guinchosVisiveis.forEach((g) => {
                         const lat = Number(g.lat), lng = Number(g.lng);
                         if (Number.isFinite(lat) && Number.isFinite(lng) && Math.abs(lat) <= 90 && Math.abs(lng) <= 180 && (lat || lng)) pontos.push([lat, lng]);
                     });
@@ -717,6 +725,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
 
+        window.gfCentralMapFilter = function (pedidoId) {
+            pedidoMapaSelecionado = pedidoId === null ? null : Number(pedidoId);
+            map.__gfInitialFitDone = false;
+            syncMapa();
+        };
         syncMapa();
 
         window.setInterval(syncMapa, 10000);

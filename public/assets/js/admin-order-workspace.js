@@ -146,7 +146,7 @@
                 '  <div class="ops-order-fact"><span class="ops-order-fact__label">Serviço</span><span class="ops-order-fact__value">' + escapeHtml((detail.service && detail.service.name) || '—') + '</span></div>' +
                 '</div>' +
                 '<div class="ops-tabs" role="tablist">' +
-                '  <button type="button" class="ops-tab is-active" data-tab="mapa">Mapa</button>' +
+                
                 '  <button type="button" class="ops-tab" data-tab="timeline">Timeline</button>' +
                 '  <button type="button" class="ops-tab" data-tab="chat">Chat</button>' +
                 '</div>' +
@@ -328,7 +328,7 @@
         }
 
         function selectOrder(orderId) {
-            currentOrderId = orderId;
+            currentOrderId = orderId;            if (typeof window.gfCentralMapFilter === 'function') window.gfCentralMapFilter(orderId || null);
             var buttons = results.querySelectorAll('[data-order-id]');
             buttons.forEach(function (btn) {
                 var match = Number(btn.dataset.orderId) === orderId;

@@ -15,3 +15,73 @@ body.admin .bo-operation-grid .ops-worklist-search input {background:#f8fafc;bor
 body.admin .bo-operation-grid :is(input,button,a):focus-visible {outline:2px solid #2fb34a;outline-offset:2px}
 @media(max-width:1250px) {body.admin .ops-summary.bo-metrics {grid-template-columns:repeat(4,minmax(0,1fr))}body.admin .bo-operation-grid.shell-ops {grid-template-columns:68px 290px minmax(0,1fr)}}
 @media(max-width:760px) {body.admin .ops-summary.bo-metrics {grid-template-columns:repeat(2,minmax(0,1fr));margin:10px}body.admin .bo-operation-grid.shell-ops {display:block;margin:0 10px 18px}body.admin .bo-operation-grid .bo-orders {border-right:0;border-bottom:1px solid #e2e8f0}}
+
+/* Central operacional: oito indicadores em uma grade legível e previsível. */
+body.admin .ops-summary.bo-metrics {grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:0}
+body.admin .bo-operation-grid.shell-ops {grid-template-columns:minmax(240px,18vw) minmax(300px,24vw) minmax(0,1fr);align-items:stretch}
+body.admin .bo-operation-grid.shell-ops .bo-orders {min-height:clamp(520px,calc(100vh - 250px),760px)}
+body.admin .bo-operation-grid.shell-ops .ops-worklist-results {min-height:0}
+body.admin .bo-operation-grid.shell-ops .bo-incident {min-width:0;overflow:hidden}
+body.admin .ops-worklist-item {min-height:86px}
+body.admin .ops-worklist-item:focus-visible {outline:2px solid #2fb34a;outline-offset:-2px}
+@media(max-width:1250px) {
+  body.admin .ops-summary.bo-metrics {grid-template-columns:repeat(3,minmax(0,1fr))!important}
+  body.admin .bo-operation-grid.shell-ops {grid-template-columns:minmax(220px,25vw) minmax(300px,34vw) minmax(0,1fr)}
+}
+@media(max-width:760px) {
+  body.admin .ops-summary.bo-metrics {grid-template-columns:repeat(2,minmax(0,1fr))!important;margin:10px}
+  body.admin .bo-operation-grid.shell-ops {display:block;margin:0 10px 18px}
+  body.admin .bo-operation-grid.shell-ops .bo-orders {min-height:0}
+  body.admin .bo-operation-grid .bo-orders {border-right:0;border-bottom:1px solid #e2e8f0}
+}
+@media(prefers-reduced-motion:reduce) {
+  body.admin .bo-operation-grid *, body.admin .ops-summary * {scroll-behavior:auto!important;transition-duration:.01ms!important;animation-duration:.01ms!important}
+}
+
+/* Fila compacta: o operador escolhe um pedido para revelar o contexto completo. */
+body.admin .ops-worklist-item {
+  min-height:48px;
+  grid-template-columns:3px minmax(0,1fr);
+  align-items:center;
+  padding:0;
+  background:#eef1f3;
+  border:1px solid #d8dee3;
+  color:#263238;
+  border-radius:6px;
+  margin:5px 8px;
+}
+body.admin .ops-worklist-item[aria-selected="false"] .ops-worklist-item__content {padding:10px 12px}
+body.admin .ops-worklist-item[aria-selected="false"] .ops-worklist-item__top {justify-content:flex-start}
+body.admin .ops-worklist-item[aria-selected="false"] .ops-worklist-item__top .ops-badge,
+body.admin .ops-worklist-item[aria-selected="false"] .ops-worklist-item__vehicle,
+body.admin .ops-worklist-item[aria-selected="false"] .ops-worklist-item__footer,
+body.admin .ops-worklist-item[aria-selected="false"] .ops-worklist-item__signals {display:none}
+body.admin .ops-worklist-item[aria-selected="false"] .ops-worklist-item__top strong,
+body.admin .ops-worklist-item[aria-selected="false"] .ops-worklist-item__customer {color:#263238}
+body.admin .ops-worklist-item[aria-selected="true"] {
+  min-height:132px;
+  background:#16853a;
+  border-color:#0f6f2f;
+  color:#fff;
+}
+body.admin .ops-worklist-item[aria-selected="true"] .ops-worklist-item__top strong,
+body.admin .ops-worklist-item[aria-selected="true"] .ops-worklist-item__customer,
+body.admin .ops-worklist-item[aria-selected="true"] .ops-worklist-item__vehicle,
+body.admin .ops-worklist-item[aria-selected="true"] .ops-worklist-item__footer {color:#fff}
+body.admin .ops-worklist-item[aria-selected="true"] .ops-worklist-item__signals {display:flex}
+body.admin .ops-worklist-item:hover {background:#dfe5e8}
+body.admin .ops-worklist-item[aria-selected="true"]:hover {background:#117331}
+#opsWorkspace .ops-map-workspace,
+#opsWorkspace [data-panel="mapa"],
+#opsWorkspace .ops-tab[data-tab="mapa"] {display:none!important}
+.ops-worklist-item[aria-selected="false"] .ops-worklist-item__top .ops-badge,
+.ops-worklist-item[aria-selected="false"] .ops-worklist-item__vehicle,
+.ops-worklist-item[aria-selected="false"] .ops-worklist-item__footer,
+.ops-worklist-item[aria-selected="false"] .ops-worklist-item__signals {display:none!important}
+.ops-worklist-item[aria-selected="false"] {min-height:48px!important;background:#eef1f3!important;border-color:#d8dee3!important}
+.ops-worklist-item[aria-selected="false"] .ops-worklist-item__content {padding:10px 12px}
+.ops-worklist-item[aria-selected="true"] {min-height:132px!important;background:#16853a!important;border-color:#0f6f2f!important}
+.ops-worklist-item[aria-selected="true"] .ops-worklist-item__top strong,
+.ops-worklist-item[aria-selected="true"] .ops-worklist-item__customer,
+.ops-worklist-item[aria-selected="true"] .ops-worklist-item__vehicle,
+.ops-worklist-item[aria-selected="true"] .ops-worklist-item__footer {color:#fff}
