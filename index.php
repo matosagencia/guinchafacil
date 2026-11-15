@@ -428,6 +428,7 @@ $rotas = [
         '/admin/marketing/comissoes-indicacao/salvar'             => ['AdminMarketingReferralController', 'storeCommission', 'admin'],
         '/admin/marketing/comissoes-indicacao/status'             => ['AdminMarketingReferralController', 'toggleCommission', 'admin'],
         '/admin/marketing/cupons/status'                          => ['AdminMarketingReferralController', 'togglePromotion', 'admin'],
+        '/admin/marketing/cupons/excluir'                         => ['AdminMarketingReferralController', 'deletePromotion', 'admin'],
         '/admin/catalogo-servicos/capacidade-veicular/salvar' => ['AdminServiceCatalogController', 'capacidadeVeicularSalvar', 'admin'],
         '/admin/catalogo-servicos/capacidade/decidir'         => ['AdminServiceCatalogController', 'capacidadeDecidir', 'admin'],
         '/admin/catalogo-servicos/requisito/salvar'           => ['AdminServiceCatalogController', 'requisitoSalvar', 'admin'],

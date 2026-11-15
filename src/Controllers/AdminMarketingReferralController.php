@@ -95,8 +95,60 @@ final class AdminMarketingReferralController extends BaseController
         if (!AuthService::validarCsrfToken((string)($_POST['csrf_token'] ?? ''))) { http_response_code(403); return; }
         $id = (int)($_POST['id'] ?? 0);
         if ($id <= 0) { $this->redirect('/admin/marketing/cupons?erro=id'); return; }
-        try { getPDO()->prepare("UPDATE marketing_promotion_rules SET status = IF(status = 'ativo', 'inativo', 'ativo') WHERE id = ?")->execute([$id]); $this->redirect('/admin/marketing/cupons?ok=status'); }
-        catch (Throwable $e) { $this->redirect('/admin/marketing/cupons?erro=schema'); }
+        try {
+            $pdo = getPDO();
+            $stmt = $pdo->prepare("UPDATE marketing_promotion_rules
+                SET status = CASE WHEN status = 'ativo' THEN 'inativo' ELSE 'ativo' END
+                WHERE id = ?");
+            $stmt->execute([$id]);
+            if ($stmt->rowCount() !== 1) {
+                $this->redirect('/admin/marketing/cupons?erro=nao_encontrado');
+                return;
+            }
+            $this->redirect('/admin/marketing/cupons?ok=status');
+        } catch (Throwable $e) {
+            $this->redirect('/admin/marketing/cupons?erro=schema');
+        }
+    }
+
+    public function deletePromotion(): void
+    {
+        AuthService::requireAuth('admin');
+        if (!AuthService::validarCsrfToken((string)($_POST['csrf_token'] ?? ''))) {
+            http_response_code(403);
+            return;
+        }
+
+        $id = (int)($_POST['id'] ?? 0);
+        $confirmation = strtoupper(trim((string)($_POST['confirmacao'] ?? $_POST['confirm_delete'] ?? '')));
+        if ($id <= 0) {
+            $this->redirect('/admin/marketing/cupons?erro=id');
+            return;
+        }
+        if ($confirmation !== '' && $confirmation !== 'EXCLUIR') { $this->redirect('/admin/marketing/cupons?erro=confirmacao'); return; }
+
+        try {
+            $pdo = getPDO();
+            $check = $pdo->prepare('SELECT used_count FROM marketing_promotion_rules WHERE id = ? LIMIT 1');
+            $check->execute([$id]);
+            $promotion = $check->fetch(PDO::FETCH_ASSOC);
+            if (!$promotion) {
+                $this->redirect('/admin/marketing/cupons?erro=nao_encontrado');
+                return;
+            }
+            if ((int)$promotion['used_count'] > 0) {
+                $this->redirect('/admin/marketing/cupons?erro=usado');
+                return;
+            }
+
+            $delete = $pdo->prepare('DELETE FROM marketing_promotion_rules WHERE id = ? AND used_count = 0');
+            $delete->execute([$id]);
+            $this->redirect($delete->rowCount() === 1
+                ? '/admin/marketing/cupons?ok=excluido'
+                : '/admin/marketing/cupons?erro=nao_excluido');
+        } catch (Throwable $e) {
+            $this->redirect('/admin/marketing/cupons?erro=schema');
+        }
     }
 
     public function toggleCommission(): void
@@ -105,7 +157,7 @@ final class AdminMarketingReferralController extends BaseController
         if (!AuthService::validarCsrfToken((string)($_POST['csrf_token'] ?? ''))) { http_response_code(403); return; }
         $id = (int)($_POST['id'] ?? 0);
         if ($id <= 0) { $this->redirect('/admin/marketing/comissoes-indicacao?erro=id'); return; }
-        try { getPDO()->prepare("UPDATE partner_referral_commission_rules SET status = IF(status = 'ativo', 'inativo', 'ativo') WHERE id = ?")->execute([$id]); $this->redirect('/admin/marketing/comissoes-indicacao?ok=status'); }
+        try { getPDO()->prepare("UPDATE partner_referral_commission_rules SET status = IF(status = 'ativo', 'pausado', 'ativo') WHERE id = ?")->execute([$id]); $this->redirect('/admin/marketing/comissoes-indicacao?ok=status'); }
         catch (Throwable $e) { $this->redirect('/admin/marketing/comissoes-indicacao?erro=schema'); }
     }
 }
