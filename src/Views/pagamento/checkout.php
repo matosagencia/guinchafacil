@@ -93,6 +93,7 @@ include __DIR__ . '/../layouts/header.php';
             <div class="card h-100 checkout-recibo">
                 <div class="card-header"><i class="fas fa-receipt me-2"></i>Resumo da solicita��o</div>
                 <div class="card-body">
+                    <?php if ((float)($pedido['desconto_promocional'] ?? 0) > 0): ?><div class="recibo-linha text-success"><span>Desconto<?php echo !empty($pedido['cupom_codigo']) ? ' (' . htmlspecialchars($pedido['cupom_codigo']) . ')' : ''; ?></span><span>- R$ <?php echo number_format((float)$pedido['desconto_promocional'], 2, ',', '.'); ?></span></div><?php endif; ?>
                     <div class="recibo-linha recibo-total">
                         <span>Total a pagar</span>
                         <strong>R$ <?php echo number_format($valorPedido, 2, ',', '.'); ?></strong>

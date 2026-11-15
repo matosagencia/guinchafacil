@@ -8,6 +8,8 @@ require_once __DIR__ . '/../Models/Veiculo.php';
 require_once __DIR__ . '/../Models/Pedido.php';
 require_once __DIR__ . '/../Models/Pagamento.php';
 require_once __DIR__ . '/../Services/Payment/PaymentProviderFactory.php';
+require_once __DIR__ . '/../Services/PromotionResolutionService.php';
+require_once __DIR__ . '/../Services/MarketingAttributionService.php';
 
 final class CheckoutController extends BaseController
 {
@@ -57,6 +59,20 @@ final class CheckoutController extends BaseController
             $this->redirect('/checkout/veiculo?triage_session_id=' . rawurlencode($id));
         }
 
+        $cupom = strtoupper(trim((string)($_POST['cupom_codigo'] ?? '')));
+        $atribuicao = MarketingAttributionService::forPedido();
+        $refCode = (string)($atribuicao['referral_code'] ?? '');
+        $context = ['partner_profile' => 'cliente', 'vehicle_make' => $veiculo['marca'] ?? '', 'vehicle_type' => $veiculo['tipo'] ?? '', 'service_type_id' => $triagem['dados']['service_type_id'] ?? ''];
+        $promocao = $cupom !== '' ? PromotionResolutionService::resolve($cupom, $context) : ['ok' => false];
+        if ($cupom !== '' && !($promocao['ok'] ?? false)) {
+            $this->setFlashMessage((string)($promocao['message'] ?? 'Cupom inválido.'), 'warning');
+            $promocao = ['ok' => false];
+            $cupom = '';
+        }
+        $gross = (float)($triagem['dados']['custo_estimado'] ?? 0);
+        $applied = ($promocao['ok'] ?? false) ? PromotionResolutionService::apply($gross, $promocao) : ['discount' => 0, 'net' => $gross];
+        $triagem['dados']['custo_estimado'] = $applied['net'];
+
         $pedidoId = (int)($triagem['pedido_id'] ?? 0);
         if ($pedidoId <= 0) {
             $pedidoId = Pedido::criar(array_merge($triagem['dados'], [
@@ -69,6 +85,10 @@ final class CheckoutController extends BaseController
                 http_response_code(500); echo 'Não foi possível reconstruir seu pedido.'; exit;
             }
             Pedido::registrarContextoCheckout((int)$pedidoId, $triagem['dados']);
+            $pdo = getPDO();
+            $pdo->prepare('UPDATE pedidos SET cupom_codigo = ?, desconto_promocional = ?, valor_bruto_checkout = ?, parceiro_indicador_codigo = ? WHERE id = ?')->execute([$cupom ?: null, $applied['discount'], $gross, $refCode ?: null, $pedidoId]);
+            if ($applied['discount'] > 0) $pdo->prepare('UPDATE order_price_snapshots SET customer_total = ? WHERE order_id = ?')->execute([$applied['net'], $pedidoId]);
+            if (($promocao['ok'] ?? false) && !empty($promocao['rule']['id'])) PromotionResolutionService::consume((int)$promocao['rule']['id']);
             TriageSessionService::registrarPedido($id, (int)$usuario['id'], $pedidoId);
 
             // A escolha feita na pr�-cota��o atravessa o cadastro e � aplicada

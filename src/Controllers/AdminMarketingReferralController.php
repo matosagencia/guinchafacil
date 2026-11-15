@@ -63,4 +63,29 @@ final class AdminMarketingReferralController extends BaseController
         if (!in_array($profile, ['guincho','oficina','distribuicao'], true)) { $this->redirect('/admin/marketing/comissoes-indicacao?erro=validacao'); return; }
         try { getPDO()->prepare("INSERT INTO partner_referral_commission_rules (partner_profile,commission_percent,discount_percent,status,effective_from,created_by_admin_id) VALUES (?,?,?,'ativo',NOW(),?)")->execute([$profile,$share,$discount,(int)$admin['id']]); $this->redirect('/admin/marketing/comissoes-indicacao?ok=1'); } catch (Throwable $e) { $this->redirect('/admin/marketing/comissoes-indicacao?erro=schema'); }
     }
+
+    public function promotions(): void
+    {
+        AuthService::requireAuth('admin');
+        $rows = [];
+        try { $rows = getPDO()->query('SELECT * FROM marketing_promotion_rules ORDER BY status DESC, priority DESC, id DESC')->fetchAll(PDO::FETCH_ASSOC); }
+        catch (Throwable $e) { $erro = 'A migration de promoções ainda não foi aplicada.'; }
+        $csrfToken = AuthService::gerarCsrfToken();
+        require __DIR__ . '/../Views/admin/marketing_cupons.php';
+    }
+
+    public function storePromotion(): void
+    {
+        $admin = AuthService::requireAuth('admin');
+        if (!AuthService::validarCsrfToken((string)($_POST['csrf_token'] ?? ''))) { http_response_code(403); return; }
+        $code = strtoupper(trim((string)($_POST['code'] ?? '')));
+        $name = trim((string)($_POST['name'] ?? ''));
+        $type = (string)($_POST['discount_type'] ?? 'percent');
+        $value = max(0, (float)str_replace(',', '.', (string)($_POST['discount_value'] ?? 0)));
+        if (!preg_match('/^[A-Z0-9][A-Z0-9_-]{2,79}$/', $code) || $name === '' || !in_array($type, ['percent','fixed'], true) || ($type === 'percent' && $value > 100)) { $this->redirect('/admin/marketing/cupons?erro=validacao'); return; }
+        try {
+            getPDO()->prepare("INSERT INTO marketing_promotion_rules (code,name,discount_type,discount_value,partner_profile,vehicle_type,vehicle_make,region,service_type_id,priority,starts_at,ends_at,max_uses,created_by_admin_id) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?) ON DUPLICATE KEY UPDATE name=VALUES(name),discount_type=VALUES(discount_type),discount_value=VALUES(discount_value),partner_profile=VALUES(partner_profile),vehicle_type=VALUES(vehicle_type),vehicle_make=VALUES(vehicle_make),region=VALUES(region),service_type_id=VALUES(service_type_id),priority=VALUES(priority),starts_at=VALUES(starts_at),ends_at=VALUES(ends_at),max_uses=VALUES(max_uses),status='ativo'")->execute([$code,$name,$type,$value,trim((string)($_POST['partner_profile'] ?? '')) ?: null,trim((string)($_POST['vehicle_type'] ?? '')) ?: null,trim((string)($_POST['vehicle_make'] ?? '')) ?: null,trim((string)($_POST['region'] ?? '')) ?: null,(int)($_POST['service_type_id'] ?? 0) ?: null,(int)($_POST['priority'] ?? 0),($_POST['starts_at'] ?? '') ?: null,($_POST['ends_at'] ?? '') ?: null,(int)($_POST['max_uses'] ?? 0) ?: null,(int)$admin['id']]);
+            $this->redirect('/admin/marketing/cupons?ok=1');
+        } catch (Throwable $e) { $this->redirect('/admin/marketing/cupons?erro=schema'); }
+    }
 }

@@ -21,6 +21,7 @@ require __DIR__ . '/../public/_header-public.php';
 <header class="gf-site-header"><div class="gf-container"><a class="gf-brand" href="<?php echo htmlspecialchars($bp); ?>/">Guincha<span>Fácil</span>.</a><nav class="gf-nav" aria-label="Navegação principal"><a href="<?php echo htmlspecialchars($bp); ?>/pre-cotacao">Como funciona</a><a href="<?php echo htmlspecialchars($bp); ?>/guincho/niteroi-rj">Onde atendemos</a><a href="<?php echo htmlspecialchars($bp); ?>/parceiros">Seja um parceiro</a></nav><a class="gf-btn gf-btn--primary gf-btn--sm" href="<?php echo htmlspecialchars($bp); ?>/pre-cotacao">Pedir guincho</a></div></header>
 <?php ob_end_clean(); ?>
 <main class="gf-checkout">
+  <?php if (!empty($flash)): ?><div class="alert alert-<?php echo htmlspecialchars(($flash['type'] ?? 'info') === 'warning' ? 'warning' : 'info'); ?>" role="alert"><?php echo htmlspecialchars((string)($flash['message'] ?? '')); ?></div><?php endif; ?>
   <div class="gf-checkout__grid">
     <section class="gf-checkout__panel">
       <span class="gf-checkout__eyebrow">Próximo passo</span>
@@ -43,6 +44,9 @@ require __DIR__ . '/../public/_header-public.php';
               <option value="<?php echo (int)$veiculo['id']; ?>"><?php echo htmlspecialchars(trim(($veiculo['marca'] ?? '') . ' ' . ($veiculo['modelo'] ?? '') . ' · ' . ($veiculo['placa'] ?? ''))); ?></option>
             <?php endforeach; ?>
           </select>
+          <label class="form-label" for="cupom_codigo">Código de desconto <span class="text-muted fw-normal">(opcional)</span></label>
+          <input class="form-control mb-2" name="cupom_codigo" id="cupom_codigo" maxlength="80" autocomplete="off" placeholder="Ex.: PARCEIRO10" value="<?php echo htmlspecialchars((string)($_POST['cupom_codigo'] ?? '')); ?>">
+          <small class="text-muted d-block mb-4">O desconto será validado para este atendimento antes do pagamento.</small>
           <button class="gf-checkout__btn" type="submit">Continuar para pagamento</button>
         </form>
       <?php endif; ?>

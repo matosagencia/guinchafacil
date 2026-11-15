@@ -356,8 +356,8 @@ class PagamentoController extends BaseController
         if (!is_array($draft)) { $draft = []; }
         $cpfSessao = preg_replace('/\D+/', '', (string)($draft['cpf'] ?? ''));
         $cpfUsuario = preg_replace('/\D+/', '', (string)($user['cpf'] ?? $user['documento'] ?? ''));
-        if ($cpfSessao !== '' && (strlen($cpfSessao) !== 11 || strlen($cpfUsuario) !== 11 || !hash_equals($cpfUsuario, $cpfSessao))) {
-            throw new DomainException('CPF do pagador não corresponde ao cadastro autenticado.');
+        if ($cpfSessao !== '' && (strlen($cpfSessao) !== 11 || (strlen($cpfUsuario) === 11 && !hash_equals($cpfUsuario, $cpfSessao)))) {
+            $cpfSessao = '';
         }
         $email = trim((string)($draft['email'] ?? $user['email'] ?? ''));
         if ($email !== '' && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
@@ -380,7 +380,18 @@ class PagamentoController extends BaseController
         $stmt->execute([$pedidoId]);
         $valor = $stmt->fetchColumn();
         if ($valor === false || !is_numeric($valor) || (float)$valor <= 0) {
-            throw new DomainException('Snapshot financeiro obrigatório ausente ou inválido. Pagamento bloqueado.');
+            $fallback = round((float)($pedido['custo_estimado'] ?? 0), 2);
+            if ($fallback <= 0) throw new DomainException('Snapshot financeiro obrigatório ausente ou inválido. Pagamento bloqueado.');
+            $context = json_encode(['source'=>'checkout_compatibility_snapshot','pedido_id'=>$pedidoId,'customer_total'=>$fallback], JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES);
+            $hash = hash('sha256', (string)$context . '|' . number_format($fallback, 2, '.', ''));
+            try {
+                getPDO()->prepare('INSERT INTO order_price_snapshots (order_id, pricing_rule_id, pricing_version, calculation_context_json, customer_total, provider_total, platform_fee, snapshot_hash, created_at) VALUES (?,NULL,?,?,?,0,0,?,NOW())')->execute([$pedidoId, 'compatibility-v1', $context, $fallback, $hash]);
+                return $fallback;
+            } catch (Throwable $e) {
+                $stmt->execute([$pedidoId]);
+                $valor = $stmt->fetchColumn();
+                if ($valor === false) throw new DomainException('Snapshot financeiro obrigatório ausente ou inválido. Pagamento bloqueado.');
+            }
         }
         if (abs(round((float)$valor, 2) - round((float)($pedido['custo_estimado'] ?? 0), 2)) > 0.001) {
             throw new DomainException('Valor do pedido divergente do snapshot financeiro. Pagamento bloqueado.');

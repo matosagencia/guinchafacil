@@ -5,7 +5,7 @@ final class MarketingAttributionService
 {
     private const SESSION_KEY = 'first_touch_utm';
     private const COOKIE_KEY = 'gf_first_touch';
-    private const FIELDS = ['utm_source','utm_medium','utm_campaign','utm_content','utm_term','canal_aquisicao','referrer_url','landing_page'];
+    private const FIELDS = ['utm_source','utm_medium','utm_campaign','utm_content','utm_term','canal_aquisicao','referrer_url','landing_page','referral_code'];
 
     public static function capture(): void
     {
@@ -14,7 +14,7 @@ final class MarketingAttributionService
         foreach (self::FIELDS as $field) {
             $value = trim((string)($_GET[$field] ?? ''));
             if ($value !== '') $raw[$field] = mb_substr($value, 0, $field === 'referrer_url' || $field === 'landing_page' ? 1000 : 180);
-        }
+        }        $ref = trim((string)($_GET['ref'] ?? $_GET['referral_code'] ?? ''));        if ($ref !== '') $raw['referral_code'] = mb_substr($ref, 0, 80);
         if (!$current) {
             $cookie = json_decode((string)($_COOKIE[self::COOKIE_KEY] ?? ''), true);
             if (is_array($cookie)) $current = $cookie;
@@ -28,7 +28,7 @@ final class MarketingAttributionService
                 'utm_term' => $raw['utm_term'] ?? null,
                 'canal_aquisicao' => self::normalizarCanal($raw['canal_aquisicao'] ?? ($raw['utm_source'] ?? 'organico')),
                 'referrer_url' => (string)($_SERVER['HTTP_REFERER'] ?? ''),
-                'landing_page' => (string)($_SERVER['REQUEST_URI'] ?? '/'),
+                'landing_page' => (string)($_SERVER['REQUEST_URI'] ?? '/'),                'referral_code' => $raw['referral_code'] ?? null,
                 'captured_at' => date('c'),
             ];
             $_SESSION[self::SESSION_KEY] = $current;

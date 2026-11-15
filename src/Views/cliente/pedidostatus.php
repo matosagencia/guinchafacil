@@ -109,12 +109,18 @@ include __DIR__ . '/../layouts/header.php';
                     <div style="font-size:1.6rem;font-weight:700;color:#2fb34a">
                         R$ <?= number_format((float)($pedido['custo_estimado'] ?? 0), 2, ',', '.') ?>
                     </div>
+                    <?php if ((float)($pedido['desconto_promocional'] ?? 0) > 0): ?><div class="text-success small mt-1">Cupom <?= htmlspecialchars((string)($pedido['cupom_codigo'] ?? '')) ?>: desconto de R$ <?= number_format((float)$pedido['desconto_promocional'], 2, ',', '.') ?></div><?php endif; ?>
                     <p class="text-muted small mb-0">O valor final pode variar apos a avaliacao no local.</p>
                 </div>
             </div>
 
             <div class="card shadow-sm">
                 <div class="card-body d-grid gap-2">
+                    <?php if ($st === 'aguardando_pagamento'): ?>
+                        <a href="<?= $bp ?>/pagamento/checkout/<?= (int)($pedido['id'] ?? 0) ?>" class="btn btn-primary">
+                            <i class="fas fa-credit-card me-1"></i> Continuar para pagamento
+                        </a>
+                    <?php endif; ?>
                     <a href="<?= $bp ?>/cliente/historico" class="btn btn-outline-secondary">
                         <i class="fas fa-list me-1"></i> Meus pedidos
                     </a>
