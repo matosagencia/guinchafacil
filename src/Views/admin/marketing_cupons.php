@@ -2,13 +2,14 @@
 $bp = defined('BASE_PATH') ? BASE_PATH : '';
 $e = static fn ($value): string => htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8');
 ob_start();
+?><style>@media (min-width:768px){#cupons-admin-grid>div:first-child{flex:0 0 41.666667%;max-width:41.666667%}#cupons-admin-grid>div:last-child{flex:0 0 58.333333%;max-width:58.333333%}}</style><?php
 ?>
 <div class="container-fluid py-4">
     <div class="mb-4"><span class="eyebrow">Marketing</span><h1>Cupons e promoções</h1><p class="text-muted mb-0">Defina descontos e regras de indicação aplicadas no checkout.</p></div>
     <?php if (!empty($_GET['ok'])): ?><div class="alert alert-success" role="status"><?= $_GET['ok'] === 'status' ? 'Status da promoção atualizado.' : 'Promoção salva e ativada.' ?></div><?php endif; ?>
     <?php if (!empty($_GET['erro'])): ?><div class="alert alert-warning" role="alert">Não foi possível salvar. Confira os campos e a migration.</div><?php endif; ?>
-    <div class="row g-4 align-items-start">
-        <div class="col-12 col-xl-5">
+    <div class="row g-4 align-items-start" id="cupons-admin-grid">
+        <div class="col-12 col-md-5">
             <section class="card shadow-sm h-100" aria-labelledby="nova-promocao-titulo"><div class="card-header"><strong id="nova-promocao-titulo">Nova promoção</strong></div><div class="card-body">
                 <form method="post" action="<?= $e($bp) ?>/admin/marketing/cupons/salvar"><input type="hidden" name="csrf_token" value="<?= $e($csrfToken) ?>"><div class="row g-3">
                     <?php foreach ([['code','Código','text',true],['name','Nome','text',true],['discount_value','Desconto','number',true],['partner_profile','Perfil parceiro','text',false],['vehicle_type','Tipo de veículo','text',false],['vehicle_make','Fabricante','text',false],['region','Região','text',false],['priority','Prioridade','number',false],['max_uses','Limite de usos','number',false],['service_type_id','Serviço ID','number',false]] as [$name,$label,$type,$required]): ?><div class="col-md-6"><label class="form-label" for="cupom-<?= $e($name) ?>"><?= $label ?></label><input id="cupom-<?= $e($name) ?>" class="form-control" name="<?= $e($name) ?>" type="<?= $type ?>"<?= $name === 'priority' ? ' value="0"' : '' ?><?= $name === 'discount_value' ? ' min="0" step="0.01"' : '' ?><?= in_array($name, ['max_uses','service_type_id'], true) ? ' min="0"' : '' ?><?= $required ? ' required' : '' ?>></div><?php endforeach; ?>
