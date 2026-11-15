@@ -1,0 +1,14 @@
+#cupons-admin-grid .cupons-acoes{display:inline-flex;align-items:center;justify-content:flex-end;gap:.35rem;white-space:nowrap}
+#cupons-admin-grid .cupons-acao{width:2rem;height:2rem;display:inline-flex;align-items:center;justify-content:center;padding:0}
+@media (min-width: 768px) {
+    #cupons-admin-grid>div:first-child {
+        flex: 0 0 41.666667%;
+        max-width: 99%;
+    }
+}
+@media (min-width: 768px) {
+    #cupons-admin-grid>div:last-child {
+        flex: 0 0 58.333333%;
+        max-width: 93%;
+    }
+}
