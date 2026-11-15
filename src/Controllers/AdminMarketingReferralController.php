@@ -98,4 +98,14 @@ final class AdminMarketingReferralController extends BaseController
         try { getPDO()->prepare("UPDATE marketing_promotion_rules SET status = IF(status = 'ativo', 'inativo', 'ativo') WHERE id = ?")->execute([$id]); $this->redirect('/admin/marketing/cupons?ok=status'); }
         catch (Throwable $e) { $this->redirect('/admin/marketing/cupons?erro=schema'); }
     }
+
+    public function toggleCommission(): void
+    {
+        AuthService::requireAuth('admin');
+        if (!AuthService::validarCsrfToken((string)($_POST['csrf_token'] ?? ''))) { http_response_code(403); return; }
+        $id = (int)($_POST['id'] ?? 0);
+        if ($id <= 0) { $this->redirect('/admin/marketing/comissoes-indicacao?erro=id'); return; }
+        try { getPDO()->prepare("UPDATE partner_referral_commission_rules SET status = IF(status = 'ativo', 'inativo', 'ativo') WHERE id = ?")->execute([$id]); $this->redirect('/admin/marketing/comissoes-indicacao?ok=status'); }
+        catch (Throwable $e) { $this->redirect('/admin/marketing/comissoes-indicacao?erro=schema'); }
+    }
 }
