@@ -425,6 +425,7 @@ $rotas = [
     'POST' => [
         '/admin/marketing/prospeccao/sincronizar-zonas'          => ['AdminFinanceAttributionController', 'prospeccaoSincronizarZonas', 'admin'],
         '/admin/marketing/cupons/salvar'                         => ['AdminMarketingReferralController', 'storePromotion', 'admin'],
+        '/admin/marketing/comissoes-indicacao/salvar'             => ['AdminMarketingReferralController', 'storeCommission', 'admin'],
         '/admin/catalogo-servicos/capacidade-veicular/salvar' => ['AdminServiceCatalogController', 'capacidadeVeicularSalvar', 'admin'],
         '/admin/catalogo-servicos/capacidade/decidir'         => ['AdminServiceCatalogController', 'capacidadeDecidir', 'admin'],
         '/admin/catalogo-servicos/requisito/salvar'           => ['AdminServiceCatalogController', 'requisitoSalvar', 'admin'],
