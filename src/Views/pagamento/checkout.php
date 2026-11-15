@@ -41,6 +41,9 @@ include __DIR__ . '/../layouts/header.php';
     </header>
 
     <div id="checkout-mensagem" class="alert d-none" role="alert"></div>
+    <?php if (!empty($pedido['cupom_codigo'])): ?>
+        <div class="alert alert-success" role="status">Cupom <strong><?php echo htmlspecialchars((string)$pedido['cupom_codigo'], ENT_QUOTES, 'UTF-8'); ?></strong> aceito e aplicado.</div>
+    <?php endif; ?>
 
     <?php if ($formaPagamentoEscolhida === 'pago_na_chegada'): ?>
         <div class="alert alert-info" role="alert">

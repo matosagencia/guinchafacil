@@ -66,8 +66,8 @@ final class CheckoutController extends BaseController
         $promocao = $cupom !== '' ? PromotionResolutionService::resolve($cupom, $context) : ['ok' => false];
         if ($cupom !== '' && !($promocao['ok'] ?? false)) {
             $this->setFlashMessage((string)($promocao['message'] ?? 'Cupom inválido.'), 'warning');
-            $promocao = ['ok' => false];
-            $cupom = '';
+            $this->redirect('/checkout/veiculo?triage_session_id=' . rawurlencode($id));
+            return;
         }
         $gross = (float)($triagem['dados']['custo_estimado'] ?? 0);
         $applied = ($promocao['ok'] ?? false) ? PromotionResolutionService::apply($gross, $promocao) : ['discount' => 0, 'net' => $gross];

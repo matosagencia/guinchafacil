@@ -1,5 +1,14 @@
 #cupons-admin-grid .cupons-acoes{display:inline-flex;align-items:center;justify-content:flex-end;gap:.35rem;white-space:nowrap}
-#cupons-admin-grid .cupons-acao{width:2rem;height:2rem;display:inline-flex;align-items:center;justify-content:center;padding:0}
+#cupons-admin-grid .cupons-acao{min-width:5.5rem;display:inline-flex;align-items:center;justify-content:center;gap:.3rem}
+#cupons-admin-grid .cupons-acao i{font-size:.85rem}
+#cupons-admin-grid .cupons-acao.btn-outline-primary{background:#0d6efd;color:#fff}
+#cupons-admin-grid .cupons-acao.btn-outline-warning{background:#ffc107;color:#212529}
+#cupons-admin-grid .cupons-acao.btn-outline-success{background:#198754;color:#fff}
+#cupons-admin-grid .cupons-acao.btn-outline-danger{background:#dc3545;color:#fff}
+#cupons-admin-grid .cupons-acao.btn-outline-primary::after{content:"Editar"}
+#cupons-admin-grid .cupons-acao.btn-outline-warning::after{content:"Pausar"}
+#cupons-admin-grid .cupons-acao.btn-outline-success::after{content:"Ativar"}
+#cupons-admin-grid .cupons-acao.btn-outline-danger::after{content:"Excluir"}
 @media (min-width: 768px) {
     #cupons-admin-grid>div:first-child {
         flex: 0 0 41.666667%;
