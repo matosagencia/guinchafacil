@@ -70,6 +70,7 @@ final class AdminMarketingReferralController extends BaseController
         $rows = [];
         try { $rows = getPDO()->query('SELECT * FROM marketing_promotion_rules ORDER BY status DESC, priority DESC, id DESC')->fetchAll(PDO::FETCH_ASSOC); }
         catch (Throwable $e) { $erro = 'A migration de promoções ainda não foi aplicada.'; }
+        $editId=(int)($_GET['edit']??0);$editRow=null;foreach($rows as $candidate){if((int)$candidate['id']===$editId){$editRow=$candidate;break;}}
         $csrfToken = AuthService::gerarCsrfToken();
         require __DIR__ . '/../Views/admin/marketing_cupons.php';
     }
