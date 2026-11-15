@@ -108,7 +108,7 @@ function maskEnvValue(string $value): string {
 
         <div class="card-header"><i class="fas fa-eye me-2"></i>Configuração efetiva carregada</div>
 
-        <div class="card-body">
+            <div class="card-body"><div class="alert alert-light border d-flex flex-wrap align-items-center gap-2 mb-3"><strong>Indicações e descontos:</strong><a class="btn btn-sm btn-outline-primary" href="<?php echo $bp; ?>/admin/marketing/comissoes-indicacao">Configurar comissão e desconto do afiliado</a><a class="btn btn-sm btn-outline-success" href="<?php echo $bp; ?>/admin/marketing/cupons">Gerenciar cupons e promoções</a></div>
 
             <p class="config-info-text mb-3">Valores abaixo são somente leitura e mostram o que o sistema encontrou no arquivo <code><?php echo htmlspecialchars($envArquivoAtivo ?? '.env'); ?></code> e no banco de dados.</p>
 
